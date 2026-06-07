@@ -379,3 +379,85 @@ export async function getReverseUnitRelationStatusOptions(
 
 	return [...byStatusId.values()];
 }
+
+/**
+ * The `institution -> eric` relation types that represent a country in DARIAH ERIC. These are
+ * edited from the institution / ERIC side; here they are surfaced read-only on the country, scoped
+ * to institutions located in that country.
+ */
+const countryEricInstitutionStatuses = [
+	"is_national_coordinating_institution_in",
+	"is_national_representative_institution_in",
+	"is_partner_institution_of",
+	"is_cooperating_partner_of",
+] as const satisfies ReadonlyArray<UnitRelationStatusType>;
+
+/**
+ * Derived "lens" view: institutions located in `countryDocumentId` that also hold a representation
+ * relation to DARIAH ERIC (partner / cooperating / national coordinating / national
+ * representative). Joins the `institution is_located_in country` edge to the `institution <status>
+ * eric` edge; the displayed duration is the ERIC relation's. Read-only — editing happens on the
+ * institution itself.
+ */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export async function getEricInstitutionsForCountry(countryDocumentId: string) {
+	const ericRelations = alias(schema.organisationalUnitsRelations, "country_eric_relations");
+	const locatedInRelations = alias(
+		schema.organisationalUnitsRelations,
+		"country_located_in_relations",
+	);
+	const ericStatus = alias(schema.organisationalUnitStatus, "country_eric_status");
+	const locatedInStatus = alias(schema.organisationalUnitStatus, "country_located_in_status");
+	const institutionLifecycle = alias(
+		schema.documentLifecycle,
+		"country_eric_institution_lifecycle",
+	);
+
+	const rows = await db
+		.select({
+			id: ericRelations.id,
+			institutionId: ericRelations.unitDocumentId,
+			institutionName: schema.organisationalUnits.name,
+			institutionSlug: schema.entities.slug,
+			institutionType: schema.organisationalUnitTypes.type,
+			statusType: ericStatus.status,
+			duration: ericRelations.duration,
+		})
+		.from(ericRelations)
+		.innerJoin(ericStatus, eq(ericStatus.id, ericRelations.status))
+		.innerJoin(
+			locatedInRelations,
+			eq(locatedInRelations.unitDocumentId, ericRelations.unitDocumentId),
+		)
+		.innerJoin(locatedInStatus, eq(locatedInStatus.id, locatedInRelations.status))
+		.innerJoin(
+			institutionLifecycle,
+			eq(institutionLifecycle.documentId, ericRelations.unitDocumentId),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			sql`${schema.organisationalUnits.id} = COALESCE(${institutionLifecycle.draftId}, ${institutionLifecycle.publishedId})`,
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.innerJoin(schema.entities, eq(schema.entities.id, ericRelations.unitDocumentId))
+		.where(
+			and(
+				inArray(ericStatus.status, [...countryEricInstitutionStatuses]),
+				eq(locatedInStatus.status, "is_located_in"),
+				eq(locatedInRelations.relatedUnitDocumentId, countryDocumentId),
+			),
+		)
+		.orderBy(ericStatus.status, schema.organisationalUnits.name);
+
+	// An institution could have more than one located-in row for the country; key by the ERIC row.
+	const byId = new Map(rows.map((row) => [row.id, row] as const));
+
+	return [...byId.values()];
+}
+
+export type CountryEricInstitution = Awaited<
+	ReturnType<typeof getEricInstitutionsForCountry>
+>[number];

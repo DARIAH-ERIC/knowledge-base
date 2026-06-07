@@ -3,8 +3,8 @@ import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { CountryDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-details";
-import { publishCountryAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/publish-country.action";
+import { EricDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details";
+import { publishEricAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_lib/publish-eric.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
@@ -12,38 +12,36 @@ import {
 	getRichTextFieldContent,
 	resolveSelectedDetailVersion,
 } from "@/lib/data/entity-detail-view";
-import { getPersonRelations } from "@/lib/data/person-relations";
-import { getEricInstitutionsForCountry, getReverseUnitRelations } from "@/lib/data/unit-relations";
+import { getEricReverseRelationGroups } from "@/lib/data/eric";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorCountryDetailsPageProps extends PageProps<"/[locale]/dashboard/administrator/countries/[slug]/details"> {}
+interface DashboardAdministratorEricDetailsPageProps extends PageProps<"/[locale]/dashboard/administrator/eric/[slug]/details"> {}
 
 export async function generateMetadata(
-	_props: Readonly<DashboardAdministratorCountryDetailsPageProps>,
+	_props: Readonly<DashboardAdministratorEricDetailsPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Administrator dashboard - View country"),
+		title: t("Administrator dashboard - View DARIAH ERIC"),
 	});
 
 	return metadata;
 }
 
-export default async function DashboardAdministratorCountryDetailsPage(
-	props: Readonly<DashboardAdministratorCountryDetailsPageProps>,
+export default async function DashboardAdministratorEricDetailsPage(
+	props: Readonly<DashboardAdministratorEricDetailsPageProps>,
 ): Promise<ReactNode> {
 	const { params, searchParams: searchParamsPromise } = props;
 
 	const { slug } = await params;
-
 	const { user } = await assertAuthenticated();
 
 	const anyVersion = await db.query.organisationalUnits.findFirst({
-		where: { entityVersion: { entity: { slug } } },
+		where: { entityVersion: { entity: { slug } }, type: { type: "eric" } },
 		columns: {},
 		with: {
 			entityVersion: {
@@ -67,57 +65,50 @@ export default async function DashboardAdministratorCountryDetailsPage(
 	}
 	const { hasDraftChanges, publishedId, selectedVersion, versionId } = versionState;
 
-	const [personRelations, description, countryData, ericInstitutions, nationalConsortia] =
-		await Promise.all([
-			getPersonRelations(documentId),
-			getRichTextFieldContent(versionId, "description"),
-			getOrganisationalUnitEditDataForAdmin(user, {
-				slug,
-				unitType: "country",
-				versionId,
-				publishedVersionId: publishedId,
-			}),
-			getEricInstitutionsForCountry(documentId),
-			getReverseUnitRelations(documentId, { sourceUnitType: "national_consortium" }),
-		]);
+	const [description, ericData, reverseRelationGroups] = await Promise.all([
+		getRichTextFieldContent(versionId, "description"),
+		getOrganisationalUnitEditDataForAdmin(user, {
+			slug,
+			unitType: "eric",
+			versionId,
+			publishedVersionId: publishedId,
+		}),
+		getEricReverseRelationGroups(documentId),
+	]);
 
-	if (countryData == null) {
+	if (ericData == null) {
 		notFound();
 	}
 
 	const {
-		relations,
 		selectedRelatedEntities,
 		selectedRelatedResources,
 		selectedSocialMediaItems,
-		unit: country,
-	} = countryData;
+		unit: eric,
+	} = ericData;
 
 	const image =
-		country.image != null
+		eric.image != null
 			? {
-					...country.image,
+					...eric.image,
 					url: images.generateSignedImageUrl({
-						key: country.image.key,
+						key: eric.image.key,
 						options: imageGridOptions,
 					}).url,
 				}
 			: null;
 
 	return (
-		<CountryDetails
-			country={{ ...country, description, image }}
+		<EricDetails
 			documentId={documentId}
-			ericInstitutions={ericInstitutions}
+			eric={{ ...eric, description, image }}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
-			nationalConsortia={nationalConsortia}
-			personRelations={personRelations}
-			relations={relations}
+			publishAction={publishEricAction}
+			reverseRelationGroups={reverseRelationGroups}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
 			selectedSocialMediaItems={selectedSocialMediaItems}
-			publishAction={publishCountryAction}
 			selectedVersion={selectedVersion}
 		/>
 	);

@@ -15,7 +15,11 @@ import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { PersonRelation } from "@/lib/data/person-relations";
-import type { UnitRelation } from "@/lib/data/unit-relations";
+import type {
+	CountryEricInstitution,
+	ReverseUnitRelation,
+	UnitRelation,
+} from "@/lib/data/unit-relations";
 import { getEntityDetailHref, getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
 import { formatRoleType } from "@/lib/format-role-type";
 
@@ -46,6 +50,13 @@ interface CountryDetailsProps {
 	}>;
 	personRelations: Array<PersonRelation>;
 	relations: Array<UnitRelation>;
+	/**
+	 * National consortia of this country (reverse of `national_consortium
+	 * is_national_consortium_of`).
+	 */
+	nationalConsortia: Array<ReverseUnitRelation>;
+	/** Institutions that represent the country in DARIAH ERIC (derived, read-only). */
+	ericInstitutions: Array<CountryEricInstitution>;
 	publishAction: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
@@ -58,6 +69,8 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 		country,
 		personRelations,
 		relations,
+		nationalConsortia,
+		ericInstitutions,
 		publishAction,
 		discardDraftAction,
 		selectedRelatedEntities,
@@ -241,6 +254,63 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 													dateStyle: "short",
 												})
 											: format.dateTime(relation.duration.start, { dateStyle: "short" })}
+									</span>
+								</li>
+							))}
+						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("National consortium")}</DescriptionTerm>
+				<DescriptionDetails>
+					{nationalConsortia.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{nationalConsortia.map((consortium) => (
+								<li key={consortium.id} className="text-sm">
+									<RelationLink
+										className="font-medium"
+										href={getOrganisationalUnitDetailHref(consortium.unitType, consortium.unitSlug)}
+									>
+										{consortium.unitName}
+									</RelationLink>
+									<span className="text-muted-fg">
+										{" · "}
+										{consortium.duration.end
+											? format.dateTimeRange(consortium.duration.start, consortium.duration.end, {
+													dateStyle: "short",
+												})
+											: format.dateTime(consortium.duration.start, { dateStyle: "short" })}
+									</span>
+								</li>
+							))}
+						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Representation in DARIAH ERIC")}</DescriptionTerm>
+				<DescriptionDetails>
+					{ericInstitutions.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{ericInstitutions.map((institution) => (
+								<li key={institution.id} className="text-sm">
+									<span className="font-medium">{formatRoleType(institution.statusType)}</span>
+									{" · "}
+									<RelationLink
+										className="text-muted-fg"
+										href={getOrganisationalUnitDetailHref(
+											institution.institutionType,
+											institution.institutionSlug,
+										)}
+									>
+										{institution.institutionName}
+									</RelationLink>
+									<span className="text-muted-fg">
+										{" · "}
+										{institution.duration.end
+											? format.dateTimeRange(institution.duration.start, institution.duration.end, {
+													dateStyle: "short",
+												})
+											: format.dateTime(institution.duration.start, { dateStyle: "short" })}
 									</span>
 								</li>
 							))}
