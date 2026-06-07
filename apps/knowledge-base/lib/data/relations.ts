@@ -73,17 +73,37 @@ export async function getEntityRelationOptionsByIds(ids: ReadonlyArray<string>) 
 			entityType: schema.entityTypes.type,
 			id: schema.entities.id,
 			slug: schema.entities.slug,
+			unitType: schema.organisationalUnitTypes.type,
 		})
 		.from(schema.entities)
 		.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
 		.innerJoin(schema.entityVersions, eq(schema.entityVersions.entityId, schema.entities.id))
 		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.leftJoin(
+			schema.organisationalUnits,
+			eq(schema.organisationalUnits.id, schema.entityVersions.id),
+		)
+		.leftJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
 		.where(and(publishedEntityVersionWhere(), inArray(schema.entities.id, [...ids])))
 		.orderBy(schema.entities.slug);
 
 	const itemById = new Map(
 		rows.map(
-			(row) => [row.id, { id: row.id, name: row.slug, description: row.entityType }] as const,
+			(row) =>
+				[
+					row.id,
+					{
+						id: row.id,
+						name: row.slug,
+						description: row.entityType,
+						slug: row.slug,
+						entityType: row.entityType,
+						unitType: row.unitType,
+					},
+				] as const,
 		),
 	);
 

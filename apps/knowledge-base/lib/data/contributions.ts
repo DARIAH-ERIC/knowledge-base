@@ -236,9 +236,14 @@ export async function getPersonContributions(personDocumentId: string) {
 			roleType: schema.personRoleTypes.type,
 			organisationalUnitId: schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
 			organisationalUnitName: schema.organisationalUnits.name,
+			organisationalUnitSlug: schema.entities.slug,
 			organisationalUnitType: schema.organisationalUnitTypes.type,
 		})
 		.from(schema.personsToOrganisationalUnits)
+		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, schema.personsToOrganisationalUnits.organisationalUnitDocumentId),
+		)
 		.innerJoin(
 			schema.personRoleTypes,
 			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),

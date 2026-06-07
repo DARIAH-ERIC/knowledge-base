@@ -12,9 +12,11 @@ import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { PersonRelation } from "@/lib/data/person-relations";
 import type { UnitRelation } from "@/lib/data/unit-relations";
+import { getEntityDetailHref, getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
 import { formatRoleType } from "@/lib/format-role-type";
 
 interface CountryDetailsProps {
@@ -26,7 +28,14 @@ interface CountryDetailsProps {
 		description: JSONContent | null;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
-	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedEntities: Array<{
+		id: string;
+		name: string;
+		description?: string;
+		slug: string;
+		entityType: string;
+		unitType: string | null;
+	}>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	selectedSocialMediaItems: Array<{
 		id: string;
@@ -148,7 +157,16 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 						<ul className="flex flex-col gap-1">
 							{selectedRelatedEntities.map((relatedEntity) => (
 								<li key={relatedEntity.id} className="text-sm">
-									<span className="font-medium">{relatedEntity.name}</span>
+									<RelationLink
+										className="font-medium"
+										href={getEntityDetailHref({
+											entityType: relatedEntity.entityType,
+											slug: relatedEntity.slug,
+											unitType: relatedEntity.unitType,
+										})}
+									>
+										{relatedEntity.name}
+									</RelationLink>
 								</li>
 							))}
 						</ul>
@@ -174,7 +192,15 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 						<ul className="flex flex-col gap-1">
 							{personRelations.map((relation) => (
 								<li key={relation.id} className="text-sm">
-									<span className="font-medium">{relation.personName}</span>
+									<RelationLink
+										className="font-medium"
+										href={getEntityDetailHref({
+											entityType: "persons",
+											slug: relation.personSlug,
+										})}
+									>
+										{relation.personName}
+									</RelationLink>
 									{" · "}
 									<span className="text-muted-fg">{formatRoleType(relation.roleType)}</span>
 									<span className="text-muted-fg">
@@ -199,7 +225,15 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 								<li key={relation.id} className="text-sm">
 									<span className="font-medium">{formatRoleType(relation.statusType)}</span>
 									{" · "}
-									<span className="text-muted-fg">{relation.relatedUnitName}</span>
+									<RelationLink
+										className="text-muted-fg"
+										href={getOrganisationalUnitDetailHref(
+											relation.relatedUnitType,
+											relation.relatedUnitSlug,
+										)}
+									>
+										{relation.relatedUnitName}
+									</RelationLink>
 									<span className="text-muted-fg">
 										{" · "}
 										{relation.duration.end

@@ -45,6 +45,7 @@ export const createContributionAction = createServerAction(
 			const unit = await tx
 				.select({
 					unitType: schema.organisationalUnitTypes.type,
+					slug: schema.entities.slug,
 					allowedRelationId: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.id,
 				})
 				.from(schema.organisationalUnits)
@@ -56,6 +57,7 @@ export const createContributionAction = createServerAction(
 					schema.organisationalUnitTypes,
 					eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 				)
+				.innerJoin(schema.entities, eq(schema.entities.id, schema.documentLifecycle.documentId))
 				.leftJoin(
 					schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations,
 					and(
@@ -90,6 +92,14 @@ export const createContributionAction = createServerAction(
 				return { error: "duplicate" as const };
 			}
 
+			// `personId` is a document id (entities.id); resolve its slug for the optimistic row.
+			const personEntity = await tx
+				.select({ slug: schema.entities.slug })
+				.from(schema.entities)
+				.where(eq(schema.entities.id, personId))
+				.limit(1)
+				.then((rows) => rows[0] ?? null);
+
 			const row = await tx
 				.insert(schema.personsToOrganisationalUnits)
 				.values({
@@ -109,7 +119,12 @@ export const createContributionAction = createServerAction(
 				summary: getAuditSummaryFromFormData(formData),
 			});
 
-			return { row, targetUnitType: unit.unitType };
+			return {
+				row,
+				targetUnitType: unit.unitType,
+				organisationalUnitSlug: unit.slug,
+				personSlug: personEntity?.slug,
+			};
 		});
 
 		if ("error" in returned) {
@@ -132,6 +147,8 @@ export const createContributionAction = createServerAction(
 				durationStart: duration.start.toISOString(),
 				durationEnd: duration.end?.toISOString() ?? null,
 				targetUnitType: returned.targetUnitType,
+				organisationalUnitSlug: returned.organisationalUnitSlug,
+				personSlug: returned.personSlug,
 			},
 		});
 	},

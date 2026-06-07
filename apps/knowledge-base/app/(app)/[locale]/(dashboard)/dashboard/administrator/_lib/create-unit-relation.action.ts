@@ -55,7 +55,10 @@ export const createUnitRelationAction = createServerAction(
 
 			// Resolve the related unit's current version (draft-or-published) for its type.
 			const relatedUnit = await tx
-				.select({ unitType: schema.organisationalUnitTypes.type })
+				.select({
+					unitType: schema.organisationalUnitTypes.type,
+					slug: schema.entities.slug,
+				})
 				.from(schema.organisationalUnits)
 				.innerJoin(
 					schema.documentLifecycle,
@@ -65,6 +68,7 @@ export const createUnitRelationAction = createServerAction(
 					schema.organisationalUnitTypes,
 					eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 				)
+				.innerJoin(schema.entities, eq(schema.entities.id, schema.documentLifecycle.documentId))
 				.where(eq(schema.documentLifecycle.documentId, relatedUnitId))
 				.limit(1)
 				.then((rows) => rows[0] ?? null);
@@ -88,7 +92,11 @@ export const createUnitRelationAction = createServerAction(
 				summary: getAuditSummaryFromFormData(formData),
 			});
 
-			return { relatedUnitType: relatedUnit?.unitType, row };
+			return {
+				relatedUnitType: relatedUnit?.unitType,
+				relatedUnitSlug: relatedUnit?.slug,
+				row,
+			};
 		});
 
 		if ("error" in returned) {
@@ -103,6 +111,7 @@ export const createUnitRelationAction = createServerAction(
 				durationStart: duration.start.toISOString(),
 				durationEnd: duration.end?.toISOString() ?? null,
 				relatedUnitType: returned.relatedUnitType,
+				relatedUnitSlug: returned.relatedUnitSlug,
 			},
 		});
 	},

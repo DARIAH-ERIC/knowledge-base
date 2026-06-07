@@ -21,12 +21,17 @@ export async function getPersonRelations(organisationalUnitDocumentId: string) {
 			id: schema.personsToOrganisationalUnits.id,
 			personId: schema.personsToOrganisationalUnits.personDocumentId,
 			personName: schema.persons.name,
+			personSlug: schema.entities.slug,
 			roleTypeId: schema.personsToOrganisationalUnits.roleTypeId,
 			roleType: schema.personRoleTypes.type,
 			duration: schema.personsToOrganisationalUnits.duration,
 			targetUnitType: schema.organisationalUnitTypes.type,
 		})
 		.from(schema.personsToOrganisationalUnits)
+		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
+		)
 		.innerJoin(
 			personDocumentLifecycle,
 			eq(personDocumentLifecycle.documentId, schema.personsToOrganisationalUnits.personDocumentId),

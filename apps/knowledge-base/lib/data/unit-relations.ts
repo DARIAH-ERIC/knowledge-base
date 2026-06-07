@@ -25,9 +25,14 @@ export async function getUnitRelations(unitDocumentId: string) {
 			statusType: schema.organisationalUnitStatus.status,
 			relatedUnitId: schema.organisationalUnitsRelations.relatedUnitDocumentId,
 			relatedUnitName: schema.organisationalUnits.name,
+			relatedUnitSlug: schema.entities.slug,
 			relatedUnitType: schema.organisationalUnitTypes.type,
 		})
 		.from(schema.organisationalUnitsRelations)
+		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, schema.organisationalUnitsRelations.relatedUnitDocumentId),
+		)
 		.innerJoin(
 			schema.organisationalUnitStatus,
 			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),

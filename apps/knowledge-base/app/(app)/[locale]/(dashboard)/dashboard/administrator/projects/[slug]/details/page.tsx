@@ -125,9 +125,15 @@ export default async function DashboardAdministratorProjectDetailsPage(
 					id: schema.projectsToOrganisationalUnits.id,
 					duration: schema.projectsToOrganisationalUnits.duration,
 					unitName: schema.organisationalUnits.name,
+					unitSlug: schema.entities.slug,
+					unitType: schema.organisationalUnitTypes.type,
 					roleName: schema.projectRoles.role,
 				})
 				.from(schema.projectsToOrganisationalUnits)
+				.innerJoin(
+					schema.entities,
+					eq(schema.entities.id, schema.projectsToOrganisationalUnits.unitDocumentId),
+				)
 				.innerJoin(
 					unitDocumentLifecycle,
 					eq(unitDocumentLifecycle.documentId, schema.projectsToOrganisationalUnits.unitDocumentId),
@@ -135,6 +141,10 @@ export default async function DashboardAdministratorProjectDetailsPage(
 				.innerJoin(
 					schema.organisationalUnits,
 					sql`${schema.organisationalUnits.id} = COALESCE(${unitDocumentLifecycle.publishedId}, ${unitDocumentLifecycle.draftId})`,
+				)
+				.innerJoin(
+					schema.organisationalUnitTypes,
+					eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 				)
 				.innerJoin(
 					schema.projectRoles,
@@ -179,6 +189,8 @@ export default async function DashboardAdministratorProjectDetailsPage(
 					return {
 						id: partner.id,
 						unitName: partner.unitName,
+						unitSlug: partner.unitSlug,
+						unitType: partner.unitType,
 						roleName: partner.roleName,
 						duration: partner.duration ?? null,
 					};

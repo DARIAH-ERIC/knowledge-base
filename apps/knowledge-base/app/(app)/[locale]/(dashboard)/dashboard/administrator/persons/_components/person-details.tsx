@@ -11,8 +11,10 @@ import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { PersonContribution } from "@/lib/data/contributions";
+import { getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
 import { formatRoleType } from "@/lib/format-role-type";
 
 interface PersonDetailsProps {
@@ -96,7 +98,15 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 								<li key={contribution.id} className="text-sm">
 									<span className="font-medium">{formatRoleType(contribution.roleType)}</span>
 									{" · "}
-									<span className="text-muted-fg">{contribution.organisationalUnitName}</span>
+									<RelationLink
+										className="text-muted-fg"
+										href={getOrganisationalUnitDetailHref(
+											contribution.organisationalUnitType,
+											contribution.organisationalUnitSlug,
+										)}
+									>
+										{contribution.organisationalUnitName}
+									</RelationLink>
 									<span className="text-muted-fg">
 										{" · "}
 										{contribution.duration.end
