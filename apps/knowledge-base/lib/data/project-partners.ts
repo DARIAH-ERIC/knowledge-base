@@ -265,6 +265,7 @@ export interface UnitProjectPartnership {
 	projectName: string;
 	projectAcronym: string | null;
 	projectSlug: string;
+	roleId: string;
 	roleType: string;
 	duration: { start: Date; end?: Date | null | undefined } | null;
 }
@@ -292,6 +293,7 @@ export async function getUnitProjectPartnerships(
 			projectName: schema.projects.name,
 			projectAcronym: schema.projects.acronym,
 			projectSlug: projectEntities.slug,
+			roleId: schema.projectsToOrganisationalUnits.roleId,
 			roleType: schema.projectRoles.role,
 			duration: schema.projectsToOrganisationalUnits.duration,
 		})
@@ -323,6 +325,7 @@ export async function getUnitProjectPartnerships(
 			projectName: row.projectName,
 			projectAcronym: row.projectAcronym,
 			projectSlug: row.projectSlug,
+			roleId: row.roleId,
 			roleType: row.roleType,
 			duration: row.duration ?? null,
 		};
