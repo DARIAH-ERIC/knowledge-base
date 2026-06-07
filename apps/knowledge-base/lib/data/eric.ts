@@ -2,7 +2,10 @@ import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
-import type { OrganisationalUnitType } from "@/lib/data/organisational-units";
+import {
+	type EricReverseRelationSourceType,
+	ericReverseRelationSourceTypes,
+} from "@/lib/data/eric-relation-source-types";
 import {
 	type ReverseUnitRelation,
 	type UnitRelationStatusOption,
@@ -11,20 +14,6 @@ import {
 } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
-
-/**
- * DARIAH-EU (the ERIC) is a singleton organisational unit of type `eric` and the target of most
- * unit↔unit relations. The source unit types whose relations point at it, each surfaced as its own
- * reverse-relation tab.
- */
-export const ericReverseRelationSourceTypes = [
-	"country",
-	"institution",
-	"working_group",
-	"governance_body",
-] as const satisfies ReadonlyArray<OrganisationalUnitType>;
-
-export type EricReverseRelationSourceType = (typeof ericReverseRelationSourceTypes)[number];
 
 export interface EricReverseRelationGroup {
 	relations: Array<ReverseUnitRelation>;

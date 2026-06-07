@@ -13,6 +13,7 @@ import {
 	resolveSelectedDetailVersion,
 } from "@/lib/data/entity-detail-view";
 import { getPersonRelations } from "@/lib/data/person-relations";
+import { getEricInstitutionsForCountry, getReverseUnitRelations } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -66,16 +67,19 @@ export default async function DashboardAdministratorCountryDetailsPage(
 	}
 	const { hasDraftChanges, publishedId, selectedVersion, versionId } = versionState;
 
-	const [personRelations, description, countryData] = await Promise.all([
-		getPersonRelations(documentId),
-		getRichTextFieldContent(versionId, "description"),
-		getOrganisationalUnitEditDataForAdmin(user, {
-			slug,
-			unitType: "country",
-			versionId,
-			publishedVersionId: publishedId,
-		}),
-	]);
+	const [personRelations, description, countryData, ericInstitutions, nationalConsortia] =
+		await Promise.all([
+			getPersonRelations(documentId),
+			getRichTextFieldContent(versionId, "description"),
+			getOrganisationalUnitEditDataForAdmin(user, {
+				slug,
+				unitType: "country",
+				versionId,
+				publishedVersionId: publishedId,
+			}),
+			getEricInstitutionsForCountry(documentId),
+			getReverseUnitRelations(documentId, { sourceUnitType: "national_consortium" }),
+		]);
 
 	if (countryData == null) {
 		notFound();
@@ -104,8 +108,10 @@ export default async function DashboardAdministratorCountryDetailsPage(
 		<CountryDetails
 			country={{ ...country, description, image }}
 			documentId={documentId}
+			ericInstitutions={ericInstitutions}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
+			nationalConsortia={nationalConsortia}
 			personRelations={personRelations}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}

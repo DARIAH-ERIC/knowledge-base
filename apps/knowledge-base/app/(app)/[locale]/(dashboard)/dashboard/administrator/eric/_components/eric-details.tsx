@@ -14,11 +14,11 @@ import { Fragment, type ReactNode } from "react";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import type { EricReverseRelationGroups } from "@/lib/data/eric";
 import {
-	type EricReverseRelationGroups,
 	type EricReverseRelationSourceType,
 	ericReverseRelationSourceTypes,
-} from "@/lib/data/eric";
+} from "@/lib/data/eric-relation-source-types";
 import { getEntityDetailHref, getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
 import { formatRoleType } from "@/lib/format-role-type";
 
