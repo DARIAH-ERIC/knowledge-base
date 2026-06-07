@@ -12,6 +12,10 @@ import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
 import { getSocialMediaOptions } from "@/lib/data/social-media";
+import {
+	getReverseUnitRelationStatusOptions,
+	getReverseUnitRelations,
+} from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -71,6 +75,8 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 		initialRelatedResources,
 		initialSocialMedia,
 		nationalConsortiumData,
+		memberInstitutions,
+		memberInstitutionStatusOptions,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
 		getEntityRelationOptions(),
@@ -82,6 +88,8 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 			versionId: draftVersionId,
 			publishedVersionId: publishedId,
 		}),
+		getReverseUnitRelations(documentId, { sourceUnitType: "institution" }),
+		getReverseUnitRelationStatusOptions("national_consortium", "institution"),
 	]);
 
 	if (nationalConsortiumData == null) {
@@ -126,6 +134,8 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 			initialSocialMediaItems={initialSocialMedia.items}
 			initialSocialMediaTotal={initialSocialMedia.total}
 			isPublished={publishedId != null}
+			memberInstitutions={memberInstitutions}
+			memberInstitutionStatusOptions={memberInstitutionStatusOptions}
 			nationalConsortium={{ ...nationalConsortium, image }}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}

@@ -12,12 +12,17 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { ReverseUnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { NationalConsortiumForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form";
 import { discardNationalConsortiumDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/discard-national-consortium-draft.action";
 import { publishNationalConsortiumAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/publish-national-consortium.action";
 import { updateNationalConsortiumAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/update-national-consortium.action";
-import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
+import type {
+	ReverseUnitRelation,
+	UnitRelation,
+	UnitRelationStatusOption,
+} from "@/lib/data/unit-relations";
 
 interface NationalConsortiumEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
@@ -45,6 +50,8 @@ interface NationalConsortiumEditFormProps {
 	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
 	relations: Array<UnitRelation>;
 	unitRelationStatusOptions: Array<UnitRelationStatusOption>;
+	memberInstitutions: Array<ReverseUnitRelation>;
+	memberInstitutionStatusOptions: Array<UnitRelationStatusOption>;
 }
 
 export function NationalConsortiumEditForm(
@@ -70,6 +77,8 @@ export function NationalConsortiumEditForm(
 		selectedSocialMediaItems,
 		relations,
 		unitRelationStatusOptions,
+		memberInstitutions,
+		memberInstitutionStatusOptions,
 	} = props;
 
 	const t = useExtracted();
@@ -83,6 +92,7 @@ export function NationalConsortiumEditForm(
 				<TabList aria-label={t("Edit national consortium")}>
 					<EntityEditTab id="details">{t("Details")}</EntityEditTab>
 					<EntityEditTab id="relations">{t("Relations")}</EntityEditTab>
+					<EntityEditTab id="institutions">{t("Institutions")}</EntityEditTab>
 				</TabList>
 
 				<TabPanel
@@ -126,6 +136,21 @@ export function NationalConsortiumEditForm(
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}
 						unitId={documentId}
+					/>
+				</TabPanel>
+
+				<TabPanel id="institutions" shouldPreserveState={true}>
+					<ReverseUnitRelationsSection
+						messages={{
+							title: t("Institutions"),
+							memberLabel: t("Institution"),
+							empty: t("No institutions."),
+							addButton: t("Add institution"),
+						}}
+						relatedUnitId={documentId}
+						relations={memberInstitutions}
+						sourceUnitType="institution"
+						statusOptions={memberInstitutionStatusOptions}
 					/>
 				</TabPanel>
 			</EntityEditTabs>
