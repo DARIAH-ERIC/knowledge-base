@@ -52,6 +52,12 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				icon: <ListBulletIcon />,
 			},
 			{
+				href: "/dashboard/administrator/eric",
+				tooltip: t("DARIAH ERIC"),
+				label: t("DARIAH ERIC"),
+				icon: <ListBulletIcon />,
+			},
+			{
 				href: "/dashboard/administrator/countries",
 				tooltip: t("Countries"),
 				label: t("Countries"),

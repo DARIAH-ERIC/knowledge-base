@@ -15,6 +15,7 @@ import { and, eq } from "@/lib/db/sql";
 
 type ManagedOrganisationalUnitType =
 	| "country"
+	| "eric"
 	| "governance_body"
 	| "institution"
 	| "national_consortium"
