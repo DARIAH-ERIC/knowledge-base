@@ -13,6 +13,7 @@ import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
+import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { PersonRelation } from "@/lib/data/person-relations";
 import type {
@@ -204,27 +205,24 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 					{personRelations.length > 0 ? (
 						<ul className="flex flex-col gap-1">
 							{personRelations.map((relation) => (
-								<li key={relation.id} className="text-sm">
-									<RelationLink
-										className="font-medium"
-										href={getEntityDetailHref({
-											entityType: "persons",
-											slug: relation.personSlug,
-										})}
-									>
-										{relation.personName}
-									</RelationLink>
-									{" · "}
-									<span className="text-muted-fg">{formatRoleType(relation.roleType)}</span>
-									<span className="text-muted-fg">
-										{" · "}
-										{relation.duration.end
+								<RelationStatement
+									key={relation.id}
+									source={relation.personName}
+									sourceHref={getEntityDetailHref({
+										entityType: "persons",
+										slug: relation.personSlug,
+									})}
+									relation={formatRoleType(relation.roleType)}
+									target={country.name}
+									targetType={formatRoleType(relation.targetUnitType)}
+									duration={
+										relation.duration.end
 											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
 													dateStyle: "short",
 												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })}
-									</span>
-								</li>
+											: format.dateTime(relation.duration.start, { dateStyle: "short" })
+									}
+								/>
 							))}
 						</ul>
 					) : null}
@@ -235,27 +233,24 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 					{relations.length > 0 ? (
 						<ul className="flex flex-col gap-1">
 							{relations.map((relation) => (
-								<li key={relation.id} className="text-sm">
-									<span className="font-medium">{formatRoleType(relation.statusType)}</span>
-									{" · "}
-									<RelationLink
-										className="text-muted-fg"
-										href={getOrganisationalUnitDetailHref(
-											relation.relatedUnitType,
-											relation.relatedUnitSlug,
-										)}
-									>
-										{relation.relatedUnitName}
-									</RelationLink>
-									<span className="text-muted-fg">
-										{" · "}
-										{relation.duration.end
+								<RelationStatement
+									key={relation.id}
+									source={country.name}
+									relation={formatRoleType(relation.statusType)}
+									target={relation.relatedUnitName}
+									targetHref={getOrganisationalUnitDetailHref(
+										relation.relatedUnitType,
+										relation.relatedUnitSlug,
+									)}
+									targetType={formatRoleType(relation.relatedUnitType)}
+									duration={
+										relation.duration.end
 											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
 													dateStyle: "short",
 												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })}
-									</span>
-								</li>
+											: format.dateTime(relation.duration.start, { dateStyle: "short" })
+									}
+								/>
 							))}
 						</ul>
 					) : null}
@@ -266,22 +261,24 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 					{nationalConsortia.length > 0 ? (
 						<ul className="flex flex-col gap-1">
 							{nationalConsortia.map((consortium) => (
-								<li key={consortium.id} className="text-sm">
-									<RelationLink
-										className="font-medium"
-										href={getOrganisationalUnitDetailHref(consortium.unitType, consortium.unitSlug)}
-									>
-										{consortium.unitName}
-									</RelationLink>
-									<span className="text-muted-fg">
-										{" · "}
-										{consortium.duration.end
+								<RelationStatement
+									key={consortium.id}
+									source={consortium.unitName}
+									sourceHref={getOrganisationalUnitDetailHref(
+										consortium.unitType,
+										consortium.unitSlug,
+									)}
+									relation={formatRoleType(consortium.statusType)}
+									target={country.name}
+									targetType={formatRoleType("country")}
+									duration={
+										consortium.duration.end
 											? format.dateTimeRange(consortium.duration.start, consortium.duration.end, {
 													dateStyle: "short",
 												})
-											: format.dateTime(consortium.duration.start, { dateStyle: "short" })}
-									</span>
-								</li>
+											: format.dateTime(consortium.duration.start, { dateStyle: "short" })
+									}
+								/>
 							))}
 						</ul>
 					) : null}
@@ -292,27 +289,24 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 					{ericInstitutions.length > 0 ? (
 						<ul className="flex flex-col gap-1">
 							{ericInstitutions.map((institution) => (
-								<li key={institution.id} className="text-sm">
-									<span className="font-medium">{formatRoleType(institution.statusType)}</span>
-									{" · "}
-									<RelationLink
-										className="text-muted-fg"
-										href={getOrganisationalUnitDetailHref(
-											institution.institutionType,
-											institution.institutionSlug,
-										)}
-									>
-										{institution.institutionName}
-									</RelationLink>
-									<span className="text-muted-fg">
-										{" · "}
-										{institution.duration.end
+								<RelationStatement
+									key={institution.id}
+									source={institution.institutionName}
+									sourceHref={getOrganisationalUnitDetailHref(
+										institution.institutionType,
+										institution.institutionSlug,
+									)}
+									relation={formatRoleType(institution.statusType)}
+									target="DARIAH ERIC"
+									targetType={formatRoleType("eric")}
+									duration={
+										institution.duration.end
 											? format.dateTimeRange(institution.duration.start, institution.duration.end, {
 													dateStyle: "short",
 												})
-											: format.dateTime(institution.duration.start, { dateStyle: "short" })}
-									</span>
-								</li>
+											: format.dateTime(institution.duration.start, { dateStyle: "short" })
+									}
+								/>
 							))}
 						</ul>
 					) : null}
