@@ -60,9 +60,12 @@ export async function GET(
 					title: "Institutions",
 					lines:
 						report.summary.institutions.length > 0
-							? report.summary.institutions.map((i) =>
-									i.acronym == null ? i.name : `${i.name} (${i.acronym})`,
-								)
+							? report.summary.institutions.map((i) => {
+									const label = i.acronym == null ? i.name : `${i.name} (${i.acronym})`;
+									return i.representationType == null
+										? label
+										: `${label} - ${formatRole(i.representationType)}`;
+								})
 							: ["No institutions recorded."],
 				},
 				{

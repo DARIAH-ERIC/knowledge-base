@@ -18,6 +18,7 @@ export interface CountryReportSummaryData {
 		id: string;
 		name: string;
 		acronym: string | null;
+		representationType: string | null;
 	}>;
 	contributions: Array<{
 		id: string;
@@ -79,7 +80,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			campaign: { columns: { year: true, status: true } },
 			country: { columns: { name: true } },
 			institutions: {
-				columns: { id: true },
+				columns: { id: true, representationType: true },
 				with: {
 					organisationalUnit: { columns: { name: true, acronym: true } },
 				},
@@ -212,6 +213,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 					id: i.id,
 					name: i.organisationalUnit?.name ?? "",
 					acronym: i.organisationalUnit?.acronym ?? null,
+					representationType: i.representationType,
 				};
 			}),
 			contributions: reportContributions,

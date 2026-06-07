@@ -6,6 +6,7 @@ import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 
 import { CreateCountryReportActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/create-country-report.schema";
+import { getCurrentPartnerInstitutions } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
@@ -56,6 +57,30 @@ export const createCountryReportAction = createMutationAction({
 			.returning({ id: schema.countryReports.id });
 
 		assert(created);
+
+		// Seed the (frozen) institutions snapshot from the country's current partner institutions for
+		// the campaign year. Editing the live relations happens on the institution/country screens; the
+		// report tab only re-captures this snapshot.
+		const campaign = await tx.query.reportingCampaigns.findFirst({
+			where: { id: input.campaignId },
+			columns: { year: true },
+		});
+
+		if (campaign != null) {
+			const partners = await getCurrentPartnerInstitutions(input.countryId, campaign.year);
+
+			if (partners.length > 0) {
+				await tx.insert(schema.countryReportInstitutions).values(
+					partners.map((partner) => {
+						return {
+							countryReportId: created.id,
+							organisationalUnitDocumentId: partner.institutionDocumentId,
+							representationType: partner.representationType,
+						};
+					}),
+				);
+			}
+		}
 
 		return { subjectId: created.id };
 	},

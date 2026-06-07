@@ -13,7 +13,7 @@ interface CountryReportStepNavProps {
 	editBasePath: string;
 	/**
 	 * - `reporting`: the user-facing flow — ends with a "Confirm" step.
-	 * - `admin`: starts with a "Details" tab (status editor at the edit index) and has no confirm step.
+	 * - `admin`: starts with a "Status" tab (status editor at the edit index) and has no confirm step.
 	 */
 	variant: "admin" | "reporting";
 }
@@ -24,7 +24,7 @@ export function CountryReportStepNav(props: Readonly<CountryReportStepNavProps>)
 	const t = useExtracted();
 
 	const steps: Array<ReportStep> = [
-		...(variant === "admin" ? [{ href: editBasePath, label: t("Details") }] : []),
+		...(variant === "admin" ? [{ href: editBasePath, label: t("Status") }] : []),
 		{ href: `${editBasePath}/institutions`, label: t("Institutions") },
 		{ href: `${editBasePath}/contributors`, label: t("Contributors") },
 		{ href: `${editBasePath}/events`, label: t("Events") },
