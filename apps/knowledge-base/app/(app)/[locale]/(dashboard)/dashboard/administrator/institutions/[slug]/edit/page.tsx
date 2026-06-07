@@ -12,6 +12,7 @@ import { getContributionPersonOptions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { getPersonRelationRoleOptions, getPersonRelations } from "@/lib/data/person-relations";
+import { getUnitProjectPartnerships } from "@/lib/data/project-partners";
 import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
 import { getSocialMediaOptions } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
@@ -76,6 +77,8 @@ export default async function DashboardAdministratorEditInstitutionPage(
 		{ items: initialPersonItems, total: initialPersonTotal },
 		personRelations,
 		personRelationRoleOptions,
+		projectPartnerships,
+		projectRoles,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
 		getEntityRelationOptions(),
@@ -90,6 +93,11 @@ export default async function DashboardAdministratorEditInstitutionPage(
 		getContributionPersonOptions(),
 		getPersonRelations(documentId),
 		getPersonRelationRoleOptions("institution"),
+		getUnitProjectPartnerships(documentId),
+		db.query.projectRoles.findMany({
+			orderBy: { role: "asc" },
+			columns: { id: true, role: true },
+		}),
 	]);
 
 	if (institutionData == null) {
@@ -139,11 +147,24 @@ export default async function DashboardAdministratorEditInstitutionPage(
 			isPublished={publishedId != null}
 			personRelationRoleOptions={personRelationRoleOptions}
 			personRelations={personRelations}
+			projectRoles={projectRoles}
+			projects={projectPartnerships.map((partnership) => {
+				return {
+					id: partnership.id,
+					projectId: partnership.projectId,
+					projectName: partnership.projectAcronym ?? partnership.projectName,
+					roleId: partnership.roleId,
+					roleName: partnership.roleType,
+					durationStart: partnership.duration?.start ?? null,
+					durationEnd: partnership.duration?.end ?? null,
+				};
+			})}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
 			selectedSocialMediaItems={selectedSocialMediaItems}
 			unitRelationStatusOptions={unitRelationStatusOptions}
+			unitVersionId={institution.id}
 		/>
 	);
 }

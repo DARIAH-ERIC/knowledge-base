@@ -13,6 +13,10 @@ import {
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
+import {
+	type UnitProject,
+	UnitProjectsSection,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-projects-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { InstitutionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form";
 import { discardInstitutionDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/discard-institution-draft.action";
@@ -52,6 +56,9 @@ interface InstitutionEditFormProps {
 	initialPersonTotal: number;
 	relations: Array<UnitRelation>;
 	unitRelationStatusOptions: Array<UnitRelationStatusOption>;
+	unitVersionId: string;
+	projects: Array<UnitProject>;
+	projectRoles: Array<{ id: string; role: string }>;
 }
 
 export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): ReactNode {
@@ -79,6 +86,9 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 		initialPersonTotal,
 		relations,
 		unitRelationStatusOptions,
+		unitVersionId,
+		projects,
+		projectRoles,
 	} = props;
 
 	const t = useExtracted();
@@ -93,6 +103,7 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 					<EntityEditTab id="details">{t("Details")}</EntityEditTab>
 					<EntityEditTab id="people">{t("People")}</EntityEditTab>
 					<EntityEditTab id="relations">{t("Relations")}</EntityEditTab>
+					<EntityEditTab id="projects">{t("Projects")}</EntityEditTab>
 				</TabList>
 
 				<TabPanel
@@ -145,6 +156,14 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}
 						unitId={documentId}
+					/>
+				</TabPanel>
+
+				<TabPanel id="projects" shouldPreserveState={true}>
+					<UnitProjectsSection
+						projects={projects}
+						roles={projectRoles}
+						unitVersionId={unitVersionId}
 					/>
 				</TabPanel>
 			</EntityEditTabs>
