@@ -64,9 +64,6 @@ function useRepresentationLabel(): (
 			case "is_partner_institution_of": {
 				return t("Partner institution");
 			}
-			case "is_cooperating_partner_of": {
-				return t("Cooperating partner");
-			}
 			default: {
 				return null;
 			}

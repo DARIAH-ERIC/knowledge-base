@@ -38,15 +38,15 @@ export const ReportingCampaignUpdateSchema = createUpdateSchema(reportingCampaig
 export const reportStatusEnum = ["draft", "submitted", "accepted"] as const;
 
 /**
- * The institution↔ERIC representation relation captured per country-report institution. Mirrors the
- * `institution -> eric` representation statuses surfaced by the country partner-institutions lens;
- * a frozen snapshot of the institution's role at capture time.
+ * The institution↔ERIC representation relation captured per country-report institution. A subset of
+ * the `institution -> eric` representation statuses: only member/observer countries file reports,
+ * so `is_cooperating_partner_of` is deliberately excluded. A frozen snapshot of the role at capture
+ * time.
  */
 export const countryReportInstitutionRepresentationEnum = [
 	"is_national_coordinating_institution_in",
 	"is_national_representative_institution_in",
 	"is_partner_institution_of",
-	"is_cooperating_partner_of",
 ] as const;
 
 export const reportScreenCommentTypeEnum = ["country", "working_group"] as const;
