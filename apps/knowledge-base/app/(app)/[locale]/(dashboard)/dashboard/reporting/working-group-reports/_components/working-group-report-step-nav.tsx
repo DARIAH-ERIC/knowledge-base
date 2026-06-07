@@ -13,7 +13,7 @@ interface WorkingGroupReportStepNavProps {
 	editBasePath: string;
 	/**
 	 * - `reporting`: the user-facing flow — ends with a "Confirm" step.
-	 * - `admin`: starts with a "Details" tab (status editor at the edit index) and has no confirm step.
+	 * - `admin`: starts with a "Status" tab (status editor at the edit index) and has no confirm step.
 	 */
 	variant: "admin" | "reporting";
 }
@@ -26,7 +26,7 @@ export function WorkingGroupReportStepNav(
 	const t = useExtracted();
 
 	const steps: Array<ReportStep> = [
-		...(variant === "admin" ? [{ href: editBasePath, label: t("Details") }] : []),
+		...(variant === "admin" ? [{ href: editBasePath, label: t("Status") }] : []),
 		{ href: `${editBasePath}/data`, label: t("Data") },
 		{ href: `${editBasePath}/events`, label: t("Events") },
 		{ href: `${editBasePath}/questions`, label: t("Questions") },

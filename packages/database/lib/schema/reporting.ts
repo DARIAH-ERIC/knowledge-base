@@ -36,6 +36,19 @@ export const ReportingCampaignInsertSchema = createInsertSchema(reportingCampaig
 export const ReportingCampaignUpdateSchema = createUpdateSchema(reportingCampaigns);
 
 export const reportStatusEnum = ["draft", "submitted", "accepted"] as const;
+
+/**
+ * The institution↔ERIC representation relation captured per country-report institution. A subset of
+ * the `institution -> eric` representation statuses: only member/observer countries file reports,
+ * so `is_cooperating_partner_of` is deliberately excluded. A frozen snapshot of the role at capture
+ * time.
+ */
+export const countryReportInstitutionRepresentationEnum = [
+	"is_national_coordinating_institution_in",
+	"is_national_representative_institution_in",
+	"is_partner_institution_of",
+] as const;
+
 export const reportScreenCommentTypeEnum = ["country", "working_group"] as const;
 export const reportScreenCommentKeyEnum = [
 	"institutions",
@@ -320,8 +333,20 @@ export const countryReportInstitutions = p.snakeCase.table(
 			.uuid("organisational_unit_document_id")
 			.notNull()
 			.references(() => entities.id),
+		// Frozen at capture time from the institution's `institution -> eric` representation relation.
+		// Nullable: legacy rows captured before this column existed stay null until a refresh re-captures.
+		representationType: p.text("representation_type", {
+			enum: countryReportInstitutionRepresentationEnum,
+		}),
 	},
-	(t) => [p.unique().on(t.countryReportId, t.organisationalUnitDocumentId)],
+	(t) => [
+		p.unique().on(t.countryReportId, t.organisationalUnitDocumentId),
+		// A CHECK only fails on FALSE, so NULL (legacy rows) passes.
+		p.check(
+			"country_report_institutions_representation_type_enum_check",
+			inArray(t.representationType, countryReportInstitutionRepresentationEnum),
+		),
+	],
 );
 
 export type CountryReportInstitution = typeof countryReportInstitutions.$inferSelect;

@@ -461,3 +461,121 @@ export async function getEricInstitutionsForCountry(countryDocumentId: string) {
 export type CountryEricInstitution = Awaited<
 	ReturnType<typeof getEricInstitutionsForCountry>
 >[number];
+
+/** Slug of the DARIAH ERIC organisational unit. Relations to ERIC are resolved against this. */
+const dariahEricSlug = "dariah-eu";
+
+export type CountryReportInstitutionRepresentation =
+	(typeof schema.countryReportInstitutionRepresentationEnum)[number];
+
+/**
+ * Resolve the DARIAH ERIC organisational unit's document id (`entities.id`), explicitly by its
+ * `dariah-eu` slug _and_ `eric` type — we deliberately do not assume a single `eric`-typed unit.
+ * Returns `null` if it is absent.
+ */
+export async function getDariahEricDocumentId(): Promise<string | null> {
+	const unit = await db.query.organisationalUnits.findFirst({
+		where: { type: { type: "eric" }, entityVersion: { entity: { slug: dariahEricSlug } } },
+		columns: {},
+		with: { entityVersion: { columns: {}, with: { entity: { columns: { id: true } } } } },
+	});
+
+	return unit?.entityVersion.entity.id ?? null;
+}
+
+/**
+ * The institutions that count as current partner institutions of `countryDocumentId` for the given
+ * reporting `year`: institutions `is_located_in` the country that also hold an `institution ->
+ * eric` representation relation whose duration overlaps the reporting calendar year. One row per
+ * institution — if it holds several representation relations that year, the most significant is
+ * kept (coordinating > representative > partner > cooperating). Used to capture the country-report
+ * institutions snapshot.
+ */
+export interface CurrentPartnerInstitution {
+	institutionDocumentId: string;
+	representationType: CountryReportInstitutionRepresentation;
+	name: string;
+	acronym: string | null;
+	slug: string;
+}
+
+export async function getCurrentPartnerInstitutions(
+	countryDocumentId: string,
+	year: number,
+): Promise<Array<CurrentPartnerInstitution>> {
+	const ericDocumentId = await getDariahEricDocumentId();
+	if (ericDocumentId == null) {
+		return [];
+	}
+
+	const ericRelations = alias(schema.organisationalUnitsRelations, "capture_eric_relations");
+	const locatedInRelations = alias(schema.organisationalUnitsRelations, "capture_located_in");
+	const ericStatus = alias(schema.organisationalUnitStatus, "capture_eric_status");
+	const locatedInStatus = alias(schema.organisationalUnitStatus, "capture_located_in_status");
+	const institutionLifecycle = alias(schema.documentLifecycle, "capture_institution_lifecycle");
+
+	const representationPrecedence = sql`
+		CASE ${ericStatus.status}
+			WHEN 'is_national_coordinating_institution_in' THEN 1
+			WHEN 'is_national_representative_institution_in' THEN 2
+			WHEN 'is_partner_institution_of' THEN 3
+			ELSE 4
+		END
+	`;
+
+	const rows = await db
+		.select({
+			institutionDocumentId: ericRelations.unitDocumentId,
+			representationType: ericStatus.status,
+			name: schema.organisationalUnits.name,
+			acronym: schema.organisationalUnits.acronym,
+			slug: schema.entities.slug,
+		})
+		.from(ericRelations)
+		.innerJoin(ericStatus, eq(ericStatus.id, ericRelations.status))
+		.innerJoin(
+			locatedInRelations,
+			eq(locatedInRelations.unitDocumentId, ericRelations.unitDocumentId),
+		)
+		.innerJoin(locatedInStatus, eq(locatedInStatus.id, locatedInRelations.status))
+		.innerJoin(
+			institutionLifecycle,
+			eq(institutionLifecycle.documentId, ericRelations.unitDocumentId),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			sql`${schema.organisationalUnits.id} = COALESCE(${institutionLifecycle.draftId}, ${institutionLifecycle.publishedId})`,
+		)
+		.innerJoin(schema.entities, eq(schema.entities.id, ericRelations.unitDocumentId))
+		.where(
+			and(
+				eq(ericRelations.relatedUnitDocumentId, ericDocumentId),
+				inArray(ericStatus.status, [...schema.countryReportInstitutionRepresentationEnum]),
+				eq(locatedInStatus.status, "is_located_in"),
+				eq(locatedInRelations.relatedUnitDocumentId, countryDocumentId),
+				sql`
+					${ericRelations.duration} && tstzrange (
+						MAKE_DATE(${year}, 1, 1)::TIMESTAMPTZ,
+						MAKE_DATE(${year + 1}, 1, 1)::TIMESTAMPTZ
+					)
+				`,
+			),
+		)
+		.orderBy(representationPrecedence, schema.organisationalUnits.name);
+
+	// One row per institution; the precedence ordering keeps the most significant representation.
+	const byInstitution = new Map<string, CurrentPartnerInstitution>();
+	for (const row of rows) {
+		if (!byInstitution.has(row.institutionDocumentId)) {
+			byInstitution.set(row.institutionDocumentId, {
+				institutionDocumentId: row.institutionDocumentId,
+				representationType: row.representationType as CountryReportInstitutionRepresentation,
+				name: row.name,
+				acronym: row.acronym,
+				slug: row.slug,
+			});
+		}
+	}
+
+	return [...byInstitution.values()];
+}

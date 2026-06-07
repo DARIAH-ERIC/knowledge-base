@@ -50,7 +50,7 @@ export function WorkingGroupReportEditForm(
 
 			<FormLayout>
 				<Form action={action} className="flex flex-col gap-y-6" state={state}>
-					<FormSection description={t("Update the report status.")} title={t("Details")}>
+					<FormSection description={t("Update the report status.")} title={t("Status")}>
 						<div className="space-y-1">
 							<p className="text-sm font-medium text-fg">{t("Campaign")}</p>
 							<p className="text-sm text-muted-fg">{report.campaign.year}</p>
