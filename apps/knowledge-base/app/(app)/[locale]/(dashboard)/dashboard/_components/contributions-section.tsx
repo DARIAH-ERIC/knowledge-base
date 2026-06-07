@@ -55,6 +55,7 @@ interface CreateContributionActionData {
 	durationStart: string;
 	durationEnd: string | null;
 	targetUnitType: PersonContribution["organisationalUnitType"];
+	organisationalUnitSlug: PersonContribution["organisationalUnitSlug"];
 }
 
 async function fetchOrganisationalUnitOptionsPage(
@@ -151,6 +152,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 						roleType: option.roleType as PersonContribution["roleType"],
 						organisationalUnitId: unit.id,
 						organisationalUnitName: unit.name,
+						organisationalUnitSlug: data.organisationalUnitSlug,
 						organisationalUnitType: data.targetUnitType,
 						duration: {
 							start: new Date(data.durationStart),

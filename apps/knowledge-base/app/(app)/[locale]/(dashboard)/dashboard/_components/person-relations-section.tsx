@@ -137,6 +137,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							durationStart: string;
 							durationEnd: string | null;
 							targetUnitType: PersonRelation["targetUnitType"];
+							personSlug: PersonRelation["personSlug"];
 					  }
 					| undefined;
 
@@ -147,6 +148,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							id: data.id,
 							personId: person.id,
 							personName: person.name,
+							personSlug: data.personSlug,
 							roleTypeId: option.roleTypeId,
 							roleType: option.roleType as PersonRelation["roleType"],
 							targetUnitType: data.targetUnitType,

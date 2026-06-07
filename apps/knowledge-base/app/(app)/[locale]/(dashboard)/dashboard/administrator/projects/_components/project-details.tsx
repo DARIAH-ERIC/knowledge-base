@@ -12,7 +12,9 @@ import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import { getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
 
 interface ProjectDetailsProps {
 	documentId: string;
@@ -32,6 +34,8 @@ interface ProjectDetailsProps {
 		partners: Array<{
 			id: string;
 			unitName: string;
+			unitSlug: string;
+			unitType: string;
 			roleName: string;
 			duration: { start: Date; end?: Date | null | undefined } | null;
 		}>;
@@ -160,7 +164,12 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 						<ul className="flex flex-col gap-1">
 							{project.partners.map((partner) => (
 								<li key={partner.id} className="text-sm">
-									<span className="font-medium">{partner.unitName}</span>
+									<RelationLink
+										className="font-medium"
+										href={getOrganisationalUnitDetailHref(partner.unitType, partner.unitSlug)}
+									>
+										{partner.unitName}
+									</RelationLink>
 									{" · "}
 									<span className="text-muted-fg">{partner.roleName}</span>
 									{partner.duration != null ? (

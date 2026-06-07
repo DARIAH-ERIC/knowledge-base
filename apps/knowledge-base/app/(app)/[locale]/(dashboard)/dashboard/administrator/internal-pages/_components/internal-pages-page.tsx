@@ -9,7 +9,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -82,7 +82,7 @@ export function InternalPagesPage(props: Readonly<InternalPagesPageProps>): Reac
 				</TableHeader>
 				<TableBody items={internalPages.data}>
 					{(item) => (
-						<TableRow href={`/dashboard/administrator/internal-pages/${item.entity.slug}/edit`}>
+						<TableRow href={`/dashboard/administrator/internal-pages/${item.entity.slug}/details`}>
 							<TableCell>
 								<div className="max-inline-64 truncate">{item.title}</div>
 							</TableCell>
@@ -94,6 +94,12 @@ export function InternalPagesPage(props: Readonly<InternalPagesPageProps>): Reac
 							</TableCell>
 							<TableCell className="text-end">
 								<RowActionsMenu>
+									<RowActionsMenu.Link
+										href={`/dashboard/administrator/internal-pages/${item.entity.slug}/details`}
+										icon={<EyeIcon className="me-2 block-4 inline-4" />}
+									>
+										{t("View")}
+									</RowActionsMenu.Link>
 									<RowActionsMenu.Link
 										href={`/dashboard/administrator/internal-pages/${item.entity.slug}/edit`}
 										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}

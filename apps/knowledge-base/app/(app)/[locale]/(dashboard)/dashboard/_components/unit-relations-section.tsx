@@ -132,6 +132,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 							durationStart: string;
 							durationEnd: string | null;
 							relatedUnitType: UnitRelation["relatedUnitType"];
+							relatedUnitSlug: UnitRelation["relatedUnitSlug"];
 					  }
 					| undefined;
 
@@ -144,6 +145,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 							statusType: option.statusType as UnitRelation["statusType"],
 							relatedUnitId: relatedUnit.id,
 							relatedUnitName: relatedUnit.name,
+							relatedUnitSlug: data.relatedUnitSlug,
 							relatedUnitType: data.relatedUnitType,
 							duration: {
 								start: new Date(data.durationStart),
