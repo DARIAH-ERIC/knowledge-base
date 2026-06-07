@@ -13,6 +13,7 @@ import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
+import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { EricReverseRelationGroups } from "@/lib/data/eric";
 import {
@@ -81,6 +82,7 @@ export function EricDetails(props: Readonly<EricDetailsProps>): ReactNode {
 		working_group: t("Working groups"),
 		governance_body: t("Governance bodies"),
 	};
+	const ericHref = getOrganisationalUnitDetailHref("eric", slug);
 
 	return (
 		<Fragment>
@@ -212,27 +214,25 @@ export function EricDetails(props: Readonly<EricDetailsProps>): ReactNode {
 								{relations.length > 0 ? (
 									<ul className="flex flex-col gap-1">
 										{relations.map((relation) => (
-											<li key={relation.id} className="text-sm">
-												<span className="font-medium">{formatRoleType(relation.statusType)}</span>
-												{" · "}
-												<RelationLink
-													className="text-muted-fg"
-													href={getOrganisationalUnitDetailHref(
-														relation.unitType,
-														relation.unitSlug,
-													)}
-												>
-													{relation.unitName}
-												</RelationLink>
-												<span className="text-muted-fg">
-													{" · "}
-													{relation.duration.end
+											<RelationStatement
+												key={relation.id}
+												source={relation.unitName}
+												sourceHref={getOrganisationalUnitDetailHref(
+													relation.unitType,
+													relation.unitSlug,
+												)}
+												relation={formatRoleType(relation.statusType)}
+												target={eric.name}
+												targetHref={ericHref}
+												targetType={formatRoleType("eric")}
+												duration={
+													relation.duration.end
 														? format.dateTimeRange(relation.duration.start, relation.duration.end, {
 																dateStyle: "short",
 															})
-														: format.dateTime(relation.duration.start, { dateStyle: "short" })}
-												</span>
-											</li>
+														: format.dateTime(relation.duration.start, { dateStyle: "short" })
+												}
+											/>
 										))}
 									</ul>
 								) : null}

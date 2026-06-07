@@ -64,7 +64,7 @@ export async function getEricForAdmin(
 
 	const lifecycle = await db
 		.select({
-			draftId: schema.documentLifecycle.draftId,
+			hasDraftChanges: schema.documentLifecycle.hasDraftChanges,
 			publishedId: schema.documentLifecycle.publishedId,
 		})
 		.from(schema.documentLifecycle)
@@ -75,7 +75,7 @@ export async function getEricForAdmin(
 		documentId,
 		slug: unit.entityVersion.entity.slug,
 		name: unit.name,
-		hasDraft: lifecycle?.draftId != null,
+		hasDraft: lifecycle?.hasDraftChanges ?? false,
 		isPublished: lifecycle?.publishedId != null,
 	};
 }
