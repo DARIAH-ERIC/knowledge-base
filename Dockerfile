@@ -56,7 +56,8 @@ FROM base AS migrate
 USER node
 WORKDIR /app
 COPY --chown=node:node --from=migrate-build /out/ .
-CMD [ "pnpm", "run", "db:migrations:apply" ]
+# Prevent pnpm 11 from reinstalling dependencies in the immutable deploy output.
+CMD [ "pnpm", "--config.verify-deps-before-run=false", "run", "db:migrations:apply" ]
 
 # =================================================================================================
 # api
