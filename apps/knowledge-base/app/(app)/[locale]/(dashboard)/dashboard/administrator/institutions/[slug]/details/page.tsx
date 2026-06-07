@@ -12,6 +12,7 @@ import {
 	resolveSelectedDetailVersion,
 } from "@/lib/data/entity-detail-view";
 import { getPersonRelations } from "@/lib/data/person-relations";
+import { getUnitProjectPartnerships } from "@/lib/data/project-partners";
 import {
 	getEntityRelationOptionsByIds,
 	getEntityRelations,
@@ -110,12 +111,14 @@ export default async function DashboardAdministratorInstitutionDetailsPage(
 		personRelations,
 		{ relatedEntityIds, relatedResourceIds },
 		relations,
+		projectPartnerships,
 		socialMediaRows,
 		description,
 	] = await Promise.all([
 		getPersonRelations(documentId),
 		getEntityRelations(documentId),
 		getUnitRelations(documentId),
+		getUnitProjectPartnerships(documentId),
 		db.query.organisationalUnitsToSocialMedia.findMany({
 			where: { organisationalUnitId: institution.id },
 			columns: { socialMediaId: true },
@@ -150,6 +153,7 @@ export default async function DashboardAdministratorInstitutionDetailsPage(
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
 			personRelations={personRelations}
+			projectPartnerships={projectPartnerships}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}

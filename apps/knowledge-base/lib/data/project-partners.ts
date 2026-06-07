@@ -259,6 +259,76 @@ export async function getProjectOptions(params: Readonly<GetProjectOptionsParams
 	};
 }
 
+export interface UnitProjectPartnership {
+	id: string;
+	projectId: string;
+	projectName: string;
+	projectAcronym: string | null;
+	projectSlug: string;
+	roleType: string;
+	duration: { start: Date; end?: Date | null | undefined } | null;
+}
+
+/**
+ * `unitDocumentId` is the unit's `entities.id`. Returns every project the unit is/was related to
+ * (partner / coordinator / funder), resolving each project to its latest editable version. The
+ * `projectsToOrganisationalUnits` rows are document-level, so there is a single set per unit
+ * document (no draft/published diff).
+ */
+export async function getUnitProjectPartnerships(
+	unitDocumentId: string,
+): Promise<Array<UnitProjectPartnership>> {
+	const projectEntities = alias(schema.entities, "unit_project_entities");
+	const projectDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"unit_project_document_lifecycle",
+	);
+	const projectPickedVersion = sql`COALESCE(${projectDocumentLifecycle.draftId}, ${projectDocumentLifecycle.publishedId})`;
+
+	const rows = await db
+		.select({
+			id: schema.projectsToOrganisationalUnits.id,
+			projectId: schema.projectsToOrganisationalUnits.projectDocumentId,
+			projectName: schema.projects.name,
+			projectAcronym: schema.projects.acronym,
+			projectSlug: projectEntities.slug,
+			roleType: schema.projectRoles.role,
+			duration: schema.projectsToOrganisationalUnits.duration,
+		})
+		.from(schema.projectsToOrganisationalUnits)
+		.innerJoin(
+			projectEntities,
+			eq(projectEntities.id, schema.projectsToOrganisationalUnits.projectDocumentId),
+		)
+		.innerJoin(
+			projectDocumentLifecycle,
+			eq(projectDocumentLifecycle.documentId, projectEntities.id),
+		)
+		.innerJoin(schema.projects, sql`${schema.projects.id} = ${projectPickedVersion}`)
+		.innerJoin(
+			schema.projectRoles,
+			eq(schema.projectRoles.id, schema.projectsToOrganisationalUnits.roleId),
+		)
+		.where(eq(schema.projectsToOrganisationalUnits.unitDocumentId, unitDocumentId))
+		.orderBy(
+			sql`UPPER(${schema.projectsToOrganisationalUnits.duration}) DESC NULLS FIRST`,
+			sql`LOWER(${schema.projectsToOrganisationalUnits.duration}) DESC`,
+			schema.projects.name,
+		);
+
+	return rows.map((row) => {
+		return {
+			id: row.id,
+			projectId: row.projectId,
+			projectName: row.projectName,
+			projectAcronym: row.projectAcronym,
+			projectSlug: row.projectSlug,
+			roleType: row.roleType,
+			duration: row.duration ?? null,
+		};
+	});
+}
+
 export async function getProjectPartnersForAdmin(
 	currentUser: Pick<User, "role">,
 	params: Readonly<GetProjectPartnersParams>,

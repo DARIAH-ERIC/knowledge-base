@@ -14,6 +14,7 @@ import { Fragment, type ReactNode } from "react";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { PersonRelation } from "@/lib/data/person-relations";
+import type { UnitProjectPartnership } from "@/lib/data/project-partners";
 import type { UnitRelation } from "@/lib/data/unit-relations";
 import { formatRoleType } from "@/lib/format-role-type";
 
@@ -39,6 +40,7 @@ interface InstitutionDetailsProps {
 		description?: string;
 	}>;
 	personRelations: Array<PersonRelation>;
+	projectPartnerships: Array<UnitProjectPartnership>;
 	relations: Array<UnitRelation>;
 
 	publishAction: (documentId: string) => Promise<unknown>;
@@ -52,6 +54,7 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 		isPublished,
 		institution,
 		personRelations,
+		projectPartnerships,
 		relations,
 		publishAction,
 		discardDraftAction,
@@ -215,6 +218,35 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 												})
 											: format.dateTime(relation.duration.start, { dateStyle: "short" })}
 									</span>
+								</li>
+							))}
+						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Projects")}</DescriptionTerm>
+				<DescriptionDetails>
+					{projectPartnerships.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{projectPartnerships.map((partnership) => (
+								<li key={partnership.id} className="text-sm">
+									<span className="font-medium">
+										{partnership.projectAcronym ?? partnership.projectName}
+									</span>
+									{" · "}
+									<span className="text-muted-fg">{partnership.roleType}</span>
+									{partnership.duration != null ? (
+										<span className="text-muted-fg">
+											{" · "}
+											{partnership.duration.end
+												? format.dateTimeRange(
+														partnership.duration.start,
+														partnership.duration.end,
+														{ dateStyle: "short" },
+													)
+												: format.dateTime(partnership.duration.start, { dateStyle: "short" })}
+										</span>
+									) : null}
 								</li>
 							))}
 						</ul>
