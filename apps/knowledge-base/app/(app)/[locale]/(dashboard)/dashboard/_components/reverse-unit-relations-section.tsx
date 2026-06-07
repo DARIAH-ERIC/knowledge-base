@@ -41,37 +41,47 @@ import { createUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { deleteUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/delete-unit-relation.action";
 import { endUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-unit-relation.action";
 import { updateUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-unit-relation.action";
-import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
+import type { OrganisationalUnitType } from "@/lib/data/organisational-units";
+import type { ReverseUnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 import { dateToCalendarDate } from "@/lib/date";
 
-interface UnitRelationsSectionProps {
-	unitId: string;
-	relations: Array<UnitRelation & { lifecycleStatus?: "changed" | "new" }>;
+interface ReverseUnitRelationsSectionProps {
+	/** The current unit's document id — the fixed _target_ of every relation shown here. */
+	relatedUnitId: string;
+	relations: Array<ReverseUnitRelation>;
 	statusOptions: Array<UnitRelationStatusOption>;
+	/** Organisational-unit type to pick as the relation's source/owner (e.g. "institution"). */
+	sourceUnitType: OrganisationalUnitType;
+	/** Entity-specific copy, kept in the parent so message extraction works. */
+	messages: {
+		title: string;
+		/** Singular noun for the source unit, used as column header and picker label. */
+		memberLabel: string;
+		empty: string;
+		addButton: string;
+	};
 }
 
-async function fetchRelatedUnitOptionsPage(
-	unitId: string,
-	statusId: string,
+async function fetchSourceUnitOptionsPage(
+	unitType: string,
 	params: Readonly<AsyncOptionsFetchPageParams>,
 ): Promise<{ items: Array<AsyncOption>; total: number }> {
 	const searchParams = new URLSearchParams({
 		limit: String(params.limit),
 		offset: String(params.offset),
-		statusId,
-		unitId,
+		unitType,
 	});
 
 	if (params.q !== "") {
 		searchParams.set("q", params.q);
 	}
 
-	const response = await fetch(`/api/unit-relations/options?${searchParams.toString()}`, {
+	const response = await fetch(`/api/organisational-units/options?${searchParams.toString()}`, {
 		signal: params.signal,
 	});
 
 	if (!response.ok) {
-		throw new Error("Failed to load related units.");
+		throw new Error("Failed to load units.");
 	}
 
 	return (await response.json()) as { items: Array<AsyncOption>; total: number };
@@ -81,34 +91,31 @@ function formatStatus(type: string): string {
 	return type.replaceAll("_", " ");
 }
 
-function formatUnitType(type: string): string {
-	return type.replaceAll("_", " ");
-}
-
-function formatLifecycleStatus(
-	status: "changed" | "new",
-	t: ReturnType<typeof useExtracted>,
-): string {
-	return status === "new" ? t("New") : t("Changed");
-}
-
-export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>): ReactNode {
-	const { unitId, relations, statusOptions } = props;
+export function ReverseUnitRelationsSection(
+	props: Readonly<ReverseUnitRelationsSectionProps>,
+): ReactNode {
+	const { relatedUnitId, relations, statusOptions, sourceUnitType, messages } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
+
+	const hasStatusChoice = statusOptions.length > 1;
+	const singleStatus = statusOptions.length === 1 ? statusOptions[0]! : null;
 
 	const [localRelations, setLocalRelations] = useState(relations);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string } | null>(null);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
-	const [itemToEdit, setItemToEdit] = useState<UnitRelation | null>(null);
+
+	const [itemToEdit, setItemToEdit] = useState<ReverseUnitRelation | null>(null);
 	const [editStatusId, setEditStatusId] = useState<string | null>(null);
 	const [editUnitItem, setEditUnitItem] = useState<AsyncOption | null>(null);
 	const [editStartDate, setEditStartDate] = useState<CalendarDate | null>(null);
 	const [editEndDate, setEditEndDate] = useState<CalendarDate | null>(null);
 
-	const [selectedStatusId, setSelectedStatusId] = useState<string | null>(null);
+	const [selectedStatusId, setSelectedStatusId] = useState<string | null>(
+		singleStatus?.statusId ?? null,
+	);
 	const [selectedUnitItem, setSelectedUnitItem] = useState<AsyncOption | null>(null);
 
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
@@ -116,24 +123,21 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 	const [isPending, startFormTransition] = useTransition();
 	const [isEditPending, startEditTransition] = useTransition();
 
+	function resolveStatus(statusId: string | null): UnitRelationStatusOption | null {
+		return statusOptions.find((entry) => entry.statusId === statusId) ?? null;
+	}
+
 	function formAction(formData: FormData) {
-		const statusId = selectedStatusId;
-		const relatedUnit = selectedUnitItem;
-		const option = statusOptions.find((entry) => entry.statusId === statusId);
+		const sourceUnit = selectedUnitItem;
+		const option = resolveStatus(selectedStatusId);
 
 		startFormTransition(async () => {
 			const newState = await createUnitRelationAction(state, formData);
 			setState(newState);
 
-			if (newState.status === "success" && option != null && relatedUnit != null) {
+			if (newState.status === "success" && option != null && sourceUnit != null) {
 				const data = newState.data as
-					| {
-							id: string;
-							durationStart: string;
-							durationEnd: string | null;
-							relatedUnitType: UnitRelation["relatedUnitType"];
-							relatedUnitSlug: UnitRelation["relatedUnitSlug"];
-					  }
+					| { id: string; durationStart: string; durationEnd: string | null }
 					| undefined;
 
 				if (data != null) {
@@ -143,10 +147,10 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 							id: data.id,
 							statusId: option.statusId,
 							statusType: option.statusType,
-							relatedUnitId: relatedUnit.id,
-							relatedUnitName: relatedUnit.name,
-							relatedUnitSlug: data.relatedUnitSlug,
-							relatedUnitType: data.relatedUnitType,
+							unitId: sourceUnit.id,
+							unitName: sourceUnit.name,
+							unitSlug: "",
+							unitType: sourceUnitType,
 							duration: {
 								start: new Date(data.durationStart),
 								...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
@@ -155,29 +159,24 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 					]);
 				}
 
-				setSelectedStatusId(null);
 				setSelectedUnitItem(null);
+				setSelectedStatusId(singleStatus?.statusId ?? null);
 			}
 		});
 	}
 
-	function openEditDialog(relation: UnitRelation) {
+	function openEditDialog(relation: ReverseUnitRelation) {
 		setEditState(createActionStateInitial());
 		setItemToEdit(relation);
 		setEditStatusId(relation.statusId);
-		setEditUnitItem({
-			id: relation.relatedUnitId,
-			name: relation.relatedUnitName,
-			description: formatUnitType(relation.relatedUnitType),
-		});
+		setEditUnitItem({ id: relation.unitId, name: relation.unitName });
 		setEditStartDate(dateToCalendarDate(relation.duration.start));
 		setEditEndDate(dateToCalendarDate(relation.duration.end));
 	}
 
 	function editFormAction(formData: FormData) {
-		const statusId = editStatusId;
-		const relatedUnit = editUnitItem;
-		const option = statusOptions.find((entry) => entry.statusId === statusId);
+		const sourceUnit = editUnitItem;
+		const option = resolveStatus(editStatusId);
 
 		startEditTransition(async () => {
 			const newState = await updateUnitRelationAction(editState, formData);
@@ -187,7 +186,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 				newState.status === "success" &&
 				itemToEdit != null &&
 				option != null &&
-				relatedUnit != null
+				sourceUnit != null
 			) {
 				const start = editStartDate?.toDate("UTC") ?? itemToEdit.duration.start;
 				const end = editEndDate?.toDate("UTC") ?? undefined;
@@ -199,8 +198,8 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									...relation,
 									statusId: option.statusId,
 									statusType: option.statusType,
-									relatedUnitId: relatedUnit.id,
-									relatedUnitName: relatedUnit.name,
+									unitId: sourceUnit.id,
+									unitName: sourceUnit.name,
 									duration: { start, ...(end != null ? { end } : {}) },
 								}
 							: relation,
@@ -215,15 +214,14 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 		<Fragment>
 			<div className="max-inline-3xl space-y-6">
 				<div className="space-y-1">
-					<FormSectionTitle title={t("Relations")} />
+					<FormSectionTitle title={messages.title} />
 				</div>
 
 				{localRelations.length > 0 ? (
-					<Table aria-label="relations" className="[--gutter:0] sm:[--gutter:0]">
+					<Table aria-label={messages.title} className="[--gutter:0] sm:[--gutter:0]">
 						<TableHeader>
-							<TableColumn isRowHeader={true}>{t("Status")}</TableColumn>
-							<TableColumn>{t("Type")}</TableColumn>
-							<TableColumn>{t("Related unit")}</TableColumn>
+							<TableColumn isRowHeader={true}>{messages.memberLabel}</TableColumn>
+							{hasStatusChoice ? <TableColumn>{t("Type")}</TableColumn> : null}
 							<TableColumn>{t("From")}</TableColumn>
 							<TableColumn>{t("Until")}</TableColumn>
 							<TableColumn />
@@ -231,20 +229,12 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 						<TableBody items={localRelations}>
 							{(relation) => (
 								<TableRow id={relation.id}>
-									<TableCell>
-										<div className="flex items-center gap-x-2">
-											<span>{formatStatus(relation.statusType)}</span>
-											{relation.lifecycleStatus != null && (
-												<Badge intent={relation.lifecycleStatus === "new" ? "emerald" : "amber"}>
-													{formatLifecycleStatus(relation.lifecycleStatus, t)}
-												</Badge>
-											)}
-										</div>
-									</TableCell>
-									<TableCell>
-										<Badge intent="slate">{formatUnitType(relation.relatedUnitType)}</Badge>
-									</TableCell>
-									<TableCell>{relation.relatedUnitName}</TableCell>
+									<TableCell>{relation.unitName}</TableCell>
+									{hasStatusChoice ? (
+										<TableCell>
+											<Badge intent="slate">{formatStatus(relation.statusType)}</Badge>
+										</TableCell>
+									) : null}
 									<TableCell>
 										{format.dateTime(relation.duration.start, { dateStyle: "short" })}
 									</TableCell>
@@ -307,7 +297,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 						</TableBody>
 					</Table>
 				) : (
-					<p className="text-sm text-neutral-500">{t("No relations.")}</p>
+					<p className="text-sm text-neutral-500">{messages.empty}</p>
 				)}
 
 				{statusOptions.length > 0 && (
@@ -315,53 +305,46 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 						<Form action={formAction} className="flex flex-col gap-y-6" state={state}>
 							<FormSection
 								description={t("Add a new relation to another organisational unit.")}
-								title={t("Add relation")}
+								title={messages.addButton}
 								variant="stacked"
 							>
-								<Select
-									isRequired={true}
-									onChange={(key) => {
-										setSelectedStatusId(String(key));
-										setSelectedUnitItem(null);
-									}}
-									value={selectedStatusId}
-								>
-									<Label>{t("Relation type")}</Label>
-									<SelectTrigger />
-									<FieldError />
-									<SelectContent>
-										{statusOptions.map((option) => (
-											<SelectItem key={option.statusId} id={option.statusId}>
-												{formatStatus(option.statusType)}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
+								{hasStatusChoice ? (
+									<Select
+										isRequired={true}
+										onChange={(key) => {
+											setSelectedStatusId(String(key));
+										}}
+										value={selectedStatusId}
+									>
+										<Label>{t("Relation type")}</Label>
+										<SelectTrigger />
+										<FieldError />
+										<SelectContent>
+											{statusOptions.map((option) => (
+												<SelectItem key={option.statusId} id={option.statusId}>
+													{formatStatus(option.statusType)}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								) : null}
 								<input name="statusId" type="hidden" value={selectedStatusId ?? ""} />
 
 								<AsyncSelect
-									aria-label={t("Related unit")}
-									cacheKey={selectedStatusId ?? "none"}
+									aria-label={messages.memberLabel}
 									emptyMessage={t("No related units found.")}
-									fetchPage={(params) => {
-										if (selectedStatusId == null) {
-											return Promise.resolve({ items: [], total: 0 });
-										}
-
-										return fetchRelatedUnitOptionsPage(unitId, selectedStatusId, params);
-									}}
+									fetchPage={(params) => fetchSourceUnitOptionsPage(sourceUnitType, params)}
 									initialItems={[]}
 									initialTotal={0}
-									isDisabled={selectedStatusId == null}
-									label={t("Related unit")}
-									loadOnMount={selectedStatusId != null}
+									label={messages.memberLabel}
+									loadOnMount={true}
 									onSelect={(item) => {
 										setSelectedUnitItem(item);
 									}}
 									placeholder={t("No related unit selected")}
 									selectedItem={selectedUnitItem}
 								/>
-								<input name="relatedUnitId" type="hidden" value={selectedUnitItem?.id ?? ""} />
+								<input name="unitId" type="hidden" value={selectedUnitItem?.id ?? ""} />
 
 								<DatePicker granularity="day" isRequired={true} name="duration.start">
 									<Label>{t("Start date")}</Label>
@@ -375,7 +358,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									<FieldError />
 								</DatePicker>
 
-								<input name="unitId" type="hidden" value={unitId} />
+								<input name="relatedUnitId" type="hidden" value={relatedUnitId} />
 							</FormSection>
 
 							<Button className="self-start" isPending={isPending} type="submit">
@@ -385,7 +368,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 										<span aria-hidden={true}>{t("Saving...")}</span>
 									</Fragment>
 								) : (
-									t("Add relation")
+									messages.addButton
 								)}
 							</Button>
 
@@ -465,50 +448,43 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 				<Form action={editFormAction} state={editState}>
 					<ModalBody className="flex flex-col gap-y-4">
 						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
-						<input name="unitId" type="hidden" value={unitId} />
-						<Select
-							isRequired={true}
-							onChange={(key) => {
-								setEditStatusId(String(key));
-								setEditUnitItem(null);
-							}}
-							value={editStatusId}
-						>
-							<Label>{t("Relation type")}</Label>
-							<SelectTrigger />
-							<FieldError />
-							<SelectContent>
-								{statusOptions.map((option) => (
-									<SelectItem key={option.statusId} id={option.statusId}>
-										{formatStatus(option.statusType)}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+						<input name="relatedUnitId" type="hidden" value={relatedUnitId} />
+						{hasStatusChoice ? (
+							<Select
+								isRequired={true}
+								onChange={(key) => {
+									setEditStatusId(String(key));
+								}}
+								value={editStatusId}
+							>
+								<Label>{t("Relation type")}</Label>
+								<SelectTrigger />
+								<FieldError />
+								<SelectContent>
+									{statusOptions.map((option) => (
+										<SelectItem key={option.statusId} id={option.statusId}>
+											{formatStatus(option.statusType)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						) : null}
 						<input name="statusId" type="hidden" value={editStatusId ?? ""} />
 						<AsyncSelect
-							aria-label={t("Related unit")}
-							cacheKey={editStatusId ?? "none"}
+							aria-label={messages.memberLabel}
 							emptyMessage={t("No related units found.")}
-							fetchPage={(params) => {
-								if (editStatusId == null) {
-									return Promise.resolve({ items: [], total: 0 });
-								}
-
-								return fetchRelatedUnitOptionsPage(unitId, editStatusId, params);
-							}}
+							fetchPage={(params) => fetchSourceUnitOptionsPage(sourceUnitType, params)}
 							initialItems={[]}
 							initialTotal={0}
-							isDisabled={editStatusId == null}
-							label={t("Related unit")}
-							loadOnMount={editStatusId != null}
+							label={messages.memberLabel}
+							loadOnMount={true}
 							onSelect={(item) => {
 								setEditUnitItem(item);
 							}}
 							placeholder={t("No related unit selected")}
 							selectedItem={editUnitItem}
 						/>
-						<input name="relatedUnitId" type="hidden" value={editUnitItem?.id ?? ""} />
+						<input name="unitId" type="hidden" value={editUnitItem?.id ?? ""} />
 						<DatePicker
 							granularity="day"
 							isRequired={true}

@@ -8,6 +8,9 @@ import { db } from "@/lib/db";
 import { and, count, eq, ilike, inArray } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
+/** The literal union of organisational-unit types (e.g. "institution", "national_consortium"). */
+export type OrganisationalUnitType = typeof schema.organisationalUnitTypes.$inferSelect.type;
+
 export interface OrganisationalUnitOption {
 	id: string;
 	name: string;
@@ -29,18 +32,22 @@ interface GetOrganisationalUnitOptionsParams {
 	limit?: number;
 	offset?: number;
 	q?: string;
+	/** Restrict options to a single organisational-unit type (e.g. "institution"). */
+	unitType?: OrganisationalUnitType;
 }
 
 export async function getOrganisationalUnitOptions(
 	params: GetOrganisationalUnitOptionsParams = {},
 ): Promise<{ items: Array<OrganisationalUnitOption>; total: number }> {
-	const { limit = 20, offset = 0, q } = params;
+	const { limit = 20, offset = 0, q, unitType } = params;
 	const query = q?.trim();
 	const searchWhere =
 		query != null && query !== ""
 			? ilike(schema.organisationalUnits.name, `%${query}%`)
 			: undefined;
-	const where = and(publishedEntityVersionWhere(), searchWhere);
+	const typeWhere =
+		unitType != null ? eq(schema.organisationalUnitTypes.type, unitType) : undefined;
+	const where = and(publishedEntityVersionWhere(), searchWhere, typeWhere);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -65,6 +72,10 @@ export async function getOrganisationalUnitOptions(
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
 			.where(where),
 	]);
 
