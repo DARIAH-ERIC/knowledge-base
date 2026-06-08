@@ -189,11 +189,11 @@ export class WebsiteDocumentsPoliciesPage {
 	async moveGroup(label: string, direction: "up" | "down"): Promise<void> {
 		const action = direction === "up" ? "Move group up" : "Move group down";
 		const [response] = await Promise.all([
-			this.page.waitForResponse((candidate) => {
-				return (
-					candidate.request().method() === "POST" && new URL(candidate.url()).pathname === BASE_PATH
-				);
-			}),
+			this.page.waitForResponse(
+				(candidate) =>
+					candidate.request().method() === "POST" &&
+					new URL(candidate.url()).pathname === BASE_PATH,
+			),
 			this.groupSection(label).getByRole("button", { name: action }).click(),
 		]);
 

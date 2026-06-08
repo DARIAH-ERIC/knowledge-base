@@ -50,12 +50,7 @@ test.describe("website documents-policies admin", () => {
 
 		await docPoliciesPage.moveGroup(secondLabel, "up");
 		await expect
-			.poll(
-				async () => {
-					return docPoliciesPage.groupLabels();
-				},
-				{ timeout: 15_000 },
-			)
+			.poll(async () => docPoliciesPage.groupLabels(), { timeout: 15_000 })
 			.toContainEqual(secondLabel);
 		await expect
 			.poll(
@@ -80,9 +75,7 @@ test.describe("website documents-policies admin", () => {
 		await docPoliciesPage.deleteGroup(renamedLabel);
 		await expect(docPoliciesPage.groupSection(renamedLabel)).toBeHidden();
 		await expect
-			.poll(async () => {
-				return db.getDocumentPolicyGroupsByLabelPrefix(docPoliciesPage.workerPrefix);
-			})
+			.poll(async () => db.getDocumentPolicyGroupsByLabelPrefix(docPoliciesPage.workerPrefix))
 			.toEqual([]);
 	});
 
