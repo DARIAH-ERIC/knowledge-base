@@ -605,7 +605,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
-					description: item.summary,
+					description: item.summary ?? "",
 					link: "/about/documents",
 				});
 			}
@@ -649,7 +649,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
-					description: item.summary,
+					description: item.summary ?? "",
 					link: `/events/${item.entityVersion.entity.slug}`,
 				});
 			}
@@ -1208,7 +1208,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
-					description: item.summary,
+					description: item.summary ?? "",
 					link: "/about/documents",
 				}),
 			),
