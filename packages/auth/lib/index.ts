@@ -376,6 +376,16 @@ export function createAuthService(params: CreateAuthServiceParams) {
 			return { session: null, user: null };
 		}
 
+		if (
+			result.user.isTwoFactorRegistered &&
+			result.session.isTwoFactorVerified &&
+			result.session.twoFactorCredentialId == null
+		) {
+			await deleteSession(result.session.id);
+
+			return { session: null, user: null };
+		}
+
 		if (now >= result.session.expiresAt.getTime()) {
 			await deleteSession(result.session.id);
 
