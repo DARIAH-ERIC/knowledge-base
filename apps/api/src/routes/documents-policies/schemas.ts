@@ -33,8 +33,10 @@ export const DocumentOrPolicyListSchema = v.pipe(
 
 export type DocumentOrPolicyList = v.InferOutput<typeof DocumentOrPolicyListSchema>;
 
+const { group: _group, ...DocumentOrPolicyTreeItemEntries } = DocumentOrPolicyBaseSchema.entries;
+
 const DocumentOrPolicyTreeItemSchema = v.object({
-	...DocumentOrPolicyBaseSchema.entries,
+	...DocumentOrPolicyTreeItemEntries,
 	type: v.literal("item"),
 });
 
