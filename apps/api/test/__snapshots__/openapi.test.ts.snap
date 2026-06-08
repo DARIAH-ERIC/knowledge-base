@@ -1665,35 +1665,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   ],
                   "type": "object",
                 },
-                "group": {
-                  "anyOf": [
-                    {
-                      "properties": {
-                        "id": {
-                          "format": "uuid",
-                          "type": "string",
-                        },
-                        "label": {
-                          "type": "string",
-                        },
-                        "position": {
-                          "maximum": 2147483647,
-                          "minimum": -2147483648,
-                          "type": "integer",
-                        },
-                      },
-                      "required": [
-                        "id",
-                        "label",
-                        "position",
-                      ],
-                      "type": "object",
-                    },
-                    {
-                      "type": "null",
-                    },
-                  ],
-                },
                 "id": {
                   "format": "uuid",
                   "type": "string",
@@ -1737,7 +1708,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "document",
                 "entity",
                 "publishedAt",
-                "group",
                 "type",
               ],
               "type": "object",
@@ -1772,35 +1742,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "slug",
                         ],
                         "type": "object",
-                      },
-                      "group": {
-                        "anyOf": [
-                          {
-                            "properties": {
-                              "id": {
-                                "format": "uuid",
-                                "type": "string",
-                              },
-                              "label": {
-                                "type": "string",
-                              },
-                              "position": {
-                                "maximum": 2147483647,
-                                "minimum": -2147483648,
-                                "type": "integer",
-                              },
-                            },
-                            "required": [
-                              "id",
-                              "label",
-                              "position",
-                            ],
-                            "type": "object",
-                          },
-                          {
-                            "type": "null",
-                          },
-                        ],
                       },
                       "id": {
                         "format": "uuid",
@@ -1845,7 +1786,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "document",
                       "entity",
                       "publishedAt",
-                      "group",
                       "type",
                     ],
                     "type": "object",

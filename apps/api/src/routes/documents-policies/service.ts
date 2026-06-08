@@ -115,13 +115,6 @@ export async function getDocumentsPoliciesTree(db: Database | Transaction) {
 						},
 					},
 				},
-				group: {
-					columns: {
-						id: true,
-						label: true,
-						position: true,
-					},
-				},
 			},
 		}),
 	]);
