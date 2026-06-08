@@ -1637,6 +1637,240 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         },
         "type": "array",
       },
+      "DocumentOrPolicyTree": {
+        "description": "Ordered tree of documents, policies, and groups",
+        "items": {
+          "anyOf": [
+            {
+              "properties": {
+                "document": {
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "url",
+                  ],
+                  "type": "object",
+                },
+                "entity": {
+                  "properties": {
+                    "slug": {
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "slug",
+                  ],
+                  "type": "object",
+                },
+                "group": {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string",
+                        },
+                        "label": {
+                          "type": "string",
+                        },
+                        "position": {
+                          "maximum": 2147483647,
+                          "minimum": -2147483648,
+                          "type": "integer",
+                        },
+                      },
+                      "required": [
+                        "id",
+                        "label",
+                        "position",
+                      ],
+                      "type": "object",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
+                "id": {
+                  "format": "uuid",
+                  "type": "string",
+                },
+                "publishedAt": {
+                  "format": "date-time",
+                  "type": "string",
+                },
+                "summary": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
+                "title": {
+                  "type": "string",
+                },
+                "type": {
+                  "const": "item",
+                },
+                "url": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
+              },
+              "required": [
+                "id",
+                "title",
+                "url",
+                "summary",
+                "document",
+                "entity",
+                "publishedAt",
+                "group",
+                "type",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string",
+                },
+                "items": {
+                  "items": {
+                    "properties": {
+                      "document": {
+                        "properties": {
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      "entity": {
+                        "properties": {
+                          "slug": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "slug",
+                        ],
+                        "type": "object",
+                      },
+                      "group": {
+                        "anyOf": [
+                          {
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string",
+                              },
+                              "label": {
+                                "type": "string",
+                              },
+                              "position": {
+                                "maximum": 2147483647,
+                                "minimum": -2147483648,
+                                "type": "integer",
+                              },
+                            },
+                            "required": [
+                              "id",
+                              "label",
+                              "position",
+                            ],
+                            "type": "object",
+                          },
+                          {
+                            "type": "null",
+                          },
+                        ],
+                      },
+                      "id": {
+                        "format": "uuid",
+                        "type": "string",
+                      },
+                      "publishedAt": {
+                        "format": "date-time",
+                        "type": "string",
+                      },
+                      "summary": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                          },
+                          {
+                            "type": "null",
+                          },
+                        ],
+                      },
+                      "title": {
+                        "type": "string",
+                      },
+                      "type": {
+                        "const": "item",
+                      },
+                      "url": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                          },
+                          {
+                            "type": "null",
+                          },
+                        ],
+                      },
+                    },
+                    "required": [
+                      "id",
+                      "title",
+                      "url",
+                      "summary",
+                      "document",
+                      "entity",
+                      "publishedAt",
+                      "group",
+                      "type",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "label": {
+                  "type": "string",
+                },
+                "type": {
+                  "const": "group",
+                },
+              },
+              "required": [
+                "id",
+                "label",
+                "type",
+                "items",
+              ],
+              "type": "object",
+            },
+          ],
+        },
+        "type": "array",
+      },
       "Event": {
         "description": "Event",
         "properties": {
@@ -2827,6 +3061,18 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "limit",
           "offset",
           "total",
+          "data",
+        ],
+        "type": "object",
+      },
+      "GetDocumentsPoliciesTreeResponse": {
+        "description": "Ordered tree of documents, policies, and groups",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/DocumentOrPolicyTree",
+          },
+        },
+        "required": [
           "data",
         ],
         "type": "object",
@@ -11161,6 +11407,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
         },
         "summary": "Get document or policy by slug",
+        "tags": [
+          "documents-policies",
+        ],
+      },
+    },
+    "/api/v1/documents-policies/tree": {
+      "get": {
+        "description": "Retrieve documents and policies grouped and ordered for display",
+        "operationId": "getDocumentsPoliciesTree",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDocumentsPoliciesTreeResponse",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+        },
+        "summary": "Get ordered documents and policies tree",
         "tags": [
           "documents-policies",
         ],
