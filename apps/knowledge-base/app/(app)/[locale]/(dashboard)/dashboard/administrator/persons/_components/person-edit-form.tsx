@@ -27,7 +27,7 @@ interface PersonEditFormProps {
 	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
 		biography?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } };
+	} & { image: { key: string; label: string; url: string } | null };
 	contributions: Array<PersonContribution>;
 	contributionRoleOptions: Array<ContributionRoleOption>;
 }

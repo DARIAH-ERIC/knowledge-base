@@ -143,6 +143,36 @@ test.describe("persons admin", () => {
 		expect(updated).toMatchObject({ email: null, orcid: null });
 	});
 
+	test("should reset person image to null", async ({ page, createAdminPersonsPage, db }) => {
+		const workerIndex = test.info().workerIndex;
+		const personsPage = createAdminPersonsPage(workerIndex);
+		const originalName = `${personsPage.workerPrefix} Clear Image ${randomUUID()}`;
+
+		await personsPage.gotoCreate();
+		await personsPage.fillName(originalName);
+		await personsPage.fillSortName("Image, Clear");
+		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await personsPage.fillBiography("Required biography for image clear test.");
+		await personsPage.submitForm();
+
+		const created = await db.getPersonByName(originalName);
+		expect(created?.imageId).toBeTruthy();
+
+		await personsPage.searchByName(originalName);
+		const row = personsPage.rowByName(originalName);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		await personsPage.removeImage();
+		await personsPage.submitForm();
+
+		const updated = await db.getPersonByName(originalName);
+		expect(updated?.imageId).toBeNull();
+	});
+
 	test("failure injection forces createServerAction to return an error state", async ({
 		page,
 		createAdminPersonsPage,

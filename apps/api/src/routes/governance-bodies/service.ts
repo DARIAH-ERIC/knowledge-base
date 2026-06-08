@@ -27,7 +27,7 @@ interface GovernanceBodyPerson {
 	email: string | null;
 	orcid: string | null;
 	position: Awaited<ReturnType<typeof getPersonPositions>> extends Map<string, infer T> ? T : never;
-	image: { url: string };
+	image: { url: string } | null;
 	slug: string;
 	role: (typeof schema.personRoleTypesEnum)[number];
 	duration: { start: string; end: string | null };
@@ -95,7 +95,7 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			schema.entities,
 			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
-		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
 			and(
 				eq(schema.personRoleTypes.type, "is_chair_of"),
@@ -119,7 +119,10 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			email: row.email,
 			orcid: row.orcid,
 			position: positions.get(row.id) ?? null,
-			image: generateImageUrl({ key: row.imageKey }, imageWidth.avatar),
+			image: generateImageUrl(
+				row.imageKey != null ? { key: row.imageKey } : null,
+				imageWidth.avatar,
+			),
 			slug: row.slug,
 			role: row.role,
 			duration: {
@@ -211,7 +214,7 @@ async function getActiveGovernanceBodyPersons(
 			schema.entities,
 			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
-		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
 			and(
 				inArray(governanceBodyEntityVersions.id, governanceBodyIds),
@@ -235,7 +238,10 @@ async function getActiveGovernanceBodyPersons(
 			email: row.email,
 			orcid: row.orcid,
 			position: positions.get(row.id) ?? null,
-			image: generateImageUrl({ key: row.imageKey }, imageWidth.avatar),
+			image: generateImageUrl(
+				row.imageKey != null ? { key: row.imageKey } : null,
+				imageWidth.avatar,
+			),
 			slug: row.slug,
 			role: row.role,
 			duration: {

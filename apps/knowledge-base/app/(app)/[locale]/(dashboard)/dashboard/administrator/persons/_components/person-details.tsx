@@ -25,7 +25,7 @@ interface PersonDetailsProps {
 	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
 		biography: JSONContent | null;
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } };
+	} & { image: { key: string; label: string; url: string } | null };
 	contributions: Array<PersonContribution>;
 	publishAction: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
@@ -83,11 +83,13 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
-					<img
-						alt=""
-						className="block-24 inline-auto max-inline-full rounded-lg object-contain"
-						src={person.image.url}
-					/>
+					{person.image != null ? (
+						<img
+							alt=""
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
+							src={person.image.url}
+						/>
+					) : null}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Relations")}</DescriptionTerm>

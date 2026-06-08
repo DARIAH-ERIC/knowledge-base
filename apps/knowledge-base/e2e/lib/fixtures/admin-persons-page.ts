@@ -64,6 +64,10 @@ export class AdminPersonsPage {
 		await dialog.getByRole("button", { name: "Select" }).click();
 	}
 
+	async removeImage(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove image" }).click();
+	}
+
 	async submitForm(): Promise<void> {
 		await waitForActionRedirect({
 			page: this.page,

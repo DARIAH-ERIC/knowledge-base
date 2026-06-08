@@ -32,10 +32,7 @@ export const persons = p.snakeCase.table("persons", {
 	sortName: p.text("sort_name").notNull(),
 	email: p.text("email"),
 	orcid: p.text("orcid"),
-	imageId: p
-		.uuid("image_id")
-		.notNull()
-		.references(() => assets.id),
+	imageId: p.uuid("image_id").references(() => assets.id),
 	...f.timestamps(),
 });
 

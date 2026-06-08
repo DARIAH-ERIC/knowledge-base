@@ -30,16 +30,19 @@ export const createPersonAction = createMutationAction({
 
 		const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
 
-		const asset = await tx.query.assets.findFirst({
-			where: { key: input.imageKey },
-			columns: { id: true },
-		});
-		assert(asset);
+		const asset =
+			input.imageKey != null
+				? await tx.query.assets.findFirst({
+						where: { key: input.imageKey },
+						columns: { id: true },
+					})
+				: null;
+		assert(input.imageKey == null || asset != null);
 
 		await tx.insert(schema.persons).values({
 			id: versionId,
 			email: input.email,
-			imageId: asset.id,
+			imageId: asset?.id ?? null,
 			name: input.name,
 			orcid: input.orcid,
 			sortName: input.sortName,
