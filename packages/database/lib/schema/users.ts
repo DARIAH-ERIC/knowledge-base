@@ -59,17 +59,53 @@ export const UserSelectSchema = createSelectSchema(users);
 export const UserInsertSchema = createInsertSchema(users);
 export const UserUpdateSchema = createUpdateSchema(users);
 
-export const sessions = p.snakeCase.table("sessions", {
-	id: p.text("id").primaryKey(),
-	secretHash: p.bytea("secret_hash").notNull(),
-	userId: p
-		.uuid("user_id")
-		.notNull()
-		.references(() => users.id, { onDelete: "cascade" }),
-	expiresAt: f.timestamp("expires_at").notNull(),
-	isTwoFactorVerified: p.boolean("is_two_factor_verified").notNull().default(false),
-	...f.timestamps(),
-});
+export const userTotpCredentials = p.snakeCase.table(
+	"user_totp_credentials",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		userId: p
+			.uuid("user_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		label: p.text("label").notNull(),
+		encryptedKey: p.bytea("encrypted_key").notNull(),
+		lastUsedAt: f.timestamp("last_used_at"),
+		...f.timestamps(),
+	},
+	(t) => [p.index("user_totp_credentials_user_id_idx").on(t.userId)],
+);
+
+export type UserTotpCredential = typeof userTotpCredentials.$inferSelect;
+export type UserTotpCredentialInput = typeof userTotpCredentials.$inferInsert;
+
+export const UserTotpCredentialSelectSchema = createSelectSchema(userTotpCredentials);
+export const UserTotpCredentialInsertSchema = createInsertSchema(userTotpCredentials);
+export const UserTotpCredentialUpdateSchema = createUpdateSchema(userTotpCredentials);
+
+export const sessions = p.snakeCase.table(
+	"sessions",
+	{
+		id: p.text("id").primaryKey(),
+		secretHash: p.bytea("secret_hash").notNull(),
+		userId: p
+			.uuid("user_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		expiresAt: f.timestamp("expires_at").notNull(),
+		isTwoFactorVerified: p.boolean("is_two_factor_verified").notNull().default(false),
+		twoFactorCredentialId: p
+			.uuid("two_factor_credential_id")
+			.references(() => userTotpCredentials.id, { onDelete: "set null" }),
+		...f.timestamps(),
+	},
+	(t) => [
+		p.index("sessions_two_factor_credential_id_idx").on(t.twoFactorCredentialId),
+		p.check(
+			"sessions_unverified_credential_null_check",
+			sql`${t.isTwoFactorVerified} OR ${t.twoFactorCredentialId} IS NULL`,
+		),
+	],
+);
 
 export type Session = typeof sessions.$inferSelect;
 export type SessionInput = typeof sessions.$inferInsert;
