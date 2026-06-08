@@ -76,7 +76,11 @@ export function SpotlightArticleDetails(props: Readonly<SpotlightArticleDetailsP
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
-					<img alt="" src={spotlightArticle.image.url} />
+					<img
+						alt=""
+						className="block-24 inline-auto max-inline-full rounded-lg object-contain"
+						src={spotlightArticle.image.url}
+					/>
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>

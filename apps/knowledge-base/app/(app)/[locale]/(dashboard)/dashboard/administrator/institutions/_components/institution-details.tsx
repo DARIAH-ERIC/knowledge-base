@@ -117,7 +117,7 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 					{institution.image != null ? (
 						<img
 							alt=""
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
 							src={institution.image.url}
 						/>
 					) : null}
@@ -212,13 +212,7 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 									relation={formatRoleType(relation.roleType)}
 									target={institution.name}
 									targetType={formatRoleType(relation.targetUnitType)}
-									duration={
-										relation.duration.end
-											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })
-									}
+									duration={relation.duration}
 								/>
 							))}
 						</ul>
@@ -240,13 +234,7 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 										relation.relatedUnitSlug,
 									)}
 									targetType={formatRoleType(relation.relatedUnitType)}
-									duration={
-										relation.duration.end
-											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })
-									}
+									duration={relation.duration}
 								/>
 							))}
 						</ul>

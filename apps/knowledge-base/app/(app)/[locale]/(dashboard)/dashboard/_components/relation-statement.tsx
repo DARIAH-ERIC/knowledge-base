@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@dariah-eric/ui/badge";
+import { useExtracted, useFormatter } from "next-intl";
 import type { ReactNode } from "react";
 
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
@@ -12,7 +13,7 @@ interface RelationStatementProps {
 	target: ReactNode;
 	targetHref?: string | null;
 	targetType?: ReactNode;
-	duration?: ReactNode;
+	duration?: { start: Date; end?: Date | null };
 }
 
 export function RelationStatement(props: Readonly<RelationStatementProps>): ReactNode {
@@ -25,6 +26,15 @@ export function RelationStatement(props: Readonly<RelationStatementProps>): Reac
 		targetType,
 		duration,
 	} = props;
+
+	const t = useExtracted();
+	const format = useFormatter();
+	const formattedDuration =
+		duration == null
+			? null
+			: duration.end != null
+				? format.dateTimeRange(duration.start, duration.end, { dateStyle: "short" })
+				: `${format.dateTime(duration.start, { dateStyle: "short" })} - ${t("present")}`;
 
 	return (
 		<li className="text-sm">
@@ -43,10 +53,10 @@ export function RelationStatement(props: Readonly<RelationStatementProps>): Reac
 					<Badge intent="slate">{targetType}</Badge>
 				</>
 			) : null}
-			{duration != null ? (
+			{formattedDuration != null ? (
 				<span className="text-muted-fg">
 					{" · "}
-					{duration}
+					{formattedDuration}
 				</span>
 			) : null}
 		</li>

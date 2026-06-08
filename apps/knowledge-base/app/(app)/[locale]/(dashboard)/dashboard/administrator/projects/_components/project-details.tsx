@@ -123,7 +123,7 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 					{project.image ? (
 						<img
 							alt=""
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
 							src={project.image.url}
 						/>
 					) : null}
