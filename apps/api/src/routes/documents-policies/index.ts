@@ -233,6 +233,7 @@ export const router = createRouter()
 				200: {
 					description: "Binary file stream",
 					content: {
+						"application/pdf": {},
 						"application/octet-stream": {},
 					},
 				},
@@ -254,6 +255,7 @@ export const router = createRouter()
 
 			const { key } = item.document;
 			const filename = getDownloadFilename(item.document);
+			const disposition = item.document.mimeType === "application/pdf" ? "inline" : "attachment";
 
 			const storage = c.get("storage");
 			assert(storage, "Storage must be provided via middleware.");
@@ -262,8 +264,8 @@ export const router = createRouter()
 			const webStream = Readable.toWeb(nodeStream) as ReadableStream;
 
 			return c.body(webStream, 200, {
-				"Content-Disposition": `attachment; filename="${filename}"`,
-				"Content-Type": "application/octet-stream",
+				"Content-Disposition": `${disposition}; filename="${filename}"`,
+				"Content-Type": item.document.mimeType,
 			});
 		},
 	)
