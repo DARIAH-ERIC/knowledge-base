@@ -153,7 +153,9 @@ export async function getDocumentsPoliciesTree(db: Database | Transaction) {
 		...items
 			.filter((item) => item.groupId == null)
 			.toSorted(comparePosition)
-			.map((item) => {return { ...item, type: "item" as const }}),
+			.map((item) => {
+				return { ...item, type: "item" as const };
+			}),
 	].map((node) => {
 		if (node.type === "item") {
 			const { groupId: _groupId, position: _position, ...item } = node;
