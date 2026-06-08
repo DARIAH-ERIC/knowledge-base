@@ -183,6 +183,68 @@ async function seedWorkingGroupCountFixtures(db: Database) {
 	]);
 }
 
+async function seedPartnerInstitutionWithOverlappingRelations(db: Database) {
+	const [publishedStatus, entityType, institutionType, partnerStatus, coordinatingStatus] =
+		await Promise.all([
+			db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+			db.query.entityTypes.findFirst({
+				columns: { id: true },
+				where: { type: "organisational_units" },
+			}),
+			db.query.organisationalUnitTypes.findFirst({
+				columns: { id: true },
+				where: { type: "institution" },
+			}),
+			db.query.organisationalUnitStatus.findFirst({
+				columns: { id: true },
+				where: { status: "is_partner_institution_of" },
+			}),
+			db.query.organisationalUnitStatus.findFirst({
+				columns: { id: true },
+				where: { status: "is_national_coordinating_institution_in" },
+			}),
+		]);
+
+	assert(publishedStatus, "No published entity status in database.");
+	assert(entityType, "No organisational_units entity type in database.");
+	assert(institutionType, "No institution type in database.");
+	assert(partnerStatus, "No is_partner_institution_of status in database.");
+	assert(coordinatingStatus, "No is_national_coordinating_institution_in status in database.");
+
+	const eric = await db.query.organisationalUnits.findFirst({
+		columns: { id: true },
+		where: { type: { type: "eric" } },
+	});
+	assert(eric, "No eric organisational unit in database.");
+
+	const ericDocument = await db.query.entityVersions.findFirst({
+		columns: { entityId: true },
+		where: { id: eric.id },
+	});
+	assert(ericDocument, "No eric entity version in database.");
+
+	const institution = createOrganisationalUnit(publishedStatus.id, entityType.id);
+	await db.insert(schema.entities).values(institution.entity);
+	await db.insert(schema.entityVersions).values(institution.version);
+	await db
+		.insert(schema.organisationalUnits)
+		.values({ ...institution.unit, typeId: institutionType.id });
+	await db.insert(schema.organisationalUnitsRelations).values([
+		{
+			unitDocumentId: institution.entity.id,
+			relatedUnitDocumentId: ericDocument.entityId,
+			status: partnerStatus.id,
+			duration: { start: f.date.past({ years: 5 }) },
+		},
+		{
+			unitDocumentId: institution.entity.id,
+			relatedUnitDocumentId: ericDocument.entityId,
+			status: coordinatingStatus.id,
+			duration: { start: f.date.past({ years: 5 }) },
+		},
+	]);
+}
+
 describe("statistics", () => {
 	it("counts distinct published member countries", async () => {
 		await withTransaction(async (db) => {
@@ -209,6 +271,20 @@ describe("statistics", () => {
 			assert(after.workingGroups != null, "Expected workingGroups statistic.");
 
 			expect(after.workingGroups).toBe(before.workingGroups + 1);
+		});
+	});
+
+	it("counts an institution with partner and coordinating relations once", async () => {
+		await withTransaction(async (db) => {
+			const before = await getStatistics(db);
+			assert(before.partnerInstitutions != null, "Expected partnerInstitutions statistic.");
+
+			await seedPartnerInstitutionWithOverlappingRelations(db);
+
+			const after = await getStatistics(db);
+			assert(after.partnerInstitutions != null, "Expected partnerInstitutions statistic.");
+
+			expect(after.partnerInstitutions).toBe(before.partnerInstitutions + 1);
 		});
 	});
 });
