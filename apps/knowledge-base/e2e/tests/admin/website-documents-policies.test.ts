@@ -17,6 +17,66 @@ test.describe("website documents-policies admin", () => {
 
 	test.afterAll(async ({ db }, testInfo) => {
 		await db.cleanupWorkerDocumentsPoliciesLifecycleItems(testInfo.workerIndex);
+		await db.cleanupWorkerDocumentPolicyGroups(testInfo.workerIndex);
+	});
+
+	test("should create, rename, reorder, and delete groups", async ({
+		createWebsiteDocumentsPoliciesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const docPoliciesPage = createWebsiteDocumentsPoliciesPage(workerIndex);
+		const suffix = randomUUID();
+		const firstLabel = `${docPoliciesPage.workerPrefix} Group A ${suffix}`;
+		const secondLabel = `${docPoliciesPage.workerPrefix} Group B ${suffix}`;
+		const renamedLabel = `${docPoliciesPage.workerPrefix} Group A renamed ${suffix}`;
+
+		await docPoliciesPage.goto();
+		await docPoliciesPage.createGroup(firstLabel);
+		await docPoliciesPage.createGroup(secondLabel);
+
+		await expect(docPoliciesPage.groupSection(firstLabel)).toBeVisible();
+		await expect(docPoliciesPage.groupSection(secondLabel)).toBeVisible();
+		await expect
+			.poll(async () => {
+				const groups = await db.getDocumentPolicyGroupsByLabelPrefix(docPoliciesPage.workerPrefix);
+				return groups.map((group) => group.label);
+			})
+			.toStrictEqual([firstLabel, secondLabel]);
+
+		await docPoliciesPage.editGroup(firstLabel, renamedLabel);
+		await expect(docPoliciesPage.groupSection(firstLabel)).toBeHidden();
+		await expect(docPoliciesPage.groupSection(renamedLabel)).toBeVisible();
+
+		await docPoliciesPage.moveGroup(secondLabel, "up");
+		await expect
+			.poll(async () => docPoliciesPage.groupLabels(), { timeout: 15_000 })
+			.toContainEqual(secondLabel);
+		await expect
+			.poll(
+				async () => {
+					const orderedLabels = await docPoliciesPage.groupLabels();
+					return orderedLabels.indexOf(secondLabel) < orderedLabels.indexOf(renamedLabel);
+				},
+				{ timeout: 15_000 },
+			)
+			.toBe(true);
+		await expect
+			.poll(async () => {
+				const groups = await db.getDocumentPolicyGroupsByLabelPrefix(docPoliciesPage.workerPrefix);
+				return groups.map((group) => group.label);
+			})
+			.toStrictEqual([secondLabel, renamedLabel]);
+		await expect(docPoliciesPage.groupSection(secondLabel)).toBeVisible();
+		await expect(docPoliciesPage.groupSection(renamedLabel)).toBeVisible();
+
+		await docPoliciesPage.deleteGroup(secondLabel);
+		await expect(docPoliciesPage.groupSection(secondLabel)).toBeHidden();
+		await docPoliciesPage.deleteGroup(renamedLabel);
+		await expect(docPoliciesPage.groupSection(renamedLabel)).toBeHidden();
+		await expect
+			.poll(async () => db.getDocumentPolicyGroupsByLabelPrefix(docPoliciesPage.workerPrefix))
+			.toStrictEqual([]);
 	});
 
 	test("should create a document or policy", async ({ createWebsiteDocumentsPoliciesPage, db }) => {

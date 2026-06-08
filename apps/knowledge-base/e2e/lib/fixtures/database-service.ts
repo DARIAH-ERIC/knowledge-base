@@ -2595,6 +2595,40 @@ export class DatabaseService {
 		return group;
 	}
 
+	async getDocumentPolicyGroupsByLabelPrefix(
+		prefix: string,
+	): Promise<Array<{ id: string; label: string; position: number }>> {
+		return this.db
+			.select({
+				id: schema.documentPolicyGroups.id,
+				label: schema.documentPolicyGroups.label,
+				position: schema.documentPolicyGroups.position,
+			})
+			.from(schema.documentPolicyGroups)
+			.where(sql`${schema.documentPolicyGroups.label} LIKE ${`${prefix}%`}`)
+			.orderBy(schema.documentPolicyGroups.position, schema.documentPolicyGroups.label);
+	}
+
+	async cleanupWorkerDocumentPolicyGroups(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+		const groups = await this.getDocumentPolicyGroupsByLabelPrefix(prefix);
+		const groupIds = groups.map((group) => group.id);
+
+		if (groupIds.length === 0) {
+			return;
+		}
+
+		await this.db.transaction(async (tx) => {
+			await tx
+				.update(schema.documentsPolicies)
+				.set({ groupId: null })
+				.where(inArray(schema.documentsPolicies.groupId, groupIds));
+			await tx
+				.delete(schema.documentPolicyGroups)
+				.where(inArray(schema.documentPolicyGroups.id, groupIds));
+		});
+	}
+
 	async getDocumentOrPolicyByTitle(title: string): Promise<{
 		documentId: string;
 		groupId: string | null;
