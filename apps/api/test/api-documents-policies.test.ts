@@ -409,12 +409,30 @@ describe("documents-policies", () => {
 				});
 
 				expect(response.status).toBe(200);
-				expect(response.headers.get("Content-Type")).toBe("application/octet-stream");
+				expect(response.headers.get("Content-Type")).toBe("application/pdf");
 				expect(response.headers.get("Content-Disposition")).toBe(
-					`attachment; filename="policy-2024.pdf"`,
+					`inline; filename="policy-2024.pdf"`,
 				);
 				const body = await response.text();
 				expect(body).toBe(content);
+			});
+		});
+
+		it("should serve non-PDF documents as attachments with their MIME type", async () => {
+			await withTransaction(async (db) => {
+				const key = "documents/019b7605-b88f-7893-84af-22aaf476e41f";
+				const { id } = await seedDocument(db, key, "policy-2024.docx", "application/msword");
+				const client = createTestClient(db, createMockStorage());
+
+				const response = await client["documents-policies"][":id"].document.$get({
+					param: { id },
+				});
+
+				expect(response.status).toBe(200);
+				expect(response.headers.get("Content-Type")).toBe("application/msword");
+				expect(response.headers.get("Content-Disposition")).toBe(
+					`attachment; filename="policy-2024.docx"`,
+				);
 			});
 		});
 
@@ -430,7 +448,7 @@ describe("documents-policies", () => {
 
 				expect(response.status).toBe(200);
 				expect(response.headers.get("Content-Disposition")).toBe(
-					`attachment; filename="test-policy.pdf"`,
+					`inline; filename="test-policy.pdf"`,
 				);
 			});
 		});

@@ -11434,6 +11434,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "200": {
             "content": {
               "application/octet-stream": {},
+              "application/pdf": {},
             },
             "description": "Binary file stream",
           },
