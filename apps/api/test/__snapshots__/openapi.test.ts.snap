@@ -1491,8 +1491,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "required": [
           "id",
           "title",
-          "url",
           "summary",
+          "url",
           "document",
           "entity",
           "publishedAt",
@@ -1589,8 +1589,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "required": [
           "id",
           "title",
-          "url",
           "summary",
+          "url",
           "document",
           "entity",
           "publishedAt",
@@ -1703,8 +1703,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "required": [
                 "id",
                 "title",
-                "url",
                 "summary",
+                "url",
                 "document",
                 "entity",
                 "publishedAt",
@@ -1781,8 +1781,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "required": [
                       "id",
                       "title",
-                      "url",
                       "summary",
+                      "url",
                       "document",
                       "entity",
                       "publishedAt",
