@@ -42,7 +42,7 @@ test.describe("website documents-policies admin", () => {
 				const groups = await db.getDocumentPolicyGroupsByLabelPrefix(docPoliciesPage.workerPrefix);
 				return groups.map((group) => group.label);
 			})
-			.toEqual([firstLabel, secondLabel]);
+			.toStrictEqual([firstLabel, secondLabel]);
 
 		await docPoliciesPage.editGroup(firstLabel, renamedLabel);
 		await expect(docPoliciesPage.groupSection(firstLabel)).toBeHidden();
@@ -66,7 +66,7 @@ test.describe("website documents-policies admin", () => {
 				const groups = await db.getDocumentPolicyGroupsByLabelPrefix(docPoliciesPage.workerPrefix);
 				return groups.map((group) => group.label);
 			})
-			.toEqual([secondLabel, renamedLabel]);
+			.toStrictEqual([secondLabel, renamedLabel]);
 		await expect(docPoliciesPage.groupSection(secondLabel)).toBeVisible();
 		await expect(docPoliciesPage.groupSection(renamedLabel)).toBeVisible();
 
@@ -76,7 +76,7 @@ test.describe("website documents-policies admin", () => {
 		await expect(docPoliciesPage.groupSection(renamedLabel)).toBeHidden();
 		await expect
 			.poll(async () => db.getDocumentPolicyGroupsByLabelPrefix(docPoliciesPage.workerPrefix))
-			.toEqual([]);
+			.toStrictEqual([]);
 	});
 
 	test("should create a document or policy", async ({ createWebsiteDocumentsPoliciesPage, db }) => {
