@@ -129,9 +129,7 @@ export async function getDocumentsPoliciesTree(db: Database | Transaction) {
 	const comparePosition = (
 		a: { id: string; position: number },
 		b: { id: string; position: number },
-	) => {
-		return a.position - b.position || a.id.localeCompare(b.id);
-	};
+	) => a.position - b.position || a.id.localeCompare(b.id);
 
 	const groupedItems = new Map<string, typeof items>();
 
@@ -144,18 +142,18 @@ export async function getDocumentsPoliciesTree(db: Database | Transaction) {
 	}
 
 	const data = [
-		...groups.sort(comparePosition).map((group) => {
+		...groups.toSorted(comparePosition).map((group) => {
 			return {
 				id: group.id,
 				label: group.label,
 				type: "group" as const,
-				items: (groupedItems.get(group.id) ?? []).sort(comparePosition),
+				items: (groupedItems.get(group.id) ?? []).toSorted(comparePosition),
 			};
 		}),
 		...items
 			.filter((item) => item.groupId == null)
-			.sort(comparePosition)
-			.map((item) => ({ ...item, type: "item" as const })),
+			.toSorted(comparePosition)
+			.map((item) => {return { ...item, type: "item" as const }}),
 	].map((node) => {
 		if (node.type === "item") {
 			const { groupId: _groupId, position: _position, ...item } = node;

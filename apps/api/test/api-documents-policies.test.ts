@@ -159,9 +159,7 @@ describe("documents-policies", () => {
 					query: { limit: "100", offset: "0" },
 				});
 				const { data } = await response.json();
-				const relevant = data.filter((item) => {
-					return items.some((seeded) => seeded.version.id === item.id);
-				});
+				const relevant = data.filter((item) => items.some((seeded) => seeded.version.id === item.id));
 
 				expect(relevant.map((item) => item.id)).toEqual([
 					items[1]!.version.id,
@@ -206,12 +204,8 @@ describe("documents-policies", () => {
 				expect(response.status).toBe(200);
 
 				const { data } = await response.json();
-				const ungroupedIndex = data.findIndex((node) => {
-					return node.type === "item" && node.id === items[0]!.version.id;
-				});
-				const groupIndex = data.findIndex((node) => {
-					return node.type === "group" && node.id === groupId;
-				});
+				const ungroupedIndex = data.findIndex((node) => node.type === "item" && node.id === items[0]!.version.id);
+				const groupIndex = data.findIndex((node) => node.type === "group" && node.id === groupId);
 				const group = data.at(groupIndex);
 
 				expect(groupIndex).toBeLessThan(ungroupedIndex);
