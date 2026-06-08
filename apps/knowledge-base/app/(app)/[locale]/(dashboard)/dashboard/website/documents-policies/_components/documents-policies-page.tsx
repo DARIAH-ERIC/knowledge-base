@@ -25,6 +25,7 @@ import {
 	DocumentOrPolicyFormDialog,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog";
 import { DocumentPolicyGroupCreateDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-create-dialog";
+import { DocumentPolicyGroupEditDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog";
 import { deleteDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/delete-document-or-policy.action";
 import { deleteDocumentPolicyGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/delete-document-policy-group.action";
 import { moveDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/move-document-or-policy.action";
@@ -156,6 +157,7 @@ interface DocumentSectionProps {
 	onEditDocument: (item: DocumentOrPolicyDialogItem) => void;
 	onDeleteDocument: (id: string) => void;
 	onMoveDocument: (id: string, direction: "up" | "down") => void;
+	onEditGroup?: (group: { id: string; label: string }) => void;
 	onMoveGroup?: (id: string, direction: "up" | "down") => void;
 	onDeleteGroup?: (id: string) => void;
 }
@@ -171,6 +173,7 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 		onEditDocument,
 		onDeleteDocument,
 		onMoveDocument,
+		onEditGroup,
 		onMoveGroup,
 		onDeleteGroup,
 	} = props;
@@ -181,8 +184,21 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 		<div className="mbe-6">
 			<div className="mbe-2 flex items-center gap-x-2 border-be pbe-2">
 				<h2 className="flex-1 text-sm font-semibold">{label}</h2>
-				{groupId != null && onMoveGroup != null && onDeleteGroup != null && (
+				{groupId != null && onMoveGroup != null && onDeleteGroup != null && onEditGroup != null && (
 					<div className="flex shrink-0 items-center gap-x-1">
+						<Tooltip>
+							<Button
+								aria-label={t("Edit group")}
+								intent="plain"
+								onPress={() => {
+									onEditGroup({ id: groupId, label });
+								}}
+								size="sq-sm"
+							>
+								<PencilSquareIcon className="block-4 inline-4" />
+							</Button>
+							<TooltipContent inverse={true}>{t("Edit group")}</TooltipContent>
+						</Tooltip>
 						<Tooltip>
 							<Button
 								aria-label={t("Move group up")}
@@ -283,6 +299,7 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 	const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
 	const [groupDeleteError, setGroupDeleteError] = useState<string | null>(null);
 	const [isGroupDeletePending, startGroupDeleteTransition] = useTransition();
+	const [groupToEdit, setGroupToEdit] = useState<{ id: string; label: string } | null>(null);
 
 	return (
 		<Fragment>
@@ -328,6 +345,9 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 						onEditDocument={(item) => {
 							setDialogState({ isOpen: true, item });
 						}}
+						onEditGroup={(group) => {
+							setGroupToEdit(group);
+						}}
 						onMoveDocument={(id, direction) => {
 							startTransition(async () => {
 								await moveDocumentOrPolicyAction(id, direction);
@@ -363,6 +383,16 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 					}}
 				/>
 			</div>
+
+			<DocumentPolicyGroupEditDialog
+				group={groupToEdit}
+				isOpen={groupToEdit != null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setGroupToEdit(null);
+					}
+				}}
+			/>
 
 			<DocumentOrPolicyFormDialog
 				groups={allGroups}
