@@ -155,6 +155,61 @@ export class WebsiteDocumentsPoliciesPage {
 	}
 
 	// ---------------------------------------------------------------------------
+	// Group management
+	// ---------------------------------------------------------------------------
+
+	groupSection(label: string): Locator {
+		return this.page
+			.getByRole("heading", { name: label, exact: true })
+			.locator("xpath=ancestor::div[contains(@class, 'mbe-6')][1]");
+	}
+
+	async groupLabels(): Promise<Array<string>> {
+		return this.page.getByRole("heading", { level: 2 }).allTextContents();
+	}
+
+	async createGroup(label: string): Promise<void> {
+		await this.page.getByRole("button", { name: "New group" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "New group" });
+		await dialog.getByLabel("Label").fill(label);
+		await dialog.getByRole("button", { name: "Create" }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	async editGroup(currentLabel: string, updatedLabel: string): Promise<void> {
+		await this.groupSection(currentLabel).getByRole("button", { name: "Edit group" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Edit group" });
+		const label = dialog.getByLabel("Label");
+		await label.clear();
+		await label.fill(updatedLabel);
+		await dialog.getByRole("button", { name: "Save" }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	async moveGroup(label: string, direction: "up" | "down"): Promise<void> {
+		const action = direction === "up" ? "Move group up" : "Move group down";
+		const [response] = await Promise.all([
+			this.page.waitForResponse((candidate) => {
+				return (
+					candidate.request().method() === "POST" && new URL(candidate.url()).pathname === BASE_PATH
+				);
+			}),
+			this.groupSection(label).getByRole("button", { name: action }).click(),
+		]);
+
+		expect(response.ok(), `Move group action failed with HTTP ${String(response.status())}.`).toBe(
+			true,
+		);
+	}
+
+	async deleteGroup(label: string): Promise<void> {
+		await this.groupSection(label).getByRole("button", { name: "Delete group" }).click();
+		const dialog = this.page.getByRole("dialog", { name: /Delete group/i });
+		await dialog.getByRole("button", { name: "Delete" }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	// ---------------------------------------------------------------------------
 	// Details page — navigation
 	// ---------------------------------------------------------------------------
 
