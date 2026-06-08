@@ -436,7 +436,6 @@ export const relations = defineRelations(schema, (r) => {
 			image: r.one.assets({
 				from: r.persons.imageId,
 				to: r.assets.id,
-				optional: false,
 			}),
 		},
 		personsToOrganisationalUnits: {

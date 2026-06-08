@@ -20,7 +20,7 @@ const GovernanceBodyPersonSchema = v.object({
 			}),
 		),
 	),
-	image: v.object({ url: v.string() }),
+	image: v.nullable(v.object({ url: v.string() })),
 	slug: v.string(),
 	role: v.picklist(schema.personRoleTypesEnum),
 	duration: v.object({

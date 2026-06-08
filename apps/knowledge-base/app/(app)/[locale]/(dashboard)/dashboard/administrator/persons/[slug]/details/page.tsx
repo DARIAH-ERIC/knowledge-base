@@ -111,13 +111,16 @@ export default async function DashboardAdministratorPersonDetailsPage(
 		getRichTextFieldContent(versionId, "biography"),
 	]);
 
-	const image = {
-		...person.image,
-		url: images.generateSignedImageUrl({
-			key: person.image.key,
-			options: imageGridOptions,
-		}).url,
-	};
+	const image =
+		person.image != null
+			? {
+					...person.image,
+					url: images.generateSignedImageUrl({
+						key: person.image.key,
+						options: imageGridOptions,
+					}).url,
+				}
+			: null;
 
 	return (
 		<PersonDetails

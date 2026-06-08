@@ -137,10 +137,11 @@ test.describe("persons admin", () => {
 		await page.getByLabel("Name", { exact: true }).fill(updatedName);
 		await personsPage.fillEmail("");
 		await personsPage.fillOrcid("");
+		await personsPage.removeImage();
 		await personsPage.submitForm();
 
 		const updated = await db.getPersonByName(updatedName);
-		expect(updated).toMatchObject({ email: null, orcid: null });
+		expect(updated).toMatchObject({ email: null, imageId: null, orcid: null });
 	});
 
 	test("failure injection forces createServerAction to return an error state", async ({

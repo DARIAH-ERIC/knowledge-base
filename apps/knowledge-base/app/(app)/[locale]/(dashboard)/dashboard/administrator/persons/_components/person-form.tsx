@@ -25,7 +25,7 @@ interface PersonFormProps {
 	person?: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
 		biography?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } };
+	} & { image: { key: string; label: string; url: string } | null };
 	formAction: ServerAction;
 }
 
@@ -74,15 +74,11 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 
 				<Separator className="my-6" />
 
-				<FormSection
-					description={t("Select or upload an image.")}
-					isRequired={true}
-					title={t("Image")}
-				>
+				<FormSection description={t("Select or upload an image.")} title={t("Image")}>
 					<ImageSelectField
+						allowRemove={true}
 						defaultPrefix="avatars"
 						initialAssets={initialAssets}
-						isRequired={true}
 						onChange={setSelectedImage}
 						prefixes={["avatars"]}
 						selectedImage={selectedImage}

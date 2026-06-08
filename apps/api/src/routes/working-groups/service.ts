@@ -179,7 +179,7 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 			schema.entities,
 			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
-		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
 			and(
 				sql`${schema.personsToOrganisationalUnits.organisationalUnitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${workingGroupId})`,
@@ -198,7 +198,7 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 			...row,
 			position: positions.get(row.id) ?? null,
 			role: roleType,
-			image: generateImageUrl({ key: imageKey }, imageWidth.avatar),
+			image: generateImageUrl(imageKey != null ? { key: imageKey } : null, imageWidth.avatar),
 		};
 	});
 }

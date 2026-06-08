@@ -46,7 +46,7 @@ export const ImpactCaseStudySchema = v.pipe(
 						}),
 					),
 				),
-				image: v.object({ url: v.string() }),
+				image: v.nullable(v.object({ url: v.string() })),
 				slug: v.string(),
 				role: v.picklist(schema.articleContributorRolesEnum),
 			}),

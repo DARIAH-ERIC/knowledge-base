@@ -114,7 +114,7 @@ function mapPersonContributors(
 		id: string;
 		name: string;
 		slug: string;
-		imageKey: string;
+		imageKey: string | null;
 		role: string;
 	}>,
 	positions: Map<string, Array<{ role: string; name: string; type: string }> | null>,
@@ -125,7 +125,7 @@ function mapPersonContributors(
 			position: positions.get(row.id) ?? null,
 			role,
 			slug: row.slug,
-			image: generateImageUrl({ key: imageKey }, imageWidth.avatar),
+			image: generateImageUrl(imageKey != null ? { key: imageKey } : null, imageWidth.avatar),
 		};
 	});
 }
@@ -529,7 +529,7 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 			schema.entities,
 			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
-		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.innerJoin(
 			schema.personRoleTypes,
 			eq(schema.personsToOrganisationalUnits.roleTypeId, schema.personRoleTypes.id),

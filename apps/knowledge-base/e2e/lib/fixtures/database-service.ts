@@ -616,7 +616,7 @@ export class DatabaseService {
 		documentId: string;
 		email: string | null;
 		id: string;
-		imageId: string;
+		imageId: string | null;
 		name: string;
 		orcid: string | null;
 		sortName: string;

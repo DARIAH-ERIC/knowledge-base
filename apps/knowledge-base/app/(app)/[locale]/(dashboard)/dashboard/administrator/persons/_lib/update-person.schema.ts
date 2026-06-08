@@ -6,6 +6,6 @@ export const UpdatePersonActionInputSchema = v.object({
 	...v.pick(PersonUpdateSchema, ["name", "sortName"]).entries,
 	email: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	orcid: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
-	imageKey: v.pipe(v.string(), v.nonEmpty()),
+	imageKey: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	biography: v.pipe(v.string(), v.nonEmpty()),
 });

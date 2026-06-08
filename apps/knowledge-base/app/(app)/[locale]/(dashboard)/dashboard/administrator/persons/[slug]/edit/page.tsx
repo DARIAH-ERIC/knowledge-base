@@ -123,13 +123,16 @@ export default async function DashboardAdministratorEditPersonPage(
 
 	const biography = biographyRows.at(0)?.content;
 
-	const image = {
-		...person.image,
-		url: images.generateSignedImageUrl({
-			key: person.image.key,
-			options: imageGridOptions,
-		}).url,
-	};
+	const image =
+		person.image != null
+			? {
+					...person.image,
+					url: images.generateSignedImageUrl({
+						key: person.image.key,
+						options: imageGridOptions,
+					}).url,
+				}
+			: null;
 
 	return (
 		<PersonEditForm

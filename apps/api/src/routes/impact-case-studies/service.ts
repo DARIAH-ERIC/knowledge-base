@@ -109,7 +109,7 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 			eq(schema.documentLifecycle.documentId, schema.entities.id),
 		)
 		.innerJoin(schema.persons, eq(schema.persons.id, schema.documentLifecycle.publishedId))
-		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
 			eq(schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId, impactCaseStudyDocumentId),
 		);
@@ -123,7 +123,7 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 		return {
 			...row,
 			position: positions.get(row.id) ?? null,
-			image: generateImageUrl({ key: imageKey }, imageWidth.avatar),
+			image: generateImageUrl(imageKey != null ? { key: imageKey } : null, imageWidth.avatar),
 		};
 	});
 }
