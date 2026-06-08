@@ -12,7 +12,8 @@ const DocumentPolicyGroupSchema = v.nullable(
 
 export const DocumentOrPolicyBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.DocumentOrPolicySelectSchema, ["id", "title", "summary", "url"]).entries,
+		...v.pick(schema.DocumentOrPolicySelectSchema, ["id", "title", "url"]).entries,
+		summary: v.nullable(v.string()),
 		document: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
@@ -53,7 +54,8 @@ export type DocumentOrPolicyTree = v.InferOutput<typeof DocumentOrPolicyTreeSche
 
 export const DocumentOrPolicySchema = v.pipe(
 	v.object({
-		...v.pick(schema.DocumentOrPolicySelectSchema, ["id", "title", "summary", "url"]).entries,
+		...v.pick(schema.DocumentOrPolicySelectSchema, ["id", "title", "url"]).entries,
+		summary: v.nullable(v.string()),
 		document: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),

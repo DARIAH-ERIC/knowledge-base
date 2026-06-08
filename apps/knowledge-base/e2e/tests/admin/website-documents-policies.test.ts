@@ -86,7 +86,7 @@ test.describe("website documents-policies admin", () => {
 		});
 	});
 
-	test("should clear optional url via inline dialog", async ({
+	test("should clear optional summary and url via inline dialog", async ({
 		createWebsiteDocumentsPoliciesPage,
 		db,
 	}) => {
@@ -102,11 +102,12 @@ test.describe("website documents-policies admin", () => {
 		await docPoliciesPage.submitForm();
 
 		await docPoliciesPage.openEditDialog(title);
+		await docPoliciesPage.fillSummary("");
 		await docPoliciesPage.fillUrl("");
 		await docPoliciesPage.submitEditDialog();
 
 		const updated = await db.getDocumentOrPolicyByTitle(title);
-		expect(updated).toMatchObject({ url: null });
+		expect(updated).toMatchObject({ summary: null, url: null });
 	});
 
 	test("should delete a document or policy", async ({ createWebsiteDocumentsPoliciesPage }) => {

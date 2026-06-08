@@ -2599,7 +2599,7 @@ export class DatabaseService {
 		documentId: string;
 		groupId: string | null;
 		id: string;
-		summary: string;
+		summary: string | null;
 		url: string | null;
 	} | null> {
 		const [row] = await this.db

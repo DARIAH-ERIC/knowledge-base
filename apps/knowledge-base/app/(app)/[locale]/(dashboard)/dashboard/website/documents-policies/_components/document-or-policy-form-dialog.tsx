@@ -26,7 +26,7 @@ import { updateDocumentOrPolicyDetailsAction } from "@/app/(app)/[locale]/(dashb
 export interface DocumentOrPolicyDialogItem {
 	id: string;
 	title: string;
-	summary: string;
+	summary: string | null;
 	url: string | null;
 	groupId: string | null;
 	document: { key: string; label: string };
@@ -89,7 +89,7 @@ function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): React
 					<FieldError />
 				</TextField>
 
-				<TextField defaultValue={item?.summary ?? undefined} isRequired={true} name="summary">
+				<TextField defaultValue={item?.summary ?? undefined} name="summary">
 					<Label>{t("Summary")}</Label>
 					<Input />
 					<FieldError />
