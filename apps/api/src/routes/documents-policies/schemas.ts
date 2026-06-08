@@ -32,6 +32,25 @@ export const DocumentOrPolicyListSchema = v.pipe(
 
 export type DocumentOrPolicyList = v.InferOutput<typeof DocumentOrPolicyListSchema>;
 
+const DocumentOrPolicyTreeItemSchema = v.object({
+	...DocumentOrPolicyBaseSchema.entries,
+	type: v.literal("item"),
+});
+
+const DocumentOrPolicyTreeGroupSchema = v.object({
+	...v.pick(schema.DocumentPolicyGroupSelectSchema, ["id", "label"]).entries,
+	type: v.literal("group"),
+	items: v.array(DocumentOrPolicyTreeItemSchema),
+});
+
+export const DocumentOrPolicyTreeSchema = v.pipe(
+	v.array(v.union([DocumentOrPolicyTreeItemSchema, DocumentOrPolicyTreeGroupSchema])),
+	v.description("Ordered tree of documents, policies, and groups"),
+	v.metadata({ ref: "DocumentOrPolicyTree" }),
+);
+
+export type DocumentOrPolicyTree = v.InferOutput<typeof DocumentOrPolicyTreeSchema>;
+
 export const DocumentOrPolicySchema = v.pipe(
 	v.object({
 		...v.pick(schema.DocumentOrPolicySelectSchema, ["id", "title", "summary", "url"]).entries,
@@ -75,6 +94,16 @@ export const GetDocumentsPolicies = {
 		}),
 		v.description("Paginated list of documents and policies"),
 		v.metadata({ ref: "GetDocumentsPoliciesResponse" }),
+	),
+};
+
+export const GetDocumentsPoliciesTree = {
+	ResponseSchema: v.pipe(
+		v.object({
+			data: DocumentOrPolicyTreeSchema,
+		}),
+		v.description("Ordered tree of documents, policies, and groups"),
+		v.metadata({ ref: "GetDocumentsPoliciesTreeResponse" }),
 	),
 };
 

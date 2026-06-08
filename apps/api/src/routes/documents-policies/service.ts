@@ -34,6 +34,7 @@ export async function getDocumentsPolicies(
 				title: true,
 				summary: true,
 				url: true,
+				position: true,
 			},
 			with: {
 				entityVersion: {
@@ -52,8 +53,13 @@ export async function getDocumentsPolicies(
 					},
 				},
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
+			orderBy(t, { asc, sql }) {
+				return [
+					asc(sql`CASE WHEN "group"."r" IS NULL THEN 1 ELSE 0 END`),
+					asc(sql`("group"."r" ->> 'position')::integer`),
+					asc(t.position),
+					asc(t.id),
+				];
 			},
 			limit,
 			offset,
@@ -70,9 +76,102 @@ export async function getDocumentsPolicies(
 
 	const total = aggregate.at(0)?.total ?? 0;
 
-	const data = items.map((item) => flattenEntityVersion(item));
+	const data = items.map(({ position: _position, ...item }) => flattenEntityVersion(item));
 
 	return { data, limit, offset, total };
+}
+
+export async function getDocumentsPoliciesTree(db: Database | Transaction) {
+	const [groups, items] = await Promise.all([
+		db.query.documentPolicyGroups.findMany({
+			columns: {
+				id: true,
+				label: true,
+				position: true,
+			},
+		}),
+		db.query.documentsPolicies.findMany({
+			where: {
+				entityVersion: {
+					status: {
+						type: "published",
+					},
+				},
+			},
+			columns: {
+				id: true,
+				title: true,
+				summary: true,
+				url: true,
+				groupId: true,
+				position: true,
+			},
+			with: {
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
+					},
+				},
+				group: {
+					columns: {
+						id: true,
+						label: true,
+						position: true,
+					},
+				},
+			},
+		}),
+	]);
+
+	const comparePosition = (
+		a: { id: string; position: number },
+		b: { id: string; position: number },
+	) => {
+		return a.position - b.position || a.id.localeCompare(b.id);
+	};
+
+	const groupedItems = new Map<string, typeof items>();
+
+	for (const item of items) {
+		if (item.groupId != null) {
+			const groupItems = groupedItems.get(item.groupId) ?? [];
+			groupItems.push(item);
+			groupedItems.set(item.groupId, groupItems);
+		}
+	}
+
+	const data = [
+		...groups.sort(comparePosition).map((group) => {
+			return {
+				id: group.id,
+				label: group.label,
+				type: "group" as const,
+				items: (groupedItems.get(group.id) ?? []).sort(comparePosition),
+			};
+		}),
+		...items
+			.filter((item) => item.groupId == null)
+			.sort(comparePosition)
+			.map((item) => ({ ...item, type: "item" as const })),
+	].map((node) => {
+		if (node.type === "item") {
+			const { groupId: _groupId, position: _position, ...item } = node;
+			return { ...flattenEntityVersion(item), type: "item" as const };
+		}
+
+		return {
+			...node,
+			items: node.items.map((item) => {
+				const { groupId: _groupId, position: _itemPosition, ...rest } = item;
+				return { ...flattenEntityVersion(rest), type: "item" as const };
+			}),
+		};
+	});
+
+	return { data };
 }
 
 //
