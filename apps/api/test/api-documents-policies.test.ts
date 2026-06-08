@@ -448,7 +448,7 @@ describe("documents-policies", () => {
 
 				expect(response.status).toBe(200);
 				expect(response.headers.get("Content-Disposition")).toBe(
-					`attachment; filename="test-policy.pdf"`,
+					`inline; filename="test-policy.pdf"`,
 				);
 			});
 		});
