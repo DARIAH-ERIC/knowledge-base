@@ -19,7 +19,16 @@ import { hash, verify } from "@node-rs/argon2";
 import { decodeBase64, encodeBase32UpperCaseNoPadding, encodeBase64 } from "@oslojs/encoding";
 import { createTOTPKeyURI, verifyTOTP } from "@oslojs/otp";
 
-import { InvalidUserIdError } from "./errors";
+import {
+	CannotRemoveFinalTotpCredentialError,
+	InvalidTotpCredentialLabelError,
+	InvalidUserIdError,
+	TotpCredentialLimitReachedError,
+	TotpCredentialNotFoundError,
+} from "./errors";
+
+const maxTotpCredentials = 10;
+const maxTotpCredentialLabelLength = 100;
 
 interface CookieConfig {
 	name: string;
@@ -109,6 +118,11 @@ export interface UnauthenticatedSession {
 }
 
 export type SessionValidationResult = AuthenticatedSession | UnauthenticatedSession;
+
+export interface TotpCredentialSummary extends Pick<
+	schema.UserTotpCredential,
+	"id" | "label" | "lastUsedAt" | "createdAt"
+> {}
 
 export interface EmailVerificationRequest extends Pick<
 	schema.EmailVerificationRequest,
@@ -796,6 +810,186 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		return decrypt(user.twoFactorTotpKey);
 	}
 
+	async function hasTotpCredentials(userId: string): Promise<boolean> {
+		const count = await db.$count(
+			schema.userTotpCredentials,
+			eq(schema.userTotpCredentials.userId, userId),
+		);
+
+		return count > 0;
+	}
+
+	async function listTotpCredentials(userId: string): Promise<Array<TotpCredentialSummary>> {
+		return await db
+			.select({
+				id: schema.userTotpCredentials.id,
+				label: schema.userTotpCredentials.label,
+				lastUsedAt: schema.userTotpCredentials.lastUsedAt,
+				createdAt: schema.userTotpCredentials.createdAt,
+			})
+			.from(schema.userTotpCredentials)
+			.where(eq(schema.userTotpCredentials.userId, userId))
+			.orderBy(schema.userTotpCredentials.createdAt, schema.userTotpCredentials.id);
+	}
+
+	async function addTotpCredential(userId: string, label: string, key: Buffer): Promise<string> {
+		const normalizedLabel = label.trim();
+
+		if (normalizedLabel.length === 0 || normalizedLabel.length > maxTotpCredentialLabelLength) {
+			throw new InvalidTotpCredentialLabelError({
+				message: `Authenticator labels must contain between 1 and ${maxTotpCredentialLabelLength} characters.`,
+			});
+		}
+
+		const encryptedKey = encryptBuffer(key);
+
+		return await db.transaction(async (tx) => {
+			const [user] = await tx
+				.select({ id: schema.users.id })
+				.from(schema.users)
+				.where(eq(schema.users.id, userId))
+				.for("update");
+
+			if (user == null) {
+				throw new InvalidUserIdError({ id: userId, message: "Invalid user" });
+			}
+
+			const credentialCount = await tx.$count(
+				schema.userTotpCredentials,
+				eq(schema.userTotpCredentials.userId, userId),
+			);
+
+			if (credentialCount >= maxTotpCredentials) {
+				throw new TotpCredentialLimitReachedError({
+					limit: maxTotpCredentials,
+					message: `A user can have at most ${maxTotpCredentials} authenticators.`,
+				});
+			}
+
+			const [credential] = await tx
+				.insert(schema.userTotpCredentials)
+				.values({
+					userId,
+					label: normalizedLabel,
+					encryptedKey,
+				})
+				.returning({ id: schema.userTotpCredentials.id });
+
+			if (credential == null) {
+				throw new DatabaseError({ message: "Failed to add TOTP credential" });
+			}
+
+			return credential.id;
+		});
+	}
+
+	async function removeTotpCredential(userId: string, credentialId: string): Promise<void> {
+		await db.transaction(async (tx) => {
+			const [user] = await tx
+				.select({ id: schema.users.id })
+				.from(schema.users)
+				.where(eq(schema.users.id, userId))
+				.for("update");
+
+			if (user == null) {
+				throw new InvalidUserIdError({ id: userId, message: "Invalid user" });
+			}
+
+			const [credential] = await tx
+				.select({ id: schema.userTotpCredentials.id })
+				.from(schema.userTotpCredentials)
+				.where(
+					and(
+						eq(schema.userTotpCredentials.id, credentialId),
+						eq(schema.userTotpCredentials.userId, userId),
+					),
+				)
+				.for("update");
+
+			if (credential == null) {
+				throw new TotpCredentialNotFoundError({
+					id: credentialId,
+					message: "TOTP credential not found",
+				});
+			}
+
+			const credentialCount = await tx.$count(
+				schema.userTotpCredentials,
+				eq(schema.userTotpCredentials.userId, userId),
+			);
+
+			if (credentialCount <= 1) {
+				throw new CannotRemoveFinalTotpCredentialError({
+					message: "The final TOTP credential cannot be removed individually.",
+				});
+			}
+
+			await tx
+				.delete(schema.sessions)
+				.where(eq(schema.sessions.twoFactorCredentialId, credentialId));
+
+			await tx
+				.delete(schema.userTotpCredentials)
+				.where(
+					and(
+						eq(schema.userTotpCredentials.id, credentialId),
+						eq(schema.userTotpCredentials.userId, userId),
+					),
+				);
+		});
+	}
+
+	async function removeAllTotpCredentials(userId: string): Promise<void> {
+		await db.transaction(async (tx) => {
+			const [user] = await tx
+				.select({ id: schema.users.id })
+				.from(schema.users)
+				.where(eq(schema.users.id, userId))
+				.for("update");
+
+			if (user == null) {
+				throw new InvalidUserIdError({ id: userId, message: "Invalid user" });
+			}
+
+			await tx.delete(schema.sessions).where(eq(schema.sessions.userId, userId));
+			await tx
+				.delete(schema.userTotpCredentials)
+				.where(eq(schema.userTotpCredentials.userId, userId));
+		});
+	}
+
+	async function verifyUserTotp(userId: string, code: string): Promise<string | null> {
+		const credentials = await db
+			.select({
+				id: schema.userTotpCredentials.id,
+				encryptedKey: schema.userTotpCredentials.encryptedKey,
+			})
+			.from(schema.userTotpCredentials)
+			.where(eq(schema.userTotpCredentials.userId, userId))
+			.orderBy(schema.userTotpCredentials.createdAt, schema.userTotpCredentials.id);
+
+		for (const credential of credentials) {
+			if (!verifyTOTP(decrypt(credential.encryptedKey), 30, 6, code)) {
+				continue;
+			}
+
+			const [updatedCredential] = await db
+				.update(schema.userTotpCredentials)
+				.set({ lastUsedAt: new Date() })
+				.where(
+					and(
+						eq(schema.userTotpCredentials.id, credential.id),
+						eq(schema.userTotpCredentials.userId, userId),
+					),
+				)
+				.returning({ id: schema.userTotpCredentials.id });
+
+			return updatedCredential?.id ?? null;
+		}
+
+		return null;
+	}
+
 	async function setPasswordResetSessionAsTwoFactorVerified(id: string): Promise<void> {
 		await db
 			.update(schema.passwordResetSessions)
@@ -957,6 +1151,12 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		deletePasswordResetSessionCookie,
 		validatePasswordResetSessionFromRequest,
 		getUserTotpKey,
+		hasTotpCredentials,
+		listTotpCredentials,
+		addTotpCredential,
+		removeTotpCredential,
+		removeAllTotpCredentials,
+		verifyUserTotp,
 		verifyTotp,
 		createTotpKeyUri,
 		setPasswordResetSessionAsTwoFactorVerified,
