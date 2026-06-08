@@ -1,6 +1,7 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
+import { TotpCredentialLimitReachedError } from "@dariah-eric/auth/errors";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { getExtracted, getLocale } from "next-intl/server";
@@ -74,8 +75,25 @@ export const setupTwoFactorAction = createServerAction(
 			return createActionStateError({ message: t("Invalid code.") });
 		}
 
-		await auth.updateUserTotpKey(user.id, key);
-		await auth.setSessionAsTwoFactorVerified(session.id);
+		const credentials = await auth.listTotpCredentials(user.id);
+		const label =
+			credentials.length === 0 ? "Authenticator" : `Authenticator ${credentials.length + 1}`;
+
+		let credentialId: string;
+
+		try {
+			credentialId = await auth.addTotpCredential(user.id, label, key);
+		} catch (error) {
+			if (error instanceof TotpCredentialLimitReachedError) {
+				return createActionStateError({
+					message: t("You cannot add another authenticator."),
+				});
+			}
+
+			throw error;
+		}
+
+		await auth.setSessionAsTwoFactorVerified(session.id, credentialId);
 
 		redirect({ href: "/auth/recovery-code", locale });
 	},

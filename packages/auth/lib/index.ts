@@ -11,7 +11,7 @@ import { createUrl } from "@acdh-oeaw/lib";
 import type { Database } from "@dariah-eric/database";
 import { DatabaseError } from "@dariah-eric/database/errors";
 import * as schema from "@dariah-eric/database/schema";
-import { and, eq, sql } from "@dariah-eric/database/sql";
+import { and, desc, eq, sql } from "@dariah-eric/database/sql";
 import type { EmailService } from "@dariah-eric/email";
 import { ExpiringTokenBucket, RefillingTokenBucket, Throttler } from "@dariah-eric/rate-limiter";
 import { request } from "@dariah-eric/request";
@@ -104,7 +104,7 @@ export interface User extends Pick<
 
 export interface Session extends Pick<
 	schema.Session,
-	"id" | "secretHash" | "expiresAt" | "isTwoFactorVerified"
+	"id" | "secretHash" | "expiresAt" | "isTwoFactorVerified" | "twoFactorCredentialId"
 > {}
 
 export interface AuthenticatedSession {
@@ -154,6 +154,11 @@ interface CreateUserWithPasswordParams {
 	encryptionKey: Buffer;
 	name: string;
 	password: string;
+}
+
+interface CreateSessionOptions {
+	isTwoFactorVerified?: boolean;
+	twoFactorCredentialId?: string | null;
 }
 
 function generateRandomString() {
@@ -214,7 +219,7 @@ export async function createUserWithPassword(params: CreateUserWithPasswordParam
 			isEmailVerified: schema.users.isEmailVerified,
 			personDocumentId: schema.users.personDocumentId,
 			organisationalUnitDocumentId: schema.users.organisationalUnitDocumentId,
-			isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
+			isTwoFactorRegistered: sql<boolean>`false`,
 		});
 
 	if (user == null) {
@@ -257,11 +262,23 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		return decrypt(data).toString("utf-8");
 	}
 
+	function isTwoFactorRegistered() {
+		return sql<boolean>`
+			EXISTS (
+				SELECT 1
+				FROM ${schema.userTotpCredentials}
+				WHERE ${schema.userTotpCredentials.userId} = ${schema.users.id}
+			)
+			OR ${schema.users.twoFactorTotpKey} IS NOT NULL
+		`;
+	}
+
 	async function createSession(
 		userId: string,
-		isTwoFactorVerified = false,
+		options: CreateSessionOptions = {},
 	): Promise<Session & { token: string }> {
 		const now = Date.now();
+		const { isTwoFactorVerified = false, twoFactorCredentialId = null } = options;
 
 		const id = generateRandomString();
 		const secret = generateRandomString();
@@ -276,12 +293,14 @@ export function createAuthService(params: CreateAuthServiceParams) {
 				expiresAt: new Date(now + config.sessions.cookie.durationMs),
 				userId,
 				isTwoFactorVerified,
+				twoFactorCredentialId,
 			})
 			.returning({
 				id: schema.sessions.id,
 				secretHash: schema.sessions.secretHash,
 				expiresAt: schema.sessions.expiresAt,
 				isTwoFactorVerified: schema.sessions.isTwoFactorVerified,
+				twoFactorCredentialId: schema.sessions.twoFactorCredentialId,
 			});
 
 		if (session == null) {
@@ -293,6 +312,7 @@ export function createAuthService(params: CreateAuthServiceParams) {
 			secretHash: session.secretHash,
 			expiresAt: session.expiresAt,
 			isTwoFactorVerified: session.isTwoFactorVerified,
+			twoFactorCredentialId: session.twoFactorCredentialId,
 			token,
 		};
 	}
@@ -338,13 +358,14 @@ export function createAuthService(params: CreateAuthServiceParams) {
 					isEmailVerified: schema.users.isEmailVerified,
 					personDocumentId: schema.users.personDocumentId,
 					organisationalUnitDocumentId: schema.users.organisationalUnitDocumentId,
-					isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
+					isTwoFactorRegistered: isTwoFactorRegistered(),
 				},
 				session: {
 					id: schema.sessions.id,
 					secretHash: schema.sessions.secretHash,
 					expiresAt: schema.sessions.expiresAt,
 					isTwoFactorVerified: schema.sessions.isTwoFactorVerified,
+					twoFactorCredentialId: schema.sessions.twoFactorCredentialId,
 				},
 			})
 			.from(schema.sessions)
@@ -409,13 +430,6 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		return session;
 	}
 
-	async function setSessionTwoFactorVerified(id: string) {
-		await db
-			.update(schema.sessions)
-			.set({ isTwoFactorVerified: true })
-			.where(eq(schema.sessions.id, id));
-	}
-
 	async function getUserByEmail(email: string): Promise<User | null> {
 		const [user] = await db
 			.select({
@@ -427,7 +441,7 @@ export function createAuthService(params: CreateAuthServiceParams) {
 				isEmailVerified: schema.users.isEmailVerified,
 				personDocumentId: schema.users.personDocumentId,
 				organisationalUnitDocumentId: schema.users.organisationalUnitDocumentId,
-				isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
+				isTwoFactorRegistered: isTwoFactorRegistered(),
 			})
 			.from(schema.users)
 			.where(eq(schema.users.email, email));
@@ -781,7 +795,7 @@ export function createAuthService(params: CreateAuthServiceParams) {
 					isEmailVerified: schema.users.isEmailVerified,
 					personDocumentId: schema.users.personDocumentId,
 					organisationalUnitDocumentId: schema.users.organisationalUnitDocumentId,
-					isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
+					isTwoFactorRegistered: isTwoFactorRegistered(),
 				},
 			})
 			.from(schema.passwordResetSessions)
@@ -793,21 +807,6 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		}
 
 		return session;
-	}
-
-	async function getUserTotpKey(userId: string): Promise<Buffer | null> {
-		const [user] = await db
-			.select({
-				twoFactorTotpKey: schema.users.twoFactorTotpKey,
-			})
-			.from(schema.users)
-			.where(eq(schema.users.id, userId));
-
-		if (user?.twoFactorTotpKey == null) {
-			return null;
-		}
-
-		return decrypt(user.twoFactorTotpKey);
 	}
 
 	async function hasTotpCredentials(userId: string): Promise<boolean> {
@@ -879,6 +878,11 @@ export function createAuthService(params: CreateAuthServiceParams) {
 				throw new DatabaseError({ message: "Failed to add TOTP credential" });
 			}
 
+			await tx
+				.update(schema.users)
+				.set({ twoFactorTotpKey: encryptedKey })
+				.where(eq(schema.users.id, userId));
+
 			return credential.id;
 		});
 	}
@@ -936,6 +940,18 @@ export function createAuthService(params: CreateAuthServiceParams) {
 						eq(schema.userTotpCredentials.userId, userId),
 					),
 				);
+
+			const [remainingCredential] = await tx
+				.select({ encryptedKey: schema.userTotpCredentials.encryptedKey })
+				.from(schema.userTotpCredentials)
+				.where(eq(schema.userTotpCredentials.userId, userId))
+				.orderBy(desc(schema.userTotpCredentials.createdAt), desc(schema.userTotpCredentials.id))
+				.limit(1);
+
+			await tx
+				.update(schema.users)
+				.set({ twoFactorTotpKey: remainingCredential?.encryptedKey ?? null })
+				.where(eq(schema.users.id, userId));
 		});
 	}
 
@@ -955,6 +971,10 @@ export function createAuthService(params: CreateAuthServiceParams) {
 			await tx
 				.delete(schema.userTotpCredentials)
 				.where(eq(schema.userTotpCredentials.userId, userId));
+			await tx
+				.update(schema.users)
+				.set({ twoFactorTotpKey: null })
+				.where(eq(schema.users.id, userId));
 		});
 	}
 
@@ -987,7 +1007,61 @@ export function createAuthService(params: CreateAuthServiceParams) {
 			return updatedCredential?.id ?? null;
 		}
 
-		return null;
+		return await db.transaction(async (tx) => {
+			const [user] = await tx
+				.select({
+					id: schema.users.id,
+					twoFactorTotpKey: schema.users.twoFactorTotpKey,
+				})
+				.from(schema.users)
+				.where(eq(schema.users.id, userId))
+				.for("update");
+
+			if (
+				user?.twoFactorTotpKey == null ||
+				!verifyTOTP(decrypt(user.twoFactorTotpKey), 30, 6, code)
+			) {
+				return null;
+			}
+
+			const currentCredentials = await tx
+				.select({
+					id: schema.userTotpCredentials.id,
+					encryptedKey: schema.userTotpCredentials.encryptedKey,
+				})
+				.from(schema.userTotpCredentials)
+				.where(eq(schema.userTotpCredentials.userId, userId))
+				.orderBy(schema.userTotpCredentials.createdAt, schema.userTotpCredentials.id);
+
+			for (const credential of currentCredentials) {
+				if (!verifyTOTP(decrypt(credential.encryptedKey), 30, 6, code)) {
+					continue;
+				}
+
+				await tx
+					.update(schema.userTotpCredentials)
+					.set({ lastUsedAt: new Date() })
+					.where(eq(schema.userTotpCredentials.id, credential.id));
+
+				return credential.id;
+			}
+
+			if (currentCredentials.length >= maxTotpCredentials) {
+				return null;
+			}
+
+			const [credential] = await tx
+				.insert(schema.userTotpCredentials)
+				.values({
+					userId,
+					label: "Migrated authenticator",
+					encryptedKey: user.twoFactorTotpKey,
+					lastUsedAt: new Date(),
+				})
+				.returning({ id: schema.userTotpCredentials.id });
+
+			return credential?.id ?? null;
+		});
 	}
 
 	async function setPasswordResetSessionAsTwoFactorVerified(id: string): Promise<void> {
@@ -1007,7 +1081,8 @@ export function createAuthService(params: CreateAuthServiceParams) {
 					twoFactorRecoveryCode: schema.users.twoFactorRecoveryCode,
 				})
 				.from(schema.users)
-				.where(eq(schema.users.id, userId));
+				.where(eq(schema.users.id, userId))
+				.for("update");
 
 			if (user == null) {
 				return false;
@@ -1021,12 +1096,10 @@ export function createAuthService(params: CreateAuthServiceParams) {
 
 			const newRecoveryCode = encryptString(generateTwoFactorRecoveryCode());
 
+			await tx.delete(schema.sessions).where(eq(schema.sessions.userId, userId));
 			await tx
-				.update(schema.sessions)
-				.set({
-					isTwoFactorVerified: false,
-				})
-				.where(eq(schema.sessions.userId, userId));
+				.delete(schema.userTotpCredentials)
+				.where(eq(schema.userTotpCredentials.userId, userId));
 
 			const [result] = await tx
 				.update(schema.users)
@@ -1070,24 +1143,17 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		return user != null;
 	}
 
-	async function setSessionAsTwoFactorVerified(id: string): Promise<void> {
+	async function setSessionAsTwoFactorVerified(
+		id: string,
+		credentialId: string | null,
+	): Promise<void> {
 		await db
 			.update(schema.sessions)
 			.set({
 				isTwoFactorVerified: true,
+				twoFactorCredentialId: credentialId,
 			})
 			.where(eq(schema.sessions.id, id));
-	}
-
-	async function updateUserTotpKey(userId: string, key: Buffer): Promise<void> {
-		const twoFactorTotpKey = encryptBuffer(key);
-
-		await db
-			.update(schema.users)
-			.set({
-				twoFactorTotpKey,
-			})
-			.where(eq(schema.users.id, userId));
 	}
 
 	function verifyTotp(key: Buffer, code: string): boolean {
@@ -1121,7 +1187,6 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		validateSessionToken,
 		deleteSession,
 		deleteUserSessions,
-		setSessionTwoFactorVerified,
 		setSessionCookie,
 		deleteSessionCookie,
 		getSessionCookie,
@@ -1150,7 +1215,6 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		setPasswordResetSessionCookie,
 		deletePasswordResetSessionCookie,
 		validatePasswordResetSessionFromRequest,
-		getUserTotpKey,
 		hasTotpCredentials,
 		listTotpCredentials,
 		addTotpCredential,
@@ -1164,7 +1228,6 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		setPasswordResetSessionAsEmailVerified,
 		setUserAsEmailVerifiedIfEmailMatches,
 		setSessionAsTwoFactorVerified,
-		updateUserTotpKey,
 		decodeBase64,
 
 		passwordResetEmailIpBucket,

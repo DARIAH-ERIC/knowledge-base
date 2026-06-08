@@ -70,7 +70,10 @@ export const updatePasswordAction = createServerAction(
 		await auth.deleteUserSessions(user.id);
 		await auth.updatePassword(user.id, newPassword);
 
-		const newSession = await auth.createSession(user.id, session.isTwoFactorVerified);
+		const newSession = await auth.createSession(user.id, {
+			isTwoFactorVerified: session.isTwoFactorVerified,
+			twoFactorCredentialId: session.twoFactorCredentialId,
+		});
 		await auth.setSessionCookie(newSession.token, newSession.expiresAt);
 
 		return createActionStateSuccess({ message: t("Updated password.") });
