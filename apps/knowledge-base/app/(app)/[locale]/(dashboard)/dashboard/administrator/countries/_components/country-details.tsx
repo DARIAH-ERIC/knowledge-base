@@ -8,7 +8,7 @@ import {
 } from "@dariah-eric/ui/description-list";
 import { RichTextRenderer } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
-import { useExtracted, useFormatter } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
@@ -81,7 +81,6 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 	} = props;
 
 	const t = useExtracted();
-	const format = useFormatter();
 
 	return (
 		<Fragment>
@@ -120,7 +119,7 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 					{country.image != null ? (
 						<img
 							alt=""
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
 							src={country.image.url}
 						/>
 					) : null}
@@ -215,13 +214,7 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 									relation={formatRoleType(relation.roleType)}
 									target={country.name}
 									targetType={formatRoleType(relation.targetUnitType)}
-									duration={
-										relation.duration.end
-											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })
-									}
+									duration={relation.duration}
 								/>
 							))}
 						</ul>
@@ -243,13 +236,7 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 										relation.relatedUnitSlug,
 									)}
 									targetType={formatRoleType(relation.relatedUnitType)}
-									duration={
-										relation.duration.end
-											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })
-									}
+									duration={relation.duration}
 								/>
 							))}
 						</ul>
@@ -271,13 +258,7 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 									relation={formatRoleType(consortium.statusType)}
 									target={country.name}
 									targetType={formatRoleType("country")}
-									duration={
-										consortium.duration.end
-											? format.dateTimeRange(consortium.duration.start, consortium.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(consortium.duration.start, { dateStyle: "short" })
-									}
+									duration={consortium.duration}
 								/>
 							))}
 						</ul>
@@ -299,13 +280,7 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 									relation={formatRoleType(institution.statusType)}
 									target="DARIAH ERIC"
 									targetType={formatRoleType("eric")}
-									duration={
-										institution.duration.end
-											? format.dateTimeRange(institution.duration.start, institution.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(institution.duration.start, { dateStyle: "short" })
-									}
+									duration={institution.duration}
 								/>
 							))}
 						</ul>

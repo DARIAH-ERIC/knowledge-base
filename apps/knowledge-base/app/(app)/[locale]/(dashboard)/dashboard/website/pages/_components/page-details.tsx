@@ -78,7 +78,11 @@ export function PageItemDetails(props: Readonly<PageItemDetailsProps>): ReactNod
 					<Fragment>
 						<DescriptionTerm>{t("Image")}</DescriptionTerm>
 						<DescriptionDetails>
-							<img alt="" src={pageItem.image.url} />
+							<img
+								alt=""
+								className="block-24 inline-auto max-inline-full rounded-lg object-contain"
+								src={pageItem.image.url}
+							/>
 						</DescriptionDetails>
 					</Fragment>
 				) : null}

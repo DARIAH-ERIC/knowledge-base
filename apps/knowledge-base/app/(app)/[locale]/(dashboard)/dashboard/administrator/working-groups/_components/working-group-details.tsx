@@ -8,7 +8,7 @@ import {
 } from "@dariah-eric/ui/description-list";
 import { RichTextRenderer } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
-import { useExtracted, useFormatter } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
@@ -71,7 +71,6 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 	} = props;
 
 	const t = useExtracted();
-	const format = useFormatter();
 
 	return (
 		<Fragment>
@@ -113,7 +112,7 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 					{workingGroup.image != null ? (
 						<img
 							alt=""
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
 							src={workingGroup.image.url}
 						/>
 					) : null}
@@ -208,13 +207,7 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 									relation={formatRoleType(relation.roleType)}
 									target={workingGroup.name}
 									targetType={formatRoleType(relation.targetUnitType)}
-									duration={
-										relation.duration.end
-											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })
-									}
+									duration={relation.duration}
 								/>
 							))}
 						</ul>
@@ -236,13 +229,7 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 										relation.relatedUnitSlug,
 									)}
 									targetType={formatRoleType(relation.relatedUnitType)}
-									duration={
-										relation.duration.end
-											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })
-									}
+									duration={relation.duration}
 								/>
 							))}
 						</ul>

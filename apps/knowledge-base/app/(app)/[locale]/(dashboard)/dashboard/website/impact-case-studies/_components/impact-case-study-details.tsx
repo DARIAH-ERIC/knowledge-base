@@ -80,7 +80,11 @@ export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsPro
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
-					<img alt="" src={impactCaseStudy.image.url} />
+					<img
+						alt=""
+						className="block-24 inline-auto max-inline-full rounded-lg object-contain"
+						src={impactCaseStudy.image.url}
+					/>
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Related entities")}</DescriptionTerm>

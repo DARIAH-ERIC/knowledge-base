@@ -76,7 +76,11 @@ export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNod
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
-					<img alt="" src={newsItem.image.url} />
+					<img
+						alt=""
+						className="block-24 inline-auto max-inline-full rounded-lg object-contain"
+						src={newsItem.image.url}
+					/>
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>
