@@ -192,7 +192,11 @@ export class AdminProjectsPage {
 	}
 
 	async clickEditProjectPartner(): Promise<void> {
-		await this.projectPartnersTable().getByRole("button", { name: "Edit partner" }).first().click();
+		await this.projectPartnersTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
+		await this.page.getByRole("menuitem", { name: "Edit partner" }).click();
 	}
 
 	async fillProjectPartnerEditDate(
@@ -218,9 +222,10 @@ export class AdminProjectsPage {
 
 	async clickDeleteProjectPartner(): Promise<void> {
 		await this.projectPartnersTable()
-			.getByRole("button", { name: "Delete partner" })
+			.getByRole("button", { name: "Open actions menu" })
 			.first()
 			.click();
+		await this.page.getByRole("menuitem", { name: "Delete partner" }).click();
 	}
 
 	async confirmDeleteProjectPartner(): Promise<void> {

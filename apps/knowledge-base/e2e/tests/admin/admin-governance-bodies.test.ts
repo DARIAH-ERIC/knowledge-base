@@ -174,10 +174,16 @@ test.describe("governance bodies admin", () => {
 		await governanceBodiesPage.fillEndPersonRelationDate(2025, 12, 31);
 		await governanceBodiesPage.confirmEndPersonRelation();
 
-		// Verify "End person relation" button is gone and "present" is replaced by a date.
+		// Verify "End person relation" action is gone and "present" is replaced by a date.
+		await governanceBodiesPage
+			.peopleTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
 		await expect(
-			governanceBodiesPage.peopleTable().getByRole("button", { name: "End person relation" }),
+			governanceBodiesPage.page.getByRole("menuitem", { name: "End person relation" }),
 		).toBeHidden();
+		await governanceBodiesPage.page.keyboard.press("Escape");
 		await expect(governanceBodiesPage.peopleTable().getByText("present")).toBeHidden();
 
 		// Verify end date persisted.
@@ -282,10 +288,16 @@ test.describe("governance bodies admin", () => {
 		await governanceBodiesPage.fillEndRelationDate(2025, 12, 31);
 		await governanceBodiesPage.confirmEndRelation();
 
-		// Verify "End relation" button is gone and "present" is replaced by a date.
+		// Verify "End relation" action is gone and "present" is replaced by a date.
+		await governanceBodiesPage
+			.relationsTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
 		await expect(
-			governanceBodiesPage.relationsTable().getByRole("button", { name: "End relation" }),
+			governanceBodiesPage.page.getByRole("menuitem", { name: "End relation" }),
 		).toBeHidden();
+		await governanceBodiesPage.page.keyboard.press("Escape");
 		await expect(governanceBodiesPage.relationsTable().getByText("present")).toBeHidden();
 
 		// Verify end date persisted.

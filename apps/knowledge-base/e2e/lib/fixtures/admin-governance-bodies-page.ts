@@ -186,8 +186,13 @@ export class AdminGovernanceBodiesPage {
 		});
 	}
 
+	async openFirstRelationsRowAction(action: string): Promise<void> {
+		await this.relationsTable().getByRole("button", { name: "Open actions menu" }).first().click();
+		await this.page.getByRole("menuitem", { name: action }).click();
+	}
+
 	async clickEndRelation(): Promise<void> {
-		await this.relationsTable().getByRole("button", { name: "End relation" }).first().click();
+		await this.openFirstRelationsRowAction("End relation");
 	}
 
 	async fillEndRelationDate(year: number, month: number, day: number): Promise<void> {
@@ -209,7 +214,7 @@ export class AdminGovernanceBodiesPage {
 	}
 
 	async clickEditRelation(): Promise<void> {
-		await this.relationsTable().getByRole("button", { name: "Edit relation" }).first().click();
+		await this.openFirstRelationsRowAction("Edit relation");
 		await this.page.getByRole("dialog", { name: "Edit relation" }).waitFor({ state: "visible" });
 	}
 
@@ -236,7 +241,7 @@ export class AdminGovernanceBodiesPage {
 	}
 
 	async clickDeleteRelation(): Promise<void> {
-		await this.relationsTable().getByRole("button", { name: "Delete relation" }).first().click();
+		await this.openFirstRelationsRowAction("Delete relation");
 		await this.page.getByRole("alertdialog", { name: "Delete relation" }).waitFor({
 			state: "visible",
 		});
@@ -312,8 +317,13 @@ export class AdminGovernanceBodiesPage {
 		});
 	}
 
+	async openFirstPeopleRowAction(action: string): Promise<void> {
+		await this.peopleTable().getByRole("button", { name: "Open actions menu" }).first().click();
+		await this.page.getByRole("menuitem", { name: action }).click();
+	}
+
 	async clickEndPersonRelation(): Promise<void> {
-		await this.peopleTable().getByRole("button", { name: "End person relation" }).first().click();
+		await this.openFirstPeopleRowAction("End person relation");
 	}
 
 	async fillEndPersonRelationDate(year: number, month: number, day: number): Promise<void> {
@@ -335,7 +345,7 @@ export class AdminGovernanceBodiesPage {
 	}
 
 	async clickEditPersonRelation(): Promise<void> {
-		await this.peopleTable().getByRole("button", { name: "Edit person relation" }).first().click();
+		await this.openFirstPeopleRowAction("Edit person relation");
 		await this.page
 			.getByRole("dialog", { name: "Edit person relation" })
 			.waitFor({ state: "visible" });
@@ -364,10 +374,7 @@ export class AdminGovernanceBodiesPage {
 	}
 
 	async clickDeletePersonRelation(): Promise<void> {
-		await this.peopleTable()
-			.getByRole("button", { name: "Delete person relation" })
-			.first()
-			.click();
+		await this.openFirstPeopleRowAction("Delete person relation");
 		await this.page
 			.getByRole("alertdialog", { name: "Delete person relation" })
 			.waitFor({ state: "visible" });

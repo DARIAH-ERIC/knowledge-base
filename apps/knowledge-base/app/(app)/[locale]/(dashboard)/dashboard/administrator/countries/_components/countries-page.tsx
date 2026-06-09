@@ -106,7 +106,7 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 					<TableColumn>{t("From")}</TableColumn>
 					<TableColumn>{t("Until")}</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
-					<TableColumn />
+					<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
@@ -139,7 +139,7 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 									isPublished={item.isPublished}
 								/>
 							</TableCell>
-							<TableCell className="text-end">
+							<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Link
 										href={`/dashboard/administrator/countries/${item.entity.slug}/details`}

@@ -25,13 +25,13 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
 	FormSection,
@@ -216,17 +216,23 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 				{localRelations.length > 0 ? (
 					<Table aria-label="people" className="[--gutter:0] sm:[--gutter:0]">
 						<TableHeader>
-							<TableColumn isRowHeader={true}>{t("Person")}</TableColumn>
+							<TableColumn className="max-inline-80" isRowHeader={true}>
+								{t("Person")}
+							</TableColumn>
 							<TableColumn>{t("Type")}</TableColumn>
 							<TableColumn>{t("Role")}</TableColumn>
 							<TableColumn>{t("From")}</TableColumn>
 							<TableColumn>{t("Until")}</TableColumn>
-							<TableColumn />
+							<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
 						<TableBody items={localRelations}>
 							{(relation) => (
 								<TableRow id={relation.id}>
-									<TableCell>{relation.personName}</TableCell>
+									<TableCell>
+										<div className="max-inline-80 truncate" title={relation.personName}>
+											{relation.personName}
+										</div>
+									</TableCell>
 									<TableCell>
 										<Badge intent="slate">{formatUnitType(relation.targetUnitType)}</Badge>
 									</TableCell>
@@ -248,56 +254,38 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 											? format.dateTime(relation.duration.end, { dateStyle: "short" })
 											: t("present")}
 									</TableCell>
-									<TableCell className="text-end">
-										<div className="flex justify-end gap-1">
-											<Tooltip>
-												<Button
-													aria-label={t("Edit person relation")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														openEditDialog(relation);
-													}}
-													size="sq-sm"
-												>
-													<PencilSquareIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Edit person relation")}</TooltipContent>
-											</Tooltip>
+									<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+										<RowActionsMenu>
+											<RowActionsMenu.Action
+												icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													openEditDialog(relation);
+												}}
+											>
+												{t("Edit person relation")}
+											</RowActionsMenu.Action>
 											{relation.duration.end == null && (
-												<Tooltip>
-													<Button
-														aria-label={t("End person relation")}
-														className="block-7 sm:block-7"
-														intent="plain"
-														onPress={() => {
-															setItemToEnd({ id: relation.id });
-															setSelectedEndDate(null);
-														}}
-														size="sq-sm"
-													>
-														<ArchiveBoxXMarkIcon className="block-4 inline-4" />
-													</Button>
-													<TooltipContent inverse={true}>{t("End person relation")}</TooltipContent>
-												</Tooltip>
-											)}
-											<Tooltip>
-												<Button
-													aria-label={t("Delete person relation")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														setItemToDelete({ id: relation.id });
+												<RowActionsMenu.Action
+													icon={<ArchiveBoxXMarkIcon className="me-2 block-4 inline-4" />}
+													onAction={() => {
+														setItemToEnd({ id: relation.id });
+														setSelectedEndDate(null);
 													}}
-													size="sq-sm"
 												>
-													<TrashIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>
-													{t("Delete person relation")}
-												</TooltipContent>
-											</Tooltip>
-										</div>
+													{t("End person relation")}
+												</RowActionsMenu.Action>
+											)}
+											<RowActionsMenu.Separator />
+											<RowActionsMenu.Action
+												danger={true}
+												icon={<TrashIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													setItemToDelete({ id: relation.id });
+												}}
+											>
+												{t("Delete person relation")}
+											</RowActionsMenu.Action>
+										</RowActionsMenu>
 									</TableCell>
 								</TableRow>
 							)}

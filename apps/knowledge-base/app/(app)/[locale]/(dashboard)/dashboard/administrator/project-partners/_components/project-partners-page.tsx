@@ -255,7 +255,12 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 				sortDescriptor={search.sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn allowsSorting={true} id="projectName" isRowHeader={true}>
+					<TableColumn
+						allowsSorting={true}
+						className="max-inline-80"
+						id="projectName"
+						isRowHeader={true}
+					>
 						{t("Project")}
 					</TableColumn>
 					<TableColumn allowsSorting={true} id="roleType">
@@ -264,7 +269,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 					<TableColumn allowsSorting={true} id="unitType">
 						{t("Type")}
 					</TableColumn>
-					<TableColumn allowsSorting={true} id="unitName">
+					<TableColumn allowsSorting={true} className="max-inline-80" id="unitName">
 						{t("Partner")}
 					</TableColumn>
 					<TableColumn allowsSorting={true} id="durationStart">
@@ -273,13 +278,13 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 					<TableColumn allowsSorting={true} id="durationEnd">
 						{t("Until")}
 					</TableColumn>
-					<TableColumn />
+					<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
 						<TableRow id={item.id}>
 							<TableCell>
-								<div className="max-inline-64 truncate">
+								<div className="max-inline-80 truncate" title={item.projectName}>
 									{item.projectAcronym ?? item.projectName}
 								</div>
 							</TableCell>
@@ -289,7 +294,11 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 									{formatValue(item.unitType)}
 								</Badge>
 							</TableCell>
-							<TableCell>{item.unitName}</TableCell>
+							<TableCell>
+								<div className="max-inline-80 truncate" title={item.unitName}>
+									{item.unitName}
+								</div>
+							</TableCell>
 							<TableCell>
 								{item.durationStart != null
 									? format.dateTime(item.durationStart, { dateStyle: "short" })
@@ -302,7 +311,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 										? t("present")
 										: "—"}
 							</TableCell>
-							<TableCell className="text-end">
+							<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Action
 										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}

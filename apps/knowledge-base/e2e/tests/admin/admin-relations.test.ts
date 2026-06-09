@@ -285,12 +285,18 @@ test.describe("admin relation management", () => {
 		await governanceBodiesPage.fillRelationDatePicker("Start date", 2025, 1, 1);
 		await governanceBodiesPage.submitAddRelation();
 
+		await governanceBodiesPage
+			.relationsTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
 		await expect(
-			governanceBodiesPage.relationsTable().getByRole("button", { name: "Edit relation" }),
+			governanceBodiesPage.page.getByRole("menuitem", { name: "Edit relation" }),
 		).toBeVisible();
 		await expect(
-			governanceBodiesPage.relationsTable().getByRole("button", { name: "Delete relation" }),
+			governanceBodiesPage.page.getByRole("menuitem", { name: "Delete relation" }),
 		).toBeVisible();
+		await governanceBodiesPage.page.keyboard.press("Escape");
 
 		const governanceBody = await db.getGovernanceBodyByName(name);
 		await governanceBodiesPage.clickEditRelation();
@@ -329,12 +335,18 @@ test.describe("admin relation management", () => {
 		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2025, 1, 1);
 		await governanceBodiesPage.submitAddPerson();
 
+		await governanceBodiesPage
+			.peopleTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
 		await expect(
-			governanceBodiesPage.peopleTable().getByRole("button", { name: "Edit person relation" }),
+			governanceBodiesPage.page.getByRole("menuitem", { name: "Edit person relation" }),
 		).toBeVisible();
 		await expect(
-			governanceBodiesPage.peopleTable().getByRole("button", { name: "Delete person relation" }),
+			governanceBodiesPage.page.getByRole("menuitem", { name: "Delete person relation" }),
 		).toBeVisible();
+		await governanceBodiesPage.page.keyboard.press("Escape");
 
 		const governanceBody = await db.getGovernanceBodyByName(name);
 		await governanceBodiesPage.clickEditPersonRelation();
@@ -373,12 +385,18 @@ test.describe("admin relation management", () => {
 		await workingGroupsPage.fillPersonRelationDatePicker("Start date", 2025, 1, 1);
 		await workingGroupsPage.submitAddPerson();
 
+		await workingGroupsPage
+			.peopleTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
 		await expect(
-			workingGroupsPage.peopleTable().getByRole("button", { name: "Edit person relation" }),
+			workingGroupsPage.page.getByRole("menuitem", { name: "Edit person relation" }),
 		).toBeVisible();
 		await expect(
-			workingGroupsPage.peopleTable().getByRole("button", { name: "Delete person relation" }),
+			workingGroupsPage.page.getByRole("menuitem", { name: "Delete person relation" }),
 		).toBeVisible();
+		await workingGroupsPage.page.keyboard.press("Escape");
 
 		const workingGroup = await db.getWorkingGroupByName(name);
 		let relations = await db.getPersonRelationsByUnitVersionId(workingGroup!.id);
@@ -469,12 +487,18 @@ test.describe("admin relation management", () => {
 		await personsPage.fillContributionDatePicker("Start date", 2025, 1, 1);
 		await personsPage.submitAddContribution();
 
+		await personsPage
+			.contributionsTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
 		await expect(
-			personsPage.contributionsTable().getByRole("button", { name: "Edit contribution" }),
+			personsPage.page.getByRole("menuitem", { name: "Edit contribution" }),
 		).toBeVisible();
 		await expect(
-			personsPage.contributionsTable().getByRole("button", { name: "Delete contribution" }),
+			personsPage.page.getByRole("menuitem", { name: "Delete contribution" }),
 		).toBeVisible();
+		await personsPage.page.keyboard.press("Escape");
 
 		const person = await db.getPersonByName(name);
 		await personsPage.clickEditContribution();

@@ -299,7 +299,12 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 				sortDescriptor={search.sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn allowsSorting={true} id="personName" isRowHeader={true}>
+					<TableColumn
+						allowsSorting={true}
+						className="max-inline-80"
+						id="personName"
+						isRowHeader={true}
+					>
 						{t("Person")}
 					</TableColumn>
 					<TableColumn allowsSorting={true} id="roleType">
@@ -308,7 +313,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 					<TableColumn allowsSorting={true} id="organisationalUnitType">
 						{t("Type")}
 					</TableColumn>
-					<TableColumn allowsSorting={true} id="organisationalUnitName">
+					<TableColumn allowsSorting={true} className="max-inline-80" id="organisationalUnitName">
 						{t("Name")}
 					</TableColumn>
 					<TableColumn allowsSorting={true} id="durationStart">
@@ -317,7 +322,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 					<TableColumn allowsSorting={true} id="durationEnd">
 						{t("Until")}
 					</TableColumn>
-					<TableColumn />
+					<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => {
@@ -328,21 +333,29 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 
 						return (
 							<TableRow id={item.id}>
-								<TableCell>{item.personName}</TableCell>
+								<TableCell>
+									<div className="max-inline-80 truncate" title={item.personName}>
+										{item.personName}
+									</div>
+								</TableCell>
 								<TableCell>{formatRoleType(item.roleType)}</TableCell>
 								<TableCell>
 									<Badge intent={organisationalUnitTypeIntent(item.organisationalUnitType)}>
 										{formatOrganisationalUnitType(item.organisationalUnitType)}
 									</Badge>
 								</TableCell>
-								<TableCell>{item.organisationalUnitName}</TableCell>
+								<TableCell>
+									<div className="max-inline-80 truncate" title={item.organisationalUnitName}>
+										{item.organisationalUnitName}
+									</div>
+								</TableCell>
 								<TableCell>{format.dateTime(item.durationStart, { dateStyle: "short" })}</TableCell>
 								<TableCell>
 									{item.durationEnd != null
 										? format.dateTime(item.durationEnd, { dateStyle: "short" })
 										: t("present")}
 								</TableCell>
-								<TableCell className="text-end">
+								<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 									<RowActionsMenu>
 										<RowActionsMenu.Link
 											href={`/dashboard/administrator/persons/${item.personSlug}/edit`}

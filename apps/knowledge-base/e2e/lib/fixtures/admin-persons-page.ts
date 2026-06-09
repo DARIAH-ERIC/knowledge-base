@@ -161,11 +161,16 @@ export class AdminPersonsPage {
 		});
 	}
 
-	async clickEndContribution(): Promise<void> {
+	async openFirstContributionsRowAction(action: string): Promise<void> {
 		await this.contributionsTable()
-			.getByRole("button", { name: "End contribution" })
+			.getByRole("button", { name: "Open actions menu" })
 			.first()
 			.click();
+		await this.page.getByRole("menuitem", { name: action }).click();
+	}
+
+	async clickEndContribution(): Promise<void> {
+		await this.openFirstContributionsRowAction("End contribution");
 	}
 
 	async fillEndContributionDate(year: number, month: number, day: number): Promise<void> {
@@ -187,10 +192,7 @@ export class AdminPersonsPage {
 	}
 
 	async clickEditContribution(): Promise<void> {
-		await this.contributionsTable()
-			.getByRole("button", { name: "Edit contribution" })
-			.first()
-			.click();
+		await this.openFirstContributionsRowAction("Edit contribution");
 		await this.page
 			.getByRole("dialog", { name: "Edit contribution" })
 			.waitFor({ state: "visible" });
@@ -219,10 +221,7 @@ export class AdminPersonsPage {
 	}
 
 	async clickDeleteContribution(): Promise<void> {
-		await this.contributionsTable()
-			.getByRole("button", { name: "Delete contribution" })
-			.first()
-			.click();
+		await this.openFirstContributionsRowAction("Delete contribution");
 		await this.page
 			.getByRole("alertdialog", { name: "Delete contribution" })
 			.waitFor({ state: "visible" });
