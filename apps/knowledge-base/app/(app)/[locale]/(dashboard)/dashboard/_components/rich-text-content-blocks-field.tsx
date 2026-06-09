@@ -5,16 +5,19 @@ import type { JSONContent } from "@tiptap/core";
 import { ImageIcon } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
-import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
-import { mergeBlocksToDocument, splitDocumentToBlocks } from "@/lib/content-blocks-document";
+import {
+	type MergeableBlock,
+	mergeBlocksToDocument,
+	splitDocumentToBlocks,
+} from "@/lib/content-blocks-document";
 
 interface RichTextContentBlocksFieldProps {
 	"aria-label": string;
 	content?: JSONContent;
 	initialAssets: Array<MediaLibraryAsset>;
-	initialBlocks?: Array<ContentBlock>;
+	initialBlocks?: Array<MergeableBlock>;
 	name: string;
 }
 
