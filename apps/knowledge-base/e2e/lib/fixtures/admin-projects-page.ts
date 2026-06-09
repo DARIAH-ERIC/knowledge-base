@@ -119,7 +119,7 @@ export class AdminProjectsPage {
 		await asset.click();
 		await dialog.getByRole("button", { name: "Select" }).click();
 		await dialog.waitFor({ state: "hidden" });
-		await expect(this.page.getByText("Image block", { exact: true })).toBeVisible();
+		await expect(this.page.getByLabel("Image block", { exact: true })).toBeVisible();
 	}
 
 	async selectFirstOptionInControl(label: string): Promise<void> {

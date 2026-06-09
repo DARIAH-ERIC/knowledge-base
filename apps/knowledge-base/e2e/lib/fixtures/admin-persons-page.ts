@@ -63,7 +63,7 @@ export class AdminPersonsPage {
 		await asset.click();
 		await dialog.getByRole("button", { name: "Select" }).click();
 		await dialog.waitFor({ state: "hidden" });
-		await expect(this.page.getByText("Image block", { exact: true })).toBeVisible();
+		await expect(this.page.getByLabel("Image block", { exact: true })).toBeVisible();
 	}
 
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
