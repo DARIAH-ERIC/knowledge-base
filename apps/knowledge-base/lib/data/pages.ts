@@ -4,7 +4,8 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { and, count, desc, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
 export type PagesSort = "title" | "updatedAt";
@@ -22,7 +23,8 @@ interface GetPagesParams {
 export async function getPages(params: GetPagesParams) {
 	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
 	const query = q?.trim();
-	const where = query != null && query !== "" ? ilike(schema.pages.title, `%${query}%`) : undefined;
+	const where =
+		query != null && query !== "" ? unaccentIlike(schema.pages.title, `%${query}%`) : undefined;
 	const orderBy =
 		sort === "title"
 			? dir === "asc"

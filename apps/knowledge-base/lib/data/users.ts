@@ -3,7 +3,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { count, desc, eq, or, sql } from "@/lib/db/sql";
 
 export type UsersSort = "name" | "email" | "role" | "canManageAdmins" | "isEmailVerified";
 
@@ -47,7 +48,10 @@ async function getUsers(params: Readonly<GetUsersParams>): Promise<UsersResult> 
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
-			? or(ilike(schema.users.name, `%${query}%`), ilike(schema.users.email, `%${query}%`))
+			? or(
+					unaccentIlike(schema.users.name, `%${query}%`),
+					unaccentIlike(schema.users.email, `%${query}%`),
+				)
 			: undefined;
 
 	const orderBy =

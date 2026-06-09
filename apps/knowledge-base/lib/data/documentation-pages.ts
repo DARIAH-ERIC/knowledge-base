@@ -3,7 +3,8 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { and, count, desc, eq, sql } from "@/lib/db/sql";
 
 export type DocumentationPagesSort = "title" | "updatedAt";
 
@@ -20,7 +21,7 @@ export async function getDocumentationPages(params: GetDocumentationPagesParams)
 	const query = q?.trim();
 	const searchWhere =
 		query != null && query !== ""
-			? ilike(schema.documentationPages.title, `%${query}%`)
+			? unaccentIlike(schema.documentationPages.title, `%${query}%`)
 			: undefined;
 	const orderBy =
 		sort === "title"

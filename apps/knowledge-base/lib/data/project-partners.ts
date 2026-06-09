@@ -3,7 +3,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { alias, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { alias, count, desc, eq, or, sql } from "@/lib/db/sql";
 
 export type ProjectPartnersSort =
 	| "projectName"
@@ -62,11 +63,11 @@ export async function getProjectPartners(
 	const searchWhere =
 		query != null && query !== ""
 			? or(
-					ilike(schema.projects.name, `%${query}%`),
-					ilike(schema.projects.acronym, `%${query}%`),
-					ilike(schema.projectRoles.role, `%${query}%`),
-					ilike(schema.organisationalUnits.name, `%${query}%`),
-					ilike(schema.organisationalUnitTypes.type, `%${query}%`),
+					unaccentIlike(schema.projects.name, `%${query}%`),
+					unaccentIlike(schema.projects.acronym, `%${query}%`),
+					unaccentIlike(schema.projectRoles.role, `%${query}%`),
+					unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
+					unaccentIlike(schema.organisationalUnitTypes.type, `%${query}%`),
 				)
 			: undefined;
 	const where = searchWhere;
@@ -210,7 +211,10 @@ export async function getProjectOptions(params: Readonly<GetProjectOptionsParams
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
-			? or(ilike(schema.projects.name, `%${query}%`), ilike(schema.projects.acronym, `%${query}%`))
+			? or(
+					unaccentIlike(schema.projects.name, `%${query}%`),
+					unaccentIlike(schema.projects.acronym, `%${query}%`),
+				)
 			: undefined;
 	const projectEntities = alias(schema.entities, "project_option_entities");
 	const projectDocumentLifecycle = alias(

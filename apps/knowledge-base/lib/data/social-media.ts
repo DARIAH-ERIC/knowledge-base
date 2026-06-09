@@ -5,7 +5,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { count, desc, eq, ilike, inArray, or } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { count, desc, eq, inArray, or } from "@/lib/db/sql";
 
 export interface SocialMediaOption {
 	id: string;
@@ -54,8 +55,8 @@ export async function getSocialMedia(
 	const where =
 		query != null && query !== ""
 			? or(
-					ilike(schema.socialMedia.name, `%${query}%`),
-					ilike(schema.socialMedia.url, `%${query}%`),
+					unaccentIlike(schema.socialMedia.name, `%${query}%`),
+					unaccentIlike(schema.socialMedia.url, `%${query}%`),
 				)
 			: undefined;
 	const orderBy =
@@ -126,8 +127,8 @@ export async function getSocialMediaOptions(
 	const where =
 		query != null && query !== ""
 			? or(
-					ilike(schema.socialMedia.name, `%${query}%`),
-					ilike(schema.socialMedia.url, `%${query}%`),
+					unaccentIlike(schema.socialMedia.name, `%${query}%`),
+					unaccentIlike(schema.socialMedia.url, `%${query}%`),
 				)
 			: undefined;
 

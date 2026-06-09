@@ -3,7 +3,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { and, count, desc, eq, sql } from "@/lib/db/sql";
 
 export type PersonsSort = "name" | "email" | "orcid";
 
@@ -40,7 +41,7 @@ export async function getPersons(params: Readonly<GetPersonsParams>): Promise<Pe
 	const { limit, offset, q, sort = "name", dir = "asc" } = params;
 	const query = q?.trim();
 	const where =
-		query != null && query !== "" ? ilike(schema.persons.name, `%${query}%`) : undefined;
+		query != null && query !== "" ? unaccentIlike(schema.persons.name, `%${query}%`) : undefined;
 	const orderBy =
 		sort === "email"
 			? dir === "asc"

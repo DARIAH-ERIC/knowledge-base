@@ -5,7 +5,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { imageAssetWidth } from "@/config/assets.config";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { and, count, eq, ilike, inArray } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { and, count, eq, inArray } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
 /** The literal union of organisational-unit types (e.g. "institution", "national_consortium"). */
@@ -43,7 +44,7 @@ export async function getOrganisationalUnitOptions(
 	const query = q?.trim();
 	const searchWhere =
 		query != null && query !== ""
-			? ilike(schema.organisationalUnits.name, `%${query}%`)
+			? unaccentIlike(schema.organisationalUnits.name, `%${query}%`)
 			: undefined;
 	const typeWhere =
 		unitType != null ? eq(schema.organisationalUnitTypes.type, unitType) : undefined;
