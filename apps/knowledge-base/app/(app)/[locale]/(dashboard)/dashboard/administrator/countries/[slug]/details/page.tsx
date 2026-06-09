@@ -64,18 +64,17 @@ export default async function DashboardAdministratorCountryDetailsPage(
 	}
 	const { hasDraftChanges, publishedId, selectedVersion, versionId } = versionState;
 
-	const [personRelations, countryData, ericInstitutions, nationalConsortia] =
-		await Promise.all([
-			getPersonRelations(documentId),
-			getOrganisationalUnitEditDataForAdmin(user, {
-				slug,
-				unitType: "country",
-				versionId,
-				publishedVersionId: publishedId,
-			}),
-			getEricInstitutionsForCountry(documentId),
-			getReverseUnitRelations(documentId, { sourceUnitType: "national_consortium" }),
-		]);
+	const [personRelations, countryData, ericInstitutions, nationalConsortia] = await Promise.all([
+		getPersonRelations(documentId),
+		getOrganisationalUnitEditDataForAdmin(user, {
+			slug,
+			unitType: "country",
+			versionId,
+			publishedVersionId: publishedId,
+		}),
+		getEricInstitutionsForCountry(documentId),
+		getReverseUnitRelations(documentId, { sourceUnitType: "national_consortium" }),
+	]);
 
 	if (countryData == null) {
 		notFound();

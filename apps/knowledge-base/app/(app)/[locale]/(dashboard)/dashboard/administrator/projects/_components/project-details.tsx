@@ -135,7 +135,10 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 				<DescriptionTerm>{t("Description")}</DescriptionTerm>
 				<DescriptionDetails>
 					{project.descriptionContentBlocks.length > 0 ? (
-						<ContentBlocksView key={selectedVersion} contentBlocks={project.descriptionContentBlocks} />
+						<ContentBlocksView
+							key={selectedVersion}
+							contentBlocks={project.descriptionContentBlocks}
+						/>
 					) : null}
 				</DescriptionDetails>
 

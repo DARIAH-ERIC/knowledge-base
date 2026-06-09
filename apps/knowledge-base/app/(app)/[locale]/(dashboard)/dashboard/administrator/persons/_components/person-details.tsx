@@ -131,7 +131,10 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 				<DescriptionTerm>{t("Biography")}</DescriptionTerm>
 				<DescriptionDetails>
 					{person.biographyContentBlocks.length > 0 ? (
-						<ContentBlocksView key={selectedVersion} contentBlocks={person.biographyContentBlocks} />
+						<ContentBlocksView
+							key={selectedVersion}
+							contentBlocks={person.biographyContentBlocks}
+						/>
 					) : null}
 				</DescriptionDetails>
 			</DescriptionList>

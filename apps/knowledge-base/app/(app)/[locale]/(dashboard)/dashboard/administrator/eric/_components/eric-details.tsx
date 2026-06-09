@@ -132,7 +132,10 @@ export function EricDetails(props: Readonly<EricDetailsProps>): ReactNode {
 				<DescriptionTerm>{t("Description")}</DescriptionTerm>
 				<DescriptionDetails>
 					{eric.descriptionContentBlocks.length > 0 ? (
-						<ContentBlocksView key={selectedVersion} contentBlocks={eric.descriptionContentBlocks} />
+						<ContentBlocksView
+							key={selectedVersion}
+							contentBlocks={eric.descriptionContentBlocks}
+						/>
 					) : null}
 				</DescriptionDetails>
 

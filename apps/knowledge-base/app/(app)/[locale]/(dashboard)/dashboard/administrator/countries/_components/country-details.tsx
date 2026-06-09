@@ -128,7 +128,10 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 				<DescriptionTerm>{t("Description")}</DescriptionTerm>
 				<DescriptionDetails>
 					{country.descriptionContentBlocks.length > 0 ? (
-						<ContentBlocksView key={selectedVersion} contentBlocks={country.descriptionContentBlocks} />
+						<ContentBlocksView
+							key={selectedVersion}
+							contentBlocks={country.descriptionContentBlocks}
+						/>
 					) : null}
 				</DescriptionDetails>
 
