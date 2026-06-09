@@ -62,10 +62,7 @@ async function confirmDeleteDialog(page: Page, name: RegExp): Promise<void> {
 }
 
 async function selectFirstOptionFromSelect(scope: Locator, label: string): Promise<void> {
-	const control = scope
-		.locator('[data-slot="control"]')
-		.filter({ has: scope.getByText(label, { exact: true }) });
-	await control.locator("button").click();
+	await scope.getByRole("button", { name: label }).click();
 	await scope.page().getByRole("option").first().waitFor({ state: "visible" });
 	await scope.page().getByRole("option").first().click();
 }
@@ -78,11 +75,9 @@ async function selectAsyncOption(
 ): Promise<void> {
 	await scope.getByRole("button", { name: triggerName }).click();
 
-	if (searchText != null) {
-		const searchInput = page.locator('input[placeholder="Search"]').last();
-		await searchInput.fill(searchText);
-		await searchInput.press("Enter");
-	}
+	const searchInput = page.getByRole("dialog").last().getByPlaceholder("Search");
+	await searchInput.fill(searchText ?? "");
+	await searchInput.press("Enter");
 
 	await page.getByRole("option").first().waitFor({ state: "visible" });
 	await page.getByRole("option").first().click();
@@ -161,6 +156,9 @@ test.describe("admin relation management", () => {
 		await personsPage.fillName(name);
 		await personsPage.fillSortName(name);
 		await personsPage.submitForm();
+		await personsPage.searchByName(name);
+		await personsPage.gotoDetailsFromList(name);
+		await personsPage.publishItem();
 
 		const person = await db.getPersonByName(name);
 		expect(person).not.toBeNull();
@@ -245,6 +243,9 @@ test.describe("admin relation management", () => {
 			"Description for standalone institution relation create test.",
 		);
 		await institutionsPage.submitForm();
+		await institutionsPage.searchByName(name);
+		await institutionsPage.gotoDetailsFromList(name);
+		await institutionsPage.publishFromDetails();
 
 		const institution = await db.getInstitutionByName(name);
 		expect(institution).not.toBeNull();
@@ -256,7 +257,9 @@ test.describe("admin relation management", () => {
 		const dialog = page.getByRole("dialog", { name: "Add relation" });
 		await selectAsyncOption(page, dialog, "No institution selected", name);
 		await selectFirstOptionFromSelect(dialog, "Relation type");
-		await selectAsyncOption(page, dialog, "No related unit selected");
+		const statusId = await dialog.locator('input[name="statusId"]').inputValue();
+		const relatedUnit = await db.getEligibleRelatedUnit(institution!.documentId, statusId);
+		await selectAsyncOption(page, dialog, "No related unit selected", relatedUnit.name);
 		await fillDatePicker(page, dialog, "Start date", 2025, 1, 1);
 		await saveAddRelationDialog(page);
 

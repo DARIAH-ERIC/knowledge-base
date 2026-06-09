@@ -34,7 +34,7 @@ test.describe("website documents-policies lifecycle", () => {
 		await docPoliciesPage.fillTitle(title);
 		await docPoliciesPage.fillSummary(summary);
 		await docPoliciesPage.fillUrl(url);
-		await docPoliciesPage.selectFirstGroup();
+		await docPoliciesPage.selectGroup(group.label);
 		await docPoliciesPage.selectDocumentFromMediaLibrary("E2E Test Document");
 		await docPoliciesPage.addContentBlock(content);
 		await docPoliciesPage.submitForm();
@@ -85,7 +85,7 @@ test.describe("website documents-policies lifecycle", () => {
 		const updatedContent = `Updated document or policy content ${randomUUID()}`;
 		await docPoliciesPage.fillSummary(updatedSummary);
 		await docPoliciesPage.fillUrl(updatedUrl);
-		await docPoliciesPage.selectFirstGroup();
+		await docPoliciesPage.selectGroup(group.label);
 		await docPoliciesPage.selectDocumentFromMediaLibrary("E2E Test Document");
 		await docPoliciesPage.updateContentBlockText(updatedContent);
 		await docPoliciesPage.submitForm();

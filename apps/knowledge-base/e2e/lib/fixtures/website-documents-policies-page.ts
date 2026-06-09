@@ -52,6 +52,11 @@ export class WebsiteDocumentsPoliciesPage {
 		await this.page.getByRole("option").nth(1).click();
 	}
 
+	async selectGroup(label: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Group" }).click();
+		await this.page.getByRole("option", { name: label, exact: true }).click();
+	}
+
 	async selectNoGroup(): Promise<void> {
 		const groupControl = this.page
 			.locator('[data-slot="control"]')
