@@ -278,7 +278,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 					<TableColumn allowsSorting={true} id="durationEnd">
 						{t("Until")}
 					</TableColumn>
-					<TableColumn className="sticky end-0 z-10 bg-secondary/50 shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]" />
+					<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
@@ -311,7 +311,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 										? t("present")
 										: "—"}
 							</TableCell>
-							<TableCell className="sticky end-0 z-10 bg-bg text-end shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]">
+							<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Action
 										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}

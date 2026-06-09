@@ -102,7 +102,7 @@ export function FundingCallsPage(props: Readonly<FundingCallsPageProps>): ReactN
 						{t("Updated")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
-					<TableColumn />
+					<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
@@ -124,7 +124,7 @@ export function FundingCallsPage(props: Readonly<FundingCallsPageProps>): ReactN
 									isPublished={item.isPublished}
 								/>
 							</TableCell>
-							<TableCell className="text-end">
+							<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Link
 										href={`/dashboard/website/funding-calls/${item.entity.slug}/details`}

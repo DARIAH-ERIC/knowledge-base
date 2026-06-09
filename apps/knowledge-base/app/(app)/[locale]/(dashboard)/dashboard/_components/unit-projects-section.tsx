@@ -24,13 +24,13 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useState, useTransition } from "react";
 
+import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
 	FormSection,
@@ -195,7 +195,7 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 							<TableColumn className="max-inline-80">{t("Project")}</TableColumn>
 							<TableColumn>{t("From")}</TableColumn>
 							<TableColumn>{t("Until")}</TableColumn>
-							<TableColumn className="sticky end-0 z-10 bg-secondary/50 shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]" />
+							<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
 						<TableBody items={items}>
 							{(item) => (
@@ -218,37 +218,27 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 												? t("present")
 												: "—"}
 									</TableCell>
-									<TableCell className="sticky end-0 z-10 bg-bg text-end shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]">
-										<div className="flex justify-end gap-1">
-											<Tooltip>
-												<Button
-													aria-label={t("Edit project")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														openEditDialog(item);
-													}}
-													size="sq-sm"
-												>
-													<PencilSquareIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Edit project")}</TooltipContent>
-											</Tooltip>
-											<Tooltip>
-												<Button
-													aria-label={t("Delete project")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														setItemToDelete(item);
-													}}
-													size="sq-sm"
-												>
-													<TrashIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Delete project")}</TooltipContent>
-											</Tooltip>
-										</div>
+									<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+										<RowActionsMenu>
+											<RowActionsMenu.Action
+												icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													openEditDialog(item);
+												}}
+											>
+												{t("Edit project")}
+											</RowActionsMenu.Action>
+											<RowActionsMenu.Separator />
+											<RowActionsMenu.Action
+												danger={true}
+												icon={<TrashIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													setItemToDelete(item);
+												}}
+											>
+												{t("Delete project")}
+											</RowActionsMenu.Action>
+										</RowActionsMenu>
 									</TableCell>
 								</TableRow>
 							)}

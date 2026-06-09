@@ -90,7 +90,7 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn>{t("Country reports")}</TableColumn>
 					<TableColumn>{t("Working group reports")}</TableColumn>
-					<TableColumn />
+					<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
@@ -99,7 +99,7 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 							<TableCell>{item.status}</TableCell>
 							<TableCell>{item.countryReportCount}</TableCell>
 							<TableCell>{item.workingGroupReportCount}</TableCell>
-							<TableCell className="text-end">
+							<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Link
 										href={`/dashboard/administrator/reporting-campaigns/${item.id}/edit`}
