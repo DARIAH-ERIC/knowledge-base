@@ -4,7 +4,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth/session";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { type SQL, and, count, eq, ilike, inArray } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { type SQL, and, count, eq, inArray } from "@/lib/db/sql";
 import { enforceApiGetRateLimit } from "@/lib/server/api-rate-limit";
 
 const defaultLimit = 20;
@@ -25,7 +26,7 @@ function isContentBlockEntryType(value: string | null): value is ContentBlockEnt
 }
 
 function createWhere(
-	title: Parameters<typeof ilike>[0],
+	title: Parameters<typeof unaccentIlike>[0],
 	id: Parameters<typeof inArray>[0],
 	q: string | undefined,
 	ids: Array<string> | undefined,
@@ -33,7 +34,7 @@ function createWhere(
 	const query = q?.trim();
 	const entryWhere =
 		query != null && query !== ""
-			? ilike(title, `%${query}%`)
+			? unaccentIlike(title, `%${query}%`)
 			: ids != null
 				? inArray(id, ids)
 				: undefined;
