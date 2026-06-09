@@ -120,7 +120,7 @@ export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactN
 						name="description"
 					>
 						<Label>{t("Description")}</Label>
-						<TextArea rows={3} />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>
