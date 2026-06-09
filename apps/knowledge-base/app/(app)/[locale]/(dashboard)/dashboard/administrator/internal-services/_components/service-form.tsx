@@ -119,7 +119,7 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 
 					<TextField defaultValue={service?.comment ?? undefined} name="comment">
 						<Label>{t("Comment")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>

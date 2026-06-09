@@ -81,7 +81,7 @@ export function NewsItemForm(props: Readonly<NewsItemFormProps>): ReactNode {
 
 					<TextField defaultValue={newsItem?.summary ?? undefined} isRequired={true} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>

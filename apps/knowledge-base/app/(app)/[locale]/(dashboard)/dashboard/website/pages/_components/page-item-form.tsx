@@ -84,7 +84,7 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 
 					<TextField defaultValue={pageItem?.summary ?? undefined} isRequired={true} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>
