@@ -194,10 +194,16 @@ test.describe("working groups admin", () => {
 		await workingGroupsPage.fillEndRelationDate(2025, 12, 31);
 		await workingGroupsPage.confirmEndRelation();
 
-		// Verify "End relation" button is gone and "present" is replaced by a date.
+		// Verify "End relation" action is gone and "present" is replaced by a date.
+		await workingGroupsPage
+			.relationsTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
 		await expect(
-			workingGroupsPage.relationsTable().getByRole("button", { name: "End relation" }),
+			workingGroupsPage.page.getByRole("menuitem", { name: "End relation" }),
 		).toBeHidden();
+		await workingGroupsPage.page.keyboard.press("Escape");
 		await expect(workingGroupsPage.relationsTable().getByText("present")).toBeHidden();
 
 		// Verify end date persisted.
