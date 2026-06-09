@@ -241,7 +241,9 @@ test.describe("admin relation management", () => {
 
 		await institutionsPage.gotoCreate();
 		await institutionsPage.fillName(name);
-		await institutionsPage.fillDescription("Description for standalone institution relation create test.");
+		await institutionsPage.fillDescription(
+			"Description for standalone institution relation create test.",
+		);
 		await institutionsPage.submitForm();
 
 		const institution = await db.getInstitutionByName(name);
