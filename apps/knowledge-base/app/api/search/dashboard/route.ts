@@ -4,7 +4,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getUserAllCountryReports, getUserAllWorkingGroupReports } from "@/lib/data/reporting";
 import { db } from "@/lib/db";
-import { alias, and, desc, eq, ilike, or, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { alias, and, desc, eq, or, sql } from "@/lib/db/sql";
 import { enforceApiGetRateLimit } from "@/lib/server/api-rate-limit";
 
 interface DashboardSearchResult {
@@ -25,6 +26,10 @@ const organisationalUnitTypeHrefs: Record<string, string> = {
 
 function formatOrganisationalUnitType(type: string): string {
 	return type.replaceAll("_", " ");
+}
+
+function normalizeSearchValue(value: string): string {
+	return value.normalize("NFD").replaceAll(/\p{M}/gu, "").toLocaleLowerCase();
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -111,13 +116,13 @@ async function searchReports(
 		getUserAllCountryReports(user),
 		getUserAllWorkingGroupReports(user),
 	]);
-	const normalizedQuery = query.toLocaleLowerCase();
+	const normalizedQuery = normalizeSearchValue(query);
 
 	return [
 		...countryReports.flatMap((report) => {
 			const label = `${report.countryName} ${report.campaignYear}`;
 
-			if (!label.toLocaleLowerCase().includes(normalizedQuery)) {
+			if (!normalizeSearchValue(label).includes(normalizedQuery)) {
 				return [];
 			}
 
@@ -132,7 +137,7 @@ async function searchReports(
 		...workingGroupReports.flatMap((report) => {
 			const label = `${report.workingGroupName} ${report.campaignYear}`;
 
-			if (!label.toLocaleLowerCase().includes(normalizedQuery)) {
+			if (!normalizeSearchValue(label).includes(normalizedQuery)) {
 				return [];
 			}
 
@@ -175,7 +180,7 @@ async function searchCountryReportsForAdmin(
 		.innerJoin(schema.organisationalUnits, sql`${schema.organisationalUnits.id} = ${pickedVersion}`)
 		.where(
 			or(
-				ilike(schema.organisationalUnits.name, `%${query}%`),
+				unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
 				sql<boolean>`${schema.reportingCampaigns.year}::text ilike ${`%${query}%`}`,
 			),
 		)
@@ -221,7 +226,7 @@ async function searchWorkingGroupReportsForAdmin(
 		.innerJoin(schema.organisationalUnits, sql`${schema.organisationalUnits.id} = ${pickedVersion}`)
 		.where(
 			or(
-				ilike(schema.organisationalUnits.name, `%${query}%`),
+				unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
 				sql<boolean>`${schema.reportingCampaigns.year}::text ilike ${`%${query}%`}`,
 			),
 		)
@@ -254,7 +259,7 @@ async function searchPersons(query: string, limit: number): Promise<Array<Dashbo
 		.from(personEntities)
 		.innerJoin(personLifecycle, eq(personLifecycle.documentId, personEntities.id))
 		.innerJoin(schema.persons, sql`${schema.persons.id} = ${pickedVersion}`)
-		.where(ilike(schema.persons.name, `%${query}%`))
+		.where(unaccentIlike(schema.persons.name, `%${query}%`))
 		.orderBy(schema.persons.sortName)
 		.limit(limit);
 
@@ -283,7 +288,7 @@ async function searchPages(query: string, limit: number): Promise<Array<Dashboar
 		.from(pageEntities)
 		.innerJoin(pageLifecycle, eq(pageLifecycle.documentId, pageEntities.id))
 		.innerJoin(schema.pages, sql`${schema.pages.id} = ${pickedVersion}`)
-		.where(ilike(schema.pages.title, `%${query}%`))
+		.where(unaccentIlike(schema.pages.title, `%${query}%`))
 		.orderBy(schema.pages.title)
 		.limit(limit);
 
@@ -318,7 +323,7 @@ async function searchSpotlightArticles(
 		.from(spotlightEntities)
 		.innerJoin(spotlightLifecycle, eq(spotlightLifecycle.documentId, spotlightEntities.id))
 		.innerJoin(schema.spotlightArticles, sql`${schema.spotlightArticles.id} = ${pickedVersion}`)
-		.where(ilike(schema.spotlightArticles.title, `%${query}%`))
+		.where(unaccentIlike(schema.spotlightArticles.title, `%${query}%`))
 		.orderBy(schema.spotlightArticles.title)
 		.limit(limit);
 
@@ -350,7 +355,7 @@ async function searchImpactCaseStudies(
 		.from(impactEntities)
 		.innerJoin(impactLifecycle, eq(impactLifecycle.documentId, impactEntities.id))
 		.innerJoin(schema.impactCaseStudies, sql`${schema.impactCaseStudies.id} = ${pickedVersion}`)
-		.where(ilike(schema.impactCaseStudies.title, `%${query}%`))
+		.where(unaccentIlike(schema.impactCaseStudies.title, `%${query}%`))
 		.orderBy(schema.impactCaseStudies.title)
 		.limit(limit);
 
@@ -379,7 +384,7 @@ async function searchNews(query: string, limit: number): Promise<Array<Dashboard
 		.from(newsEntities)
 		.innerJoin(newsLifecycle, eq(newsLifecycle.documentId, newsEntities.id))
 		.innerJoin(schema.news, sql`${schema.news.id} = ${pickedVersion}`)
-		.where(ilike(schema.news.title, `%${query}%`))
+		.where(unaccentIlike(schema.news.title, `%${query}%`))
 		.orderBy(schema.news.title)
 		.limit(limit);
 
@@ -408,7 +413,7 @@ async function searchEvents(query: string, limit: number): Promise<Array<Dashboa
 		.from(eventEntities)
 		.innerJoin(eventLifecycle, eq(eventLifecycle.documentId, eventEntities.id))
 		.innerJoin(schema.events, sql`${schema.events.id} = ${pickedVersion}`)
-		.where(ilike(schema.events.title, `%${query}%`))
+		.where(unaccentIlike(schema.events.title, `%${query}%`))
 		.orderBy(schema.events.title)
 		.limit(limit);
 
@@ -443,7 +448,7 @@ async function searchOpportunities(
 		.from(opportunityEntities)
 		.innerJoin(opportunityLifecycle, eq(opportunityLifecycle.documentId, opportunityEntities.id))
 		.innerJoin(schema.opportunities, sql`${schema.opportunities.id} = ${pickedVersion}`)
-		.where(ilike(schema.opportunities.title, `%${query}%`))
+		.where(unaccentIlike(schema.opportunities.title, `%${query}%`))
 		.orderBy(schema.opportunities.title)
 		.limit(limit);
 
@@ -478,7 +483,7 @@ async function searchFundingCalls(
 		.from(fundingCallEntities)
 		.innerJoin(fundingCallLifecycle, eq(fundingCallLifecycle.documentId, fundingCallEntities.id))
 		.innerJoin(schema.fundingCalls, sql`${schema.fundingCalls.id} = ${pickedVersion}`)
-		.where(ilike(schema.fundingCalls.title, `%${query}%`))
+		.where(unaccentIlike(schema.fundingCalls.title, `%${query}%`))
 		.orderBy(schema.fundingCalls.title)
 		.limit(limit);
 
@@ -510,7 +515,7 @@ async function searchDocumentsPolicies(
 		.from(documentEntities)
 		.innerJoin(documentLifecycle, eq(documentLifecycle.documentId, documentEntities.id))
 		.innerJoin(schema.documentsPolicies, sql`${schema.documentsPolicies.id} = ${pickedVersion}`)
-		.where(ilike(schema.documentsPolicies.title, `%${query}%`))
+		.where(unaccentIlike(schema.documentsPolicies.title, `%${query}%`))
 		.orderBy(schema.documentsPolicies.title)
 		.limit(limit);
 
@@ -541,7 +546,10 @@ async function searchProjects(query: string, limit: number): Promise<Array<Dashb
 		.innerJoin(projectLifecycle, eq(projectLifecycle.documentId, projectEntities.id))
 		.innerJoin(schema.projects, sql`${schema.projects.id} = ${pickedVersion}`)
 		.where(
-			or(ilike(schema.projects.name, `%${query}%`), ilike(schema.projects.acronym, `%${query}%`)),
+			or(
+				unaccentIlike(schema.projects.name, `%${query}%`),
+				unaccentIlike(schema.projects.acronym, `%${query}%`),
+			),
 		)
 		.orderBy(schema.projects.name)
 		.limit(limit);
@@ -584,8 +592,8 @@ async function searchOrganisationalUnits(
 			and(
 				sql`${unitLifecycle.draftId} IS NOT NULL OR ${unitLifecycle.publishedId} IS NOT NULL`,
 				or(
-					ilike(schema.organisationalUnits.name, `%${query}%`),
-					ilike(schema.organisationalUnits.acronym, `%${query}%`),
+					unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
+					unaccentIlike(schema.organisationalUnits.acronym, `%${query}%`),
 				),
 			),
 		)
