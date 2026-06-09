@@ -223,10 +223,10 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 						<TableHeader>
 							<TableColumn isRowHeader={true}>{t("Role")}</TableColumn>
 							<TableColumn>{t("Type")}</TableColumn>
-							<TableColumn>{t("Organisation")}</TableColumn>
+							<TableColumn className="max-inline-80">{t("Organisation")}</TableColumn>
 							<TableColumn>{t("From")}</TableColumn>
 							<TableColumn>{t("Until")}</TableColumn>
-							<TableColumn />
+							<TableColumn className="sticky end-0 z-10 bg-secondary/50 shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]" />
 						</TableHeader>
 						<TableBody items={localContributions}>
 							{(contribution) => (
@@ -248,7 +248,14 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 											{formatRoleType(contribution.organisationalUnitType)}
 										</Badge>
 									</TableCell>
-									<TableCell>{contribution.organisationalUnitName}</TableCell>
+									<TableCell>
+										<div
+											className="max-inline-80 truncate"
+											title={contribution.organisationalUnitName}
+										>
+											{contribution.organisationalUnitName}
+										</div>
+									</TableCell>
 									<TableCell>
 										{format.dateTime(contribution.duration.start, { dateStyle: "short" })}
 									</TableCell>
@@ -257,7 +264,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 											? format.dateTime(contribution.duration.end, { dateStyle: "short" })
 											: t("present")}
 									</TableCell>
-									<TableCell className="text-end">
+									<TableCell className="sticky end-0 z-10 bg-bg text-end shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]">
 										<div className="flex justify-end gap-1">
 											<Tooltip>
 												<Button

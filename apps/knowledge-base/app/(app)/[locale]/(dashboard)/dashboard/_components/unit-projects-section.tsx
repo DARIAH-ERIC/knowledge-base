@@ -192,17 +192,17 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 					<Table aria-label="projects" className="[--gutter:0] sm:[--gutter:0]">
 						<TableHeader>
 							<TableColumn isRowHeader={true}>{t("Role")}</TableColumn>
-							<TableColumn>{t("Project")}</TableColumn>
+							<TableColumn className="max-inline-80">{t("Project")}</TableColumn>
 							<TableColumn>{t("From")}</TableColumn>
 							<TableColumn>{t("Until")}</TableColumn>
-							<TableColumn />
+							<TableColumn className="sticky end-0 z-10 bg-secondary/50 shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]" />
 						</TableHeader>
 						<TableBody items={items}>
 							{(item) => (
 								<TableRow id={item.id}>
 									<TableCell>{formatValue(item.roleName)}</TableCell>
 									<TableCell>
-										<div className="max-inline-64 truncate" title={item.projectName}>
+										<div className="max-inline-80 truncate" title={item.projectName}>
 											{item.projectName}
 										</div>
 									</TableCell>
@@ -218,7 +218,7 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 												? t("present")
 												: "—"}
 									</TableCell>
-									<TableCell className="text-end">
+									<TableCell className="sticky end-0 z-10 bg-bg text-end shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]">
 										<div className="flex justify-end gap-1">
 											<Tooltip>
 												<Button

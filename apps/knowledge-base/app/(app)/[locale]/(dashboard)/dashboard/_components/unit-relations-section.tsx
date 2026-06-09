@@ -223,10 +223,10 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 						<TableHeader>
 							<TableColumn isRowHeader={true}>{t("Status")}</TableColumn>
 							<TableColumn>{t("Type")}</TableColumn>
-							<TableColumn>{t("Related unit")}</TableColumn>
+							<TableColumn className="max-inline-80">{t("Related unit")}</TableColumn>
 							<TableColumn>{t("From")}</TableColumn>
 							<TableColumn>{t("Until")}</TableColumn>
-							<TableColumn />
+							<TableColumn className="sticky end-0 z-10 bg-secondary/50 shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]" />
 						</TableHeader>
 						<TableBody items={localRelations}>
 							{(relation) => (
@@ -244,7 +244,11 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									<TableCell>
 										<Badge intent="slate">{formatUnitType(relation.relatedUnitType)}</Badge>
 									</TableCell>
-									<TableCell>{relation.relatedUnitName}</TableCell>
+									<TableCell>
+										<div className="max-inline-80 truncate" title={relation.relatedUnitName}>
+											{relation.relatedUnitName}
+										</div>
+									</TableCell>
 									<TableCell>
 										{format.dateTime(relation.duration.start, { dateStyle: "short" })}
 									</TableCell>
@@ -253,7 +257,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 											? format.dateTime(relation.duration.end, { dateStyle: "short" })
 											: t("present")}
 									</TableCell>
-									<TableCell className="text-end">
+									<TableCell className="sticky end-0 z-10 bg-bg text-end shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]">
 										<div className="flex justify-end gap-1">
 											<Tooltip>
 												<Button

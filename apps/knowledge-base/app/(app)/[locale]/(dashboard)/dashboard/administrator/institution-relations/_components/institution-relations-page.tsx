@@ -273,7 +273,12 @@ export function InstitutionRelationsPage(
 				sortDescriptor={search.sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn allowsSorting={true} id="institutionName" isRowHeader={true}>
+					<TableColumn
+						allowsSorting={true}
+						className="max-inline-80"
+						id="institutionName"
+						isRowHeader={true}
+					>
 						{t("Institution")}
 					</TableColumn>
 					<TableColumn allowsSorting={true} id="statusType">
@@ -282,7 +287,7 @@ export function InstitutionRelationsPage(
 					<TableColumn allowsSorting={true} id="relatedUnitType">
 						{t("Type")}
 					</TableColumn>
-					<TableColumn allowsSorting={true} id="relatedUnitName">
+					<TableColumn allowsSorting={true} className="max-inline-80" id="relatedUnitName">
 						{t("Name")}
 					</TableColumn>
 					<TableColumn allowsSorting={true} id="durationStart">
@@ -291,26 +296,34 @@ export function InstitutionRelationsPage(
 					<TableColumn allowsSorting={true} id="durationEnd">
 						{t("Until")}
 					</TableColumn>
-					<TableColumn />
+					<TableColumn className="sticky end-0 z-10 bg-secondary/50 shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
 						<TableRow id={item.id}>
-							<TableCell>{item.institutionName}</TableCell>
+							<TableCell>
+								<div className="max-inline-80 truncate" title={item.institutionName}>
+									{item.institutionName}
+								</div>
+							</TableCell>
 							<TableCell>{formatValue(item.statusType)}</TableCell>
 							<TableCell>
 								<Badge intent={organisationalUnitTypeIntent(item.relatedUnitType)}>
 									{formatValue(item.relatedUnitType)}
 								</Badge>
 							</TableCell>
-							<TableCell>{item.relatedUnitName}</TableCell>
+							<TableCell>
+								<div className="max-inline-80 truncate" title={item.relatedUnitName}>
+									{item.relatedUnitName}
+								</div>
+							</TableCell>
 							<TableCell>{format.dateTime(item.durationStart, { dateStyle: "short" })}</TableCell>
 							<TableCell>
 								{item.durationEnd != null
 									? format.dateTime(item.durationEnd, { dateStyle: "short" })
 									: t("present")}
 							</TableCell>
-							<TableCell className="text-end">
+							<TableCell className="sticky end-0 z-10 bg-bg text-end shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]">
 								<RowActionsMenu>
 									<RowActionsMenu.Action
 										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}

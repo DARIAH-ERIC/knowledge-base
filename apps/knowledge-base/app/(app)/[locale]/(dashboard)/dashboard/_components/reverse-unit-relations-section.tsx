@@ -220,16 +220,22 @@ export function ReverseUnitRelationsSection(
 				{localRelations.length > 0 ? (
 					<Table aria-label={messages.title} className="[--gutter:0] sm:[--gutter:0]">
 						<TableHeader>
-							<TableColumn isRowHeader={true}>{messages.memberLabel}</TableColumn>
+							<TableColumn className="max-inline-80" isRowHeader={true}>
+								{messages.memberLabel}
+							</TableColumn>
 							{hasStatusChoice ? <TableColumn>{t("Type")}</TableColumn> : null}
 							<TableColumn>{t("From")}</TableColumn>
 							<TableColumn>{t("Until")}</TableColumn>
-							<TableColumn />
+							<TableColumn className="sticky end-0 z-10 bg-secondary/50 shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]" />
 						</TableHeader>
 						<TableBody items={localRelations}>
 							{(relation) => (
 								<TableRow id={relation.id}>
-									<TableCell>{relation.unitName}</TableCell>
+									<TableCell>
+										<div className="max-inline-80 truncate" title={relation.unitName}>
+											{relation.unitName}
+										</div>
+									</TableCell>
 									{hasStatusChoice ? (
 										<TableCell>
 											<Badge intent="slate">{formatStatus(relation.statusType)}</Badge>
@@ -243,7 +249,7 @@ export function ReverseUnitRelationsSection(
 											? format.dateTime(relation.duration.end, { dateStyle: "short" })
 											: t("present")}
 									</TableCell>
-									<TableCell className="text-end">
+									<TableCell className="sticky end-0 z-10 bg-bg text-end shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]">
 										<div className="flex justify-end gap-1">
 											<Tooltip>
 												<Button

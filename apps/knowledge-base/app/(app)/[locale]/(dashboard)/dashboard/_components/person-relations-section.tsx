@@ -216,17 +216,23 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 				{localRelations.length > 0 ? (
 					<Table aria-label="people" className="[--gutter:0] sm:[--gutter:0]">
 						<TableHeader>
-							<TableColumn isRowHeader={true}>{t("Person")}</TableColumn>
+							<TableColumn className="max-inline-80" isRowHeader={true}>
+								{t("Person")}
+							</TableColumn>
 							<TableColumn>{t("Type")}</TableColumn>
 							<TableColumn>{t("Role")}</TableColumn>
 							<TableColumn>{t("From")}</TableColumn>
 							<TableColumn>{t("Until")}</TableColumn>
-							<TableColumn />
+							<TableColumn className="sticky end-0 z-10 bg-secondary/50 shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]" />
 						</TableHeader>
 						<TableBody items={localRelations}>
 							{(relation) => (
 								<TableRow id={relation.id}>
-									<TableCell>{relation.personName}</TableCell>
+									<TableCell>
+										<div className="max-inline-80 truncate" title={relation.personName}>
+											{relation.personName}
+										</div>
+									</TableCell>
 									<TableCell>
 										<Badge intent="slate">{formatUnitType(relation.targetUnitType)}</Badge>
 									</TableCell>
@@ -248,7 +254,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 											? format.dateTime(relation.duration.end, { dateStyle: "short" })
 											: t("present")}
 									</TableCell>
-									<TableCell className="text-end">
+									<TableCell className="sticky end-0 z-10 bg-bg text-end shadow-[-8px_0_12px_-12px_rgb(0_0_0/0.45)]">
 										<div className="flex justify-end gap-1">
 											<Tooltip>
 												<Button
