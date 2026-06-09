@@ -5,10 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { UpdateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/update-project.schema";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
-import {
-	replaceEntityVersionFieldContentBlocks,
-	upsertRichTextEntityVersionField,
-} from "@/lib/data/entity-version-fields";
+import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
 import { eq, inArray } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
@@ -51,17 +48,12 @@ export const updateProjectAction = createMutationAction({
 			})
 			.where(eq(schema.projects.id, draftVersionId));
 
-		if (input.descriptionContentBlocks.length > 0) {
-			await replaceEntityVersionFieldContentBlocks(
-				tx,
-				draftVersionId,
-				"description",
-				input.descriptionContentBlocks,
-			);
-		} else if (input.description != null) {
-			const parsedContent = JSON.parse(input.description) as schema.RichTextContentBlock["content"];
-			await upsertRichTextEntityVersionField(tx, draftVersionId, "description", parsedContent);
-		}
+		await replaceEntityVersionFieldContentBlocks(
+			tx,
+			draftVersionId,
+			"description",
+			input.descriptionContentBlocks,
+		);
 
 		const existingSocialMedia = await tx.query.projectsToSocialMedia.findMany({
 			where: { projectId: draftVersionId },

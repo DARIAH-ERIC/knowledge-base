@@ -50,6 +50,35 @@ test.describe("persons admin", () => {
 		expect(JSON.stringify(await db.getPersonBiographyByName(name))).toContain(biography);
 	});
 
+	test("should store images inserted in person rich-text biographies as image content blocks", async ({
+		createAdminPersonsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const personsPage = createAdminPersonsPage(workerIndex);
+		const testAsset = await db.getTestAsset();
+
+		const name = `${personsPage.workerPrefix} Rich Text Image ${randomUUID()}`;
+		const biographyBeforeImage = "E2E person biography before image.";
+		const biographyAfterImage = "E2E person biography after image.";
+
+		await personsPage.gotoCreate();
+		await personsPage.fillName(name);
+		await personsPage.fillSortName("Image, Rich Text");
+		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await personsPage.fillBiography(biographyBeforeImage);
+		await personsPage.insertImageInBiography("E2E Test Asset");
+		await personsPage.fillBiography(biographyAfterImage);
+
+		await personsPage.submitForm();
+
+		const blocks = await db.getPersonBiographyContentBlocksByName(name);
+		expect(blocks.map((block) => block.type)).toEqual(["rich_text", "image", "rich_text"]);
+		expect(JSON.stringify(blocks[0]?.content)).toContain(biographyBeforeImage);
+		expect(blocks[1]?.imageId).toBe(testAsset.id);
+		expect(JSON.stringify(blocks[2]?.content)).toContain(biographyAfterImage);
+	});
+
 	test("should edit all person form fields", async ({ page, createAdminPersonsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const personsPage = createAdminPersonsPage(workerIndex);

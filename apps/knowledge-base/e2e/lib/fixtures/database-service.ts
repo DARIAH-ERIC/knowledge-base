@@ -666,6 +666,18 @@ export class DatabaseService {
 		return row?.content ?? null;
 	}
 
+	async getPersonBiographyContentBlocksByName(
+		name: string,
+	): Promise<Array<{ type: string; position: number; content: unknown; imageId: string | null }>> {
+		const person = await this.getPersonByName(name);
+
+		if (person == null) {
+			return [];
+		}
+
+		return this.getEntityVersionFieldContentBlocks(person.id, "biography");
+	}
+
 	async getSocialMediaByName(name: string): Promise<{
 		duration: { start?: Date; end?: Date } | null;
 		id: string;
@@ -811,6 +823,56 @@ export class DatabaseService {
 			.limit(1);
 
 		return row?.content ?? null;
+	}
+
+	async getProjectDescriptionContentBlocksByName(
+		name: string,
+	): Promise<Array<{ type: string; position: number; content: unknown; imageId: string | null }>> {
+		const project = await this.getProjectByName(name);
+
+		if (project == null) {
+			return [];
+		}
+
+		return this.getEntityVersionFieldContentBlocks(project.id, "description");
+	}
+
+	private async getEntityVersionFieldContentBlocks(
+		entityVersionId: string,
+		fieldName: string,
+	): Promise<Array<{ type: string; position: number; content: unknown; imageId: string | null }>> {
+		return this.db
+			.select({
+				content: sql<unknown>`${schema.richTextContentBlocks.content}`,
+				imageId: schema.imageContentBlocks.imageId,
+				position: schema.contentBlocks.position,
+				type: schema.contentBlockTypes.type,
+			})
+			.from(schema.contentBlocks)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.innerJoin(
+				schema.contentBlockTypes,
+				eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+			)
+			.leftJoin(
+				schema.richTextContentBlocks,
+				eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(
+				schema.imageContentBlocks,
+				eq(schema.imageContentBlocks.id, schema.contentBlocks.id),
+			)
+			.where(
+				and(
+					eq(schema.fields.entityVersionId, entityVersionId),
+					eq(schema.entityTypesFieldsNames.fieldName, fieldName),
+				),
+			)
+			.orderBy(schema.contentBlocks.position);
 	}
 
 	async getServiceByName(name: string): Promise<{

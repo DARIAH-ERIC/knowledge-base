@@ -49,43 +49,12 @@ export const createPersonAction = createMutationAction({
 			sortName: input.sortName,
 		});
 
-		if (input.biographyContentBlocks.length > 0) {
-			await replaceEntityVersionFieldContentBlocks(
-				tx,
-				versionId,
-				"biography",
-				input.biographyContentBlocks,
-			);
-		} else {
-			const biographyFieldName = await tx.query.entityTypesFieldsNames.findFirst({
-				where: { entityTypeId: type.id, fieldName: "biography" },
-				columns: { id: true },
-			});
-			assert(biographyFieldName);
-
-			const [biographyField] = await tx
-				.insert(schema.fields)
-				.values({ entityVersionId: versionId, fieldNameId: biographyFieldName.id })
-				.returning({ id: schema.fields.id });
-			assert(biographyField);
-
-			const richTextType = await tx.query.contentBlockTypes.findFirst({
-				where: { type: "rich_text" },
-				columns: { id: true },
-			});
-			assert(richTextType);
-
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({ fieldId: biographyField.id, typeId: richTextType.id, position: 0 })
-				.returning({ id: schema.contentBlocks.id });
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				id: contentBlock.id,
-				content: JSON.parse(input.biography) as schema.RichTextContentBlock["content"],
-			});
-		}
+		await replaceEntityVersionFieldContentBlocks(
+			tx,
+			versionId,
+			"biography",
+			input.biographyContentBlocks,
+		);
 
 		if (shouldSaveAndPublish(formData)) {
 			await publishVersion(tx, documentId, personsLifecycleAdapter);

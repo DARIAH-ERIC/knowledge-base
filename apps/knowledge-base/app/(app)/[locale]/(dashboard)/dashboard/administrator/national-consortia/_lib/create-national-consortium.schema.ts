@@ -11,7 +11,6 @@ export const CreateNationalConsortiumActionInputSchema = v.object({
 		null,
 	),
 	imageKey: v.optional(v.pipe(v.string(), v.nonEmpty())),
-	description: v.pipe(v.string(), v.nonEmpty()),
 	descriptionContentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
 		[],

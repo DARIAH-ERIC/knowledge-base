@@ -9,10 +9,10 @@ import { Input } from "@dariah-eric/ui/input";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import {
@@ -27,7 +27,7 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface GovernanceBodyFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	governanceBody?: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
-		description?: JSONContent;
+		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	formId?: string;
@@ -147,7 +147,7 @@ export function GovernanceBodyForm(props: Readonly<GovernanceBodyFormProps>): Re
 				>
 					<RichTextContentBlocksField
 						aria-label={t("Description")}
-						content={governanceBody?.description}
+						initialBlocks={governanceBody?.descriptionContentBlocks}
 						initialAssets={initialAssets}
 						name="description"
 					/>

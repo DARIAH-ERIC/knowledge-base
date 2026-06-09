@@ -13,7 +13,6 @@ export const UpdateWorkingGroupActionInputSchema = v.object({
 		null,
 	),
 	imageKey: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
-	description: v.pipe(v.string(), v.nonEmpty()),
 	descriptionContentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
 		[],

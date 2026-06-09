@@ -9,7 +9,6 @@ export const UpdatePersonActionInputSchema = v.object({
 	email: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	orcid: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	imageKey: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
-	biography: v.pipe(v.string(), v.nonEmpty()),
 	biographyContentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
 		[],

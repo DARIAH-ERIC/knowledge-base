@@ -13,9 +13,10 @@ import {
 	splitDocumentToBlocks,
 } from "@/lib/content-blocks-document";
 
+type MergeableContentBlock = Extract<ContentBlock, { type: "rich_text" | "image" | "embed" }>;
+
 interface RichTextContentBlocksFieldProps {
 	"aria-label": string;
-	content?: JSONContent;
 	initialAssets: Array<MediaLibraryAsset>;
 	initialBlocks?: Array<MergeableBlock>;
 	name: string;
@@ -23,15 +24,15 @@ interface RichTextContentBlocksFieldProps {
 
 export function RichTextContentBlocksField({
 	"aria-label": ariaLabel,
-	content,
 	initialAssets,
 	initialBlocks,
 	name,
 }: Readonly<RichTextContentBlocksFieldProps>): ReactNode {
-	const initialContent =
-		initialBlocks != null && initialBlocks.length > 0
-			? mergeBlocksToDocument(initialBlocks)
-			: content;
+	const mergeableBlocks =
+		initialBlocks?.filter((block): block is MergeableContentBlock => {
+			return block.type === "rich_text" || block.type === "image" || block.type === "embed";
+		}) ?? [];
+	const initialContent = mergeBlocksToDocument(mergeableBlocks);
 	const [editorContent, setEditorContent] = useState<JSONContent>(
 		initialContent ?? { type: "doc", content: [] },
 	);
@@ -42,7 +43,6 @@ export function RichTextContentBlocksField({
 			<RichTextEditor
 				aria-label={ariaLabel}
 				content={initialContent}
-				name={name}
 				onChange={setEditorContent}
 				renderImagePicker={(insert) => (
 					<MediaLibraryDialog

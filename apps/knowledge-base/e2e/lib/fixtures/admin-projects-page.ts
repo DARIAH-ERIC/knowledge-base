@@ -110,6 +110,16 @@ export class AdminProjectsPage {
 		await this.page.keyboard.type(text);
 	}
 
+	async insertImageInDescription(assetLabel: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Insert image" }).click();
+		await this.page.waitForSelector('[role="dialog"]');
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		const asset = dialog.getByRole("gridcell", { name: assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+	}
+
 	async selectFirstOptionInControl(label: string): Promise<void> {
 		const control = this.page
 			.locator('[data-slot="control"]')

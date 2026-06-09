@@ -8,10 +8,7 @@ import { publishCountryAction } from "@/app/(app)/[locale]/(dashboard)/dashboard
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
-import {
-	getRichTextFieldContent,
-	resolveSelectedDetailVersion,
-} from "@/lib/data/entity-detail-view";
+import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { getPersonRelations } from "@/lib/data/person-relations";
 import { getEricInstitutionsForCountry, getReverseUnitRelations } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
@@ -67,10 +64,9 @@ export default async function DashboardAdministratorCountryDetailsPage(
 	}
 	const { hasDraftChanges, publishedId, selectedVersion, versionId } = versionState;
 
-	const [personRelations, description, countryData, ericInstitutions, nationalConsortia] =
+	const [personRelations, countryData, ericInstitutions, nationalConsortia] =
 		await Promise.all([
 			getPersonRelations(documentId),
-			getRichTextFieldContent(versionId, "description"),
 			getOrganisationalUnitEditDataForAdmin(user, {
 				slug,
 				unitType: "country",
@@ -106,7 +102,7 @@ export default async function DashboardAdministratorCountryDetailsPage(
 
 	return (
 		<CountryDetails
-			country={{ ...country, description, image }}
+			country={{ ...country, image }}
 			documentId={documentId}
 			ericInstitutions={ericInstitutions}
 			hasDraft={hasDraftChanges}

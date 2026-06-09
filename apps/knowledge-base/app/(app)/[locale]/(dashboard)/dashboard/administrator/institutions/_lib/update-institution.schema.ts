@@ -18,7 +18,6 @@ export const UpdateInstitutionActionInputSchema = v.object({
 	),
 	documentId: v.pipe(v.string(), v.uuid()),
 	imageKey: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
-	description: v.pipe(v.string(), v.nonEmpty()),
 	descriptionContentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
 		[],

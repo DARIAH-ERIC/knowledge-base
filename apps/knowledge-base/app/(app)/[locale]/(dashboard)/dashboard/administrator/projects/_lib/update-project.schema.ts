@@ -15,7 +15,6 @@ export const UpdateProjectActionInputSchema = v.object({
 	funding: v.nullish(v.pipe(v.string(), v.toNumber(), v.minValue(0)), null),
 	topic: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	imageKey: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
-	description: v.optional(v.pipe(v.string(), v.nonEmpty())),
 	descriptionContentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
 		[],

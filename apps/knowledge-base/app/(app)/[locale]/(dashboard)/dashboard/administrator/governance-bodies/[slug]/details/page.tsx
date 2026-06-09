@@ -7,10 +7,8 @@ import { GovernanceBodyDetails } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { publishGovernanceBodyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/publish-governance-body.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import {
-	getRichTextFieldContent,
-	resolveSelectedDetailVersion,
-} from "@/lib/data/entity-detail-view";
+import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { getPersonRelations } from "@/lib/data/person-relations";
 import {
 	getEntityRelationOptionsByIds,
@@ -110,7 +108,7 @@ export default async function DashboardAdministratorGovernanceBodyDetailsPage(
 		{ relatedEntityIds, relatedResourceIds },
 		relations,
 		socialMediaRows,
-		description,
+		descriptionContentBlocks,
 	] = await Promise.all([
 		getPersonRelations(documentId),
 		getEntityRelations(documentId),
@@ -119,7 +117,7 @@ export default async function DashboardAdministratorGovernanceBodyDetailsPage(
 			where: { organisationalUnitId: governanceBody.id },
 			columns: { socialMediaId: true },
 		}),
-		getRichTextFieldContent(versionId, "description"),
+		getEntityContentBlocks(versionId, "description"),
 	]);
 
 	const socialMediaIds = socialMediaRows.map((row) => row.socialMediaId);
@@ -145,7 +143,7 @@ export default async function DashboardAdministratorGovernanceBodyDetailsPage(
 	return (
 		<GovernanceBodyDetails
 			documentId={documentId}
-			governanceBody={{ ...governanceBody, description, image }}
+			governanceBody={{ ...governanceBody, descriptionContentBlocks, image }}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
 			personRelations={personRelations}

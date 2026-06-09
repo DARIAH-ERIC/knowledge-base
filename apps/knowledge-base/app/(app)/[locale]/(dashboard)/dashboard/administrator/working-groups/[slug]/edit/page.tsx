@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { WorkingGroupEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { getContributionPersonOptions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
@@ -22,7 +23,7 @@ import {
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
+import { eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -129,36 +130,20 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 		relations,
 		personRelations,
 		personRelationRoleOptions,
-		descriptionRows,
+		descriptionContentBlocks,
 		socialMediaRows,
 	] = await Promise.all([
 		getEntityRelations(documentId),
 		getUnitRelations(documentId),
 		getPersonRelations(documentId),
 		getPersonRelationRoleOptions("working_group"),
-		db
-			.select({ content: schema.richTextContentBlocks.content })
-			.from(schema.richTextContentBlocks)
-			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
-			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-			.innerJoin(
-				schema.entityTypesFieldsNames,
-				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-			)
-			.where(
-				and(
-					eq(schema.fields.entityVersionId, workingGroup.id),
-					eq(schema.entityTypesFieldsNames.fieldName, "description"),
-				),
-			)
-			.limit(1),
+		getEntityContentBlocks(workingGroup.id, "description"),
 		db.query.organisationalUnitsToSocialMedia.findMany({
 			where: { organisationalUnitId: workingGroup.id },
 			columns: { socialMediaId: true },
 		}),
 	]);
 
-	const description = descriptionRows.at(0)?.content;
 	const socialMediaIds = socialMediaRows.map((row) => row.socialMediaId);
 
 	const unitRelationStatusOptions = await getUnitRelationStatusOptions("working_group");
@@ -205,7 +190,7 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 			selectedRelatedResources={selectedRelatedResources}
 			selectedSocialMediaItems={selectedSocialMediaItems}
 			unitRelationStatusOptions={unitRelationStatusOptions}
-			workingGroup={{ ...workingGroup, description, image }}
+			workingGroup={{ ...workingGroup, descriptionContentBlocks, image }}
 		/>
 	);
 }

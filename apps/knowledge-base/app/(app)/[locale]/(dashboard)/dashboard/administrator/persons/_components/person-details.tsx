@@ -6,10 +6,11 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
@@ -23,7 +24,7 @@ interface PersonDetailsProps {
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
 	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
-		biography: JSONContent | null;
+		biographyContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	contributions: Array<PersonContribution>;
@@ -124,6 +125,13 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 								</li>
 							))}
 						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Biography")}</DescriptionTerm>
+				<DescriptionDetails>
+					{person.biographyContentBlocks.length > 0 ? (
+						<ContentBlocksView key={selectedVersion} contentBlocks={person.biographyContentBlocks} />
 					) : null}
 				</DescriptionDetails>
 			</DescriptionList>

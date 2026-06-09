@@ -30,6 +30,7 @@ import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState, useTransition } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import {
 	FormLayout,
@@ -72,7 +73,7 @@ interface ProjectFormProps {
 		schema.Project,
 		"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
 	> & {
-		description?: JSONContent;
+		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: {
 			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
@@ -298,7 +299,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				>
 					<RichTextContentBlocksField
 						aria-label={t("Description")}
-						content={project?.description}
+						initialBlocks={project?.descriptionContentBlocks}
 						initialAssets={initialAssets}
 						name="description"
 					/>

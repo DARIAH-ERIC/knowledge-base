@@ -8,10 +8,7 @@ import { publishWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dash
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
-import {
-	getRichTextFieldContent,
-	resolveSelectedDetailVersion,
-} from "@/lib/data/entity-detail-view";
+import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { getPersonRelations } from "@/lib/data/person-relations";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
@@ -65,9 +62,8 @@ export default async function DashboardAdministratorWorkingGroupDetailsPage(
 	}
 	const { hasDraftChanges, publishedId, selectedVersion, versionId } = versionState;
 
-	const [personRelations, description, workingGroupData] = await Promise.all([
+	const [personRelations, workingGroupData] = await Promise.all([
 		getPersonRelations(documentId),
-		getRichTextFieldContent(versionId, "description"),
 		getOrganisationalUnitEditDataForAdmin(user, {
 			slug,
 			unitType: "working_group",
@@ -109,7 +105,7 @@ export default async function DashboardAdministratorWorkingGroupDetailsPage(
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
 			selectedSocialMediaItems={selectedSocialMediaItems}
-			workingGroup={{ ...workingGroup, description, image }}
+			workingGroup={{ ...workingGroup, image }}
 			publishAction={publishWorkingGroupAction}
 			selectedVersion={selectedVersion}
 		/>
