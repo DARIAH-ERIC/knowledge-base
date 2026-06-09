@@ -7,6 +7,10 @@ FROM node:24-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME/bin:$PNPM_HOME:$PATH"
 ENV CI=true
+# pnpm 11 may run dependency verification before package scripts, which can fail in
+# turbo-pruned Docker workspaces.
+# @see {@link https://github.com/pnpm/pnpm/issues/11865}
+ENV pnpm_config_verify_deps_before_run=false
 RUN corepack enable
 RUN pnpm add --global turbo
 
@@ -56,8 +60,7 @@ FROM base AS migrate
 USER node
 WORKDIR /app
 COPY --chown=node:node --from=migrate-build /out/ .
-# Prevent pnpm 11 from reinstalling dependencies in the immutable deploy output.
-CMD [ "pnpm", "--config.verify-deps-before-run=false", "run", "db:migrations:apply" ]
+CMD [ "pnpm", "run", "db:migrations:apply" ]
 
 # =================================================================================================
 # api
