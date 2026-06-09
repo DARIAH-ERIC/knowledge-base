@@ -414,6 +414,7 @@ export function InstitutionRelationsPage(
 							initialTotal={0}
 							isDisabled={dialog.institution == null || dialog.statusId == null}
 							label={t("Related unit")}
+							loadOnMount={dialog.institution != null && dialog.statusId != null}
 							onSelect={(item) => {
 								setDialog((prev) => {
 									return { ...prev, relatedUnit: item };

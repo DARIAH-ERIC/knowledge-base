@@ -451,6 +451,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 							initialTotal={0}
 							isDisabled={dialog.roleTypeId == null}
 							label={t("Organisation")}
+							loadOnMount={dialog.roleTypeId != null}
 							onSelect={(item) => {
 								setDialog((prev) => {
 									return { ...prev, organisationalUnit: item };
