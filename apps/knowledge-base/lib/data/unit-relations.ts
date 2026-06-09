@@ -4,7 +4,8 @@ import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import type { OrganisationalUnitType } from "@/lib/data/organisational-units";
 import { db } from "@/lib/db";
-import { alias, and, count, eq, ilike, inArray, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { alias, and, count, eq, inArray, sql } from "@/lib/db/sql";
 
 /**
  * `unitDocumentId` is the owner unit's `entities.id`. Unit↔unit relations are document-level, so
@@ -158,7 +159,7 @@ export async function getUnitRelationRelatedUnitOptions(
 		publishedEntityVersionWhere(),
 		inArray(schema.organisationalUnits.typeId, relatedUnitTypeIds),
 		query != null && query !== ""
-			? ilike(schema.organisationalUnits.name, `%${query}%`)
+			? unaccentIlike(schema.organisationalUnits.name, `%${query}%`)
 			: undefined,
 	);
 

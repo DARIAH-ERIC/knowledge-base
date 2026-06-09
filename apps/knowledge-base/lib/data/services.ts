@@ -9,7 +9,8 @@ import {
 	getOrganisationalUnitOptionsByIds,
 } from "@/lib/data/organisational-units";
 import { db } from "@/lib/db";
-import { alias, and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { alias, and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 
 export type ServicesSort = "name" | "type" | "status" | "sshocMarketplaceId";
 type ServiceTypes = (typeof schema.serviceTypesEnum)[number];
@@ -50,7 +51,7 @@ export async function getServices(params: Readonly<GetServicesParams>): Promise<
 	const serviceTypes: Array<ServiceTypes> =
 		type === "internal" ? InternalServiceTypes : SSHOCServiceTypes;
 	const where = and(
-		query != null && query !== "" ? ilike(schema.services.name, `%${query}%`) : undefined,
+		query != null && query !== "" ? unaccentIlike(schema.services.name, `%${query}%`) : undefined,
 		inArray(schema.serviceTypes.type, serviceTypes),
 	);
 	const orderBy =

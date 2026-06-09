@@ -5,7 +5,8 @@ import { forbidden } from "next/navigation";
 import { contributionOptionsPageSize } from "@/lib/constants/contributions";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { alias, and, count, desc, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { alias, and, count, desc, eq, inArray, or, sql } from "@/lib/db/sql";
 
 export type ContributionsSort =
 	| "personName"
@@ -68,11 +69,11 @@ export async function getContributions(
 	const searchWhere =
 		query != null && query !== ""
 			? or(
-					ilike(schema.persons.name, `%${query}%`),
-					ilike(schema.persons.sortName, `%${query}%`),
-					ilike(schema.organisationalUnits.name, `%${query}%`),
-					ilike(schema.organisationalUnitTypes.type, `%${query}%`),
-					ilike(schema.personRoleTypes.type, `%${query}%`),
+					unaccentIlike(schema.persons.name, `%${query}%`),
+					unaccentIlike(schema.persons.sortName, `%${query}%`),
+					unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
+					unaccentIlike(schema.organisationalUnitTypes.type, `%${query}%`),
+					unaccentIlike(schema.personRoleTypes.type, `%${query}%`),
 				)
 			: undefined;
 	const where = searchWhere;
@@ -327,7 +328,10 @@ export async function getContributionPersonOptions(params: GetContributionOption
 	const query = q?.trim();
 	const searchWhere =
 		query != null && query !== ""
-			? or(ilike(schema.persons.name, `%${query}%`), ilike(schema.persons.sortName, `%${query}%`))
+			? or(
+					unaccentIlike(schema.persons.name, `%${query}%`),
+					unaccentIlike(schema.persons.sortName, `%${query}%`),
+				)
 			: undefined;
 	const lifecycleWhere = publishedEntityVersionWhere();
 	const where = and(lifecycleWhere, searchWhere);
@@ -376,7 +380,7 @@ export async function getContributionOrganisationalUnitOptions(
 		publishedEntityVersionWhere(),
 		eq(schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId, roleTypeId),
 		query != null && query !== ""
-			? ilike(schema.organisationalUnits.name, `%${query}%`)
+			? unaccentIlike(schema.organisationalUnits.name, `%${query}%`)
 			: undefined,
 	);
 
@@ -505,7 +509,7 @@ export async function getCountryOptions(params: GetContributionOptionsParams = {
 		publishedEntityVersionWhere(),
 		eq(schema.organisationalUnitTypes.type, "country"),
 		query != null && query !== ""
-			? ilike(schema.organisationalUnits.name, `%${query}%`)
+			? unaccentIlike(schema.organisationalUnits.name, `%${query}%`)
 			: undefined,
 	);
 

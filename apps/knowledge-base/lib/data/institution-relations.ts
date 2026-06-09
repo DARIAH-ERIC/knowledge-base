@@ -3,7 +3,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { alias, and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { alias, and, count, desc, eq, or, sql } from "@/lib/db/sql";
 
 export type InstitutionRelationsSort =
 	| "institutionName"
@@ -77,10 +78,10 @@ export async function getInstitutionRelations(
 			? and(
 					baseWhere,
 					or(
-						ilike(schema.organisationalUnits.name, `%${query}%`),
-						ilike(schema.organisationalUnitStatus.status, `%${query}%`),
-						ilike(relatedOrganisationalUnits.name, `%${query}%`),
-						ilike(relatedOrganisationalUnitTypes.type, `%${query}%`),
+						unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
+						unaccentIlike(schema.organisationalUnitStatus.status, `%${query}%`),
+						unaccentIlike(relatedOrganisationalUnits.name, `%${query}%`),
+						unaccentIlike(relatedOrganisationalUnitTypes.type, `%${query}%`),
 					),
 				)
 			: undefined;
