@@ -96,7 +96,7 @@ export function CountryForm(props: Readonly<CountryFormProps>): ReactNode {
 
 					<TextField defaultValue={country?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>
