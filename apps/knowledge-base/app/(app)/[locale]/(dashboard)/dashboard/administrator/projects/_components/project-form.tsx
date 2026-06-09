@@ -26,7 +26,6 @@ import { TextArea } from "@dariah-eric/ui/textarea";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { CalendarDate } from "@internationalized/date";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState, useTransition } from "react";
 

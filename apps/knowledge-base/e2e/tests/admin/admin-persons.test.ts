@@ -73,7 +73,7 @@ test.describe("persons admin", () => {
 		await personsPage.submitForm();
 
 		const blocks = await db.getPersonBiographyContentBlocksByName(name);
-		expect(blocks.map((block) => block.type)).toEqual(["rich_text", "image", "rich_text"]);
+		expect(blocks.map((block) => block.type)).toStrictEqual(["rich_text", "image", "rich_text"]);
 		expect(JSON.stringify(blocks[0]?.content)).toContain(biographyBeforeImage);
 		expect(blocks[1]?.imageId).toBe(testAsset.id);
 		expect(JSON.stringify(blocks[2]?.content)).toContain(biographyAfterImage);

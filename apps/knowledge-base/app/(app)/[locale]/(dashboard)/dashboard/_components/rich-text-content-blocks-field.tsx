@@ -5,20 +5,17 @@ import type { JSONContent } from "@tiptap/core";
 import { ImageIcon } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
-import {
-	type MergeableBlock,
-	mergeBlocksToDocument,
-	splitDocumentToBlocks,
-} from "@/lib/content-blocks-document";
+import { mergeBlocksToDocument, splitDocumentToBlocks } from "@/lib/content-blocks-document";
 
 type MergeableContentBlock = Extract<ContentBlock, { type: "rich_text" | "image" | "embed" }>;
 
 interface RichTextContentBlocksFieldProps {
 	"aria-label": string;
 	initialAssets: Array<MediaLibraryAsset>;
-	initialBlocks?: Array<MergeableBlock>;
+	initialBlocks?: Array<ContentBlock>;
 	name: string;
 }
 
@@ -29,9 +26,10 @@ export function RichTextContentBlocksField({
 	name,
 }: Readonly<RichTextContentBlocksFieldProps>): ReactNode {
 	const mergeableBlocks =
-		initialBlocks?.filter((block): block is MergeableContentBlock => {
-			return block.type === "rich_text" || block.type === "image" || block.type === "embed";
-		}) ?? [];
+		initialBlocks?.filter(
+			(block): block is MergeableContentBlock =>
+				block.type === "rich_text" || block.type === "image" || block.type === "embed",
+		) ?? [];
 	const initialContent = mergeBlocksToDocument(mergeableBlocks);
 	const [editorContent, setEditorContent] = useState<JSONContent>(
 		initialContent ?? { type: "doc", content: [] },

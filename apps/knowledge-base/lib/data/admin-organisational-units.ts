@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import type { User } from "@dariah-eric/auth";
-import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
@@ -12,7 +11,6 @@ import {
 import { getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
-import { eq } from "@/lib/db/sql";
 
 type ManagedOrganisationalUnitType =
 	| "country"

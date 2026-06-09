@@ -95,7 +95,7 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.submitForm();
 
 		const blocks = await db.getProjectDescriptionContentBlocksByName(projectName);
-		expect(blocks.map((block) => block.type)).toEqual(["rich_text", "image", "rich_text"]);
+		expect(blocks.map((block) => block.type)).toStrictEqual(["rich_text", "image", "rich_text"]);
 		expect(JSON.stringify(blocks[0]?.content)).toContain(descriptionBeforeImage);
 		expect(blocks[1]?.imageId).toBe(testAsset.id);
 		expect(JSON.stringify(blocks[2]?.content)).toContain(descriptionAfterImage);
