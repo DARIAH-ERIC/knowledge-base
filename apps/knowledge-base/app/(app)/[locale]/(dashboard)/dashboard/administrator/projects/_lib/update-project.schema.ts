@@ -1,6 +1,8 @@
 import { ProjectUpdateSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+import { ContentBlockInputSchema } from "@/lib/content-block-input";
+
 export const UpdateProjectActionInputSchema = v.object({
 	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(ProjectUpdateSchema, ["name", "scopeId", "summary"]).entries,
@@ -14,5 +16,9 @@ export const UpdateProjectActionInputSchema = v.object({
 	topic: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	imageKey: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	description: v.optional(v.pipe(v.string(), v.nonEmpty())),
+	descriptionContentBlocks: v.optional(
+		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
+		[],
+	),
 	socialMediaIds: v.optional(v.array(v.pipe(v.string(), v.uuid())), []),
 });

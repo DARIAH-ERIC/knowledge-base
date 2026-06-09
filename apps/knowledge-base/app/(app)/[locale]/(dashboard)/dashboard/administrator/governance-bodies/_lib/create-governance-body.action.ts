@@ -6,6 +6,7 @@ import slugify from "@sindresorhus/slugify";
 
 import { CreateGovernanceBodyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/create-governance-body.schema";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { filterToPublishedDocumentIds } from "@/lib/data/relations";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
@@ -103,6 +104,14 @@ export const createGovernanceBodyAction = createMutationAction({
 			id: contentBlock.id,
 			content: JSON.parse(input.description) as schema.RichTextContentBlock["content"],
 		});
+		if (input.descriptionContentBlocks.length > 0) {
+			await replaceEntityVersionFieldContentBlocks(
+				tx,
+				versionId,
+				"description",
+				input.descriptionContentBlocks,
+			);
+		}
 
 		if (shouldSaveAndPublish(formData)) {
 			await publishVersion(tx, documentId, organisationalUnitsLifecycleAdapter);

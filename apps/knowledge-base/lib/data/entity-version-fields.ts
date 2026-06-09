@@ -1,8 +1,10 @@
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
+import type { ContentBlockInput } from "@/lib/content-block-input";
+import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import type { Transaction } from "@/lib/db";
-import { eq } from "@/lib/db/sql";
+import { eq, inArray } from "@/lib/db/sql";
 
 export async function ensureEntityVersionField(
 	tx: Transaction,
@@ -102,4 +104,42 @@ export async function upsertRichTextEntityVersionField(
 			content,
 		});
 	}
+}
+
+export async function replaceEntityVersionFieldContentBlocks(
+	tx: Transaction,
+	entityVersionId: string,
+	fieldName: string,
+	contentBlocks: Array<ContentBlockInput>,
+): Promise<void> {
+	const field = await ensureEntityVersionField(tx, entityVersionId, fieldName);
+	const contentBlockTypes = await tx.query.contentBlockTypes.findMany({
+		columns: { id: true, type: true },
+	});
+	const contentBlockTypesByType = new Map(contentBlockTypes.map((item) => [item.type, item]));
+
+	const existingBlocks = await tx.query.contentBlocks.findMany({
+		where: { fieldId: field.id },
+		columns: { id: true },
+	});
+	const existingBlockIds = existingBlocks.map((block) => block.id);
+
+	if (existingBlockIds.length > 0) {
+		await tx.delete(schema.contentBlocks).where(inArray(schema.contentBlocks.id, existingBlockIds));
+	}
+
+	await Promise.all(
+		contentBlocks.map(async (contentBlock, index) => {
+			const contentBlockType = contentBlockTypesByType.get(contentBlock.type);
+			assert(contentBlockType);
+
+			const [added] = await tx
+				.insert(schema.contentBlocks)
+				.values({ fieldId: field.id, typeId: contentBlockType.id, position: index })
+				.returning({ id: schema.contentBlocks.id });
+			assert(added);
+
+			await upsertTypedContentBlock(tx, contentBlock, added.id, true);
+		}),
+	);
 }

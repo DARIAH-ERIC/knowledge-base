@@ -5,7 +5,10 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { UpdateWorkingGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/update-working-group.schema";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
-import { upsertRichTextEntityVersionField } from "@/lib/data/entity-version-fields";
+import {
+	replaceEntityVersionFieldContentBlocks,
+	upsertRichTextEntityVersionField,
+} from "@/lib/data/entity-version-fields";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { eq, inArray } from "@/lib/db/sql";
@@ -49,8 +52,17 @@ export const updateWorkingGroupAction = createMutationAction({
 			})
 			.where(eq(schema.organisationalUnits.id, draftVersionId));
 
-		const parsedContent = JSON.parse(input.description) as schema.RichTextContentBlock["content"];
-		await upsertRichTextEntityVersionField(tx, draftVersionId, "description", parsedContent);
+		if (input.descriptionContentBlocks.length > 0) {
+			await replaceEntityVersionFieldContentBlocks(
+				tx,
+				draftVersionId,
+				"description",
+				input.descriptionContentBlocks,
+			);
+		} else {
+			const parsedContent = JSON.parse(input.description) as schema.RichTextContentBlock["content"];
+			await upsertRichTextEntityVersionField(tx, draftVersionId, "description", parsedContent);
+		}
 
 		const existingSocialMedia = await tx.query.organisationalUnitsToSocialMedia.findMany({
 			where: { organisationalUnitId: draftVersionId },

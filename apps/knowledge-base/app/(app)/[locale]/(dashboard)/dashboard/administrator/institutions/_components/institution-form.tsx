@@ -6,7 +6,6 @@ import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { Input } from "@dariah-eric/ui/input";
-import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
@@ -21,6 +20,7 @@ import {
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import { RichTextContentBlocksField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-content-blocks-field";
 import { SocialMediaRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
@@ -168,9 +168,10 @@ export function InstitutionForm(props: Readonly<InstitutionFormProps>): ReactNod
 					title={t("Description")}
 					variant="stacked"
 				>
-					<RichTextEditor
+					<RichTextContentBlocksField
 						aria-label={t("Description")}
 						content={institution?.description}
+						initialAssets={initialAssets}
 						name="description"
 					/>
 				</FormSection>

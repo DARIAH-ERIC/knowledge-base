@@ -6,6 +6,7 @@ import slugify from "@sindresorhus/slugify";
 
 import { CreateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-project.schema";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -53,7 +54,14 @@ export const createProjectAction = createMutationAction({
 			topic: input.topic,
 		});
 
-		if (input.description != null) {
+		if (input.descriptionContentBlocks.length > 0) {
+			await replaceEntityVersionFieldContentBlocks(
+				tx,
+				versionId,
+				"description",
+				input.descriptionContentBlocks,
+			);
+		} else if (input.description != null) {
 			const descriptionFieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: { entityTypeId: type.id, fieldName: "description" },
 				columns: { id: true },

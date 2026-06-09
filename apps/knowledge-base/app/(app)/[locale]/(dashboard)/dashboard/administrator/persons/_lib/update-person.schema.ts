@@ -1,6 +1,8 @@
 import { PersonUpdateSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+import { ContentBlockInputSchema } from "@/lib/content-block-input";
+
 export const UpdatePersonActionInputSchema = v.object({
 	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(PersonUpdateSchema, ["name", "sortName"]).entries,
@@ -8,4 +10,8 @@ export const UpdatePersonActionInputSchema = v.object({
 	orcid: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	imageKey: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	biography: v.pipe(v.string(), v.nonEmpty()),
+	biographyContentBlocks: v.optional(
+		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
+		[],
+	),
 });

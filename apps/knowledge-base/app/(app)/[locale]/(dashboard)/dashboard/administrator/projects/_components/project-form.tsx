@@ -19,7 +19,6 @@ import {
 } from "@dariah-eric/ui/modal";
 import { NumberField } from "@dariah-eric/ui/number-field";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
@@ -37,6 +36,7 @@ import {
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import { RichTextContentBlocksField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-content-blocks-field";
 import {
 	type CreatedSocialMedia,
 	createSocialMediaAction,
@@ -296,9 +296,10 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					title={t("Description")}
 					variant="stacked"
 				>
-					<RichTextEditor
+					<RichTextContentBlocksField
 						aria-label={t("Description")}
 						content={project?.description}
+						initialAssets={initialAssets}
 						name="description"
 					/>
 				</FormSection>
