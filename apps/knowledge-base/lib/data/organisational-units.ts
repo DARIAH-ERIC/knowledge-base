@@ -6,7 +6,7 @@ import { imageAssetWidth } from "@/config/assets.config";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { unaccentIlike } from "@/lib/db/search";
-import { and, count, eq, inArray } from "@/lib/db/sql";
+import { and, count, eq, exists, inArray, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import type { OrganisationalUnitOption } from "@/lib/organisational-unit-options";
 
@@ -30,12 +30,17 @@ interface GetOrganisationalUnitOptionsParams {
 	q?: string;
 	/** Restrict options to a single organisational-unit type (e.g. "institution"). */
 	unitType?: OrganisationalUnitType;
+	/**
+	 * Restrict options to units that hold an `is_located_in` relation to this country document id.
+	 * Used to scope, for example, the institution picker on a country edit form.
+	 */
+	locatedInCountryDocumentId?: string;
 }
 
 export async function getOrganisationalUnitOptions(
 	params: GetOrganisationalUnitOptionsParams = {},
 ): Promise<{ items: Array<OrganisationalUnitOption>; total: number }> {
-	const { limit = 20, offset = 0, q, unitType } = params;
+	const { limit = 20, offset = 0, q, unitType, locatedInCountryDocumentId } = params;
 	const query = q?.trim();
 	const searchWhere =
 		query != null && query !== ""
@@ -43,7 +48,34 @@ export async function getOrganisationalUnitOptions(
 			: undefined;
 	const typeWhere =
 		unitType != null ? eq(schema.organisationalUnitTypes.type, unitType) : undefined;
-	const where = and(publishedEntityVersionWhere(), searchWhere, typeWhere);
+	// Correlated on the outer `entityVersions.entityId` (the unit's document id): keep only units
+	// that are `is_located_in` the given country.
+	const locatedInWhere =
+		locatedInCountryDocumentId != null
+			? exists(
+					db
+						.select({ one: sql`1` })
+						.from(schema.organisationalUnitsRelations)
+						.innerJoin(
+							schema.organisationalUnitStatus,
+							eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+						)
+						.where(
+							and(
+								eq(
+									schema.organisationalUnitsRelations.unitDocumentId,
+									schema.entityVersions.entityId,
+								),
+								eq(schema.organisationalUnitStatus.status, "is_located_in"),
+								eq(
+									schema.organisationalUnitsRelations.relatedUnitDocumentId,
+									locatedInCountryDocumentId,
+								),
+							),
+						),
+				)
+			: undefined;
+	const where = and(publishedEntityVersionWhere(), searchWhere, typeWhere, locatedInWhere);
 
 	const [items, aggregate] = await Promise.all([
 		db

@@ -58,6 +58,11 @@ interface ReverseUnitRelationsSectionProps {
 	statusOptions: Array<UnitRelationStatusOption>;
 	/** Organisational-unit type to pick as the relation's source/owner (e.g. "institution"). */
 	sourceUnitType: OrganisationalUnitType;
+	/**
+	 * Restrict the source-unit picker to units `is_located_in` this country document id. Used to
+	 * scope, for example, a country edit form to its own institutions.
+	 */
+	sourceUnitLocatedInCountryDocumentId?: string;
 	/** Entity-specific copy, kept in the parent so message extraction works. */
 	messages: {
 		title: string;
@@ -71,6 +76,7 @@ interface ReverseUnitRelationsSectionProps {
 async function fetchSourceUnitOptionsPage(
 	unitType: string,
 	params: Readonly<AsyncOptionsFetchPageParams>,
+	locatedInCountryDocumentId?: string,
 ): Promise<{ items: Array<AsyncOption>; total: number }> {
 	const searchParams = new URLSearchParams({
 		limit: String(params.limit),
@@ -80,6 +86,10 @@ async function fetchSourceUnitOptionsPage(
 
 	if (params.q !== "") {
 		searchParams.set("q", params.q);
+	}
+
+	if (locatedInCountryDocumentId != null) {
+		searchParams.set("locatedInCountryDocumentId", locatedInCountryDocumentId);
 	}
 
 	const response = await fetch(`/api/organisational-units/options?${searchParams.toString()}`, {
@@ -102,7 +112,14 @@ function formatStatus(type: string): string {
 export function ReverseUnitRelationsSection(
 	props: Readonly<ReverseUnitRelationsSectionProps>,
 ): ReactNode {
-	const { relatedUnitDocumentId, relations, statusOptions, sourceUnitType, messages } = props;
+	const {
+		relatedUnitDocumentId,
+		relations,
+		statusOptions,
+		sourceUnitType,
+		sourceUnitLocatedInCountryDocumentId,
+		messages,
+	} = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -368,7 +385,13 @@ export function ReverseUnitRelationsSection(
 								<AsyncSelect
 									aria-label={messages.memberLabel}
 									emptyMessage={t("No related units found.")}
-									fetchPage={(params) => fetchSourceUnitOptionsPage(sourceUnitType, params)}
+									fetchPage={(params) =>
+										fetchSourceUnitOptionsPage(
+											sourceUnitType,
+											params,
+											sourceUnitLocatedInCountryDocumentId,
+										)
+									}
 									initialItems={[]}
 									initialTotal={0}
 									label={messages.memberLabel}
@@ -508,7 +531,13 @@ export function ReverseUnitRelationsSection(
 						<AsyncSelect
 							aria-label={messages.memberLabel}
 							emptyMessage={t("No related units found.")}
-							fetchPage={(params) => fetchSourceUnitOptionsPage(sourceUnitType, params)}
+							fetchPage={(params) =>
+								fetchSourceUnitOptionsPage(
+									sourceUnitType,
+									params,
+									sourceUnitLocatedInCountryDocumentId,
+								)
+							}
 							initialItems={[]}
 							initialTotal={0}
 							label={messages.memberLabel}

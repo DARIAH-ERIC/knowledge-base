@@ -14,6 +14,11 @@ import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-u
 import { getPersonRelationRoleOptions, getPersonRelations } from "@/lib/data/person-relations";
 import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
 import { getSocialMediaOptions } from "@/lib/data/social-media";
+import {
+	getDariahEricDocumentId,
+	getEricInstitutionsForCountry,
+	getReverseUnitRelationStatusOptions,
+} from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -76,6 +81,9 @@ export default async function DashboardAdministratorEditCountryPage(
 		{ items: initialPersonItems, total: initialPersonTotal },
 		personRelations,
 		personRelationRoleOptions,
+		ericDocumentId,
+		ericInstitutions,
+		ericInstitutionStatusOptions,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
 		getEntityRelationOptions(),
@@ -90,7 +98,25 @@ export default async function DashboardAdministratorEditCountryPage(
 		getContributionPersonOptions(),
 		getPersonRelations(documentId),
 		getPersonRelationRoleOptions("country"),
+		getDariahEricDocumentId(),
+		getEricInstitutionsForCountry(documentId),
+		getReverseUnitRelationStatusOptions("eric", "institution"),
 	]);
+
+	// The four ERIC representation relations are stored as `institution -> ERIC` edges; surface them
+	// on the country as the reverse-relation section's source units, scoped to this country.
+	const ericInstitutionRelations = ericInstitutions.map((institution) => {
+		return {
+			id: institution.id,
+			statusId: institution.statusId,
+			statusType: institution.statusType,
+			unitDocumentId: institution.institutionId,
+			unitName: institution.institutionName,
+			unitSlug: institution.institutionSlug,
+			unitType: institution.institutionType,
+			duration: institution.duration,
+		};
+	});
 
 	if (countryData == null) {
 		notFound();
@@ -123,6 +149,9 @@ export default async function DashboardAdministratorEditCountryPage(
 		<CountryEditForm
 			country={{ ...country, image }}
 			documentId={documentId}
+			ericDocumentId={ericDocumentId}
+			ericInstitutionRelations={ericInstitutionRelations}
+			ericInstitutionStatusOptions={ericInstitutionStatusOptions}
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
