@@ -6,11 +6,11 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import { RichTextRenderer } from "@dariah-eric/ui/rich-text-editor";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
@@ -28,7 +28,7 @@ interface NationalConsortiumDetailsProps {
 		schema.OrganisationalUnit,
 		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
 	> & {
-		description: JSONContent | null;
+		descriptionContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	selectedRelatedEntities: Array<{
@@ -119,8 +119,11 @@ export function NationalConsortiumDetails(
 
 				<DescriptionTerm>{t("Description")}</DescriptionTerm>
 				<DescriptionDetails>
-					{nationalConsortium.description != null ? (
-						<RichTextRenderer key={selectedVersion} content={nationalConsortium.description} />
+					{nationalConsortium.descriptionContentBlocks.length > 0 ? (
+						<ContentBlocksView
+							key={selectedVersion}
+							contentBlocks={nationalConsortium.descriptionContentBlocks}
+						/>
 					) : null}
 				</DescriptionDetails>
 

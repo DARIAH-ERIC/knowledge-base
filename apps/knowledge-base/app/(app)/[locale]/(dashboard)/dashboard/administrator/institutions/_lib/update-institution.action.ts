@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { UpdateInstitutionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/update-institution.schema";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
-import { upsertRichTextEntityVersionField } from "@/lib/data/entity-version-fields";
+import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { eq, inArray } from "@/lib/db/sql";
@@ -50,8 +50,12 @@ export const updateInstitutionAction = createMutationAction({
 			})
 			.where(eq(schema.organisationalUnits.id, draftVersionId));
 
-		const parsedContent = JSON.parse(input.description) as schema.RichTextContentBlock["content"];
-		await upsertRichTextEntityVersionField(tx, draftVersionId, "description", parsedContent);
+		await replaceEntityVersionFieldContentBlocks(
+			tx,
+			draftVersionId,
+			"description",
+			input.descriptionContentBlocks,
+		);
 
 		const existingSocialMedia = await tx.query.organisationalUnitsToSocialMedia.findMany({
 			where: { organisationalUnitId: draftVersionId },

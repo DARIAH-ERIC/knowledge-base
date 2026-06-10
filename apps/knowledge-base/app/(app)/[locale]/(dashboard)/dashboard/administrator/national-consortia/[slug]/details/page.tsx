@@ -8,10 +8,7 @@ import { publishNationalConsortiumAction } from "@/app/(app)/[locale]/(dashboard
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
-import {
-	getRichTextFieldContent,
-	resolveSelectedDetailVersion,
-} from "@/lib/data/entity-detail-view";
+import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -64,15 +61,12 @@ export default async function DashboardAdministratorNationalConsortiumDetailsPag
 	}
 	const { hasDraftChanges, publishedId, selectedVersion, versionId } = versionState;
 
-	const [description, nationalConsortiumData] = await Promise.all([
-		getRichTextFieldContent(versionId, "description"),
-		getOrganisationalUnitEditDataForAdmin(user, {
-			slug,
-			unitType: "national_consortium",
-			versionId,
-			publishedVersionId: publishedId,
-		}),
-	]);
+	const nationalConsortiumData = await getOrganisationalUnitEditDataForAdmin(user, {
+		slug,
+		unitType: "national_consortium",
+		versionId,
+		publishedVersionId: publishedId,
+	});
 
 	if (nationalConsortiumData == null) {
 		notFound();
@@ -102,7 +96,7 @@ export default async function DashboardAdministratorNationalConsortiumDetailsPag
 			documentId={documentId}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
-			nationalConsortium={{ ...nationalConsortium, description, image }}
+			nationalConsortium={{ ...nationalConsortium, image }}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}

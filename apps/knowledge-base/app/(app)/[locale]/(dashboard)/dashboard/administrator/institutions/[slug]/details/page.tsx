@@ -7,10 +7,8 @@ import { InstitutionDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/a
 import { publishInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/publish-institution.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import {
-	getRichTextFieldContent,
-	resolveSelectedDetailVersion,
-} from "@/lib/data/entity-detail-view";
+import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { getPersonRelations } from "@/lib/data/person-relations";
 import { getUnitProjectPartnerships } from "@/lib/data/project-partners";
 import {
@@ -113,7 +111,7 @@ export default async function DashboardAdministratorInstitutionDetailsPage(
 		relations,
 		projectPartnerships,
 		socialMediaRows,
-		description,
+		descriptionContentBlocks,
 	] = await Promise.all([
 		getPersonRelations(documentId),
 		getEntityRelations(documentId),
@@ -123,7 +121,7 @@ export default async function DashboardAdministratorInstitutionDetailsPage(
 			where: { organisationalUnitId: institution.id },
 			columns: { socialMediaId: true },
 		}),
-		getRichTextFieldContent(versionId, "description"),
+		getEntityContentBlocks(versionId, "description"),
 	]);
 
 	const socialMediaIds = socialMediaRows.map((row) => row.socialMediaId);
@@ -149,7 +147,7 @@ export default async function DashboardAdministratorInstitutionDetailsPage(
 	return (
 		<InstitutionDetails
 			documentId={documentId}
-			institution={{ ...institution, description, image }}
+			institution={{ ...institution, descriptionContentBlocks, image }}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
 			personRelations={personRelations}

@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { UpdatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.schema";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
-import { upsertRichTextEntityVersionField } from "@/lib/data/entity-version-fields";
+import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { eq } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
@@ -43,8 +43,12 @@ export const updatePersonAction = createMutationAction({
 			})
 			.where(eq(schema.persons.id, draftVersionId));
 
-		const parsedContent = JSON.parse(input.biography) as schema.RichTextContentBlock["content"];
-		await upsertRichTextEntityVersionField(tx, draftVersionId, "biography", parsedContent);
+		await replaceEntityVersionFieldContentBlocks(
+			tx,
+			draftVersionId,
+			"biography",
+			input.biographyContentBlocks,
+		);
 		await touchVersion(tx, draftVersionId);
 
 		if (shouldSaveAndPublish(formData)) {

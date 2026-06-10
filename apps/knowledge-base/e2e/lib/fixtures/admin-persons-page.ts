@@ -54,6 +54,24 @@ export class AdminPersonsPage {
 		await this.page.keyboard.type(text);
 	}
 
+	async insertImageInBiography(assetLabel: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Insert image" }).click();
+		await this.page.waitForSelector('[role="dialog"]');
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		const asset = dialog.getByRole("gridcell", { name: assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
+		await expect(this.page.getByLabel("Image block", { exact: true })).toBeVisible();
+	}
+
+	async typeBiographyAfterImage(text: string): Promise<void> {
+		const editor = this.page.getByRole("textbox", { name: "Biography" });
+		await editor.press("ArrowRight");
+		await this.page.keyboard.type(text);
+	}
+
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
 		await this.page.waitForSelector('[role="dialog"]');

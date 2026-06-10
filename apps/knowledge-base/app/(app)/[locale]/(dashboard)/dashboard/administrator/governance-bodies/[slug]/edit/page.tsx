@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -7,6 +6,7 @@ import type { ReactNode } from "react";
 import { GovernanceBodyEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { getContributionPersonOptions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
@@ -22,7 +22,6 @@ import {
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -128,7 +127,7 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 		{ relatedEntityIds, relatedResourceIds },
 		relations,
 		unitRelationStatusOptions,
-		descriptionRows,
+		descriptionContentBlocks,
 		socialMediaRows,
 	] = await Promise.all([
 		getContributionPersonOptions(),
@@ -137,29 +136,13 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 		getEntityRelations(documentId),
 		getUnitRelations(documentId),
 		getUnitRelationStatusOptions("governance_body"),
-		db
-			.select({ content: schema.richTextContentBlocks.content })
-			.from(schema.richTextContentBlocks)
-			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
-			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-			.innerJoin(
-				schema.entityTypesFieldsNames,
-				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-			)
-			.where(
-				and(
-					eq(schema.fields.entityVersionId, governanceBody.id),
-					eq(schema.entityTypesFieldsNames.fieldName, "description"),
-				),
-			)
-			.limit(1),
+		getEntityContentBlocks(governanceBody.id, "description"),
 		db.query.organisationalUnitsToSocialMedia.findMany({
 			where: { organisationalUnitId: governanceBody.id },
 			columns: { socialMediaId: true },
 		}),
 	]);
 
-	const description = descriptionRows.at(0)?.content;
 	const socialMediaIds = socialMediaRows.map((row) => row.socialMediaId);
 
 	const [selectedRelatedEntities, selectedRelatedResources, selectedSocialMediaItems] =
@@ -183,7 +166,7 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 	return (
 		<GovernanceBodyEditForm
 			documentId={documentId}
-			governanceBody={{ ...governanceBody, description, image }}
+			governanceBody={{ ...governanceBody, descriptionContentBlocks, image }}
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			initialPersonItems={initialPersonItems}

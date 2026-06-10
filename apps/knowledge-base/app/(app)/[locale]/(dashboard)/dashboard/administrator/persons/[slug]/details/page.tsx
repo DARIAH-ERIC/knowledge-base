@@ -8,11 +8,9 @@ import { discardPersonDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { publishPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/publish-person.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getPersonContributions } from "@/lib/data/contributions";
-import {
-	getRichTextFieldContent,
-	resolveSelectedDetailVersion,
-} from "@/lib/data/entity-detail-view";
+import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -106,9 +104,9 @@ export default async function DashboardAdministratorPersonDetailsPage(
 		notFound();
 	}
 
-	const [contributions, biography] = await Promise.all([
+	const [contributions, biographyContentBlocks] = await Promise.all([
 		getPersonContributions(documentId),
-		getRichTextFieldContent(versionId, "biography"),
+		getEntityContentBlocks(versionId, "biography"),
 	]);
 
 	const image =
@@ -129,7 +127,7 @@ export default async function DashboardAdministratorPersonDetailsPage(
 			documentId={documentId}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
-			person={{ ...person, biography, image }}
+			person={{ ...person, biographyContentBlocks, image }}
 			publishAction={publishPersonAction}
 			selectedVersion={selectedVersion}
 		/>

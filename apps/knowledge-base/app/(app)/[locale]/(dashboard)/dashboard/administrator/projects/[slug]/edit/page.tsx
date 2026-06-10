@@ -7,12 +7,13 @@ import type { ReactNode } from "react";
 import { ProjectEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
-import { alias, and, eq } from "@/lib/db/sql";
+import { alias, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -116,29 +117,14 @@ export default async function DashboardAdministratorEditProjectPage(
 	}
 
 	const [
-		descriptionRows,
+		descriptionContentBlocks,
 		scopes,
 		roles,
 		initialSocialMedia,
 		existingPartners,
 		existingSocialMedia,
 	] = await Promise.all([
-		db
-			.select({ content: schema.richTextContentBlocks.content })
-			.from(schema.richTextContentBlocks)
-			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
-			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-			.innerJoin(
-				schema.entityTypesFieldsNames,
-				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-			)
-			.where(
-				and(
-					eq(schema.fields.entityVersionId, project.id),
-					eq(schema.entityTypesFieldsNames.fieldName, "description"),
-				),
-			)
-			.limit(1),
+		getEntityContentBlocks(project.id, "description"),
 		db.query.projectScopes.findMany({
 			orderBy: { scope: "asc" },
 			columns: { id: true, scope: true },
@@ -196,8 +182,6 @@ export default async function DashboardAdministratorEditProjectPage(
 
 	const selectedSocialMediaItems = await getSocialMediaOptionsByIds(initialSocialMediaIds);
 
-	const description = descriptionRows.at(0)?.content;
-
 	const image =
 		project.image != null
 			? {
@@ -219,7 +203,7 @@ export default async function DashboardAdministratorEditProjectPage(
 			initialSocialMediaItems={initialSocialMedia.items}
 			initialSocialMediaTotal={initialSocialMedia.total}
 			isPublished={publishedId != null}
-			project={{ ...project, description, image }}
+			project={{ ...project, descriptionContentBlocks, image }}
 			roles={roles}
 			scopes={scopes}
 			selectedSocialMediaItems={selectedSocialMediaItems}
