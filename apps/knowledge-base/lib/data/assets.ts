@@ -8,6 +8,7 @@ import { relationsFilterToSQL } from "@dariah-eric/database/relations";
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
+import { unaccentIlike } from "@/lib/db/search";
 import { eq } from "@/lib/db/sql";
 import { type ImageUrlOptions, images } from "@/lib/images";
 import { type AssetPrefix, assetPrefixes, storage as s3 } from "@/lib/storage";
@@ -69,7 +70,9 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 	const { imageUrlOptions, limit = 20, offset = 0, prefix, q } = params;
 
 	const prefixFilter = prefix != null ? { key: { like: `${prefix}/%` } } : undefined;
-	const searchFilter = isNonEmptyString(q) ? { label: { ilike: `%${q}%` } } : undefined;
+	const searchFilter = isNonEmptyString(q)
+		? { RAW: unaccentIlike(schema.assets.label, `%${q}%`) }
+		: undefined;
 
 	const filter =
 		prefixFilter != null || searchFilter != null ? { ...prefixFilter, ...searchFilter } : undefined;
@@ -174,7 +177,9 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 	const { imageUrlOptions, limit = 24, offset = 0, prefix, q } = params;
 
 	const prefixFilter = prefix != null ? { key: { like: `${prefix}/%` } } : undefined;
-	const searchFilter = isNonEmptyString(q) ? { label: { ilike: `%${q}%` } } : undefined;
+	const searchFilter = isNonEmptyString(q)
+		? { RAW: unaccentIlike(schema.assets.label, `%${q}%`) }
+		: undefined;
 
 	const filter =
 		prefixFilter != null || searchFilter != null ? { ...prefixFilter, ...searchFilter } : undefined;
