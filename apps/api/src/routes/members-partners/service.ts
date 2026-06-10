@@ -9,7 +9,7 @@ import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
 import { mapSocialMedia } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
-import { type SQLWrapper, alias, and, count, eq, exists, sql } from "@/services/db/sql";
+import { type SQLWrapper, alias, and, count, eq, exists, inArray, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 interface GetMembersAndPartnersParams {
@@ -180,16 +180,19 @@ function hasContentBlocks(blocks: Array<ContentBlock> | undefined): blocks is Ar
 	return blocks?.some((block) => hasContent(block)) === true;
 }
 
+type RelationStatus =
+	| "is_member_of"
+	| "is_observer_of"
+	| "is_partner_institution_of"
+	| "is_national_coordinating_institution_in"
+	| "is_located_in"
+	| "is_national_consortium_of"
+	| "is_cooperating_partner_of";
+
 function buildActiveRelationExistsFilter(
 	db: Database | Transaction,
 	idRef: string | SQLWrapper,
-	status:
-		| "is_member_of"
-		| "is_observer_of"
-		| "is_partner_institution_of"
-		| "is_located_in"
-		| "is_national_consortium_of"
-		| "is_cooperating_partner_of",
+	status: RelationStatus | Array<RelationStatus>,
 	relatedType: "eric" | "country",
 ) {
 	const durationContainsNow = sql`
@@ -225,7 +228,9 @@ function buildActiveRelationExistsFilter(
 			.where(
 				and(
 					sql`${schema.organisationalUnitsRelations.unitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${idRef})`,
-					eq(schema.organisationalUnitStatus.status, status),
+					Array.isArray(status)
+						? inArray(schema.organisationalUnitStatus.status, status)
+						: eq(schema.organisationalUnitStatus.status, status),
 					eq(schema.organisationalUnitTypes.type, relatedType),
 					relatedType === "eric" ? eq(relatedEntity.slug, "dariah-eu") : undefined,
 					durationContainsNow,
@@ -237,13 +242,7 @@ function buildActiveRelationExistsFilter(
 function buildActiveRelationToUnitFilter(
 	db: Database | Transaction,
 	idRef: string | SQLWrapper,
-	status:
-		| "is_member_of"
-		| "is_observer_of"
-		| "is_partner_institution_of"
-		| "is_located_in"
-		| "is_national_consortium_of"
-		| "is_cooperating_partner_of",
+	status: RelationStatus,
 	relatedType: "eric" | "country",
 	relatedUnitId: string | SQLWrapper,
 ) {
@@ -306,7 +305,12 @@ async function getMemberObserverInstitutions(
 			},
 			RAW(t) {
 				return and(
-					buildActiveRelationExistsFilter(db, t.id, "is_partner_institution_of", "eric"),
+					buildActiveRelationExistsFilter(
+						db,
+						t.id,
+						["is_partner_institution_of", "is_national_coordinating_institution_in"],
+						"eric",
+					),
 					buildActiveRelationToUnitFilter(db, t.id, "is_located_in", "country", countryId),
 				)!;
 			},
