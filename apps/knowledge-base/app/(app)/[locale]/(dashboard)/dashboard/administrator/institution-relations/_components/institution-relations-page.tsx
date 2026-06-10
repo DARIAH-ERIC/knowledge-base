@@ -392,6 +392,7 @@ export function InstitutionRelationsPage(
 							fetchPage={fetchInstitutionOptionsPage}
 							initialItems={[]}
 							initialTotal={0}
+							isRequired={true}
 							label={t("Institution")}
 							onSelect={(item) => {
 								setDialog((prev) => {
@@ -433,6 +434,7 @@ export function InstitutionRelationsPage(
 							initialItems={[]}
 							initialTotal={0}
 							isDisabled={dialog.institution == null || dialog.statusId == null}
+							isRequired={true}
 							label={t("Related unit")}
 							loadOnMount={dialog.institution != null && dialog.statusId != null}
 							onSelect={(item) => {

@@ -172,6 +172,7 @@ export function ArticleContributorsSection(
 								fetchPage={fetchPersonOptionsPage}
 								initialItems={initialPersonItems}
 								initialTotal={initialPersonTotal}
+								isRequired={true}
 								label={t("Person")}
 								onSelect={(item) => {
 									setSelectedPerson(item);

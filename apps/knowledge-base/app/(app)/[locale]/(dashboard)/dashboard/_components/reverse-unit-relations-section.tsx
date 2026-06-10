@@ -394,6 +394,7 @@ export function ReverseUnitRelationsSection(
 									}
 									initialItems={[]}
 									initialTotal={0}
+									isRequired={true}
 									label={messages.memberLabel}
 									loadOnMount={true}
 									onSelect={(item) => {
@@ -540,6 +541,7 @@ export function ReverseUnitRelationsSection(
 							}
 							initialItems={[]}
 							initialTotal={0}
+							isRequired={true}
 							label={messages.memberLabel}
 							loadOnMount={true}
 							onSelect={(item) => {

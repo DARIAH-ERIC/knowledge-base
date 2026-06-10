@@ -394,6 +394,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									initialItems={[]}
 									initialTotal={0}
 									isDisabled={selectedRoleOption == null}
+									isRequired={true}
 									label={t("Organisation")}
 									loadOnMount={selectedRoleTypeId != null}
 									onSelect={setSelectedUnit}
@@ -552,6 +553,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 							initialItems={[]}
 							initialTotal={0}
 							isDisabled={editRoleOption == null}
+							isRequired={true}
 							label={t("Organisation")}
 							loadOnMount={editRoleTypeId != null}
 							onSelect={setEditUnit}

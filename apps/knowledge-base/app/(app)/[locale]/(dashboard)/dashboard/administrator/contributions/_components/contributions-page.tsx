@@ -420,6 +420,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 							fetchPage={fetchPersonOptionsPage}
 							initialItems={[]}
 							initialTotal={0}
+							isRequired={true}
 							label={t("Person")}
 							onSelect={(item) => {
 								setDialog((prev) => {
@@ -463,6 +464,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 							initialItems={[]}
 							initialTotal={0}
 							isDisabled={dialog.roleTypeId == null}
+							isRequired={true}
 							label={t("Organisation")}
 							loadOnMount={dialog.roleTypeId != null}
 							onSelect={(item) => {

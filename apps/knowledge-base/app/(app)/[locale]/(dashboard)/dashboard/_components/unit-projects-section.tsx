@@ -318,6 +318,7 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 							fetchPage={fetchProjectOptionsPage}
 							initialItems={[]}
 							initialTotal={0}
+							isRequired={true}
 							label={t("Project")}
 							onSelect={(item) => {
 								setDialog((prev) => {

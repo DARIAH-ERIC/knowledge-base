@@ -373,6 +373,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 							fetchPage={fetchProjectOptionsPage}
 							initialItems={[]}
 							initialTotal={0}
+							isRequired={true}
 							label={t("Project")}
 							onSelect={(item) => {
 								setDialog((prev) => {
@@ -389,6 +390,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 							fetchPage={fetchOrganisationalUnitOptionsPage}
 							initialItems={[]}
 							initialTotal={0}
+							isRequired={true}
 							label={t("Partner")}
 							onSelect={(item) => {
 								setDialog((prev) => {
