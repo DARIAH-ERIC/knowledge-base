@@ -24,7 +24,7 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 	};
 
 	const client = {
-		async get(params?: { count?: number; offset?: number }) {
+		async get(params?: { count?: number; offset?: number; status?: string }) {
 			const url = createUrl({
 				baseUrl,
 				pathname: "/3.0/campaigns",
@@ -35,6 +35,7 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 					list_id: listId,
 					sort_dir: "DESC",
 					sort_field: "send_time",
+					status: params?.status,
 				}),
 			});
 

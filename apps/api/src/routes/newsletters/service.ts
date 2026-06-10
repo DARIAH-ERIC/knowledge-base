@@ -27,7 +27,7 @@ interface GetNewslettersParams {
 export async function getNewsletters(params: GetNewslettersParams) {
 	const { limit = 10, offset = 0 } = params;
 
-	const result = (await mailchimp.get({ count: limit, offset })).unwrap().data;
+	const result = (await mailchimp.get({ count: limit, offset, status: "sent" })).unwrap().data;
 
 	const total = result.total_items;
 	const data = result.campaigns.map((campaign) => {
