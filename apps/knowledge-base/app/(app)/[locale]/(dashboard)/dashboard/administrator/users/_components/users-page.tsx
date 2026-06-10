@@ -104,7 +104,7 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 					<TableColumn allowsSorting={true} id="isEmailVerified">
 						{t("Email verified")}
 					</TableColumn>
-					<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
+					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
@@ -114,7 +114,7 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 							<TableCell>{item.role}</TableCell>
 							<TableCell>{item.canManageAdmins ? t("Yes") : t("No")}</TableCell>
 							<TableCell>{item.isEmailVerified ? t("Yes") : t("No")}</TableCell>
-							<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Link
 										href={`/dashboard/administrator/users/${item.id}/edit`}

@@ -303,7 +303,7 @@ export function InstitutionRelationsPage(
 					<TableColumn allowsSorting={true} id="durationEnd">
 						{t("Until")}
 					</TableColumn>
-					<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
+					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
@@ -330,7 +330,7 @@ export function InstitutionRelationsPage(
 									? format.dateTime(item.durationEnd, { dateStyle: "short" })
 									: t("present")}
 							</TableCell>
-							<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Action
 										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
