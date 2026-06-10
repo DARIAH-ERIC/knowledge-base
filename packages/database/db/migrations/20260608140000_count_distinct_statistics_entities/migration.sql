@@ -2,7 +2,8 @@ DROP VIEW statistics;
 
 --> statement-breakpoint
 -- Count documents rather than matching relation rows so overlapping classifications cannot inflate
--- the public statistics.
+-- the public statistics. Pin the related unit to the dariah-eu document so that any future
+-- additional eric units cannot leak into these counts.
 CREATE VIEW statistics AS
 SELECT
   (
@@ -17,6 +18,7 @@ SELECT
     JOIN "entity_status" rs ON rs."id" = rv."status_id" AND rs."type" = 'published'
     JOIN "organisational_units" related ON related."id" = rv."id"
     JOIN "organisational_unit_types" related_t ON related."type_id" = related_t."id" AND related_t."type" = 'eric'
+    JOIN "entities" eric_e ON eric_e."id" = r."related_unit_document_id" AND eric_e."slug" = 'dariah-eu'
   ) AS "member_countries",
   (
     SELECT COUNT(DISTINCT uv."entity_id")::integer
@@ -33,6 +35,7 @@ SELECT
     JOIN "entity_status" rs ON rs."id" = rv."status_id" AND rs."type" = 'published'
     JOIN "organisational_units" umb ON umb."id" = rv."id"
     JOIN "organisational_unit_types" umb_t ON umb."type_id" = umb_t."id" AND umb_t."type" = 'eric'
+    JOIN "entities" eric_e ON eric_e."id" = r."related_unit_document_id" AND eric_e."slug" = 'dariah-eu'
   ) AS "partner_institutions",
   (
     SELECT COUNT(DISTINCT uv."entity_id")::integer
@@ -46,6 +49,7 @@ SELECT
     JOIN "entity_status" rs ON rs."id" = rv."status_id" AND rs."type" = 'published'
     JOIN "organisational_units" umb ON umb."id" = rv."id"
     JOIN "organisational_unit_types" umb_t ON umb."type_id" = umb_t."id" AND umb_t."type" = 'eric'
+    JOIN "entities" eric_e ON eric_e."id" = r."related_unit_document_id" AND eric_e."slug" = 'dariah-eu'
   ) AS "cooperating_partners",
   (
     SELECT COUNT(DISTINCT uv."entity_id")::integer
@@ -59,4 +63,5 @@ SELECT
     JOIN "entity_status" rs ON rs."id" = rv."status_id" AND rs."type" = 'published'
     JOIN "organisational_units" related ON related."id" = rv."id"
     JOIN "organisational_unit_types" related_t ON related."type_id" = related_t."id" AND related_t."type" = 'eric'
+    JOIN "entities" eric_e ON eric_e."id" = r."related_unit_document_id" AND eric_e."slug" = 'dariah-eu'
   ) AS "working_groups";
