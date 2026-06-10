@@ -64,6 +64,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 	const selectedPrefix = search.filters.prefix !== "" ? search.filters.prefix : "all";
 	const totalPages = Math.max(1, Math.ceil(assets.total / pageSize));
 	const [layout, setLayout] = useState<AssetsLayout>("grid");
+	const licensesById = new Map(licenses.map((license) => [license.id, license]));
 
 	return (
 		<Fragment>
@@ -95,6 +96,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 
 						<ToggleGroup
 							aria-label={t("Layout")}
+							className="shrink-0"
 							disallowEmptySelection={true}
 							onSelectionChange={(keys) => {
 								const [selectedLayout] = [...keys] as Array<AssetsLayout>;
@@ -168,10 +170,11 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 				<ul className="flex flex-col gap-y-3 content-start">
 					{assets.items.map((asset) => {
 						const prefix = asset.key.split("/")[0] ?? "";
+						const license = asset.licenseId != null ? licensesById.get(asset.licenseId) : undefined;
 						return (
 							<li key={asset.id}>
-								<figure className="flex flex-row items-center gap-x-4 rounded-lg border border-border p-3">
-									<div className="relative block-40 inline-56 shrink-0 overflow-hidden rounded-lg bg-muted">
+								<figure className="flex flex-row items-start gap-x-3 rounded-lg border border-border p-2.5">
+									<div className="relative block-16 inline-20 shrink-0 overflow-hidden rounded-md bg-muted">
 										<AssetPreview
 											alt={asset.alt ?? asset.label}
 											className="block-full inline-full"
@@ -189,9 +192,30 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 											}}
 										/>
 									</div>
-									<figcaption className="flex min-inline-0 flex-col gap-y-0.5">
-										<span className="truncate text-sm/tight font-medium">{asset.label}</span>
-										<span className="text-xs text-muted-fg">{prefix}</span>
+									<figcaption className="flex min-inline-0 flex-1 flex-col gap-y-1.5">
+										<div className="flex flex-row items-baseline gap-x-2">
+											<span className="truncate text-sm/tight font-medium">{asset.label}</span>
+											<span className="shrink-0 text-xs text-muted-fg">{prefix}</span>
+										</div>
+										{asset.alt != null && asset.alt !== "" ? (
+											<span className="line-clamp-1 text-xs text-muted-fg">
+												<span className="font-medium">{t("Alt text")}:</span> {asset.alt}
+											</span>
+										) : null}
+										{asset.caption != null && asset.caption !== "" ? (
+											<span className="line-clamp-2 text-xs text-muted-fg">
+												<span className="font-medium">{t("Caption")}:</span> {asset.caption}
+											</span>
+										) : null}
+										<div className="flex flex-row flex-wrap items-center gap-x-1.5 text-xs text-muted-fg">
+											{license != null ? (
+												<Fragment>
+													<span>{license.code}</span>
+													<span aria-hidden={true}>{"·"}</span>
+												</Fragment>
+											) : null}
+											<span>{asset.mimeType}</span>
+										</div>
 									</figcaption>
 								</figure>
 							</li>

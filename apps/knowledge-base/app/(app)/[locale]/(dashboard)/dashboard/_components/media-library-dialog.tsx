@@ -14,15 +14,19 @@ import {
 	ModalHeader,
 } from "@dariah-eric/ui/modal";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
 import { TextField } from "@dariah-eric/ui/text-field";
+import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
+import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import cn from "clsx/lite";
 import { useExtracted } from "next-intl";
 import {
 	type ComponentType,
 	Fragment,
 	type ReactNode,
+	useEffect,
 	useRef,
 	useState,
 	useTransition,
@@ -45,6 +49,8 @@ interface MediaLibraryDialogProps<T extends AssetPrefix> {
 }
 
 type ActiveTab = "select" | "upload";
+
+type AssetsLayout = "grid" | "list";
 
 interface LicenseOption {
 	id: string;
@@ -75,7 +81,9 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	const [displayedAssets, setDisplayedAssets] = useState<Array<MediaLibraryAsset>>(initialAssets);
 	const [selectedPrefix, setSelectedPrefix] = useState<T>(defaultPrefix);
 	const [offset, setOffset] = useState<number>(0);
+	const [query, setQuery] = useState("");
 	const [appliedQ, setAppliedQ] = useState("");
+	const [layout, setLayout] = useState<AssetsLayout>("grid");
 	const [isFetching, startFetching] = useTransition();
 
 	// Upload tab state
@@ -85,7 +93,6 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	const [licenseOptions, setLicenseOptions] = useState<Array<LicenseOption>>([]);
 	const [isUploading, startUploading] = useTransition();
 
-	const searchInputRef = useRef<HTMLInputElement>(null);
 	const uploadFormRef = useRef<HTMLFormElement>(null);
 
 	const hasPrev = offset > 0;
@@ -130,12 +137,10 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		setActiveTab("select");
 		setSelectedPrefix(defaultPrefix);
 		setOffset(0);
+		setQuery("");
 		setAppliedQ("");
 		setSelectedKeys(new Set());
 		setSelectedAsset(null);
-		if (searchInputRef.current) {
-			searchInputRef.current.value = "";
-		}
 		startFetching(async () => {
 			const [items, licenses] = await Promise.all([
 				fetchPage(0, "", defaultPrefix),
@@ -156,12 +161,10 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	function handlePrefixChange(newPrefix: T) {
 		setSelectedPrefix(newPrefix);
 		setOffset(0);
+		setQuery("");
 		setAppliedQ("");
 		setSelectedKeys(new Set());
 		setSelectedAsset(null);
-		if (searchInputRef.current) {
-			searchInputRef.current.value = "";
-		}
 		startFetching(async () => {
 			const items = await fetchPage(0, "", newPrefix);
 			setDisplayedAssets(items);
@@ -181,18 +184,32 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		}
 	}
 
-	function handleSearch(event: { preventDefault: () => void }) {
-		event.preventDefault();
-		const q = searchInputRef.current?.value ?? "";
-		setAppliedQ(q);
-		setSelectedKeys(new Set());
-		setSelectedAsset(null);
-		startFetching(async () => {
-			const items = await fetchPage(0, q, selectedPrefix);
-			setDisplayedAssets(items);
-			setOffset(0);
-		});
-	}
+	// Debounced search-as-you-type: fetch the first page whenever the trimmed
+	// query settles to a value different from what is currently applied.
+	useEffect(() => {
+		if (!isOpen) {
+			return;
+		}
+
+		const handle = window.setTimeout(() => {
+			const q = query.trim();
+			if (q === appliedQ) {
+				return;
+			}
+			setAppliedQ(q);
+			setSelectedKeys(new Set());
+			setSelectedAsset(null);
+			startFetching(async () => {
+				const items = await fetchPage(0, q, selectedPrefix);
+				setDisplayedAssets(items);
+				setOffset(0);
+			});
+		}, 300);
+
+		return () => {
+			window.clearTimeout(handle);
+		};
+	}, [query, appliedQ, selectedPrefix, isOpen]);
 
 	function handlePrev() {
 		const newOffset: number = offset - mediaLibraryPageSize;
@@ -300,7 +317,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 							id="select"
 							shouldPreserveState={true}
 						>
-							<div className="flex gap-2">
+							<div className="flex items-center gap-2">
 								{prefixes.map((p) => (
 									<Button
 										key={p}
@@ -313,19 +330,31 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 										{p}
 									</Button>
 								))}
+
+								<ToggleGroup
+									aria-label={t("Layout")}
+									className="ms-auto shrink-0"
+									disallowEmptySelection={true}
+									onSelectionChange={(keys) => {
+										const [selectedLayout] = [...keys] as Array<AssetsLayout>;
+										setLayout(selectedLayout ?? "grid");
+									}}
+									selectedKeys={new Set([layout])}
+									selectionMode="single"
+									size="sq-sm"
+								>
+									<ToggleGroupItem id="grid" aria-label={t("Grid layout")}>
+										<Squares2X2Icon aria-hidden={true} data-slot="icon" />
+									</ToggleGroupItem>
+									<ToggleGroupItem id="list" aria-label={t("List layout")}>
+										<ListBulletIcon aria-hidden={true} data-slot="icon" />
+									</ToggleGroupItem>
+								</ToggleGroup>
 							</div>
 
-							<form className="flex gap-2" id="media-library-search-form" onSubmit={handleSearch}>
-								<input
-									ref={searchInputRef}
-									className="block-9 flex-1 rounded-md border border-input bg-transparent px-3 text-sm outline-none placeholder:text-muted-fg focus:ring-2 focus:ring-ring"
-									placeholder={t("Search...")}
-									type="search"
-								/>
-								<Button intent="outline" type="submit">
-									{t("Search")}
-								</Button>
-							</form>
+							<SearchField aria-label={t("Search")} onChange={setQuery} value={query}>
+								<SearchInput placeholder={t("Search...")} />
+							</SearchField>
 
 							{displayedAssets.length === 0 && !isPending ? (
 								<div className="flex flex-1 items-center justify-center">
@@ -337,40 +366,78 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 								</div>
 							) : (
 								<div className="relative flex-1 overflow-y-auto">
-									<GridList
-										aria-label={t("Media library")}
-										className={cn(
-											"grid grid-cols-[repeat(auto-fill,minmax(min(8rem,100%),1fr))] gap-3",
-											isPending && "opacity-50",
-										)}
-										items={displayedAssets}
-										layout="grid"
-										onSelectionChange={handleSelectionChange}
-										selectedKeys={selectedKeys}
-										selectionBehavior="replace"
-										selectionMode="single"
-									>
-										{(asset) => (
-											<GridListItem
-												className="flex flex-col gap-1 p-1 place-content-center"
-												id={asset.key}
-												textValue={asset.label}
-											>
-												<AssetPreview
-													alt={asset.label}
-													className="block-24 inline-24"
-													imageClassName="rounded-sm object-cover"
-													kindLabelClassName="bg-background/90"
-													mimeType={asset.mimeType}
-													src={asset.url}
-													storageKey={asset.key}
-												/>
-												<span className="inline-24 truncate text-center text-xs text-muted-fg">
-													{asset.label}
-												</span>
-											</GridListItem>
-										)}
-									</GridList>
+									{layout === "grid" ? (
+										<GridList
+											aria-label={t("Media library")}
+											className={cn(
+												"grid grid-cols-[repeat(auto-fill,minmax(min(8rem,100%),1fr))] gap-3",
+												isPending && "opacity-50",
+											)}
+											items={displayedAssets}
+											layout="grid"
+											onSelectionChange={handleSelectionChange}
+											selectedKeys={selectedKeys}
+											selectionBehavior="replace"
+											selectionMode="single"
+										>
+											{(asset) => (
+												<GridListItem
+													className="flex flex-col gap-1 p-1 place-content-center"
+													id={asset.key}
+													textValue={asset.label}
+												>
+													<AssetPreview
+														alt={asset.label}
+														className="block-24 inline-24"
+														imageClassName="rounded-sm object-cover"
+														kindLabelClassName="bg-background/90"
+														mimeType={asset.mimeType}
+														src={asset.url}
+														storageKey={asset.key}
+													/>
+													<span className="inline-24 truncate text-center text-xs text-muted-fg">
+														{asset.label}
+													</span>
+												</GridListItem>
+											)}
+										</GridList>
+									) : (
+										<GridList
+											aria-label={t("Media library")}
+											className={cn("flex flex-col gap-1.5", isPending && "opacity-50")}
+											items={displayedAssets}
+											onSelectionChange={handleSelectionChange}
+											selectedKeys={selectedKeys}
+											selectionBehavior="replace"
+											selectionMode="single"
+										>
+											{(asset) => (
+												<GridListItem
+													className="flex flex-row items-center gap-3 p-1.5"
+													id={asset.key}
+													textValue={asset.label}
+												>
+													<AssetPreview
+														alt={asset.label}
+														className="block-12 inline-16 shrink-0"
+														imageClassName="rounded-sm object-contain"
+														kindLabelClassName="bg-background/90 text-xs"
+														mimeType={asset.mimeType}
+														src={asset.url}
+														storageKey={asset.key}
+													/>
+													<div className="flex min-inline-0 flex-1 flex-col gap-y-0.5">
+														<span className="truncate text-sm/tight font-medium">
+															{asset.label}
+														</span>
+														{asset.mimeType != null ? (
+															<span className="text-xs text-muted-fg">{asset.mimeType}</span>
+														) : null}
+													</div>
+												</GridListItem>
+											)}
+										</GridList>
+									)}
 
 									{isPending ? (
 										<div className="absolute inset-0 flex items-center justify-center">
