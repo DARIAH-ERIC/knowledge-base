@@ -244,10 +244,10 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 		setDialog({
 			isOpen: true,
 			item,
-			person: { id: item.personId, name: item.personName },
+			person: { id: item.personDocumentId, name: item.personName },
 			roleTypeId: item.roleTypeId,
 			organisationalUnit: {
-				id: item.organisationalUnitId,
+				id: item.organisationalUnitDocumentId,
 				name: item.organisationalUnitName,
 				description: formatOrganisationalUnitType(item.organisationalUnitType),
 			},
@@ -429,7 +429,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 							placeholder={t("No person selected")}
 							selectedItem={dialog.person}
 						/>
-						<input name="personId" type="hidden" value={dialog.person?.id ?? ""} />
+						<input name="personDocumentId" type="hidden" value={dialog.person?.id ?? ""} />
 						<Select
 							isRequired={true}
 							onChange={(key) => {
@@ -464,6 +464,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 							initialTotal={0}
 							isDisabled={dialog.roleTypeId == null}
 							label={t("Organisation")}
+							loadOnMount={dialog.roleTypeId != null}
 							onSelect={(item) => {
 								setDialog((prev) => {
 									return { ...prev, organisationalUnit: item };
@@ -473,7 +474,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 							selectedItem={dialog.organisationalUnit}
 						/>
 						<input
-							name="organisationalUnitId"
+							name="organisationalUnitDocumentId"
 							type="hidden"
 							value={dialog.organisationalUnit?.id ?? ""}
 						/>

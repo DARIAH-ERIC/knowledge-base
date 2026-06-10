@@ -9,7 +9,6 @@ import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
-import { getOrganisationalUnitOptionsByIds } from "@/lib/data/organisational-units";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
@@ -154,8 +153,7 @@ export default async function DashboardAdministratorEditProjectPage(
 			return db
 				.select({
 					id: schema.projectsToOrganisationalUnits.id,
-					// the org's published version id, for the (version-id) shared unit picker.
-					unitId: schema.organisationalUnits.id,
+					unitDocumentId: schema.projectsToOrganisationalUnits.unitDocumentId,
 					unitName: schema.organisationalUnits.name,
 					roleId: schema.projectsToOrganisationalUnits.roleId,
 					roleName: schema.projectRoles.role,
@@ -185,7 +183,7 @@ export default async function DashboardAdministratorEditProjectPage(
 	const initialPartners = existingPartners.map((partner) => {
 		return {
 			id: partner.id,
-			unitId: partner.unitId,
+			unitDocumentId: partner.unitDocumentId,
 			unitName: partner.unitName,
 			roleId: partner.roleId,
 			roleName: partner.roleName,
@@ -196,18 +194,9 @@ export default async function DashboardAdministratorEditProjectPage(
 
 	const initialSocialMediaIds = existingSocialMedia.map((row) => row.socialMediaId);
 
-	const [selectedSocialMediaItems, selectedPartnerUnits] = await Promise.all([
-		getSocialMediaOptionsByIds(initialSocialMediaIds),
-		getOrganisationalUnitOptionsByIds(initialPartners.map((partner) => partner.unitId)),
-	]);
+	const selectedSocialMediaItems = await getSocialMediaOptionsByIds(initialSocialMediaIds);
 
 	const description = descriptionRows.at(0)?.content;
-
-	const resolvedPartners = initialPartners.map((partner) => {
-		const matchedUnit = selectedPartnerUnits.find((unit) => unit.id === partner.unitId);
-
-		return { ...partner, unitName: matchedUnit?.name ?? partner.unitName };
-	});
 
 	const image =
 		project.image != null
@@ -225,7 +214,7 @@ export default async function DashboardAdministratorEditProjectPage(
 			documentId={documentId}
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
-			initialPartners={resolvedPartners}
+			initialPartners={initialPartners}
 			initialSocialMediaIds={initialSocialMediaIds}
 			initialSocialMediaItems={initialSocialMedia.items}
 			initialSocialMediaTotal={initialSocialMedia.total}

@@ -31,8 +31,7 @@ export interface ProjectPartnersResult {
 		projectSlug: string;
 		roleId: string;
 		roleType: string;
-		unitId: string;
-		unitVersionId: string;
+		unitDocumentId: string;
 		unitName: string;
 		unitType: string;
 		durationStart: Date | undefined;
@@ -106,8 +105,7 @@ export async function getProjectPartners(
 				projectSlug: projectEntities.slug,
 				roleId: schema.projectsToOrganisationalUnits.roleId,
 				roleType: schema.projectRoles.role,
-				unitId: schema.projectsToOrganisationalUnits.unitDocumentId,
-				unitVersionId: schema.organisationalUnits.id,
+				unitDocumentId: schema.projectsToOrganisationalUnits.unitDocumentId,
 				unitName: schema.organisationalUnits.name,
 				unitType: schema.organisationalUnitTypes.type,
 				duration: schema.projectsToOrganisationalUnits.duration,
@@ -183,8 +181,7 @@ export async function getProjectPartners(
 				projectSlug: row.projectSlug,
 				roleId: row.roleId,
 				roleType: row.roleType,
-				unitId: row.unitId,
-				unitVersionId: row.unitVersionId,
+				unitDocumentId: row.unitDocumentId,
 				unitName: row.unitName,
 				unitType: row.unitType,
 				durationStart: row.duration?.start,

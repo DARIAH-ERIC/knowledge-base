@@ -56,7 +56,6 @@ interface InstitutionEditFormProps {
 	initialPersonTotal: number;
 	relations: Array<UnitRelation>;
 	unitRelationStatusOptions: Array<UnitRelationStatusOption>;
-	unitVersionId: string;
 	projects: Array<UnitProject>;
 	projectRoles: Array<{ id: string; role: string }>;
 }
@@ -86,7 +85,6 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 		initialPersonTotal,
 		relations,
 		unitRelationStatusOptions,
-		unitVersionId,
 		projects,
 		projectRoles,
 	} = props;
@@ -147,7 +145,7 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 						initialPersonTotal={initialPersonTotal}
 						relations={personRelations}
 						roleOptions={personRelationRoleOptions}
-						unitId={documentId}
+						organisationalUnitDocumentId={documentId}
 					/>
 				</TabPanel>
 
@@ -155,7 +153,7 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 					<UnitRelationsSection
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}
-						unitId={documentId}
+						unitDocumentId={documentId}
 					/>
 				</TabPanel>
 
@@ -163,7 +161,7 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 					<UnitProjectsSection
 						projects={projects}
 						roles={projectRoles}
-						unitVersionId={unitVersionId}
+						unitDocumentId={documentId}
 					/>
 				</TabPanel>
 			</EntityEditTabs>

@@ -742,7 +742,7 @@ export class DatabaseService {
 		partners: Array<{
 			duration: { start?: Date; end?: Date } | null;
 			roleId: string;
-			unitId: string;
+			unitDocumentId: string;
 		}>;
 		socialMediaIds: Array<string>;
 	} | null> {
@@ -756,21 +756,9 @@ export class DatabaseService {
 			.select({
 				duration: schema.projectsToOrganisationalUnits.duration,
 				roleId: schema.projectsToOrganisationalUnits.roleId,
-				// resolve the unit document back to its published version id (what the picker submitted).
-				unitId: schema.organisationalUnits.id,
+				unitDocumentId: schema.projectsToOrganisationalUnits.unitDocumentId,
 			})
 			.from(schema.projectsToOrganisationalUnits)
-			.innerJoin(
-				schema.documentLifecycle,
-				eq(
-					schema.documentLifecycle.documentId,
-					schema.projectsToOrganisationalUnits.unitDocumentId,
-				),
-			)
-			.innerJoin(
-				schema.organisationalUnits,
-				eq(schema.organisationalUnits.id, schema.documentLifecycle.publishedId),
-			)
 			.where(
 				sql`${schema.projectsToOrganisationalUnits.projectDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${project.id})`,
 			);
@@ -820,9 +808,9 @@ export class DatabaseService {
 		metadata: unknown;
 		monitoring: boolean | null;
 		name: string;
-		ownerUnitIds: Array<string>;
+		ownerUnitDocumentIds: Array<string>;
 		privateSupplier: boolean | null;
-		providerUnitIds: Array<string>;
+		providerUnitDocumentIds: Array<string>;
 		statusId: string;
 	} | null> {
 		const [row] = await this.db
@@ -844,15 +832,10 @@ export class DatabaseService {
 			return null;
 		}
 
-		// service↔unit relations are document-level; resolve the unit's document id to its published
-		// version id to match the picker / form id space.
 		const unitRoleRows = await this.db
 			.select({
-				organisationalUnitId: sql<string | null>`(
-					SELECT ${schema.documentLifecycle.publishedId}
-					FROM ${schema.documentLifecycle}
-					WHERE ${schema.documentLifecycle.documentId} = ${schema.servicesToOrganisationalUnits.organisationalUnitDocumentId}
-				)`,
+				organisationalUnitDocumentId:
+					schema.servicesToOrganisationalUnits.organisationalUnitDocumentId,
 				role: schema.organisationalUnitServiceRoles.role,
 			})
 			.from(schema.servicesToOrganisationalUnits)
@@ -862,22 +845,22 @@ export class DatabaseService {
 			)
 			.where(eq(schema.servicesToOrganisationalUnits.serviceId, row.id));
 
-		const ownerUnitIds = unitRoleRows
+		const ownerUnitDocumentIds = unitRoleRows
 			.filter((unitRole) => unitRole.role === "service_owner")
-			.map((unitRole) => unitRole.organisationalUnitId)
-			.filter((unitId): unitId is string => unitId != null);
-		const providerUnitIds = unitRoleRows
+			.map((unitRole) => unitRole.organisationalUnitDocumentId);
+		const providerUnitDocumentIds = unitRoleRows
 			.filter((unitRole) => unitRole.role === "service_provider")
-			.map((unitRole) => unitRole.organisationalUnitId)
-			.filter((unitId): unitId is string => unitId != null);
+			.map((unitRole) => unitRole.organisationalUnitDocumentId);
 
-		return { ...row, ownerUnitIds, providerUnitIds };
+		return { ...row, ownerUnitDocumentIds, providerUnitDocumentIds };
 	}
 
-	async getOrganisationalUnitOptions(limit = 4): Promise<Array<{ id: string; name: string }>> {
+	async getOrganisationalUnitOptions(
+		limit = 4,
+	): Promise<Array<{ documentId: string; name: string }>> {
 		return this.db
 			.select({
-				id: schema.organisationalUnits.id,
+				documentId: schema.entityVersions.entityId,
 				name: schema.organisationalUnits.name,
 			})
 			.from(schema.organisationalUnits)

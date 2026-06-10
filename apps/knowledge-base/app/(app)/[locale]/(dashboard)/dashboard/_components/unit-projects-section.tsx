@@ -51,8 +51,7 @@ export interface UnitProject {
 }
 
 interface UnitProjectsSectionProps {
-	/** The unit's version id; the upsert action resolves it to the owning document. */
-	unitVersionId: string;
+	unitDocumentId: string;
 	projects: Array<UnitProject>;
 	roles: Array<{ id: string; role: string }>;
 }
@@ -103,7 +102,7 @@ function formatValue(value: string): string {
 }
 
 export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): ReactNode {
-	const { unitVersionId, projects, roles } = props;
+	const { unitDocumentId, projects, roles } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -277,7 +276,7 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 				<Form action={formAction} state={formState}>
 					<ModalBody className="flex flex-col gap-y-4">
 						{dialog.item != null ? <input name="id" type="hidden" value={dialog.item.id} /> : null}
-						<input name="unitId" type="hidden" value={unitVersionId} />
+						<input name="unitDocumentId" type="hidden" value={unitDocumentId} />
 						<AsyncSelect
 							aria-label={t("Project")}
 							emptyMessage={t("No projects found.")}
@@ -293,7 +292,7 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 							placeholder={t("No project selected")}
 							selectedItem={dialog.project}
 						/>
-						<input name="projectId" type="hidden" value={dialog.project?.id ?? ""} />
+						<input name="projectDocumentId" type="hidden" value={dialog.project?.id ?? ""} />
 						<Select
 							isRequired={true}
 							onChange={(key) => {

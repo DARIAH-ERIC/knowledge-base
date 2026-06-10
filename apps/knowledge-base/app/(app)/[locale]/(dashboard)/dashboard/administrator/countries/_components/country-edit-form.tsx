@@ -134,7 +134,7 @@ export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNod
 						initialPersonTotal={initialPersonTotal}
 						relations={personRelations}
 						roleOptions={personRelationRoleOptions}
-						unitId={documentId}
+						organisationalUnitDocumentId={documentId}
 					/>
 				</TabPanel>
 
@@ -142,7 +142,7 @@ export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNod
 					<UnitRelationsSection
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}
-						unitId={documentId}
+						unitDocumentId={documentId}
 					/>
 				</TabPanel>
 			</EntityEditTabs>

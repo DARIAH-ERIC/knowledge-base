@@ -47,6 +47,10 @@ import type { InstitutionRelationsResult } from "@/lib/data/institution-relation
 import type { UnitRelationStatusOption } from "@/lib/data/unit-relations";
 import { dateToCalendarDate } from "@/lib/date";
 import { useRouter } from "@/lib/navigation/navigation";
+import {
+	type OrganisationalUnitOption,
+	toOrganisationalUnitDocumentOptionsPage,
+} from "@/lib/organisational-unit-options";
 
 interface InstitutionRelationsPageProps {
 	institutionRelations: InstitutionRelationsResult;
@@ -128,6 +132,7 @@ async function fetchInstitutionOptionsPage(
 	const searchParams = new URLSearchParams({
 		limit: String(params.limit),
 		offset: String(params.offset),
+		unitType: "institution",
 	});
 
 	if (params.q !== "") {
@@ -142,15 +147,17 @@ async function fetchInstitutionOptionsPage(
 		throw new Error("Failed to load institutions.");
 	}
 
-	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+	return toOrganisationalUnitDocumentOptionsPage(
+		(await response.json()) as { items: Array<OrganisationalUnitOption>; total: number },
+	);
 }
 
 async function fetchRelatedUnitOptionsPage(
-	unitId: string | null,
+	unitDocumentId: string | null,
 	statusId: string | null,
 	params: Readonly<AsyncOptionsFetchPageParams>,
 ): Promise<{ items: Array<AsyncOption>; total: number }> {
-	if (unitId == null || statusId == null) {
+	if (unitDocumentId == null || statusId == null) {
 		return { items: [], total: 0 };
 	}
 
@@ -158,7 +165,7 @@ async function fetchRelatedUnitOptionsPage(
 		limit: String(params.limit),
 		offset: String(params.offset),
 		statusId,
-		unitId,
+		unitDocumentId,
 	});
 
 	if (params.q !== "") {
@@ -218,10 +225,10 @@ export function InstitutionRelationsPage(
 		setDialog({
 			isOpen: true,
 			item,
-			institution: { id: item.institutionId, name: item.institutionName },
+			institution: { id: item.institutionDocumentId, name: item.institutionName },
 			statusId: item.statusId,
 			relatedUnit: {
-				id: item.relatedUnitId,
+				id: item.relatedUnitDocumentId,
 				name: item.relatedUnitName,
 				description: formatValue(item.relatedUnitType),
 			},
@@ -394,7 +401,7 @@ export function InstitutionRelationsPage(
 							placeholder={t("No institution selected")}
 							selectedItem={dialog.institution}
 						/>
-						<input name="unitId" type="hidden" value={dialog.institution?.id ?? ""} />
+						<input name="unitDocumentId" type="hidden" value={dialog.institution?.id ?? ""} />
 						<Select
 							isRequired={true}
 							onChange={(key) => {
@@ -427,6 +434,7 @@ export function InstitutionRelationsPage(
 							initialTotal={0}
 							isDisabled={dialog.institution == null || dialog.statusId == null}
 							label={t("Related unit")}
+							loadOnMount={dialog.institution != null && dialog.statusId != null}
 							onSelect={(item) => {
 								setDialog((prev) => {
 									return { ...prev, relatedUnit: item };
@@ -435,7 +443,11 @@ export function InstitutionRelationsPage(
 							placeholder={t("No related unit selected")}
 							selectedItem={dialog.relatedUnit}
 						/>
-						<input name="relatedUnitId" type="hidden" value={dialog.relatedUnit?.id ?? ""} />
+						<input
+							name="relatedUnitDocumentId"
+							type="hidden"
+							value={dialog.relatedUnit?.id ?? ""}
+						/>
 						<DatePicker
 							granularity="day"
 							isRequired={true}

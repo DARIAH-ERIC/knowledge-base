@@ -33,7 +33,7 @@ export const updateUnitRelationAction = createServerAction(
 			});
 		}
 
-		const { id, unitId, statusId, relatedUnitId, duration } = result.output;
+		const { id, unitDocumentId, statusId, relatedUnitDocumentId, duration } = result.output;
 
 		const existing = await db
 			.select({ id: schema.organisationalUnitsRelations.id })
@@ -41,8 +41,8 @@ export const updateUnitRelationAction = createServerAction(
 			.where(
 				and(
 					ne(schema.organisationalUnitsRelations.id, id),
-					eq(schema.organisationalUnitsRelations.unitDocumentId, unitId),
-					eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, relatedUnitId),
+					eq(schema.organisationalUnitsRelations.unitDocumentId, unitDocumentId),
+					eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, relatedUnitDocumentId),
 					eq(schema.organisationalUnitsRelations.status, statusId),
 				),
 			)
@@ -57,8 +57,8 @@ export const updateUnitRelationAction = createServerAction(
 			await tx
 				.update(schema.organisationalUnitsRelations)
 				.set({
-					unitDocumentId: unitId,
-					relatedUnitDocumentId: relatedUnitId,
+					unitDocumentId,
+					relatedUnitDocumentId,
 					status: statusId,
 					duration,
 				})

@@ -50,23 +50,17 @@ test.describe("website documents-policies admin", () => {
 
 		await docPoliciesPage.moveGroup(secondLabel, "up");
 		await expect
-			.poll(async () => docPoliciesPage.groupLabels(), { timeout: 15_000 })
-			.toContainEqual(secondLabel);
-		await expect
-			.poll(
-				async () => {
-					const orderedLabels = await docPoliciesPage.groupLabels();
-					return orderedLabels.indexOf(secondLabel) < orderedLabels.indexOf(renamedLabel);
-				},
-				{ timeout: 15_000 },
-			)
-			.toBe(true);
-		await expect
 			.poll(async () => {
 				const groups = await db.getDocumentPolicyGroupsByLabelPrefix(docPoliciesPage.workerPrefix);
 				return groups.map((group) => group.label);
 			})
 			.toStrictEqual([secondLabel, renamedLabel]);
+		await docPoliciesPage.goto();
+		await expect
+			.poll(async () => docPoliciesPage.groupLabels(), { timeout: 15_000 })
+			.toContainEqual(secondLabel);
+		const orderedLabels = await docPoliciesPage.groupLabels();
+		expect(orderedLabels.indexOf(secondLabel)).toBeLessThan(orderedLabels.indexOf(renamedLabel));
 		await expect(docPoliciesPage.groupSection(secondLabel)).toBeVisible();
 		await expect(docPoliciesPage.groupSection(renamedLabel)).toBeVisible();
 

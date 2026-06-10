@@ -45,6 +45,10 @@ import { dashboardPageSize } from "@/config/pagination.config";
 import type { ProjectPartnersResult } from "@/lib/data/project-partners";
 import { dateToCalendarDate } from "@/lib/date";
 import { useRouter } from "@/lib/navigation/navigation";
+import {
+	type OrganisationalUnitOption,
+	toOrganisationalUnitDocumentOptionsPage,
+} from "@/lib/organisational-unit-options";
 
 interface ProjectPartnersPageProps {
 	projectPartners: ProjectPartnersResult;
@@ -134,7 +138,9 @@ async function fetchProjectOptionsPage(
 		throw new Error("Failed to load projects.");
 	}
 
-	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+	return toOrganisationalUnitDocumentOptionsPage(
+		(await response.json()) as { items: Array<OrganisationalUnitOption>; total: number },
+	);
 }
 
 async function fetchOrganisationalUnitOptionsPage(
@@ -206,7 +212,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 				description: item.projectName,
 			},
 			unit: {
-				id: item.unitVersionId,
+				id: item.unitDocumentId,
 				name: item.unitName,
 				description: formatValue(item.unitType),
 			},
@@ -376,7 +382,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 							placeholder={t("No project selected")}
 							selectedItem={dialog.project}
 						/>
-						<input name="projectId" type="hidden" value={dialog.project?.id ?? ""} />
+						<input name="projectDocumentId" type="hidden" value={dialog.project?.id ?? ""} />
 						<AsyncSelect
 							aria-label={t("Partner")}
 							emptyMessage={t("No organisations found.")}
@@ -392,7 +398,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 							placeholder={t("No partner selected")}
 							selectedItem={dialog.unit}
 						/>
-						<input name="unitId" type="hidden" value={dialog.unit?.id ?? ""} />
+						<input name="unitDocumentId" type="hidden" value={dialog.unit?.id ?? ""} />
 						<Select
 							isRequired={true}
 							onChange={(key) => {

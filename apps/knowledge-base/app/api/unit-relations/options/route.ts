@@ -17,10 +17,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 	}
 
 	const { searchParams } = request.nextUrl;
-	const unitId = searchParams.get("unitId");
+	const unitDocumentId = searchParams.get("unitDocumentId");
 	const statusId = searchParams.get("statusId");
 
-	if (unitId == null || statusId == null) {
+	if (unitDocumentId == null || statusId == null) {
 		return NextResponse.json({ items: [], total: 0 });
 	}
 
@@ -28,7 +28,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 	const offset = Math.max(Number(searchParams.get("offset") ?? 0), 0);
 	const q = searchParams.get("q") ?? undefined;
 
-	const result = await getUnitRelationRelatedUnitOptions({ limit, offset, q, statusId, unitId });
+	const result = await getUnitRelationRelatedUnitOptions({
+		limit,
+		offset,
+		q,
+		statusId,
+		unitDocumentId,
+	});
 
 	return NextResponse.json(result);
 }

@@ -44,10 +44,14 @@ import { updateUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import type { OrganisationalUnitType } from "@/lib/data/organisational-units";
 import type { ReverseUnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 import { dateToCalendarDate } from "@/lib/date";
+import {
+	type OrganisationalUnitOption,
+	toOrganisationalUnitDocumentOptionsPage,
+} from "@/lib/organisational-unit-options";
 
 interface ReverseUnitRelationsSectionProps {
 	/** The current unit's document id — the fixed _target_ of every relation shown here. */
-	relatedUnitId: string;
+	relatedUnitDocumentId: string;
 	relations: Array<ReverseUnitRelation>;
 	statusOptions: Array<UnitRelationStatusOption>;
 	/** Organisational-unit type to pick as the relation's source/owner (e.g. "institution"). */
@@ -84,7 +88,9 @@ async function fetchSourceUnitOptionsPage(
 		throw new Error("Failed to load units.");
 	}
 
-	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+	return toOrganisationalUnitDocumentOptionsPage(
+		(await response.json()) as { items: Array<OrganisationalUnitOption>; total: number },
+	);
 }
 
 function formatStatus(type: string): string {
@@ -94,7 +100,7 @@ function formatStatus(type: string): string {
 export function ReverseUnitRelationsSection(
 	props: Readonly<ReverseUnitRelationsSectionProps>,
 ): ReactNode {
-	const { relatedUnitId, relations, statusOptions, sourceUnitType, messages } = props;
+	const { relatedUnitDocumentId, relations, statusOptions, sourceUnitType, messages } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -147,7 +153,7 @@ export function ReverseUnitRelationsSection(
 							id: data.id,
 							statusId: option.statusId,
 							statusType: option.statusType,
-							unitId: sourceUnit.id,
+							unitDocumentId: sourceUnit.id,
 							unitName: sourceUnit.name,
 							unitSlug: "",
 							unitType: sourceUnitType,
@@ -169,7 +175,7 @@ export function ReverseUnitRelationsSection(
 		setEditState(createActionStateInitial());
 		setItemToEdit(relation);
 		setEditStatusId(relation.statusId);
-		setEditUnitItem({ id: relation.unitId, name: relation.unitName });
+		setEditUnitItem({ id: relation.unitDocumentId, name: relation.unitName });
 		setEditStartDate(dateToCalendarDate(relation.duration.start));
 		setEditEndDate(dateToCalendarDate(relation.duration.end));
 	}
@@ -198,7 +204,7 @@ export function ReverseUnitRelationsSection(
 									...relation,
 									statusId: option.statusId,
 									statusType: option.statusType,
-									unitId: sourceUnit.id,
+									unitDocumentId: sourceUnit.id,
 									unitName: sourceUnit.name,
 									duration: { start, ...(end != null ? { end } : {}) },
 								}
@@ -334,7 +340,7 @@ export function ReverseUnitRelationsSection(
 									placeholder={t("No related unit selected")}
 									selectedItem={selectedUnitItem}
 								/>
-								<input name="unitId" type="hidden" value={selectedUnitItem?.id ?? ""} />
+								<input name="unitDocumentId" type="hidden" value={selectedUnitItem?.id ?? ""} />
 
 								<DatePicker granularity="day" isRequired={true} name="duration.start">
 									<Label>{t("Start date")}</Label>
@@ -348,7 +354,7 @@ export function ReverseUnitRelationsSection(
 									<FieldError />
 								</DatePicker>
 
-								<input name="relatedUnitId" type="hidden" value={relatedUnitId} />
+								<input name="relatedUnitDocumentId" type="hidden" value={relatedUnitDocumentId} />
 							</FormSection>
 
 							<Button className="self-start" isPending={isPending} type="submit">
@@ -438,7 +444,7 @@ export function ReverseUnitRelationsSection(
 				<Form action={editFormAction} state={editState}>
 					<ModalBody className="flex flex-col gap-y-4">
 						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
-						<input name="relatedUnitId" type="hidden" value={relatedUnitId} />
+						<input name="relatedUnitDocumentId" type="hidden" value={relatedUnitDocumentId} />
 						{hasStatusChoice ? (
 							<Select
 								isRequired={true}
@@ -474,7 +480,7 @@ export function ReverseUnitRelationsSection(
 							placeholder={t("No related unit selected")}
 							selectedItem={editUnitItem}
 						/>
-						<input name="unitId" type="hidden" value={editUnitItem?.id ?? ""} />
+						<input name="unitDocumentId" type="hidden" value={editUnitItem?.id ?? ""} />
 						<DatePicker
 							granularity="day"
 							isRequired={true}

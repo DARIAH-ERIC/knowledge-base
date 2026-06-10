@@ -39,10 +39,14 @@ import {
 import { deleteProjectPartnerAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/delete-project-partner.action";
 import { upsertProjectPartnerAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/upsert-project-partner.action";
 import { dateToCalendarDate } from "@/lib/date";
+import {
+	type OrganisationalUnitOption,
+	toOrganisationalUnitDocumentOptionsPage,
+} from "@/lib/organisational-unit-options";
 
 interface ProjectPartner {
 	id: string;
-	unitId: string;
+	unitDocumentId: string;
 	unitName: string;
 	roleId: string;
 	roleName: string;
@@ -51,7 +55,7 @@ interface ProjectPartner {
 }
 
 interface ProjectPartnersSectionProps {
-	projectId: string;
+	projectDocumentId: string;
 	partners: Array<ProjectPartner>;
 	roles: Array<{ id: string; role: string }>;
 }
@@ -94,7 +98,9 @@ async function fetchOrganisationalUnitOptionsPage(
 		throw new Error("Failed to load organisations.");
 	}
 
-	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+	return toOrganisationalUnitDocumentOptionsPage(
+		(await response.json()) as { items: Array<OrganisationalUnitOption>; total: number },
+	);
 }
 
 function formatValue(value: string): string {
@@ -102,7 +108,7 @@ function formatValue(value: string): string {
 }
 
 export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionProps>): ReactNode {
-	const { projectId, partners, roles } = props;
+	const { projectDocumentId, partners, roles } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -125,7 +131,7 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 		setDialog({
 			isOpen: true,
 			item,
-			unit: { id: item.unitId, name: item.unitName },
+			unit: { id: item.unitDocumentId, name: item.unitName },
 			roleId: item.roleId,
 			durationStart: dateToCalendarDate(item.durationStart),
 			durationEnd: dateToCalendarDate(item.durationEnd),
@@ -151,7 +157,7 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 							item.id === dialog.item?.id
 								? {
 										...item,
-										unitId: unit.id,
+										unitDocumentId: unit.id,
 										unitName: unit.name,
 										roleId: role.id,
 										roleName: role.role,
@@ -166,7 +172,7 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 						...prev,
 						{
 							id: data.id,
-							unitId: unit.id,
+							unitDocumentId: unit.id,
 							unitName: unit.name,
 							roleId: role.id,
 							roleName: role.role,
@@ -277,7 +283,7 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 				<Form action={formAction} state={formState}>
 					<ModalBody className="flex flex-col gap-y-4">
 						{dialog.item != null ? <input name="id" type="hidden" value={dialog.item.id} /> : null}
-						<input name="projectId" type="hidden" value={projectId} />
+						<input name="projectDocumentId" type="hidden" value={projectDocumentId} />
 						<AsyncSelect
 							aria-label={t("Partner")}
 							emptyMessage={t("No organisations found.")}
@@ -293,7 +299,7 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 							placeholder={t("No partner selected")}
 							selectedItem={dialog.unit}
 						/>
-						<input name="unitId" type="hidden" value={dialog.unit?.id ?? ""} />
+						<input name="unitDocumentId" type="hidden" value={dialog.unit?.id ?? ""} />
 						<Select
 							isRequired={true}
 							onChange={(key) => {

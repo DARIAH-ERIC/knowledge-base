@@ -14,8 +14,8 @@ interface ServiceDetailsProps {
 		schema.Service,
 		"id" | "name" | "statusId" | "comment" | "dariahBranding" | "monitoring" | "privateSupplier"
 	> & {
-		ownerUnitIds: Array<string>;
-		providerUnitIds: Array<string>;
+		ownerUnitDocumentIds: Array<string>;
+		providerUnitDocumentIds: Array<string>;
 	};
 	serviceStatuses: Array<Pick<schema.ServiceStatus, "id" | "status">>;
 	initialOrganisationalUnitItems: Array<{ id: string; name: string }>;
@@ -29,10 +29,10 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 	const t = useExtracted();
 
 	const owners = selectedOrganisationalUnits.filter((orgaUnit) =>
-		service.ownerUnitIds.includes(orgaUnit.id),
+		service.ownerUnitDocumentIds.includes(orgaUnit.id),
 	);
 	const providers = selectedOrganisationalUnits.filter((orgaUnit) =>
-		service.providerUnitIds.includes(orgaUnit.id),
+		service.providerUnitDocumentIds.includes(orgaUnit.id),
 	);
 
 	return (

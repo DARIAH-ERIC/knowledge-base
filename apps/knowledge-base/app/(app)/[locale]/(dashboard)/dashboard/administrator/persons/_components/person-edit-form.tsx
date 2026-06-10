@@ -80,7 +80,7 @@ export function PersonEditForm(props: Readonly<PersonEditFormProps>): ReactNode 
 				<TabPanel id="contributions" shouldPreserveState={true}>
 					<ContributionsSection
 						contributions={contributions}
-						personId={documentId}
+						personDocumentId={documentId}
 						roleOptions={contributionRoleOptions}
 					/>
 				</TabPanel>
