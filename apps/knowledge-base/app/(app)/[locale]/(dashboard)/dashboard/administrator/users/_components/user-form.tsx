@@ -181,6 +181,7 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 							fetchPage={fetchPersonOptionsPage}
 							initialItems={[]}
 							initialTotal={0}
+							isRequired={true}
 							label={t("Person")}
 							loadOnMount={true}
 							onSelect={setSelectedPerson}
@@ -196,6 +197,7 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 							fetchPage={fetchCountryOptionsPage}
 							initialItems={[]}
 							initialTotal={0}
+							isRequired={true}
 							label={t("Country")}
 							loadOnMount={true}
 							onSelect={setSelectedCountry}

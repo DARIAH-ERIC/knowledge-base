@@ -325,6 +325,7 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 							fetchPage={fetchOrganisationalUnitOptionsPage}
 							initialItems={[]}
 							initialTotal={0}
+							isRequired={true}
 							label={t("Partner")}
 							onSelect={(item) => {
 								setDialog((prev) => {

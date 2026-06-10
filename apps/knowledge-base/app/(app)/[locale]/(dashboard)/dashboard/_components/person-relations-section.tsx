@@ -380,6 +380,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 									fetchPage={fetchPersonOptionsPage}
 									initialItems={initialPersonItems}
 									initialTotal={initialPersonTotal}
+									isRequired={true}
 									label={t("Person")}
 									onSelect={setSelectedPerson}
 									placeholder={t("No person selected")}
@@ -528,6 +529,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							fetchPage={fetchPersonOptionsPage}
 							initialItems={initialPersonItems}
 							initialTotal={initialPersonTotal}
+							isRequired={true}
 							label={t("Person")}
 							onSelect={setEditPerson}
 							placeholder={t("No person selected")}

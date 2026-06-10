@@ -34,6 +34,7 @@ export interface AsyncSelectProps<T extends AsyncOption> {
 	initialTotal: number;
 	inputPlaceholder?: string;
 	isDisabled?: boolean;
+	isRequired?: boolean;
 	label?: string;
 	loadOnMount?: boolean;
 	onSelect: (item: T) => void;
@@ -82,6 +83,7 @@ function AsyncSelectInner<T extends AsyncOption>(
 		initialTotal,
 		inputPlaceholder,
 		isDisabled = false,
+		isRequired = false,
 		label,
 		loadOnMount = false,
 		onSelect,
@@ -129,7 +131,11 @@ function AsyncSelectInner<T extends AsyncOption>(
 			: t("Could not load options.");
 
 	return (
-		<div className={fieldStyles({ className: "group/select" })} data-slot="control">
+		<div
+			className={fieldStyles({ className: "group/select" })}
+			data-required={isRequired || undefined}
+			data-slot="control"
+		>
 			{label != null ? <Label>{label}</Label> : null}
 
 			<AriaDialogTrigger
@@ -144,6 +150,7 @@ function AsyncSelectInner<T extends AsyncOption>(
 			>
 				<AriaButton
 					ref={triggerRef}
+					aria-required={isRequired || undefined}
 					className={cx(
 						"group/select-trigger flex inline-full min-inline-0 cursor-default items-center gap-x-2 rounded-lg border border-input px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] text-start text-fg outline-hidden transition duration-200 sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
 						"hover:border-muted-fg/30",

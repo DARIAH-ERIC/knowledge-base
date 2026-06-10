@@ -378,6 +378,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									initialItems={[]}
 									initialTotal={0}
 									isDisabled={selectedStatusId == null}
+									isRequired={true}
 									label={t("Related unit")}
 									loadOnMount={selectedStatusId != null}
 									onSelect={(item) => {
@@ -529,6 +530,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 							initialItems={[]}
 							initialTotal={0}
 							isDisabled={editStatusId == null}
+							isRequired={true}
 							label={t("Related unit")}
 							loadOnMount={editStatusId != null}
 							onSelect={(item) => {
