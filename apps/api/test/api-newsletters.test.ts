@@ -59,7 +59,7 @@ describe("newsletters", () => {
 			});
 
 			expect(response.status).toBe(200);
-			expect(mailchimp.get).toHaveBeenCalledWith({ count: 10, offset: 0 });
+			expect(mailchimp.get).toHaveBeenCalledWith({ count: 10, offset: 0, status: "sent" });
 			await expect(response.json()).resolves.toEqual({
 				data: [
 					{
