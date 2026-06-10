@@ -36,6 +36,8 @@ import {
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
 import { deleteProjectPartnerAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/delete-project-partner.action";
 import { upsertProjectPartnerAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/upsert-project-partner.action";
 import { dateToCalendarDate } from "@/lib/date";
@@ -108,6 +110,17 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 	const format = useFormatter();
 
 	const [items, setItems] = useState(projects);
+
+	const table = useClientTable({
+		items,
+		sortAccessors: {
+			from: (item) => item.durationStart,
+			project: (item) => item.projectName,
+			role: (item) => item.roleName,
+			until: (item) => item.durationEnd,
+		},
+	});
+
 	const [dialog, setDialog] = useState<DialogState>(emptyDialog);
 	const [formState, setFormState] = useState<ActionState>(() => createActionStateInitial());
 	const [itemToDelete, setItemToDelete] = useState<UnitProject | null>(null);
@@ -188,15 +201,28 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 				</div>
 
 				{items.length > 0 ? (
-					<Table aria-label="projects" className="[--gutter:0] sm:[--gutter:0]">
+					<Table
+						aria-label="projects"
+						className="[--gutter:0] sm:[--gutter:0]"
+						onSortChange={table.onSortChange}
+						sortDescriptor={table.sortDescriptor}
+					>
 						<TableHeader>
-							<TableColumn isRowHeader={true}>{t("Role")}</TableColumn>
-							<TableColumn className="max-inline-80">{t("Project")}</TableColumn>
-							<TableColumn>{t("From")}</TableColumn>
-							<TableColumn>{t("Until")}</TableColumn>
+							<TableColumn allowsSorting={true} id="role" isRowHeader={true}>
+								{t("Role")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} className="max-inline-80" id="project">
+								{t("Project")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="from">
+								{t("From")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="until">
+								{t("Until")}
+							</TableColumn>
 							<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
-						<TableBody items={items}>
+						<TableBody items={table.pageItems}>
 							{(item) => (
 								<TableRow id={item.id}>
 									<TableCell>{formatValue(item.roleName)}</TableCell>
@@ -245,6 +271,15 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 					</Table>
 				) : (
 					<p className="text-sm text-neutral-500">{t("No projects.")}</p>
+				)}
+
+				{table.totalPages > 1 && (
+					<Paginate
+						page={table.page}
+						setPage={table.setPage}
+						total={table.totalPages}
+						totalItems={table.total}
+					/>
 				)}
 
 				<FormLayout variant="stacked">

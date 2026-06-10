@@ -37,6 +37,8 @@ import {
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
 import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
 import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
 import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
@@ -116,6 +118,17 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 	const [editPerson, setEditPerson] = useState<AsyncOption | null>(null);
 	const [editStartDate, setEditStartDate] = useState<CalendarDate | null>(null);
 	const [editEndDate, setEditEndDate] = useState<CalendarDate | null>(null);
+
+	const table = useClientTable({
+		items: localRelations,
+		sortAccessors: {
+			from: (relation) => relation.duration.start,
+			person: (relation) => relation.personName,
+			role: (relation) => relation.roleType,
+			type: (relation) => relation.targetUnitType,
+			until: (relation) => relation.duration.end,
+		},
+	});
 
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
@@ -220,18 +233,36 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 				</div>
 
 				{localRelations.length > 0 ? (
-					<Table aria-label="people" className="[--gutter:0] sm:[--gutter:0]">
+					<Table
+						aria-label="people"
+						className="[--gutter:0] sm:[--gutter:0]"
+						onSortChange={table.onSortChange}
+						sortDescriptor={table.sortDescriptor}
+					>
 						<TableHeader>
-							<TableColumn className="max-inline-80" isRowHeader={true}>
+							<TableColumn
+								allowsSorting={true}
+								className="max-inline-80"
+								id="person"
+								isRowHeader={true}
+							>
 								{t("Person")}
 							</TableColumn>
-							<TableColumn>{t("Type")}</TableColumn>
-							<TableColumn>{t("Role")}</TableColumn>
-							<TableColumn>{t("From")}</TableColumn>
-							<TableColumn>{t("Until")}</TableColumn>
+							<TableColumn allowsSorting={true} id="type">
+								{t("Type")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="role">
+								{t("Role")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="from">
+								{t("From")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="until">
+								{t("Until")}
+							</TableColumn>
 							<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
-						<TableBody items={localRelations}>
+						<TableBody items={table.pageItems}>
 							{(relation) => (
 								<TableRow id={relation.id}>
 									<TableCell>
@@ -299,6 +330,15 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 					</Table>
 				) : (
 					<p className="text-sm text-neutral-500">{t("No people assigned.")}</p>
+				)}
+
+				{table.totalPages > 1 && (
+					<Paginate
+						page={table.page}
+						setPage={table.setPage}
+						total={table.totalPages}
+						totalItems={table.total}
+					/>
 				)}
 
 				{roleOptions.length > 0 && (

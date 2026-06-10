@@ -37,6 +37,8 @@ import {
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
 import { createUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-unit-relation.action";
 import { deleteUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/delete-unit-relation.action";
 import { endUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-unit-relation.action";
@@ -123,6 +125,16 @@ export function ReverseUnitRelationsSection(
 		singleStatus?.statusId ?? null,
 	);
 	const [selectedUnitItem, setSelectedUnitItem] = useState<AsyncOption | null>(null);
+
+	const table = useClientTable({
+		items: localRelations,
+		sortAccessors: {
+			from: (relation) => relation.duration.start,
+			type: (relation) => relation.statusType,
+			unit: (relation) => relation.unitName,
+			until: (relation) => relation.duration.end,
+		},
+	});
 
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
@@ -224,17 +236,35 @@ export function ReverseUnitRelationsSection(
 				</div>
 
 				{localRelations.length > 0 ? (
-					<Table aria-label={messages.title} className="[--gutter:0] sm:[--gutter:0]">
+					<Table
+						aria-label={messages.title}
+						className="[--gutter:0] sm:[--gutter:0]"
+						onSortChange={table.onSortChange}
+						sortDescriptor={table.sortDescriptor}
+					>
 						<TableHeader>
-							<TableColumn className="max-inline-80" isRowHeader={true}>
+							<TableColumn
+								allowsSorting={true}
+								className="max-inline-80"
+								id="unit"
+								isRowHeader={true}
+							>
 								{messages.memberLabel}
 							</TableColumn>
-							{hasStatusChoice ? <TableColumn>{t("Type")}</TableColumn> : null}
-							<TableColumn>{t("From")}</TableColumn>
-							<TableColumn>{t("Until")}</TableColumn>
+							{hasStatusChoice ? (
+								<TableColumn allowsSorting={true} id="type">
+									{t("Type")}
+								</TableColumn>
+							) : null}
+							<TableColumn allowsSorting={true} id="from">
+								{t("From")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="until">
+								{t("Until")}
+							</TableColumn>
 							<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
-						<TableBody items={localRelations}>
+						<TableBody items={table.pageItems}>
 							{(relation) => (
 								<TableRow id={relation.id}>
 									<TableCell>
@@ -294,6 +324,15 @@ export function ReverseUnitRelationsSection(
 					</Table>
 				) : (
 					<p className="text-sm text-neutral-500">{messages.empty}</p>
+				)}
+
+				{table.totalPages > 1 && (
+					<Paginate
+						page={table.page}
+						setPage={table.setPage}
+						total={table.totalPages}
+						totalItems={table.total}
+					/>
 				)}
 
 				{statusOptions.length > 0 && (

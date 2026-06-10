@@ -37,6 +37,8 @@ import {
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
 import { createUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-unit-relation.action";
 import { deleteUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/delete-unit-relation.action";
 import { endUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-unit-relation.action";
@@ -110,6 +112,17 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 
 	const [selectedStatusId, setSelectedStatusId] = useState<string | null>(null);
 	const [selectedUnitItem, setSelectedUnitItem] = useState<AsyncOption | null>(null);
+
+	const table = useClientTable({
+		items: localRelations,
+		sortAccessors: {
+			from: (relation) => relation.duration.start,
+			relatedUnit: (relation) => relation.relatedUnitName,
+			status: (relation) => relation.statusType,
+			type: (relation) => relation.relatedUnitType,
+			until: (relation) => relation.duration.end,
+		},
+	});
 
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
@@ -219,16 +232,31 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 				</div>
 
 				{localRelations.length > 0 ? (
-					<Table aria-label="relations" className="[--gutter:0] sm:[--gutter:0]">
+					<Table
+						aria-label="relations"
+						className="[--gutter:0] sm:[--gutter:0]"
+						onSortChange={table.onSortChange}
+						sortDescriptor={table.sortDescriptor}
+					>
 						<TableHeader>
-							<TableColumn isRowHeader={true}>{t("Status")}</TableColumn>
-							<TableColumn>{t("Type")}</TableColumn>
-							<TableColumn className="max-inline-80">{t("Related unit")}</TableColumn>
-							<TableColumn>{t("From")}</TableColumn>
-							<TableColumn>{t("Until")}</TableColumn>
+							<TableColumn allowsSorting={true} id="status" isRowHeader={true}>
+								{t("Status")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="type">
+								{t("Type")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} className="max-inline-80" id="relatedUnit">
+								{t("Related unit")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="from">
+								{t("From")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="until">
+								{t("Until")}
+							</TableColumn>
 							<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
-						<TableBody items={localRelations}>
+						<TableBody items={table.pageItems}>
 							{(relation) => (
 								<TableRow id={relation.id}>
 									<TableCell>
@@ -296,6 +324,15 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 					</Table>
 				) : (
 					<p className="text-sm text-neutral-500">{t("No relations.")}</p>
+				)}
+
+				{table.totalPages > 1 && (
+					<Paginate
+						page={table.page}
+						setPage={table.setPage}
+						total={table.totalPages}
+						totalItems={table.total}
+					/>
 				)}
 
 				{statusOptions.length > 0 && (

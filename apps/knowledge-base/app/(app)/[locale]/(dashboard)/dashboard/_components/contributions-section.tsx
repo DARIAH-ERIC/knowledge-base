@@ -37,6 +37,8 @@ import {
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
 import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
 import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
 import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
@@ -120,6 +122,17 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 	const [editUnit, setEditUnit] = useState<AsyncOption | null>(null);
 	const [editStartDate, setEditStartDate] = useState<CalendarDate | null>(null);
 	const [editEndDate, setEditEndDate] = useState<CalendarDate | null>(null);
+
+	const table = useClientTable({
+		items: localContributions,
+		sortAccessors: {
+			from: (contribution) => contribution.duration.start,
+			organisation: (contribution) => contribution.organisationalUnitName,
+			role: (contribution) => contribution.roleType,
+			type: (contribution) => contribution.organisationalUnitType,
+			until: (contribution) => contribution.duration.end,
+		},
+	});
 
 	const [state, setState] = useState<ActionState>(createActionStateInitial());
 	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
@@ -219,16 +232,31 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 				</div>
 
 				{localContributions.length > 0 ? (
-					<Table aria-label="contributions" className="[--gutter:0] sm:[--gutter:0]">
+					<Table
+						aria-label="contributions"
+						className="[--gutter:0] sm:[--gutter:0]"
+						onSortChange={table.onSortChange}
+						sortDescriptor={table.sortDescriptor}
+					>
 						<TableHeader>
-							<TableColumn isRowHeader={true}>{t("Role")}</TableColumn>
-							<TableColumn>{t("Type")}</TableColumn>
-							<TableColumn className="max-inline-80">{t("Organisation")}</TableColumn>
-							<TableColumn>{t("From")}</TableColumn>
-							<TableColumn>{t("Until")}</TableColumn>
+							<TableColumn allowsSorting={true} id="role" isRowHeader={true}>
+								{t("Role")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="type">
+								{t("Type")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} className="max-inline-80" id="organisation">
+								{t("Organisation")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="from">
+								{t("From")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="until">
+								{t("Until")}
+							</TableColumn>
 							<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
-						<TableBody items={localContributions}>
+						<TableBody items={table.pageItems}>
 							{(contribution) => (
 								<TableRow id={contribution.id}>
 									<TableCell>
@@ -303,6 +331,15 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 					</Table>
 				) : (
 					<p className="text-sm text-neutral-500">{t("No contributions.")}</p>
+				)}
+
+				{table.totalPages > 1 && (
+					<Paginate
+						page={table.page}
+						setPage={table.setPage}
+						total={table.totalPages}
+						totalItems={table.total}
+					/>
 				)}
 
 				{roleOptions.length > 0 && (
