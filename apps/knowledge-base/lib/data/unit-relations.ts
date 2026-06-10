@@ -420,6 +420,7 @@ export async function getEricInstitutionsForCountry(countryDocumentId: string) {
 			institutionName: schema.organisationalUnits.name,
 			institutionSlug: schema.entities.slug,
 			institutionType: schema.organisationalUnitTypes.type,
+			statusId: ericStatus.id,
 			statusType: ericStatus.status,
 			duration: ericRelations.duration,
 		})
