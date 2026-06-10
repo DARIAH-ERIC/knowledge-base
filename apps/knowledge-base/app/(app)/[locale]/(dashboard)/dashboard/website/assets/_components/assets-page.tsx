@@ -173,8 +173,8 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 						const license = asset.licenseId != null ? licensesById.get(asset.licenseId) : undefined;
 						return (
 							<li key={asset.id}>
-								<figure className="flex flex-row items-start gap-x-4 rounded-lg border border-border p-3">
-									<div className="relative block-40 inline-56 shrink-0 overflow-hidden rounded-lg bg-muted">
+								<figure className="flex flex-row items-start gap-x-3 rounded-lg border border-border p-2.5">
+									<div className="relative block-16 inline-20 shrink-0 overflow-hidden rounded-md bg-muted">
 										<AssetPreview
 											alt={asset.alt ?? asset.label}
 											className="block-full inline-full"
