@@ -66,6 +66,12 @@ export class AdminPersonsPage {
 		await expect(this.page.getByLabel("Image block", { exact: true })).toBeVisible();
 	}
 
+	async typeBiographyAfterImage(text: string): Promise<void> {
+		const editor = this.page.getByRole("textbox", { name: "Biography" });
+		await editor.press("ArrowRight");
+		await this.page.keyboard.type(text);
+	}
+
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
 		await this.page.waitForSelector('[role="dialog"]');

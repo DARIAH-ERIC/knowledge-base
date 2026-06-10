@@ -122,6 +122,12 @@ export class AdminProjectsPage {
 		await expect(this.page.getByLabel("Image block", { exact: true })).toBeVisible();
 	}
 
+	async typeDescriptionAfterImage(text: string): Promise<void> {
+		const editor = this.page.getByRole("textbox", { name: "Description" });
+		await editor.press("ArrowRight");
+		await this.page.keyboard.type(text);
+	}
+
 	async selectFirstOptionInControl(label: string): Promise<void> {
 		const control = this.page
 			.locator('[data-slot="control"]')

@@ -201,10 +201,10 @@ test.describe("website documents-policies lifecycle", () => {
 
 		await docPoliciesPage.searchByTitle(title);
 		const row = docPoliciesPage.rowByTitle(title);
-		const editHref = await row.getByRole("link", { name: "Content" }).getAttribute("href");
-		expect(editHref).not.toBeNull();
-		await page.goto(editHref!);
-		await page.waitForURL("**/edit");
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			row.getByRole("link", { name: "Content" }).click(),
+		]);
 
 		await docPoliciesPage.fillUrl("");
 		await docPoliciesPage.selectNoGroup();

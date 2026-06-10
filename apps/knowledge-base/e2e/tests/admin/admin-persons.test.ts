@@ -68,7 +68,7 @@ test.describe("persons admin", () => {
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await personsPage.fillBiography(biographyBeforeImage);
 		await personsPage.insertImageInBiography("E2E Test Asset");
-		await personsPage.fillBiography(biographyAfterImage);
+		await personsPage.typeBiographyAfterImage(biographyAfterImage);
 
 		await personsPage.submitForm();
 

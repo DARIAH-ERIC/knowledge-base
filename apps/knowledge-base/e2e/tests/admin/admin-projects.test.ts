@@ -90,7 +90,7 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await adminProjectsPage.fillDescription(descriptionBeforeImage);
 		await adminProjectsPage.insertImageInDescription("E2E Test Asset");
-		await adminProjectsPage.fillDescription(descriptionAfterImage);
+		await adminProjectsPage.typeDescriptionAfterImage(descriptionAfterImage);
 
 		await adminProjectsPage.submitForm();
 

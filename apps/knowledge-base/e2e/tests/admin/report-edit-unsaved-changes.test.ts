@@ -68,9 +68,10 @@ test.describe("report editor unsaved-changes guard", () => {
 		await expect(page.getByLabel("Small events")).toHaveValue("7");
 
 		// Accepting the confirm lets the same navigation proceed.
-		const acceptedDialog = page.waitForEvent("dialog");
-		await page.getByRole("tab", { name: "Institutions" }).click({ noWaitAfter: true });
-		await (await acceptedDialog).accept();
+		page.once("dialog", async (dialog) => {
+			await dialog.accept();
+		});
+		await page.getByRole("tab", { name: "Institutions" }).click();
 		await expect(page).toHaveURL(new RegExp(`${reportId!}/edit/institutions`));
 	});
 
