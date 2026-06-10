@@ -227,7 +227,7 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 							<TableColumn allowsSorting={true} id="until">
 								{t("Until")}
 							</TableColumn>
-							<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
+							<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
 						<TableBody items={table.pageItems}>
 							{(item) => (
@@ -250,7 +250,7 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 												? t("present")
 												: "—"}
 									</TableCell>
-									<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+									<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 										<RowActionsMenu>
 											<RowActionsMenu.Action
 												icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}

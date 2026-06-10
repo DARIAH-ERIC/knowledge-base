@@ -2,8 +2,10 @@
 
 import { assetPrefixes } from "@dariah-eric/storage/config";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
+import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode } from "react";
+import { Fragment, type ReactNode, useState } from "react";
 
 import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
 import {
@@ -47,6 +49,8 @@ interface AssetsPageProps {
 
 const pageSize = dashboardPageSize;
 
+type AssetsLayout = "grid" | "list";
+
 export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 	const { assets, licenses, page: initialPage, prefix: initialPrefix, q: initialQ } = props;
 
@@ -59,6 +63,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 	});
 	const selectedPrefix = search.filters.prefix !== "" ? search.filters.prefix : "all";
 	const totalPages = Math.max(1, Math.ceil(assets.total / pageSize));
+	const [layout, setLayout] = useState<AssetsLayout>("grid");
 
 	return (
 		<Fragment>
@@ -88,6 +93,25 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 							</SelectContent>
 						</Select>
 
+						<ToggleGroup
+							aria-label={t("Layout")}
+							disallowEmptySelection={true}
+							onSelectionChange={(keys) => {
+								const [selectedLayout] = [...keys] as Array<AssetsLayout>;
+								setLayout(selectedLayout ?? "grid");
+							}}
+							selectedKeys={new Set([layout])}
+							selectionMode="single"
+							size="sq-sm"
+						>
+							<ToggleGroupItem id="grid" aria-label={t("Grid layout")}>
+								<Squares2X2Icon aria-hidden={true} data-slot="icon" />
+							</ToggleGroupItem>
+							<ToggleGroupItem id="list" aria-label={t("List layout")}>
+								<ListBulletIcon aria-hidden={true} data-slot="icon" />
+							</ToggleGroupItem>
+						</ToggleGroup>
+
 						<UploadImageDialog
 							licenses={licenses}
 							onSuccess={() => {
@@ -106,7 +130,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 							: t("No images found. Upload one to get started.")}
 					</p>
 				</div>
-			) : (
+			) : layout === "grid" ? (
 				<ul className="grid grid-cols-[repeat(auto-fill,minmax(min(12rem,100%),1fr))] gap-4 content-start">
 					{assets.items.map((asset) => {
 						const prefix = asset.key.split("/")[0] ?? "";
@@ -132,6 +156,40 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 										/>
 									</div>
 									<figcaption className="flex flex-col gap-y-0.5 px-0.5">
+										<span className="truncate text-sm/tight font-medium">{asset.label}</span>
+										<span className="text-xs text-muted-fg">{prefix}</span>
+									</figcaption>
+								</figure>
+							</li>
+						);
+					})}
+				</ul>
+			) : (
+				<ul className="flex flex-col gap-y-3 content-start">
+					{assets.items.map((asset) => {
+						const prefix = asset.key.split("/")[0] ?? "";
+						return (
+							<li key={asset.id}>
+								<figure className="flex flex-row items-center gap-x-4 rounded-lg border border-border p-3">
+									<div className="relative block-40 inline-56 shrink-0 overflow-hidden rounded-lg bg-muted">
+										<AssetPreview
+											alt={asset.alt ?? asset.label}
+											className="block-full inline-full"
+											imageClassName="object-contain"
+											kindLabelClassName="bg-background/90 text-xs"
+											mimeType={asset.mimeType}
+											src={asset.url}
+											storageKey={asset.key}
+										/>
+										<EditAssetMetadataDialog
+											asset={asset}
+											licenses={licenses}
+											onSuccess={() => {
+												router.refresh();
+											}}
+										/>
+									</div>
+									<figcaption className="flex min-inline-0 flex-col gap-y-0.5">
 										<span className="truncate text-sm/tight font-medium">{asset.label}</span>
 										<span className="text-xs text-muted-fg">{prefix}</span>
 									</figcaption>

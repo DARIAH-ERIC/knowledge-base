@@ -95,7 +95,7 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 						{t("Type")}
 					</TableColumn>
 					<TableColumn>{t("URL")}</TableColumn>
-					<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
+					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
@@ -109,7 +109,7 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 									{item.url}
 								</a>
 							</TableCell>
-							<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Link
 										href={`/dashboard/administrator/social-media/${item.id}/edit`}

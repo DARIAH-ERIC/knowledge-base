@@ -93,7 +93,7 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 						{t("Campaign")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
-					<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
+					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
@@ -104,7 +104,7 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 							<TableCell>{item.workingGroup.name}</TableCell>
 							<TableCell>{item.campaign.year}</TableCell>
 							<TableCell>{formatStatus(item.status)}</TableCell>
-							<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Link
 										href={`/dashboard/administrator/working-group-reports/${item.id}`}
