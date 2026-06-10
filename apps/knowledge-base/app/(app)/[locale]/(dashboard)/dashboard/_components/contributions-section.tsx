@@ -45,7 +45,7 @@ import type { ContributionRoleOption, PersonContribution } from "@/lib/data/cont
 import { dateToCalendarDate } from "@/lib/date";
 
 interface ContributionsSectionProps {
-	personId: string;
+	personDocumentId: string;
 	contributions: Array<PersonContribution & { lifecycleStatus?: "changed" | "new" }>;
 	roleOptions: Array<ContributionRoleOption>;
 }
@@ -102,7 +102,7 @@ function formatRoleOptionLabel(option: ContributionRoleOption): string {
 }
 
 export function ContributionsSection(props: Readonly<ContributionsSectionProps>): ReactNode {
-	const { personId, roleOptions, contributions } = props;
+	const { personDocumentId, roleOptions, contributions } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -150,7 +150,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 						id: data.id,
 						roleTypeId: roleTypeId!,
 						roleType: option.roleType as PersonContribution["roleType"],
-						organisationalUnitId: unit.id,
+						organisationalUnitDocumentId: unit.id,
 						organisationalUnitName: unit.name,
 						organisationalUnitSlug: data.organisationalUnitSlug,
 						organisationalUnitType: data.targetUnitType,
@@ -172,7 +172,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 		setItemToEdit(contribution);
 		setEditRoleTypeId(contribution.roleTypeId);
 		setEditUnit({
-			id: contribution.organisationalUnitId,
+			id: contribution.organisationalUnitDocumentId,
 			name: contribution.organisationalUnitName,
 			description: formatRoleType(contribution.organisationalUnitType),
 		});
@@ -199,7 +199,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									...contribution,
 									roleTypeId: option.roleTypeId,
 									roleType: option.roleType as PersonContribution["roleType"],
-									organisationalUnitId: unit.id,
+									organisationalUnitDocumentId: unit.id,
 									organisationalUnitName: unit.name,
 									duration: { start, ...(end != null ? { end } : {}) },
 								}
@@ -352,8 +352,8 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 											: t("Select a role first.")
 									}
 									errorMessage={
-										typeof validationErrors?.organisationalUnitId === "string"
-											? validationErrors.organisationalUnitId
+										typeof validationErrors?.organisationalUnitDocumentId === "string"
+											? validationErrors.organisationalUnitDocumentId
 											: undefined
 									}
 									fetchPage={(params) => {
@@ -376,7 +376,11 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									}
 									selectedItem={selectedUnit}
 								/>
-								<input name="organisationalUnitId" type="hidden" value={selectedUnit?.id ?? ""} />
+								<input
+									name="organisationalUnitDocumentId"
+									type="hidden"
+									value={selectedUnit?.id ?? ""}
+								/>
 
 								<DatePicker granularity="day" isRequired={true} name="duration.start">
 									<Label>{t("Start date")}</Label>
@@ -390,7 +394,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									<FieldError />
 								</DatePicker>
 
-								<input name="personId" type="hidden" value={personId} />
+								<input name="personDocumentId" type="hidden" value={personDocumentId} />
 							</FormSection>
 
 							<Button className="self-start" isPending={isPending} type="submit">
@@ -478,7 +482,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 				<Form action={editFormAction} state={editState}>
 					<ModalBody className="flex flex-col gap-y-4">
 						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
-						<input name="personId" type="hidden" value={personId} />
+						<input name="personDocumentId" type="hidden" value={personDocumentId} />
 						<Select
 							isRequired={true}
 							onChange={(key) => {
@@ -506,8 +510,8 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 								editRoleOption != null ? t("No organisations found.") : t("Select a role first.")
 							}
 							errorMessage={
-								typeof editValidationErrors?.organisationalUnitId === "string"
-									? editValidationErrors.organisationalUnitId
+								typeof editValidationErrors?.organisationalUnitDocumentId === "string"
+									? editValidationErrors.organisationalUnitDocumentId
 									: undefined
 							}
 							fetchPage={(params) => {
@@ -528,7 +532,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 							}
 							selectedItem={editUnit}
 						/>
-						<input name="organisationalUnitId" type="hidden" value={editUnit?.id ?? ""} />
+						<input name="organisationalUnitDocumentId" type="hidden" value={editUnit?.id ?? ""} />
 						<DatePicker
 							granularity="day"
 							isRequired={true}

@@ -45,13 +45,13 @@ import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-rel
 import { dateToCalendarDate } from "@/lib/date";
 
 interface UnitRelationsSectionProps {
-	unitId: string;
+	unitDocumentId: string;
 	relations: Array<UnitRelation & { lifecycleStatus?: "changed" | "new" }>;
 	statusOptions: Array<UnitRelationStatusOption>;
 }
 
 async function fetchRelatedUnitOptionsPage(
-	unitId: string,
+	unitDocumentId: string,
 	statusId: string,
 	params: Readonly<AsyncOptionsFetchPageParams>,
 ): Promise<{ items: Array<AsyncOption>; total: number }> {
@@ -59,7 +59,7 @@ async function fetchRelatedUnitOptionsPage(
 		limit: String(params.limit),
 		offset: String(params.offset),
 		statusId,
-		unitId,
+		unitDocumentId,
 	});
 
 	if (params.q !== "") {
@@ -93,7 +93,7 @@ function formatLifecycleStatus(
 }
 
 export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>): ReactNode {
-	const { unitId, relations, statusOptions } = props;
+	const { unitDocumentId, relations, statusOptions } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -143,7 +143,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 							id: data.id,
 							statusId: option.statusId,
 							statusType: option.statusType,
-							relatedUnitId: relatedUnit.id,
+							relatedUnitDocumentId: relatedUnit.id,
 							relatedUnitName: relatedUnit.name,
 							relatedUnitSlug: data.relatedUnitSlug,
 							relatedUnitType: data.relatedUnitType,
@@ -166,7 +166,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 		setItemToEdit(relation);
 		setEditStatusId(relation.statusId);
 		setEditUnitItem({
-			id: relation.relatedUnitId,
+			id: relation.relatedUnitDocumentId,
 			name: relation.relatedUnitName,
 			description: formatUnitType(relation.relatedUnitType),
 		});
@@ -199,7 +199,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									...relation,
 									statusId: option.statusId,
 									statusType: option.statusType,
-									relatedUnitId: relatedUnit.id,
+									relatedUnitDocumentId: relatedUnit.id,
 									relatedUnitName: relatedUnit.name,
 									duration: { start, ...(end != null ? { end } : {}) },
 								}
@@ -348,7 +348,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 											return Promise.resolve({ items: [], total: 0 });
 										}
 
-										return fetchRelatedUnitOptionsPage(unitId, selectedStatusId, params);
+										return fetchRelatedUnitOptionsPage(unitDocumentId, selectedStatusId, params);
 									}}
 									initialItems={[]}
 									initialTotal={0}
@@ -361,7 +361,11 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									placeholder={t("No related unit selected")}
 									selectedItem={selectedUnitItem}
 								/>
-								<input name="relatedUnitId" type="hidden" value={selectedUnitItem?.id ?? ""} />
+								<input
+									name="relatedUnitDocumentId"
+									type="hidden"
+									value={selectedUnitItem?.id ?? ""}
+								/>
 
 								<DatePicker granularity="day" isRequired={true} name="duration.start">
 									<Label>{t("Start date")}</Label>
@@ -375,7 +379,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									<FieldError />
 								</DatePicker>
 
-								<input name="unitId" type="hidden" value={unitId} />
+								<input name="unitDocumentId" type="hidden" value={unitDocumentId} />
 							</FormSection>
 
 							<Button className="self-start" isPending={isPending} type="submit">
@@ -465,7 +469,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 				<Form action={editFormAction} state={editState}>
 					<ModalBody className="flex flex-col gap-y-4">
 						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
-						<input name="unitId" type="hidden" value={unitId} />
+						<input name="unitDocumentId" type="hidden" value={unitDocumentId} />
 						<Select
 							isRequired={true}
 							onChange={(key) => {
@@ -495,7 +499,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									return Promise.resolve({ items: [], total: 0 });
 								}
 
-								return fetchRelatedUnitOptionsPage(unitId, editStatusId, params);
+								return fetchRelatedUnitOptionsPage(unitDocumentId, editStatusId, params);
 							}}
 							initialItems={[]}
 							initialTotal={0}
@@ -508,7 +512,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 							placeholder={t("No related unit selected")}
 							selectedItem={editUnitItem}
 						/>
-						<input name="relatedUnitId" type="hidden" value={editUnitItem?.id ?? ""} />
+						<input name="relatedUnitDocumentId" type="hidden" value={editUnitItem?.id ?? ""} />
 						<DatePicker
 							granularity="day"
 							isRequired={true}

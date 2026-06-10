@@ -45,7 +45,7 @@ import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person
 import { dateToCalendarDate } from "@/lib/date";
 
 interface PersonRelationsSectionProps {
-	unitId: string;
+	organisationalUnitDocumentId: string;
 	relations: Array<PersonRelation & { lifecycleStatus?: "changed" | "new" }>;
 	roleOptions: Array<PersonRelationRoleOption>;
 	initialPersonItems: Array<AsyncOption>;
@@ -92,7 +92,13 @@ function formatLifecycleStatus(
 }
 
 export function PersonRelationsSection(props: Readonly<PersonRelationsSectionProps>): ReactNode {
-	const { unitId, relations, roleOptions, initialPersonItems, initialPersonTotal } = props;
+	const {
+		organisationalUnitDocumentId,
+		relations,
+		roleOptions,
+		initialPersonItems,
+		initialPersonTotal,
+	} = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -146,7 +152,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 						...prev,
 						{
 							id: data.id,
-							personId: person.id,
+							personDocumentId: person.id,
 							personName: person.name,
 							personSlug: data.personSlug,
 							roleTypeId: option.roleTypeId,
@@ -170,7 +176,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 		setEditState(createActionStateInitial());
 		setItemToEdit(relation);
 		setEditRoleTypeId(relation.roleTypeId);
-		setEditPerson({ id: relation.personId, name: relation.personName });
+		setEditPerson({ id: relation.personDocumentId, name: relation.personName });
 		setEditStartDate(dateToCalendarDate(relation.duration.start));
 		setEditEndDate(dateToCalendarDate(relation.duration.end));
 	}
@@ -192,7 +198,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 						relation.id === itemToEdit.id
 							? {
 									...relation,
-									personId: person.id,
+									personDocumentId: person.id,
 									personName: person.name,
 									roleTypeId: option.roleTypeId,
 									roleType: option.roleType as PersonRelation["roleType"],
@@ -339,8 +345,8 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 									aria-label={t("Person")}
 									emptyMessage={t("No persons found.")}
 									errorMessage={
-										typeof validationErrors?.personId === "string"
-											? validationErrors.personId
+										typeof validationErrors?.personDocumentId === "string"
+											? validationErrors.personDocumentId
 											: undefined
 									}
 									fetchPage={fetchPersonOptionsPage}
@@ -351,7 +357,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 									placeholder={t("No person selected")}
 									selectedItem={selectedPerson}
 								/>
-								<input name="personId" type="hidden" value={selectedPerson?.id ?? ""} />
+								<input name="personDocumentId" type="hidden" value={selectedPerson?.id ?? ""} />
 
 								<DatePicker granularity="day" isRequired={true} name="duration.start">
 									<Label>{t("Start date")}</Label>
@@ -365,7 +371,11 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 									<FieldError />
 								</DatePicker>
 
-								<input name="organisationalUnitId" type="hidden" value={unitId} />
+								<input
+									name="organisationalUnitDocumentId"
+									type="hidden"
+									value={organisationalUnitDocumentId}
+								/>
 							</FormSection>
 
 							<Button className="self-start" isPending={isPending} type="submit">
@@ -455,7 +465,11 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 				<Form action={editFormAction} state={editState}>
 					<ModalBody className="flex flex-col gap-y-4">
 						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
-						<input name="organisationalUnitId" type="hidden" value={unitId} />
+						<input
+							name="organisationalUnitDocumentId"
+							type="hidden"
+							value={organisationalUnitDocumentId}
+						/>
 						<Select
 							isRequired={true}
 							onChange={(key) => {
@@ -479,8 +493,8 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							aria-label={t("Person")}
 							emptyMessage={t("No persons found.")}
 							errorMessage={
-								typeof editValidationErrors?.personId === "string"
-									? editValidationErrors.personId
+								typeof editValidationErrors?.personDocumentId === "string"
+									? editValidationErrors.personDocumentId
 									: undefined
 							}
 							fetchPage={fetchPersonOptionsPage}
@@ -491,7 +505,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							placeholder={t("No person selected")}
 							selectedItem={editPerson}
 						/>
-						<input name="personId" type="hidden" value={editPerson?.id ?? ""} />
+						<input name="personDocumentId" type="hidden" value={editPerson?.id ?? ""} />
 						<DatePicker
 							granularity="day"
 							isRequired={true}

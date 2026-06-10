@@ -35,15 +35,13 @@ export const createUnitRelationAction = createServerAction(
 			});
 		}
 
-		const { unitId, statusId, relatedUnitId, duration } = result.output;
+		const { unitDocumentId, statusId, relatedUnitDocumentId, duration } = result.output;
 
 		const returned = await db.transaction(async (tx) => {
-			// unitId / relatedUnitId are document ids (entities.id). Relations are document-level and do
-			// not require the edited unit to be published (the picker restricts the *target*).
 			const existing = await tx.query.organisationalUnitsRelations.findFirst({
 				where: {
-					unitDocumentId: unitId,
-					relatedUnitDocumentId: relatedUnitId,
+					unitDocumentId,
+					relatedUnitDocumentId,
 					status: statusId,
 				},
 				columns: { id: true },
@@ -69,15 +67,15 @@ export const createUnitRelationAction = createServerAction(
 					eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 				)
 				.innerJoin(schema.entities, eq(schema.entities.id, schema.documentLifecycle.documentId))
-				.where(eq(schema.documentLifecycle.documentId, relatedUnitId))
+				.where(eq(schema.documentLifecycle.documentId, relatedUnitDocumentId))
 				.limit(1)
 				.then((rows) => rows[0] ?? null);
 
 			const row = await tx
 				.insert(schema.organisationalUnitsRelations)
 				.values({
-					unitDocumentId: unitId,
-					relatedUnitDocumentId: relatedUnitId,
+					unitDocumentId,
+					relatedUnitDocumentId,
 					status: statusId,
 					duration,
 				})

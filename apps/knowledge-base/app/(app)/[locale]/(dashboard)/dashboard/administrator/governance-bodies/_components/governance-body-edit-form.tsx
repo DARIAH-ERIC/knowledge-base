@@ -133,7 +133,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 						initialPersonTotal={initialPersonTotal}
 						relations={personRelations}
 						roleOptions={personRelationRoleOptions}
-						unitId={documentId}
+						organisationalUnitDocumentId={documentId}
 					/>
 				</TabPanel>
 
@@ -141,7 +141,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 					<UnitRelationsSection
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}
-						unitId={documentId}
+						unitDocumentId={documentId}
 					/>
 				</TabPanel>
 			</EntityEditTabs>

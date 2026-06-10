@@ -25,12 +25,12 @@ interface GetInstitutionRelationsParams {
 export interface InstitutionRelationsResult {
 	data: Array<{
 		id: string;
-		institutionId: string;
+		institutionDocumentId: string;
 		institutionName: string;
 		institutionSlug: string;
 		statusId: string;
 		statusType: string;
-		relatedUnitId: string;
+		relatedUnitDocumentId: string;
 		relatedUnitName: string;
 		relatedUnitType: string;
 		durationStart: Date;
@@ -114,12 +114,12 @@ export async function getInstitutionRelations(
 		db
 			.select({
 				id: schema.organisationalUnitsRelations.id,
-				institutionId: schema.organisationalUnitsRelations.unitDocumentId,
+				institutionDocumentId: schema.organisationalUnitsRelations.unitDocumentId,
 				institutionName: schema.organisationalUnits.name,
 				institutionSlug: institutionEntities.slug,
 				statusId: schema.organisationalUnitsRelations.status,
 				statusType: schema.organisationalUnitStatus.status,
-				relatedUnitId: schema.organisationalUnitsRelations.relatedUnitDocumentId,
+				relatedUnitDocumentId: schema.organisationalUnitsRelations.relatedUnitDocumentId,
 				relatedUnitName: relatedOrganisationalUnits.name,
 				relatedUnitType: relatedOrganisationalUnitTypes.type,
 				duration: schema.organisationalUnitsRelations.duration,
@@ -208,12 +208,12 @@ export async function getInstitutionRelations(
 		data: rows.map((row) => {
 			return {
 				id: row.id,
-				institutionId: row.institutionId,
+				institutionDocumentId: row.institutionDocumentId,
 				institutionName: row.institutionName,
 				institutionSlug: row.institutionSlug,
 				statusId: row.statusId,
 				statusType: row.statusType,
-				relatedUnitId: row.relatedUnitId,
+				relatedUnitDocumentId: row.relatedUnitDocumentId,
 				relatedUnitName: row.relatedUnitName,
 				relatedUnitType: row.relatedUnitType,
 				durationStart: row.duration.start,

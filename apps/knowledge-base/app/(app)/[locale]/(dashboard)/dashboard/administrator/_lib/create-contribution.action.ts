@@ -35,13 +35,11 @@ export const createContributionAction = createServerAction(
 			});
 		}
 
-		const { personId, roleTypeId, organisationalUnitId, duration } = result.output;
+		const { personDocumentId, roleTypeId, organisationalUnitDocumentId, duration } = result.output;
 
 		const returned = await db.transaction(async (tx) => {
-			// personId / organisationalUnitId are document ids (entities.id). Relations are document-level
-			// and do not require the edited entity to be published (the picker restricts the *target* to
-			// published). Resolve the org to its current version (draft-or-published) to validate the
-			// role/unit-type combination and report back the unit type.
+			// Relations are document-level and do not require the edited entity to be published. Resolve
+			// the org to its current version to validate the role/unit-type combination.
 			const unit = await tx
 				.select({
 					unitType: schema.organisationalUnitTypes.type,
@@ -71,7 +69,7 @@ export const createContributionAction = createServerAction(
 						),
 					),
 				)
-				.where(eq(schema.documentLifecycle.documentId, organisationalUnitId))
+				.where(eq(schema.documentLifecycle.documentId, organisationalUnitDocumentId))
 				.limit(1)
 				.then((rows) => rows[0] ?? null);
 
@@ -81,8 +79,8 @@ export const createContributionAction = createServerAction(
 
 			const existing = await tx.query.personsToOrganisationalUnits.findFirst({
 				where: {
-					personDocumentId: personId,
-					organisationalUnitDocumentId: organisationalUnitId,
+					personDocumentId,
+					organisationalUnitDocumentId,
 					roleTypeId,
 				},
 				columns: { id: true },
@@ -92,19 +90,18 @@ export const createContributionAction = createServerAction(
 				return { error: "duplicate" as const };
 			}
 
-			// `personId` is a document id (entities.id); resolve its slug for the optimistic row.
 			const personEntity = await tx
 				.select({ slug: schema.entities.slug })
 				.from(schema.entities)
-				.where(eq(schema.entities.id, personId))
+				.where(eq(schema.entities.id, personDocumentId))
 				.limit(1)
 				.then((rows) => rows[0] ?? null);
 
 			const row = await tx
 				.insert(schema.personsToOrganisationalUnits)
 				.values({
-					personDocumentId: personId,
-					organisationalUnitDocumentId: organisationalUnitId,
+					personDocumentId,
+					organisationalUnitDocumentId,
 					roleTypeId,
 					duration,
 				})
@@ -134,7 +131,9 @@ export const createContributionAction = createServerAction(
 			return createActionStateError({
 				message: t("The selected role is not allowed for this organisation."),
 				validationErrors: {
-					organisationalUnitId: t("The selected role is not allowed for this organisation."),
+					organisationalUnitDocumentId: t(
+						"The selected role is not allowed for this organisation.",
+					),
 				},
 			});
 		}

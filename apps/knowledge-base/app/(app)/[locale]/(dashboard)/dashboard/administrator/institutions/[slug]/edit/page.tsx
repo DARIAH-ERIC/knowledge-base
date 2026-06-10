@@ -164,7 +164,6 @@ export default async function DashboardAdministratorEditInstitutionPage(
 			selectedRelatedResources={selectedRelatedResources}
 			selectedSocialMediaItems={selectedSocialMediaItems}
 			unitRelationStatusOptions={unitRelationStatusOptions}
-			unitVersionId={institution.id}
 		/>
 	);
 }

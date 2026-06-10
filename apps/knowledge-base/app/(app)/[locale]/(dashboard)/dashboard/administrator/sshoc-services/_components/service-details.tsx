@@ -22,8 +22,8 @@ interface ServiceDetailsProps {
 	> & {
 		status: Pick<schema.ServiceStatus, "status">;
 		type: Pick<schema.ServiceType, "type">;
-		ownerUnitIds: Array<string>;
-		providerUnitIds: Array<string>;
+		ownerUnitDocumentIds: Array<string>;
+		providerUnitDocumentIds: Array<string>;
 	};
 	selectedOrganisationalUnitItems: Array<{ id: string; name: string }>;
 }
@@ -47,17 +47,19 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 			<DescriptionDetails>{service.comment}</DescriptionDetails>
 			<DescriptionTerm>{t("Service owners")}</DescriptionTerm>
 			<DescriptionDetails>
-				{service.ownerUnitIds.map(
-					(ownerUnitId) =>
-						selectedOrganisationalUnitItems.find((orgaUnit) => orgaUnit.id === ownerUnitId)?.name,
+				{service.ownerUnitDocumentIds.map(
+					(ownerUnitDocumentId) =>
+						selectedOrganisationalUnitItems.find((orgaUnit) => orgaUnit.id === ownerUnitDocumentId)
+							?.name,
 				)}
 			</DescriptionDetails>
 			<DescriptionTerm>{t("Service providers")}</DescriptionTerm>
 			<DescriptionDetails>
-				{service.providerUnitIds.map(
-					(providerUnitId) =>
-						selectedOrganisationalUnitItems.find((orgaUnit) => orgaUnit.id === providerUnitId)
-							?.name,
+				{service.providerUnitDocumentIds.map(
+					(providerUnitDocumentId) =>
+						selectedOrganisationalUnitItems.find(
+							(orgaUnit) => orgaUnit.id === providerUnitDocumentId,
+						)?.name,
 				)}
 			</DescriptionDetails>
 		</DescriptionList>

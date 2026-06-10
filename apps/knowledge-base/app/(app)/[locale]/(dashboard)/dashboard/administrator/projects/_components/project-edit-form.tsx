@@ -41,7 +41,7 @@ interface ProjectEditFormProps {
 	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
 	initialPartners: Array<{
 		id: string;
-		unitId: string;
+		unitDocumentId: string;
 		unitName: string;
 		roleId: string;
 		roleName: string;
@@ -107,7 +107,11 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 				</TabPanel>
 
 				<TabPanel id="project-partners" shouldPreserveState={true}>
-					<ProjectPartnersSection partners={initialPartners} projectId={documentId} roles={roles} />
+					<ProjectPartnersSection
+						partners={initialPartners}
+						projectDocumentId={documentId}
+						roles={roles}
+					/>
 				</TabPanel>
 			</EntityEditTabs>
 		</Fragment>

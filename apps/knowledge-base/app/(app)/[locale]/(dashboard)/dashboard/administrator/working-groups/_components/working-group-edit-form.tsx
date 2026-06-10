@@ -136,7 +136,7 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 						initialPersonTotal={initialPersonTotal}
 						relations={personRelations}
 						roleOptions={personRelationRoleOptions}
-						unitId={documentId}
+						organisationalUnitDocumentId={documentId}
 					/>
 				</TabPanel>
 
@@ -144,7 +144,7 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 					<UnitRelationsSection
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}
-						unitId={documentId}
+						unitDocumentId={documentId}
 					/>
 				</TabPanel>
 			</EntityEditTabs>
