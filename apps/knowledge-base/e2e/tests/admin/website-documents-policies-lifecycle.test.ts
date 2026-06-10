@@ -188,12 +188,13 @@ test.describe("website documents-policies lifecycle", () => {
 		const workerIndex = test.info().workerIndex;
 		const docPoliciesPage = createWebsiteDocumentsPoliciesPage(workerIndex);
 		const title = `${docPoliciesPage.workerPrefix} Clear Optional ${randomUUID()}`;
+		const group = await db.getDocumentPolicyGroup();
 
 		await docPoliciesPage.gotoCreate();
 		await docPoliciesPage.fillTitle(title);
 		await docPoliciesPage.fillSummary("Document or policy with optional fields to clear");
 		await docPoliciesPage.fillUrl("https://example.com/document-policy-clear");
-		await docPoliciesPage.selectFirstGroup();
+		await docPoliciesPage.selectGroup(group.label);
 		await docPoliciesPage.selectDocumentFromMediaLibrary("E2E Test Document");
 		await docPoliciesPage.addContentBlock("Optional document or policy content");
 		await docPoliciesPage.submitForm();

@@ -126,8 +126,10 @@ async function fetchInstitutionOptionsPage(
 	params: Readonly<AsyncOptionsFetchPageParams>,
 ): Promise<{ items: Array<AsyncOption>; total: number }> {
 	const searchParams = new URLSearchParams({
+		idType: "document",
 		limit: String(params.limit),
 		offset: String(params.offset),
+		unitType: "institution",
 	});
 
 	if (params.q !== "") {

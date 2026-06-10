@@ -30,6 +30,8 @@ interface GetOrganisationalUnitsParams {
 }
 
 interface GetOrganisationalUnitOptionsParams {
+	/** @default "version" */
+	idType?: "document" | "version";
 	limit?: number;
 	offset?: number;
 	q?: string;
@@ -40,7 +42,7 @@ interface GetOrganisationalUnitOptionsParams {
 export async function getOrganisationalUnitOptions(
 	params: GetOrganisationalUnitOptionsParams = {},
 ): Promise<{ items: Array<OrganisationalUnitOption>; total: number }> {
-	const { limit = 20, offset = 0, q, unitType } = params;
+	const { idType = "version", limit = 20, offset = 0, q, unitType } = params;
 	const query = q?.trim();
 	const searchWhere =
 		query != null && query !== ""
@@ -53,7 +55,7 @@ export async function getOrganisationalUnitOptions(
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({
-				id: schema.organisationalUnits.id,
+				id: idType === "document" ? schema.entityVersions.entityId : schema.organisationalUnits.id,
 				name: schema.organisationalUnits.name,
 				type: schema.organisationalUnitTypes.type,
 			})

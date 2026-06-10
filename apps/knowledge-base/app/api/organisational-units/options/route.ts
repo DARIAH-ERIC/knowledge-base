@@ -24,6 +24,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 	const limit = Math.min(Math.max(Number(searchParams.get("limit") ?? 20), 1), 100);
 	const offset = Math.max(Number(searchParams.get("offset") ?? 0), 0);
 	const q = searchParams.get("q") ?? undefined;
+	const idType = searchParams.get("idType") === "document" ? "document" : "version";
 	const unitTypeParam = searchParams.get("unitType");
 	const unitType = (organisationalUnitTypesEnum as ReadonlyArray<string>).includes(
 		unitTypeParam ?? "",
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 		? (unitTypeParam as OrganisationalUnitType)
 		: undefined;
 
-	const result = await getOrganisationalUnitOptions({ limit, offset, q, unitType });
+	const result = await getOrganisationalUnitOptions({ idType, limit, offset, q, unitType });
 
 	return NextResponse.json(result);
 }

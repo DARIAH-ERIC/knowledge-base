@@ -52,6 +52,9 @@ out/
 /playwright/.cache/
 /playwright-report/
 /test-results/
+.auth/
+.playwright/
+.playwright-cli/
 
 # storybook
 storybook-static/

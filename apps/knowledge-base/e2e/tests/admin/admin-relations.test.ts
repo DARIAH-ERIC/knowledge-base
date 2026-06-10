@@ -67,6 +67,15 @@ async function selectFirstOptionFromSelect(scope: Locator, label: string): Promi
 	await scope.page().getByRole("option").first().click();
 }
 
+async function selectOptionFromSelect(
+	scope: Locator,
+	label: string,
+	optionName: string,
+): Promise<void> {
+	await scope.getByRole("button", { name: label }).click();
+	await scope.page().getByRole("option", { name: optionName, exact: true }).click();
+}
+
 async function selectAsyncOption(
 	page: Page,
 	scope: Locator,
@@ -75,12 +84,15 @@ async function selectAsyncOption(
 ): Promise<void> {
 	await scope.getByRole("button", { name: triggerName }).click();
 
-	const searchInput = page.getByRole("dialog").last().getByPlaceholder("Search");
-	await searchInput.fill(searchText ?? "");
-	await searchInput.press("Enter");
+	if (searchText != null) {
+		const searchInput = page.getByRole("dialog", { name: triggerName }).getByRole("searchbox");
+		await searchInput.fill(searchText);
+		await searchInput.press("Enter");
+	}
 
-	await page.getByRole("option").first().waitFor({ state: "visible" });
-	await page.getByRole("option").first().click();
+	const option = page.getByRole("option").first();
+	await option.waitFor({ state: "visible" });
+	await option.click();
 }
 
 test.describe("admin relation management", () => {
@@ -256,10 +268,8 @@ test.describe("admin relation management", () => {
 
 		const dialog = page.getByRole("dialog", { name: "Add relation" });
 		await selectAsyncOption(page, dialog, "No institution selected", name);
-		await selectFirstOptionFromSelect(dialog, "Relation type");
-		const statusId = await dialog.locator('input[name="statusId"]').inputValue();
-		const relatedUnit = await db.getEligibleRelatedUnit(institution!.documentId, statusId);
-		await selectAsyncOption(page, dialog, "No related unit selected", relatedUnit.name);
+		await selectOptionFromSelect(dialog, "Relation type", "is located in");
+		await selectAsyncOption(page, dialog, "No related unit selected");
 		await fillDatePicker(page, dialog, "Start date", 2025, 1, 1);
 		await saveAddRelationDialog(page);
 

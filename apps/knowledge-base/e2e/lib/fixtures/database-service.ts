@@ -226,56 +226,6 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
-	async getEligibleRelatedUnit(
-		unitDocumentId: string,
-		statusId: string,
-	): Promise<{ id: string; name: string }> {
-		const [unit] = await this.db
-			.select({ typeId: schema.organisationalUnits.typeId })
-			.from(schema.documentLifecycle)
-			.innerJoin(
-				schema.organisationalUnits,
-				sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
-			)
-			.where(eq(schema.documentLifecycle.documentId, unitDocumentId))
-			.limit(1);
-
-		if (unit == null) {
-			throw new Error(`Unit "${unitDocumentId}" not found.`);
-		}
-
-		const [relatedUnit] = await this.db
-			.select({
-				id: schema.entityVersions.entityId,
-				name: schema.organisationalUnits.name,
-			})
-			.from(schema.organisationalUnitsAllowedRelations)
-			.innerJoin(
-				schema.organisationalUnits,
-				eq(
-					schema.organisationalUnits.typeId,
-					schema.organisationalUnitsAllowedRelations.relatedUnitTypeId,
-				),
-			)
-			.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
-			.where(
-				and(
-					eq(schema.organisationalUnitsAllowedRelations.unitTypeId, unit.typeId),
-					eq(schema.organisationalUnitsAllowedRelations.relationTypeId, statusId),
-					eq(schema.entityStatus.type, "published"),
-				),
-			)
-			.orderBy(schema.organisationalUnits.name)
-			.limit(1);
-
-		if (relatedUnit == null) {
-			throw new Error(`No eligible related unit found for relation status "${statusId}".`);
-		}
-
-		return relatedUnit;
-	}
-
 	async getInstitutionDescriptionByName(name: string): Promise<unknown> {
 		const institution = await this.getInstitutionByName(name);
 		if (institution == null) {
