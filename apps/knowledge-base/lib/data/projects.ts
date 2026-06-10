@@ -4,13 +4,10 @@ import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
-import {
-	getOrganisationalUnitOptions,
-	getOrganisationalUnitOptionsByIds,
-} from "@/lib/data/organisational-units";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
-import { alias, and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { alias, and, count, desc, eq, or, sql } from "@/lib/db/sql";
 
 export type ProjectsSort = "name" | "acronym" | "funding" | "scope";
 
@@ -49,7 +46,10 @@ export async function getProjects(params: Readonly<GetProjectsParams>): Promise<
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
-			? or(ilike(schema.projects.name, `%${query}%`), ilike(schema.projects.acronym, `%${query}%`))
+			? or(
+					unaccentIlike(schema.projects.name, `%${query}%`),
+					unaccentIlike(schema.projects.acronym, `%${query}%`),
+				)
 			: undefined;
 	const orderBy =
 		sort === "acronym"
@@ -149,7 +149,7 @@ export async function getProjectsForAdmin(
 export async function getProjectCreateDataForAdmin(currentUser: Pick<User, "role">) {
 	assertAdminUser(currentUser);
 
-	const [scopes, initialOrgUnits, roles, initialSocialMedia] = await Promise.all([
+	const [scopes, roles, initialSocialMedia] = await Promise.all([
 		db.query.projectScopes.findMany({
 			orderBy: {
 				scope: "asc",
@@ -159,7 +159,6 @@ export async function getProjectCreateDataForAdmin(currentUser: Pick<User, "role
 				scope: true,
 			},
 		}),
-		getOrganisationalUnitOptions(),
 		db.query.projectRoles.findMany({
 			orderBy: { role: "asc" },
 			columns: { id: true, role: true },
@@ -167,7 +166,7 @@ export async function getProjectCreateDataForAdmin(currentUser: Pick<User, "role
 		getSocialMediaOptions(),
 	]);
 
-	return { initialOrgUnits, initialSocialMedia, roles, scopes };
+	return { initialSocialMedia, roles, scopes };
 }
 
 export async function getProjectBySlugForAdmin(currentUser: Pick<User, "role">, slug: string) {
@@ -229,16 +228,14 @@ export async function getProjectBySlugForAdmin(currentUser: Pick<User, "role">, 
  * Project partner rows (project↔org-unit relations) for a single project, for the admin surfaces.
  * Each partner's unit is resolved to its published version: a partner is only ever created against
  * a published unit and that published version is never removed without deleting the whole document
- * (which also removes the partner row), so `publishedId` is always present here — i.e. equivalent
- * to `COALESCE(publishedId, draftId)` for partner rows. `unitId` is the published version id, which
- * the shared (version-id) unit picker expects.
+ * (which also removes the partner row), so `publishedId` is always present here.
  */
 function getProjectPartnerRowsForAdmin(projectDocumentId: string) {
 	const unitDocumentLifecycle = alias(schema.documentLifecycle, "unit_document_lifecycle");
 	return db
 		.select({
 			id: schema.projectsToOrganisationalUnits.id,
-			unitId: schema.organisationalUnits.id,
+			unitDocumentId: schema.projectsToOrganisationalUnits.unitDocumentId,
 			unitName: schema.organisationalUnits.name,
 			roleId: schema.projectsToOrganisationalUnits.roleId,
 			roleName: schema.projectRoles.role,
@@ -326,7 +323,6 @@ export async function getProjectEditDataForAdmin(currentUser: Pick<User, "role">
 	const [
 		descriptionRows,
 		scopes,
-		initialOrgUnits,
 		roles,
 		initialSocialMedia,
 		existingPartners,
@@ -352,7 +348,6 @@ export async function getProjectEditDataForAdmin(currentUser: Pick<User, "role">
 			orderBy: { scope: "asc" },
 			columns: { id: true, scope: true },
 		}),
-		getOrganisationalUnitOptions(),
 		db.query.projectRoles.findMany({
 			orderBy: { role: "asc" },
 			columns: { id: true, role: true },
@@ -368,7 +363,7 @@ export async function getProjectEditDataForAdmin(currentUser: Pick<User, "role">
 	const initialPartners = existingPartners.map((partner) => {
 		return {
 			id: partner.id,
-			unitId: partner.unitId,
+			unitDocumentId: partner.unitDocumentId,
 			unitName: partner.unitName,
 			roleId: partner.roleId,
 			roleName: partner.roleName,
@@ -381,19 +376,11 @@ export async function getProjectEditDataForAdmin(currentUser: Pick<User, "role">
 
 	const initialSocialMediaIds = existingSocialMedia.map((row) => row.socialMediaId);
 
-	const [selectedSocialMediaItems, selectedPartnerUnits] = await Promise.all([
-		getSocialMediaOptionsByIds(initialSocialMediaIds),
-		getOrganisationalUnitOptionsByIds(initialPartners.map((partner) => partner.unitId)),
-	]);
+	const selectedSocialMediaItems = await getSocialMediaOptionsByIds(initialSocialMediaIds);
 
 	return {
 		description: descriptionRows.at(0)?.content,
-		initialOrgUnits,
-		initialPartners: initialPartners.map((partner) => {
-			const matchedUnit = selectedPartnerUnits.find((unit) => unit.id === partner.unitId);
-
-			return { ...partner, unitName: matchedUnit?.name ?? partner.unitName };
-		}),
+		initialPartners,
 		initialSocialMedia,
 		initialSocialMediaIds,
 		project,

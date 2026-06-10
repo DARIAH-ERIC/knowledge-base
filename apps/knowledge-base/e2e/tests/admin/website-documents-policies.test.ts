@@ -55,8 +55,10 @@ test.describe("website documents-policies admin", () => {
 				return groups.map((group) => group.label);
 			})
 			.toStrictEqual([secondLabel, renamedLabel]);
-
 		await docPoliciesPage.goto();
+		await expect
+			.poll(async () => docPoliciesPage.groupLabels(), { timeout: 15_000 })
+			.toContainEqual(secondLabel);
 		const orderedLabels = await docPoliciesPage.groupLabels();
 		expect(orderedLabels.indexOf(secondLabel)).toBeLessThan(orderedLabels.indexOf(renamedLabel));
 		await expect(docPoliciesPage.groupSection(secondLabel)).toBeVisible();

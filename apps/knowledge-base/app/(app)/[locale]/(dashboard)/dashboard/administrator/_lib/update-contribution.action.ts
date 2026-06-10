@@ -33,7 +33,8 @@ export const updateContributionAction = createServerAction(
 			});
 		}
 
-		const { id, personId, roleTypeId, organisationalUnitId, duration } = result.output;
+		const { id, personDocumentId, roleTypeId, organisationalUnitDocumentId, duration } =
+			result.output;
 
 		const returned = await db.transaction(async (tx) => {
 			const unit = await tx
@@ -63,7 +64,7 @@ export const updateContributionAction = createServerAction(
 						),
 					),
 				)
-				.where(eq(schema.documentLifecycle.documentId, organisationalUnitId))
+				.where(eq(schema.documentLifecycle.documentId, organisationalUnitDocumentId))
 				.limit(1)
 				.then((rows) => rows[0] ?? null);
 
@@ -77,10 +78,10 @@ export const updateContributionAction = createServerAction(
 				.where(
 					and(
 						ne(schema.personsToOrganisationalUnits.id, id),
-						eq(schema.personsToOrganisationalUnits.personDocumentId, personId),
+						eq(schema.personsToOrganisationalUnits.personDocumentId, personDocumentId),
 						eq(
 							schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
-							organisationalUnitId,
+							organisationalUnitDocumentId,
 						),
 						eq(schema.personsToOrganisationalUnits.roleTypeId, roleTypeId),
 					),
@@ -95,8 +96,8 @@ export const updateContributionAction = createServerAction(
 			await tx
 				.update(schema.personsToOrganisationalUnits)
 				.set({
-					personDocumentId: personId,
-					organisationalUnitDocumentId: organisationalUnitId,
+					personDocumentId,
+					organisationalUnitDocumentId,
 					roleTypeId,
 					duration,
 				})

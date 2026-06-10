@@ -5,17 +5,13 @@ import * as schema from "@dariah-eric/database/schema";
 import { imageAssetWidth } from "@/config/assets.config";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { and, count, eq, ilike, inArray } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { and, count, eq, inArray } from "@/lib/db/sql";
 import { images } from "@/lib/images";
+import type { OrganisationalUnitOption } from "@/lib/organisational-unit-options";
 
 /** The literal union of organisational-unit types (e.g. "institution", "national_consortium"). */
 export type OrganisationalUnitType = typeof schema.organisationalUnitTypes.$inferSelect.type;
-
-export interface OrganisationalUnitOption {
-	id: string;
-	name: string;
-	description: string;
-}
 
 function formatOrganisationalUnitType(type: string): string {
 	return type.replaceAll("_", " ");
@@ -43,7 +39,7 @@ export async function getOrganisationalUnitOptions(
 	const query = q?.trim();
 	const searchWhere =
 		query != null && query !== ""
-			? ilike(schema.organisationalUnits.name, `%${query}%`)
+			? unaccentIlike(schema.organisationalUnits.name, `%${query}%`)
 			: undefined;
 	const typeWhere =
 		unitType != null ? eq(schema.organisationalUnitTypes.type, unitType) : undefined;
@@ -52,7 +48,7 @@ export async function getOrganisationalUnitOptions(
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({
-				id: schema.organisationalUnits.id,
+				documentId: schema.entityVersions.entityId,
 				name: schema.organisationalUnits.name,
 				type: schema.organisationalUnitTypes.type,
 			})
@@ -82,7 +78,7 @@ export async function getOrganisationalUnitOptions(
 	return {
 		items: items.map((item) => {
 			return {
-				id: item.id,
+				documentId: item.documentId,
 				name: item.name,
 				description: formatOrganisationalUnitType(item.type),
 			};
@@ -91,14 +87,16 @@ export async function getOrganisationalUnitOptions(
 	};
 }
 
-export async function getOrganisationalUnitOptionsByIds(ids: ReadonlyArray<string>) {
-	if (ids.length === 0) {
+export async function getOrganisationalUnitOptionsByDocumentIds(
+	documentIds: ReadonlyArray<string>,
+) {
+	if (documentIds.length === 0) {
 		return [];
 	}
 
 	const rows = await db
 		.select({
-			id: schema.organisationalUnits.id,
+			documentId: schema.entityVersions.entityId,
 			name: schema.organisationalUnits.name,
 			type: schema.organisationalUnitTypes.type,
 		})
@@ -109,16 +107,18 @@ export async function getOrganisationalUnitOptionsByIds(ids: ReadonlyArray<strin
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 		)
-		.where(and(publishedEntityVersionWhere(), inArray(schema.organisationalUnits.id, [...ids])))
+		.where(
+			and(publishedEntityVersionWhere(), inArray(schema.entityVersions.entityId, [...documentIds])),
+		)
 		.orderBy(schema.organisationalUnits.name);
 
-	const itemById = new Map(
+	const itemByDocumentId = new Map(
 		rows.map(
 			(row) =>
 				[
-					row.id,
+					row.documentId,
 					{
-						id: row.id,
+						documentId: row.documentId,
 						name: row.name,
 						description: formatOrganisationalUnitType(row.type),
 					},
@@ -126,8 +126,8 @@ export async function getOrganisationalUnitOptionsByIds(ids: ReadonlyArray<strin
 		),
 	);
 
-	return ids.flatMap((id) => {
-		const item = itemById.get(id);
+	return documentIds.flatMap((documentId) => {
+		const item = itemByDocumentId.get(documentId);
 		return item != null ? [item] : [];
 	});
 }

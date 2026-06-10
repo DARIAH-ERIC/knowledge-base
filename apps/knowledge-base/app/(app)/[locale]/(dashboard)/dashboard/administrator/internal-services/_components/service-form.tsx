@@ -22,6 +22,10 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import {
+	type OrganisationalUnitOption,
+	toOrganisationalUnitDocumentOptionsPage,
+} from "@/lib/organisational-unit-options";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface ServiceFormProps {
@@ -29,8 +33,8 @@ interface ServiceFormProps {
 		schema.Service,
 		"id" | "name" | "statusId" | "comment" | "dariahBranding" | "monitoring" | "privateSupplier"
 	> & {
-		ownerUnitIds: Array<string>;
-		providerUnitIds: Array<string>;
+		ownerUnitDocumentIds: Array<string>;
+		providerUnitDocumentIds: Array<string>;
 	};
 	serviceStatuses: Array<Pick<schema.ServiceStatus, "id" | "status">>;
 	initialOrganisationalUnitItems: Array<AsyncOption>;
@@ -59,7 +63,9 @@ async function fetchOrganisationalUnitOptionsPage(
 		throw new Error("Failed to load organisational units.");
 	}
 
-	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+	return toOrganisationalUnitDocumentOptionsPage(
+		(await response.json()) as { items: Array<OrganisationalUnitOption>; total: number },
+	);
 }
 
 function formatServiceStatus(status: string): string {
@@ -81,12 +87,12 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
 	const [selectedStatusId, setSelectedStatusId] = useState<string>(service?.statusId ?? "");
-	const [selectedOwnerUnitIds, setSelectedOwnerUnitIds] = useState<Array<string>>(
-		service?.ownerUnitIds ?? [],
+	const [selectedOwnerUnitDocumentIds, setSelectedOwnerUnitDocumentIds] = useState<Array<string>>(
+		service?.ownerUnitDocumentIds ?? [],
 	);
-	const [selectedProviderUnitIds, setSelectedProviderUnitIds] = useState<Array<string>>(
-		service?.providerUnitIds ?? [],
-	);
+	const [selectedProviderUnitDocumentIds, setSelectedProviderUnitDocumentIds] = useState<
+		Array<string>
+	>(service?.providerUnitDocumentIds ?? []);
 
 	return (
 		<FormLayout>
@@ -119,7 +125,7 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 
 					<TextField defaultValue={service?.comment ?? undefined} name="comment">
 						<Label>{t("Comment")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>
@@ -160,13 +166,18 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						initialItems={initialOrganisationalUnitItems}
 						initialTotal={initialOrganisationalUnitTotal}
 						label={t("Service owners")}
-						onChange={setSelectedOwnerUnitIds}
+						onChange={setSelectedOwnerUnitDocumentIds}
 						placeholder={t("No service owners")}
 						selectedItems={selectedOrganisationalUnits}
-						value={selectedOwnerUnitIds}
+						value={selectedOwnerUnitDocumentIds}
 					/>
-					{selectedOwnerUnitIds.map((id, index) => (
-						<input key={id} name={`ownerUnitIds.${String(index)}`} type="hidden" value={id} />
+					{selectedOwnerUnitDocumentIds.map((documentId, index) => (
+						<input
+							key={documentId}
+							name={`ownerUnitDocumentIds.${String(index)}`}
+							type="hidden"
+							value={documentId}
+						/>
 					))}
 
 					<AsyncMultipleSelect
@@ -175,13 +186,18 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						initialItems={initialOrganisationalUnitItems}
 						initialTotal={initialOrganisationalUnitTotal}
 						label={t("Service providers")}
-						onChange={setSelectedProviderUnitIds}
+						onChange={setSelectedProviderUnitDocumentIds}
 						placeholder={t("No service providers")}
 						selectedItems={selectedOrganisationalUnits}
-						value={selectedProviderUnitIds}
+						value={selectedProviderUnitDocumentIds}
 					/>
-					{selectedProviderUnitIds.map((id, index) => (
-						<input key={id} name={`providerUnitIds.${String(index)}`} type="hidden" value={id} />
+					{selectedProviderUnitDocumentIds.map((documentId, index) => (
+						<input
+							key={documentId}
+							name={`providerUnitDocumentIds.${String(index)}`}
+							type="hidden"
+							value={documentId}
+						/>
 					))}
 				</FormSection>
 

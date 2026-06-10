@@ -94,7 +94,7 @@ export function GovernanceBodyForm(props: Readonly<GovernanceBodyFormProps>): Re
 
 					<TextField defaultValue={governanceBody?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>

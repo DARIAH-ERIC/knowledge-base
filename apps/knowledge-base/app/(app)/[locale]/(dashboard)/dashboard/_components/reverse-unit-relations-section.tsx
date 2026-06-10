@@ -25,13 +25,13 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
 	FormSection,
@@ -44,10 +44,14 @@ import { updateUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import type { OrganisationalUnitType } from "@/lib/data/organisational-units";
 import type { ReverseUnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 import { dateToCalendarDate } from "@/lib/date";
+import {
+	type OrganisationalUnitOption,
+	toOrganisationalUnitDocumentOptionsPage,
+} from "@/lib/organisational-unit-options";
 
 interface ReverseUnitRelationsSectionProps {
 	/** The current unit's document id — the fixed _target_ of every relation shown here. */
-	relatedUnitId: string;
+	relatedUnitDocumentId: string;
 	relations: Array<ReverseUnitRelation>;
 	statusOptions: Array<UnitRelationStatusOption>;
 	/** Organisational-unit type to pick as the relation's source/owner (e.g. "institution"). */
@@ -84,7 +88,9 @@ async function fetchSourceUnitOptionsPage(
 		throw new Error("Failed to load units.");
 	}
 
-	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+	return toOrganisationalUnitDocumentOptionsPage(
+		(await response.json()) as { items: Array<OrganisationalUnitOption>; total: number },
+	);
 }
 
 function formatStatus(type: string): string {
@@ -94,7 +100,7 @@ function formatStatus(type: string): string {
 export function ReverseUnitRelationsSection(
 	props: Readonly<ReverseUnitRelationsSectionProps>,
 ): ReactNode {
-	const { relatedUnitId, relations, statusOptions, sourceUnitType, messages } = props;
+	const { relatedUnitDocumentId, relations, statusOptions, sourceUnitType, messages } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -147,7 +153,7 @@ export function ReverseUnitRelationsSection(
 							id: data.id,
 							statusId: option.statusId,
 							statusType: option.statusType,
-							unitId: sourceUnit.id,
+							unitDocumentId: sourceUnit.id,
 							unitName: sourceUnit.name,
 							unitSlug: "",
 							unitType: sourceUnitType,
@@ -169,7 +175,7 @@ export function ReverseUnitRelationsSection(
 		setEditState(createActionStateInitial());
 		setItemToEdit(relation);
 		setEditStatusId(relation.statusId);
-		setEditUnitItem({ id: relation.unitId, name: relation.unitName });
+		setEditUnitItem({ id: relation.unitDocumentId, name: relation.unitName });
 		setEditStartDate(dateToCalendarDate(relation.duration.start));
 		setEditEndDate(dateToCalendarDate(relation.duration.end));
 	}
@@ -198,7 +204,7 @@ export function ReverseUnitRelationsSection(
 									...relation,
 									statusId: option.statusId,
 									statusType: option.statusType,
-									unitId: sourceUnit.id,
+									unitDocumentId: sourceUnit.id,
 									unitName: sourceUnit.name,
 									duration: { start, ...(end != null ? { end } : {}) },
 								}
@@ -220,16 +226,22 @@ export function ReverseUnitRelationsSection(
 				{localRelations.length > 0 ? (
 					<Table aria-label={messages.title} className="[--gutter:0] sm:[--gutter:0]">
 						<TableHeader>
-							<TableColumn isRowHeader={true}>{messages.memberLabel}</TableColumn>
+							<TableColumn className="max-inline-80" isRowHeader={true}>
+								{messages.memberLabel}
+							</TableColumn>
 							{hasStatusChoice ? <TableColumn>{t("Type")}</TableColumn> : null}
 							<TableColumn>{t("From")}</TableColumn>
 							<TableColumn>{t("Until")}</TableColumn>
-							<TableColumn />
+							<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
 						<TableBody items={localRelations}>
 							{(relation) => (
 								<TableRow id={relation.id}>
-									<TableCell>{relation.unitName}</TableCell>
+									<TableCell>
+										<div className="max-inline-80 truncate" title={relation.unitName}>
+											{relation.unitName}
+										</div>
+									</TableCell>
 									{hasStatusChoice ? (
 										<TableCell>
 											<Badge intent="slate">{formatStatus(relation.statusType)}</Badge>
@@ -243,54 +255,38 @@ export function ReverseUnitRelationsSection(
 											? format.dateTime(relation.duration.end, { dateStyle: "short" })
 											: t("present")}
 									</TableCell>
-									<TableCell className="text-end">
-										<div className="flex justify-end gap-1">
-											<Tooltip>
-												<Button
-													aria-label={t("Edit relation")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														openEditDialog(relation);
-													}}
-													size="sq-sm"
-												>
-													<PencilSquareIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Edit relation")}</TooltipContent>
-											</Tooltip>
+									<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+										<RowActionsMenu>
+											<RowActionsMenu.Action
+												icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													openEditDialog(relation);
+												}}
+											>
+												{t("Edit relation")}
+											</RowActionsMenu.Action>
 											{relation.duration.end == null && (
-												<Tooltip>
-													<Button
-														aria-label={t("End relation")}
-														className="block-7 sm:block-7"
-														intent="plain"
-														onPress={() => {
-															setItemToEnd({ id: relation.id });
-															setSelectedEndDate(null);
-														}}
-														size="sq-sm"
-													>
-														<ArchiveBoxXMarkIcon className="block-4 inline-4" />
-													</Button>
-													<TooltipContent inverse={true}>{t("End relation")}</TooltipContent>
-												</Tooltip>
-											)}
-											<Tooltip>
-												<Button
-													aria-label={t("Delete relation")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														setItemToDelete({ id: relation.id });
+												<RowActionsMenu.Action
+													icon={<ArchiveBoxXMarkIcon className="me-2 block-4 inline-4" />}
+													onAction={() => {
+														setItemToEnd({ id: relation.id });
+														setSelectedEndDate(null);
 													}}
-													size="sq-sm"
 												>
-													<TrashIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Delete relation")}</TooltipContent>
-											</Tooltip>
-										</div>
+													{t("End relation")}
+												</RowActionsMenu.Action>
+											)}
+											<RowActionsMenu.Separator />
+											<RowActionsMenu.Action
+												danger={true}
+												icon={<TrashIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													setItemToDelete({ id: relation.id });
+												}}
+											>
+												{t("Delete relation")}
+											</RowActionsMenu.Action>
+										</RowActionsMenu>
 									</TableCell>
 								</TableRow>
 							)}
@@ -344,7 +340,7 @@ export function ReverseUnitRelationsSection(
 									placeholder={t("No related unit selected")}
 									selectedItem={selectedUnitItem}
 								/>
-								<input name="unitId" type="hidden" value={selectedUnitItem?.id ?? ""} />
+								<input name="unitDocumentId" type="hidden" value={selectedUnitItem?.id ?? ""} />
 
 								<DatePicker granularity="day" isRequired={true} name="duration.start">
 									<Label>{t("Start date")}</Label>
@@ -358,7 +354,7 @@ export function ReverseUnitRelationsSection(
 									<FieldError />
 								</DatePicker>
 
-								<input name="relatedUnitId" type="hidden" value={relatedUnitId} />
+								<input name="relatedUnitDocumentId" type="hidden" value={relatedUnitDocumentId} />
 							</FormSection>
 
 							<Button className="self-start" isPending={isPending} type="submit">
@@ -448,7 +444,7 @@ export function ReverseUnitRelationsSection(
 				<Form action={editFormAction} state={editState}>
 					<ModalBody className="flex flex-col gap-y-4">
 						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
-						<input name="relatedUnitId" type="hidden" value={relatedUnitId} />
+						<input name="relatedUnitDocumentId" type="hidden" value={relatedUnitDocumentId} />
 						{hasStatusChoice ? (
 							<Select
 								isRequired={true}
@@ -484,7 +480,7 @@ export function ReverseUnitRelationsSection(
 							placeholder={t("No related unit selected")}
 							selectedItem={editUnitItem}
 						/>
-						<input name="unitId" type="hidden" value={editUnitItem?.id ?? ""} />
+						<input name="unitDocumentId" type="hidden" value={editUnitItem?.id ?? ""} />
 						<DatePicker
 							granularity="day"
 							isRequired={true}

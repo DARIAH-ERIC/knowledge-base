@@ -3,7 +3,8 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { and, count, desc, eq, sql } from "@/lib/db/sql";
 
 export type InternalPagesSort = "title" | "updatedAt";
 
@@ -19,7 +20,9 @@ export async function getInternalPages(params: GetInternalPagesParams) {
 	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
 	const query = q?.trim();
 	const searchWhere =
-		query != null && query !== "" ? ilike(schema.internalPages.title, `%${query}%`) : undefined;
+		query != null && query !== ""
+			? unaccentIlike(schema.internalPages.title, `%${query}%`)
+			: undefined;
 	const orderBy =
 		sort === "title"
 			? dir === "asc"

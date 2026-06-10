@@ -236,10 +236,14 @@ test.describe("persons admin", () => {
 		await personsPage.fillEndContributionDate(2025, 12, 31);
 		await personsPage.confirmEndContribution();
 
-		// Verify "End contribution" button is gone and "present" is replaced by a date.
-		await expect(
-			personsPage.contributionsTable().getByRole("button", { name: "End contribution" }),
-		).toBeHidden();
+		// Verify "End contribution" action is gone and "present" is replaced by a date.
+		await personsPage
+			.contributionsTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
+		await expect(personsPage.page.getByRole("menuitem", { name: "End contribution" })).toBeHidden();
+		await personsPage.page.keyboard.press("Escape");
 		await expect(personsPage.contributionsTable().getByText("present")).toBeHidden();
 
 		// Verify end date persisted.

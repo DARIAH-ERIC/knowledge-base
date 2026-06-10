@@ -111,7 +111,7 @@ export function EricForm(props: Readonly<EricFormProps>): ReactNode {
 
 					<TextField defaultValue={eric.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>

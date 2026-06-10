@@ -102,7 +102,7 @@ export function CountryReportEventsForm(props: Readonly<CountryReportEventsFormP
 				<FormSection title={t("Reusable outcomes")}>
 					<TextField defaultValue={report.reusableOutcomes ?? undefined} name="reusableOutcomes">
 						<Label>{t("Description")}</Label>
-						<TextArea rows={4} />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>

@@ -66,7 +66,7 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 					name="summary"
 				>
 					<Label>{t("Summary")}</Label>
-					<TextArea />
+					<TextArea rows={5} />
 					<FieldError />
 				</TextField>
 

@@ -9,6 +9,7 @@ import * as v from "valibot";
 
 import { UpsertProjectPartnerActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/upsert-project-partner.schema";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
+import { arePublishedEntityDocuments } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { and, eq, ne } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -33,13 +34,9 @@ export const upsertProjectPartnerAction = createServerAction(
 			});
 		}
 
-		const { id, projectId, unitId, roleId, duration } = result.output;
-		const unitDocument = await db.query.entityVersions.findFirst({
-			where: { id: unitId },
-			columns: { entityId: true },
-		});
+		const { id, projectDocumentId, unitDocumentId, roleId, duration } = result.output;
 
-		if (unitDocument == null) {
+		if (!(await arePublishedEntityDocuments(db, [unitDocumentId]))) {
 			return createActionStateError({
 				message: t("Relations can only target published entities."),
 			});
@@ -51,8 +48,8 @@ export const upsertProjectPartnerAction = createServerAction(
 			.where(
 				and(
 					id != null ? ne(schema.projectsToOrganisationalUnits.id, id) : undefined,
-					eq(schema.projectsToOrganisationalUnits.projectDocumentId, projectId),
-					eq(schema.projectsToOrganisationalUnits.unitDocumentId, unitDocument.entityId),
+					eq(schema.projectsToOrganisationalUnits.projectDocumentId, projectDocumentId),
+					eq(schema.projectsToOrganisationalUnits.unitDocumentId, unitDocumentId),
 					eq(schema.projectsToOrganisationalUnits.roleId, roleId),
 				),
 			)
@@ -69,8 +66,8 @@ export const upsertProjectPartnerAction = createServerAction(
 					? await tx
 							.update(schema.projectsToOrganisationalUnits)
 							.set({
-								projectDocumentId: projectId,
-								unitDocumentId: unitDocument.entityId,
+								projectDocumentId,
+								unitDocumentId,
 								roleId,
 								duration: duration ?? null,
 							})
@@ -80,8 +77,8 @@ export const upsertProjectPartnerAction = createServerAction(
 					: await tx
 							.insert(schema.projectsToOrganisationalUnits)
 							.values({
-								projectDocumentId: projectId,
-								unitDocumentId: unitDocument.entityId,
+								projectDocumentId,
+								unitDocumentId,
 								roleId,
 								duration,
 							})

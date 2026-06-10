@@ -135,7 +135,7 @@ export function NationalConsortiumEditForm(
 					<UnitRelationsSection
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}
-						unitId={documentId}
+						unitDocumentId={documentId}
 					/>
 				</TabPanel>
 
@@ -147,7 +147,7 @@ export function NationalConsortiumEditForm(
 							empty: t("No institutions."),
 							addButton: t("Add institution"),
 						}}
-						relatedUnitId={documentId}
+						relatedUnitDocumentId={documentId}
 						relations={memberInstitutions}
 						sourceUnitType="institution"
 						statusOptions={memberInstitutionStatusOptions}

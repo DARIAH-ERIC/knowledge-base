@@ -3,7 +3,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { alias, and, count, desc, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { alias, and, count, desc, eq, inArray, or, sql } from "@/lib/db/sql";
 
 export type InstitutionEricRelationStatus =
 	| "is_cooperating_partner_of"
@@ -356,8 +357,8 @@ export async function getInstitutions(
 					and(
 						eq(schema.organisationalUnitTypes.type, institutionType),
 						or(
-							ilike(schema.organisationalUnits.name, `%${query}%`),
-							ilike(schema.organisationalUnits.acronym, `%${query}%`),
+							unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
+							unaccentIlike(schema.organisationalUnits.acronym, `%${query}%`),
 						),
 					),
 				),
@@ -394,7 +395,7 @@ export async function getInstitutions(
 							schema.organisationalUnitTypes.type,
 							"country" as typeof schema.organisationalUnitTypes.$inferSelect.type,
 						),
-						ilike(schema.organisationalUnits.name, `%${query}%`),
+						unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
 						sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
 					),
 				),

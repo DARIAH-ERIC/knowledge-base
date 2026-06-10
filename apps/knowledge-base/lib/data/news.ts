@@ -6,7 +6,8 @@ import { imageAssetWidth } from "@/config/assets.config";
 import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { type Database, type Transaction, db } from "@/lib/db";
-import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images/";
 
 export type NewsSort = "title" | "updatedAt";
@@ -24,7 +25,8 @@ interface GetNewsParams {
 export async function getNews(params: GetNewsParams, queryDb: Database | Transaction = db) {
 	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
 	const query = q?.trim();
-	const where = query != null && query !== "" ? ilike(schema.news.title, `%${query}%`) : undefined;
+	const where =
+		query != null && query !== "" ? unaccentIlike(schema.news.title, `%${query}%`) : undefined;
 	const orderBy =
 		sort === "title"
 			? dir === "asc"
@@ -156,7 +158,7 @@ export async function getNewsItemOptions(
 	const { limit = relationOptionsPageSize, offset = 0, q } = params;
 	const query = q?.trim();
 	const searchWhere =
-		query != null && query !== "" ? ilike(schema.news.title, `%${query}%`) : undefined;
+		query != null && query !== "" ? unaccentIlike(schema.news.title, `%${query}%`) : undefined;
 	const where = and(publishedEntityVersionWhere(), searchWhere);
 
 	const [items, aggregate] = await Promise.all([

@@ -6,10 +6,15 @@ import { forbidden } from "next/navigation";
 
 import {
 	getOrganisationalUnitOptions,
-	getOrganisationalUnitOptionsByIds,
+	getOrganisationalUnitOptionsByDocumentIds,
 } from "@/lib/data/organisational-units";
 import { db } from "@/lib/db";
-import { alias, and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
+import {
+	toOrganisationalUnitDocumentOption,
+	toOrganisationalUnitDocumentOptionsPage,
+} from "@/lib/organisational-unit-options";
 
 export type ServicesSort = "name" | "type" | "status" | "sshocMarketplaceId";
 type ServiceTypes = (typeof schema.serviceTypesEnum)[number];
@@ -50,7 +55,7 @@ export async function getServices(params: Readonly<GetServicesParams>): Promise<
 	const serviceTypes: Array<ServiceTypes> =
 		type === "internal" ? InternalServiceTypes : SSHOCServiceTypes;
 	const where = and(
-		query != null && query !== "" ? ilike(schema.services.name, `%${query}%`) : undefined,
+		query != null && query !== "" ? unaccentIlike(schema.services.name, `%${query}%`) : undefined,
 		inArray(schema.serviceTypes.type, serviceTypes),
 	);
 	const orderBy =
@@ -128,7 +133,7 @@ export async function getServiceCreateDataForAdmin(currentUser: Pick<User, "role
 			orderBy: { status: "asc" },
 			columns: { id: true, status: true },
 		}),
-		getOrganisationalUnitOptions(),
+		getOrganisationalUnitOptions().then(toOrganisationalUnitDocumentOptionsPage),
 	]);
 
 	return { initialOrganisationalUnits, serviceStatuses, serviceTypes };
@@ -173,7 +178,7 @@ export async function getServiceForAdmin(currentUser: Pick<User, "role">, id: st
 				orderBy: { status: "asc" },
 				columns: { id: true, status: true },
 			}),
-			getOrganisationalUnitOptions(),
+			getOrganisationalUnitOptions().then(toOrganisationalUnitDocumentOptionsPage),
 			db.query.organisationalUnitServiceRoles.findMany({ columns: { id: true, role: true } }),
 		]);
 
@@ -181,45 +186,36 @@ export async function getServiceForAdmin(currentUser: Pick<User, "role">, id: st
 		return null;
 	}
 
-	// The relation stores the unit's document id; resolve it to its published version id so it matches
-	// the (published) version-id space of the organisational-unit picker.
-	const unitDocumentLifecycle = alias(schema.documentLifecycle, "unit_document_lifecycle");
 	const unitRoleRows = await db
 		.select({
-			organisationalUnitId: unitDocumentLifecycle.publishedId,
+			organisationalUnitDocumentId:
+				schema.servicesToOrganisationalUnits.organisationalUnitDocumentId,
 			roleId: schema.servicesToOrganisationalUnits.roleId,
 		})
 		.from(schema.servicesToOrganisationalUnits)
-		.innerJoin(
-			unitDocumentLifecycle,
-			eq(
-				unitDocumentLifecycle.documentId,
-				schema.servicesToOrganisationalUnits.organisationalUnitDocumentId,
-			),
-		)
 		.where(eq(schema.servicesToOrganisationalUnits.serviceId, id));
 
 	const ownerRoleId = serviceRoles.find((r) => r.role === "service_owner")?.id;
 	const providerRoleId = serviceRoles.find((r) => r.role === "service_provider")?.id;
 
-	const ownerUnitIds = unitRoleRows
+	const ownerUnitDocumentIds = unitRoleRows
 		.filter((r) => r.roleId === ownerRoleId)
-		.map((r) => r.organisationalUnitId)
-		.filter((unitId): unitId is string => unitId != null);
+		.map((r) => r.organisationalUnitDocumentId);
 
-	const providerUnitIds = unitRoleRows
+	const providerUnitDocumentIds = unitRoleRows
 		.filter((r) => r.roleId === providerRoleId)
-		.map((r) => r.organisationalUnitId)
-		.filter((unitId): unitId is string => unitId != null);
+		.map((r) => r.organisationalUnitDocumentId);
 
-	const selectedOrganisationalUnits = await getOrganisationalUnitOptionsByIds([
-		...new Set([...ownerUnitIds, ...providerUnitIds]),
-	]);
+	const selectedOrganisationalUnits = (
+		await getOrganisationalUnitOptionsByDocumentIds([
+			...new Set([...ownerUnitDocumentIds, ...providerUnitDocumentIds]),
+		])
+	).map(toOrganisationalUnitDocumentOption);
 
 	return {
 		initialOrganisationalUnits,
 		selectedOrganisationalUnits,
-		service: { ...service, ownerUnitIds, providerUnitIds },
+		service: { ...service, ownerUnitDocumentIds, providerUnitDocumentIds },
 		serviceStatuses,
 		serviceTypes,
 	};

@@ -24,13 +24,13 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useState, useTransition } from "react";
 
+import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
 	FormSection,
@@ -51,8 +51,7 @@ export interface UnitProject {
 }
 
 interface UnitProjectsSectionProps {
-	/** The unit's version id; the upsert action resolves it to the owning document. */
-	unitVersionId: string;
+	unitDocumentId: string;
 	projects: Array<UnitProject>;
 	roles: Array<{ id: string; role: string }>;
 }
@@ -103,7 +102,7 @@ function formatValue(value: string): string {
 }
 
 export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): ReactNode {
-	const { unitVersionId, projects, roles } = props;
+	const { unitDocumentId, projects, roles } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -192,17 +191,17 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 					<Table aria-label="projects" className="[--gutter:0] sm:[--gutter:0]">
 						<TableHeader>
 							<TableColumn isRowHeader={true}>{t("Role")}</TableColumn>
-							<TableColumn>{t("Project")}</TableColumn>
+							<TableColumn className="max-inline-80">{t("Project")}</TableColumn>
 							<TableColumn>{t("From")}</TableColumn>
 							<TableColumn>{t("Until")}</TableColumn>
-							<TableColumn />
+							<TableColumn className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
 						<TableBody items={items}>
 							{(item) => (
 								<TableRow id={item.id}>
 									<TableCell>{formatValue(item.roleName)}</TableCell>
 									<TableCell>
-										<div className="max-inline-64 truncate" title={item.projectName}>
+										<div className="max-inline-80 truncate" title={item.projectName}>
 											{item.projectName}
 										</div>
 									</TableCell>
@@ -218,37 +217,27 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 												? t("present")
 												: "—"}
 									</TableCell>
-									<TableCell className="text-end">
-										<div className="flex justify-end gap-1">
-											<Tooltip>
-												<Button
-													aria-label={t("Edit project")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														openEditDialog(item);
-													}}
-													size="sq-sm"
-												>
-													<PencilSquareIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Edit project")}</TooltipContent>
-											</Tooltip>
-											<Tooltip>
-												<Button
-													aria-label={t("Delete project")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														setItemToDelete(item);
-													}}
-													size="sq-sm"
-												>
-													<TrashIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Delete project")}</TooltipContent>
-											</Tooltip>
-										</div>
+									<TableCell className="sticky end-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+										<RowActionsMenu>
+											<RowActionsMenu.Action
+												icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													openEditDialog(item);
+												}}
+											>
+												{t("Edit project")}
+											</RowActionsMenu.Action>
+											<RowActionsMenu.Separator />
+											<RowActionsMenu.Action
+												danger={true}
+												icon={<TrashIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													setItemToDelete(item);
+												}}
+											>
+												{t("Delete project")}
+											</RowActionsMenu.Action>
+										</RowActionsMenu>
 									</TableCell>
 								</TableRow>
 							)}
@@ -287,7 +276,7 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 				<Form action={formAction} state={formState}>
 					<ModalBody className="flex flex-col gap-y-4">
 						{dialog.item != null ? <input name="id" type="hidden" value={dialog.item.id} /> : null}
-						<input name="unitId" type="hidden" value={unitVersionId} />
+						<input name="unitDocumentId" type="hidden" value={unitDocumentId} />
 						<AsyncSelect
 							aria-label={t("Project")}
 							emptyMessage={t("No projects found.")}
@@ -303,7 +292,7 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 							placeholder={t("No project selected")}
 							selectedItem={dialog.project}
 						/>
-						<input name="projectId" type="hidden" value={dialog.project?.id ?? ""} />
+						<input name="projectDocumentId" type="hidden" value={dialog.project?.id ?? ""} />
 						<Select
 							isRequired={true}
 							onChange={(key) => {

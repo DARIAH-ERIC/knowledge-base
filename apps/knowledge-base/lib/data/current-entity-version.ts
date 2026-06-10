@@ -62,3 +62,28 @@ export async function isPublishedEntityVersions(
 
 	return rows.length === entityVersionIds.length;
 }
+
+/** True when every document has at least one published version. */
+export async function arePublishedEntityDocuments(
+	tx: Database | Transaction,
+	documentIds: ReadonlyArray<string>,
+): Promise<boolean> {
+	const uniqueDocumentIds = [...new Set(documentIds)];
+
+	if (uniqueDocumentIds.length === 0) {
+		return true;
+	}
+
+	const rows = await tx
+		.selectDistinct({ id: schema.entityVersions.entityId })
+		.from(schema.entityVersions)
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.where(
+			and(
+				eq(schema.entityStatus.type, "published"),
+				inArray(schema.entityVersions.entityId, uniqueDocumentIds),
+			),
+		);
+
+	return rows.length === uniqueDocumentIds.length;
+}

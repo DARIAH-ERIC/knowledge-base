@@ -3,7 +3,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { alias, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { alias, count, desc, eq, or, sql } from "@/lib/db/sql";
 
 export type ProjectPartnersSort =
 	| "projectName"
@@ -30,8 +31,7 @@ export interface ProjectPartnersResult {
 		projectSlug: string;
 		roleId: string;
 		roleType: string;
-		unitId: string;
-		unitVersionId: string;
+		unitDocumentId: string;
 		unitName: string;
 		unitType: string;
 		durationStart: Date | undefined;
@@ -62,11 +62,11 @@ export async function getProjectPartners(
 	const searchWhere =
 		query != null && query !== ""
 			? or(
-					ilike(schema.projects.name, `%${query}%`),
-					ilike(schema.projects.acronym, `%${query}%`),
-					ilike(schema.projectRoles.role, `%${query}%`),
-					ilike(schema.organisationalUnits.name, `%${query}%`),
-					ilike(schema.organisationalUnitTypes.type, `%${query}%`),
+					unaccentIlike(schema.projects.name, `%${query}%`),
+					unaccentIlike(schema.projects.acronym, `%${query}%`),
+					unaccentIlike(schema.projectRoles.role, `%${query}%`),
+					unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
+					unaccentIlike(schema.organisationalUnitTypes.type, `%${query}%`),
 				)
 			: undefined;
 	const where = searchWhere;
@@ -105,8 +105,7 @@ export async function getProjectPartners(
 				projectSlug: projectEntities.slug,
 				roleId: schema.projectsToOrganisationalUnits.roleId,
 				roleType: schema.projectRoles.role,
-				unitId: schema.projectsToOrganisationalUnits.unitDocumentId,
-				unitVersionId: schema.organisationalUnits.id,
+				unitDocumentId: schema.projectsToOrganisationalUnits.unitDocumentId,
 				unitName: schema.organisationalUnits.name,
 				unitType: schema.organisationalUnitTypes.type,
 				duration: schema.projectsToOrganisationalUnits.duration,
@@ -182,8 +181,7 @@ export async function getProjectPartners(
 				projectSlug: row.projectSlug,
 				roleId: row.roleId,
 				roleType: row.roleType,
-				unitId: row.unitId,
-				unitVersionId: row.unitVersionId,
+				unitDocumentId: row.unitDocumentId,
 				unitName: row.unitName,
 				unitType: row.unitType,
 				durationStart: row.duration?.start,
@@ -210,7 +208,10 @@ export async function getProjectOptions(params: Readonly<GetProjectOptionsParams
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
-			? or(ilike(schema.projects.name, `%${query}%`), ilike(schema.projects.acronym, `%${query}%`))
+			? or(
+					unaccentIlike(schema.projects.name, `%${query}%`),
+					unaccentIlike(schema.projects.acronym, `%${query}%`),
+				)
 			: undefined;
 	const projectEntities = alias(schema.entities, "project_option_entities");
 	const projectDocumentLifecycle = alias(

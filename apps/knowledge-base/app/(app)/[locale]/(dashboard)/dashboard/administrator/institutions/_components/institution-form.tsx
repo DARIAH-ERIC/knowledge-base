@@ -117,7 +117,7 @@ export function InstitutionForm(props: Readonly<InstitutionFormProps>): ReactNod
 
 					<TextField defaultValue={institution?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>

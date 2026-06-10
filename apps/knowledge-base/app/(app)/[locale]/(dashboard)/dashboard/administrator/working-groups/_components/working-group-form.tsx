@@ -111,7 +111,7 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 
 					<TextField defaultValue={workingGroup?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>
