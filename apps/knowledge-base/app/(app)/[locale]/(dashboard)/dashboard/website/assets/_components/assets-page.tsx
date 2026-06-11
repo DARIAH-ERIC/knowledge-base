@@ -17,6 +17,7 @@ import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { EditAssetMetadataDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog";
 import { UploadImageDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog";
 import { dashboardPageSize } from "@/config/pagination.config";
+import { formatFileSize } from "@/lib/format-file-size";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface AssetItem {
@@ -27,6 +28,7 @@ interface AssetItem {
 	caption: string | null;
 	licenseId: string | null;
 	mimeType: string;
+	size: number | null;
 	url: string;
 }
 
@@ -159,7 +161,10 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 									</div>
 									<figcaption className="flex flex-col gap-y-0.5 px-0.5">
 										<span className="truncate text-sm/tight font-medium">{asset.label}</span>
-										<span className="text-xs text-muted-fg">{prefix}</span>
+										<span className="text-xs text-muted-fg">
+											{prefix}
+											{asset.size != null ? ` · ${formatFileSize(asset.size)}` : null}
+										</span>
 									</figcaption>
 								</figure>
 							</li>
@@ -215,6 +220,12 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 												</Fragment>
 											) : null}
 											<span>{asset.mimeType}</span>
+											{asset.size != null ? (
+												<Fragment>
+													<span aria-hidden={true}>{"·"}</span>
+													<span>{formatFileSize(asset.size)}</span>
+												</Fragment>
+											) : null}
 										</div>
 									</figcaption>
 								</figure>
