@@ -1030,12 +1030,12 @@ async function main() {
 					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
 				},
 				{
-					id: createId("person-org:governance-president"),
+					id: createId("person-org:governance-chair"),
 					personDocumentId: kitchenSinkPersonEntityId,
 					organisationalUnitDocumentId: governanceBodyEntityId,
 					roleTypeId: assertLookupId(
-						personRoleIds.get("is_president_of"),
-						'Missing person role type "is_president_of".',
+						personRoleIds.get("is_chair_of"),
+						'Missing person role type "is_chair_of".',
 					),
 					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
 				},

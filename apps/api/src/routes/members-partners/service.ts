@@ -526,12 +526,33 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 			),
 		);
 
-	const positions = await getPersonPositions(
-		db,
-		rows.map((row) => row.id),
-	);
+	// national_coordinator(_deputy) and national_representative(_deputy) are non-exclusive: a person may
+	// legitimately hold a coordinator and a representative relation, and should then be listed once per
+	// role. Collapse only exact duplicates (same person and role) so a stray duplicate relation row
+	// cannot list the same contributor twice with an identical role.
+	const rowsByPersonAndRole = new Map<string, (typeof rows)[number]>();
+	for (const row of rows) {
+		const key = `${row.id}:${row.role}`;
+		if (!rowsByPersonAndRole.has(key)) {
+			rowsByPersonAndRole.set(key, row);
+		}
+	}
 
-	return mapPersonContributors(rows, positions);
+	const contributors = [...rowsByPersonAndRole.values()].toSorted((a, b) => {
+		const byName = a.name.localeCompare(b.name);
+		if (byName !== 0) {
+			return byName;
+		}
+		const byRole = a.role.localeCompare(b.role);
+		if (byRole !== 0) {
+			return byRole;
+		}
+		return a.id.localeCompare(b.id);
+	});
+
+	const positions = await getPersonPositions(db, [...new Set(contributors.map((row) => row.id))]);
+
+	return mapPersonContributors(contributors, positions);
 }
 
 interface GetMemberOrPartnerByIdParams {

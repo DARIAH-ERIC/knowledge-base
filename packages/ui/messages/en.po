@@ -7,7 +7,7 @@ msgstr ""
 "X-Crowdin-SourceKey: msgstr\n"
 
 #: lib/async-multiple-select.tsx:163
-#: lib/async-select.tsx:129
+#: lib/async-select.tsx:131
 msgctxt "ui"
 msgid "JDP92p"
 msgstr "Could not load options."
@@ -31,7 +31,7 @@ msgid "hBhV8k"
 msgstr "Open options"
 
 #: lib/async-multiple-select.tsx:240
-#: lib/async-select.tsx:186
+#: lib/async-select.tsx:193
 #: lib/multiple-select.tsx:166
 #: lib/search-field.tsx:26
 msgctxt "ui"
@@ -40,28 +40,28 @@ msgstr "Search"
 
 #: lib/async-multiple-select.tsx:289
 #: lib/async-multiple-select.tsx:295
-#: lib/async-select.tsx:232
-#: lib/async-select.tsx:238
+#: lib/async-select.tsx:239
+#: lib/async-select.tsx:245
 #: lib/loader.tsx:95
 msgctxt "ui"
 msgid "99OtWT"
 msgstr "Pending..."
 
 #: lib/async-multiple-select.tsx:299
-#: lib/async-select.tsx:242
+#: lib/async-select.tsx:249
 msgctxt "ui"
 msgid "GEi2T8"
 msgstr "No options found."
 
 #: lib/async-multiple-select.tsx:311
-#: lib/async-select.tsx:254
+#: lib/async-select.tsx:261
 #: lib/pagination.tsx:153
 msgctxt "ui"
 msgid "k9hDFZ"
 msgstr "Previous page"
 
 #: lib/async-multiple-select.tsx:319
-#: lib/async-select.tsx:262
+#: lib/async-select.tsx:269
 #: lib/pagination.tsx:199
 msgctxt "ui"
 msgid "rBj9Ib"
