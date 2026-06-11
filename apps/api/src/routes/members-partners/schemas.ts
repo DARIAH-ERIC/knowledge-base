@@ -103,39 +103,61 @@ export const MemberOrPartnerListSchema = v.pipe(
 
 export type MemberOrPartnerList = v.InferOutput<typeof MemberOrPartnerListSchema>;
 
-export const MemberOrPartnerSchema = v.pipe(
+const memberOrPartnerSharedEntries = {
+	...v.pick(schema.OrganisationalUnitSelectSchema, [
+		"id",
+		"name",
+		"summary",
+		"metadata",
+		"sshocMarketplaceActorId",
+	]).entries,
+	image: v.nullable(v.object({ url: v.string() })),
+	entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+	publishedAt: v.pipe(v.string(), v.isoTimestamp()),
+	type: v.literal(schema.membersAndPartnersUnitType),
+	socialMedia: v.array(
+		v.object({
+			...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
+			duration: v.nullable(
+				v.object({
+					start: CalendarDateSchema,
+					end: v.nullable(CalendarDateSchema),
+				}),
+			),
+			type: v.picklist(schema.socialMediaTypesEnum),
+		}),
+	),
+	description: v.optional(v.array(ContentBlockSchema), []),
+	relatedEntities: v.optional(RelatedEntitiesSchema, []),
+	relatedResources: v.optional(RelatedResourcesSchema, []),
+};
+
+export const MemberOrObserverSchema = v.pipe(
 	v.object({
-		...v.pick(schema.OrganisationalUnitSelectSchema, [
-			"id",
-			"name",
-			"summary",
-			"metadata",
-			"sshocMarketplaceActorId",
-		]).entries,
-		image: v.nullable(v.object({ url: v.string() })),
-		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
-		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
-		type: v.literal(schema.membersAndPartnersUnitType),
-		status: v.picklist(schema.membersAndPartnersUnitStatusEnum),
+		...memberOrPartnerSharedEntries,
+		status: v.picklist(["is_member_of", "is_observer_of"] as const),
 		contributors: v.array(ContributorSchema),
 		institutions: v.array(PartnerInstitutionSchema),
+		nationalCoordinatingInstitution: v.nullable(PartnerInstitutionSchema),
+		nationalRepresentativeInstitution: v.nullable(PartnerInstitutionSchema),
 		nationalConsortium: v.nullable(RelatedNationalConsortiumSchema),
-		socialMedia: v.array(
-			v.object({
-				...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
-				duration: v.nullable(
-					v.object({
-						start: CalendarDateSchema,
-						end: v.nullable(CalendarDateSchema),
-					}),
-				),
-				type: v.picklist(schema.socialMediaTypesEnum),
-			}),
-		),
-		description: v.optional(v.array(ContentBlockSchema), []),
-		relatedEntities: v.optional(RelatedEntitiesSchema, []),
-		relatedResources: v.optional(RelatedResourcesSchema, []),
 	}),
+	v.description("Member or observer country"),
+	v.metadata({ ref: "MemberOrObserver" }),
+);
+
+export const CooperatingPartnerSchema = v.pipe(
+	v.object({
+		...memberOrPartnerSharedEntries,
+		status: v.literal("is_cooperating_partner_of"),
+		institutions: v.array(PartnerInstitutionSchema),
+	}),
+	v.description("Cooperating partner"),
+	v.metadata({ ref: "CooperatingPartner" }),
+);
+
+export const MemberOrPartnerSchema = v.pipe(
+	v.variant("status", [MemberOrObserverSchema, CooperatingPartnerSchema]),
 	v.description("Member or partner"),
 	v.metadata({ ref: "MemberOrPartner" }),
 );

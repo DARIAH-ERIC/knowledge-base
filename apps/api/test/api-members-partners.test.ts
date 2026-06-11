@@ -187,6 +187,10 @@ async function seedPartnerInstitutions(
 	ericUnitId: string,
 	countryId: string,
 	items: ReturnType<typeof createItems>,
+	relationStatus:
+		| "is_partner_institution_of"
+		| "is_national_coordinating_institution_in"
+		| "is_national_representative_institution_in" = "is_partner_institution_of",
 ) {
 	const [status, entityType, institutionType, locatedInStatus, partnerInstitutionStatus] =
 		await Promise.all([
@@ -205,7 +209,7 @@ async function seedPartnerInstitutions(
 			}),
 			db.query.organisationalUnitStatus.findFirst({
 				columns: { id: true },
-				where: { status: "is_partner_institution_of" },
+				where: { status: relationStatus },
 			}),
 		]);
 
@@ -213,7 +217,7 @@ async function seedPartnerInstitutions(
 	assert(entityType, "No entity type in database.");
 	assert(institutionType, "No institution type in database.");
 	assert(locatedInStatus, "No is_located_in status in database.");
-	assert(partnerInstitutionStatus, "No is_partner_institution_of status in database.");
+	assert(partnerInstitutionStatus, `No ${relationStatus} status in database.`);
 
 	const [institution] = items;
 	assert(institution);
@@ -630,6 +634,24 @@ describe("members-partners", () => {
 					partnerInstitutionItems,
 				);
 				const partnerInstitution = partnerInstitutionItems[0]!;
+				const coordinatingInstitutionItems = createItems(1);
+				await seedPartnerInstitutions(
+					db,
+					items[0]!.organisationalUnit.id,
+					countryId,
+					coordinatingInstitutionItems,
+					"is_national_coordinating_institution_in",
+				);
+				const coordinatingInstitution = coordinatingInstitutionItems[0]!;
+				const representativeInstitutionItems = createItems(1);
+				await seedPartnerInstitutions(
+					db,
+					items[0]!.organisationalUnit.id,
+					countryId,
+					representativeInstitutionItems,
+					"is_national_representative_institution_in",
+				);
+				const representativeInstitution = representativeInstitutionItems[0]!;
 				const contributorItems = createPersonItems(1);
 				const contributor = await seedContributor(db, countryId, contributorItems);
 				const nationalConsortiumItems = createItems(1);
@@ -650,14 +672,25 @@ describe("members-partners", () => {
 				/** @see {@link https://github.com/honojs/hono/issues/2280} */
 				const data = (await response.json()) as MemberOrPartner;
 
+				assert(data.status !== "is_cooperating_partner_of");
 				assert("description" in data);
 				expect(data).toMatchObject({ name });
+				// `is_national_coordinating_institution_in` and `is_national_representative_institution_in`
+				// are surfaced as their own fields, not mixed into `institutions`.
 				expect(data.institutions).toHaveLength(1);
 				expect(data.institutions[0]).toMatchObject({
 					name: partnerInstitution.organisationalUnit.name,
 					slug: partnerInstitution.entity.slug,
 					ror: null,
 					website: null,
+				});
+				expect(data.nationalCoordinatingInstitution).toMatchObject({
+					name: coordinatingInstitution.organisationalUnit.name,
+					slug: coordinatingInstitution.entity.slug,
+				});
+				expect(data.nationalRepresentativeInstitution).toMatchObject({
+					name: representativeInstitution.organisationalUnit.name,
+					slug: representativeInstitution.entity.slug,
 				});
 				expect(data.contributors).toHaveLength(1);
 				expect(data.contributors[0]).toMatchObject({
@@ -791,6 +824,7 @@ describe("members-partners", () => {
 				const listItem = listData.data.find((entry) => entry.id === item.version.id);
 				assert(listItem);
 
+				assert(detailData.status !== "is_cooperating_partner_of");
 				expect(detailData.nationalConsortium?.image).not.toBeNull();
 				expect(detailData.image).toEqual(detailData.nationalConsortium?.image);
 				expect(listItem.image).not.toBeNull();
@@ -1018,6 +1052,7 @@ describe("members-partners", () => {
 				/** @see {@link https://github.com/honojs/hono/issues/2280} */
 				const data = (await response.json()) as MemberOrPartner;
 
+				assert(data.status !== "is_cooperating_partner_of");
 				assert("description" in data);
 				expect(data).toMatchObject({ name });
 				expect(data.institutions).toHaveLength(1);

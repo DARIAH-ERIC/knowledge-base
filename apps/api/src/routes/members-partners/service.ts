@@ -185,6 +185,7 @@ type RelationStatus =
 	| "is_observer_of"
 	| "is_partner_institution_of"
 	| "is_national_coordinating_institution_in"
+	| "is_national_representative_institution_in"
 	| "is_located_in"
 	| "is_national_consortium_of"
 	| "is_cooperating_partner_of";
@@ -289,9 +290,10 @@ function buildActiveRelationToUnitFilter(
 	);
 }
 
-async function getMemberObserverInstitutions(
+async function getInstitutionsByRelation(
 	db: Database | Transaction,
 	countryId: schema.OrganisationalUnit["id"],
+	status: RelationStatus | Array<RelationStatus>,
 ) {
 	const items = (await db.query.organisationalUnits.findMany({
 		where: {
@@ -305,12 +307,7 @@ async function getMemberObserverInstitutions(
 			},
 			RAW(t) {
 				return and(
-					buildActiveRelationExistsFilter(
-						db,
-						t.id,
-						["is_partner_institution_of", "is_national_coordinating_institution_in"],
-						"eric",
-					),
+					buildActiveRelationExistsFilter(db, t.id, status, "eric"),
 					buildActiveRelationToUnitFilter(db, t.id, "is_located_in", "country", countryId),
 				)!;
 			},
@@ -372,82 +369,42 @@ async function getMemberObserverInstitutions(
 	});
 }
 
-async function getCooperatingPartnerInstitutions(
+function getPartnerInstitutions(
 	db: Database | Transaction,
 	countryId: schema.OrganisationalUnit["id"],
 ) {
-	const items = (await db.query.organisationalUnits.findMany({
-		where: {
-			entityVersion: {
-				status: {
-					type: "published",
-				},
-			},
-			type: {
-				type: "institution",
-			},
-			RAW(t) {
-				return and(
-					buildActiveRelationExistsFilter(db, t.id, "is_cooperating_partner_of", "eric"),
-					buildActiveRelationToUnitFilter(db, t.id, "is_located_in", "country", countryId),
-				)!;
-			},
-		},
-		columns: {
-			name: true,
-			ror: true,
-		},
-		with: {
-			entityVersion: {
-				columns: {},
-				with: {
-					entity: {
-						columns: { slug: true },
-					},
-				},
-			},
-			socialMedia: {
-				columns: {
-					url: true,
-				},
-				with: {
-					type: {
-						columns: {
-							type: true,
-						},
-					},
-				},
-			},
-		},
-		orderBy(t, { asc }) {
-			return [asc(t.name)];
-		},
-	})) as unknown as Array<{
-		name: string;
-		ror: string | null;
-		entityVersion: {
-			entity: {
-				slug: string;
-			};
-		};
-		socialMedia: Array<{
-			url: string;
-			type: {
-				type: string;
-			};
-		}>;
-	}>;
+	return getInstitutionsByRelation(db, countryId, "is_partner_institution_of");
+}
 
-	return items.map((item) => {
-		const website = item.socialMedia.find((sm) => sm.type.type === "website")?.url ?? null;
+function getCooperatingPartnerInstitutions(
+	db: Database | Transaction,
+	countryId: schema.OrganisationalUnit["id"],
+) {
+	return getInstitutionsByRelation(db, countryId, "is_cooperating_partner_of");
+}
 
-		return {
-			name: item.name,
-			ror: item.ror,
-			slug: item.entityVersion.entity.slug,
-			website,
-		};
-	});
+async function getNationalCoordinatingInstitution(
+	db: Database | Transaction,
+	countryId: schema.OrganisationalUnit["id"],
+) {
+	const items = await getInstitutionsByRelation(
+		db,
+		countryId,
+		"is_national_coordinating_institution_in",
+	);
+	return items.at(0) ?? null;
+}
+
+async function getNationalRepresentativeInstitution(
+	db: Database | Transaction,
+	countryId: schema.OrganisationalUnit["id"],
+) {
+	const items = await getInstitutionsByRelation(
+		db,
+		countryId,
+		"is_national_representative_institution_in",
+	);
+	return items.at(0) ?? null;
 }
 
 async function getNationalConsortium(
@@ -630,43 +587,55 @@ export async function getMemberOrPartnerById(
 		return null;
 	}
 
-	const includeCountryRelations =
-		item.status === "is_member_of" || item.status === "is_observer_of";
-	const includeInstitutions =
-		includeCountryRelations || item.status === "is_cooperating_partner_of";
-
-	const institutionsPromise =
-		item.status === "is_cooperating_partner_of"
-			? getCooperatingPartnerInstitutions(db, item.id)
-			: getMemberObserverInstitutions(db, item.id);
-
-	const [institutions, contributors, nationalConsortium] = await Promise.all([
-		includeInstitutions ? institutionsPromise : Promise.resolve([]),
-		includeCountryRelations ? getContributors(db, item.id) : Promise.resolve([]),
-		includeCountryRelations
-			? getNationalConsortium(db, item.id, {
-					imageSize: imageWidth.featured,
-					includeDescription: true,
-				})
-			: Promise.resolve(null),
-	]);
-
-	const image = nationalConsortium?.image ?? generateImageUrl(item.image, imageWidth.featured);
-	const description = hasContentBlocks(nationalConsortium?.description)
-		? nationalConsortium.description
-		: fields.description;
-
-	return {
+	const base = {
 		...flattenEntityVersion(item),
-		image,
 		socialMedia: mapSocialMedia(item.socialMedia),
-		institutions,
-		contributors,
-		nationalConsortium,
 		...fields,
-		description,
 		relatedEntities,
 		relatedResources,
+	};
+
+	if (item.status === "is_member_of" || item.status === "is_observer_of") {
+		const [
+			institutions,
+			contributors,
+			nationalCoordinatingInstitution,
+			nationalRepresentativeInstitution,
+			nationalConsortium,
+		] = await Promise.all([
+			getPartnerInstitutions(db, item.id),
+			getContributors(db, item.id),
+			getNationalCoordinatingInstitution(db, item.id),
+			getNationalRepresentativeInstitution(db, item.id),
+			getNationalConsortium(db, item.id, {
+				imageSize: imageWidth.featured,
+				includeDescription: true,
+			}),
+		]);
+
+		const image = nationalConsortium?.image ?? generateImageUrl(item.image, imageWidth.featured);
+		const description = hasContentBlocks(nationalConsortium?.description)
+			? nationalConsortium.description
+			: fields.description;
+
+		return {
+			...base,
+			status: item.status,
+			image,
+			description,
+			contributors,
+			institutions,
+			nationalCoordinatingInstitution,
+			nationalRepresentativeInstitution,
+			nationalConsortium,
+		};
+	}
+
+	return {
+		...base,
+		status: item.status,
+		image: generateImageUrl(item.image, imageWidth.featured),
+		institutions: await getCooperatingPartnerInstitutions(db, item.id),
 	};
 }
 
@@ -805,50 +774,60 @@ export async function getMemberOrPartnerBySlug(
 		return null;
 	}
 
-	const includeCountryRelations =
-		item.status === "is_member_of" || item.status === "is_observer_of";
-	const includeInstitutions =
-		includeCountryRelations || item.status === "is_cooperating_partner_of";
-	const institutionsPromise =
-		item.status === "is_cooperating_partner_of"
-			? getCooperatingPartnerInstitutions(db, item.id)
-			: getMemberObserverInstitutions(db, item.id);
-	const [
-		fields,
-		institutions,
-		contributors,
-		nationalConsortium,
-		relatedEntities,
-		relatedResources,
-	] = await Promise.all([
+	const [fields, relatedEntities, relatedResources] = await Promise.all([
 		getContentBlocks(db, item.id),
-		includeInstitutions ? institutionsPromise : Promise.resolve([]),
-		includeCountryRelations ? getContributors(db, item.id) : Promise.resolve([]),
-		includeCountryRelations
-			? getNationalConsortium(db, item.id, {
-					imageSize: imageWidth.featured,
-					includeDescription: true,
-				})
-			: Promise.resolve(null),
 		getRelatedEntities(db, item.id),
 		getRelatedResources(db, item.id),
 	]);
 
-	const image = nationalConsortium?.image ?? generateImageUrl(item.image, imageWidth.featured);
-	const description = hasContentBlocks(nationalConsortium?.description)
-		? nationalConsortium.description
-		: fields.description;
-
-	return {
+	const base = {
 		...flattenEntityVersion(item),
-		image,
 		socialMedia: mapSocialMedia(item.socialMedia),
-		institutions,
-		contributors,
-		nationalConsortium,
 		...fields,
-		description,
 		relatedEntities,
 		relatedResources,
+	};
+
+	if (item.status === "is_member_of" || item.status === "is_observer_of") {
+		const [
+			institutions,
+			contributors,
+			nationalCoordinatingInstitution,
+			nationalRepresentativeInstitution,
+			nationalConsortium,
+		] = await Promise.all([
+			getPartnerInstitutions(db, item.id),
+			getContributors(db, item.id),
+			getNationalCoordinatingInstitution(db, item.id),
+			getNationalRepresentativeInstitution(db, item.id),
+			getNationalConsortium(db, item.id, {
+				imageSize: imageWidth.featured,
+				includeDescription: true,
+			}),
+		]);
+
+		const image = nationalConsortium?.image ?? generateImageUrl(item.image, imageWidth.featured);
+		const description = hasContentBlocks(nationalConsortium?.description)
+			? nationalConsortium.description
+			: fields.description;
+
+		return {
+			...base,
+			status: item.status,
+			image,
+			description,
+			contributors,
+			institutions,
+			nationalCoordinatingInstitution,
+			nationalRepresentativeInstitution,
+			nationalConsortium,
+		};
+	}
+
+	return {
+		...base,
+		status: item.status,
+		image: generateImageUrl(item.image, imageWidth.featured),
+		institutions: await getCooperatingPartnerInstitutions(db, item.id),
 	};
 }
