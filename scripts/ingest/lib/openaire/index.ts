@@ -20,9 +20,7 @@ export function createOpenAirePublication(item: ResearchProduct): ResourceDocume
 	const source_url = `https://explore.openaire.eu/search/result?id=${sourceId}`;
 
 	/** External urls pointing to where the actual resource lives. */
-	const links = [
-		...new Set((item.instances ?? []).flatMap((instance) => instance.urls ?? [])),
-	];
+	const links = [...new Set((item.instances ?? []).flatMap((instance) => instance.urls ?? []))];
 
 	return {
 		id,

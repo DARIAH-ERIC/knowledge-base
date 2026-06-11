@@ -783,6 +783,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -1308,6 +1318,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "type": "string",
                   },
                   "type": "array",
+                },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
                 },
                 "type": {
                   "anyOf": [
@@ -2689,6 +2709,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -3260,6 +3290,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "type": "string",
                   },
                   "type": "array",
+                },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
                 },
                 "type": {
                   "anyOf": [
@@ -4820,6 +4860,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -5728,6 +5778,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -6438,6 +6498,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "type": "string",
                   },
                   "type": "array",
+                },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
                 },
                 "type": {
                   "anyOf": [
@@ -7462,6 +7532,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -7973,6 +8053,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "type": "string",
                   },
                   "type": "array",
+                },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
                 },
                 "type": {
                   "anyOf": [
@@ -8530,6 +8620,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "type": "string",
                   },
                   "type": "array",
+                },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
                 },
                 "type": {
                   "anyOf": [
@@ -10544,6 +10644,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -11200,6 +11310,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "type": "string",
                   },
                   "type": "array",
+                },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
                 },
                 "type": {
                   "anyOf": [

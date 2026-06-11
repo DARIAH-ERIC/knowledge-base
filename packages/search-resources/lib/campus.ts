@@ -1,8 +1,23 @@
-import { isNonEmptyString } from "@acdh-oeaw/lib";
-import type { DariahCampusCurriculum, DariahCampusResource } from "@dariah-eric/client-campus";
+import { createUrl, isNonEmptyString } from "@acdh-oeaw/lib";
+import type {
+	DariahCampusCurriculum,
+	DariahCampusResource,
+	DariahCampusResourceCollection,
+} from "@dariah-eric/client-campus";
 import type { ResourceDocument } from "@dariah-eric/search";
 
 import { toPlainText } from "./markdown/to-plain-text";
+
+/** Public Dariah-Campus website, used to link back to the resource on the ingest source website. */
+const campusWebBaseUrl = "https://campus.dariah.eu";
+
+/** Maps a resource collection to its `:resourceType` path segment in the public campus url. */
+const resourceTypeByCollection: Record<DariahCampusResourceCollection, string> = {
+	resourcesEvents: "events",
+	resourcesExternal: "external",
+	resourcesHosted: "hosted",
+	resourcesPathfinders: "pathfinders",
+};
 
 export function createCampusResource(item: DariahCampusResource): ResourceDocument {
 	const source = "dariah-campus" as const;
@@ -14,10 +29,15 @@ export function createCampusResource(item: DariahCampusResource): ResourceDocume
 		? new Date(item["publication-date"]).getFullYear()
 		: null;
 	/**
-	 * Dariah-Campus hosts the resource itself, so the persistent identifier (which resolves to the
-	 * campus page) is the url on the ingest source website. There is no separate external url.
+	 * Dariah-Campus hosts the resource itself, so its canonical page on the campus website is the url
+	 * on the ingest source website. Any external urls would go into `links`.
 	 */
-	const source_url = isNonEmptyString(item.pid) ? item.pid : null;
+	const source_url = String(
+		createUrl({
+			baseUrl: campusWebBaseUrl,
+			pathname: `/resources/${resourceTypeByCollection[item.collection]}/${item.id}`,
+		}),
+	);
 	const links: Array<string> = [];
 	const sourceUpdatedAt = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getTime()
@@ -56,10 +76,12 @@ export function createCampusCurriculum(item: DariahCampusCurriculum): ResourceDo
 		? new Date(item["publication-date"]).getFullYear()
 		: null;
 	/**
-	 * Dariah-Campus hosts the resource itself, so the persistent identifier (which resolves to the
-	 * campus page) is the url on the ingest source website. There is no separate external url.
+	 * Dariah-Campus hosts the curriculum itself, so its canonical page on the campus website is the
+	 * url on the ingest source website. Any external urls would go into `links`.
 	 */
-	const source_url = isNonEmptyString(item.pid) ? item.pid : null;
+	const source_url = String(
+		createUrl({ baseUrl: campusWebBaseUrl, pathname: `/curricula/${item.id}` }),
+	);
 	const links: Array<string> = [];
 	const sourceUpdatedAt = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getTime()

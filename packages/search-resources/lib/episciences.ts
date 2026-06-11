@@ -28,11 +28,7 @@ export function createEpisciencesDocument(item: EpisciencesSearchDocument): Reso
 
 	/** External urls pointing to where the actual publication lives. */
 	const links =
-		doi != null
-			? [`https://doi.org/${doi}`]
-			: item.es_pdf_url_s != null
-				? [item.es_pdf_url_s]
-				: [];
+		doi != null ? [`https://doi.org/${doi}`] : item.es_pdf_url_s != null ? [item.es_pdf_url_s] : [];
 
 	return {
 		id,
