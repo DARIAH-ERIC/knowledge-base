@@ -182,13 +182,12 @@ VALUES
 	('is_chair_of'),
 	('is_vice_chair_of'),
 	('is_member_of'),
-	('is_director_of'),
-	('is_president_of'),
 	('is_contact_for'),
 	('national_coordinator'),
 	('national_coordinator_deputy'),
 	('national_representative'),
-	('national_representative_deputy');
+	('national_representative_deputy')
+ON CONFLICT ("type") DO NOTHING;
 
 --> statement-breakpoint
 INSERT INTO
@@ -206,8 +205,6 @@ FROM
 			('is_member_of', 'governance_body'),
 			('is_member_of', 'working_group'),
 			('is_member_of', 'institution'),
-			('is_director_of', 'governance_body'),
-			('is_president_of', 'governance_body'),
 			('is_contact_for', 'governance_body'),
 			('is_contact_for', 'working_group'),
 			('is_contact_for', 'institution'),

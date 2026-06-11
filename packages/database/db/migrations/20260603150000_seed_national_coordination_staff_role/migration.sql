@@ -3,7 +3,7 @@
 ALTER TABLE "person_role_types" DROP CONSTRAINT IF EXISTS "person_role_types_type_enum_check";
 
 --> statement-breakpoint
-ALTER TABLE "person_role_types" ADD CONSTRAINT "person_role_types_type_enum_check" CHECK ("type" IN ('is_affiliated_with', 'is_chair_of', 'is_vice_chair_of', 'is_member_of', 'is_director_of', 'is_president_of', 'is_contact_for', 'national_coordinator', 'national_coordinator_deputy', 'national_coordination_staff', 'national_representative', 'national_representative_deputy'));
+ALTER TABLE "person_role_types" ADD CONSTRAINT "person_role_types_type_enum_check" CHECK ("type" IN ('is_affiliated_with', 'is_chair_of', 'is_vice_chair_of', 'is_member_of', 'is_contact_for', 'national_coordinator', 'national_coordinator_deputy', 'national_coordination_staff', 'national_representative', 'national_representative_deputy'));
 
 --> statement-breakpoint
 INSERT INTO
