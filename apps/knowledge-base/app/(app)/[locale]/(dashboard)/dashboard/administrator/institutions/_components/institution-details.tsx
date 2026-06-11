@@ -28,7 +28,7 @@ interface InstitutionDetailsProps {
 	selectedVersion: "draft" | "published";
 	institution: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
 		descriptionContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
@@ -105,6 +105,9 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 
 				<DescriptionTerm>{t("Acronym")}</DescriptionTerm>
 				<DescriptionDetails>{institution.acronym}</DescriptionDetails>
+
+				<DescriptionTerm>{t("ROR")}</DescriptionTerm>
+				<DescriptionDetails>{institution.ror}</DescriptionDetails>
 
 				<DescriptionTerm>{t("SSHOC actor ID")}</DescriptionTerm>
 				<DescriptionDetails>{institution.sshocMarketplaceActorId}</DescriptionDetails>

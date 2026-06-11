@@ -26,7 +26,7 @@ interface NationalConsortiumDetailsProps {
 	selectedVersion: "draft" | "published";
 	nationalConsortium: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
 		descriptionContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
@@ -99,6 +99,9 @@ export function NationalConsortiumDetails(
 
 				<DescriptionTerm>{t("Acronym")}</DescriptionTerm>
 				<DescriptionDetails>{nationalConsortium.acronym}</DescriptionDetails>
+
+				<DescriptionTerm>{t("ROR")}</DescriptionTerm>
+				<DescriptionDetails>{nationalConsortium.ror}</DescriptionDetails>
 
 				<DescriptionTerm>{t("SSHOC actor ID")}</DescriptionTerm>
 				<DescriptionDetails>{nationalConsortium.sshocMarketplaceActorId}</DescriptionDetails>

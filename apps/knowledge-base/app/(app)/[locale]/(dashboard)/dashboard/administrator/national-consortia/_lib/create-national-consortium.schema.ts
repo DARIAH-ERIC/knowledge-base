@@ -6,6 +6,7 @@ import { ContentBlockInputSchema } from "@/lib/content-block-input";
 export const CreateNationalConsortiumActionInputSchema = v.object({
 	...v.pick(OrganisationalUnitInsertSchema, ["name", "summary"]).entries,
 	acronym: v.optional(v.pipe(v.string(), v.nonEmpty())),
+	ror: v.optional(v.pipe(v.string(), v.nonEmpty())),
 	sshocMarketplaceActorId: v.nullish(
 		v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		null,
