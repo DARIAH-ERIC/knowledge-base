@@ -9922,13 +9922,35 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "name": {
             "type": "string",
           },
+          "ror": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "slug": {
             "type": "string",
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
           },
         },
         "required": [
           "name",
           "slug",
+          "ror",
+          "website",
           "image",
         ],
         "type": "object",

@@ -87,6 +87,8 @@ export const RelatedNationalConsortiumSchema = v.pipe(
 	v.object({
 		name: v.string(),
 		slug: v.string(),
+		ror: v.nullable(v.string()),
+		website: v.nullable(v.string()),
 		image: v.nullable(v.object({ url: v.string() })),
 	}),
 	v.description("National consortium"),
