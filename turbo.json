@@ -107,7 +107,8 @@
 		"ADMIN_PASSWORD",
 		"CI",
 		"ENV_VALIDATION",
-		"PORT"
+		"PORT",
+		"pnpm_config_verify_deps_before_run"
 	],
 	"tasks": {
 		"//#format:check": {},

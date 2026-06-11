@@ -12,7 +12,12 @@ ENV CI=true
 # @see {@link https://github.com/pnpm/pnpm/issues/11865}
 ENV pnpm_config_verify_deps_before_run=false
 RUN corepack enable
-RUN pnpm add --global turbo
+# `turbo prune` runs before `pnpm install`, so it needs a turbo binary available up front. The version
+# is supplied as a build arg (resolved from the lockfile in CI) instead of installing the floating
+# latest, so prune is reproducible and matches the repo turbo used via `pnpm exec turbo` in the build
+# stages.
+ARG TURBO_VERSION
+RUN pnpm add --global "turbo@${TURBO_VERSION}"
 
 # source
 # -------------------------------------------------------------------------------------------------
@@ -48,7 +53,7 @@ FROM migrate-install AS migrate-build
 COPY --from=migrate-prune /app/out/full/ .
 RUN --mount=type=secret,id=TURBO_TEAM,env=TURBO_TEAM \
     --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN \
-    turbo run build --filter=@dariah-eric/database^...
+    pnpm exec turbo run build --filter=@dariah-eric/database^...
 # We don't set `injectWorkspacePackages` directly in `pnpm-workspace.yaml` because it currently
 # produces lots of peer dependency warnings.
 RUN pnpm deploy --filter @dariah-eric/database --config.inject-workspace-packages=true /out
@@ -89,7 +94,7 @@ FROM api-install AS api-build
 COPY --from=api-prune /app/out/full/ .
 RUN --mount=type=secret,id=TURBO_TEAM,env=TURBO_TEAM \
     --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN \
-    turbo run build --filter=@dariah-eric/api
+    pnpm exec turbo run build --filter=@dariah-eric/api
 # We don't set `injectWorkspacePackages` directly in `pnpm-workspace.yaml` because it currently
 # produces lots of peer dependency warnings.
 RUN pnpm deploy --filter @dariah-eric/api --config.inject-workspace-packages=true --prod /out
@@ -192,7 +197,7 @@ RUN --mount=type=secret,id=API_ACCESS_TOKEN,env=API_ACCESS_TOKEN \
 		--mount=type=secret,id=UNR_S3_BUCKET_NAME,env=UNR_S3_BUCKET_NAME \
     --mount=type=secret,id=ZOTERO_API_KEY,env=ZOTERO_API_KEY \
     --mount=type=secret,id=ZOTERO_API_BASE_URL,env=ZOTERO_API_BASE_URL \
-    turbo run build --filter=@dariah-eric/knowledge-base
+    pnpm exec turbo run build --filter=@dariah-eric/knowledge-base
 
 # serve
 # -------------------------------------------------------------------------------------------------
