@@ -21,6 +21,7 @@ jobs:
       matrix: ${{ steps.changes.outputs.matrix }}
       has_changes: ${{ steps.changes.outputs.has_changes }}
       repository: ${{ steps.repository.outputs.repository }}
+      turbo_version: ${{ steps.turbo.outputs.turbo_version }}
 
     steps:
       - name: Checkout repository
@@ -42,6 +43,14 @@ jobs:
       - name: Set lowercase repository name
         id: repository
         run: echo "repository=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >>
+          $GITHUB_OUTPUT
+
+      - name: Resolve turbo version
+        id: turbo
+        # Read the turbo version resolved in the lockfile catalog so the Dockerfile's pre-install
+        # `turbo prune` uses the same version as the repo (passed via the TURBO_VERSION build arg).
+        run:
+          echo "turbo_version=$(awk '/^catalogs:/{c=1} c&&/^    turbo:/{t=1} t&&/version:/{print $2; exit}' pnpm-lock.yaml)" >>
           $GITHUB_OUTPUT
 
       - name: Detect affected apps
@@ -135,6 +144,7 @@ jobs:
           tags: "${{ steps.meta.outputs.tags }}"
           labels: "${{ steps.meta.outputs.labels }}"
           build-args: |
+            "TURBO_VERSION=${{ needs.config.outputs.turbo_version }}"
             "NEXT_PUBLIC_APP_BASE_URL=${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
             "NEXT_PUBLIC_APP_BOTS=disabled"
             "NEXT_PUBLIC_APP_GOOGLE_SITE_VERIFICATION=${{ vars.NEXT_PUBLIC_APP_GOOGLE_SITE_VERIFICATION }}"
@@ -201,8 +211,8 @@ jobs:
             "UNR_S3_BUCKET_NAME=${{ vars.K8S_SECRET_UNR_S3_BUCKET_NAME }}"
             "ZOTERO_API_KEY=${{ secrets.K8S_SECRET_ZOTERO_API_KEY }}"
             "ZOTERO_API_BASE_URL=${{ secrets.K8S_SECRET_ZOTERO_API_BASE_URL }}"
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.target.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.target.image }}
 
   build-migrate:
     name: Build and push docker images
@@ -246,11 +256,13 @@ jobs:
           push: true
           tags: "${{ steps.meta-migrate.outputs.tags }}"
           labels: "${{ steps.meta-migrate.outputs.labels }}"
+          build-args: |
+            "TURBO_VERSION=${{ needs.config.outputs.turbo_version }}"
           secrets: |
             "TURBO_TEAM=${{ vars.TURBO_TEAM }}"
             "TURBO_TOKEN=${{ secrets.TURBO_TOKEN }}"
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=migrate
+          cache-to: type=gha,mode=max,scope=migrate
 
   deploy:
     name: Deploy docker images
