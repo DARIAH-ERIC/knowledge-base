@@ -1,6 +1,9 @@
-import { isNonEmptyString, log } from "@acdh-oeaw/lib";
+import { createUrl, isNonEmptyString, log } from "@acdh-oeaw/lib";
 import type { ZoteroJsonItem } from "@dariah-eric/client-zotero";
 import type { ResourceDocument } from "@dariah-eric/search";
+
+/** Public Zotero web library, used to link back to the item on the ingest source website. */
+const zoteroWebBaseUrl = "https://www.zotero.org";
 
 export interface ZoteroJsonItemData {
 	title?: string;
@@ -40,6 +43,7 @@ export function createZoteroItem(
 	item: ZoteroJsonItem<ZoteroJsonItemData>,
 	collections: ZoteroCollectionLookup,
 	orgUnits: ZoteroOrgUnitLookups,
+	groupId: string,
 ): ResourceDocument {
 	const data = item.data;
 	const authors = [];
@@ -59,6 +63,14 @@ export function createZoteroItem(
 	const source = "zotero";
 	const sourceId = item.key;
 	const id = [source, sourceId].join(":");
+
+	/** Url of the item in the Zotero group library (the ingest source website). */
+	const source_url = String(
+		createUrl({
+			baseUrl: zoteroWebBaseUrl,
+			pathname: `/groups/${groupId}/items/${item.key}`,
+		}),
+	);
 	const sourceUpdatedAt = data.dateModified != null ? new Date(data.dateModified).getTime() : null;
 
 	const nationalConsortia = new Set<string>();
@@ -95,6 +107,7 @@ export function createZoteroItem(
 		type: "publication",
 		label: data.title ?? "",
 		description: data.abstractNote ?? "",
+		source_url,
 		links: data.url != null ? [data.url] : [],
 		keywords: data.tags?.map((tag) => tag.tag).filter((keyword) => isNonEmptyString(keyword)) ?? [],
 		kind: data.itemType ?? null,

@@ -146,10 +146,10 @@ export async function CountryReportPublicationsScreen(
 							<li key={document.id} className="rounded-md border border-border p-4">
 								<div className="flex flex-col gap-y-2">
 									<div className="flex flex-col gap-y-1">
-										{document.links[0] != null ? (
+										{(document.links[0] ?? document.source_url) != null ? (
 											<a
 												className="text-sm font-semibold text-fg underline-offset-4 hover:underline"
-												href={document.links[0]}
+												href={document.links[0] ?? document.source_url ?? undefined}
 												rel="noreferrer"
 												target="_blank"
 											>

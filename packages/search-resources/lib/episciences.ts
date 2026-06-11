@@ -22,14 +22,17 @@ export function createEpisciencesDocument(item: EpisciencesSearchDocument): Reso
 				? new Date(item.publication_date_tdate).getFullYear()
 				: null;
 	const doi = item.doi_s ?? null;
+
+	/** Episciences landing page for the document (the ingest source website). */
+	const source_url = item.es_doc_url_s ?? null;
+
+	/** External urls pointing to where the actual publication lives. */
 	const links =
-		item.es_doc_url_s != null
-			? [item.es_doc_url_s]
+		doi != null
+			? [`https://doi.org/${doi}`]
 			: item.es_pdf_url_s != null
 				? [item.es_pdf_url_s]
-				: doi != null
-					? [`https://doi.org/${doi}`]
-					: [];
+				: [];
 
 	return {
 		id,
@@ -43,6 +46,7 @@ export function createEpisciencesDocument(item: EpisciencesSearchDocument): Reso
 		type: "publication",
 		label: title,
 		description,
+		source_url,
 		links,
 		keywords,
 		kind: null,

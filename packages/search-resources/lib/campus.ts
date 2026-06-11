@@ -13,7 +13,12 @@ export function createCampusResource(item: DariahCampusResource): ResourceDocume
 	const year = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getFullYear()
 		: null;
-	const links = isNonEmptyString(item.pid) ? [item.pid] : [];
+	/**
+	 * Dariah-Campus hosts the resource itself, so the persistent identifier (which resolves to the
+	 * campus page) is the url on the ingest source website. There is no separate external url.
+	 */
+	const source_url = isNonEmptyString(item.pid) ? item.pid : null;
+	const links: Array<string> = [];
 	const sourceUpdatedAt = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getTime()
 		: null;
@@ -27,6 +32,7 @@ export function createCampusResource(item: DariahCampusResource): ResourceDocume
 		type: "training-material",
 		label: item.title,
 		description: toPlainText(item.summary.content),
+		source_url,
 		links,
 		keywords,
 		kind: null,
@@ -49,7 +55,12 @@ export function createCampusCurriculum(item: DariahCampusCurriculum): ResourceDo
 	const year = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getFullYear()
 		: null;
-	const links = isNonEmptyString(item.pid) ? [item.pid] : [];
+	/**
+	 * Dariah-Campus hosts the resource itself, so the persistent identifier (which resolves to the
+	 * campus page) is the url on the ingest source website. There is no separate external url.
+	 */
+	const source_url = isNonEmptyString(item.pid) ? item.pid : null;
+	const links: Array<string> = [];
 	const sourceUpdatedAt = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getTime()
 		: null;
@@ -63,6 +74,7 @@ export function createCampusCurriculum(item: DariahCampusCurriculum): ResourceDo
 		type: "training-material",
 		label: item.title,
 		description: toPlainText(item.summary.content),
+		source_url,
 		links,
 		keywords,
 		kind: null,

@@ -24,6 +24,7 @@ export const resourcesCollection = defineCollection({
 		{ name: "description", type: "string", index: true },
 		{ name: "keywords", type: "string[]", index: true, facet: true },
 		{ name: "kind", type: "string", index: false, optional: true },
+		{ name: "source_url", type: "string", index: false, optional: true },
 		{ name: "links", type: "string[]", index: false },
 		{ name: "authors", type: "string[]", index: false, optional: true },
 		{ name: "year", type: "int32", index: true, facet: true, optional: true },

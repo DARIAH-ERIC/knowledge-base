@@ -134,6 +134,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		return createSearchIndexResourceDocuments({
 			sourceData,
 			sshocMarketplaceBaseUrl,
+			zoteroGroupId,
 			orgUnits,
 		});
 	}

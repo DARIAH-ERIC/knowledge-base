@@ -34,6 +34,7 @@ export interface OrgUnitResourceLookups {
 export interface CreateSearchIndexResourceDocumentsParams {
 	sourceData: SearchIndexResourceSourceData;
 	sshocMarketplaceBaseUrl: string;
+	zoteroGroupId: string;
 	orgUnits: OrgUnitResourceLookups;
 }
 
@@ -50,7 +51,7 @@ function buildZoteroCollectionLookup(
 export function createSearchIndexResourceDocuments(
 	params: CreateSearchIndexResourceDocumentsParams,
 ): Array<ResourceDocument> {
-	const { sourceData, sshocMarketplaceBaseUrl, orgUnits } = params;
+	const { sourceData, sshocMarketplaceBaseUrl, zoteroGroupId, orgUnits } = params;
 	const {
 		campusCurricula,
 		campusResources,
@@ -69,7 +70,7 @@ export function createSearchIndexResourceDocuments(
 		...episciencesDocuments.map((item) => createEpisciencesDocument(item)),
 		...zoteroItems
 			.filter((item) => isZoteroItemInCollection(item))
-			.map((item) => createZoteroItem(item, zoteroCollectionLookup, orgUnits)),
+			.map((item) => createZoteroItem(item, zoteroCollectionLookup, orgUnits, zoteroGroupId)),
 	];
 }
 
@@ -84,7 +85,7 @@ export function createWebsiteResourceDocument(resource: ResourceDocument): Websi
 		type: resource.type,
 		label: resource.label,
 		description: resource.description,
-		link: resource.links[0],
+		link: resource.links[0] ?? resource.source_url,
 	};
 }
 
