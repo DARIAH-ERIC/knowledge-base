@@ -30,7 +30,7 @@ interface EricDetailsProps {
 	selectedVersion: "draft" | "published";
 	eric: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
 		descriptionContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
@@ -111,6 +111,9 @@ export function EricDetails(props: Readonly<EricDetailsProps>): ReactNode {
 
 				<DescriptionTerm>{t("Acronym")}</DescriptionTerm>
 				<DescriptionDetails>{eric.acronym}</DescriptionDetails>
+
+				<DescriptionTerm>{t("ROR")}</DescriptionTerm>
+				<DescriptionDetails>{eric.ror}</DescriptionDetails>
 
 				<DescriptionTerm>{t("SSHOC actor ID")}</DescriptionTerm>
 				<DescriptionDetails>{eric.sshocMarketplaceActorId}</DescriptionDetails>
