@@ -25,7 +25,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
+import type { AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
@@ -43,6 +43,7 @@ import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
 import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
 import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
+import type { ContributionPersonOption } from "@/lib/data/contributions";
 import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
 import { dateToCalendarDate } from "@/lib/date";
 
@@ -50,13 +51,13 @@ interface PersonRelationsSectionProps {
 	organisationalUnitDocumentId: string;
 	relations: Array<PersonRelation & { lifecycleStatus?: "changed" | "new" }>;
 	roleOptions: Array<PersonRelationRoleOption>;
-	initialPersonItems: Array<AsyncOption>;
+	initialPersonItems: Array<ContributionPersonOption>;
 	initialPersonTotal: number;
 }
 
 async function fetchPersonOptionsPage(
 	params: Readonly<AsyncOptionsFetchPageParams>,
-): Promise<{ items: Array<AsyncOption>; total: number }> {
+): Promise<{ items: Array<ContributionPersonOption>; total: number }> {
 	const searchParams = new URLSearchParams({
 		limit: String(params.limit),
 		offset: String(params.offset),
@@ -75,7 +76,7 @@ async function fetchPersonOptionsPage(
 		throw new Error("Failed to load persons.");
 	}
 
-	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+	return (await response.json()) as { items: Array<ContributionPersonOption>; total: number };
 }
 
 function formatRoleType(type: string): string {
@@ -111,11 +112,11 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 
 	const [selectedRoleTypeId, setSelectedRoleTypeId] = useState<string | null>(null);
-	const [selectedPerson, setSelectedPerson] = useState<AsyncOption | null>(null);
+	const [selectedPerson, setSelectedPerson] = useState<ContributionPersonOption | null>(null);
 
 	const [itemToEdit, setItemToEdit] = useState<PersonRelation | null>(null);
 	const [editRoleTypeId, setEditRoleTypeId] = useState<string | null>(null);
-	const [editPerson, setEditPerson] = useState<AsyncOption | null>(null);
+	const [editPerson, setEditPerson] = useState<ContributionPersonOption | null>(null);
 	const [editStartDate, setEditStartDate] = useState<CalendarDate | null>(null);
 	const [editEndDate, setEditEndDate] = useState<CalendarDate | null>(null);
 
@@ -123,7 +124,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 		items: localRelations,
 		sortAccessors: {
 			from: (relation) => relation.duration.start,
-			person: (relation) => relation.personName,
+			person: (relation) => relation.personSortName,
 			role: (relation) => relation.roleType,
 			type: (relation) => relation.targetUnitType,
 			until: (relation) => relation.duration.end,
@@ -167,6 +168,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							id: data.id,
 							personDocumentId: person.id,
 							personName: person.name,
+							personSortName: person.sortName,
 							personSlug: data.personSlug,
 							roleTypeId: option.roleTypeId,
 							roleType: option.roleType as PersonRelation["roleType"],
@@ -189,7 +191,11 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 		setEditState(createActionStateInitial());
 		setItemToEdit(relation);
 		setEditRoleTypeId(relation.roleTypeId);
-		setEditPerson({ id: relation.personDocumentId, name: relation.personName });
+		setEditPerson({
+			id: relation.personDocumentId,
+			name: relation.personName,
+			sortName: relation.personSortName,
+		});
 		setEditStartDate(dateToCalendarDate(relation.duration.start));
 		setEditEndDate(dateToCalendarDate(relation.duration.end));
 	}
@@ -213,6 +219,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 									...relation,
 									personDocumentId: person.id,
 									personName: person.name,
+									personSortName: person.sortName,
 									roleTypeId: option.roleTypeId,
 									roleType: option.roleType as PersonRelation["roleType"],
 									duration: { start, ...(end != null ? { end } : {}) },

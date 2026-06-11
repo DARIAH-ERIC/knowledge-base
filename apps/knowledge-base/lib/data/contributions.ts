@@ -340,7 +340,11 @@ export async function getContributionPersonOptions(params: GetContributionOption
 
 	const [items, aggregate] = await Promise.all([
 		db
-			.select({ id: schema.entityVersions.entityId, name: schema.persons.name })
+			.select({
+				id: schema.entityVersions.entityId,
+				name: schema.persons.name,
+				sortName: schema.persons.sortName,
+			})
 			.from(schema.persons)
 			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
