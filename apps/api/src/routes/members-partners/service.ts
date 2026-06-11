@@ -434,6 +434,7 @@ async function getNationalConsortium(
 		},
 		columns: {
 			name: true,
+			ror: true,
 		},
 		with: {
 			entityVersion: {
@@ -449,6 +450,18 @@ async function getNationalConsortium(
 					key: true,
 				},
 			},
+			socialMedia: {
+				columns: {
+					url: true,
+				},
+				with: {
+					type: {
+						columns: {
+							type: true,
+						},
+					},
+				},
+			},
 		},
 	});
 
@@ -458,10 +471,13 @@ async function getNationalConsortium(
 
 	const fields =
 		options?.includeDescription === true ? await getContentBlocks(db, item.entityVersion.id) : {};
+	const website = item.socialMedia.find((sm) => sm.type.type === "website")?.url ?? null;
 
 	return {
 		name: item.name,
 		slug: item.entityVersion.entity.slug,
+		ror: item.ror,
+		website,
 		image: generateImageUrl(item.image, options?.imageSize ?? imageWidth.preview),
 		description: fields.description,
 	};
