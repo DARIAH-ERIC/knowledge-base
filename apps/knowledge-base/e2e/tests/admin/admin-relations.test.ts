@@ -278,6 +278,153 @@ test.describe("admin relation management", () => {
 		expect(relations[0]!.duration.start).toStrictEqual(new Date("2025-01-01T00:00:00.000Z"));
 	});
 
+	test("should allow the same person, role and body over non-overlapping periods", async ({
+		createAdminGovernanceBodiesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const governanceBodiesPage = createAdminGovernanceBodiesPage(workerIndex);
+		const name = `${governanceBodiesPage.workerPrefix} Person Re-appointment ${randomUUID()}`;
+
+		await governanceBodiesPage.gotoCreate();
+		await governanceBodiesPage.fillName(name);
+		await governanceBodiesPage.fillDescription("Description for person re-appointment test.");
+		await governanceBodiesPage.submitForm();
+
+		await governanceBodiesPage.gotoEditFromList(name);
+		await governanceBodiesPage.goToPeopleTab();
+
+		// First term: 2020-01-01 → 2020-12-31. `selectFirst*` is deterministic, so the second add below
+		// targets the same (person, role) triple.
+		await governanceBodiesPage.selectFirstPersonRole();
+		await governanceBodiesPage.selectFirstPerson();
+		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2020, 1, 1);
+		await governanceBodiesPage.fillPersonRelationDatePicker("End date", 2020, 12, 31);
+		await governanceBodiesPage.submitAddPerson();
+
+		const governanceBody = await db.getGovernanceBodyByName(name);
+		expect(await db.getPersonRelationsByUnitVersionId(governanceBody!.id)).toHaveLength(1);
+
+		// Second term: same person and role, non-overlapping from 2023-01-01. This used to be rejected by
+		// an over-strict (person, org, role) application check; only the duration-overlap exclusion
+		// constraint should gate it now, so the re-appointment is allowed.
+		await governanceBodiesPage.selectFirstPersonRole();
+		await governanceBodiesPage.selectFirstPerson();
+		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2023, 1, 1);
+		await governanceBodiesPage.submitAddPerson();
+
+		expect(await db.getPersonRelationsByUnitVersionId(governanceBody!.id)).toHaveLength(2);
+	});
+
+	test("should reject a person relation that overlaps an existing one", async ({
+		page,
+		createAdminGovernanceBodiesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const governanceBodiesPage = createAdminGovernanceBodiesPage(workerIndex);
+		const name = `${governanceBodiesPage.workerPrefix} Person Overlap ${randomUUID()}`;
+
+		await governanceBodiesPage.gotoCreate();
+		await governanceBodiesPage.fillName(name);
+		await governanceBodiesPage.fillDescription("Description for person overlap test.");
+		await governanceBodiesPage.submitForm();
+
+		await governanceBodiesPage.gotoEditFromList(name);
+		await governanceBodiesPage.goToPeopleTab();
+
+		// Open-ended term from 2020-01-01.
+		await governanceBodiesPage.selectFirstPersonRole();
+		await governanceBodiesPage.selectFirstPerson();
+		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2020, 1, 1);
+		await governanceBodiesPage.submitAddPerson();
+
+		const governanceBody = await db.getGovernanceBodyByName(name);
+		expect(await db.getPersonRelationsByUnitVersionId(governanceBody!.id)).toHaveLength(1);
+
+		// Same person and role starting 2020-06-01 overlaps the open-ended term. The exclusion
+		// constraint rejects it and the action surfaces the message; the submit returns an error (still
+		// HTTP 200), so assert on the rendered alert rather than waiting for an action success.
+		await governanceBodiesPage.selectFirstPersonRole();
+		await governanceBodiesPage.selectFirstPerson();
+		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2020, 6, 1);
+		await page.getByRole("button", { name: "Add person" }).click();
+
+		await expect(page.getByText(/during an overlapping period/i)).toBeVisible();
+		expect(await db.getPersonRelationsByUnitVersionId(governanceBody!.id)).toHaveLength(1);
+	});
+
+	test("should allow the same unit relation over non-overlapping periods", async ({
+		createAdminInstitutionsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const institutionsPage = createAdminInstitutionsPage(workerIndex);
+		const name = `${institutionsPage.workerPrefix} Relation Re-add ${randomUUID()}`;
+
+		await institutionsPage.gotoCreate();
+		await institutionsPage.fillName(name);
+		await institutionsPage.fillDescription("Description for unit relation re-add test.");
+		await institutionsPage.submitForm();
+
+		await institutionsPage.gotoEditFromList(name);
+		await institutionsPage.goToRelationsTab();
+
+		// First period: 2020-01-01 → 2020-12-31, against the deterministic first relation type and unit.
+		await institutionsPage.selectFirstRelationType();
+		await institutionsPage.selectFirstRelatedUnit();
+		await institutionsPage.fillRelationDatePicker("Start date", 2020, 1, 1);
+		await institutionsPage.fillRelationDatePicker("End date", 2020, 12, 31);
+		await institutionsPage.submitAddRelation();
+
+		const institution = await db.getInstitutionByName(name);
+		expect(await db.getUnitRelationsByUnitVersionId(institution!.id)).toHaveLength(1);
+
+		// Same (unit, related unit, status) over a non-overlapping period from 2023-01-01 is allowed.
+		await institutionsPage.selectFirstRelationType();
+		await institutionsPage.selectFirstRelatedUnit();
+		await institutionsPage.fillRelationDatePicker("Start date", 2023, 1, 1);
+		await institutionsPage.submitAddRelation();
+
+		expect(await db.getUnitRelationsByUnitVersionId(institution!.id)).toHaveLength(2);
+	});
+
+	test("should reject a unit relation that overlaps an existing one", async ({
+		page,
+		createAdminInstitutionsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const institutionsPage = createAdminInstitutionsPage(workerIndex);
+		const name = `${institutionsPage.workerPrefix} Relation Overlap ${randomUUID()}`;
+
+		await institutionsPage.gotoCreate();
+		await institutionsPage.fillName(name);
+		await institutionsPage.fillDescription("Description for unit relation overlap test.");
+		await institutionsPage.submitForm();
+
+		await institutionsPage.gotoEditFromList(name);
+		await institutionsPage.goToRelationsTab();
+
+		// Open-ended relation from 2020-01-01.
+		await institutionsPage.selectFirstRelationType();
+		await institutionsPage.selectFirstRelatedUnit();
+		await institutionsPage.fillRelationDatePicker("Start date", 2020, 1, 1);
+		await institutionsPage.submitAddRelation();
+
+		const institution = await db.getInstitutionByName(name);
+		expect(await db.getUnitRelationsByUnitVersionId(institution!.id)).toHaveLength(1);
+
+		// Same triple starting 2020-06-01 overlaps; the exclusion constraint rejects it.
+		await institutionsPage.selectFirstRelationType();
+		await institutionsPage.selectFirstRelatedUnit();
+		await institutionsPage.fillRelationDatePicker("Start date", 2020, 6, 1);
+		await page.getByRole("button", { name: "Add relation" }).click();
+
+		await expect(page.getByText(/during an overlapping period/i)).toBeVisible();
+		expect(await db.getUnitRelationsByUnitVersionId(institution!.id)).toHaveLength(1);
+	});
+
 	test("should manage project partners from the project tab and standalone list", async ({
 		page,
 		createAdminProjectsPage,
