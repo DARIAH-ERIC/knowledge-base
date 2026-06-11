@@ -77,6 +77,7 @@ export default async function DashboardAdministratorInstitutionDetailsPage(
 			acronym: true,
 			id: true,
 			name: true,
+			ror: true,
 			sshocMarketplaceActorId: true,
 			summary: true,
 		},

@@ -324,6 +324,7 @@ export class DatabaseService {
 		id: string;
 		imageId: string | null;
 		name: string;
+		ror: string | null;
 		sshocMarketplaceActorId: number | null;
 		summary: string | null;
 	} | null> {
@@ -334,6 +335,7 @@ export class DatabaseService {
 				id: schema.organisationalUnits.id,
 				imageId: schema.organisationalUnits.imageId,
 				name: schema.organisationalUnits.name,
+				ror: schema.organisationalUnits.ror,
 				sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
 				summary: schema.organisationalUnits.summary,
 			})

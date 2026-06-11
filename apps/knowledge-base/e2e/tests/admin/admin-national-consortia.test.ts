@@ -19,6 +19,7 @@ test.describe("national consortia admin", () => {
 
 		const name = `${nationalConsortiaPage.workerPrefix} Test NC ${randomUUID()}`;
 		const acronym = "E2ENC";
+		const ror = "https://ror.org/05n09v162";
 		const sshocMarketplaceActorId = 234561;
 		const summary = "E2E test national consortium summary.";
 		const description = "E2E test national consortium description.";
@@ -28,6 +29,7 @@ test.describe("national consortia admin", () => {
 
 		await nationalConsortiaPage.fillName(name);
 		await nationalConsortiaPage.fillAcronym(acronym);
+		await nationalConsortiaPage.fillRor(ror);
 		await nationalConsortiaPage.fillSshocMarketplaceActorId(sshocMarketplaceActorId);
 		await nationalConsortiaPage.fillSummary(summary);
 		await nationalConsortiaPage.selectTestImage();
@@ -44,6 +46,7 @@ test.describe("national consortia admin", () => {
 			acronym,
 			imageId: testAsset.id,
 			name,
+			ror,
 			sshocMarketplaceActorId,
 			summary,
 		});
@@ -65,6 +68,7 @@ test.describe("national consortia admin", () => {
 		await nationalConsortiaPage.gotoCreate();
 		await nationalConsortiaPage.fillName(originalName);
 		await nationalConsortiaPage.fillAcronym("E2ENCOLD");
+		await nationalConsortiaPage.fillRor("https://ror.org/05n09v162");
 		await nationalConsortiaPage.fillSshocMarketplaceActorId(234562);
 		await nationalConsortiaPage.fillSummary("E2E test national consortium to be edited.");
 		await nationalConsortiaPage.fillDescription("Description for edit test.");
@@ -82,12 +86,14 @@ test.describe("national consortia admin", () => {
 
 		const updatedName = `${nationalConsortiaPage.workerPrefix} Updated ${randomUUID()}`;
 		const updatedAcronym = "E2ENCNEW";
+		const updatedRor = "https://ror.org/0abcdef12";
 		const updatedSshocMarketplaceActorId = 234563;
 		const updatedSummary = "Updated E2E test national consortium summary.";
 		const updatedDescription = "Updated E2E test national consortium description.";
 
 		await page.getByLabel("Name", { exact: true }).fill(updatedName);
 		await nationalConsortiaPage.fillAcronym(updatedAcronym);
+		await nationalConsortiaPage.fillRor(updatedRor);
 		await nationalConsortiaPage.fillSshocMarketplaceActorId(updatedSshocMarketplaceActorId);
 		await nationalConsortiaPage.fillSummary(updatedSummary);
 		await nationalConsortiaPage.selectTestImage();
@@ -109,6 +115,7 @@ test.describe("national consortia admin", () => {
 			acronym: updatedAcronym,
 			imageId: testAsset.id,
 			name: updatedName,
+			ror: updatedRor,
 			sshocMarketplaceActorId: updatedSshocMarketplaceActorId,
 			summary: updatedSummary,
 		});
@@ -129,6 +136,7 @@ test.describe("national consortia admin", () => {
 		await nationalConsortiaPage.gotoCreate();
 		await nationalConsortiaPage.fillName(originalName);
 		await nationalConsortiaPage.fillAcronym("E2ENCOPT");
+		await nationalConsortiaPage.fillRor("https://ror.org/05n09v162");
 		await nationalConsortiaPage.fillSshocMarketplaceActorId(234564);
 		await nationalConsortiaPage.fillSummary("Optional national consortium summary.");
 		await nationalConsortiaPage.selectTestImage();
@@ -146,6 +154,7 @@ test.describe("national consortia admin", () => {
 		const updatedName = `${nationalConsortiaPage.workerPrefix} Cleared ${randomUUID()}`;
 		await page.getByLabel("Name", { exact: true }).fill(updatedName);
 		await nationalConsortiaPage.fillAcronym("");
+		await nationalConsortiaPage.fillRor("");
 		await page.locator('input[name="sshocMarketplaceActorId"]').fill("");
 		await nationalConsortiaPage.fillSummary("");
 		await nationalConsortiaPage.removeImage();
@@ -155,6 +164,7 @@ test.describe("national consortia admin", () => {
 		expect(updated).toMatchObject({
 			acronym: null,
 			imageId: null,
+			ror: null,
 			sshocMarketplaceActorId: null,
 			summary: null,
 		});

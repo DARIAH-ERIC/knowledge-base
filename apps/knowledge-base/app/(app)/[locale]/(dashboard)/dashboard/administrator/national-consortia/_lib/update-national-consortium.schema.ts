@@ -11,6 +11,7 @@ export const UpdateNationalConsortiumActionInputSchema = v.object({
 	...v.pick(OrganisationalUnitUpdateSchema, ["name", "summary"]).entries,
 	summary: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
+	ror: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	sshocMarketplaceActorId: v.nullish(
 		v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		null,

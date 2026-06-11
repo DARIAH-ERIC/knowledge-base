@@ -28,7 +28,7 @@ interface NationalConsortiumFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	nationalConsortium?: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
 		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
@@ -93,6 +93,12 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 
 					<TextField defaultValue={nationalConsortium?.acronym ?? undefined} name="acronym">
 						<Label>{t("Acronym")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
+
+					<TextField defaultValue={nationalConsortium?.ror ?? undefined} name="ror">
+						<Label>{t("ROR")}</Label>
 						<Input />
 						<FieldError />
 					</TextField>

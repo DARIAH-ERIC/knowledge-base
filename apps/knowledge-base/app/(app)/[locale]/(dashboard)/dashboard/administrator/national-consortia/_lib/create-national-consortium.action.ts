@@ -52,6 +52,7 @@ export const createNationalConsortiumAction = createMutationAction({
 			acronym: input.acronym,
 			imageId,
 			name: input.name,
+			ror: input.ror,
 			sshocMarketplaceActorId: input.sshocMarketplaceActorId,
 			summary: input.summary,
 			typeId: orgUnitType.id,
