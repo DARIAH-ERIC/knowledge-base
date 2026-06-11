@@ -28,7 +28,7 @@ interface EricFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	eric: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
 		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
@@ -91,6 +91,12 @@ export function EricForm(props: Readonly<EricFormProps>): ReactNode {
 
 					<TextField defaultValue={eric.acronym ?? undefined} name="acronym">
 						<Label>{t("Acronym")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
+
+					<TextField defaultValue={eric.ror ?? undefined} name="ror">
+						<Label>{t("ROR")}</Label>
 						<Input />
 						<FieldError />
 					</TextField>
