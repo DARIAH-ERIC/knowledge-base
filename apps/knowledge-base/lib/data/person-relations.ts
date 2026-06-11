@@ -21,6 +21,7 @@ export async function getPersonRelations(organisationalUnitDocumentId: string) {
 			id: schema.personsToOrganisationalUnits.id,
 			personDocumentId: schema.personsToOrganisationalUnits.personDocumentId,
 			personName: schema.persons.name,
+			personSortName: schema.persons.sortName,
 			personSlug: schema.entities.slug,
 			roleTypeId: schema.personsToOrganisationalUnits.roleTypeId,
 			roleType: schema.personRoleTypes.type,
