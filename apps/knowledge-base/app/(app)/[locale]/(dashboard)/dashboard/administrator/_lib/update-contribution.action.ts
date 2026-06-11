@@ -10,7 +10,8 @@ import * as v from "valibot";
 import { UpdateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.schema";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { db } from "@/lib/db";
-import { and, eq, ne, sql } from "@/lib/db/sql";
+import { isExclusionViolation } from "@/lib/db/errors";
+import { and, eq, sql } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 
@@ -36,94 +37,86 @@ export const updateContributionAction = createServerAction(
 		const { id, personDocumentId, roleTypeId, organisationalUnitDocumentId, duration } =
 			result.output;
 
-		const returned = await db.transaction(async (tx) => {
-			const unit = await tx
-				.select({
-					unitType: schema.organisationalUnitTypes.type,
-					allowedRelationId: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.id,
-				})
-				.from(schema.organisationalUnits)
-				.innerJoin(
-					schema.documentLifecycle,
-					sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
-				)
-				.innerJoin(
-					schema.organisationalUnitTypes,
-					eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
-				)
-				.leftJoin(
-					schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations,
-					and(
-						eq(
-							schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.unitTypeId,
-							schema.organisationalUnits.typeId,
+		try {
+			const returned = await db.transaction(async (tx) => {
+				const unit = await tx
+					.select({
+						unitType: schema.organisationalUnitTypes.type,
+						allowedRelationId: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.id,
+					})
+					.from(schema.organisationalUnits)
+					.innerJoin(
+						schema.documentLifecycle,
+						sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
+					)
+					.innerJoin(
+						schema.organisationalUnitTypes,
+						eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+					)
+					.leftJoin(
+						schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations,
+						and(
+							eq(
+								schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.unitTypeId,
+								schema.organisationalUnits.typeId,
+							),
+							eq(
+								schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId,
+								roleTypeId,
+							),
 						),
-						eq(
-							schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId,
-							roleTypeId,
-						),
-					),
-				)
-				.where(eq(schema.documentLifecycle.documentId, organisationalUnitDocumentId))
-				.limit(1)
-				.then((rows) => rows[0] ?? null);
+					)
+					.where(eq(schema.documentLifecycle.documentId, organisationalUnitDocumentId))
+					.limit(1)
+					.then((rows) => rows[0] ?? null);
 
-			if (unit?.allowedRelationId == null) {
-				return { error: "role-not-allowed" as const };
-			}
+				if (unit?.allowedRelationId == null) {
+					return { error: "role-not-allowed" as const };
+				}
 
-			const existing = await tx
-				.select({ id: schema.personsToOrganisationalUnits.id })
-				.from(schema.personsToOrganisationalUnits)
-				.where(
-					and(
-						ne(schema.personsToOrganisationalUnits.id, id),
-						eq(schema.personsToOrganisationalUnits.personDocumentId, personDocumentId),
-						eq(
-							schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
-							organisationalUnitDocumentId,
-						),
-						eq(schema.personsToOrganisationalUnits.roleTypeId, roleTypeId),
-					),
-				)
-				.limit(1)
-				.then((rows) => rows[0] ?? null);
+				await tx
+					.update(schema.personsToOrganisationalUnits)
+					.set({
+						personDocumentId,
+						organisationalUnitDocumentId,
+						roleTypeId,
+						duration,
+					})
+					.where(eq(schema.personsToOrganisationalUnits.id, id));
 
-			if (existing != null) {
-				return { error: "duplicate" as const };
-			}
+				await recordAuditEvent(tx, {
+					actorUserId: user?.id,
+					action: "update",
+					subjectType: "contributions",
+					subjectId: id,
+					summary: getAuditSummaryFromFormData(formData),
+				});
 
-			await tx
-				.update(schema.personsToOrganisationalUnits)
-				.set({
-					personDocumentId,
-					organisationalUnitDocumentId,
-					roleTypeId,
-					duration,
-				})
-				.where(eq(schema.personsToOrganisationalUnits.id, id));
-
-			await recordAuditEvent(tx, {
-				actorUserId: user?.id,
-				action: "update",
-				subjectType: "contributions",
-				subjectId: id,
-				summary: getAuditSummaryFromFormData(formData),
+				return { ok: true as const };
 			});
 
-			return { ok: true };
-		});
-
-		if ("error" in returned) {
-			if (returned.error === "duplicate") {
-				return createActionStateError({ message: t("This contribution already exists.") });
+			if ("error" in returned) {
+				return createActionStateError({
+					message: t("The selected role is not allowed for this organisation."),
+				});
 			}
-			return createActionStateError({
-				message: t("The selected role is not allowed for this organisation."),
-			});
+
+			revalidatePath("/[locale]/dashboard/administrator", "layout");
+			return createActionStateSuccess({});
+		} catch (error) {
+			// A person may hold the same role at the same org over several non-overlapping periods; the
+			// duration-overlap rule is enforced by a GiST exclusion constraint. Translate its violation
+			// rather than mirroring the rule here, so the database stays the single source of truth.
+			if (
+				isExclusionViolation(error, "persons_to_organisational_units_person_org_role_no_overlap")
+			) {
+				return createActionStateError({
+					message: t(
+						"This person already holds this role at this organisation during an overlapping period.",
+					),
+				});
+			}
+			throw error;
 		}
-
-		revalidatePath("/[locale]/dashboard/administrator", "layout");
-		return createActionStateSuccess({});
 	},
 );
