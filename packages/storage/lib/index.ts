@@ -66,6 +66,19 @@ export function createStorageService(params: CreateStorageServiceParams) {
 		},
 
 		// oxlint-disable-next-line typescript/explicit-module-boundary-types
+		stat(key: string) {
+			return Result.tryPromise({
+				async try() {
+					const { size } = await client.statObject(bucketName, key);
+					return { size };
+				},
+				catch(cause) {
+					return new StorageDownloadError({ cause });
+				},
+			});
+		},
+
+		// oxlint-disable-next-line typescript/explicit-module-boundary-types
 		download(key: string) {
 			return Result.tryPromise({
 				async try() {

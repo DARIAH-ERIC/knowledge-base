@@ -11,6 +11,8 @@ export const assets = p.snakeCase.table("assets", {
 	label: p.text("label").notNull(),
 	filename: p.text("filename"),
 	mimeType: p.text("mime_type").notNull(),
+	/** File size in bytes. Nullable for assets uploaded before size tracking was added. */
+	size: p.bigint("size", { mode: "number" }),
 	caption: p.text("caption"),
 	alt: p.text("alt"),
 	licenseId: p.uuid("license_id").references(() => licenses.id),

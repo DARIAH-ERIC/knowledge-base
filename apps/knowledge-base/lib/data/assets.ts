@@ -131,6 +131,7 @@ export async function uploadAsset(params: UploadAssetParams) {
 		licenseId,
 		mimeType: metadata["content-type"],
 		filename: file.name,
+		size,
 		label: label ?? file.name,
 		alt,
 		caption,
@@ -196,6 +197,7 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 				caption: true,
 				licenseId: true,
 				mimeType: true,
+				size: true,
 			},
 			limit,
 			offset,
@@ -221,6 +223,7 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 			caption: asset.caption,
 			licenseId: asset.licenseId,
 			mimeType: asset.mimeType,
+			size: asset.size,
 			url,
 		};
 	});
