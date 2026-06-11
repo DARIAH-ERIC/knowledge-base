@@ -412,6 +412,516 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
         "type": "object",
       },
+      "CooperatingPartner": {
+        "description": "Cooperating partner",
+        "properties": {
+          "description": {
+            "default": [],
+            "items": {
+              "anyOf": [
+                {
+                  "properties": {
+                    "content": {},
+                    "type": {
+                      "const": "rich_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "embed",
+                    },
+                    "url": {
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "url",
+                    "caption",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "image": {
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                      ],
+                      "type": "object",
+                    },
+                    "type": {
+                      "const": "image",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "caption",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "dataType": {
+                      "enum": [
+                        "events",
+                        "funding_calls",
+                        "impact_case_studies",
+                        "news",
+                        "opportunities",
+                        "pages",
+                        "spotlight_articles",
+                      ],
+                      "type": "string",
+                    },
+                    "limit": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "data",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "dataType",
+                    "limit",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "ctas": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                              },
+                              "url": {
+                                "type": "string",
+                              },
+                            },
+                            "required": [
+                              "label",
+                              "url",
+                            ],
+                            "type": "object",
+                          },
+                          "type": "array",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "eyebrow": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "image": {
+                      "anyOf": [
+                        {
+                          "properties": {
+                            "url": {
+                              "type": "string",
+                            },
+                          },
+                          "required": [
+                            "url",
+                          ],
+                          "type": "object",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "title": {
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "hero",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "eyebrow",
+                    "image",
+                    "ctas",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "properties": {
+                          "content": {},
+                          "title": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "title",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                    "type": {
+                      "const": "accordion",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "items",
+                  ],
+                  "type": "object",
+                },
+              ],
+            },
+            "type": "array",
+          },
+          "entity": {
+            "properties": {
+              "slug": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "slug",
+            ],
+            "type": "object",
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string",
+          },
+          "image": {
+            "anyOf": [
+              {
+                "properties": {
+                  "url": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "url",
+                ],
+                "type": "object",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "institutions": {
+            "items": {
+              "$ref": "#/components/schemas/PartnerInstitution",
+            },
+            "type": "array",
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "number",
+                      },
+                      {
+                        "type": "boolean",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  {
+                    "items": {},
+                    "type": "array",
+                  },
+                  {
+                    "additionalProperties": {},
+                    "propertyNames": {
+                      "type": "string",
+                    },
+                    "type": "object",
+                  },
+                ],
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "name": {
+            "type": "string",
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string",
+          },
+          "relatedEntities": {
+            "default": [],
+            "items": {
+              "properties": {
+                "entityType": {
+                  "enum": [
+                    "documents_policies",
+                    "events",
+                    "funding_calls",
+                    "impact_case_studies",
+                    "news",
+                    "opportunities",
+                    "pages",
+                    "persons",
+                    "projects",
+                    "spotlight_articles",
+                    "governance_body",
+                    "national_consortium",
+                    "country",
+                    "institution",
+                    "regional_hub",
+                    "eric",
+                    "working_group",
+                  ],
+                  "type": "string",
+                },
+                "id": {
+                  "format": "uuid",
+                  "type": "string",
+                },
+                "label": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
+                "slug": {
+                  "type": "string",
+                },
+              },
+              "required": [
+                "id",
+                "slug",
+                "entityType",
+                "label",
+              ],
+              "type": "object",
+            },
+            "type": "array",
+          },
+          "relatedResources": {
+            "default": [],
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string",
+                },
+                "label": {
+                  "type": "string",
+                },
+                "links": {
+                  "items": {
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "type": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
+              },
+              "required": [
+                "id",
+                "label",
+                "type",
+                "links",
+              ],
+              "type": "object",
+            },
+            "type": "array",
+          },
+          "socialMedia": {
+            "items": {
+              "properties": {
+                "duration": {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "end": {
+                          "anyOf": [
+                            {
+                              "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                              "format": "date-time",
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "start": {
+                          "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                          "format": "date-time",
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "object",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
+                "id": {
+                  "format": "uuid",
+                  "type": "string",
+                },
+                "name": {
+                  "type": "string",
+                },
+                "type": {
+                  "enum": [
+                    "bluesky",
+                    "facebook",
+                    "instagram",
+                    "linkedin",
+                    "mastodon",
+                    "twitter",
+                    "vimeo",
+                    "website",
+                    "youtube",
+                    "other",
+                  ],
+                  "type": "string",
+                },
+                "url": {
+                  "type": "string",
+                },
+              },
+              "required": [
+                "id",
+                "name",
+                "url",
+                "duration",
+                "type",
+              ],
+              "type": "object",
+            },
+            "type": "array",
+          },
+          "sshocMarketplaceActorId": {
+            "anyOf": [
+              {
+                "maximum": 2147483647,
+                "minimum": -2147483648,
+                "type": "integer",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "status": {
+            "const": "is_cooperating_partner_of",
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "type": {
+            "const": "country",
+          },
+        },
+        "required": [
+          "id",
+          "name",
+          "summary",
+          "metadata",
+          "sshocMarketplaceActorId",
+          "image",
+          "entity",
+          "publishedAt",
+          "type",
+          "socialMedia",
+          "status",
+          "institutions",
+        ],
+        "type": "object",
+      },
       "DariahProject": {
         "description": "DARIAH project",
         "properties": {
@@ -5522,8 +6032,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "minimum": 1,
         "type": "integer",
       },
-      "MemberOrPartner": {
-        "description": "Member or partner",
+      "MemberOrObserver": {
+        "description": "Member or observer country",
         "properties": {
           "contributors": {
             "items": {
@@ -5835,6 +6345,26 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               },
             ],
           },
+          "nationalCoordinatingInstitution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PartnerInstitution",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "nationalRepresentativeInstitution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PartnerInstitution",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "publishedAt": {
             "format": "date-time",
             "type": "string",
@@ -6019,7 +6549,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "enum": [
               "is_member_of",
               "is_observer_of",
-              "is_cooperating_partner_of",
             ],
             "type": "string",
           },
@@ -6047,13 +6576,26 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "entity",
           "publishedAt",
           "type",
+          "socialMedia",
           "status",
           "contributors",
           "institutions",
+          "nationalCoordinatingInstitution",
+          "nationalRepresentativeInstitution",
           "nationalConsortium",
-          "socialMedia",
         ],
         "type": "object",
+      },
+      "MemberOrPartner": {
+        "description": "Member or partner",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/MemberOrObserver",
+          },
+          {
+            "$ref": "#/components/schemas/CooperatingPartner",
+          },
+        ],
       },
       "MemberOrPartnerBase": {
         "description": "Member or partner",
