@@ -60,7 +60,7 @@ export const resetPasswordAction = createServerAction(
 		await auth.deleteUserSessions(passwordResetSession.userId);
 		await auth.updatePassword(passwordResetSession.userId, password);
 
-		const session = await auth.createSession(user.id, passwordResetSession.isTwoFactorVerified);
+		const session = await auth.createSession(user.id);
 		await auth.setSessionCookie(session.token, session.expiresAt);
 		await auth.deletePasswordResetSessionCookie();
 

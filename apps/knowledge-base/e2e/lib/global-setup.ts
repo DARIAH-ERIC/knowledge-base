@@ -121,6 +121,23 @@ export default async function globalSetup(): Promise<void> {
 			const userId = existingUser.id;
 
 			await db.delete(schema.sessions).where(eq(schema.sessions.userId, userId));
+			await db
+				.delete(schema.userTotpCredentials)
+				.where(eq(schema.userTotpCredentials.userId, userId));
+
+			const [twoFactorCredential] = await db
+				.insert(schema.userTotpCredentials)
+				.values({
+					userId,
+					label: "E2E authenticator",
+					encryptedKey: twoFactorTotpKey,
+					lastUsedAt: new Date(),
+				})
+				.returning({ id: schema.userTotpCredentials.id });
+
+			if (twoFactorCredential == null) {
+				throw new Error(`Failed to create a TOTP credential for test user "${input.email}"`);
+			}
 
 			const sessionId = randomBytes(32).toString("hex");
 			const sessionSecret = randomBytes(32).toString("hex");
@@ -134,6 +151,7 @@ export default async function globalSetup(): Promise<void> {
 				userId,
 				expiresAt: sessionExpiresAt,
 				isTwoFactorVerified: true,
+				twoFactorCredentialId: twoFactorCredential.id,
 			});
 
 			const baseUrl =

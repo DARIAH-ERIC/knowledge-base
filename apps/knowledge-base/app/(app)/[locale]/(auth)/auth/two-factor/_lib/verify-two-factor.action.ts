@@ -59,19 +59,14 @@ export const verifyTwoFactorAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		const totpKey = await auth.getUserTotpKey(user.id);
-
-		if (totpKey == null) {
-			return createActionStateError({ message: t("Forbidden.") });
-		}
-
-		if (!auth.verifyTotp(totpKey, code)) {
+		const credentialId = await auth.verifyUserTotp(user.id, code);
+		if (credentialId == null) {
 			return createActionStateError({ message: t("Incorrect code.") });
 		}
 
 		totpBucket.reset(user.id);
 
-		await auth.setSessionAsTwoFactorVerified(session.id);
+		await auth.setSessionAsTwoFactorVerified(session.id, credentialId);
 
 		redirect({ href: "/dashboard", locale });
 	},

@@ -57,6 +57,8 @@ export const resetTwoFactorAction = createServerAction(
 
 		auth.recoveryCodeBucket.reset(user.id);
 
-		redirect({ href: "/auth/two-factor/setup", locale });
+		await auth.deleteSessionCookie();
+
+		redirect({ href: "/auth/sign-in", locale });
 	},
 );

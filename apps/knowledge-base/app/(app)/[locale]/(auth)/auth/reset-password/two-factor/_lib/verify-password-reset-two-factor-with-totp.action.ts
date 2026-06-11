@@ -52,14 +52,11 @@ export const verifyPasswordResetTwoFactorWithTotpAction = createServerAction(
 
 		const { code } = result.output;
 
-		const totpKey = await auth.getUserTotpKey(session.userId);
-		if (totpKey == null) {
-			return createActionStateError({ message: t("Forbidden.") });
-		}
 		if (!auth.totpBucket.consume(session.userId, 1)) {
 			return createActionStateError({ message: t("Too many requests.") });
 		}
-		if (!auth.verifyTotp(totpKey, code)) {
+		const credentialId = await auth.verifyUserTotp(session.userId, code);
+		if (credentialId == null) {
 			return createActionStateError({ message: t("Incorrect code.") });
 		}
 
