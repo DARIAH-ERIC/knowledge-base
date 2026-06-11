@@ -651,6 +651,10 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.countryReports.id,
 				to: r.countryReportContributions.countryReportId,
 			}),
+			socialMedia: r.many.countryReportSocialMedia({
+				from: r.countryReports.id,
+				to: r.countryReportSocialMedia.countryReportId,
+			}),
 			socialMediaKpis: r.many.countryReportSocialMediaKpis({
 				from: r.countryReports.id,
 				to: r.countryReportSocialMediaKpis.countryReportId,
@@ -677,6 +681,18 @@ export const relations = defineRelations(schema, (r) => {
 			personToOrgUnit: r.one.personsToOrganisationalUnits({
 				from: r.countryReportContributions.personToOrgUnitId,
 				to: r.personsToOrganisationalUnits.id,
+				optional: false,
+			}),
+		},
+		countryReportSocialMedia: {
+			countryReport: r.one.countryReports({
+				from: r.countryReportSocialMedia.countryReportId,
+				to: r.countryReports.id,
+				optional: false,
+			}),
+			socialMedia: r.one.socialMedia({
+				from: r.countryReportSocialMedia.socialMediaId,
+				to: r.socialMedia.id,
 				optional: false,
 			}),
 		},

@@ -3,6 +3,7 @@ import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 
 import { type Action, can } from "@/lib/auth/permissions";
+import { classifyCompensationRole } from "@/lib/data/report-contributions";
 import { db } from "@/lib/db";
 import { alias, eq, sql } from "@/lib/db/sql";
 
@@ -25,6 +26,11 @@ export interface CountryReportSummaryData {
 		personName: string;
 		orgUnitName: string;
 		roleType: string;
+		/**
+		 * Effective compensation role (stored, or classified from the relation); null if not
+		 * compensated.
+		 */
+		compensationRole: string | null;
 	}>;
 	socialMediaAccounts: Array<{
 		socialMediaId: string;
@@ -119,11 +125,15 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 		schema.documentLifecycle,
 		"organisational_unit_document_lifecycle",
 	);
-	const reportContributions = await db
+	const organisationalUnitEntities = alias(schema.entities, "organisational_unit_entities");
+	const contributionRows = await db
 		.select({
 			id: schema.countryReportContributions.id,
+			storedRole: schema.countryReportContributions.contributionRole,
 			personName: schema.persons.name,
 			orgUnitName: schema.organisationalUnits.name,
+			orgUnitSlug: organisationalUnitEntities.slug,
+			orgUnitType: schema.organisationalUnitTypes.type,
 			roleType: schema.personRoleTypes.type,
 		})
 		.from(schema.countryReportContributions)
@@ -143,21 +153,40 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			sql`${schema.persons.id} = COALESCE(${personDocumentLifecycle.draftId}, ${personDocumentLifecycle.publishedId})`,
 		)
 		.innerJoin(
-			organisationalUnitDocumentLifecycle,
+			organisationalUnitEntities,
 			eq(
-				organisationalUnitDocumentLifecycle.documentId,
+				organisationalUnitEntities.id,
 				schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
 			),
+		)
+		.innerJoin(
+			organisationalUnitDocumentLifecycle,
+			eq(organisationalUnitDocumentLifecycle.documentId, organisationalUnitEntities.id),
 		)
 		.innerJoin(
 			schema.organisationalUnits,
 			sql`${schema.organisationalUnits.id} = COALESCE(${organisationalUnitDocumentLifecycle.draftId}, ${organisationalUnitDocumentLifecycle.publishedId})`,
 		)
 		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.innerJoin(
 			schema.personRoleTypes,
 			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
 		)
 		.where(eq(schema.countryReportContributions.countryReportId, id));
+
+	const reportContributions = contributionRows.map((row) => {
+		return {
+			id: row.id,
+			personName: row.personName,
+			orgUnitName: row.orgUnitName,
+			roleType: row.roleType,
+			compensationRole:
+				row.storedRole ?? classifyCompensationRole(row.roleType, row.orgUnitSlug, row.orgUnitType),
+		};
+	});
 
 	const socialMediaMap = new Map<
 		string,
