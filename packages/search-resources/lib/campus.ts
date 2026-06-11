@@ -29,8 +29,8 @@ export function createCampusResource(item: DariahCampusResource): ResourceDocume
 		? new Date(item["publication-date"]).getFullYear()
 		: null;
 	/**
-	 * Dariah-Campus hosts the resource itself, so its canonical page on the campus website is the url
-	 * on the ingest source website. Any external urls would go into `links`.
+	 * Dariah-Campus hosts the resource itself, so the campus website is always the ingest source
+	 * website, regardless of resource kind.
 	 */
 	const source_url = String(
 		createUrl({
@@ -38,7 +38,17 @@ export function createCampusResource(item: DariahCampusResource): ResourceDocume
 			pathname: `/resources/${resourceTypeByCollection[item.collection]}/${item.id}`,
 		}),
 	);
+	/**
+	 * The persistent identifier (a handle url) always points to the resource, and external resources
+	 * additionally link to where they are actually hosted.
+	 */
 	const links: Array<string> = [];
+	if (isNonEmptyString(item.pid)) {
+		links.push(item.pid);
+	}
+	if (isNonEmptyString(item.external?.url)) {
+		links.push(item.external.url);
+	}
 	const sourceUpdatedAt = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getTime()
 		: null;
@@ -76,13 +86,17 @@ export function createCampusCurriculum(item: DariahCampusCurriculum): ResourceDo
 		? new Date(item["publication-date"]).getFullYear()
 		: null;
 	/**
-	 * Dariah-Campus hosts the curriculum itself, so its canonical page on the campus website is the
-	 * url on the ingest source website. Any external urls would go into `links`.
+	 * Dariah-Campus hosts the curriculum itself, so the campus website is always the ingest source
+	 * website.
 	 */
 	const source_url = String(
 		createUrl({ baseUrl: campusWebBaseUrl, pathname: `/curricula/${item.id}` }),
 	);
+	/** The persistent identifier (a handle url) always points to the curriculum. */
 	const links: Array<string> = [];
+	if (isNonEmptyString(item.pid)) {
+		links.push(item.pid);
+	}
 	const sourceUpdatedAt = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getTime()
 		: null;

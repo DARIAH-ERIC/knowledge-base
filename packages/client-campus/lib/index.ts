@@ -44,12 +44,22 @@ export interface DariahCampusWorkingGroup {
 
 export interface DariahCampusResourceSummary extends DariahCampusSummary {}
 
+/**
+ * Only present on external resources (`kind: "external"`), pointing to where the resource is
+ * hosted.
+ */
+export interface DariahCampusExternalResource {
+	url: string;
+	"publication-date"?: string;
+}
+
 export interface DariahCampusResource {
 	id: string;
 	collection: DariahCampusResourceCollection;
 	kind: DariahCampusResourceKind;
 	version: string;
 	pid: string;
+	external?: DariahCampusExternalResource;
 	title: string;
 	summary: DariahCampusSummary;
 	license: string;

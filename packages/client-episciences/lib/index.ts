@@ -132,6 +132,53 @@ export interface EpisciencesSearchDocument {
 	volume_title_t?: Array<string>;
 }
 
+/**
+ * A relation to another work, e.g. the repository deposit (HAL, Zenodo, arXiv, ...) a paper
+ * overlays. `@relationship-type` is typically `"isSameAs"` for the canonical deposit and
+ * `"hasPreprint"` for additional/older versions; `@identifier-type` is `"doi"` or `"uri"`.
+ */
+export interface EpisciencesIntraWorkRelation {
+	value: string;
+	"@identifier-type"?: string;
+	"@relationship-type"?: string;
+}
+
+export interface EpisciencesRelatedItem {
+	intra_work_relation?: EpisciencesIntraWorkRelation | Array<EpisciencesIntraWorkRelation>;
+}
+
+export interface EpisciencesDoiData {
+	doi?: string;
+	resource?: string;
+}
+
+export interface EpisciencesJournalArticle {
+	doi_data?: EpisciencesDoiData;
+	program?:
+		| { related_item?: EpisciencesRelatedItem | Array<EpisciencesRelatedItem> }
+		| Array<{ related_item?: EpisciencesRelatedItem | Array<EpisciencesRelatedItem> }>;
+	[key: string]: unknown;
+}
+
+/**
+ * Full paper record returned by `/api/papers/{docid}`. The search endpoint only returns minimal
+ * Solr documents (title, abstract, ids), so the journal DOI and the links to external repository
+ * deposits are only available here, in the crossref-style deposit metadata.
+ */
+export interface EpisciencesPaper {
+	"@context"?: string;
+	"@id"?: string;
+	"@type"?: "Paper";
+	paperid?: number;
+	document?: {
+		journal?: {
+			journal_article?: EpisciencesJournalArticle;
+			[key: string]: unknown;
+		};
+		[key: string]: unknown;
+	};
+}
+
 export interface EpisciencesHydraCollection<TItem> {
 	"hydra:totalItems": number;
 	"hydra:member"?: Array<TItem>;
@@ -206,7 +253,7 @@ export interface CreateEpisciencesClientParams {
 	};
 }
 
-const defaultJournalCode = "transformations";
+export const defaultEpisciencesJournalCode = "transformations";
 const pageSize = 30;
 
 function createHeaders(token?: string): RequestInit["headers"] | undefined {
@@ -258,8 +305,26 @@ function createListAll<TParams extends object, TItem>(
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createEpisciencesClient(params: CreateEpisciencesClientParams) {
-	const { baseUrl, journalCode = defaultJournalCode, token } = params.config;
+	const { baseUrl, journalCode = defaultEpisciencesJournalCode, token } = params.config;
 	const headers = createHeaders(token);
+	/**
+	 * The `/api/papers/{docid}` endpoint nests its crossref deposit metadata differently when served
+	 * as `application/ld+json`, so request plain json for it to keep the response shape predictable.
+	 */
+	const jsonHeaders: RequestInit["headers"] =
+		token != null
+			? { accept: "application/json", authorization: `Bearer ${token}` }
+			: { accept: "application/json" };
+
+	function getPaper(docid: number | string): Promise<RequestResult<EpisciencesPaper>> {
+		return request<EpisciencesPaper>(
+			createUrl({
+				baseUrl,
+				pathname: `/api/papers/${String(docid)}`,
+			}),
+			{ headers: jsonHeaders, responseType: "json" },
+		);
+	}
 
 	function getJournals(
 		params: GetEpisciencesJournalsParams = {},
@@ -502,6 +567,12 @@ export function createEpisciencesClient(params: CreateEpisciencesClientParams) {
 					const { data } = yield* Result.await(getPages(params));
 					return Result.ok(data);
 				});
+			},
+		},
+
+		papers: {
+			get(docid: number | string): Promise<RequestResult<EpisciencesPaper>> {
+				return getPaper(docid);
 			},
 		},
 
