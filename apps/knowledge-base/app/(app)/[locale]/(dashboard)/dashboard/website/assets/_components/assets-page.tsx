@@ -179,7 +179,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 						return (
 							<li key={asset.id}>
 								<figure className="flex flex-row items-start gap-x-3 rounded-lg border border-border p-2.5">
-									<div className="relative block-16 inline-20 shrink-0 overflow-hidden rounded-md bg-muted">
+									<div className="block-24 inline-32 shrink-0 overflow-hidden rounded-md bg-muted">
 										<AssetPreview
 											alt={asset.alt ?? asset.label}
 											className="block-full inline-full"
@@ -188,13 +188,6 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 											mimeType={asset.mimeType}
 											src={asset.url}
 											storageKey={asset.key}
-										/>
-										<EditAssetMetadataDialog
-											asset={asset}
-											licenses={licenses}
-											onSuccess={() => {
-												router.refresh();
-											}}
 										/>
 									</div>
 									<figcaption className="flex min-inline-0 flex-1 flex-col gap-y-1.5">
@@ -228,6 +221,14 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 											) : null}
 										</div>
 									</figcaption>
+									<EditAssetMetadataDialog
+										asset={asset}
+										licenses={licenses}
+										onSuccess={() => {
+											router.refresh();
+										}}
+										triggerClassName="shrink-0"
+									/>
 								</figure>
 							</li>
 						);

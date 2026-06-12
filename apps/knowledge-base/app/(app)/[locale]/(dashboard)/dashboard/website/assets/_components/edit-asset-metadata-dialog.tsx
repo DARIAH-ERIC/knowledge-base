@@ -39,10 +39,16 @@ interface EditAssetMetadataDialogProps {
 	asset: AssetMetadataItem;
 	licenses: Array<{ id: string; code: string; name: string }>;
 	onSuccess: () => void;
+	triggerClassName?: string;
 }
 
 export function EditAssetMetadataDialog(props: Readonly<EditAssetMetadataDialogProps>): ReactNode {
-	const { asset, licenses, onSuccess } = props;
+	const {
+		asset,
+		licenses,
+		onSuccess,
+		triggerClassName = "absolute inset-bs-2 inset-e-2 bg-bg",
+	} = props;
 
 	const t = useExtracted();
 	const [isOpen, setIsOpen] = useState(false);
@@ -65,7 +71,7 @@ export function EditAssetMetadataDialog(props: Readonly<EditAssetMetadataDialogP
 		<Fragment>
 			<Button
 				aria-label={t("Edit metadata")}
-				className="absolute inset-bs-2 inset-e-2 bg-bg"
+				className={triggerClassName}
 				intent="plain"
 				onPress={() => {
 					setIsOpen(true);
