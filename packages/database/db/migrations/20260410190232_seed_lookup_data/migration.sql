@@ -60,6 +60,11 @@ VALUES
 		'https://creativecommons.org/publicdomain/zero/1.0/'
 	),
 	(
+		'CC-PDM-1.0',
+		'Creative Commons Public Domain Mark 1.0 Universal',
+		'https://creativecommons.org/publicdomain/mark/1.0/'
+	),
+	(
 		'CC-BY-4.0',
 		'Creative Commons Attribution 4.0 International',
 		'https://creativecommons.org/licenses/by/4.0/'
