@@ -12,9 +12,10 @@ import { Fragment, type ReactNode } from "react";
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
-import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
+import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import { getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
+import { formatRoleType } from "@/lib/format-role-type";
 
 interface ProjectDetailsProps {
 	documentId: string;
@@ -166,26 +167,16 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 					{project.partners.length > 0 ? (
 						<ul className="flex flex-col gap-1">
 							{project.partners.map((partner) => (
-								<li key={partner.id} className="text-sm">
-									<RelationLink
-										className="font-medium"
-										href={getOrganisationalUnitDetailHref(partner.unitType, partner.unitSlug)}
-									>
-										{partner.unitName}
-									</RelationLink>
-									{" · "}
-									<span className="text-muted-fg">{partner.roleName}</span>
-									{partner.duration != null ? (
-										<span className="text-muted-fg">
-											{" · "}
-											{partner.duration.end
-												? format.dateTimeRange(partner.duration.start, partner.duration.end, {
-														dateStyle: "short",
-													})
-												: format.dateTime(partner.duration.start, { dateStyle: "short" })}
-										</span>
-									) : null}
-								</li>
+								<RelationStatement
+									key={partner.id}
+									duration={partner.duration ?? undefined}
+									relation={partner.roleName}
+									showSource={false}
+									source={project.name}
+									target={partner.unitName}
+									targetHref={getOrganisationalUnitDetailHref(partner.unitType, partner.unitSlug)}
+									targetType={formatRoleType(partner.unitType)}
+								/>
 							))}
 						</ul>
 					) : null}
