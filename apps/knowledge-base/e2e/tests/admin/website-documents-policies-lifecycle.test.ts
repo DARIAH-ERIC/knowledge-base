@@ -201,6 +201,9 @@ test.describe("website documents-policies lifecycle", () => {
 
 		await docPoliciesPage.searchByTitle(title);
 		const row = docPoliciesPage.rowByTitle(title);
+		// Ensure the searched row has rendered before clicking its link, otherwise the click can race
+		// the list re-render and the navigation never starts.
+		await expect(row).toBeVisible();
 		await Promise.all([
 			page.waitForURL("**/edit"),
 			row.getByRole("link", { name: "Content" }).click(),
