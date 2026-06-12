@@ -9,6 +9,30 @@ export interface PersonPosition {
 	type: (typeof schema.organisationalUnitTypesEnum)[number];
 }
 
+// Positions are surfaced in a fixed hierarchy of relation types so the order is consistent across
+// endpoints: national-consortium roles first, then governance-body roles by seniority, affiliation
+// last. The org-unit name is the tiebreaker within a role.
+const positionRolePriority: Record<(typeof schema.personRoleTypesEnum)[number], number> = {
+	national_coordinator: 0,
+	national_coordinator_deputy: 1,
+	national_coordination_staff: 2,
+	national_representative: 3,
+	national_representative_deputy: 4,
+	is_chair_of: 5,
+	is_vice_chair_of: 6,
+	is_member_of: 7,
+	is_contact_for: 8,
+	is_affiliated_with: 9,
+};
+
+function comparePositions(a: PersonPosition, b: PersonPosition): number {
+	const byRole = positionRolePriority[a.role] - positionRolePriority[b.role];
+	if (byRole !== 0) {
+		return byRole;
+	}
+	return a.name.localeCompare(b.name);
+}
+
 export async function getPersonPositions(
 	db: Database | Transaction,
 	personIds: Array<string>,
@@ -79,8 +103,7 @@ export async function getPersonPositions(
 
 	for (const personId of personIds) {
 		const personRows = rowsByPerson.get(personId) ?? [];
-		// eslint-disable-next-line unicorn/no-array-sort
-		const sorted = personRows.sort((a, b) => a.name.localeCompare(b.name));
+		const sorted = personRows.toSorted(comparePositions);
 
 		positions.set(personId, sorted.length > 0 ? sorted : null);
 	}
