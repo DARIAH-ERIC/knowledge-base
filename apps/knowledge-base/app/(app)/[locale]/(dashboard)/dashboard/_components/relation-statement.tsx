@@ -9,6 +9,12 @@ import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_compon
 interface RelationStatementProps {
 	source: ReactNode;
 	sourceHref?: string | null;
+	/**
+	 * Whether to render the source node. Defaults to `true`. Set to `false` on a detail page where
+	 * the source is the page's own entity (e.g. a project or impact case study) and its name is long
+	 * or redundant.
+	 */
+	showSource?: boolean;
 	relation: ReactNode;
 	target: ReactNode;
 	targetHref?: string | null;
@@ -20,6 +26,7 @@ export function RelationStatement(props: Readonly<RelationStatementProps>): Reac
 	const {
 		source,
 		sourceHref = null,
+		showSource = true,
 		relation,
 		target,
 		targetHref = null,
@@ -38,13 +45,17 @@ export function RelationStatement(props: Readonly<RelationStatementProps>): Reac
 
 	return (
 		<li className="text-sm">
-			<RelationLink className="font-medium" href={sourceHref}>
-				{source}
-			</RelationLink>
-			{" · "}
+			{showSource ? (
+				<>
+					<RelationLink className="font-medium" href={sourceHref}>
+						{source}
+					</RelationLink>
+					{" · "}
+				</>
+			) : null}
 			<span className="text-muted-fg">{relation}</span>
 			{" · "}
-			<RelationLink className="text-muted-fg" href={targetHref}>
+			<RelationLink className={showSource ? "text-muted-fg" : "font-medium"} href={targetHref}>
 				{target}
 			</RelationLink>
 			{targetType != null ? (
