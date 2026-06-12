@@ -3,6 +3,7 @@ import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import {
+	ImageSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
 	RelatedEntitiesSchema,
@@ -12,7 +13,7 @@ import {
 export const ImpactCaseStudyBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.ImpactCaseStudySelectSchema, ["id", "title", "summary"]).entries,
-		image: v.object({ url: v.string() }),
+		image: ImageSchema,
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 	}),
@@ -33,7 +34,7 @@ export type ImpactCaseStudyList = v.InferOutput<typeof ImpactCaseStudyListSchema
 export const ImpactCaseStudySchema = v.pipe(
 	v.object({
 		...v.pick(schema.ImpactCaseStudySelectSchema, ["id", "title", "summary"]).entries,
-		image: v.object({ url: v.string() }),
+		image: ImageSchema,
 		contributors: v.array(
 			v.object({
 				...v.pick(schema.PersonSelectSchema, ["id", "name"]).entries,
@@ -46,7 +47,7 @@ export const ImpactCaseStudySchema = v.pipe(
 						}),
 					),
 				),
-				image: v.nullable(v.object({ url: v.string() })),
+				image: v.nullable(ImageSchema),
 				slug: v.string(),
 				role: v.picklist(schema.articleContributorRolesEnum),
 			}),

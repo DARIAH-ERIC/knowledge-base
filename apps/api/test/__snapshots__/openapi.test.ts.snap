@@ -320,12 +320,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -470,12 +515,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -566,12 +656,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -646,12 +781,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -1006,12 +1186,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -1102,12 +1327,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -1210,12 +1480,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -1453,12 +1768,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -1756,12 +2116,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -1852,12 +2257,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -2379,12 +2829,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -2475,12 +2970,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -2569,12 +3109,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
           "image": {
             "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "url": {
                 "type": "string",
               },
             },
             "required": [
               "url",
+              "alt",
+              "caption",
+              "license",
             ],
             "type": "object",
           },
@@ -2778,12 +3363,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
           "image": {
             "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "url": {
                 "type": "string",
               },
             },
             "required": [
               "url",
+              "alt",
+              "caption",
+              "license",
             ],
             "type": "object",
           },
@@ -2997,12 +3627,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -3093,12 +3768,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -4351,12 +5071,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -4447,12 +5212,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -4527,12 +5337,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -4625,12 +5480,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "anyOf": [
                     {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -4954,12 +5854,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -5052,12 +5997,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "anyOf": [
                     {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -5357,12 +6347,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -5453,12 +6488,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -5525,12 +6605,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "anyOf": [
                     {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -5633,12 +6758,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
           "image": {
             "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "url": {
                 "type": "string",
               },
             },
             "required": [
               "url",
+              "alt",
+              "caption",
+              "license",
             ],
             "type": "object",
           },
@@ -5775,12 +6945,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
           "image": {
             "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "url": {
                 "type": "string",
               },
             },
             "required": [
               "url",
+              "alt",
+              "caption",
+              "license",
             ],
             "type": "object",
           },
@@ -5892,12 +7107,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -6086,12 +7346,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -6182,12 +7487,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -6262,12 +7612,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -6607,12 +8002,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -6875,12 +8315,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -7193,12 +8678,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -7289,12 +8819,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -7367,12 +8942,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
           "image": {
             "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "url": {
                 "type": "string",
               },
             },
             "required": [
               "url",
+              "alt",
+              "caption",
+              "license",
             ],
             "type": "object",
           },
@@ -7508,12 +9128,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
           "image": {
             "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "url": {
                 "type": "string",
               },
             },
             "required": [
               "url",
+              "alt",
+              "caption",
+              "license",
             ],
             "type": "object",
           },
@@ -7700,12 +9365,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -7796,12 +9506,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -8255,12 +10010,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -8351,12 +10151,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -8431,12 +10276,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -8579,12 +10469,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -8751,12 +10686,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -8847,12 +10827,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -8937,12 +10962,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -9067,12 +11137,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -9284,12 +11399,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -9380,12 +11540,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -9494,12 +11699,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -9646,12 +11896,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -9889,12 +12184,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -9959,12 +12299,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -10167,12 +12552,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -10263,12 +12693,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -10335,12 +12810,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "anyOf": [
                     {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -10443,12 +12963,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
           "image": {
             "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "url": {
                 "type": "string",
               },
             },
             "required": [
               "url",
+              "alt",
+              "caption",
+              "license",
             ],
             "type": "object",
           },
@@ -10585,12 +13150,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
           "image": {
             "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "url": {
                 "type": "string",
               },
             },
             "required": [
               "url",
+              "alt",
+              "caption",
+              "license",
             ],
             "type": "object",
           },
@@ -10719,12 +13329,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "anyOf": [
                     {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -10874,12 +13529,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     },
                     "image": {
                       "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "caption": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "url": {
                           "type": "string",
                         },
                       },
                       "required": [
                         "url",
+                        "alt",
+                        "caption",
+                        "license",
                       ],
                       "type": "object",
                     },
@@ -10970,12 +13670,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "anyOf": [
                         {
                           "properties": {
+                            "alt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "caption": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
+                            "license": {
+                              "anyOf": [
+                                {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                    },
+                                    "url": {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "required": [
+                                    "name",
+                                    "url",
+                                  ],
+                                  "type": "object",
+                                },
+                                {
+                                  "type": "null",
+                                },
+                              ],
+                            },
                             "url": {
                               "type": "string",
                             },
                           },
                           "required": [
                             "url",
+                            "alt",
+                            "caption",
+                            "license",
                           ],
                           "type": "object",
                         },
@@ -11050,12 +13795,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },
@@ -11332,12 +14122,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "alt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "caption": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "license": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "name",
+                          "url",
+                        ],
+                        "type": "object",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "url": {
                     "type": "string",
                   },
                 },
                 "required": [
                   "url",
+                  "alt",
+                  "caption",
+                  "license",
                 ],
                 "type": "object",
               },

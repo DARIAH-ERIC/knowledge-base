@@ -3,6 +3,7 @@ import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import {
+	ImageSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
 	RelatedEntitiesSchema,
@@ -12,7 +13,7 @@ import {
 export const SpotlightArticleBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.SpotlightArticleSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.object({ url: v.string() }),
+		image: ImageSchema,
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 	}),
@@ -33,7 +34,7 @@ export type SpotlightArticleList = v.InferOutput<typeof SpotlightArticleListSche
 export const SpotlightArticleSchema = v.pipe(
 	v.object({
 		...v.pick(schema.SpotlightArticleSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.object({ url: v.string() }),
+		image: ImageSchema,
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		content: v.optional(v.array(ContentBlockSchema), []),
@@ -50,7 +51,7 @@ export const SpotlightArticleSchema = v.pipe(
 						}),
 					),
 				),
-				image: v.nullable(v.object({ url: v.string() })),
+				image: v.nullable(ImageSchema),
 				slug: v.string(),
 				role: v.picklist(schema.articleContributorRolesEnum),
 			}),

@@ -2,7 +2,7 @@ import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
-import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
+import { ImageSchema, PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const ProjectOrganisationalUnitSchema = v.pipe(
 	v.object({
@@ -40,7 +40,7 @@ export const ProjectBaseSchema = v.pipe(
 			"topic",
 			"funding",
 		]).entries,
-		image: v.nullable(v.object({ url: v.string() })),
+		image: v.nullable(ImageSchema),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
@@ -75,7 +75,7 @@ export const ProjectSchema = v.pipe(
 			"topic",
 			"funding",
 		]).entries,
-		image: v.nullable(v.object({ url: v.string() })),
+		image: v.nullable(ImageSchema),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),

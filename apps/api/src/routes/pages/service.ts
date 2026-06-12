@@ -46,6 +46,16 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 			},
@@ -112,6 +122,16 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 			},
@@ -175,6 +195,16 @@ export async function getPageSlugs(db: Database | Transaction, params: GetPageSl
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 			},
@@ -240,6 +270,16 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 			image: {
 				columns: {
 					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
 				},
 			},
 		},

@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { type ContentBlock, getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, toImageAsset } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
 import { mapSocialMedia } from "@/lib/social-media";
@@ -55,6 +55,16 @@ export async function getMembersAndPartners(
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 				socialMedia: {
@@ -115,17 +125,30 @@ function mapPersonContributors(
 		name: string;
 		slug: string;
 		imageKey: string | null;
+		imageAlt: string | null;
+		imageCaption: string | null;
+		licenseName: string | null;
+		licenseUrl: string | null;
 		role: string;
 	}>,
 	positions: Map<string, Array<{ role: string; name: string; type: string }> | null>,
 ) {
-	return rows.map(({ imageKey, role, ...row }) => {
+	return rows.map(({ imageKey, imageAlt, imageCaption, licenseName, licenseUrl, role, ...row }) => {
 		return {
 			...row,
 			position: positions.get(row.id) ?? null,
 			role,
 			slug: row.slug,
-			image: generateImageUrl(imageKey != null ? { key: imageKey } : null, imageWidth.avatar),
+			image: generateImageUrl(
+				toImageAsset({
+					key: imageKey,
+					alt: imageAlt,
+					caption: imageCaption,
+					licenseName,
+					licenseUrl,
+				}),
+				imageWidth.avatar,
+			),
 		};
 	});
 }
@@ -448,6 +471,16 @@ async function getNationalConsortium(
 			image: {
 				columns: {
 					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
 				},
 			},
 			socialMedia: {
@@ -492,6 +525,10 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 			name: schema.persons.name,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
+			imageAlt: schema.assets.alt,
+			imageCaption: schema.assets.caption,
+			licenseName: schema.licenses.name,
+			licenseUrl: schema.licenses.url,
 			role: schema.personRoleTypes.type,
 		})
 		.from(schema.personsToOrganisationalUnits)
@@ -507,6 +544,7 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
 		.leftJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.licenses, eq(schema.licenses.id, schema.assets.licenseId))
 		.innerJoin(
 			schema.personRoleTypes,
 			eq(schema.personsToOrganisationalUnits.roleTypeId, schema.personRoleTypes.id),
@@ -596,6 +634,16 @@ export async function getMemberOrPartnerById(
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 				socialMedia: {
@@ -715,6 +763,16 @@ export async function getMemberOrPartnerSlugs(
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 			},
@@ -787,6 +845,16 @@ export async function getMemberOrPartnerBySlug(
 			image: {
 				columns: {
 					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
 				},
 			},
 			socialMedia: {

@@ -2,7 +2,7 @@
 
 import * as schema from "@dariah-eric/database/schema";
 
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, toImageAsset } from "@/lib/images";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { InstitutionRelationStatus, InstitutionStatus } from "@/routes/institutions/schemas";
 import {
@@ -162,6 +162,10 @@ function institutionQuery(db: Database | Transaction) {
 			ror: schema.organisationalUnits.ror,
 			slug: institutionEntities.slug,
 			logoKey: schema.assets.key,
+			logoAlt: schema.assets.alt,
+			logoCaption: schema.assets.caption,
+			licenseName: schema.licenses.name,
+			licenseUrl: schema.licenses.url,
 			status: ericRelation.status,
 			countryId: countryRelation.countryId,
 			countryName: countryRelation.countryName,
@@ -180,6 +184,7 @@ function institutionQuery(db: Database | Transaction) {
 		)
 		.innerJoin(institutionEntities, eq(schema.entityVersions.entityId, institutionEntities.id))
 		.leftJoin(schema.assets, eq(schema.organisationalUnits.imageId, schema.assets.id))
+		.leftJoin(schema.licenses, eq(schema.licenses.id, schema.assets.licenseId))
 		.leftJoin(ericRelation, eq(ericRelation.unitDocumentId, schema.entityVersions.entityId))
 		.leftJoin(countryRelation, eq(countryRelation.unitDocumentId, schema.entityVersions.entityId));
 
@@ -213,6 +218,10 @@ interface InstitutionRow {
 	ror: string | null;
 	slug: string;
 	logoKey: string | null;
+	logoAlt: string | null;
+	logoCaption: string | null;
+	licenseName: string | null;
+	licenseUrl: string | null;
 	status: (typeof schema.organisationalUnitStatusEnum)[number] | null;
 	countryId: string | null;
 	countryName: string | null;
@@ -238,7 +247,16 @@ function mapInstitutionRow(row: InstitutionRow) {
 						slug: row.countrySlug,
 					}
 				: null,
-		logo: generateImageUrl(row.logoKey != null ? { key: row.logoKey } : null, imageWidth.preview),
+		logo: generateImageUrl(
+			toImageAsset({
+				key: row.logoKey,
+				alt: row.logoAlt,
+				caption: row.logoCaption,
+				licenseName: row.licenseName,
+				licenseUrl: row.licenseUrl,
+			}),
+			imageWidth.preview,
+		),
 	};
 }
 
