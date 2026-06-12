@@ -4,10 +4,18 @@ export interface OrganisationalUnitOption {
 	documentId: string;
 	name: string;
 	description: string;
+	/** Raw organisational-unit type (e.g. "institution"), used to build detail-page hrefs. */
+	type: string;
+	/** Entity slug, used to build detail-page hrefs. */
+	slug: string;
 }
 
 export interface OrganisationalUnitDocumentOption extends AsyncOption {
 	documentId: string;
+	/** Raw organisational-unit type (e.g. "institution"), used to build detail-page hrefs. */
+	type: string;
+	/** Entity slug, used to build detail-page hrefs. */
+	slug: string;
 }
 
 export function toOrganisationalUnitDocumentOption(

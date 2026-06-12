@@ -83,9 +83,11 @@ export async function getOrganisationalUnitOptions(
 				documentId: schema.entityVersions.entityId,
 				name: schema.organisationalUnits.name,
 				type: schema.organisationalUnitTypes.type,
+				slug: schema.entities.slug,
 			})
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -113,6 +115,8 @@ export async function getOrganisationalUnitOptions(
 				documentId: item.documentId,
 				name: item.name,
 				description: formatOrganisationalUnitType(item.type),
+				type: item.type,
+				slug: item.slug,
 			};
 		}),
 		total: aggregate.at(0)?.total ?? 0,
@@ -131,9 +135,11 @@ export async function getOrganisationalUnitOptionsByDocumentIds(
 			documentId: schema.entityVersions.entityId,
 			name: schema.organisationalUnits.name,
 			type: schema.organisationalUnitTypes.type,
+			slug: schema.entities.slug,
 		})
 		.from(schema.organisationalUnits)
 		.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 		.innerJoin(
 			schema.organisationalUnitTypes,
@@ -153,6 +159,8 @@ export async function getOrganisationalUnitOptionsByDocumentIds(
 						documentId: row.documentId,
 						name: row.name,
 						description: formatOrganisationalUnitType(row.type),
+						type: row.type,
+						slug: row.slug,
 					},
 				] as const,
 		),
