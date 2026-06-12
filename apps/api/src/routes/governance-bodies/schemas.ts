@@ -3,6 +3,7 @@ import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import {
+	ImageSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
 	RelatedEntitiesSchema,
@@ -20,7 +21,7 @@ const GovernanceBodyPersonSchema = v.object({
 			}),
 		),
 	),
-	image: v.nullable(v.object({ url: v.string() })),
+	image: v.nullable(ImageSchema),
 	slug: v.string(),
 	role: v.picklist(schema.personRoleTypesEnum),
 	duration: v.object({
@@ -38,7 +39,7 @@ export const GovernanceBodyBaseSchema = v.pipe(
 			"summary",
 			"metadata",
 		]).entries,
-		image: v.nullable(v.object({ url: v.string() })),
+		image: v.nullable(ImageSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		socialMedia: v.array(
@@ -76,7 +77,7 @@ export const GovernanceBodySchema = v.pipe(
 			"summary",
 			"metadata",
 		]).entries,
-		image: v.nullable(v.object({ url: v.string() })),
+		image: v.nullable(ImageSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		socialMedia: v.array(

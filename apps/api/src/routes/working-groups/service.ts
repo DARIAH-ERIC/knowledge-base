@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, toImageAsset } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { mapSocialMedia } from "@/lib/social-media";
@@ -101,6 +101,16 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 				socialMedia: {
@@ -161,6 +171,10 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 			name: schema.persons.name,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
+			imageAlt: schema.assets.alt,
+			imageCaption: schema.assets.caption,
+			licenseName: schema.licenses.name,
+			licenseUrl: schema.licenses.url,
 			roleType: schema.personRoleTypes.type,
 		})
 		.from(schema.personsToOrganisationalUnits)
@@ -180,6 +194,7 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
 		.leftJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.licenses, eq(schema.licenses.id, schema.assets.licenseId))
 		.where(
 			and(
 				sql`${schema.personsToOrganisationalUnits.organisationalUnitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${workingGroupId})`,
@@ -193,14 +208,25 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 		rows.map((row) => row.id),
 	);
 
-	return rows.map(({ imageKey, roleType, ...row }) => {
-		return {
-			...row,
-			position: positions.get(row.id) ?? null,
-			role: roleType,
-			image: generateImageUrl(imageKey != null ? { key: imageKey } : null, imageWidth.avatar),
-		};
-	});
+	return rows.map(
+		({ imageKey, imageAlt, imageCaption, licenseName, licenseUrl, roleType, ...row }) => {
+			return {
+				...row,
+				position: positions.get(row.id) ?? null,
+				role: roleType,
+				image: generateImageUrl(
+					toImageAsset({
+						key: imageKey,
+						alt: imageAlt,
+						caption: imageCaption,
+						licenseName,
+						licenseUrl,
+					}),
+					imageWidth.avatar,
+				),
+			};
+		},
+	);
 }
 
 //
@@ -241,6 +267,16 @@ export async function getWorkingGroupById(
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 				socialMedia: {
@@ -326,6 +362,16 @@ export async function getWorkingGroupSlugs(
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 			},
@@ -397,6 +443,16 @@ export async function getWorkingGroupBySlug(
 			image: {
 				columns: {
 					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
 				},
 			},
 			socialMedia: {

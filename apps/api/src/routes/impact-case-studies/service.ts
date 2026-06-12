@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, toImageAsset } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
@@ -50,6 +50,16 @@ export async function getImpactCaseStudies(
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 			},
@@ -97,6 +107,10 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 			name: schema.persons.name,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
+			imageAlt: schema.assets.alt,
+			imageCaption: schema.assets.caption,
+			licenseName: schema.licenses.name,
+			licenseUrl: schema.licenses.url,
 			role: schema.impactCaseStudiesToPersons.role,
 		})
 		.from(schema.impactCaseStudiesToPersons)
@@ -110,6 +124,7 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 		)
 		.innerJoin(schema.persons, eq(schema.persons.id, schema.documentLifecycle.publishedId))
 		.leftJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.licenses, eq(schema.licenses.id, schema.assets.licenseId))
 		.where(
 			eq(schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId, impactCaseStudyDocumentId),
 		);
@@ -119,11 +134,20 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 		rows.map((row) => row.id),
 	);
 
-	return rows.map(({ imageKey, ...row }) => {
+	return rows.map(({ imageKey, imageAlt, imageCaption, licenseName, licenseUrl, ...row }) => {
 		return {
 			...row,
 			position: positions.get(row.id) ?? null,
-			image: generateImageUrl(imageKey != null ? { key: imageKey } : null, imageWidth.avatar),
+			image: generateImageUrl(
+				toImageAsset({
+					key: imageKey,
+					alt: imageAlt,
+					caption: imageCaption,
+					licenseName,
+					licenseUrl,
+				}),
+				imageWidth.avatar,
+			),
 		};
 	});
 }
@@ -163,6 +187,16 @@ export async function getImpactCaseStudyById(
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 			},
@@ -231,6 +265,16 @@ export async function getImpactCaseStudySlugs(
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 			},
@@ -299,6 +343,16 @@ export async function getImpactCaseStudyBySlug(
 			image: {
 				columns: {
 					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
 				},
 			},
 		},

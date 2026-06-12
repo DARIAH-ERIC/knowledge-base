@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, toImageAsset } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { mapSocialMedia } from "@/lib/social-media";
@@ -74,6 +74,10 @@ function mapGovernanceBodyPerson(
 		orcid: string | null;
 		slug: string;
 		imageKey: string | null;
+		imageAlt: string | null;
+		imageCaption: string | null;
+		licenseName: string | null;
+		licenseUrl: string | null;
 		role: (typeof schema.personRoleTypesEnum)[number];
 		duration: { start: Date; end?: Date | null };
 	},
@@ -86,7 +90,16 @@ function mapGovernanceBodyPerson(
 		email: row.email,
 		orcid: row.orcid,
 		position: positions.get(row.id) ?? null,
-		image: generateImageUrl(row.imageKey != null ? { key: row.imageKey } : null, imageWidth.avatar),
+		image: generateImageUrl(
+			toImageAsset({
+				key: row.imageKey,
+				alt: row.imageAlt,
+				caption: row.imageCaption,
+				licenseName: row.licenseName,
+				licenseUrl: row.licenseUrl,
+			}),
+			imageWidth.avatar,
+		),
 		slug: row.slug,
 		role: row.role,
 		duration: {
@@ -125,6 +138,10 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			orcid: schema.persons.orcid,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
+			imageAlt: schema.assets.alt,
+			imageCaption: schema.assets.caption,
+			licenseName: schema.licenses.name,
+			licenseUrl: schema.licenses.url,
 			role: schema.personRoleTypes.type,
 			duration: schema.personsToOrganisationalUnits.duration,
 		})
@@ -159,6 +176,7 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
 		.leftJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.licenses, eq(schema.licenses.id, schema.assets.licenseId))
 		.where(
 			and(
 				eq(schema.personRoleTypes.type, "is_chair_of"),
@@ -240,6 +258,10 @@ async function getActiveGovernanceBodyPersons(
 			orcid: schema.persons.orcid,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
+			imageAlt: schema.assets.alt,
+			imageCaption: schema.assets.caption,
+			licenseName: schema.licenses.name,
+			licenseUrl: schema.licenses.url,
 			role: schema.personRoleTypes.type,
 			duration: schema.personsToOrganisationalUnits.duration,
 		})
@@ -265,6 +287,7 @@ async function getActiveGovernanceBodyPersons(
 			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
 		.leftJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.licenses, eq(schema.licenses.id, schema.assets.licenseId))
 		.where(
 			and(
 				inArray(governanceBodyEntityVersions.id, governanceBodyIds),
@@ -348,6 +371,16 @@ export async function getGovernanceBodies(
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 				socialMedia: {
@@ -458,6 +491,16 @@ export async function getGovernanceBodyById(
 					image: {
 						columns: {
 							key: true,
+							alt: true,
+							caption: true,
+						},
+						with: {
+							license: {
+								columns: {
+									name: true,
+									url: true,
+								},
+							},
 						},
 					},
 					socialMedia: {
@@ -622,6 +665,16 @@ export async function getGovernanceBodyBySlug(
 			image: {
 				columns: {
 					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
 				},
 			},
 			socialMedia: {

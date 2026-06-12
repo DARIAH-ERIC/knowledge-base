@@ -46,6 +46,16 @@ export async function getFeaturedEntities(db: Database | Transaction) {
 			image: {
 				columns: {
 					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
 				},
 			},
 		},

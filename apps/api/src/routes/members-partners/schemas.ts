@@ -4,6 +4,7 @@ import * as v from "valibot";
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import {
 	CalendarDateSchema,
+	ImageSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
 	RelatedEntitiesSchema,
@@ -19,7 +20,7 @@ export const MemberOrPartnerBaseSchema = v.pipe(
 			"metadata",
 			"sshocMarketplaceActorId",
 		]).entries,
-		image: v.nullable(v.object({ url: v.string() })),
+		image: v.nullable(ImageSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		type: v.literal(schema.membersAndPartnersUnitType),
@@ -55,7 +56,7 @@ export const ContributorSchema = v.pipe(
 				}),
 			),
 		),
-		image: v.nullable(v.object({ url: v.string() })),
+		image: v.nullable(ImageSchema),
 		slug: v.string(),
 		role: v.picklist([
 			"national_coordinator",
@@ -89,7 +90,7 @@ export const RelatedNationalConsortiumSchema = v.pipe(
 		slug: v.string(),
 		ror: v.nullable(v.string()),
 		website: v.nullable(v.string()),
-		image: v.nullable(v.object({ url: v.string() })),
+		image: v.nullable(ImageSchema),
 	}),
 	v.description("National consortium"),
 	v.metadata({ ref: "RelatedNationalConsortium" }),
@@ -113,7 +114,7 @@ const memberOrPartnerSharedEntries = {
 		"metadata",
 		"sshocMarketplaceActorId",
 	]).entries,
-	image: v.nullable(v.object({ url: v.string() })),
+	image: v.nullable(ImageSchema),
 	entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 	type: v.literal(schema.membersAndPartnersUnitType),

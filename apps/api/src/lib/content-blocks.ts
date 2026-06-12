@@ -1,9 +1,10 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+import { generateImageUrl, toImageAsset } from "@/lib/images";
+import { ImageSchema } from "@/lib/schemas";
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, eq } from "@/services/db/sql";
-import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
 export const RichTextContentBlockSchema = v.object({
@@ -19,7 +20,7 @@ export const EmbedContentBlockSchema = v.object({
 
 export const ImageContentBlockSchema = v.object({
 	type: v.literal("image"),
-	image: v.object({ url: v.string() }),
+	image: ImageSchema,
 	caption: v.nullable(v.string()),
 });
 
@@ -33,7 +34,7 @@ export const HeroContentBlockSchema = v.object({
 	type: v.literal("hero"),
 	title: v.string(),
 	eyebrow: v.nullable(v.string()),
-	image: v.nullable(v.object({ url: v.string() })),
+	image: v.nullable(ImageSchema),
 	ctas: v.nullable(v.array(v.object({ label: v.string(), url: v.string() }))),
 });
 
@@ -54,6 +55,7 @@ export const ContentBlockSchema = v.union([
 export type ContentBlock = v.InferOutput<typeof ContentBlockSchema>;
 
 const heroAssets = alias(schema.assets, "hero_assets");
+const heroLicenses = alias(schema.licenses, "hero_licenses");
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getContentBlocks(db: Database | Transaction, entityId: string) {
@@ -68,11 +70,19 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			embedCaption: schema.embedContentBlocks.caption,
 			imageCaption: schema.imageContentBlocks.caption,
 			imageKey: schema.assets.key,
+			imageAlt: schema.assets.alt,
+			imageAssetCaption: schema.assets.caption,
+			imageLicenseName: schema.licenses.name,
+			imageLicenseUrl: schema.licenses.url,
 			dataLimit: schema.dataContentBlocks.limit,
 			dataType: schema.dataContentBlockTypes.type,
 			heroTitle: schema.heroContentBlocks.title,
 			heroEyebrow: schema.heroContentBlocks.eyebrow,
 			heroImageKey: heroAssets.key,
+			heroImageAlt: heroAssets.alt,
+			heroImageCaption: heroAssets.caption,
+			heroLicenseName: heroLicenses.name,
+			heroLicenseUrl: heroLicenses.url,
 			heroCtas: schema.heroContentBlocks.ctas,
 			accordionItems: schema.accordionContentBlocks.items,
 		})
@@ -93,6 +103,7 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 		.leftJoin(schema.embedContentBlocks, eq(schema.embedContentBlocks.id, schema.contentBlocks.id))
 		.leftJoin(schema.imageContentBlocks, eq(schema.imageContentBlocks.id, schema.contentBlocks.id))
 		.leftJoin(schema.assets, eq(schema.assets.id, schema.imageContentBlocks.imageId))
+		.leftJoin(schema.licenses, eq(schema.licenses.id, schema.assets.licenseId))
 		.leftJoin(schema.dataContentBlocks, eq(schema.dataContentBlocks.id, schema.contentBlocks.id))
 		.leftJoin(
 			schema.dataContentBlockTypes,
@@ -100,6 +111,7 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 		)
 		.leftJoin(schema.heroContentBlocks, eq(schema.heroContentBlocks.id, schema.contentBlocks.id))
 		.leftJoin(heroAssets, eq(heroAssets.id, schema.heroContentBlocks.imageId))
+		.leftJoin(heroLicenses, eq(heroLicenses.id, heroAssets.licenseId))
 		.leftJoin(
 			schema.accordionContentBlocks,
 			eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
@@ -128,11 +140,19 @@ function normalizeRow(row: {
 	embedCaption: string | null;
 	imageCaption: string | null;
 	imageKey: string | null;
+	imageAlt: string | null;
+	imageAssetCaption: string | null;
+	imageLicenseName: string | null;
+	imageLicenseUrl: string | null;
 	dataLimit: number | null;
 	dataType: string | null;
 	heroTitle: string | null;
 	heroEyebrow: string | null;
 	heroImageKey: string | null;
+	heroImageAlt: string | null;
+	heroImageCaption: string | null;
+	heroLicenseName: string | null;
+	heroLicenseUrl: string | null;
 	heroCtas: unknown;
 	accordionItems: unknown;
 }): ContentBlock {
@@ -146,10 +166,16 @@ function normalizeRow(row: {
 		case "image": {
 			return {
 				type: "image",
-				image: images.generateSignedImageUrl({
-					key: row.imageKey!,
-					options: { width: imageWidth.featured },
-				}),
+				image: generateImageUrl(
+					toImageAsset({
+						key: row.imageKey!,
+						alt: row.imageAlt,
+						caption: row.imageAssetCaption,
+						licenseName: row.imageLicenseName,
+						licenseUrl: row.imageLicenseUrl,
+					}),
+					imageWidth.featured,
+				),
 				caption: row.imageCaption,
 			};
 		}
@@ -165,13 +191,16 @@ function normalizeRow(row: {
 				type: "hero",
 				title: row.heroTitle!,
 				eyebrow: row.heroEyebrow,
-				image:
-					row.heroImageKey != null
-						? images.generateSignedImageUrl({
-								key: row.heroImageKey,
-								options: { width: imageWidth.featured },
-							})
-						: null,
+				image: generateImageUrl(
+					toImageAsset({
+						key: row.heroImageKey,
+						alt: row.heroImageAlt,
+						caption: row.heroImageCaption,
+						licenseName: row.heroLicenseName,
+						licenseUrl: row.heroLicenseUrl,
+					}),
+					imageWidth.featured,
+				),
 				ctas: row.heroCtas as Array<{ label: string; url: string }> | null,
 			};
 		}

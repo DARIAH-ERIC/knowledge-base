@@ -4,6 +4,7 @@ import * as v from "valibot";
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import {
 	CalendarDateSchema,
+	ImageSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
 	RelatedEntitiesSchema,
@@ -12,7 +13,7 @@ import {
 
 const eventBaseObject = v.object({
 	...v.pick(schema.EventSelectSchema, ["id", "title", "summary", "location", "isFullDay"]).entries,
-	image: v.object({ url: v.string() }),
+	image: ImageSchema,
 	duration: v.object({
 		start: CalendarDateSchema,
 		end: v.optional(CalendarDateSchema),
@@ -50,7 +51,7 @@ export const EventSchema = v.pipe(
 		...v.pick(schema.EventSelectSchema, ["id", "title", "summary", "location", "isFullDay"])
 			.entries,
 		website: v.nullable(v.string()),
-		image: v.object({ url: v.string() }),
+		image: ImageSchema,
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
