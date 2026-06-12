@@ -110,7 +110,7 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-						<TableRow id={item.id}>
+						<TableRow href={`/dashboard/administrator/sshoc-services/${item.id}/view`} id={item.id}>
 							<TableCell>{item.name}</TableCell>
 							<TableCell>{item.type.type}</TableCell>
 							<TableCell>
