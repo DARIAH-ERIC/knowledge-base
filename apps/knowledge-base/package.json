@@ -5,7 +5,6 @@
 	"type": "module",
 	"scripts": {
 		"analyze": "next experimental-analyze",
-		"assets:backfill-sizes": "dotenvx run -q -f ./.env.local --ignore MISSING_ENV_FILE -- tsx ./scripts/backfill-asset-sizes.ts",
 		"build": "next build --experimental-next-config-strip-types",
 		"dev": "PORT=3001 next dev --experimental-next-config-strip-types",
 		"dev:watch": "PORT=3001 next dev --experimental-next-config-strip-types",
