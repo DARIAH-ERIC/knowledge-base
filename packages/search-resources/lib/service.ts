@@ -1,6 +1,6 @@
 import { log } from "@acdh-oeaw/lib";
 import type { DariahCampusClient } from "@dariah-eric/client-campus";
-import type { EpisciencesClient } from "@dariah-eric/client-episciences";
+import type { EpisciencesClient, EpisciencesSearchDocument } from "@dariah-eric/client-episciences";
 import type { SshocClient } from "@dariah-eric/client-sshoc";
 import type { ZoteroClient } from "@dariah-eric/client-zotero";
 import {
@@ -13,6 +13,7 @@ import type { SearchAdminService } from "@dariah-eric/search/admin";
 import { Result } from "better-result";
 
 import {
+	type EpisciencesPaperEntry,
 	type OrgUnitResourceLookups,
 	type SearchIndexResourceSourceData,
 	createSearchIndexResourceDocuments,
@@ -62,6 +63,36 @@ function getOrFetch<T, FetchError, CacheError>(
 	}
 
 	return cache.getOrFetch(key, fetcher);
+}
+
+/**
+ * Episciences is an overlay journal: the journal DOI and the links to the external repository
+ * deposits (HAL, Zenodo, ...) a paper overlays are only present on the full paper record, not in
+ * the minimal Solr documents returned by the search endpoint. We therefore fetch each paper
+ * individually to enrich the search results. Papers that fail to load are skipped so a single bad
+ * record does not abort the whole ingest.
+ */
+async function fetchEpisciencesPapers(
+	episciences: EpisciencesClient,
+	documents: Array<EpisciencesSearchDocument>,
+): Promise<Result<Array<EpisciencesPaperEntry>, never>> {
+	const docIds = documents
+		.map((document) => document.docid)
+		.filter((docId): docId is number => docId != null);
+
+	const results = await Promise.all(docIds.map((docId) => episciences.papers.get(docId)));
+
+	const papers: Array<EpisciencesPaperEntry> = [];
+	for (const [index, result] of results.entries()) {
+		const docId = docIds[index]!;
+		if (result.isOk()) {
+			papers.push({ docId, paper: result.value.data });
+		} else {
+			log.error("Failed to fetch episciences paper.", { docId, error: result.error });
+		}
+	}
+
+	return Result.ok(papers);
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -117,10 +148,19 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 			const zoteroItems = yield* zoteroItemsResult;
 			const zoteroCollections = yield* zoteroCollectionsResult;
 
+			/**
+			 * Depends on the search documents above (needs their doc ids), so it cannot run in the
+			 * parallel batch and is fetched afterwards.
+			 */
+			const episciencesPapers = yield* await getOrFetch(cache, "episciences/papers", () =>
+				fetchEpisciencesPapers(episciences, episciencesDocuments),
+			);
+
 			return Result.ok({
 				campusCurricula,
 				campusResources,
 				episciencesDocuments,
+				episciencesPapers,
 				sshocItems,
 				zoteroItems,
 				zoteroCollections,
@@ -134,6 +174,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		return createSearchIndexResourceDocuments({
 			sourceData,
 			sshocMarketplaceBaseUrl,
+			zoteroGroupId,
 			orgUnits,
 		});
 	}
