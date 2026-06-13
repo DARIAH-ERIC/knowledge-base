@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { getExtracted } from "next-intl/server";
 
 import { RefreshCountryReportContributionsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/refresh-country-report-contributions.schema";
-import { assertCan } from "@/lib/auth/permissions";
+import { assertCan, assertReportEditable } from "@/lib/auth/permissions";
 import {
 	getSnapshotContributionCandidates,
 	snapshotCompensationRoles,
@@ -27,6 +27,7 @@ export const refreshCountryReportContributionsAction = createMutationAction({
 
 	async preCheck({ input, ctx }) {
 		await assertCan(ctx.user, "update", { type: "country_report", id: input.countryReportId });
+		await assertReportEditable(ctx.user, { type: "country_report", id: input.countryReportId });
 		return undefined;
 	},
 

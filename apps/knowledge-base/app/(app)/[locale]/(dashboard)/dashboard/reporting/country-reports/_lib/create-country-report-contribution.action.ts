@@ -6,7 +6,7 @@ import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 
 import { CreateCountryReportContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-contribution.schema";
-import { assertCan } from "@/lib/auth/permissions";
+import { assertCan, assertReportEditable } from "@/lib/auth/permissions";
 import { getManualContributionCandidateForReport } from "@/lib/data/report-contributions";
 import { countryReportRevalidatePaths } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
@@ -24,6 +24,7 @@ export const createCountryReportContributionAction = createMutationAction({
 			type: "country_report",
 			id: input.countryReportId,
 		});
+		await assertReportEditable(ctx.user, { type: "country_report", id: input.countryReportId });
 
 		const existing = await db.query.countryReportContributions.findFirst({
 			where: {

@@ -6,7 +6,7 @@ import { serviceKpiCategoryEnum } from "@dariah-eric/database/schema";
 import { getExtracted } from "next-intl/server";
 import * as v from "valibot";
 
-import { assertCan } from "@/lib/auth/permissions";
+import { assertCan, assertReportEditable } from "@/lib/auth/permissions";
 import { getCountryServices } from "@/lib/data/report-services";
 import { countryReportRevalidatePaths } from "@/lib/data/reporting-urls";
 import { and, eq, inArray } from "@/lib/db/sql";
@@ -39,6 +39,7 @@ export const upsertCountryReportServiceKpisAction = createMutationAction({
 
 	async preCheck({ input, ctx }) {
 		await assertCan(ctx.user, "update", { type: "country_report", id: input.id });
+		await assertReportEditable(ctx.user, { type: "country_report", id: input.id });
 		return undefined;
 	},
 

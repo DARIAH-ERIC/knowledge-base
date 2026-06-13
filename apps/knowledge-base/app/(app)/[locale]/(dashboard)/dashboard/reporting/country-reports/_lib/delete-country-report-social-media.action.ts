@@ -5,7 +5,7 @@ import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { revalidatePath } from "next/cache";
 
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertCan } from "@/lib/auth/permissions";
+import { assertCan, assertReportEditable } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { countryReportRevalidatePaths } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
@@ -24,6 +24,7 @@ export async function deleteCountryReportSocialMediaAction(formData: FormData): 
 
 	const { user } = await assertAuthenticated();
 	await assertCan(user, "update", { type: "country_report", id: countryReportId });
+	await assertReportEditable(user, { type: "country_report", id: countryReportId });
 
 	await db.transaction(async (tx) => {
 		// Scope by both ids so a row can only be removed via the report it belongs to (the authz check is

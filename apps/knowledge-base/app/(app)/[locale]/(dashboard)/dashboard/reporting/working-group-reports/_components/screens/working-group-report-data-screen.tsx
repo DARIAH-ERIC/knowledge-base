@@ -1,14 +1,11 @@
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { Button } from "@dariah-eric/ui/button";
-import { Label } from "@dariah-eric/ui/field";
-import { Input } from "@dariah-eric/ui/input";
-import { TextField } from "@dariah-eric/ui/text-field";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
+import { WorkingGroupReportDataForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-data-form";
 import { WorkingGroupReportSocialMediaForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form";
 import { createWorkingGroupReportSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-social-media.action";
 import { deleteWorkingGroupReportSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/delete-working-group-report-social-media.action";
@@ -20,8 +17,6 @@ import { alias, and, eq, inArray, sql } from "@/lib/db/sql";
 
 interface WorkingGroupReportDataScreenProps {
 	reportId: string;
-	/** Edit base path; the save action returns here (e.g. `${basePath}/data`). */
-	basePath: string;
 }
 
 function formatRole(role: string): string {
@@ -35,7 +30,7 @@ function formatRole(role: string): string {
 export async function WorkingGroupReportDataScreen(
 	props: Readonly<WorkingGroupReportDataScreenProps>,
 ): Promise<ReactNode> {
-	const { reportId, basePath } = props;
+	const { reportId } = props;
 
 	const { user } = await assertAuthenticated();
 	const result = await getAuthorizedWorkingGroupReportForUser(
@@ -131,30 +126,10 @@ export async function WorkingGroupReportDataScreen(
 		<div className="flex flex-col gap-y-12">
 			<section className="flex flex-col gap-y-4">
 				<h2 className="text-sm font-semibold text-fg">{t("Working group data")}</h2>
-				<form
-					action={updateWorkingGroupReportDataAction}
-					className="flex flex-col gap-y-4 max-inline-sm"
-				>
-					<input name="id" type="hidden" value={report.id} />
-					<input name="redirectTo" type="hidden" value={`${basePath}/data`} />
-					<TextField
-						defaultValue={
-							report.numberOfMembers != null ? String(report.numberOfMembers) : undefined
-						}
-						name="numberOfMembers"
-						type="number"
-					>
-						<Label>{t("Number of members")}</Label>
-						<Input min={0} />
-					</TextField>
-					<TextField defaultValue={report.mailingList ?? undefined} name="mailingList">
-						<Label>{t("Mailing list")}</Label>
-						<Input />
-					</TextField>
-					<Button className="self-start" type="submit">
-						{t("Save")}
-					</Button>
-				</form>
+				<WorkingGroupReportDataForm
+					formAction={updateWorkingGroupReportDataAction}
+					report={report}
+				/>
 			</section>
 
 			{chairs.length > 0 && (
