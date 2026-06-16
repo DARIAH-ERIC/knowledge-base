@@ -6,11 +6,11 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import { RichTextRenderer } from "@dariah-eric/ui/rich-text-editor";
-import type { JSONContent } from "@tiptap/core";
-import { useExtracted, useFormatter } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
@@ -30,7 +30,7 @@ interface CountryDetailsProps {
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
 	country: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
-		description: JSONContent | null;
+		descriptionContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	selectedRelatedEntities: Array<{
@@ -81,7 +81,6 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 	} = props;
 
 	const t = useExtracted();
-	const format = useFormatter();
 
 	return (
 		<Fragment>
@@ -120,7 +119,7 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 					{country.image != null ? (
 						<img
 							alt=""
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
 							src={country.image.url}
 						/>
 					) : null}
@@ -128,8 +127,11 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 
 				<DescriptionTerm>{t("Description")}</DescriptionTerm>
 				<DescriptionDetails>
-					{country.description != null ? (
-						<RichTextRenderer key={selectedVersion} content={country.description} />
+					{country.descriptionContentBlocks.length > 0 ? (
+						<ContentBlocksView
+							key={selectedVersion}
+							contentBlocks={country.descriptionContentBlocks}
+						/>
 					) : null}
 				</DescriptionDetails>
 
@@ -215,13 +217,7 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 									relation={formatRoleType(relation.roleType)}
 									target={country.name}
 									targetType={formatRoleType(relation.targetUnitType)}
-									duration={
-										relation.duration.end
-											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })
-									}
+									duration={relation.duration}
 								/>
 							))}
 						</ul>
@@ -243,13 +239,7 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 										relation.relatedUnitSlug,
 									)}
 									targetType={formatRoleType(relation.relatedUnitType)}
-									duration={
-										relation.duration.end
-											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })
-									}
+									duration={relation.duration}
 								/>
 							))}
 						</ul>
@@ -271,13 +261,7 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 									relation={formatRoleType(consortium.statusType)}
 									target={country.name}
 									targetType={formatRoleType("country")}
-									duration={
-										consortium.duration.end
-											? format.dateTimeRange(consortium.duration.start, consortium.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(consortium.duration.start, { dateStyle: "short" })
-									}
+									duration={consortium.duration}
 								/>
 							))}
 						</ul>
@@ -299,13 +283,7 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 									relation={formatRoleType(institution.statusType)}
 									target="DARIAH ERIC"
 									targetType={formatRoleType("eric")}
-									duration={
-										institution.duration.end
-											? format.dateTimeRange(institution.duration.start, institution.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(institution.duration.start, { dateStyle: "short" })
-									}
+									duration={institution.duration}
 								/>
 							))}
 						</ul>

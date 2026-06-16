@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, toImageAsset } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { mapSocialMedia } from "@/lib/social-media";
@@ -27,10 +27,86 @@ interface GovernanceBodyPerson {
 	email: string | null;
 	orcid: string | null;
 	position: Awaited<ReturnType<typeof getPersonPositions>> extends Map<string, infer T> ? T : never;
-	image: { url: string };
+	image: { url: string } | null;
 	slug: string;
 	role: (typeof schema.personRoleTypesEnum)[number];
 	duration: { start: string; end: string | null };
+}
+
+// Governance bodies use a single role vocabulary, and a person is not expected to hold more than one
+// of these roles at the same body. Rank them so an (unenforced) overlap resolves deterministically to
+// the most senior role.
+const governanceBodyRolePriority: Partial<
+	Record<(typeof schema.personRoleTypesEnum)[number], number>
+> = {
+	is_chair_of: 0,
+	is_vice_chair_of: 1,
+	is_member_of: 2,
+	is_contact_for: 3,
+	is_affiliated_with: 4,
+};
+
+function getGovernanceBodyRolePriority(role: (typeof schema.personRoleTypesEnum)[number]): number {
+	return governanceBodyRolePriority[role] ?? Number.MAX_SAFE_INTEGER;
+}
+
+/**
+ * Negative when `a` should be preferred over `b`: most senior role first, then most recent
+ * relation.
+ */
+function comparePreferredRelation(
+	a: { role: (typeof schema.personRoleTypesEnum)[number]; duration: { start: Date } },
+	b: { role: (typeof schema.personRoleTypesEnum)[number]; duration: { start: Date } },
+): number {
+	const byRole = getGovernanceBodyRolePriority(a.role) - getGovernanceBodyRolePriority(b.role);
+	if (byRole !== 0) {
+		return byRole;
+	}
+	return b.duration.start.getTime() - a.duration.start.getTime();
+}
+
+function mapGovernanceBodyPerson(
+	row: {
+		id: string;
+		name: string;
+		sortName: string;
+		email: string | null;
+		orcid: string | null;
+		slug: string;
+		imageKey: string | null;
+		imageAlt: string | null;
+		imageCaption: string | null;
+		licenseName: string | null;
+		licenseUrl: string | null;
+		role: (typeof schema.personRoleTypesEnum)[number];
+		duration: { start: Date; end?: Date | null };
+	},
+	positions: Awaited<ReturnType<typeof getPersonPositions>>,
+): GovernanceBodyPerson {
+	return {
+		id: row.id,
+		name: row.name,
+		sortName: row.sortName,
+		email: row.email,
+		orcid: row.orcid,
+		position: positions.get(row.id) ?? null,
+		image: generateImageUrl(
+			toImageAsset({
+				key: row.imageKey,
+				alt: row.imageAlt,
+				caption: row.imageCaption,
+				licenseName: row.licenseName,
+				licenseUrl: row.licenseUrl,
+			}),
+			imageWidth.avatar,
+		),
+		slug: row.slug,
+		role: row.role,
+		duration: {
+			start: row.duration.start.toISOString(),
+			end: row.duration.end?.toISOString() ?? null,
+		},
+	};
 }
 
 const hardcodedWorkingGroupsGovernanceBody = {
@@ -62,6 +138,10 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			orcid: schema.persons.orcid,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
+			imageAlt: schema.assets.alt,
+			imageCaption: schema.assets.caption,
+			licenseName: schema.licenses.name,
+			licenseUrl: schema.licenses.url,
 			role: schema.personRoleTypes.type,
 			duration: schema.personsToOrganisationalUnits.duration,
 		})
@@ -95,7 +175,8 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			schema.entities,
 			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
-		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.licenses, eq(schema.licenses.id, schema.assets.licenseId))
 		.where(
 			and(
 				eq(schema.personRoleTypes.type, "is_chair_of"),
@@ -104,38 +185,28 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			),
 		);
 
-	const positions = await getPersonPositions(db, [...new Set(rows.map((row) => row.id))]);
-	const chairsByPerson = new Map<string, GovernanceBodyPerson>();
+	// A person can chair several working groups; keep one entry each, preferring the most recent
+	// relation so the surfaced duration is deterministic.
+	const chairRowsByPerson = new Map<string, (typeof rows)[number]>();
 
 	for (const row of rows) {
-		if (chairsByPerson.has(row.id)) {
-			continue;
+		const existing = chairRowsByPerson.get(row.id);
+		if (existing == null || comparePreferredRelation(row, existing) < 0) {
+			chairRowsByPerson.set(row.id, row);
 		}
-
-		chairsByPerson.set(row.id, {
-			id: row.id,
-			name: row.name,
-			sortName: row.sortName,
-			email: row.email,
-			orcid: row.orcid,
-			position: positions.get(row.id) ?? null,
-			image: generateImageUrl({ key: row.imageKey }, imageWidth.avatar),
-			slug: row.slug,
-			role: row.role,
-			duration: {
-				start: row.duration.start.toISOString(),
-				end: row.duration.end?.toISOString() ?? null,
-			},
-		});
 	}
 
-	return [...chairsByPerson.values()].toSorted((a, b) => {
-		const byName = a.sortName.localeCompare(b.sortName);
-		if (byName !== 0) {
-			return byName;
-		}
-		return a.name.localeCompare(b.name);
-	});
+	const positions = await getPersonPositions(db, [...chairRowsByPerson.keys()]);
+
+	return [...chairRowsByPerson.values()]
+		.map((row) => mapGovernanceBodyPerson(row, positions))
+		.toSorted((a, b) => {
+			const byName = a.sortName.localeCompare(b.sortName);
+			if (byName !== 0) {
+				return byName;
+			}
+			return a.name.localeCompare(b.name);
+		});
 }
 
 async function getHardcodedWorkingGroupsGovernanceBody(db: Database | Transaction) {
@@ -187,6 +258,10 @@ async function getActiveGovernanceBodyPersons(
 			orcid: schema.persons.orcid,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
+			imageAlt: schema.assets.alt,
+			imageCaption: schema.assets.caption,
+			licenseName: schema.licenses.name,
+			licenseUrl: schema.licenses.url,
 			role: schema.personRoleTypes.type,
 			duration: schema.personsToOrganisationalUnits.duration,
 		})
@@ -211,7 +286,8 @@ async function getActiveGovernanceBodyPersons(
 			schema.entities,
 			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
-		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.leftJoin(schema.licenses, eq(schema.licenses.id, schema.assets.licenseId))
 		.where(
 			and(
 				inArray(governanceBodyEntityVersions.id, governanceBodyIds),
@@ -221,39 +297,38 @@ async function getActiveGovernanceBodyPersons(
 
 	const positions = await getPersonPositions(db, [...new Set(rows.map((row) => row.id))]);
 
-	for (const row of rows) {
-		const items = personsByGovernanceBody.get(row.governanceBodyId);
+	// A person should hold a single relation per governance body, but the database does not enforce
+	// non-overlapping statuses. Keep one entry per person, deterministically preferring the most
+	// senior role (then the most recent duration), so a person is never listed twice.
+	const rowsByBodyAndPerson = new Map<string, Map<string, (typeof rows)[number]>>();
+	for (const governanceBodyId of governanceBodyIds) {
+		rowsByBodyAndPerson.set(governanceBodyId, new Map());
+	}
 
-		if (items == null) {
+	for (const row of rows) {
+		const byPerson = rowsByBodyAndPerson.get(row.governanceBodyId);
+
+		if (byPerson == null) {
 			continue;
 		}
 
-		items.push({
-			id: row.id,
-			name: row.name,
-			sortName: row.sortName,
-			email: row.email,
-			orcid: row.orcid,
-			position: positions.get(row.id) ?? null,
-			image: generateImageUrl({ key: row.imageKey }, imageWidth.avatar),
-			slug: row.slug,
-			role: row.role,
-			duration: {
-				start: row.duration.start.toISOString(),
-				end: row.duration.end?.toISOString() ?? null,
-			},
-		});
+		const existing = byPerson.get(row.id);
+		if (existing == null || comparePreferredRelation(row, existing) < 0) {
+			byPerson.set(row.id, row);
+		}
 	}
 
-	for (const [governanceBodyId, items] of personsByGovernanceBody) {
-		const sorted = items.toSorted((a, b) => {
-			const byName = a.sortName.localeCompare(b.sortName);
-			if (byName !== 0) {
-				return byName;
-			}
-			return a.role.localeCompare(b.role);
-		});
-		personsByGovernanceBody.set(governanceBodyId, sorted);
+	for (const [governanceBodyId, byPerson] of rowsByBodyAndPerson) {
+		const items = [...byPerson.values()]
+			.map((row) => mapGovernanceBodyPerson(row, positions))
+			.toSorted((a, b) => {
+				const byName = a.sortName.localeCompare(b.sortName);
+				if (byName !== 0) {
+					return byName;
+				}
+				return a.role.localeCompare(b.role);
+			});
+		personsByGovernanceBody.set(governanceBodyId, items);
 	}
 
 	return personsByGovernanceBody;
@@ -296,6 +371,16 @@ export async function getGovernanceBodies(
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 				socialMedia: {
@@ -406,6 +491,16 @@ export async function getGovernanceBodyById(
 					image: {
 						columns: {
 							key: true,
+							alt: true,
+							caption: true,
+						},
+						with: {
+							license: {
+								columns: {
+									name: true,
+									url: true,
+								},
+							},
 						},
 					},
 					socialMedia: {
@@ -570,6 +665,16 @@ export async function getGovernanceBodyBySlug(
 			image: {
 				columns: {
 					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
 				},
 			},
 			socialMedia: {

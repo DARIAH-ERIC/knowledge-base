@@ -86,7 +86,7 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 
 					<TextField defaultValue={event?.summary ?? undefined} isRequired={true} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 					<DatePicker

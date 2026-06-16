@@ -50,6 +50,35 @@ test.describe("persons admin", () => {
 		expect(JSON.stringify(await db.getPersonBiographyByName(name))).toContain(biography);
 	});
 
+	test("should store images inserted in person rich-text biographies as image content blocks", async ({
+		createAdminPersonsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const personsPage = createAdminPersonsPage(workerIndex);
+		const testAsset = await db.getTestAsset();
+
+		const name = `${personsPage.workerPrefix} Rich Text Image ${randomUUID()}`;
+		const biographyBeforeImage = "E2E person biography before image.";
+		const biographyAfterImage = "E2E person biography after image.";
+
+		await personsPage.gotoCreate();
+		await personsPage.fillName(name);
+		await personsPage.fillSortName("Image, Rich Text");
+		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await personsPage.fillBiography(biographyBeforeImage);
+		await personsPage.insertImageInBiography("E2E Test Asset");
+		await personsPage.typeBiographyAfterImage(biographyAfterImage);
+
+		await personsPage.submitForm();
+
+		const blocks = await db.getPersonBiographyContentBlocksByName(name);
+		expect(blocks.map((block) => block.type)).toStrictEqual(["rich_text", "image", "rich_text"]);
+		expect(JSON.stringify(blocks[0]?.content)).toContain(biographyBeforeImage);
+		expect(blocks[1]?.imageId).toBe(testAsset.id);
+		expect(JSON.stringify(blocks[2]?.content)).toContain(biographyAfterImage);
+	});
+
 	test("should edit all person form fields", async ({ page, createAdminPersonsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const personsPage = createAdminPersonsPage(workerIndex);
@@ -137,10 +166,11 @@ test.describe("persons admin", () => {
 		await page.getByLabel("Name", { exact: true }).fill(updatedName);
 		await personsPage.fillEmail("");
 		await personsPage.fillOrcid("");
+		await personsPage.removeImage();
 		await personsPage.submitForm();
 
 		const updated = await db.getPersonByName(updatedName);
-		expect(updated).toMatchObject({ email: null, orcid: null });
+		expect(updated).toMatchObject({ email: null, imageId: null, orcid: null });
 	});
 
 	test("failure injection forces createServerAction to return an error state", async ({
@@ -206,10 +236,14 @@ test.describe("persons admin", () => {
 		await personsPage.fillEndContributionDate(2025, 12, 31);
 		await personsPage.confirmEndContribution();
 
-		// Verify "End contribution" button is gone and "present" is replaced by a date.
-		await expect(
-			personsPage.contributionsTable().getByRole("button", { name: "End contribution" }),
-		).toBeHidden();
+		// Verify "End contribution" action is gone and "present" is replaced by a date.
+		await personsPage
+			.contributionsTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
+		await expect(personsPage.page.getByRole("menuitem", { name: "End contribution" })).toBeHidden();
+		await personsPage.page.keyboard.press("Escape");
 		await expect(personsPage.contributionsTable().getByText("present")).toBeHidden();
 
 		// Verify end date persisted.

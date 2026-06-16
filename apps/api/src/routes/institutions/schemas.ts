@@ -1,7 +1,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
-import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
+import { ImageSchema, PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 /**
  * The two organisational-unit relation statuses an institution can hold towards the DARIAH-EU ERIC,
@@ -34,7 +34,7 @@ export const InstitutionSchema = v.pipe(
 		slug: v.string(),
 		status: v.picklist(institutionStatusEnum),
 		country: v.nullable(InstitutionCountrySchema),
-		logo: v.nullable(v.object({ url: v.string() })),
+		logo: v.nullable(ImageSchema),
 	}),
 	v.description("Institution"),
 	v.metadata({ ref: "Institution" }),

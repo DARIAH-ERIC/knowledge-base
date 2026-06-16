@@ -53,7 +53,7 @@ export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNod
 					</TextField>
 					<TextField defaultValue={fundingCall?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 					<DatePicker

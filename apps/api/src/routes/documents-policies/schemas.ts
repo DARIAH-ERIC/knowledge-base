@@ -12,7 +12,9 @@ const DocumentPolicyGroupSchema = v.nullable(
 
 export const DocumentOrPolicyBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.DocumentOrPolicySelectSchema, ["id", "title", "summary", "url"]).entries,
+		...v.pick(schema.DocumentOrPolicySelectSchema, ["id", "title"]).entries,
+		summary: v.nullable(v.string()),
+		url: v.nullable(v.string()),
 		document: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
@@ -32,9 +34,32 @@ export const DocumentOrPolicyListSchema = v.pipe(
 
 export type DocumentOrPolicyList = v.InferOutput<typeof DocumentOrPolicyListSchema>;
 
+const { group: _group, ...DocumentOrPolicyTreeItemEntries } = DocumentOrPolicyBaseSchema.entries;
+
+const DocumentOrPolicyTreeItemSchema = v.object({
+	...DocumentOrPolicyTreeItemEntries,
+	type: v.literal("item"),
+});
+
+const DocumentOrPolicyTreeGroupSchema = v.object({
+	...v.pick(schema.DocumentPolicyGroupSelectSchema, ["id", "label"]).entries,
+	type: v.literal("group"),
+	items: v.array(DocumentOrPolicyTreeItemSchema),
+});
+
+export const DocumentOrPolicyTreeSchema = v.pipe(
+	v.array(v.union([DocumentOrPolicyTreeItemSchema, DocumentOrPolicyTreeGroupSchema])),
+	v.description("Ordered tree of documents, policies, and groups"),
+	v.metadata({ ref: "DocumentOrPolicyTree" }),
+);
+
+export type DocumentOrPolicyTree = v.InferOutput<typeof DocumentOrPolicyTreeSchema>;
+
 export const DocumentOrPolicySchema = v.pipe(
 	v.object({
-		...v.pick(schema.DocumentOrPolicySelectSchema, ["id", "title", "summary", "url"]).entries,
+		...v.pick(schema.DocumentOrPolicySelectSchema, ["id", "title"]).entries,
+		summary: v.nullable(v.string()),
+		url: v.nullable(v.string()),
 		document: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
@@ -75,6 +100,16 @@ export const GetDocumentsPolicies = {
 		}),
 		v.description("Paginated list of documents and policies"),
 		v.metadata({ ref: "GetDocumentsPoliciesResponse" }),
+	),
+};
+
+export const GetDocumentsPoliciesTree = {
+	ResponseSchema: v.pipe(
+		v.object({
+			data: DocumentOrPolicyTreeSchema,
+		}),
+		v.description("Ordered tree of documents, policies, and groups"),
+		v.metadata({ ref: "GetDocumentsPoliciesTreeResponse" }),
 	),
 };
 

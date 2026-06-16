@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { UpdatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.schema";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
-import { upsertRichTextEntityVersionField } from "@/lib/data/entity-version-fields";
+import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { eq } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
@@ -23,25 +23,32 @@ export const updatePersonAction = createMutationAction({
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(tx, input.documentId, personsLifecycleAdapter);
 
-		const asset = await tx.query.assets.findFirst({
-			where: { key: input.imageKey },
-			columns: { id: true },
-		});
-		assert(asset);
+		const asset =
+			input.imageKey != null
+				? await tx.query.assets.findFirst({
+						where: { key: input.imageKey },
+						columns: { id: true },
+					})
+				: null;
+		assert(input.imageKey == null || asset != null);
 
 		await tx
 			.update(schema.persons)
 			.set({
 				email: input.email,
-				imageId: asset.id,
+				imageId: asset?.id ?? null,
 				name: input.name,
 				orcid: input.orcid,
 				sortName: input.sortName,
 			})
 			.where(eq(schema.persons.id, draftVersionId));
 
-		const parsedContent = JSON.parse(input.biography) as schema.RichTextContentBlock["content"];
-		await upsertRichTextEntityVersionField(tx, draftVersionId, "biography", parsedContent);
+		await replaceEntityVersionFieldContentBlocks(
+			tx,
+			draftVersionId,
+			"biography",
+			input.biographyContentBlocks,
+		);
 		await touchVersion(tx, draftVersionId);
 
 		if (shouldSaveAndPublish(formData)) {

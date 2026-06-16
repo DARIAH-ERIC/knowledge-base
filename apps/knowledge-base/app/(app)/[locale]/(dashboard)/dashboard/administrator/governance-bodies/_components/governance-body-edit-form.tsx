@@ -2,10 +2,10 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import {
 	EntityEditTab,
 	EntityEditTabs,
@@ -28,7 +28,7 @@ interface GovernanceBodyEditFormProps {
 	hasDraftChanges: boolean;
 	isPublished: boolean;
 	governanceBody: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
-		description?: JSONContent;
+		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	initialRelatedEntityIds: Array<string>;
@@ -133,7 +133,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 						initialPersonTotal={initialPersonTotal}
 						relations={personRelations}
 						roleOptions={personRelationRoleOptions}
-						unitId={documentId}
+						organisationalUnitDocumentId={documentId}
 					/>
 				</TabPanel>
 
@@ -141,7 +141,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 					<UnitRelationsSection
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}
-						unitId={documentId}
+						unitDocumentId={documentId}
 					/>
 				</TabPanel>
 			</EntityEditTabs>

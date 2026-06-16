@@ -2,10 +2,10 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import {
 	EntityEditTab,
 	EntityEditTabs,
@@ -27,7 +27,7 @@ interface ProjectEditFormProps {
 		schema.Project,
 		"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
 	> & {
-		description?: JSONContent;
+		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: {
 			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
@@ -41,7 +41,7 @@ interface ProjectEditFormProps {
 	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
 	initialPartners: Array<{
 		id: string;
-		unitId: string;
+		unitDocumentId: string;
 		unitName: string;
 		roleId: string;
 		roleName: string;
@@ -107,7 +107,11 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 				</TabPanel>
 
 				<TabPanel id="project-partners" shouldPreserveState={true}>
-					<ProjectPartnersSection partners={initialPartners} projectId={documentId} roles={roles} />
+					<ProjectPartnersSection
+						partners={initialPartners}
+						projectDocumentId={documentId}
+						roles={roles}
+					/>
 				</TabPanel>
 			</EntityEditTabs>
 		</Fragment>

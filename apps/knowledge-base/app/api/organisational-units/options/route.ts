@@ -30,8 +30,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 	)
 		? (unitTypeParam as OrganisationalUnitType)
 		: undefined;
+	const locatedInCountryDocumentId = searchParams.get("locatedInCountryDocumentId") ?? undefined;
 
-	const result = await getOrganisationalUnitOptions({ limit, offset, q, unitType });
+	const result = await getOrganisationalUnitOptions({
+		limit,
+		offset,
+		q,
+		unitType,
+		locatedInCountryDocumentId,
+	});
 
 	return NextResponse.json(result);
 }

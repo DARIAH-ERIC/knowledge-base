@@ -84,7 +84,7 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 
 					<TextField defaultValue={pageItem?.summary ?? undefined} isRequired={true} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>
@@ -95,7 +95,7 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 					{selectedImage != null && (
 						<img
 							alt={t("Selected image")}
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
 							src={selectedImage.url}
 						/>
 					)}

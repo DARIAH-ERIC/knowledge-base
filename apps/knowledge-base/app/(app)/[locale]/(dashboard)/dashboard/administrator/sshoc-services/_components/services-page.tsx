@@ -106,11 +106,11 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 					<TableColumn allowsSorting={true} id="sshocMarketplaceId">
 						{t("SSHOC ID")}
 					</TableColumn>
-					<TableColumn />
+					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-						<TableRow id={item.id}>
+						<TableRow href={`/dashboard/administrator/sshoc-services/${item.id}/view`} id={item.id}>
 							<TableCell>{item.name}</TableCell>
 							<TableCell>{item.type.type}</TableCell>
 							<TableCell>
@@ -119,7 +119,7 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 								</Badge>
 							</TableCell>
 							<TableCell>{item.sshocMarketplaceId ?? "—"}</TableCell>
-							<TableCell className="text-end">
+							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Link
 										href={`/dashboard/administrator/sshoc-services/${item.id}/view`}

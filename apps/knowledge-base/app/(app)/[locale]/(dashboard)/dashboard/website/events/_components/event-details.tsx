@@ -97,7 +97,11 @@ export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
-					<img alt="" src={event.image.url} />
+					<img
+						alt=""
+						className="block-24 inline-auto max-inline-full rounded-lg object-contain"
+						src={event.image.url}
+					/>
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Related entities")}</DescriptionTerm>

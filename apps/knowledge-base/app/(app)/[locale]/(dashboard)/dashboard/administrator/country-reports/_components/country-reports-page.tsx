@@ -91,7 +91,7 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 						{t("Campaign")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
-					<TableColumn />
+					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
@@ -99,7 +99,7 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 							<TableCell>{item.country.name}</TableCell>
 							<TableCell>{item.campaign.year}</TableCell>
 							<TableCell>{formatStatus(item.status)}</TableCell>
-							<TableCell className="text-end">
+							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Link
 										href={`/dashboard/administrator/country-reports/${item.id}`}

@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -7,12 +6,12 @@ import type { ReactNode } from "react";
 import { PersonEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { getContributionRoleOptions, getPersonContributions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -100,36 +99,22 @@ export default async function DashboardAdministratorEditPersonPage(
 		notFound();
 	}
 
-	const [contributions, contributionRoleOptions, biographyRows] = await Promise.all([
+	const [contributions, contributionRoleOptions, biographyContentBlocks] = await Promise.all([
 		getPersonContributions(documentId),
 		getContributionRoleOptions(),
-		db
-			.select({ content: schema.richTextContentBlocks.content })
-			.from(schema.richTextContentBlocks)
-			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
-			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-			.innerJoin(
-				schema.entityTypesFieldsNames,
-				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-			)
-			.where(
-				and(
-					eq(schema.fields.entityVersionId, person.id),
-					eq(schema.entityTypesFieldsNames.fieldName, "biography"),
-				),
-			)
-			.limit(1),
+		getEntityContentBlocks(person.id, "biography"),
 	]);
 
-	const biography = biographyRows.at(0)?.content;
-
-	const image = {
-		...person.image,
-		url: images.generateSignedImageUrl({
-			key: person.image.key,
-			options: imageGridOptions,
-		}).url,
-	};
+	const image =
+		person.image != null
+			? {
+					...person.image,
+					url: images.generateSignedImageUrl({
+						key: person.image.key,
+						options: imageGridOptions,
+					}).url,
+				}
+			: null;
 
 	return (
 		<PersonEditForm
@@ -139,7 +124,7 @@ export default async function DashboardAdministratorEditPersonPage(
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			isPublished={publishedId != null}
-			person={{ ...person, biography, image }}
+			person={{ ...person, biographyContentBlocks, image }}
 		/>
 	);
 }

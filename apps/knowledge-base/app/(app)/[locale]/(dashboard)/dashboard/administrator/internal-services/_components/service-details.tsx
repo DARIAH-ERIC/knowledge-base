@@ -9,18 +9,21 @@ import {
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
+import { getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
+
 interface ServiceDetailsProps {
 	service: Pick<
 		schema.Service,
 		"id" | "name" | "statusId" | "comment" | "dariahBranding" | "monitoring" | "privateSupplier"
 	> & {
-		ownerUnitIds: Array<string>;
-		providerUnitIds: Array<string>;
+		ownerUnitDocumentIds: Array<string>;
+		providerUnitDocumentIds: Array<string>;
 	};
 	serviceStatuses: Array<Pick<schema.ServiceStatus, "id" | "status">>;
 	initialOrganisationalUnitItems: Array<{ id: string; name: string }>;
 	initialOrganisationalUnitTotal: number;
-	selectedOrganisationalUnits: Array<{ id: string; name: string }>;
+	selectedOrganisationalUnits: Array<{ id: string; name: string; type: string; slug: string }>;
 }
 
 export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode {
@@ -29,10 +32,10 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 	const t = useExtracted();
 
 	const owners = selectedOrganisationalUnits.filter((orgaUnit) =>
-		service.ownerUnitIds.includes(orgaUnit.id),
+		service.ownerUnitDocumentIds.includes(orgaUnit.id),
 	);
 	const providers = selectedOrganisationalUnits.filter((orgaUnit) =>
-		service.providerUnitIds.includes(orgaUnit.id),
+		service.providerUnitDocumentIds.includes(orgaUnit.id),
 	);
 
 	return (
@@ -68,7 +71,12 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 						<ul className="flex flex-col gap-1">
 							{owners.map((owner) => (
 								<li key={owner.id} className="text-sm">
-									<span className="font-medium">{owner.name}</span>
+									<RelationLink
+										className="font-medium"
+										href={getOrganisationalUnitDetailHref(owner.type, owner.slug)}
+									>
+										{owner.name}
+									</RelationLink>
 								</li>
 							))}
 						</ul>
@@ -81,7 +89,12 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 						<ul className="flex flex-col gap-1">
 							{providers.map((provider) => (
 								<li key={provider.id} className="text-sm">
-									<span className="font-medium">{provider.name}</span>
+									<RelationLink
+										className="font-medium"
+										href={getOrganisationalUnitDetailHref(provider.type, provider.slug)}
+									>
+										{provider.name}
+									</RelationLink>
 								</li>
 							))}
 						</ul>

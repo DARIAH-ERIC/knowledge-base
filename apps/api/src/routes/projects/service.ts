@@ -60,6 +60,16 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 				scope: {
@@ -170,6 +180,16 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 				scope: {
@@ -336,6 +356,16 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 			image: {
 				columns: {
 					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
 				},
 			},
 			scope: {

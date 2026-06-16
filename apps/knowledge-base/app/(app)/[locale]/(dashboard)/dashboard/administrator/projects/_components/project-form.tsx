@@ -19,7 +19,6 @@ import {
 } from "@dariah-eric/ui/modal";
 import { NumberField } from "@dariah-eric/ui/number-field";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
@@ -27,16 +26,17 @@ import { TextArea } from "@dariah-eric/ui/textarea";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { CalendarDate } from "@internationalized/date";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState, useTransition } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import { RichTextContentBlocksField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-content-blocks-field";
 import {
 	type CreatedSocialMedia,
 	createSocialMediaAction,
@@ -72,7 +72,7 @@ interface ProjectFormProps {
 		schema.Project,
 		"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
 	> & {
-		description?: JSONContent;
+		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: {
 			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
@@ -235,7 +235,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 
 					<TextField defaultValue={project?.summary} isRequired={true} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>
@@ -246,7 +246,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					{selectedImage != null && (
 						<img
 							alt={t("Selected image")}
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
 							src={selectedImage.url}
 						/>
 					)}
@@ -296,9 +296,10 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					title={t("Description")}
 					variant="stacked"
 				>
-					<RichTextEditor
+					<RichTextContentBlocksField
 						aria-label={t("Description")}
-						content={project?.description}
+						initialBlocks={project?.descriptionContentBlocks}
+						initialAssets={initialAssets}
 						name="description"
 					/>
 				</FormSection>

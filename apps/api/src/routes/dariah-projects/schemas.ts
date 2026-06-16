@@ -3,6 +3,7 @@ import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import {
+	ImageSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
 	RelatedEntitiesSchema,
@@ -48,7 +49,7 @@ export const DariahProjectBaseSchema = v.pipe(
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
-		image: v.nullable(v.object({ url: v.string() })),
+		image: v.nullable(ImageSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
 		socialMedia: v.array(DariahProjectSocialMediaSchema),
@@ -80,7 +81,7 @@ export const DariahProjectSchema = v.pipe(
 			"topic",
 			"funding",
 		]).entries,
-		image: v.nullable(v.object({ url: v.string() })),
+		image: v.nullable(ImageSchema),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),

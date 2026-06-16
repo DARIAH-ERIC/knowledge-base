@@ -60,6 +60,11 @@ VALUES
 		'https://creativecommons.org/publicdomain/zero/1.0/'
 	),
 	(
+		'CC-PDM-1.0',
+		'Creative Commons Public Domain Mark 1.0 Universal',
+		'https://creativecommons.org/publicdomain/mark/1.0/'
+	),
+	(
 		'CC-BY-4.0',
 		'Creative Commons Attribution 4.0 International',
 		'https://creativecommons.org/licenses/by/4.0/'
@@ -182,13 +187,12 @@ VALUES
 	('is_chair_of'),
 	('is_vice_chair_of'),
 	('is_member_of'),
-	('is_director_of'),
-	('is_president_of'),
 	('is_contact_for'),
 	('national_coordinator'),
 	('national_coordinator_deputy'),
 	('national_representative'),
-	('national_representative_deputy');
+	('national_representative_deputy')
+ON CONFLICT ("type") DO NOTHING;
 
 --> statement-breakpoint
 INSERT INTO
@@ -206,8 +210,6 @@ FROM
 			('is_member_of', 'governance_body'),
 			('is_member_of', 'working_group'),
 			('is_member_of', 'institution'),
-			('is_director_of', 'governance_body'),
-			('is_president_of', 'governance_body'),
 			('is_contact_for', 'governance_body'),
 			('is_contact_for', 'working_group'),
 			('is_contact_for', 'institution'),

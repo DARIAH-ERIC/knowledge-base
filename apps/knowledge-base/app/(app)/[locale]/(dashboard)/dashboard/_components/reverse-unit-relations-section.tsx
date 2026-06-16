@@ -25,18 +25,20 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
 import { createUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-unit-relation.action";
 import { deleteUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/delete-unit-relation.action";
 import { endUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-unit-relation.action";
@@ -44,14 +46,23 @@ import { updateUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import type { OrganisationalUnitType } from "@/lib/data/organisational-units";
 import type { ReverseUnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 import { dateToCalendarDate } from "@/lib/date";
+import {
+	type OrganisationalUnitOption,
+	toOrganisationalUnitDocumentOptionsPage,
+} from "@/lib/organisational-unit-options";
 
 interface ReverseUnitRelationsSectionProps {
 	/** The current unit's document id — the fixed _target_ of every relation shown here. */
-	relatedUnitId: string;
+	relatedUnitDocumentId: string;
 	relations: Array<ReverseUnitRelation>;
 	statusOptions: Array<UnitRelationStatusOption>;
 	/** Organisational-unit type to pick as the relation's source/owner (e.g. "institution"). */
 	sourceUnitType: OrganisationalUnitType;
+	/**
+	 * Restrict the source-unit picker to units `is_located_in` this country document id. Used to
+	 * scope, for example, a country edit form to its own institutions.
+	 */
+	sourceUnitLocatedInCountryDocumentId?: string;
 	/** Entity-specific copy, kept in the parent so message extraction works. */
 	messages: {
 		title: string;
@@ -65,6 +76,7 @@ interface ReverseUnitRelationsSectionProps {
 async function fetchSourceUnitOptionsPage(
 	unitType: string,
 	params: Readonly<AsyncOptionsFetchPageParams>,
+	locatedInCountryDocumentId?: string,
 ): Promise<{ items: Array<AsyncOption>; total: number }> {
 	const searchParams = new URLSearchParams({
 		limit: String(params.limit),
@@ -76,6 +88,10 @@ async function fetchSourceUnitOptionsPage(
 		searchParams.set("q", params.q);
 	}
 
+	if (locatedInCountryDocumentId != null) {
+		searchParams.set("locatedInCountryDocumentId", locatedInCountryDocumentId);
+	}
+
 	const response = await fetch(`/api/organisational-units/options?${searchParams.toString()}`, {
 		signal: params.signal,
 	});
@@ -84,7 +100,9 @@ async function fetchSourceUnitOptionsPage(
 		throw new Error("Failed to load units.");
 	}
 
-	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+	return toOrganisationalUnitDocumentOptionsPage(
+		(await response.json()) as { items: Array<OrganisationalUnitOption>; total: number },
+	);
 }
 
 function formatStatus(type: string): string {
@@ -94,7 +112,14 @@ function formatStatus(type: string): string {
 export function ReverseUnitRelationsSection(
 	props: Readonly<ReverseUnitRelationsSectionProps>,
 ): ReactNode {
-	const { relatedUnitId, relations, statusOptions, sourceUnitType, messages } = props;
+	const {
+		relatedUnitDocumentId,
+		relations,
+		statusOptions,
+		sourceUnitType,
+		sourceUnitLocatedInCountryDocumentId,
+		messages,
+	} = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -117,6 +142,16 @@ export function ReverseUnitRelationsSection(
 		singleStatus?.statusId ?? null,
 	);
 	const [selectedUnitItem, setSelectedUnitItem] = useState<AsyncOption | null>(null);
+
+	const table = useClientTable({
+		items: localRelations,
+		sortAccessors: {
+			from: (relation) => relation.duration.start,
+			type: (relation) => relation.statusType,
+			unit: (relation) => relation.unitName,
+			until: (relation) => relation.duration.end,
+		},
+	});
 
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
@@ -147,7 +182,7 @@ export function ReverseUnitRelationsSection(
 							id: data.id,
 							statusId: option.statusId,
 							statusType: option.statusType,
-							unitId: sourceUnit.id,
+							unitDocumentId: sourceUnit.id,
 							unitName: sourceUnit.name,
 							unitSlug: "",
 							unitType: sourceUnitType,
@@ -169,7 +204,7 @@ export function ReverseUnitRelationsSection(
 		setEditState(createActionStateInitial());
 		setItemToEdit(relation);
 		setEditStatusId(relation.statusId);
-		setEditUnitItem({ id: relation.unitId, name: relation.unitName });
+		setEditUnitItem({ id: relation.unitDocumentId, name: relation.unitName });
 		setEditStartDate(dateToCalendarDate(relation.duration.start));
 		setEditEndDate(dateToCalendarDate(relation.duration.end));
 	}
@@ -198,7 +233,7 @@ export function ReverseUnitRelationsSection(
 									...relation,
 									statusId: option.statusId,
 									statusType: option.statusType,
-									unitId: sourceUnit.id,
+									unitDocumentId: sourceUnit.id,
 									unitName: sourceUnit.name,
 									duration: { start, ...(end != null ? { end } : {}) },
 								}
@@ -218,18 +253,42 @@ export function ReverseUnitRelationsSection(
 				</div>
 
 				{localRelations.length > 0 ? (
-					<Table aria-label={messages.title} className="[--gutter:0] sm:[--gutter:0]">
+					<Table
+						aria-label={messages.title}
+						className="[--gutter:0] sm:[--gutter:0]"
+						onSortChange={table.onSortChange}
+						sortDescriptor={table.sortDescriptor}
+					>
 						<TableHeader>
-							<TableColumn isRowHeader={true}>{messages.memberLabel}</TableColumn>
-							{hasStatusChoice ? <TableColumn>{t("Type")}</TableColumn> : null}
-							<TableColumn>{t("From")}</TableColumn>
-							<TableColumn>{t("Until")}</TableColumn>
-							<TableColumn />
+							<TableColumn
+								allowsSorting={true}
+								className="max-inline-80"
+								id="unit"
+								isRowHeader={true}
+							>
+								{messages.memberLabel}
+							</TableColumn>
+							{hasStatusChoice ? (
+								<TableColumn allowsSorting={true} id="type">
+									{t("Type")}
+								</TableColumn>
+							) : null}
+							<TableColumn allowsSorting={true} id="from">
+								{t("From")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="until">
+								{t("Until")}
+							</TableColumn>
+							<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
-						<TableBody items={localRelations}>
+						<TableBody items={table.pageItems}>
 							{(relation) => (
 								<TableRow id={relation.id}>
-									<TableCell>{relation.unitName}</TableCell>
+									<TableCell>
+										<div className="max-inline-80 truncate" title={relation.unitName}>
+											{relation.unitName}
+										</div>
+									</TableCell>
 									{hasStatusChoice ? (
 										<TableCell>
 											<Badge intent="slate">{formatStatus(relation.statusType)}</Badge>
@@ -243,54 +302,38 @@ export function ReverseUnitRelationsSection(
 											? format.dateTime(relation.duration.end, { dateStyle: "short" })
 											: t("present")}
 									</TableCell>
-									<TableCell className="text-end">
-										<div className="flex justify-end gap-1">
-											<Tooltip>
-												<Button
-													aria-label={t("Edit relation")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														openEditDialog(relation);
-													}}
-													size="sq-sm"
-												>
-													<PencilSquareIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Edit relation")}</TooltipContent>
-											</Tooltip>
+									<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+										<RowActionsMenu>
+											<RowActionsMenu.Action
+												icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													openEditDialog(relation);
+												}}
+											>
+												{t("Edit relation")}
+											</RowActionsMenu.Action>
 											{relation.duration.end == null && (
-												<Tooltip>
-													<Button
-														aria-label={t("End relation")}
-														className="block-7 sm:block-7"
-														intent="plain"
-														onPress={() => {
-															setItemToEnd({ id: relation.id });
-															setSelectedEndDate(null);
-														}}
-														size="sq-sm"
-													>
-														<ArchiveBoxXMarkIcon className="block-4 inline-4" />
-													</Button>
-													<TooltipContent inverse={true}>{t("End relation")}</TooltipContent>
-												</Tooltip>
-											)}
-											<Tooltip>
-												<Button
-													aria-label={t("Delete relation")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														setItemToDelete({ id: relation.id });
+												<RowActionsMenu.Action
+													icon={<ArchiveBoxXMarkIcon className="me-2 block-4 inline-4" />}
+													onAction={() => {
+														setItemToEnd({ id: relation.id });
+														setSelectedEndDate(null);
 													}}
-													size="sq-sm"
 												>
-													<TrashIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Delete relation")}</TooltipContent>
-											</Tooltip>
-										</div>
+													{t("End relation")}
+												</RowActionsMenu.Action>
+											)}
+											<RowActionsMenu.Separator />
+											<RowActionsMenu.Action
+												danger={true}
+												icon={<TrashIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													setItemToDelete({ id: relation.id });
+												}}
+											>
+												{t("Delete relation")}
+											</RowActionsMenu.Action>
+										</RowActionsMenu>
 									</TableCell>
 								</TableRow>
 							)}
@@ -298,6 +341,15 @@ export function ReverseUnitRelationsSection(
 					</Table>
 				) : (
 					<p className="text-sm text-neutral-500">{messages.empty}</p>
+				)}
+
+				{table.totalPages > 1 && (
+					<Paginate
+						page={table.page}
+						setPage={table.setPage}
+						total={table.totalPages}
+						totalItems={table.total}
+					/>
 				)}
 
 				{statusOptions.length > 0 && (
@@ -333,9 +385,16 @@ export function ReverseUnitRelationsSection(
 								<AsyncSelect
 									aria-label={messages.memberLabel}
 									emptyMessage={t("No related units found.")}
-									fetchPage={(params) => fetchSourceUnitOptionsPage(sourceUnitType, params)}
+									fetchPage={(params) =>
+										fetchSourceUnitOptionsPage(
+											sourceUnitType,
+											params,
+											sourceUnitLocatedInCountryDocumentId,
+										)
+									}
 									initialItems={[]}
 									initialTotal={0}
+									isRequired={true}
 									label={messages.memberLabel}
 									loadOnMount={true}
 									onSelect={(item) => {
@@ -344,7 +403,7 @@ export function ReverseUnitRelationsSection(
 									placeholder={t("No related unit selected")}
 									selectedItem={selectedUnitItem}
 								/>
-								<input name="unitId" type="hidden" value={selectedUnitItem?.id ?? ""} />
+								<input name="unitDocumentId" type="hidden" value={selectedUnitItem?.id ?? ""} />
 
 								<DatePicker granularity="day" isRequired={true} name="duration.start">
 									<Label>{t("Start date")}</Label>
@@ -358,7 +417,7 @@ export function ReverseUnitRelationsSection(
 									<FieldError />
 								</DatePicker>
 
-								<input name="relatedUnitId" type="hidden" value={relatedUnitId} />
+								<input name="relatedUnitDocumentId" type="hidden" value={relatedUnitDocumentId} />
 							</FormSection>
 
 							<Button className="self-start" isPending={isPending} type="submit">
@@ -448,7 +507,7 @@ export function ReverseUnitRelationsSection(
 				<Form action={editFormAction} state={editState}>
 					<ModalBody className="flex flex-col gap-y-4">
 						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
-						<input name="relatedUnitId" type="hidden" value={relatedUnitId} />
+						<input name="relatedUnitDocumentId" type="hidden" value={relatedUnitDocumentId} />
 						{hasStatusChoice ? (
 							<Select
 								isRequired={true}
@@ -473,9 +532,16 @@ export function ReverseUnitRelationsSection(
 						<AsyncSelect
 							aria-label={messages.memberLabel}
 							emptyMessage={t("No related units found.")}
-							fetchPage={(params) => fetchSourceUnitOptionsPage(sourceUnitType, params)}
+							fetchPage={(params) =>
+								fetchSourceUnitOptionsPage(
+									sourceUnitType,
+									params,
+									sourceUnitLocatedInCountryDocumentId,
+								)
+							}
 							initialItems={[]}
 							initialTotal={0}
+							isRequired={true}
 							label={messages.memberLabel}
 							loadOnMount={true}
 							onSelect={(item) => {
@@ -484,7 +550,7 @@ export function ReverseUnitRelationsSection(
 							placeholder={t("No related unit selected")}
 							selectedItem={editUnitItem}
 						/>
-						<input name="unitId" type="hidden" value={editUnitItem?.id ?? ""} />
+						<input name="unitDocumentId" type="hidden" value={editUnitItem?.id ?? ""} />
 						<DatePicker
 							granularity="day"
 							isRequired={true}

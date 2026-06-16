@@ -25,36 +25,39 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
-import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
+import type { AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
 import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
 import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
 import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
 import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
+import type { ContributionPersonOption } from "@/lib/data/contributions";
 import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
 import { dateToCalendarDate } from "@/lib/date";
 
 interface PersonRelationsSectionProps {
-	unitId: string;
+	organisationalUnitDocumentId: string;
 	relations: Array<PersonRelation & { lifecycleStatus?: "changed" | "new" }>;
 	roleOptions: Array<PersonRelationRoleOption>;
-	initialPersonItems: Array<AsyncOption>;
+	initialPersonItems: Array<ContributionPersonOption>;
 	initialPersonTotal: number;
 }
 
 async function fetchPersonOptionsPage(
 	params: Readonly<AsyncOptionsFetchPageParams>,
-): Promise<{ items: Array<AsyncOption>; total: number }> {
+): Promise<{ items: Array<ContributionPersonOption>; total: number }> {
 	const searchParams = new URLSearchParams({
 		limit: String(params.limit),
 		offset: String(params.offset),
@@ -73,7 +76,7 @@ async function fetchPersonOptionsPage(
 		throw new Error("Failed to load persons.");
 	}
 
-	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+	return (await response.json()) as { items: Array<ContributionPersonOption>; total: number };
 }
 
 function formatRoleType(type: string): string {
@@ -92,7 +95,13 @@ function formatLifecycleStatus(
 }
 
 export function PersonRelationsSection(props: Readonly<PersonRelationsSectionProps>): ReactNode {
-	const { unitId, relations, roleOptions, initialPersonItems, initialPersonTotal } = props;
+	const {
+		organisationalUnitDocumentId,
+		relations,
+		roleOptions,
+		initialPersonItems,
+		initialPersonTotal,
+	} = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -103,13 +112,24 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 
 	const [selectedRoleTypeId, setSelectedRoleTypeId] = useState<string | null>(null);
-	const [selectedPerson, setSelectedPerson] = useState<AsyncOption | null>(null);
+	const [selectedPerson, setSelectedPerson] = useState<ContributionPersonOption | null>(null);
 
 	const [itemToEdit, setItemToEdit] = useState<PersonRelation | null>(null);
 	const [editRoleTypeId, setEditRoleTypeId] = useState<string | null>(null);
-	const [editPerson, setEditPerson] = useState<AsyncOption | null>(null);
+	const [editPerson, setEditPerson] = useState<ContributionPersonOption | null>(null);
 	const [editStartDate, setEditStartDate] = useState<CalendarDate | null>(null);
 	const [editEndDate, setEditEndDate] = useState<CalendarDate | null>(null);
+
+	const table = useClientTable({
+		items: localRelations,
+		sortAccessors: {
+			from: (relation) => relation.duration.start,
+			person: (relation) => relation.personSortName,
+			role: (relation) => relation.roleType,
+			type: (relation) => relation.targetUnitType,
+			until: (relation) => relation.duration.end,
+		},
+	});
 
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
@@ -146,8 +166,9 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 						...prev,
 						{
 							id: data.id,
-							personId: person.id,
+							personDocumentId: person.id,
 							personName: person.name,
+							personSortName: person.sortName,
 							personSlug: data.personSlug,
 							roleTypeId: option.roleTypeId,
 							roleType: option.roleType as PersonRelation["roleType"],
@@ -170,7 +191,11 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 		setEditState(createActionStateInitial());
 		setItemToEdit(relation);
 		setEditRoleTypeId(relation.roleTypeId);
-		setEditPerson({ id: relation.personId, name: relation.personName });
+		setEditPerson({
+			id: relation.personDocumentId,
+			name: relation.personName,
+			sortName: relation.personSortName,
+		});
 		setEditStartDate(dateToCalendarDate(relation.duration.start));
 		setEditEndDate(dateToCalendarDate(relation.duration.end));
 	}
@@ -192,8 +217,9 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 						relation.id === itemToEdit.id
 							? {
 									...relation,
-									personId: person.id,
+									personDocumentId: person.id,
 									personName: person.name,
+									personSortName: person.sortName,
 									roleTypeId: option.roleTypeId,
 									roleType: option.roleType as PersonRelation["roleType"],
 									duration: { start, ...(end != null ? { end } : {}) },
@@ -214,19 +240,43 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 				</div>
 
 				{localRelations.length > 0 ? (
-					<Table aria-label="people" className="[--gutter:0] sm:[--gutter:0]">
+					<Table
+						aria-label="people"
+						className="[--gutter:0] sm:[--gutter:0]"
+						onSortChange={table.onSortChange}
+						sortDescriptor={table.sortDescriptor}
+					>
 						<TableHeader>
-							<TableColumn isRowHeader={true}>{t("Person")}</TableColumn>
-							<TableColumn>{t("Type")}</TableColumn>
-							<TableColumn>{t("Role")}</TableColumn>
-							<TableColumn>{t("From")}</TableColumn>
-							<TableColumn>{t("Until")}</TableColumn>
-							<TableColumn />
+							<TableColumn
+								allowsSorting={true}
+								className="max-inline-80"
+								id="person"
+								isRowHeader={true}
+							>
+								{t("Person")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="type">
+								{t("Type")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="role">
+								{t("Role")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="from">
+								{t("From")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="until">
+								{t("Until")}
+							</TableColumn>
+							<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
-						<TableBody items={localRelations}>
+						<TableBody items={table.pageItems}>
 							{(relation) => (
 								<TableRow id={relation.id}>
-									<TableCell>{relation.personName}</TableCell>
+									<TableCell>
+										<div className="max-inline-80 truncate" title={relation.personName}>
+											{relation.personName}
+										</div>
+									</TableCell>
 									<TableCell>
 										<Badge intent="slate">{formatUnitType(relation.targetUnitType)}</Badge>
 									</TableCell>
@@ -248,56 +298,38 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 											? format.dateTime(relation.duration.end, { dateStyle: "short" })
 											: t("present")}
 									</TableCell>
-									<TableCell className="text-end">
-										<div className="flex justify-end gap-1">
-											<Tooltip>
-												<Button
-													aria-label={t("Edit person relation")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														openEditDialog(relation);
-													}}
-													size="sq-sm"
-												>
-													<PencilSquareIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Edit person relation")}</TooltipContent>
-											</Tooltip>
+									<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+										<RowActionsMenu>
+											<RowActionsMenu.Action
+												icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													openEditDialog(relation);
+												}}
+											>
+												{t("Edit person relation")}
+											</RowActionsMenu.Action>
 											{relation.duration.end == null && (
-												<Tooltip>
-													<Button
-														aria-label={t("End person relation")}
-														className="block-7 sm:block-7"
-														intent="plain"
-														onPress={() => {
-															setItemToEnd({ id: relation.id });
-															setSelectedEndDate(null);
-														}}
-														size="sq-sm"
-													>
-														<ArchiveBoxXMarkIcon className="block-4 inline-4" />
-													</Button>
-													<TooltipContent inverse={true}>{t("End person relation")}</TooltipContent>
-												</Tooltip>
-											)}
-											<Tooltip>
-												<Button
-													aria-label={t("Delete person relation")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														setItemToDelete({ id: relation.id });
+												<RowActionsMenu.Action
+													icon={<ArchiveBoxXMarkIcon className="me-2 block-4 inline-4" />}
+													onAction={() => {
+														setItemToEnd({ id: relation.id });
+														setSelectedEndDate(null);
 													}}
-													size="sq-sm"
 												>
-													<TrashIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>
-													{t("Delete person relation")}
-												</TooltipContent>
-											</Tooltip>
-										</div>
+													{t("End person relation")}
+												</RowActionsMenu.Action>
+											)}
+											<RowActionsMenu.Separator />
+											<RowActionsMenu.Action
+												danger={true}
+												icon={<TrashIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													setItemToDelete({ id: relation.id });
+												}}
+											>
+												{t("Delete person relation")}
+											</RowActionsMenu.Action>
+										</RowActionsMenu>
 									</TableCell>
 								</TableRow>
 							)}
@@ -305,6 +337,15 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 					</Table>
 				) : (
 					<p className="text-sm text-neutral-500">{t("No people assigned.")}</p>
+				)}
+
+				{table.totalPages > 1 && (
+					<Paginate
+						page={table.page}
+						setPage={table.setPage}
+						total={table.totalPages}
+						totalItems={table.total}
+					/>
 				)}
 
 				{roleOptions.length > 0 && (
@@ -339,19 +380,20 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 									aria-label={t("Person")}
 									emptyMessage={t("No persons found.")}
 									errorMessage={
-										typeof validationErrors?.personId === "string"
-											? validationErrors.personId
+										typeof validationErrors?.personDocumentId === "string"
+											? validationErrors.personDocumentId
 											: undefined
 									}
 									fetchPage={fetchPersonOptionsPage}
 									initialItems={initialPersonItems}
 									initialTotal={initialPersonTotal}
+									isRequired={true}
 									label={t("Person")}
 									onSelect={setSelectedPerson}
 									placeholder={t("No person selected")}
 									selectedItem={selectedPerson}
 								/>
-								<input name="personId" type="hidden" value={selectedPerson?.id ?? ""} />
+								<input name="personDocumentId" type="hidden" value={selectedPerson?.id ?? ""} />
 
 								<DatePicker granularity="day" isRequired={true} name="duration.start">
 									<Label>{t("Start date")}</Label>
@@ -365,7 +407,11 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 									<FieldError />
 								</DatePicker>
 
-								<input name="organisationalUnitId" type="hidden" value={unitId} />
+								<input
+									name="organisationalUnitDocumentId"
+									type="hidden"
+									value={organisationalUnitDocumentId}
+								/>
 							</FormSection>
 
 							<Button className="self-start" isPending={isPending} type="submit">
@@ -455,7 +501,11 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 				<Form action={editFormAction} state={editState}>
 					<ModalBody className="flex flex-col gap-y-4">
 						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
-						<input name="organisationalUnitId" type="hidden" value={unitId} />
+						<input
+							name="organisationalUnitDocumentId"
+							type="hidden"
+							value={organisationalUnitDocumentId}
+						/>
 						<Select
 							isRequired={true}
 							onChange={(key) => {
@@ -479,19 +529,20 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							aria-label={t("Person")}
 							emptyMessage={t("No persons found.")}
 							errorMessage={
-								typeof editValidationErrors?.personId === "string"
-									? editValidationErrors.personId
+								typeof editValidationErrors?.personDocumentId === "string"
+									? editValidationErrors.personDocumentId
 									: undefined
 							}
 							fetchPage={fetchPersonOptionsPage}
 							initialItems={initialPersonItems}
 							initialTotal={initialPersonTotal}
+							isRequired={true}
 							label={t("Person")}
 							onSelect={setEditPerson}
 							placeholder={t("No person selected")}
 							selectedItem={editPerson}
 						/>
-						<input name="personId" type="hidden" value={editPerson?.id ?? ""} />
+						<input name="personDocumentId" type="hidden" value={editPerson?.id ?? ""} />
 						<DatePicker
 							granularity="day"
 							isRequired={true}

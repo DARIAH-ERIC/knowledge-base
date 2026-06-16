@@ -120,7 +120,7 @@ export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactN
 						name="description"
 					>
 						<Label>{t("Description")}</Label>
-						<TextArea rows={3} />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>
@@ -158,7 +158,7 @@ export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactN
 					{selectedImage != null && (
 						<img
 							alt={t("Selected OG image")}
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
 							src={selectedImage.url}
 						/>
 					)}

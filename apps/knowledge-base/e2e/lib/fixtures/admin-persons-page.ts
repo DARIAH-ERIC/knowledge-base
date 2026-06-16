@@ -54,6 +54,24 @@ export class AdminPersonsPage {
 		await this.page.keyboard.type(text);
 	}
 
+	async insertImageInBiography(assetLabel: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Insert image" }).click();
+		await this.page.waitForSelector('[role="dialog"]');
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		const asset = dialog.getByRole("gridcell", { name: assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
+		await expect(this.page.getByLabel("Image block", { exact: true })).toBeVisible();
+	}
+
+	async typeBiographyAfterImage(text: string): Promise<void> {
+		const editor = this.page.getByRole("textbox", { name: "Biography" });
+		await editor.press("ArrowRight");
+		await this.page.keyboard.type(text);
+	}
+
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
 		await this.page.waitForSelector('[role="dialog"]');
@@ -62,6 +80,10 @@ export class AdminPersonsPage {
 		await expect(asset).toHaveCount(1);
 		await asset.click();
 		await dialog.getByRole("button", { name: "Select" }).click();
+	}
+
+	async removeImage(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove image" }).click();
 	}
 
 	async submitForm(): Promise<void> {
@@ -157,11 +179,16 @@ export class AdminPersonsPage {
 		});
 	}
 
-	async clickEndContribution(): Promise<void> {
+	async openFirstContributionsRowAction(action: string): Promise<void> {
 		await this.contributionsTable()
-			.getByRole("button", { name: "End contribution" })
+			.getByRole("button", { name: "Open actions menu" })
 			.first()
 			.click();
+		await this.page.getByRole("menuitem", { name: action }).click();
+	}
+
+	async clickEndContribution(): Promise<void> {
+		await this.openFirstContributionsRowAction("End contribution");
 	}
 
 	async fillEndContributionDate(year: number, month: number, day: number): Promise<void> {
@@ -183,10 +210,7 @@ export class AdminPersonsPage {
 	}
 
 	async clickEditContribution(): Promise<void> {
-		await this.contributionsTable()
-			.getByRole("button", { name: "Edit contribution" })
-			.first()
-			.click();
+		await this.openFirstContributionsRowAction("Edit contribution");
 		await this.page
 			.getByRole("dialog", { name: "Edit contribution" })
 			.waitFor({ state: "visible" });
@@ -215,10 +239,7 @@ export class AdminPersonsPage {
 	}
 
 	async clickDeleteContribution(): Promise<void> {
-		await this.contributionsTable()
-			.getByRole("button", { name: "Delete contribution" })
-			.first()
-			.click();
+		await this.openFirstContributionsRowAction("Delete contribution");
 		await this.page
 			.getByRole("alertdialog", { name: "Delete contribution" })
 			.waitFor({ state: "visible" });

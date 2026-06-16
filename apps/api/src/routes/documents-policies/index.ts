@@ -14,6 +14,7 @@ import {
 	GetDocumentOrPolicyBySlug,
 	GetDocumentOrPolicySlugs,
 	GetDocumentsPolicies,
+	GetDocumentsPoliciesTree,
 } from "@/routes/documents-policies/schemas";
 import {
 	getDocumentOrPolicyById,
@@ -21,6 +22,7 @@ import {
 	getDocumentOrPolicyDocument,
 	getDocumentOrPolicySlugs,
 	getDocumentsPolicies,
+	getDocumentsPoliciesTree,
 } from "@/routes/documents-policies/service";
 import { env } from "~/config/env.config";
 
@@ -92,6 +94,51 @@ export const router = createRouter()
 			};
 
 			const payload = await validate(GetDocumentsPolicies.ResponseSchema, data, 500);
+
+			return c.json(payload);
+		},
+	)
+
+	/** GET /api/documents-policies/tree */
+	.get(
+		"/tree",
+		describeRoute({
+			tags: ["documents-policies"],
+			summary: "Get ordered documents and policies tree",
+			description: "Retrieve documents and policies grouped and ordered for display",
+			operationId: "getDocumentsPoliciesTree",
+			responses: {
+				200: {
+					description: "Success response",
+					content: {
+						"application/json": {
+							schema: resolver(GetDocumentsPoliciesTree.ResponseSchema),
+						},
+					},
+				},
+			},
+		}),
+		async (c) => {
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const result = await getDocumentsPoliciesTree(db);
+			const data = {
+				data: result.data.map((node) => {
+					if (node.type === "item") {
+						return { ...node, document: { url: documentUrl(node.id) } };
+					}
+
+					return {
+						...node,
+						items: node.items.map((item) => {
+							return { ...item, document: { url: documentUrl(item.id) } };
+						}),
+					};
+				}),
+			};
+
+			const payload = await validate(GetDocumentsPoliciesTree.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -186,6 +233,7 @@ export const router = createRouter()
 				200: {
 					description: "Binary file stream",
 					content: {
+						"application/pdf": {},
 						"application/octet-stream": {},
 					},
 				},
@@ -207,6 +255,7 @@ export const router = createRouter()
 
 			const { key } = item.document;
 			const filename = getDownloadFilename(item.document);
+			const disposition = item.document.mimeType === "application/pdf" ? "inline" : "attachment";
 
 			const storage = c.get("storage");
 			assert(storage, "Storage must be provided via middleware.");
@@ -215,8 +264,8 @@ export const router = createRouter()
 			const webStream = Readable.toWeb(nodeStream) as ReadableStream;
 
 			return c.body(webStream, 200, {
-				"Content-Disposition": `attachment; filename="${filename}"`,
-				"Content-Type": "application/octet-stream",
+				"Content-Disposition": `${disposition}; filename="${filename}"`,
+				"Content-Type": item.document.mimeType,
 			});
 		},
 	)

@@ -324,6 +324,7 @@ export class DatabaseService {
 		id: string;
 		imageId: string | null;
 		name: string;
+		ror: string | null;
 		sshocMarketplaceActorId: number | null;
 		summary: string | null;
 	} | null> {
@@ -334,6 +335,7 @@ export class DatabaseService {
 				id: schema.organisationalUnits.id,
 				imageId: schema.organisationalUnits.imageId,
 				name: schema.organisationalUnits.name,
+				ror: schema.organisationalUnits.ror,
 				sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
 				summary: schema.organisationalUnits.summary,
 			})
@@ -616,7 +618,7 @@ export class DatabaseService {
 		documentId: string;
 		email: string | null;
 		id: string;
-		imageId: string;
+		imageId: string | null;
 		name: string;
 		orcid: string | null;
 		sortName: string;
@@ -664,6 +666,18 @@ export class DatabaseService {
 			.limit(1);
 
 		return row?.content ?? null;
+	}
+
+	async getPersonBiographyContentBlocksByName(
+		name: string,
+	): Promise<Array<{ type: string; position: number; content: unknown; imageId: string | null }>> {
+		const person = await this.getPersonByName(name);
+
+		if (person == null) {
+			return [];
+		}
+
+		return this.getEntityVersionFieldContentBlocks(person.id, "biography");
 	}
 
 	async getSocialMediaByName(name: string): Promise<{
@@ -742,7 +756,7 @@ export class DatabaseService {
 		partners: Array<{
 			duration: { start?: Date; end?: Date } | null;
 			roleId: string;
-			unitId: string;
+			unitDocumentId: string;
 		}>;
 		socialMediaIds: Array<string>;
 	} | null> {
@@ -756,21 +770,9 @@ export class DatabaseService {
 			.select({
 				duration: schema.projectsToOrganisationalUnits.duration,
 				roleId: schema.projectsToOrganisationalUnits.roleId,
-				// resolve the unit document back to its published version id (what the picker submitted).
-				unitId: schema.organisationalUnits.id,
+				unitDocumentId: schema.projectsToOrganisationalUnits.unitDocumentId,
 			})
 			.from(schema.projectsToOrganisationalUnits)
-			.innerJoin(
-				schema.documentLifecycle,
-				eq(
-					schema.documentLifecycle.documentId,
-					schema.projectsToOrganisationalUnits.unitDocumentId,
-				),
-			)
-			.innerJoin(
-				schema.organisationalUnits,
-				eq(schema.organisationalUnits.id, schema.documentLifecycle.publishedId),
-			)
 			.where(
 				sql`${schema.projectsToOrganisationalUnits.projectDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${project.id})`,
 			);
@@ -813,6 +815,56 @@ export class DatabaseService {
 		return row?.content ?? null;
 	}
 
+	async getProjectDescriptionContentBlocksByName(
+		name: string,
+	): Promise<Array<{ type: string; position: number; content: unknown; imageId: string | null }>> {
+		const project = await this.getProjectByName(name);
+
+		if (project == null) {
+			return [];
+		}
+
+		return this.getEntityVersionFieldContentBlocks(project.id, "description");
+	}
+
+	private async getEntityVersionFieldContentBlocks(
+		entityVersionId: string,
+		fieldName: string,
+	): Promise<Array<{ type: string; position: number; content: unknown; imageId: string | null }>> {
+		return this.db
+			.select({
+				content: sql<unknown>`${schema.richTextContentBlocks.content}`,
+				imageId: schema.imageContentBlocks.imageId,
+				position: schema.contentBlocks.position,
+				type: schema.contentBlockTypes.type,
+			})
+			.from(schema.contentBlocks)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.innerJoin(
+				schema.contentBlockTypes,
+				eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+			)
+			.leftJoin(
+				schema.richTextContentBlocks,
+				eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(
+				schema.imageContentBlocks,
+				eq(schema.imageContentBlocks.id, schema.contentBlocks.id),
+			)
+			.where(
+				and(
+					eq(schema.fields.entityVersionId, entityVersionId),
+					eq(schema.entityTypesFieldsNames.fieldName, fieldName),
+				),
+			)
+			.orderBy(schema.contentBlocks.position);
+	}
+
 	async getServiceByName(name: string): Promise<{
 		comment: string | null;
 		dariahBranding: boolean | null;
@@ -820,9 +872,9 @@ export class DatabaseService {
 		metadata: unknown;
 		monitoring: boolean | null;
 		name: string;
-		ownerUnitIds: Array<string>;
+		ownerUnitDocumentIds: Array<string>;
 		privateSupplier: boolean | null;
-		providerUnitIds: Array<string>;
+		providerUnitDocumentIds: Array<string>;
 		statusId: string;
 	} | null> {
 		const [row] = await this.db
@@ -844,15 +896,10 @@ export class DatabaseService {
 			return null;
 		}
 
-		// service↔unit relations are document-level; resolve the unit's document id to its published
-		// version id to match the picker / form id space.
 		const unitRoleRows = await this.db
 			.select({
-				organisationalUnitId: sql<string | null>`(
-					SELECT ${schema.documentLifecycle.publishedId}
-					FROM ${schema.documentLifecycle}
-					WHERE ${schema.documentLifecycle.documentId} = ${schema.servicesToOrganisationalUnits.organisationalUnitDocumentId}
-				)`,
+				organisationalUnitDocumentId:
+					schema.servicesToOrganisationalUnits.organisationalUnitDocumentId,
 				role: schema.organisationalUnitServiceRoles.role,
 			})
 			.from(schema.servicesToOrganisationalUnits)
@@ -862,22 +909,22 @@ export class DatabaseService {
 			)
 			.where(eq(schema.servicesToOrganisationalUnits.serviceId, row.id));
 
-		const ownerUnitIds = unitRoleRows
+		const ownerUnitDocumentIds = unitRoleRows
 			.filter((unitRole) => unitRole.role === "service_owner")
-			.map((unitRole) => unitRole.organisationalUnitId)
-			.filter((unitId): unitId is string => unitId != null);
-		const providerUnitIds = unitRoleRows
+			.map((unitRole) => unitRole.organisationalUnitDocumentId);
+		const providerUnitDocumentIds = unitRoleRows
 			.filter((unitRole) => unitRole.role === "service_provider")
-			.map((unitRole) => unitRole.organisationalUnitId)
-			.filter((unitId): unitId is string => unitId != null);
+			.map((unitRole) => unitRole.organisationalUnitDocumentId);
 
-		return { ...row, ownerUnitIds, providerUnitIds };
+		return { ...row, ownerUnitDocumentIds, providerUnitDocumentIds };
 	}
 
-	async getOrganisationalUnitOptions(limit = 4): Promise<Array<{ id: string; name: string }>> {
+	async getOrganisationalUnitOptions(
+		limit = 4,
+	): Promise<Array<{ documentId: string; name: string }>> {
 		return this.db
 			.select({
-				id: schema.organisationalUnits.id,
+				documentId: schema.entityVersions.entityId,
 				name: schema.organisationalUnits.name,
 			})
 			.from(schema.organisationalUnits)
@@ -2762,11 +2809,45 @@ export class DatabaseService {
 		return group;
 	}
 
+	async getDocumentPolicyGroupsByLabelPrefix(
+		prefix: string,
+	): Promise<Array<{ id: string; label: string; position: number }>> {
+		return this.db
+			.select({
+				id: schema.documentPolicyGroups.id,
+				label: schema.documentPolicyGroups.label,
+				position: schema.documentPolicyGroups.position,
+			})
+			.from(schema.documentPolicyGroups)
+			.where(sql`${schema.documentPolicyGroups.label} LIKE ${`${prefix}%`}`)
+			.orderBy(schema.documentPolicyGroups.position, schema.documentPolicyGroups.label);
+	}
+
+	async cleanupWorkerDocumentPolicyGroups(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+		const groups = await this.getDocumentPolicyGroupsByLabelPrefix(prefix);
+		const groupIds = groups.map((group) => group.id);
+
+		if (groupIds.length === 0) {
+			return;
+		}
+
+		await this.db.transaction(async (tx) => {
+			await tx
+				.update(schema.documentsPolicies)
+				.set({ groupId: null })
+				.where(inArray(schema.documentsPolicies.groupId, groupIds));
+			await tx
+				.delete(schema.documentPolicyGroups)
+				.where(inArray(schema.documentPolicyGroups.id, groupIds));
+		});
+	}
+
 	async getDocumentOrPolicyByTitle(title: string): Promise<{
 		documentId: string;
 		groupId: string | null;
 		id: string;
-		summary: string;
+		summary: string | null;
 		url: string | null;
 	} | null> {
 		const [row] = await this.db

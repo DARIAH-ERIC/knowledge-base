@@ -1,6 +1,8 @@
 import { ProjectInsertSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+import { ContentBlockInputSchema } from "@/lib/content-block-input";
+
 export const CreateProjectActionInputSchema = v.object({
 	...v.pick(ProjectInsertSchema, ["acronym", "call", "name", "scopeId", "summary", "topic"])
 		.entries,
@@ -10,5 +12,8 @@ export const CreateProjectActionInputSchema = v.object({
 		end: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),
 	}),
 	imageKey: v.optional(v.pipe(v.string(), v.nonEmpty())),
-	description: v.optional(v.pipe(v.string(), v.nonEmpty())),
+	descriptionContentBlocks: v.optional(
+		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
+		[],
+	),
 });

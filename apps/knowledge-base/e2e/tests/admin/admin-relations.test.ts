@@ -44,10 +44,55 @@ async function saveRelationDialog(page: Page): Promise<void> {
 	await dialog.waitFor({ state: "hidden" });
 }
 
+async function saveAddRelationDialog(page: Page): Promise<void> {
+	const dialog = page.getByRole("dialog", { name: "Add relation" });
+	await waitForActionSuccess({
+		page,
+		trigger: async () => {
+			await dialog.getByRole("button", { name: "Save" }).click();
+		},
+	});
+	await dialog.waitFor({ state: "hidden" });
+}
+
 async function confirmDeleteDialog(page: Page, name: RegExp): Promise<void> {
 	const dialog = page.getByRole("dialog", { name });
 	await dialog.getByRole("button", { name: "Delete" }).click();
 	await dialog.waitFor({ state: "hidden" });
+}
+
+async function selectFirstOptionFromSelect(scope: Locator, label: string): Promise<void> {
+	await scope.getByRole("button", { name: label }).click();
+	await scope.page().getByRole("option").first().waitFor({ state: "visible" });
+	await scope.page().getByRole("option").first().click();
+}
+
+async function selectOptionFromSelect(
+	scope: Locator,
+	label: string,
+	optionName: string,
+): Promise<void> {
+	await scope.getByRole("button", { name: label }).click();
+	await scope.page().getByRole("option", { name: optionName, exact: true }).click();
+}
+
+async function selectAsyncOption(
+	page: Page,
+	scope: Locator,
+	triggerName: string,
+	searchText?: string,
+): Promise<void> {
+	await scope.getByRole("button", { name: triggerName }).click();
+
+	if (searchText != null) {
+		const searchInput = page.getByRole("dialog", { name: triggerName }).getByRole("searchbox");
+		await searchInput.fill(searchText);
+		await searchInput.press("Enter");
+	}
+
+	const option = page.getByRole("option").first();
+	await option.waitFor({ state: "visible" });
+	await option.click();
 }
 
 test.describe("admin relation management", () => {
@@ -110,6 +155,42 @@ test.describe("admin relation management", () => {
 		expect(relations).toHaveLength(0);
 	});
 
+	test("should create a person relation from the standalone list", async ({
+		page,
+		createAdminPersonsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const personsPage = createAdminPersonsPage(workerIndex);
+		const name = `${personsPage.workerPrefix} Person Relation Create ${randomUUID()}`;
+
+		await personsPage.gotoCreate();
+		await personsPage.fillName(name);
+		await personsPage.fillSortName(name);
+		await personsPage.submitForm();
+		await personsPage.searchByName(name);
+		await personsPage.gotoDetailsFromList(name);
+		await personsPage.publishItem();
+
+		const person = await db.getPersonByName(name);
+		expect(person).not.toBeNull();
+
+		const listPath = "/en/dashboard/administrator/person-relations";
+		await page.goto(listPath);
+		await page.getByRole("button", { name: "Add relation" }).click();
+
+		const dialog = page.getByRole("dialog", { name: "Add relation" });
+		await selectAsyncOption(page, dialog, "No person selected", name);
+		await selectFirstOptionFromSelect(dialog, "Role");
+		await selectAsyncOption(page, dialog, "No organisation selected");
+		await fillDatePicker(page, dialog, "Start date", 2025, 1, 1);
+		await saveAddRelationDialog(page);
+
+		const relations = await db.getContributionsByPersonVersionId(person!.id);
+		expect(relations).toHaveLength(1);
+		expect(relations[0]!.duration.start).toStrictEqual(new Date("2025-01-01T00:00:00.000Z"));
+	});
+
 	test("should edit and delete an institution relation from the standalone list", async ({
 		page,
 		createAdminInstitutionsPage,
@@ -159,6 +240,191 @@ test.describe("admin relation management", () => {
 		expect(relations).toHaveLength(0);
 	});
 
+	test("should create an institution relation from the standalone list", async ({
+		page,
+		createAdminInstitutionsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const institutionsPage = createAdminInstitutionsPage(workerIndex);
+		const name = `${institutionsPage.workerPrefix} Institution Relation Create ${randomUUID()}`;
+
+		await institutionsPage.gotoCreate();
+		await institutionsPage.fillName(name);
+		await institutionsPage.fillDescription(
+			"Description for standalone institution relation create test.",
+		);
+		await institutionsPage.submitForm();
+		await institutionsPage.searchByName(name);
+		await institutionsPage.gotoDetailsFromList(name);
+		await institutionsPage.publishFromDetails();
+
+		const institution = await db.getInstitutionByName(name);
+		expect(institution).not.toBeNull();
+
+		const listPath = "/en/dashboard/administrator/institution-relations";
+		await page.goto(listPath);
+		await page.getByRole("button", { name: "Add relation" }).click();
+
+		const dialog = page.getByRole("dialog", { name: "Add relation" });
+		await selectAsyncOption(page, dialog, "No institution selected", name);
+		await selectOptionFromSelect(dialog, "Relation type", "is located in");
+		await selectAsyncOption(page, dialog, "No related unit selected");
+		await fillDatePicker(page, dialog, "Start date", 2025, 1, 1);
+		await saveAddRelationDialog(page);
+
+		const relations = await db.getUnitRelationsByUnitVersionId(institution!.id);
+		expect(relations).toHaveLength(1);
+		expect(relations[0]!.duration.start).toStrictEqual(new Date("2025-01-01T00:00:00.000Z"));
+	});
+
+	test("should allow the same person, role and body over non-overlapping periods", async ({
+		createAdminGovernanceBodiesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const governanceBodiesPage = createAdminGovernanceBodiesPage(workerIndex);
+		const name = `${governanceBodiesPage.workerPrefix} Person Re-appointment ${randomUUID()}`;
+
+		await governanceBodiesPage.gotoCreate();
+		await governanceBodiesPage.fillName(name);
+		await governanceBodiesPage.fillDescription("Description for person re-appointment test.");
+		await governanceBodiesPage.submitForm();
+
+		await governanceBodiesPage.gotoEditFromList(name);
+		await governanceBodiesPage.goToPeopleTab();
+
+		// First term: 2020-01-01 → 2020-12-31. `selectFirst*` is deterministic, so the second add below
+		// targets the same (person, role) triple.
+		await governanceBodiesPage.selectFirstPersonRole();
+		await governanceBodiesPage.selectFirstPerson();
+		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2020, 1, 1);
+		await governanceBodiesPage.fillPersonRelationDatePicker("End date", 2020, 12, 31);
+		await governanceBodiesPage.submitAddPerson();
+
+		const governanceBody = await db.getGovernanceBodyByName(name);
+		expect(await db.getPersonRelationsByUnitVersionId(governanceBody!.id)).toHaveLength(1);
+
+		// Second term: same person and role, non-overlapping from 2023-01-01. This used to be rejected by
+		// an over-strict (person, org, role) application check; only the duration-overlap exclusion
+		// constraint should gate it now, so the re-appointment is allowed.
+		await governanceBodiesPage.selectFirstPersonRole();
+		await governanceBodiesPage.selectFirstPerson();
+		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2023, 1, 1);
+		await governanceBodiesPage.submitAddPerson();
+
+		expect(await db.getPersonRelationsByUnitVersionId(governanceBody!.id)).toHaveLength(2);
+	});
+
+	test("should reject a person relation that overlaps an existing one", async ({
+		page,
+		createAdminGovernanceBodiesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const governanceBodiesPage = createAdminGovernanceBodiesPage(workerIndex);
+		const name = `${governanceBodiesPage.workerPrefix} Person Overlap ${randomUUID()}`;
+
+		await governanceBodiesPage.gotoCreate();
+		await governanceBodiesPage.fillName(name);
+		await governanceBodiesPage.fillDescription("Description for person overlap test.");
+		await governanceBodiesPage.submitForm();
+
+		await governanceBodiesPage.gotoEditFromList(name);
+		await governanceBodiesPage.goToPeopleTab();
+
+		// Open-ended term from 2020-01-01.
+		await governanceBodiesPage.selectFirstPersonRole();
+		await governanceBodiesPage.selectFirstPerson();
+		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2020, 1, 1);
+		await governanceBodiesPage.submitAddPerson();
+
+		const governanceBody = await db.getGovernanceBodyByName(name);
+		expect(await db.getPersonRelationsByUnitVersionId(governanceBody!.id)).toHaveLength(1);
+
+		// Same person and role starting 2020-06-01 overlaps the open-ended term. The exclusion
+		// constraint rejects it and the action surfaces the message; the submit returns an error (still
+		// HTTP 200), so assert on the rendered alert rather than waiting for an action success.
+		await governanceBodiesPage.selectFirstPersonRole();
+		await governanceBodiesPage.selectFirstPerson();
+		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2020, 6, 1);
+		await page.getByRole("button", { name: "Add person" }).click();
+
+		await expect(page.getByText(/during an overlapping period/i)).toBeVisible();
+		expect(await db.getPersonRelationsByUnitVersionId(governanceBody!.id)).toHaveLength(1);
+	});
+
+	test("should allow the same unit relation over non-overlapping periods", async ({
+		createAdminInstitutionsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const institutionsPage = createAdminInstitutionsPage(workerIndex);
+		const name = `${institutionsPage.workerPrefix} Relation Re-add ${randomUUID()}`;
+
+		await institutionsPage.gotoCreate();
+		await institutionsPage.fillName(name);
+		await institutionsPage.fillDescription("Description for unit relation re-add test.");
+		await institutionsPage.submitForm();
+
+		await institutionsPage.gotoEditFromList(name);
+		await institutionsPage.goToRelationsTab();
+
+		// First period: 2020-01-01 → 2020-12-31, against the deterministic first relation type and unit.
+		await institutionsPage.selectFirstRelationType();
+		await institutionsPage.selectFirstRelatedUnit();
+		await institutionsPage.fillRelationDatePicker("Start date", 2020, 1, 1);
+		await institutionsPage.fillRelationDatePicker("End date", 2020, 12, 31);
+		await institutionsPage.submitAddRelation();
+
+		const institution = await db.getInstitutionByName(name);
+		expect(await db.getUnitRelationsByUnitVersionId(institution!.id)).toHaveLength(1);
+
+		// Same (unit, related unit, status) over a non-overlapping period from 2023-01-01 is allowed.
+		await institutionsPage.selectFirstRelationType();
+		await institutionsPage.selectFirstRelatedUnit();
+		await institutionsPage.fillRelationDatePicker("Start date", 2023, 1, 1);
+		await institutionsPage.submitAddRelation();
+
+		expect(await db.getUnitRelationsByUnitVersionId(institution!.id)).toHaveLength(2);
+	});
+
+	test("should reject a unit relation that overlaps an existing one", async ({
+		page,
+		createAdminInstitutionsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const institutionsPage = createAdminInstitutionsPage(workerIndex);
+		const name = `${institutionsPage.workerPrefix} Relation Overlap ${randomUUID()}`;
+
+		await institutionsPage.gotoCreate();
+		await institutionsPage.fillName(name);
+		await institutionsPage.fillDescription("Description for unit relation overlap test.");
+		await institutionsPage.submitForm();
+
+		await institutionsPage.gotoEditFromList(name);
+		await institutionsPage.goToRelationsTab();
+
+		// Open-ended relation from 2020-01-01.
+		await institutionsPage.selectFirstRelationType();
+		await institutionsPage.selectFirstRelatedUnit();
+		await institutionsPage.fillRelationDatePicker("Start date", 2020, 1, 1);
+		await institutionsPage.submitAddRelation();
+
+		const institution = await db.getInstitutionByName(name);
+		expect(await db.getUnitRelationsByUnitVersionId(institution!.id)).toHaveLength(1);
+
+		// Same triple starting 2020-06-01 overlaps; the exclusion constraint rejects it.
+		await institutionsPage.selectFirstRelationType();
+		await institutionsPage.selectFirstRelatedUnit();
+		await institutionsPage.fillRelationDatePicker("Start date", 2020, 6, 1);
+		await page.getByRole("button", { name: "Add relation" }).click();
+
+		await expect(page.getByText(/during an overlapping period/i)).toBeVisible();
+		expect(await db.getUnitRelationsByUnitVersionId(institution!.id)).toHaveLength(1);
+	});
+
 	test("should manage project partners from the project tab and standalone list", async ({
 		page,
 		createAdminProjectsPage,
@@ -199,7 +465,7 @@ test.describe("admin relation management", () => {
 					start: new Date("2024-03-01T00:00:00.000Z"),
 					end: new Date("2024-09-30T00:00:00.000Z"),
 				},
-				unitId: partnerUnit!.id,
+				unitDocumentId: partnerUnit!.documentId,
 			}),
 		);
 
@@ -285,12 +551,18 @@ test.describe("admin relation management", () => {
 		await governanceBodiesPage.fillRelationDatePicker("Start date", 2025, 1, 1);
 		await governanceBodiesPage.submitAddRelation();
 
+		await governanceBodiesPage
+			.relationsTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
 		await expect(
-			governanceBodiesPage.relationsTable().getByRole("button", { name: "Edit relation" }),
+			governanceBodiesPage.page.getByRole("menuitem", { name: "Edit relation" }),
 		).toBeVisible();
 		await expect(
-			governanceBodiesPage.relationsTable().getByRole("button", { name: "Delete relation" }),
+			governanceBodiesPage.page.getByRole("menuitem", { name: "Delete relation" }),
 		).toBeVisible();
+		await governanceBodiesPage.page.keyboard.press("Escape");
 
 		const governanceBody = await db.getGovernanceBodyByName(name);
 		await governanceBodiesPage.clickEditRelation();
@@ -329,12 +601,18 @@ test.describe("admin relation management", () => {
 		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2025, 1, 1);
 		await governanceBodiesPage.submitAddPerson();
 
+		await governanceBodiesPage
+			.peopleTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
 		await expect(
-			governanceBodiesPage.peopleTable().getByRole("button", { name: "Edit person relation" }),
+			governanceBodiesPage.page.getByRole("menuitem", { name: "Edit person relation" }),
 		).toBeVisible();
 		await expect(
-			governanceBodiesPage.peopleTable().getByRole("button", { name: "Delete person relation" }),
+			governanceBodiesPage.page.getByRole("menuitem", { name: "Delete person relation" }),
 		).toBeVisible();
+		await governanceBodiesPage.page.keyboard.press("Escape");
 
 		const governanceBody = await db.getGovernanceBodyByName(name);
 		await governanceBodiesPage.clickEditPersonRelation();
@@ -373,12 +651,18 @@ test.describe("admin relation management", () => {
 		await workingGroupsPage.fillPersonRelationDatePicker("Start date", 2025, 1, 1);
 		await workingGroupsPage.submitAddPerson();
 
+		await workingGroupsPage
+			.peopleTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
 		await expect(
-			workingGroupsPage.peopleTable().getByRole("button", { name: "Edit person relation" }),
+			workingGroupsPage.page.getByRole("menuitem", { name: "Edit person relation" }),
 		).toBeVisible();
 		await expect(
-			workingGroupsPage.peopleTable().getByRole("button", { name: "Delete person relation" }),
+			workingGroupsPage.page.getByRole("menuitem", { name: "Delete person relation" }),
 		).toBeVisible();
+		await workingGroupsPage.page.keyboard.press("Escape");
 
 		const workingGroup = await db.getWorkingGroupByName(name);
 		let relations = await db.getPersonRelationsByUnitVersionId(workingGroup!.id);
@@ -469,12 +753,18 @@ test.describe("admin relation management", () => {
 		await personsPage.fillContributionDatePicker("Start date", 2025, 1, 1);
 		await personsPage.submitAddContribution();
 
+		await personsPage
+			.contributionsTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
 		await expect(
-			personsPage.contributionsTable().getByRole("button", { name: "Edit contribution" }),
+			personsPage.page.getByRole("menuitem", { name: "Edit contribution" }),
 		).toBeVisible();
 		await expect(
-			personsPage.contributionsTable().getByRole("button", { name: "Delete contribution" }),
+			personsPage.page.getByRole("menuitem", { name: "Delete contribution" }),
 		).toBeVisible();
+		await personsPage.page.keyboard.press("Escape");
 
 		const person = await db.getPersonByName(name);
 		await personsPage.clickEditContribution();

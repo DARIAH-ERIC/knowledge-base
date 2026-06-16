@@ -7,7 +7,8 @@ import { forbidden } from "next/navigation";
 
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { and, asc, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { and, asc, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 import type { ListSortDirection } from "@/lib/server/list-search-params";
 
 interface GetReportingListParams {
@@ -133,7 +134,7 @@ export async function getCountryReportsForAdmin(
 							schema.entityVersions,
 							eq(schema.entityVersions.id, schema.organisationalUnits.id),
 						)
-						.where(ilike(schema.organisationalUnits.name, `%${query}%`)),
+						.where(unaccentIlike(schema.organisationalUnits.name, `%${query}%`)),
 				)
 			: undefined;
 	const primaryOrderBy =
@@ -256,7 +257,7 @@ export async function getWorkingGroupReportsForAdmin(
 							schema.entityVersions,
 							eq(schema.entityVersions.id, schema.organisationalUnits.id),
 						)
-						.where(ilike(schema.organisationalUnits.name, `%${query}%`)),
+						.where(unaccentIlike(schema.organisationalUnits.name, `%${query}%`)),
 				)
 			: undefined;
 	const primaryOrderBy =

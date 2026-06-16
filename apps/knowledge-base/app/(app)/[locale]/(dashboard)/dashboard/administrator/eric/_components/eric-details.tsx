@@ -6,11 +6,11 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import { RichTextRenderer } from "@dariah-eric/ui/rich-text-editor";
-import type { JSONContent } from "@tiptap/core";
-import { useExtracted, useFormatter } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
@@ -30,9 +30,9 @@ interface EricDetailsProps {
 	selectedVersion: "draft" | "published";
 	eric: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
-		description: JSONContent | null;
+		descriptionContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	selectedRelatedEntities: Array<{
@@ -72,7 +72,6 @@ export function EricDetails(props: Readonly<EricDetailsProps>): ReactNode {
 	} = props;
 
 	const t = useExtracted();
-	const format = useFormatter();
 
 	const slug = eric.entityVersion.entity.slug;
 
@@ -113,6 +112,9 @@ export function EricDetails(props: Readonly<EricDetailsProps>): ReactNode {
 				<DescriptionTerm>{t("Acronym")}</DescriptionTerm>
 				<DescriptionDetails>{eric.acronym}</DescriptionDetails>
 
+				<DescriptionTerm>{t("ROR")}</DescriptionTerm>
+				<DescriptionDetails>{eric.ror}</DescriptionDetails>
+
 				<DescriptionTerm>{t("SSHOC actor ID")}</DescriptionTerm>
 				<DescriptionDetails>{eric.sshocMarketplaceActorId}</DescriptionDetails>
 
@@ -124,7 +126,7 @@ export function EricDetails(props: Readonly<EricDetailsProps>): ReactNode {
 					{eric.image != null ? (
 						<img
 							alt=""
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
 							src={eric.image.url}
 						/>
 					) : null}
@@ -132,8 +134,11 @@ export function EricDetails(props: Readonly<EricDetailsProps>): ReactNode {
 
 				<DescriptionTerm>{t("Description")}</DescriptionTerm>
 				<DescriptionDetails>
-					{eric.description != null ? (
-						<RichTextRenderer key={selectedVersion} content={eric.description} />
+					{eric.descriptionContentBlocks.length > 0 ? (
+						<ContentBlocksView
+							key={selectedVersion}
+							contentBlocks={eric.descriptionContentBlocks}
+						/>
 					) : null}
 				</DescriptionDetails>
 
@@ -225,13 +230,7 @@ export function EricDetails(props: Readonly<EricDetailsProps>): ReactNode {
 												target={eric.name}
 												targetHref={ericHref}
 												targetType={formatRoleType("eric")}
-												duration={
-													relation.duration.end
-														? format.dateTimeRange(relation.duration.start, relation.duration.end, {
-																dateStyle: "short",
-															})
-														: format.dateTime(relation.duration.start, { dateStyle: "short" })
-												}
+												duration={relation.duration}
 											/>
 										))}
 									</ul>

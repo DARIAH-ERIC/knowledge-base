@@ -8,10 +8,7 @@ import { publishEricAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/ad
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
-import {
-	getRichTextFieldContent,
-	resolveSelectedDetailVersion,
-} from "@/lib/data/entity-detail-view";
+import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { getEricReverseRelationGroups } from "@/lib/data/eric";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
@@ -65,8 +62,7 @@ export default async function DashboardAdministratorEricDetailsPage(
 	}
 	const { hasDraftChanges, publishedId, selectedVersion, versionId } = versionState;
 
-	const [description, ericData, reverseRelationGroups] = await Promise.all([
-		getRichTextFieldContent(versionId, "description"),
+	const [ericData, reverseRelationGroups] = await Promise.all([
 		getOrganisationalUnitEditDataForAdmin(user, {
 			slug,
 			unitType: "eric",
@@ -101,7 +97,7 @@ export default async function DashboardAdministratorEricDetailsPage(
 	return (
 		<EricDetails
 			documentId={documentId}
-			eric={{ ...eric, description, image }}
+			eric={{ ...eric, image }}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
 			publishAction={publishEricAction}

@@ -25,18 +25,20 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
 import { createUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-unit-relation.action";
 import { deleteUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/delete-unit-relation.action";
 import { endUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-unit-relation.action";
@@ -45,13 +47,13 @@ import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-rel
 import { dateToCalendarDate } from "@/lib/date";
 
 interface UnitRelationsSectionProps {
-	unitId: string;
+	unitDocumentId: string;
 	relations: Array<UnitRelation & { lifecycleStatus?: "changed" | "new" }>;
 	statusOptions: Array<UnitRelationStatusOption>;
 }
 
 async function fetchRelatedUnitOptionsPage(
-	unitId: string,
+	unitDocumentId: string,
 	statusId: string,
 	params: Readonly<AsyncOptionsFetchPageParams>,
 ): Promise<{ items: Array<AsyncOption>; total: number }> {
@@ -59,7 +61,7 @@ async function fetchRelatedUnitOptionsPage(
 		limit: String(params.limit),
 		offset: String(params.offset),
 		statusId,
-		unitId,
+		unitDocumentId,
 	});
 
 	if (params.q !== "") {
@@ -93,7 +95,7 @@ function formatLifecycleStatus(
 }
 
 export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>): ReactNode {
-	const { unitId, relations, statusOptions } = props;
+	const { unitDocumentId, relations, statusOptions } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -110,6 +112,17 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 
 	const [selectedStatusId, setSelectedStatusId] = useState<string | null>(null);
 	const [selectedUnitItem, setSelectedUnitItem] = useState<AsyncOption | null>(null);
+
+	const table = useClientTable({
+		items: localRelations,
+		sortAccessors: {
+			from: (relation) => relation.duration.start,
+			relatedUnit: (relation) => relation.relatedUnitName,
+			status: (relation) => relation.statusType,
+			type: (relation) => relation.relatedUnitType,
+			until: (relation) => relation.duration.end,
+		},
+	});
 
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
@@ -143,7 +156,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 							id: data.id,
 							statusId: option.statusId,
 							statusType: option.statusType,
-							relatedUnitId: relatedUnit.id,
+							relatedUnitDocumentId: relatedUnit.id,
 							relatedUnitName: relatedUnit.name,
 							relatedUnitSlug: data.relatedUnitSlug,
 							relatedUnitType: data.relatedUnitType,
@@ -166,7 +179,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 		setItemToEdit(relation);
 		setEditStatusId(relation.statusId);
 		setEditUnitItem({
-			id: relation.relatedUnitId,
+			id: relation.relatedUnitDocumentId,
 			name: relation.relatedUnitName,
 			description: formatUnitType(relation.relatedUnitType),
 		});
@@ -199,7 +212,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									...relation,
 									statusId: option.statusId,
 									statusType: option.statusType,
-									relatedUnitId: relatedUnit.id,
+									relatedUnitDocumentId: relatedUnit.id,
 									relatedUnitName: relatedUnit.name,
 									duration: { start, ...(end != null ? { end } : {}) },
 								}
@@ -219,16 +232,31 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 				</div>
 
 				{localRelations.length > 0 ? (
-					<Table aria-label="relations" className="[--gutter:0] sm:[--gutter:0]">
+					<Table
+						aria-label="relations"
+						className="[--gutter:0] sm:[--gutter:0]"
+						onSortChange={table.onSortChange}
+						sortDescriptor={table.sortDescriptor}
+					>
 						<TableHeader>
-							<TableColumn isRowHeader={true}>{t("Status")}</TableColumn>
-							<TableColumn>{t("Type")}</TableColumn>
-							<TableColumn>{t("Related unit")}</TableColumn>
-							<TableColumn>{t("From")}</TableColumn>
-							<TableColumn>{t("Until")}</TableColumn>
-							<TableColumn />
+							<TableColumn allowsSorting={true} id="status" isRowHeader={true}>
+								{t("Status")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="type">
+								{t("Type")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} className="max-inline-80" id="relatedUnit">
+								{t("Related unit")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="from">
+								{t("From")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="until">
+								{t("Until")}
+							</TableColumn>
+							<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
-						<TableBody items={localRelations}>
+						<TableBody items={table.pageItems}>
 							{(relation) => (
 								<TableRow id={relation.id}>
 									<TableCell>
@@ -244,7 +272,11 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									<TableCell>
 										<Badge intent="slate">{formatUnitType(relation.relatedUnitType)}</Badge>
 									</TableCell>
-									<TableCell>{relation.relatedUnitName}</TableCell>
+									<TableCell>
+										<div className="max-inline-80 truncate" title={relation.relatedUnitName}>
+											{relation.relatedUnitName}
+										</div>
+									</TableCell>
 									<TableCell>
 										{format.dateTime(relation.duration.start, { dateStyle: "short" })}
 									</TableCell>
@@ -253,54 +285,38 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 											? format.dateTime(relation.duration.end, { dateStyle: "short" })
 											: t("present")}
 									</TableCell>
-									<TableCell className="text-end">
-										<div className="flex justify-end gap-1">
-											<Tooltip>
-												<Button
-													aria-label={t("Edit relation")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														openEditDialog(relation);
-													}}
-													size="sq-sm"
-												>
-													<PencilSquareIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Edit relation")}</TooltipContent>
-											</Tooltip>
+									<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+										<RowActionsMenu>
+											<RowActionsMenu.Action
+												icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													openEditDialog(relation);
+												}}
+											>
+												{t("Edit relation")}
+											</RowActionsMenu.Action>
 											{relation.duration.end == null && (
-												<Tooltip>
-													<Button
-														aria-label={t("End relation")}
-														className="block-7 sm:block-7"
-														intent="plain"
-														onPress={() => {
-															setItemToEnd({ id: relation.id });
-															setSelectedEndDate(null);
-														}}
-														size="sq-sm"
-													>
-														<ArchiveBoxXMarkIcon className="block-4 inline-4" />
-													</Button>
-													<TooltipContent inverse={true}>{t("End relation")}</TooltipContent>
-												</Tooltip>
-											)}
-											<Tooltip>
-												<Button
-													aria-label={t("Delete relation")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														setItemToDelete({ id: relation.id });
+												<RowActionsMenu.Action
+													icon={<ArchiveBoxXMarkIcon className="me-2 block-4 inline-4" />}
+													onAction={() => {
+														setItemToEnd({ id: relation.id });
+														setSelectedEndDate(null);
 													}}
-													size="sq-sm"
 												>
-													<TrashIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Delete relation")}</TooltipContent>
-											</Tooltip>
-										</div>
+													{t("End relation")}
+												</RowActionsMenu.Action>
+											)}
+											<RowActionsMenu.Separator />
+											<RowActionsMenu.Action
+												danger={true}
+												icon={<TrashIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													setItemToDelete({ id: relation.id });
+												}}
+											>
+												{t("Delete relation")}
+											</RowActionsMenu.Action>
+										</RowActionsMenu>
 									</TableCell>
 								</TableRow>
 							)}
@@ -308,6 +324,15 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 					</Table>
 				) : (
 					<p className="text-sm text-neutral-500">{t("No relations.")}</p>
+				)}
+
+				{table.totalPages > 1 && (
+					<Paginate
+						page={table.page}
+						setPage={table.setPage}
+						total={table.totalPages}
+						totalItems={table.total}
+					/>
 				)}
 
 				{statusOptions.length > 0 && (
@@ -348,11 +373,12 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 											return Promise.resolve({ items: [], total: 0 });
 										}
 
-										return fetchRelatedUnitOptionsPage(unitId, selectedStatusId, params);
+										return fetchRelatedUnitOptionsPage(unitDocumentId, selectedStatusId, params);
 									}}
 									initialItems={[]}
 									initialTotal={0}
 									isDisabled={selectedStatusId == null}
+									isRequired={true}
 									label={t("Related unit")}
 									loadOnMount={selectedStatusId != null}
 									onSelect={(item) => {
@@ -361,7 +387,11 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									placeholder={t("No related unit selected")}
 									selectedItem={selectedUnitItem}
 								/>
-								<input name="relatedUnitId" type="hidden" value={selectedUnitItem?.id ?? ""} />
+								<input
+									name="relatedUnitDocumentId"
+									type="hidden"
+									value={selectedUnitItem?.id ?? ""}
+								/>
 
 								<DatePicker granularity="day" isRequired={true} name="duration.start">
 									<Label>{t("Start date")}</Label>
@@ -375,7 +405,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									<FieldError />
 								</DatePicker>
 
-								<input name="unitId" type="hidden" value={unitId} />
+								<input name="unitDocumentId" type="hidden" value={unitDocumentId} />
 							</FormSection>
 
 							<Button className="self-start" isPending={isPending} type="submit">
@@ -465,7 +495,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 				<Form action={editFormAction} state={editState}>
 					<ModalBody className="flex flex-col gap-y-4">
 						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
-						<input name="unitId" type="hidden" value={unitId} />
+						<input name="unitDocumentId" type="hidden" value={unitDocumentId} />
 						<Select
 							isRequired={true}
 							onChange={(key) => {
@@ -495,11 +525,12 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									return Promise.resolve({ items: [], total: 0 });
 								}
 
-								return fetchRelatedUnitOptionsPage(unitId, editStatusId, params);
+								return fetchRelatedUnitOptionsPage(unitDocumentId, editStatusId, params);
 							}}
 							initialItems={[]}
 							initialTotal={0}
 							isDisabled={editStatusId == null}
+							isRequired={true}
 							label={t("Related unit")}
 							loadOnMount={editStatusId != null}
 							onSelect={(item) => {
@@ -508,7 +539,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 							placeholder={t("No related unit selected")}
 							selectedItem={editUnitItem}
 						/>
-						<input name="relatedUnitId" type="hidden" value={editUnitItem?.id ?? ""} />
+						<input name="relatedUnitDocumentId" type="hidden" value={editUnitItem?.id ?? ""} />
 						<DatePicker
 							granularity="day"
 							isRequired={true}

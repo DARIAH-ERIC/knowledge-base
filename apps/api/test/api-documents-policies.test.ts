@@ -10,6 +10,7 @@ import { v7 as uuidv7 } from "uuid";
 import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
+import { eq } from "@/services/db/sql";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
@@ -83,6 +84,10 @@ function createMockStorage(content = "test file content"): StorageService {
 			return Result.ok({ key: "" });
 		},
 		// eslint-disable-next-line @typescript-eslint/require-await
+		async stat() {
+			return Result.ok({ size: Buffer.from(content).byteLength });
+		},
+		// eslint-disable-next-line @typescript-eslint/require-await
 		async download() {
 			return Result.ok(Readable.from([Buffer.from(content)]));
 		},
@@ -123,6 +128,106 @@ describe("documents-policies", () => {
 				expect(data.data).toEqual(expect.arrayContaining([expect.objectContaining({ title })]));
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
+			});
+		});
+
+		it("should order groups and their items before ungrouped items", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const items = createItems(3);
+				await seed(db, items);
+
+				const groupId = uuidv7();
+				await db.insert(schema.documentPolicyGroups).values({
+					id: groupId,
+					label: "List ordering group",
+					position: -1,
+				});
+
+				await Promise.all([
+					db
+						.update(schema.documentsPolicies)
+						.set({ groupId, position: 1 })
+						.where(eq(schema.documentsPolicies.id, items[0]!.version.id)),
+					db
+						.update(schema.documentsPolicies)
+						.set({ groupId, position: 0 })
+						.where(eq(schema.documentsPolicies.id, items[1]!.version.id)),
+					db
+						.update(schema.documentsPolicies)
+						.set({ position: -100 })
+						.where(eq(schema.documentsPolicies.id, items[2]!.version.id)),
+				]);
+
+				const response = await client["documents-policies"].$get({
+					query: { limit: "100", offset: "0" },
+				});
+				const { data } = await response.json();
+				const relevant = data.filter((item) =>
+					items.some((seeded) => seeded.version.id === item.id),
+				);
+
+				expect(relevant.map((item) => item.id)).toEqual([
+					items[1]!.version.id,
+					items[0]!.version.id,
+					items[2]!.version.id,
+				]);
+			});
+		});
+	});
+
+	describe("GET /api/documents-policies/tree", () => {
+		it("should return groups and ungrouped items ordered by position", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const items = createItems(3);
+				await seed(db, items);
+
+				const groupId = uuidv7();
+				await db.insert(schema.documentPolicyGroups).values({
+					id: groupId,
+					label: "Test group",
+					position: 1,
+				});
+
+				await Promise.all([
+					db
+						.update(schema.documentsPolicies)
+						.set({ position: 0 })
+						.where(eq(schema.documentsPolicies.id, items[0]!.version.id)),
+					db
+						.update(schema.documentsPolicies)
+						.set({ groupId, position: 1 })
+						.where(eq(schema.documentsPolicies.id, items[1]!.version.id)),
+					db
+						.update(schema.documentsPolicies)
+						.set({ groupId, position: 0 })
+						.where(eq(schema.documentsPolicies.id, items[2]!.version.id)),
+				]);
+
+				const response = await client["documents-policies"].tree.$get();
+
+				expect(response.status).toBe(200);
+
+				const { data } = await response.json();
+				const ungroupedIndex = data.findIndex(
+					(node) => node.type === "item" && node.id === items[0]!.version.id,
+				);
+				const groupIndex = data.findIndex((node) => node.type === "group" && node.id === groupId);
+				const group = data.at(groupIndex);
+
+				expect(groupIndex).toBeLessThan(ungroupedIndex);
+				expect(group).toMatchObject({
+					type: "group",
+					id: groupId,
+					items: [
+						{ type: "item", id: items[2]!.version.id },
+						{ type: "item", id: items[1]!.version.id },
+					],
+				});
+				expect(data.some((node) => node.type === "item" && node.id === items[1]!.version.id)).toBe(
+					false,
+				);
 			});
 		});
 	});
@@ -308,12 +413,30 @@ describe("documents-policies", () => {
 				});
 
 				expect(response.status).toBe(200);
-				expect(response.headers.get("Content-Type")).toBe("application/octet-stream");
+				expect(response.headers.get("Content-Type")).toBe("application/pdf");
 				expect(response.headers.get("Content-Disposition")).toBe(
-					`attachment; filename="policy-2024.pdf"`,
+					`inline; filename="policy-2024.pdf"`,
 				);
 				const body = await response.text();
 				expect(body).toBe(content);
+			});
+		});
+
+		it("should serve non-PDF documents as attachments with their MIME type", async () => {
+			await withTransaction(async (db) => {
+				const key = "documents/019b7605-b88f-7893-84af-22aaf476e41f";
+				const { id } = await seedDocument(db, key, "policy-2024.docx", "application/msword");
+				const client = createTestClient(db, createMockStorage());
+
+				const response = await client["documents-policies"][":id"].document.$get({
+					param: { id },
+				});
+
+				expect(response.status).toBe(200);
+				expect(response.headers.get("Content-Type")).toBe("application/msword");
+				expect(response.headers.get("Content-Disposition")).toBe(
+					`attachment; filename="policy-2024.docx"`,
+				);
 			});
 		});
 
@@ -329,7 +452,7 @@ describe("documents-policies", () => {
 
 				expect(response.status).toBe(200);
 				expect(response.headers.get("Content-Disposition")).toBe(
-					`attachment; filename="test-policy.pdf"`,
+					`inline; filename="test-policy.pdf"`,
 				);
 			});
 		});

@@ -6,12 +6,13 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import type { JSONContent } from "@tiptap/core";
-import { useExtracted, useFormatter } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
-import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
+import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { PersonContribution } from "@/lib/data/contributions";
 import { getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
@@ -23,9 +24,9 @@ interface PersonDetailsProps {
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
 	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
-		biography: JSONContent | null;
+		biographyContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } };
+	} & { image: { key: string; label: string; url: string } | null };
 	contributions: Array<PersonContribution>;
 	publishAction: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
@@ -44,7 +45,6 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 	} = props;
 
 	const t = useExtracted();
-	const format = useFormatter();
 
 	return (
 		<Fragment>
@@ -83,11 +83,13 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
-					<img
-						alt=""
-						className="block-24 inline-auto max-inline-full rounded-lg object-cover"
-						src={person.image.url}
-					/>
+					{person.image != null ? (
+						<img
+							alt=""
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
+							src={person.image.url}
+						/>
+					) : null}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Relations")}</DescriptionTerm>
@@ -95,33 +97,30 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 					{contributions.length > 0 ? (
 						<ul className="flex flex-col gap-1">
 							{contributions.map((contribution) => (
-								<li key={contribution.id} className="text-sm">
-									<span className="font-medium">{formatRoleType(contribution.roleType)}</span>
-									{" · "}
-									<RelationLink
-										className="text-muted-fg"
-										href={getOrganisationalUnitDetailHref(
-											contribution.organisationalUnitType,
-											contribution.organisationalUnitSlug,
-										)}
-									>
-										{contribution.organisationalUnitName}
-									</RelationLink>
-									<span className="text-muted-fg">
-										{" · "}
-										{contribution.duration.end
-											? format.dateTimeRange(
-													contribution.duration.start,
-													contribution.duration.end,
-													{
-														dateStyle: "short",
-													},
-												)
-											: format.dateTime(contribution.duration.start, { dateStyle: "short" })}
-									</span>
-								</li>
+								<RelationStatement
+									key={contribution.id}
+									duration={contribution.duration}
+									relation={formatRoleType(contribution.roleType)}
+									source={person.name}
+									target={contribution.organisationalUnitName}
+									targetHref={getOrganisationalUnitDetailHref(
+										contribution.organisationalUnitType,
+										contribution.organisationalUnitSlug,
+									)}
+									targetType={formatRoleType(contribution.organisationalUnitType)}
+								/>
 							))}
 						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Biography")}</DescriptionTerm>
+				<DescriptionDetails>
+					{person.biographyContentBlocks.length > 0 ? (
+						<ContentBlocksView
+							key={selectedVersion}
+							contentBlocks={person.biographyContentBlocks}
+						/>
 					) : null}
 				</DescriptionDetails>
 			</DescriptionList>

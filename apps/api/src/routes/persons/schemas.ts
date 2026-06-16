@@ -2,7 +2,7 @@ import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
-import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
+import { ImageSchema, PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const PersonBaseSchema = v.pipe(
 	v.object({
@@ -16,7 +16,7 @@ export const PersonBaseSchema = v.pipe(
 				}),
 			),
 		),
-		image: v.object({ url: v.string() }),
+		image: v.nullable(ImageSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 	}),
@@ -46,7 +46,7 @@ export const PersonSchema = v.pipe(
 				}),
 			),
 		),
-		image: v.object({ url: v.string() }),
+		image: v.nullable(ImageSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		biography: v.optional(v.array(ContentBlockSchema), []),

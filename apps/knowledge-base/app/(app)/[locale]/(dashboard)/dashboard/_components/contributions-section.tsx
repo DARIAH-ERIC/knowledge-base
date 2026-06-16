@@ -25,18 +25,20 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
 import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
 import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
 import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
@@ -45,7 +47,7 @@ import type { ContributionRoleOption, PersonContribution } from "@/lib/data/cont
 import { dateToCalendarDate } from "@/lib/date";
 
 interface ContributionsSectionProps {
-	personId: string;
+	personDocumentId: string;
 	contributions: Array<PersonContribution & { lifecycleStatus?: "changed" | "new" }>;
 	roleOptions: Array<ContributionRoleOption>;
 }
@@ -102,7 +104,7 @@ function formatRoleOptionLabel(option: ContributionRoleOption): string {
 }
 
 export function ContributionsSection(props: Readonly<ContributionsSectionProps>): ReactNode {
-	const { personId, roleOptions, contributions } = props;
+	const { personDocumentId, roleOptions, contributions } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -120,6 +122,17 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 	const [editUnit, setEditUnit] = useState<AsyncOption | null>(null);
 	const [editStartDate, setEditStartDate] = useState<CalendarDate | null>(null);
 	const [editEndDate, setEditEndDate] = useState<CalendarDate | null>(null);
+
+	const table = useClientTable({
+		items: localContributions,
+		sortAccessors: {
+			from: (contribution) => contribution.duration.start,
+			organisation: (contribution) => contribution.organisationalUnitName,
+			role: (contribution) => contribution.roleType,
+			type: (contribution) => contribution.organisationalUnitType,
+			until: (contribution) => contribution.duration.end,
+		},
+	});
 
 	const [state, setState] = useState<ActionState>(createActionStateInitial());
 	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
@@ -150,7 +163,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 						id: data.id,
 						roleTypeId: roleTypeId!,
 						roleType: option.roleType as PersonContribution["roleType"],
-						organisationalUnitId: unit.id,
+						organisationalUnitDocumentId: unit.id,
 						organisationalUnitName: unit.name,
 						organisationalUnitSlug: data.organisationalUnitSlug,
 						organisationalUnitType: data.targetUnitType,
@@ -172,7 +185,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 		setItemToEdit(contribution);
 		setEditRoleTypeId(contribution.roleTypeId);
 		setEditUnit({
-			id: contribution.organisationalUnitId,
+			id: contribution.organisationalUnitDocumentId,
 			name: contribution.organisationalUnitName,
 			description: formatRoleType(contribution.organisationalUnitType),
 		});
@@ -199,7 +212,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									...contribution,
 									roleTypeId: option.roleTypeId,
 									roleType: option.roleType as PersonContribution["roleType"],
-									organisationalUnitId: unit.id,
+									organisationalUnitDocumentId: unit.id,
 									organisationalUnitName: unit.name,
 									duration: { start, ...(end != null ? { end } : {}) },
 								}
@@ -219,16 +232,31 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 				</div>
 
 				{localContributions.length > 0 ? (
-					<Table aria-label="contributions" className="[--gutter:0] sm:[--gutter:0]">
+					<Table
+						aria-label="contributions"
+						className="[--gutter:0] sm:[--gutter:0]"
+						onSortChange={table.onSortChange}
+						sortDescriptor={table.sortDescriptor}
+					>
 						<TableHeader>
-							<TableColumn isRowHeader={true}>{t("Role")}</TableColumn>
-							<TableColumn>{t("Type")}</TableColumn>
-							<TableColumn>{t("Organisation")}</TableColumn>
-							<TableColumn>{t("From")}</TableColumn>
-							<TableColumn>{t("Until")}</TableColumn>
-							<TableColumn />
+							<TableColumn allowsSorting={true} id="role" isRowHeader={true}>
+								{t("Role")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="type">
+								{t("Type")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} className="max-inline-80" id="organisation">
+								{t("Organisation")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="from">
+								{t("From")}
+							</TableColumn>
+							<TableColumn allowsSorting={true} id="until">
+								{t("Until")}
+							</TableColumn>
+							<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 						</TableHeader>
-						<TableBody items={localContributions}>
+						<TableBody items={table.pageItems}>
 							{(contribution) => (
 								<TableRow id={contribution.id}>
 									<TableCell>
@@ -248,7 +276,14 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 											{formatRoleType(contribution.organisationalUnitType)}
 										</Badge>
 									</TableCell>
-									<TableCell>{contribution.organisationalUnitName}</TableCell>
+									<TableCell>
+										<div
+											className="max-inline-80 truncate"
+											title={contribution.organisationalUnitName}
+										>
+											{contribution.organisationalUnitName}
+										</div>
+									</TableCell>
 									<TableCell>
 										{format.dateTime(contribution.duration.start, { dateStyle: "short" })}
 									</TableCell>
@@ -257,54 +292,38 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 											? format.dateTime(contribution.duration.end, { dateStyle: "short" })
 											: t("present")}
 									</TableCell>
-									<TableCell className="text-end">
-										<div className="flex justify-end gap-1">
-											<Tooltip>
-												<Button
-													aria-label={t("Edit contribution")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														openEditDialog(contribution);
-													}}
-													size="sq-sm"
-												>
-													<PencilSquareIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Edit contribution")}</TooltipContent>
-											</Tooltip>
+									<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+										<RowActionsMenu>
+											<RowActionsMenu.Action
+												icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													openEditDialog(contribution);
+												}}
+											>
+												{t("Edit contribution")}
+											</RowActionsMenu.Action>
 											{contribution.duration.end == null && (
-												<Tooltip>
-													<Button
-														aria-label={t("End contribution")}
-														className="block-7 sm:block-7"
-														intent="plain"
-														onPress={() => {
-															setItemToEnd({ id: contribution.id });
-															setSelectedEndDate(null);
-														}}
-														size="sq-sm"
-													>
-														<ArchiveBoxXMarkIcon className="block-4 inline-4" />
-													</Button>
-													<TooltipContent inverse={true}>{t("End contribution")}</TooltipContent>
-												</Tooltip>
-											)}
-											<Tooltip>
-												<Button
-													aria-label={t("Delete contribution")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														setItemToDelete({ id: contribution.id });
+												<RowActionsMenu.Action
+													icon={<ArchiveBoxXMarkIcon className="me-2 block-4 inline-4" />}
+													onAction={() => {
+														setItemToEnd({ id: contribution.id });
+														setSelectedEndDate(null);
 													}}
-													size="sq-sm"
 												>
-													<TrashIcon className="block-4 inline-4" />
-												</Button>
-												<TooltipContent inverse={true}>{t("Delete contribution")}</TooltipContent>
-											</Tooltip>
-										</div>
+													{t("End contribution")}
+												</RowActionsMenu.Action>
+											)}
+											<RowActionsMenu.Separator />
+											<RowActionsMenu.Action
+												danger={true}
+												icon={<TrashIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													setItemToDelete({ id: contribution.id });
+												}}
+											>
+												{t("Delete contribution")}
+											</RowActionsMenu.Action>
+										</RowActionsMenu>
 									</TableCell>
 								</TableRow>
 							)}
@@ -312,6 +331,15 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 					</Table>
 				) : (
 					<p className="text-sm text-neutral-500">{t("No contributions.")}</p>
+				)}
+
+				{table.totalPages > 1 && (
+					<Paginate
+						page={table.page}
+						setPage={table.setPage}
+						total={table.totalPages}
+						totalItems={table.total}
+					/>
 				)}
 
 				{roleOptions.length > 0 && (
@@ -352,8 +380,8 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 											: t("Select a role first.")
 									}
 									errorMessage={
-										typeof validationErrors?.organisationalUnitId === "string"
-											? validationErrors.organisationalUnitId
+										typeof validationErrors?.organisationalUnitDocumentId === "string"
+											? validationErrors.organisationalUnitDocumentId
 											: undefined
 									}
 									fetchPage={(params) => {
@@ -366,6 +394,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									initialItems={[]}
 									initialTotal={0}
 									isDisabled={selectedRoleOption == null}
+									isRequired={true}
 									label={t("Organisation")}
 									loadOnMount={selectedRoleTypeId != null}
 									onSelect={setSelectedUnit}
@@ -376,7 +405,11 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									}
 									selectedItem={selectedUnit}
 								/>
-								<input name="organisationalUnitId" type="hidden" value={selectedUnit?.id ?? ""} />
+								<input
+									name="organisationalUnitDocumentId"
+									type="hidden"
+									value={selectedUnit?.id ?? ""}
+								/>
 
 								<DatePicker granularity="day" isRequired={true} name="duration.start">
 									<Label>{t("Start date")}</Label>
@@ -390,7 +423,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									<FieldError />
 								</DatePicker>
 
-								<input name="personId" type="hidden" value={personId} />
+								<input name="personDocumentId" type="hidden" value={personDocumentId} />
 							</FormSection>
 
 							<Button className="self-start" isPending={isPending} type="submit">
@@ -478,7 +511,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 				<Form action={editFormAction} state={editState}>
 					<ModalBody className="flex flex-col gap-y-4">
 						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
-						<input name="personId" type="hidden" value={personId} />
+						<input name="personDocumentId" type="hidden" value={personDocumentId} />
 						<Select
 							isRequired={true}
 							onChange={(key) => {
@@ -506,8 +539,8 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 								editRoleOption != null ? t("No organisations found.") : t("Select a role first.")
 							}
 							errorMessage={
-								typeof editValidationErrors?.organisationalUnitId === "string"
-									? editValidationErrors.organisationalUnitId
+								typeof editValidationErrors?.organisationalUnitDocumentId === "string"
+									? editValidationErrors.organisationalUnitDocumentId
 									: undefined
 							}
 							fetchPage={(params) => {
@@ -520,6 +553,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 							initialItems={[]}
 							initialTotal={0}
 							isDisabled={editRoleOption == null}
+							isRequired={true}
 							label={t("Organisation")}
 							loadOnMount={editRoleTypeId != null}
 							onSelect={setEditUnit}
@@ -528,7 +562,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 							}
 							selectedItem={editUnit}
 						/>
-						<input name="organisationalUnitId" type="hidden" value={editUnit?.id ?? ""} />
+						<input name="organisationalUnitDocumentId" type="hidden" value={editUnit?.id ?? ""} />
 						<DatePicker
 							granularity="day"
 							isRequired={true}

@@ -40,6 +40,10 @@ export class AdminNationalConsortiaPage {
 		await this.page.getByLabel("Acronym").fill(acronym);
 	}
 
+	async fillRor(ror: string): Promise<void> {
+		await this.page.locator('input[name="ror"]').fill(ror);
+	}
+
 	async fillSshocMarketplaceActorId(id: number): Promise<void> {
 		await this.page.locator('input[name="sshocMarketplaceActorId"]').fill(String(id));
 	}

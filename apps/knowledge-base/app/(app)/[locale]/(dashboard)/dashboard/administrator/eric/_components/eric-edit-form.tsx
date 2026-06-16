@@ -2,10 +2,10 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import {
 	EntityEditTab,
 	EntityEditTabs,
@@ -26,9 +26,9 @@ interface EricEditFormProps {
 	isPublished: boolean;
 	eric: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
-		description?: JSONContent;
+		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	initialRelatedEntityIds: Array<string>;
@@ -128,7 +128,7 @@ export function EricEditForm(props: Readonly<EricEditFormProps>): ReactNode {
 							empty: t("No countries."),
 							addButton: t("Add country"),
 						}}
-						relatedUnitId={documentId}
+						relatedUnitDocumentId={documentId}
 						relations={reverseRelationGroups.country.relations}
 						sourceUnitType="country"
 						statusOptions={reverseRelationGroups.country.statusOptions}
@@ -143,7 +143,7 @@ export function EricEditForm(props: Readonly<EricEditFormProps>): ReactNode {
 							empty: t("No institutions."),
 							addButton: t("Add institution"),
 						}}
-						relatedUnitId={documentId}
+						relatedUnitDocumentId={documentId}
 						relations={reverseRelationGroups.institution.relations}
 						sourceUnitType="institution"
 						statusOptions={reverseRelationGroups.institution.statusOptions}
@@ -158,7 +158,7 @@ export function EricEditForm(props: Readonly<EricEditFormProps>): ReactNode {
 							empty: t("No working groups."),
 							addButton: t("Add working group"),
 						}}
-						relatedUnitId={documentId}
+						relatedUnitDocumentId={documentId}
 						relations={reverseRelationGroups.working_group.relations}
 						sourceUnitType="working_group"
 						statusOptions={reverseRelationGroups.working_group.statusOptions}
@@ -173,7 +173,7 @@ export function EricEditForm(props: Readonly<EricEditFormProps>): ReactNode {
 							empty: t("No governance bodies."),
 							addButton: t("Add governance body"),
 						}}
-						relatedUnitId={documentId}
+						relatedUnitDocumentId={documentId}
 						relations={reverseRelationGroups.governance_body.relations}
 						sourceUnitType="governance_body"
 						statusOptions={reverseRelationGroups.governance_body.statusOptions}

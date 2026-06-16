@@ -5,27 +5,27 @@ import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { Input } from "@dariah-eric/ui/input";
-import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { ImageSelectField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
+import { RichTextContentBlocksField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-content-blocks-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface PersonFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	person?: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
-		biography?: JSONContent;
+		biographyContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } };
+	} & { image: { key: string; label: string; url: string } | null };
 	formAction: ServerAction;
 }
 
@@ -74,15 +74,11 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 
 				<Separator className="my-6" />
 
-				<FormSection
-					description={t("Select or upload an image.")}
-					isRequired={true}
-					title={t("Image")}
-				>
+				<FormSection description={t("Select or upload an image.")} title={t("Image")}>
 					<ImageSelectField
+						allowRemove={true}
 						defaultPrefix="avatars"
 						initialAssets={initialAssets}
-						isRequired={true}
 						onChange={setSelectedImage}
 						prefixes={["avatars"]}
 						selectedImage={selectedImage}
@@ -96,9 +92,10 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 					title={t("Biography")}
 					variant="stacked"
 				>
-					<RichTextEditor
+					<RichTextContentBlocksField
 						aria-label={t("Biography")}
-						content={person?.biography}
+						initialBlocks={person?.biographyContentBlocks}
+						initialAssets={initialAssets}
 						name="biography"
 					/>
 				</FormSection>

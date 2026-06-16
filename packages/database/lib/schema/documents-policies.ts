@@ -12,7 +12,7 @@ export const documentsPolicies = p.snakeCase.table("documents_policies", {
 		.primaryKey()
 		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
-	summary: p.text("summary").notNull(),
+	summary: p.text("summary"),
 	url: p.text("url"),
 	documentId: p
 		.uuid("document_id")

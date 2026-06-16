@@ -3,7 +3,8 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { and, count, desc, eq, sql } from "@/lib/db/sql";
 
 export type FundingCallsSort = "title" | "updatedAt";
 
@@ -21,7 +22,9 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
 	const query = q?.trim();
 	const where =
-		query != null && query !== "" ? ilike(schema.fundingCalls.title, `%${query}%`) : undefined;
+		query != null && query !== ""
+			? unaccentIlike(schema.fundingCalls.title, `%${query}%`)
+			: undefined;
 	const orderBy =
 		sort === "title"
 			? dir === "asc"

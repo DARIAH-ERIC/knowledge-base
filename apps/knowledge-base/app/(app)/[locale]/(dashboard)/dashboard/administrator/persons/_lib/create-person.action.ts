@@ -6,6 +6,7 @@ import slugify from "@sindresorhus/slugify";
 
 import { CreatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.schema";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -30,49 +31,30 @@ export const createPersonAction = createMutationAction({
 
 		const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
 
-		const asset = await tx.query.assets.findFirst({
-			where: { key: input.imageKey },
-			columns: { id: true },
-		});
-		assert(asset);
+		const asset =
+			input.imageKey != null
+				? await tx.query.assets.findFirst({
+						where: { key: input.imageKey },
+						columns: { id: true },
+					})
+				: null;
+		assert(input.imageKey == null || asset != null);
 
 		await tx.insert(schema.persons).values({
 			id: versionId,
 			email: input.email,
-			imageId: asset.id,
+			imageId: asset?.id ?? null,
 			name: input.name,
 			orcid: input.orcid,
 			sortName: input.sortName,
 		});
 
-		const biographyFieldName = await tx.query.entityTypesFieldsNames.findFirst({
-			where: { entityTypeId: type.id, fieldName: "biography" },
-			columns: { id: true },
-		});
-		assert(biographyFieldName);
-
-		const [biographyField] = await tx
-			.insert(schema.fields)
-			.values({ entityVersionId: versionId, fieldNameId: biographyFieldName.id })
-			.returning({ id: schema.fields.id });
-		assert(biographyField);
-
-		const richTextType = await tx.query.contentBlockTypes.findFirst({
-			where: { type: "rich_text" },
-			columns: { id: true },
-		});
-		assert(richTextType);
-
-		const [contentBlock] = await tx
-			.insert(schema.contentBlocks)
-			.values({ fieldId: biographyField.id, typeId: richTextType.id, position: 0 })
-			.returning({ id: schema.contentBlocks.id });
-		assert(contentBlock);
-
-		await tx.insert(schema.richTextContentBlocks).values({
-			id: contentBlock.id,
-			content: JSON.parse(input.biography) as schema.RichTextContentBlock["content"],
-		});
+		await replaceEntityVersionFieldContentBlocks(
+			tx,
+			versionId,
+			"biography",
+			input.biographyContentBlocks,
+		);
 
 		if (shouldSaveAndPublish(formData)) {
 			await publishVersion(tx, documentId, personsLifecycleAdapter);

@@ -6,11 +6,11 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import { RichTextRenderer } from "@dariah-eric/ui/rich-text-editor";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
@@ -28,9 +28,9 @@ interface InstitutionDetailsProps {
 	selectedVersion: "draft" | "published";
 	institution: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
-		description: JSONContent | null;
+		descriptionContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	selectedRelatedEntities: Array<{
@@ -106,6 +106,9 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 				<DescriptionTerm>{t("Acronym")}</DescriptionTerm>
 				<DescriptionDetails>{institution.acronym}</DescriptionDetails>
 
+				<DescriptionTerm>{t("ROR")}</DescriptionTerm>
+				<DescriptionDetails>{institution.ror}</DescriptionDetails>
+
 				<DescriptionTerm>{t("SSHOC actor ID")}</DescriptionTerm>
 				<DescriptionDetails>{institution.sshocMarketplaceActorId}</DescriptionDetails>
 
@@ -117,7 +120,7 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 					{institution.image != null ? (
 						<img
 							alt=""
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
 							src={institution.image.url}
 						/>
 					) : null}
@@ -125,8 +128,11 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 
 				<DescriptionTerm>{t("Description")}</DescriptionTerm>
 				<DescriptionDetails>
-					{institution.description != null ? (
-						<RichTextRenderer key={selectedVersion} content={institution.description} />
+					{institution.descriptionContentBlocks.length > 0 ? (
+						<ContentBlocksView
+							key={selectedVersion}
+							contentBlocks={institution.descriptionContentBlocks}
+						/>
 					) : null}
 				</DescriptionDetails>
 
@@ -212,13 +218,7 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 									relation={formatRoleType(relation.roleType)}
 									target={institution.name}
 									targetType={formatRoleType(relation.targetUnitType)}
-									duration={
-										relation.duration.end
-											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })
-									}
+									duration={relation.duration}
 								/>
 							))}
 						</ul>
@@ -240,13 +240,7 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 										relation.relatedUnitSlug,
 									)}
 									targetType={formatRoleType(relation.relatedUnitType)}
-									duration={
-										relation.duration.end
-											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })
-									}
+									duration={relation.duration}
 								/>
 							))}
 						</ul>

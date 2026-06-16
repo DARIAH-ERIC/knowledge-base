@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { db } from "@/lib/db";
 import { and, desc, eq, inArray, sql } from "@/lib/db/sql";
 
-const chairRoles = ["is_chair_of", "is_vice_chair_of", "is_director_of"] as const;
+const chairRoles = ["is_chair_of", "is_vice_chair_of"] as const;
 const coordinatorRoles = ["national_coordinator", "national_coordinator_deputy"] as const;
 
 const relevantRoles = [

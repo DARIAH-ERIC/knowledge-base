@@ -6,14 +6,13 @@ import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { Input } from "@dariah-eric/ui/input";
-import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import {
@@ -21,6 +20,7 @@ import {
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import { RichTextContentBlocksField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-content-blocks-field";
 import { SocialMediaRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
@@ -28,9 +28,9 @@ interface NationalConsortiumFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	nationalConsortium?: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
-		description?: JSONContent;
+		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	formId?: string;
@@ -97,6 +97,12 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 						<FieldError />
 					</TextField>
 
+					<TextField defaultValue={nationalConsortium?.ror ?? undefined} name="ror">
+						<Label>{t("ROR")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
+
 					<TextField
 						defaultValue={
 							nationalConsortium?.sshocMarketplaceActorId != null
@@ -113,7 +119,7 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 
 					<TextField defaultValue={nationalConsortium?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>
@@ -124,7 +130,7 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 					{selectedImage != null && (
 						<img
 							alt={t("Selected image")}
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
 							src={selectedImage.url}
 						/>
 					)}
@@ -164,9 +170,10 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 					title={t("Description")}
 					variant="stacked"
 				>
-					<RichTextEditor
+					<RichTextContentBlocksField
 						aria-label={t("Description")}
-						content={nationalConsortium?.description}
+						initialBlocks={nationalConsortium?.descriptionContentBlocks}
+						initialAssets={initialAssets}
 						name="description"
 					/>
 				</FormSection>

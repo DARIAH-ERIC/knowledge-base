@@ -4,7 +4,8 @@ import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import type { OrganisationalUnitType } from "@/lib/data/organisational-units";
 import { db } from "@/lib/db";
-import { alias, and, count, eq, ilike, inArray, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { alias, and, count, eq, inArray, sql } from "@/lib/db/sql";
 
 /**
  * `unitDocumentId` is the owner unit's `entities.id`. Unit↔unit relations are document-level, so
@@ -24,7 +25,7 @@ export async function getUnitRelations(unitDocumentId: string) {
 			duration: schema.organisationalUnitsRelations.duration,
 			statusId: schema.organisationalUnitsRelations.status,
 			statusType: schema.organisationalUnitStatus.status,
-			relatedUnitId: schema.organisationalUnitsRelations.relatedUnitDocumentId,
+			relatedUnitDocumentId: schema.organisationalUnitsRelations.relatedUnitDocumentId,
 			relatedUnitName: schema.organisationalUnits.name,
 			relatedUnitSlug: schema.entities.slug,
 			relatedUnitType: schema.organisationalUnitTypes.type,
@@ -71,7 +72,7 @@ export interface UnitRelationStatusOption {
 }
 
 interface GetUnitRelationRelatedUnitOptionsParams {
-	unitId: string;
+	unitDocumentId: string;
 	statusId: string;
 	limit?: number;
 	offset?: number;
@@ -117,10 +118,9 @@ export async function getUnitRelationStatusOptions(
 export async function getUnitRelationRelatedUnitOptions(
 	params: GetUnitRelationRelatedUnitOptionsParams,
 ): Promise<{ items: Array<{ id: string; name: string }>; total: number }> {
-	const { unitId, statusId, limit = relationOptionsPageSize, offset = 0, q } = params;
+	const { unitDocumentId, statusId, limit = relationOptionsPageSize, offset = 0, q } = params;
 	const query = q?.trim();
 
-	// `unitId` is the owner unit's document id; resolve it to its current version for the type.
 	const currentUnit = await db
 		.select({ typeId: schema.organisationalUnits.typeId })
 		.from(schema.documentLifecycle)
@@ -128,7 +128,7 @@ export async function getUnitRelationRelatedUnitOptions(
 			schema.organisationalUnits,
 			sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 		)
-		.where(eq(schema.documentLifecycle.documentId, unitId))
+		.where(eq(schema.documentLifecycle.documentId, unitDocumentId))
 		.limit(1)
 		.then((rows) => rows[0] ?? null);
 
@@ -158,7 +158,7 @@ export async function getUnitRelationRelatedUnitOptions(
 		publishedEntityVersionWhere(),
 		inArray(schema.organisationalUnits.typeId, relatedUnitTypeIds),
 		query != null && query !== ""
-			? ilike(schema.organisationalUnits.name, `%${query}%`)
+			? unaccentIlike(schema.organisationalUnits.name, `%${query}%`)
 			: undefined,
 	);
 
@@ -296,7 +296,7 @@ export async function getReverseUnitRelations(
 			duration: schema.organisationalUnitsRelations.duration,
 			statusId: schema.organisationalUnitsRelations.status,
 			statusType: schema.organisationalUnitStatus.status,
-			unitId: schema.organisationalUnitsRelations.unitDocumentId,
+			unitDocumentId: schema.organisationalUnitsRelations.unitDocumentId,
 			unitName: schema.organisationalUnits.name,
 			unitSlug: schema.entities.slug,
 			unitType: schema.organisationalUnitTypes.type,
@@ -420,6 +420,7 @@ export async function getEricInstitutionsForCountry(countryDocumentId: string) {
 			institutionName: schema.organisationalUnits.name,
 			institutionSlug: schema.entities.slug,
 			institutionType: schema.organisationalUnitTypes.type,
+			statusId: ericStatus.id,
 			statusType: ericStatus.status,
 			duration: ericRelations.duration,
 		})

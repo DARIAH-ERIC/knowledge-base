@@ -3,7 +3,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { alias, and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { alias, and, count, desc, eq, or, sql } from "@/lib/db/sql";
 
 export type InstitutionRelationsSort =
 	| "institutionName"
@@ -24,12 +25,12 @@ interface GetInstitutionRelationsParams {
 export interface InstitutionRelationsResult {
 	data: Array<{
 		id: string;
-		institutionId: string;
+		institutionDocumentId: string;
 		institutionName: string;
 		institutionSlug: string;
 		statusId: string;
 		statusType: string;
-		relatedUnitId: string;
+		relatedUnitDocumentId: string;
 		relatedUnitName: string;
 		relatedUnitType: string;
 		durationStart: Date;
@@ -77,10 +78,10 @@ export async function getInstitutionRelations(
 			? and(
 					baseWhere,
 					or(
-						ilike(schema.organisationalUnits.name, `%${query}%`),
-						ilike(schema.organisationalUnitStatus.status, `%${query}%`),
-						ilike(relatedOrganisationalUnits.name, `%${query}%`),
-						ilike(relatedOrganisationalUnitTypes.type, `%${query}%`),
+						unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
+						unaccentIlike(schema.organisationalUnitStatus.status, `%${query}%`),
+						unaccentIlike(relatedOrganisationalUnits.name, `%${query}%`),
+						unaccentIlike(relatedOrganisationalUnitTypes.type, `%${query}%`),
 					),
 				)
 			: undefined;
@@ -113,12 +114,12 @@ export async function getInstitutionRelations(
 		db
 			.select({
 				id: schema.organisationalUnitsRelations.id,
-				institutionId: schema.organisationalUnitsRelations.unitDocumentId,
+				institutionDocumentId: schema.organisationalUnitsRelations.unitDocumentId,
 				institutionName: schema.organisationalUnits.name,
 				institutionSlug: institutionEntities.slug,
 				statusId: schema.organisationalUnitsRelations.status,
 				statusType: schema.organisationalUnitStatus.status,
-				relatedUnitId: schema.organisationalUnitsRelations.relatedUnitDocumentId,
+				relatedUnitDocumentId: schema.organisationalUnitsRelations.relatedUnitDocumentId,
 				relatedUnitName: relatedOrganisationalUnits.name,
 				relatedUnitType: relatedOrganisationalUnitTypes.type,
 				duration: schema.organisationalUnitsRelations.duration,
@@ -207,12 +208,12 @@ export async function getInstitutionRelations(
 		data: rows.map((row) => {
 			return {
 				id: row.id,
-				institutionId: row.institutionId,
+				institutionDocumentId: row.institutionDocumentId,
 				institutionName: row.institutionName,
 				institutionSlug: row.institutionSlug,
 				statusId: row.statusId,
 				statusType: row.statusType,
-				relatedUnitId: row.relatedUnitId,
+				relatedUnitDocumentId: row.relatedUnitDocumentId,
 				relatedUnitName: row.relatedUnitName,
 				relatedUnitType: row.relatedUnitType,
 				durationStart: row.duration.start,

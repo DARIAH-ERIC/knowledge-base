@@ -5,17 +5,13 @@ import * as schema from "@dariah-eric/database/schema";
 import { imageAssetWidth } from "@/config/assets.config";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { and, count, eq, ilike, inArray } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { and, count, eq, exists, inArray, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
+import type { OrganisationalUnitOption } from "@/lib/organisational-unit-options";
 
 /** The literal union of organisational-unit types (e.g. "institution", "national_consortium"). */
 export type OrganisationalUnitType = typeof schema.organisationalUnitTypes.$inferSelect.type;
-
-export interface OrganisationalUnitOption {
-	id: string;
-	name: string;
-	description: string;
-}
 
 function formatOrganisationalUnitType(type: string): string {
 	return type.replaceAll("_", " ");
@@ -34,30 +30,64 @@ interface GetOrganisationalUnitOptionsParams {
 	q?: string;
 	/** Restrict options to a single organisational-unit type (e.g. "institution"). */
 	unitType?: OrganisationalUnitType;
+	/**
+	 * Restrict options to units that hold an `is_located_in` relation to this country document id.
+	 * Used to scope, for example, the institution picker on a country edit form.
+	 */
+	locatedInCountryDocumentId?: string;
 }
 
 export async function getOrganisationalUnitOptions(
 	params: GetOrganisationalUnitOptionsParams = {},
 ): Promise<{ items: Array<OrganisationalUnitOption>; total: number }> {
-	const { limit = 20, offset = 0, q, unitType } = params;
+	const { limit = 20, offset = 0, q, unitType, locatedInCountryDocumentId } = params;
 	const query = q?.trim();
 	const searchWhere =
 		query != null && query !== ""
-			? ilike(schema.organisationalUnits.name, `%${query}%`)
+			? unaccentIlike(schema.organisationalUnits.name, `%${query}%`)
 			: undefined;
 	const typeWhere =
 		unitType != null ? eq(schema.organisationalUnitTypes.type, unitType) : undefined;
-	const where = and(publishedEntityVersionWhere(), searchWhere, typeWhere);
+	// Correlated on the outer `entityVersions.entityId` (the unit's document id): keep only units
+	// that are `is_located_in` the given country.
+	const locatedInWhere =
+		locatedInCountryDocumentId != null
+			? exists(
+					db
+						.select({ one: sql`1` })
+						.from(schema.organisationalUnitsRelations)
+						.innerJoin(
+							schema.organisationalUnitStatus,
+							eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+						)
+						.where(
+							and(
+								eq(
+									schema.organisationalUnitsRelations.unitDocumentId,
+									schema.entityVersions.entityId,
+								),
+								eq(schema.organisationalUnitStatus.status, "is_located_in"),
+								eq(
+									schema.organisationalUnitsRelations.relatedUnitDocumentId,
+									locatedInCountryDocumentId,
+								),
+							),
+						),
+				)
+			: undefined;
+	const where = and(publishedEntityVersionWhere(), searchWhere, typeWhere, locatedInWhere);
 
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({
-				id: schema.organisationalUnits.id,
+				documentId: schema.entityVersions.entityId,
 				name: schema.organisationalUnits.name,
 				type: schema.organisationalUnitTypes.type,
+				slug: schema.entities.slug,
 			})
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -82,52 +112,62 @@ export async function getOrganisationalUnitOptions(
 	return {
 		items: items.map((item) => {
 			return {
-				id: item.id,
+				documentId: item.documentId,
 				name: item.name,
 				description: formatOrganisationalUnitType(item.type),
+				type: item.type,
+				slug: item.slug,
 			};
 		}),
 		total: aggregate.at(0)?.total ?? 0,
 	};
 }
 
-export async function getOrganisationalUnitOptionsByIds(ids: ReadonlyArray<string>) {
-	if (ids.length === 0) {
+export async function getOrganisationalUnitOptionsByDocumentIds(
+	documentIds: ReadonlyArray<string>,
+) {
+	if (documentIds.length === 0) {
 		return [];
 	}
 
 	const rows = await db
 		.select({
-			id: schema.organisationalUnits.id,
+			documentId: schema.entityVersions.entityId,
 			name: schema.organisationalUnits.name,
 			type: schema.organisationalUnitTypes.type,
+			slug: schema.entities.slug,
 		})
 		.from(schema.organisationalUnits)
 		.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 		.innerJoin(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 		)
-		.where(and(publishedEntityVersionWhere(), inArray(schema.organisationalUnits.id, [...ids])))
+		.where(
+			and(publishedEntityVersionWhere(), inArray(schema.entityVersions.entityId, [...documentIds])),
+		)
 		.orderBy(schema.organisationalUnits.name);
 
-	const itemById = new Map(
+	const itemByDocumentId = new Map(
 		rows.map(
 			(row) =>
 				[
-					row.id,
+					row.documentId,
 					{
-						id: row.id,
+						documentId: row.documentId,
 						name: row.name,
 						description: formatOrganisationalUnitType(row.type),
+						type: row.type,
+						slug: row.slug,
 					},
 				] as const,
 		),
 	);
 
-	return ids.flatMap((id) => {
-		const item = itemById.get(id);
+	return documentIds.flatMap((documentId) => {
+		const item = itemByDocumentId.get(documentId);
 		return item != null ? [item] : [];
 	});
 }

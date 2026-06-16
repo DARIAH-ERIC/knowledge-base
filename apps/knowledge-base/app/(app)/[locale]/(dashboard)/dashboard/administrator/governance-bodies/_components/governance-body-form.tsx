@@ -6,14 +6,13 @@ import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { Input } from "@dariah-eric/ui/input";
-import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import {
@@ -21,13 +20,14 @@ import {
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import { RichTextContentBlocksField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-content-blocks-field";
 import { SocialMediaRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface GovernanceBodyFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	governanceBody?: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
-		description?: JSONContent;
+		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	formId?: string;
@@ -94,7 +94,7 @@ export function GovernanceBodyForm(props: Readonly<GovernanceBodyFormProps>): Re
 
 					<TextField defaultValue={governanceBody?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>
@@ -105,7 +105,7 @@ export function GovernanceBodyForm(props: Readonly<GovernanceBodyFormProps>): Re
 					{selectedImage != null && (
 						<img
 							alt={t("Selected image")}
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
 							src={selectedImage.url}
 						/>
 					)}
@@ -145,9 +145,10 @@ export function GovernanceBodyForm(props: Readonly<GovernanceBodyFormProps>): Re
 					title={t("Description")}
 					variant="stacked"
 				>
-					<RichTextEditor
+					<RichTextContentBlocksField
 						aria-label={t("Description")}
-						content={governanceBody?.description}
+						initialBlocks={governanceBody?.descriptionContentBlocks}
+						initialAssets={initialAssets}
 						name="description"
 					/>
 				</FormSection>

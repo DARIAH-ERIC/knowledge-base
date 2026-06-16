@@ -74,7 +74,7 @@ export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNod
 
 					<TextField defaultValue={opportunity?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 					<DatePicker

@@ -2,10 +2,10 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import {
 	EntityEditTab,
 	EntityEditTabs,
@@ -13,6 +13,7 @@ import {
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
+import { ReverseUnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { CountryForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form";
 import { discardCountryDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/discard-country-draft.action";
@@ -20,7 +21,11 @@ import { publishCountryAction } from "@/app/(app)/[locale]/(dashboard)/dashboard
 import { updateCountryAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/update-country.action";
 import type { ContributionPersonOption } from "@/lib/data/contributions";
 import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
-import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
+import type {
+	ReverseUnitRelation,
+	UnitRelation,
+	UnitRelationStatusOption,
+} from "@/lib/data/unit-relations";
 
 interface CountryEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
@@ -28,7 +33,7 @@ interface CountryEditFormProps {
 	hasDraftChanges: boolean;
 	isPublished: boolean;
 	country: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
-		description?: JSONContent;
+		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	initialRelatedEntityIds: Array<string>;
@@ -49,6 +54,10 @@ interface CountryEditFormProps {
 	initialPersonTotal: number;
 	relations: Array<UnitRelation>;
 	unitRelationStatusOptions: Array<UnitRelationStatusOption>;
+	/** DARIAH ERIC document id, the fixed target of the institution representation relations. */
+	ericDocumentId: string | null;
+	ericInstitutionRelations: Array<ReverseUnitRelation>;
+	ericInstitutionStatusOptions: Array<UnitRelationStatusOption>;
 }
 
 export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNode {
@@ -76,6 +85,9 @@ export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNod
 		initialPersonTotal,
 		relations,
 		unitRelationStatusOptions,
+		ericDocumentId,
+		ericInstitutionRelations,
+		ericInstitutionStatusOptions,
 	} = props;
 
 	const t = useExtracted();
@@ -89,6 +101,7 @@ export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNod
 				<TabList aria-label={t("Edit country")}>
 					<EntityEditTab id="details">{t("Details")}</EntityEditTab>
 					<EntityEditTab id="people">{t("People")}</EntityEditTab>
+					<EntityEditTab id="institutions">{t("Institutions")}</EntityEditTab>
 					<EntityEditTab id="relations">{t("Relations")}</EntityEditTab>
 				</TabList>
 
@@ -134,15 +147,37 @@ export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNod
 						initialPersonTotal={initialPersonTotal}
 						relations={personRelations}
 						roleOptions={personRelationRoleOptions}
-						unitId={documentId}
+						organisationalUnitDocumentId={documentId}
 					/>
+				</TabPanel>
+
+				<TabPanel id="institutions" shouldPreserveState={true}>
+					{ericDocumentId != null ? (
+						<ReverseUnitRelationsSection
+							messages={{
+								title: t("Institutions"),
+								memberLabel: t("Institution"),
+								empty: t("No institutions."),
+								addButton: t("Add institution"),
+							}}
+							relatedUnitDocumentId={ericDocumentId}
+							relations={ericInstitutionRelations}
+							sourceUnitLocatedInCountryDocumentId={documentId}
+							sourceUnitType="institution"
+							statusOptions={ericInstitutionStatusOptions}
+						/>
+					) : (
+						<p className="text-sm text-neutral-500">
+							{t("DARIAH ERIC is not available, so institution relations cannot be managed.")}
+						</p>
+					)}
 				</TabPanel>
 
 				<TabPanel id="relations" shouldPreserveState={true}>
 					<UnitRelationsSection
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}
-						unitId={documentId}
+						unitDocumentId={documentId}
 					/>
 				</TabPanel>
 			</EntityEditTabs>

@@ -21,6 +21,18 @@ export const publicRelatedEntityTypesEnum = [
 
 export type PublicRelatedEntityType = (typeof publicRelatedEntityTypesEnum)[number];
 
+export const LicenseSchema = v.object({
+	name: v.string(),
+	url: v.string(),
+});
+
+export const ImageSchema = v.object({
+	url: v.string(),
+	alt: v.nullable(v.string()),
+	caption: v.nullable(v.string()),
+	license: v.nullable(LicenseSchema),
+});
+
 export const PaginationQuerySchema = v.object({
 	limit: v.pipe(
 		v.optional(

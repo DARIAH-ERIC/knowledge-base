@@ -2,7 +2,7 @@
 
 import * as schema from "@dariah-eric/database/schema";
 
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, toImageAsset } from "@/lib/images";
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, count, desc, eq, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -34,6 +34,10 @@ function selectNationalConsortiumRows() {
 		acronym: schema.organisationalUnits.acronym,
 		slug: consortiumEntities.slug,
 		logoKey: schema.assets.key,
+		logoAlt: schema.assets.alt,
+		logoCaption: schema.assets.caption,
+		licenseName: schema.licenses.name,
+		licenseUrl: schema.licenses.url,
 		countryId: countries.id,
 		countryName: countries.name,
 		countrySlug: countryEntities.slug,
@@ -48,6 +52,10 @@ interface NationalConsortiumRow {
 	acronym: string | null;
 	slug: string;
 	logoKey: string | null;
+	logoAlt: string | null;
+	logoCaption: string | null;
+	licenseName: string | null;
+	licenseUrl: string | null;
 	countryId: string | null;
 	countryName: string | null;
 	countrySlug: string | null;
@@ -70,6 +78,7 @@ function fromNationalConsortia(db: Database | Transaction) {
 		)
 		.innerJoin(consortiumEntities, eq(schema.entityVersions.entityId, consortiumEntities.id))
 		.leftJoin(schema.assets, eq(schema.organisationalUnits.imageId, schema.assets.id))
+		.leftJoin(schema.licenses, eq(schema.licenses.id, schema.assets.licenseId))
 		.leftJoin(
 			countryRelations,
 			and(
@@ -108,7 +117,16 @@ function mapNationalConsortiumRow(row: NationalConsortiumRow) {
 						slug: row.countrySlug,
 					}
 				: null,
-		logo: generateImageUrl(row.logoKey != null ? { key: row.logoKey } : null, imageWidth.preview),
+		logo: generateImageUrl(
+			toImageAsset({
+				key: row.logoKey,
+				alt: row.logoAlt,
+				caption: row.logoCaption,
+				licenseName: row.licenseName,
+				licenseUrl: row.licenseUrl,
+			}),
+			imageWidth.preview,
+		),
 	};
 }
 

@@ -24,7 +24,7 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 	};
 
 	const client = {
-		async get(params?: { count?: number; offset?: number }) {
+		async get(params?: { count?: number; offset?: number; status?: string }) {
 			const url = createUrl({
 				baseUrl,
 				pathname: "/3.0/campaigns",
@@ -34,7 +34,14 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 					offset: params?.offset ?? 0,
 					list_id: listId,
 					sort_dir: "DESC",
-					sort_field: "send_time",
+					/**
+					 * Mailchimp does not order campaigns correctly by `sort_field=send_time` when the results
+					 * are also filtered by `list_id` (which we always do). Since campaigns are created in the
+					 * same order they are sent, we sort by `create_time` instead, which Mailchimp orders
+					 * correctly and which matches send time order.
+					 */
+					sort_field: "create_time",
+					status: params?.status,
 				}),
 			});
 

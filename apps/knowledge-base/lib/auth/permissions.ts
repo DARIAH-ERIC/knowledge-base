@@ -13,7 +13,7 @@ export type Resource =
 	| { type: "country_report"; id: string }
 	| { type: "working_group_report"; id: string };
 
-const chairRoles = ["is_chair_of", "is_vice_chair_of", "is_director_of"] as const;
+const chairRoles = ["is_chair_of", "is_vice_chair_of"] as const;
 const memberRoles = ["is_member_of"] as const;
 const coordinatorRoles = ["national_coordinator", "national_coordinator_deputy"] as const;
 const coordinationStaffRoles = ["national_coordination_staff"] as const;

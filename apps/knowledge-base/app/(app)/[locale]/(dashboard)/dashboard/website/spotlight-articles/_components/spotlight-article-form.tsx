@@ -84,7 +84,7 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 						name="summary"
 					>
 						<Label>{t("Summary")}</Label>
-						<TextArea />
+						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
 				</FormSection>

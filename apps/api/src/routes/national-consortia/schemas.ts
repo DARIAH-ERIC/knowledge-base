@@ -1,7 +1,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
-import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
+import { ImageSchema, PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 const NationalConsortiumCountrySchema = v.object({
 	...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name"]).entries,
@@ -13,7 +13,7 @@ export const NationalConsortiumSchema = v.pipe(
 		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name", "acronym"]).entries,
 		slug: v.string(),
 		country: v.nullable(NationalConsortiumCountrySchema),
-		logo: v.nullable(v.object({ url: v.string() })),
+		logo: v.nullable(ImageSchema),
 	}),
 	v.description("National consortium"),
 	v.metadata({ ref: "NationalConsortium" }),

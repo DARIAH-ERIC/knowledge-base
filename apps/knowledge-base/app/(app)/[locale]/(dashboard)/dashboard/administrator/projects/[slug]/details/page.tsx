@@ -9,10 +9,8 @@ import { discardProjectDraftAction } from "@/app/(app)/[locale]/(dashboard)/dash
 import { publishProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/publish-project.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import {
-	getRichTextFieldContent,
-	resolveSelectedDetailVersion,
-} from "@/lib/data/entity-detail-view";
+import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { db } from "@/lib/db";
 import { alias, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
@@ -116,8 +114,8 @@ export default async function DashboardAdministratorProjectDetailsPage(
 		notFound();
 	}
 
-	const [description, partners, socialMediaLinks] = await Promise.all([
-		getRichTextFieldContent(versionId, "description"),
+	const [descriptionContentBlocks, partners, socialMediaLinks] = await Promise.all([
+		getEntityContentBlocks(versionId, "description"),
 		(() => {
 			const unitDocumentLifecycle = alias(schema.documentLifecycle, "unit_document_lifecycle");
 			return db
@@ -183,7 +181,7 @@ export default async function DashboardAdministratorProjectDetailsPage(
 			isPublished={publishedId != null}
 			project={{
 				...project,
-				description,
+				descriptionContentBlocks,
 				image,
 				partners: partners.map((partner) => {
 					return {

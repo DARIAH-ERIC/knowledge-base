@@ -45,6 +45,10 @@ import { dashboardPageSize } from "@/config/pagination.config";
 import type { ProjectPartnersResult } from "@/lib/data/project-partners";
 import { dateToCalendarDate } from "@/lib/date";
 import { useRouter } from "@/lib/navigation/navigation";
+import {
+	type OrganisationalUnitOption,
+	toOrganisationalUnitDocumentOptionsPage,
+} from "@/lib/organisational-unit-options";
 
 interface ProjectPartnersPageProps {
 	projectPartners: ProjectPartnersResult;
@@ -134,7 +138,9 @@ async function fetchProjectOptionsPage(
 		throw new Error("Failed to load projects.");
 	}
 
-	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+	return toOrganisationalUnitDocumentOptionsPage(
+		(await response.json()) as { items: Array<OrganisationalUnitOption>; total: number },
+	);
 }
 
 async function fetchOrganisationalUnitOptionsPage(
@@ -206,7 +212,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 				description: item.projectName,
 			},
 			unit: {
-				id: item.unitVersionId,
+				id: item.unitDocumentId,
 				name: item.unitName,
 				description: formatValue(item.unitType),
 			},
@@ -255,7 +261,12 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 				sortDescriptor={search.sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn allowsSorting={true} id="projectName" isRowHeader={true}>
+					<TableColumn
+						allowsSorting={true}
+						className="max-inline-80"
+						id="projectName"
+						isRowHeader={true}
+					>
 						{t("Project")}
 					</TableColumn>
 					<TableColumn allowsSorting={true} id="roleType">
@@ -264,7 +275,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 					<TableColumn allowsSorting={true} id="unitType">
 						{t("Type")}
 					</TableColumn>
-					<TableColumn allowsSorting={true} id="unitName">
+					<TableColumn allowsSorting={true} className="max-inline-80" id="unitName">
 						{t("Partner")}
 					</TableColumn>
 					<TableColumn allowsSorting={true} id="durationStart">
@@ -273,13 +284,13 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 					<TableColumn allowsSorting={true} id="durationEnd">
 						{t("Until")}
 					</TableColumn>
-					<TableColumn />
+					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
 						<TableRow id={item.id}>
 							<TableCell>
-								<div className="max-inline-64 truncate">
+								<div className="max-inline-80 truncate" title={item.projectName}>
 									{item.projectAcronym ?? item.projectName}
 								</div>
 							</TableCell>
@@ -289,7 +300,11 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 									{formatValue(item.unitType)}
 								</Badge>
 							</TableCell>
-							<TableCell>{item.unitName}</TableCell>
+							<TableCell>
+								<div className="max-inline-80 truncate" title={item.unitName}>
+									{item.unitName}
+								</div>
+							</TableCell>
 							<TableCell>
 								{item.durationStart != null
 									? format.dateTime(item.durationStart, { dateStyle: "short" })
@@ -302,7 +317,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 										? t("present")
 										: "—"}
 							</TableCell>
-							<TableCell className="text-end">
+							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Action
 										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
@@ -358,6 +373,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 							fetchPage={fetchProjectOptionsPage}
 							initialItems={[]}
 							initialTotal={0}
+							isRequired={true}
 							label={t("Project")}
 							onSelect={(item) => {
 								setDialog((prev) => {
@@ -367,13 +383,14 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 							placeholder={t("No project selected")}
 							selectedItem={dialog.project}
 						/>
-						<input name="projectId" type="hidden" value={dialog.project?.id ?? ""} />
+						<input name="projectDocumentId" type="hidden" value={dialog.project?.id ?? ""} />
 						<AsyncSelect
 							aria-label={t("Partner")}
 							emptyMessage={t("No organisations found.")}
 							fetchPage={fetchOrganisationalUnitOptionsPage}
 							initialItems={[]}
 							initialTotal={0}
+							isRequired={true}
 							label={t("Partner")}
 							onSelect={(item) => {
 								setDialog((prev) => {
@@ -383,7 +400,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 							placeholder={t("No partner selected")}
 							selectedItem={dialog.unit}
 						/>
-						<input name="unitId" type="hidden" value={dialog.unit?.id ?? ""} />
+						<input name="unitDocumentId" type="hidden" value={dialog.unit?.id ?? ""} />
 						<Select
 							isRequired={true}
 							onChange={(key) => {

@@ -48,6 +48,16 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 			},
@@ -124,6 +134,16 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 			},
@@ -245,6 +265,16 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 			image: {
 				columns: {
 					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
 				},
 			},
 		},

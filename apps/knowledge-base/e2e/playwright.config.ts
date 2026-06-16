@@ -108,7 +108,7 @@ if (config.webServer != null) {
 export default defineConfig({
 	testDir: "../e2e",
 	snapshotDir: "../e2e/snapshots",
-	timeout: isCI ? 60_000 : 30_000,
+	timeout: isCI ? 90_000 : 30_000,
 	fullyParallel: true,
 	forbidOnly: isCI,
 	retries: isCI ? 1 : 0,

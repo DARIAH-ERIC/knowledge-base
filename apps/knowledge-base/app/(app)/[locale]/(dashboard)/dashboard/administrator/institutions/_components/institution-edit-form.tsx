@@ -2,10 +2,10 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import {
 	EntityEditTab,
 	EntityEditTabs,
@@ -35,7 +35,7 @@ interface InstitutionEditFormProps {
 		schema.OrganisationalUnit,
 		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
-		description?: JSONContent;
+		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	initialRelatedEntityIds: Array<string>;
@@ -56,7 +56,6 @@ interface InstitutionEditFormProps {
 	initialPersonTotal: number;
 	relations: Array<UnitRelation>;
 	unitRelationStatusOptions: Array<UnitRelationStatusOption>;
-	unitVersionId: string;
 	projects: Array<UnitProject>;
 	projectRoles: Array<{ id: string; role: string }>;
 }
@@ -86,7 +85,6 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 		initialPersonTotal,
 		relations,
 		unitRelationStatusOptions,
-		unitVersionId,
 		projects,
 		projectRoles,
 	} = props;
@@ -147,7 +145,7 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 						initialPersonTotal={initialPersonTotal}
 						relations={personRelations}
 						roleOptions={personRelationRoleOptions}
-						unitId={documentId}
+						organisationalUnitDocumentId={documentId}
 					/>
 				</TabPanel>
 
@@ -155,7 +153,7 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 					<UnitRelationsSection
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}
-						unitId={documentId}
+						unitDocumentId={documentId}
 					/>
 				</TabPanel>
 
@@ -163,7 +161,7 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 					<UnitProjectsSection
 						projects={projects}
 						roles={projectRoles}
-						unitVersionId={unitVersionId}
+						unitDocumentId={documentId}
 					/>
 				</TabPanel>
 			</EntityEditTabs>

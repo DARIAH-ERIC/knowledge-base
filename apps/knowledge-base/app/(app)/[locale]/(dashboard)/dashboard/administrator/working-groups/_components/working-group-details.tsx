@@ -6,11 +6,11 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import { RichTextRenderer } from "@dariah-eric/ui/rich-text-editor";
-import type { JSONContent } from "@tiptap/core";
-import { useExtracted, useFormatter } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
@@ -29,7 +29,7 @@ interface WorkingGroupDetailsProps {
 		schema.OrganisationalUnit,
 		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
 	> & {
-		description: JSONContent | null;
+		descriptionContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	selectedRelatedEntities: Array<{
@@ -71,7 +71,6 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 	} = props;
 
 	const t = useExtracted();
-	const format = useFormatter();
 
 	return (
 		<Fragment>
@@ -113,7 +112,7 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 					{workingGroup.image != null ? (
 						<img
 							alt=""
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
 							src={workingGroup.image.url}
 						/>
 					) : null}
@@ -121,8 +120,11 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 
 				<DescriptionTerm>{t("Description")}</DescriptionTerm>
 				<DescriptionDetails>
-					{workingGroup.description != null ? (
-						<RichTextRenderer key={selectedVersion} content={workingGroup.description} />
+					{workingGroup.descriptionContentBlocks.length > 0 ? (
+						<ContentBlocksView
+							key={selectedVersion}
+							contentBlocks={workingGroup.descriptionContentBlocks}
+						/>
 					) : null}
 				</DescriptionDetails>
 
@@ -208,13 +210,7 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 									relation={formatRoleType(relation.roleType)}
 									target={workingGroup.name}
 									targetType={formatRoleType(relation.targetUnitType)}
-									duration={
-										relation.duration.end
-											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })
-									}
+									duration={relation.duration}
 								/>
 							))}
 						</ul>
@@ -236,13 +232,7 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 										relation.relatedUnitSlug,
 									)}
 									targetType={formatRoleType(relation.relatedUnitType)}
-									duration={
-										relation.duration.end
-											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
-													dateStyle: "short",
-												})
-											: format.dateTime(relation.duration.start, { dateStyle: "short" })
-									}
+									duration={relation.duration}
 								/>
 							))}
 						</ul>

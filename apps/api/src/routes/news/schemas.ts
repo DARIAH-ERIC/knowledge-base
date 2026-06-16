@@ -3,6 +3,7 @@ import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import {
+	ImageSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
 	RelatedEntitiesSchema,
@@ -12,7 +13,7 @@ import {
 export const NewsItemBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.NewsItemSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.object({ url: v.string() }),
+		image: ImageSchema,
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 	}),
@@ -33,7 +34,7 @@ export type NewsItemList = v.InferOutput<typeof NewsItemListSchema>;
 export const NewsItemSchema = v.pipe(
 	v.object({
 		...v.pick(schema.NewsItemSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.object({ url: v.string() }),
+		image: ImageSchema,
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		content: v.optional(v.array(ContentBlockSchema), []),

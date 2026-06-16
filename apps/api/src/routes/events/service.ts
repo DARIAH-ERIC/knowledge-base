@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { getContentBlocks } from "@/lib/content-blocks";
 import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, toImageAsset } from "@/lib/images";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { EventOrder } from "@/routes/events/schemas";
@@ -83,6 +83,10 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 				},
 				image: {
 					key: schema.assets.key,
+					alt: schema.assets.alt,
+					caption: schema.assets.caption,
+					licenseName: schema.licenses.name,
+					licenseUrl: schema.licenses.url,
 				},
 			})
 			.from(schema.events)
@@ -93,6 +97,7 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
 			)
 			.leftJoin(schema.assets, eq(schema.assets.id, schema.events.imageId))
+			.leftJoin(schema.licenses, eq(schema.licenses.id, schema.assets.licenseId))
 			.where(rangeFilter)
 			.orderBy(orderBy)
 			.limit(limit)
@@ -111,7 +116,7 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = generateImageUrl(item.image, imageWidth.preview);
+		const image = generateImageUrl(toImageAsset(item.image), imageWidth.preview);
 		const duration = serializeDateRange(item.duration);
 
 		const { entityVersion, ...rest } = item;
@@ -249,6 +254,16 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 			},
@@ -316,6 +331,16 @@ export async function getEventSlugs(db: Database | Transaction, params: GetEvent
 				image: {
 					columns: {
 						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
 					},
 				},
 			},
@@ -385,6 +410,16 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 			image: {
 				columns: {
 					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
 				},
 			},
 		},

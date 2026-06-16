@@ -5,7 +5,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { type Transaction, db } from "@/lib/db";
-import { and, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
+import { unaccentIlike } from "@/lib/db/search";
+import { and, eq, inArray, or, sql } from "@/lib/db/sql";
 import { search } from "@/lib/search";
 
 export interface RelationOptionItem {
@@ -27,7 +28,10 @@ export async function getEntityRelationOptions(
 	const query = q?.trim();
 	const searchWhere =
 		query != null && query !== ""
-			? or(ilike(schema.entities.slug, `%${query}%`), ilike(schema.entityTypes.type, `%${query}%`))
+			? or(
+					unaccentIlike(schema.entities.slug, `%${query}%`),
+					unaccentIlike(schema.entityTypes.type, `%${query}%`),
+				)
 			: undefined;
 	const where = and(publishedEntityVersionWhere(), searchWhere);
 

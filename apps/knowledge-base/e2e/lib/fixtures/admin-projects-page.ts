@@ -110,6 +110,24 @@ export class AdminProjectsPage {
 		await this.page.keyboard.type(text);
 	}
 
+	async insertImageInDescription(assetLabel: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Insert image" }).click();
+		await this.page.waitForSelector('[role="dialog"]');
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		const asset = dialog.getByRole("gridcell", { name: assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
+		await expect(this.page.getByLabel("Image block", { exact: true })).toBeVisible();
+	}
+
+	async typeDescriptionAfterImage(text: string): Promise<void> {
+		const editor = this.page.getByRole("textbox", { name: "Description" });
+		await editor.press("ArrowRight");
+		await this.page.keyboard.type(text);
+	}
+
 	async selectFirstOptionInControl(label: string): Promise<void> {
 		const control = this.page
 			.locator('[data-slot="control"]')
@@ -195,7 +213,11 @@ export class AdminProjectsPage {
 	}
 
 	async clickEditProjectPartner(): Promise<void> {
-		await this.projectPartnersTable().getByRole("button", { name: "Edit partner" }).first().click();
+		await this.projectPartnersTable()
+			.getByRole("button", { name: "Open actions menu" })
+			.first()
+			.click();
+		await this.page.getByRole("menuitem", { name: "Edit partner" }).click();
 	}
 
 	async fillProjectPartnerEditDate(
@@ -221,9 +243,10 @@ export class AdminProjectsPage {
 
 	async clickDeleteProjectPartner(): Promise<void> {
 		await this.projectPartnersTable()
-			.getByRole("button", { name: "Delete partner" })
+			.getByRole("button", { name: "Open actions menu" })
 			.first()
 			.click();
+		await this.page.getByRole("menuitem", { name: "Delete partner" }).click();
 	}
 
 	async confirmDeleteProjectPartner(): Promise<void> {

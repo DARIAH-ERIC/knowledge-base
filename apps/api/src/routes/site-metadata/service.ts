@@ -16,6 +16,16 @@ export async function getSiteMetadata(db: Database | Transaction) {
 			ogImage: {
 				columns: {
 					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
 				},
 			},
 		},

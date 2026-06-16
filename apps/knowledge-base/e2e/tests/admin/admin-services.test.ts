@@ -108,8 +108,8 @@ test.describe("services admin", () => {
 		const organisationalUnits = await db.getOrganisationalUnitOptions(2);
 		expect(organisationalUnits).toHaveLength(2);
 		const [ownerUnit, providerUnit] = organisationalUnits as [
-			{ id: string; name: string },
-			{ id: string; name: string },
+			{ documentId: string; name: string },
+			{ documentId: string; name: string },
 		];
 
 		await servicesPage.gotoCreate();
@@ -134,8 +134,8 @@ test.describe("services admin", () => {
 
 		const updated = await db.getServiceByName(updatedName);
 		expect(updated).toMatchObject({
-			ownerUnitIds: [ownerUnit.id],
-			providerUnitIds: [providerUnit.id],
+			ownerUnitDocumentIds: [ownerUnit.documentId],
+			providerUnitDocumentIds: [providerUnit.documentId],
 		});
 	});
 
@@ -146,8 +146,8 @@ test.describe("services admin", () => {
 		const organisationalUnits = await db.getOrganisationalUnitOptions(2);
 		expect(organisationalUnits).toHaveLength(2);
 		const [ownerUnit, providerUnit] = organisationalUnits as [
-			{ id: string; name: string },
-			{ id: string; name: string },
+			{ documentId: string; name: string },
+			{ documentId: string; name: string },
 		];
 
 		await servicesPage.gotoCreate();
@@ -184,9 +184,9 @@ test.describe("services admin", () => {
 			comment: null,
 			dariahBranding: false,
 			monitoring: false,
-			ownerUnitIds: [],
+			ownerUnitDocumentIds: [],
 			privateSupplier: false,
-			providerUnitIds: [],
+			providerUnitDocumentIds: [],
 		});
 	});
 

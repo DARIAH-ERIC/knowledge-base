@@ -70,6 +70,37 @@ test.describe("projects admin", () => {
 		);
 	});
 
+	test("should store images inserted in project rich-text descriptions as image content blocks", async ({
+		createAdminProjectsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const adminProjectsPage = createAdminProjectsPage(workerIndex);
+		const testAsset = await db.getTestAsset();
+
+		const projectName = `${adminProjectsPage.workerPrefix} Rich Text Image ${randomUUID()}`;
+		const descriptionBeforeImage = "E2E project description before image.";
+		const descriptionAfterImage = "E2E project description after image.";
+
+		await adminProjectsPage.gotoCreate();
+		await adminProjectsPage.fillName(projectName);
+		await adminProjectsPage.selectFirstScope();
+		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
+		await adminProjectsPage.fillSummary("E2E test project with rich-text image");
+		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await adminProjectsPage.fillDescription(descriptionBeforeImage);
+		await adminProjectsPage.insertImageInDescription("E2E Test Asset");
+		await adminProjectsPage.typeDescriptionAfterImage(descriptionAfterImage);
+
+		await adminProjectsPage.submitForm();
+
+		const blocks = await db.getProjectDescriptionContentBlocksByName(projectName);
+		expect(blocks.map((block) => block.type)).toStrictEqual(["rich_text", "image", "rich_text"]);
+		expect(JSON.stringify(blocks[0]?.content)).toContain(descriptionBeforeImage);
+		expect(blocks[1]?.imageId).toBe(testAsset.id);
+		expect(JSON.stringify(blocks[2]?.content)).toContain(descriptionAfterImage);
+	});
+
 	test("should edit all project form fields", async ({ page, createAdminProjectsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const adminProjectsPage = createAdminProjectsPage(workerIndex);
