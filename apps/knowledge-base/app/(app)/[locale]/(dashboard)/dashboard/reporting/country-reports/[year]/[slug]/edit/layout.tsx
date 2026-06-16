@@ -47,13 +47,13 @@ export default async function CountryReportEditLayout(
 				</HeaderContent>
 			</Header>
 
-			<div className="flex flex-col gap-y-6 px-(--layout-padding) pbs-6">
+			<div className="flex max-inline-4xl flex-col gap-y-6 px-(--layout-padding) pbs-6">
 				<ReportEditGuard>
 					<CountryReportStepNav
 						editBasePath={getCountryReportEditHref(Number(routeYear), slug)}
 						variant="reporting"
 					/>
-					<div className="inline-full max-inline-3xl">{children}</div>
+					<div className="inline-full max-inline-4xl">{children}</div>
 				</ReportEditGuard>
 			</div>
 		</div>

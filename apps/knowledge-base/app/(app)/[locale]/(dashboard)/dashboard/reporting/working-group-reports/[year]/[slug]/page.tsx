@@ -80,7 +80,7 @@ export default async function DashboardReportingWorkingGroupReportPage(
 				</HeaderAction>
 			</Header>
 
-			<div className="mbs-8 px-(--layout-padding)">
+			<div className="mbs-8 max-inline-4xl px-(--layout-padding)">
 				<WorkingGroupReportSummary data={report.summary} />
 			</div>
 		</div>
