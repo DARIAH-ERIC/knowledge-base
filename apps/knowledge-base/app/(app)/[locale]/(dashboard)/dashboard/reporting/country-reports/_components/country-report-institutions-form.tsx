@@ -95,6 +95,14 @@ export function CountryReportInstitutionsForm(
 						"The partner institutions recorded for this report. Edit the underlying relations on the institution itself, then refresh to update this snapshot.",
 					)}
 				</p>
+				{canManageRelations && (
+					<LocaleLink
+						className="self-start text-sm text-fg underline underline-offset-4"
+						href="/dashboard/administrator/institutions"
+					>
+						{t("Manage institutions")}
+					</LocaleLink>
+				)}
 			</div>
 
 			{institutions.length > 0 && (

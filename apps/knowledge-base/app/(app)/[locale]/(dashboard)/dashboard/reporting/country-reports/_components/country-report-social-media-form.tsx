@@ -181,7 +181,12 @@ function AccountCard(props: Readonly<AccountCardProps>): ReactNode {
 				<form action={deleteAction}>
 					<input name="membershipId" type="hidden" value={account.id} />
 					<input name="countryReportId" type="hidden" value={reportId} />
-					<Button intent="danger" size="sm" type="submit">
+					<Button
+						className="text-danger hover:bg-danger/10 hover:text-danger"
+						intent="plain"
+						size="sm"
+						type="submit"
+					>
 						{t("Remove")}
 					</Button>
 				</form>

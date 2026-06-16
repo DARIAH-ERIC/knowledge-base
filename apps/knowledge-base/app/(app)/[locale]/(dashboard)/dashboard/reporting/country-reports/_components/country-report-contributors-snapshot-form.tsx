@@ -56,6 +56,14 @@ export function CountryReportContributorsSnapshotForm(
 						"Coordinators and deputies recorded for this report. Edit the role on the person itself, then refresh to update this snapshot.",
 					)}
 				</p>
+				{canManageRelations && (
+					<LocaleLink
+						className="self-start text-sm text-fg underline underline-offset-4"
+						href="/dashboard/administrator/persons"
+					>
+						{t("Manage persons")}
+					</LocaleLink>
+				)}
 			</div>
 
 			{contributors.length > 0 && (

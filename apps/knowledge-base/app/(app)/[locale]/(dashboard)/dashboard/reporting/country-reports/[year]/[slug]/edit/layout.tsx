@@ -53,7 +53,7 @@ export default async function CountryReportEditLayout(
 						editBasePath={getCountryReportEditHref(Number(routeYear), slug)}
 						variant="reporting"
 					/>
-					{children}
+					<div className="inline-full max-inline-3xl">{children}</div>
 				</ReportEditGuard>
 			</div>
 		</div>
