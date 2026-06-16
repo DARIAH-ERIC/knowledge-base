@@ -40,6 +40,7 @@ export async function CountryReportConfirmScreen(
 
 	const t = await getExtracted();
 	const canConfirm = await can(user, "confirm", { type: "country_report", id: reportId });
+	const isAdmin = user.role === "admin";
 
 	return (
 		<div className="flex flex-col gap-y-10">
@@ -52,14 +53,14 @@ export async function CountryReportConfirmScreen(
 				</div>
 
 				<div className="flex flex-wrap gap-3">
-					{report.status === "draft" && report.campaign.status === "open" && (
+					{canConfirm && report.status === "draft" && report.campaign.status === "open" && (
 						<form action={submitCountryReportAction}>
 							<input name="id" type="hidden" value={report.id} />
 							<Button type="submit">{t("Submit report")}</Button>
 						</form>
 					)}
 
-					{canConfirm && report.status === "submitted" && (
+					{isAdmin && report.status === "submitted" && (
 						<form action={confirmCountryReportAction}>
 							<input name="id" type="hidden" value={report.id} />
 							<Button type="submit">{t("Accept report")}</Button>

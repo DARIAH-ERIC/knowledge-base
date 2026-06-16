@@ -36,7 +36,12 @@ export async function GET(
 					return { name: i.name, acronym: i.acronym, representationType: i.representationType };
 				}),
 				contributors: report.summary.contributions.map((c) => {
-					return { name: c.personName, role: c.roleType, orgUnit: c.orgUnitName };
+					return {
+						name: c.personName,
+						role: c.roleType,
+						compensationRole: c.compensationRole,
+						orgUnit: c.orgUnitName,
+					};
 				}),
 				events: {
 					small: report.summary.smallEvents,

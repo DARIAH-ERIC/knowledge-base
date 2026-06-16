@@ -7,7 +7,10 @@ import { revalidatePath } from "next/cache";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getCountryReportEditHrefById } from "@/lib/data/reporting-urls";
+import {
+	countryReportRevalidatePaths,
+	getCountryReportEditHrefById,
+} from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { redirect } from "@/lib/navigation/navigation";
@@ -20,7 +23,18 @@ export async function submitCountryReportAction(formData: FormData): Promise<voi
 
 	const locale = await getLocale();
 	const { user } = await assertAuthenticated();
-	await assertCan(user, "update", { type: "country_report", id });
+	// Submitting is reserved for the confirm role (national coordinators / admins), not plain reporters.
+	await assertCan(user, "confirm", { type: "country_report", id });
+
+	const report = await db.query.countryReports.findFirst({
+		where: { id },
+		columns: { status: true },
+		with: { campaign: { columns: { status: true } } },
+	});
+	// Only a draft report in an open campaign can be submitted (no re-submit; accepted is terminal).
+	if (report?.status !== "draft" || report.campaign.status !== "open") {
+		return;
+	}
 
 	await db
 		.update(schema.countryReports)
@@ -38,7 +52,9 @@ export async function submitCountryReportAction(formData: FormData): Promise<voi
 		},
 	});
 
-	revalidatePath("/[locale]/dashboard/reporting", "layout");
+	for (const path of countryReportRevalidatePaths) {
+		revalidatePath(path, "layout");
+	}
 
 	redirect({ href: await getCountryReportEditHrefById(id, "confirm"), locale });
 }

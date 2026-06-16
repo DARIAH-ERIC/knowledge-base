@@ -20,6 +20,19 @@ dotenv({
 /** Playwright does not export the single web server config type, so we derive it. */
 type WebServer = Extract<NonNullable<PlaywrightTestConfig["webServer"]>, { command: string }>;
 
+/**
+ * Tests under these directories require a specific authenticated storage state and run in their own
+ * projects (`admin`, `non-admin`, `nc`, `wgchair`, `reporter`). The cross-browser projects must
+ * ignore them so they only run once, under the matching identity.
+ */
+const authenticatedProjectGlobs = [
+	"**/admin/**/*.test.ts",
+	"**/non-admin/**/*.test.ts",
+	"**/nc/**/*.test.ts",
+	"**/wgchair/**/*.test.ts",
+	"**/reporter/**/*.test.ts",
+];
+
 function getConfig():
 	| { kind: "remote"; baseUrl: string; webServer: undefined }
 	| { kind: "local"; baseUrl: string; webServer: WebServer } {
@@ -113,17 +126,17 @@ export default defineConfig({
 	projects: [
 		{
 			name: "chromium",
-			testIgnore: ["**/admin/**/*.test.ts", "**/non-admin/**/*.test.ts"],
+			testIgnore: authenticatedProjectGlobs,
 			use: { ...devices["Desktop Chrome"], channel: "chromium" },
 		},
 		{
 			name: "firefox",
-			testIgnore: ["**/admin/**/*.test.ts", "**/non-admin/**/*.test.ts"],
+			testIgnore: authenticatedProjectGlobs,
 			use: { ...devices["Desktop Firefox"] },
 		},
 		{
 			name: "webkit",
-			testIgnore: ["**/admin/**/*.test.ts", "**/non-admin/**/*.test.ts"],
+			testIgnore: authenticatedProjectGlobs,
 			use: { ...devices["Desktop Safari"] },
 		},
 		{
@@ -140,6 +153,36 @@ export default defineConfig({
 			use: {
 				...devices["Desktop Chrome"],
 				storageState: join(import.meta.dirname, ".auth/non-admin.json"),
+			},
+		},
+		/**
+		 * Relation-derived reporting personas, authenticated via the storage states written in
+		 * `global-setup` (see `seedReportingPersonas`). `nc` = national coordinator, `wgchair` =
+		 * working-group chair, `reporter` = WG member + country coordination staff (edits, cannot
+		 * confirm).
+		 */
+		{
+			name: "nc",
+			testMatch: "**/nc/**/*.test.ts",
+			use: {
+				...devices["Desktop Chrome"],
+				storageState: join(import.meta.dirname, ".auth/nc.json"),
+			},
+		},
+		{
+			name: "wgchair",
+			testMatch: "**/wgchair/**/*.test.ts",
+			use: {
+				...devices["Desktop Chrome"],
+				storageState: join(import.meta.dirname, ".auth/wgchair.json"),
+			},
+		},
+		{
+			name: "reporter",
+			testMatch: "**/reporter/**/*.test.ts",
+			use: {
+				...devices["Desktop Chrome"],
+				storageState: join(import.meta.dirname, ".auth/reporter.json"),
 			},
 		},
 		/** Test against mobile viewports. */

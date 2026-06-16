@@ -6,6 +6,11 @@ import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 
 import { CreateCountryReportActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/create-country-report.schema";
+import {
+	getCarriedOverManualContributions,
+	getSnapshotContributionCandidates,
+} from "@/lib/data/report-contributions";
+import { getCarriedOverReportSocialMedia } from "@/lib/data/report-social-media";
 import { getCurrentPartnerInstitutions } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
@@ -77,6 +82,71 @@ export const createCountryReportAction = createMutationAction({
 							organisationalUnitDocumentId: partner.institutionDocumentId,
 							representationType: partner.representationType,
 						};
+					}),
+				);
+			}
+
+			// Seed contributions: Section 1 (coordinator/deputy) snapshotted from current relations, plus
+			// Section 2 (cross-cutting) carried over from last year's report where still active.
+			const snapshotContributions = await getSnapshotContributionCandidates(
+				input.countryId,
+				campaign.year,
+			);
+
+			const previousCampaign = await tx.query.reportingCampaigns.findFirst({
+				where: { year: campaign.year - 1 },
+				columns: { id: true },
+			});
+			const previousReport =
+				previousCampaign == null
+					? null
+					: await tx.query.countryReports.findFirst({
+							where: { campaignId: previousCampaign.id, countryDocumentId: input.countryId },
+							columns: { id: true },
+						});
+			const carriedContributions =
+				previousReport == null
+					? []
+					: await getCarriedOverManualContributions(previousReport.id, campaign.year);
+
+			// Dedupe by personToOrgUnitId (the report's unique key for a contribution).
+			const seen = new Set<string>();
+			const contributionRows = [
+				...snapshotContributions.map((contribution) => {
+					return {
+						countryReportId: created.id,
+						personToOrgUnitId: contribution.personToOrgUnitId,
+						contributionRole: contribution.compensationRole,
+					};
+				}),
+				...carriedContributions.map((contribution) => {
+					return {
+						countryReportId: created.id,
+						personToOrgUnitId: contribution.personToOrgUnitId,
+						contributionRole: contribution.contributionRole,
+					};
+				}),
+			].filter((row) => {
+				if (seen.has(row.personToOrgUnitId)) {
+					return false;
+				}
+				seen.add(row.personToOrgUnitId);
+				return true;
+			});
+
+			if (contributionRows.length > 0) {
+				await tx.insert(schema.countryReportContributions).values(contributionRows);
+			}
+
+			// Carry over the social media coverage set from last year's report (accounts only; KPI values
+			// are re-entered each year).
+			const carriedSocialMediaIds =
+				previousReport == null ? [] : await getCarriedOverReportSocialMedia(previousReport.id);
+
+			if (carriedSocialMediaIds.length > 0) {
+				await tx.insert(schema.countryReportSocialMedia).values(
+					carriedSocialMediaIds.map((socialMediaId) => {
+						return { countryReportId: created.id, socialMediaId };
 					}),
 				);
 			}

@@ -40,6 +40,7 @@ export async function WorkingGroupReportConfirmScreen(
 
 	const t = await getExtracted();
 	const canConfirm = await can(user, "confirm", { type: "working_group_report", id: reportId });
+	const isAdmin = user.role === "admin";
 
 	return (
 		<div className="flex flex-col gap-y-10">
@@ -52,14 +53,14 @@ export async function WorkingGroupReportConfirmScreen(
 				</div>
 
 				<div className="flex flex-wrap gap-3">
-					{report.status === "draft" && report.campaign.status === "open" && (
+					{canConfirm && report.status === "draft" && report.campaign.status === "open" && (
 						<form action={submitWorkingGroupReportAction}>
 							<input name="id" type="hidden" value={report.id} />
 							<Button type="submit">{t("Submit report")}</Button>
 						</form>
 					)}
 
-					{canConfirm && report.status === "submitted" && (
+					{isAdmin && report.status === "submitted" && (
 						<form action={confirmWorkingGroupReportAction}>
 							<input name="id" type="hidden" value={report.id} />
 							<Button type="submit">{t("Accept report")}</Button>

@@ -73,7 +73,8 @@ export async function GET(
 					lines: [
 						`Total contributors: ${value(report.summary.totalContributors)}`,
 						...report.summary.contributions.map(
-							(c) => `${c.personName} - ${formatRole(c.roleType)} - ${c.orgUnitName}`,
+							(c) =>
+								`${c.personName} - ${formatRole(c.compensationRole ?? c.roleType)} - ${c.orgUnitName}`,
 						),
 					],
 				},

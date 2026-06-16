@@ -952,10 +952,20 @@ export class DatabaseService {
 		return row;
 	}
 
-	async getCountryOption(): Promise<{ id: string; name: string }> {
-		const [row] = await this.db
-			// reports key the country by document id.
-			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
+	/**
+	 * Published org-unit documents of a given type, ordered by name. `id` is the document id (matches
+	 * how reports key their org unit) and `slug` is the document slug used to build reporting URLs.
+	 */
+	private async getPublishedOrgUnitOptions(
+		unitType: "country" | "working_group",
+		limit: number,
+	): Promise<Array<{ id: string; name: string; slug: string }>> {
+		return this.db
+			.select({
+				id: schema.entityVersions.entityId,
+				name: schema.organisationalUnits.name,
+				slug: schema.entities.slug,
+			})
 			.from(schema.organisationalUnits)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -963,14 +973,19 @@ export class DatabaseService {
 			)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 			.where(
 				and(
-					eq(schema.organisationalUnitTypes.type, "country"),
+					eq(schema.organisationalUnitTypes.type, unitType),
 					eq(schema.entityStatus.type, "published"),
 				),
 			)
 			.orderBy(schema.organisationalUnits.name)
-			.limit(1);
+			.limit(limit);
+	}
+
+	async getCountryOption(): Promise<{ id: string; name: string; slug: string }> {
+		const [row] = await this.getPublishedOrgUnitOptions("country", 1);
 
 		if (row == null) {
 			throw new Error("Expected at least one country for e2e tests.");
@@ -979,31 +994,42 @@ export class DatabaseService {
 		return row;
 	}
 
-	async getWorkingGroupOption(): Promise<{ id: string; name: string }> {
-		const [row] = await this.db
-			// reports key the working group by document id.
-			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
-			.from(schema.organisationalUnits)
-			.innerJoin(
-				schema.organisationalUnitTypes,
-				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
-			)
-			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(
-				and(
-					eq(schema.organisationalUnitTypes.type, "working_group"),
-					eq(schema.entityStatus.type, "published"),
-				),
-			)
-			.orderBy(schema.organisationalUnits.name)
-			.limit(1);
+	async getWorkingGroupOption(): Promise<{ id: string; name: string; slug: string }> {
+		const [row] = await this.getPublishedOrgUnitOptions("working_group", 1);
 
 		if (row == null) {
 			throw new Error("Expected at least one working group for e2e tests.");
 		}
 
 		return row;
+	}
+
+	/**
+	 * A published country other than {@link getCountryOption} — used by authz tests to prove that a
+	 * persona's relation to one country does not grant access to another.
+	 */
+	async getOtherCountryOption(): Promise<{ id: string; name: string; slug: string }> {
+		const rows = await this.getPublishedOrgUnitOptions("country", 2);
+
+		if (rows[1] == null) {
+			throw new Error("Expected at least two countries for cross-tenant authz e2e tests.");
+		}
+
+		return rows[1];
+	}
+
+	/**
+	 * A published working group other than {@link getWorkingGroupOption}. See
+	 * {@link getOtherCountryOption}.
+	 */
+	async getOtherWorkingGroupOption(): Promise<{ id: string; name: string; slug: string }> {
+		const rows = await this.getPublishedOrgUnitOptions("working_group", 2);
+
+		if (rows[1] == null) {
+			throw new Error("Expected at least two working groups for cross-tenant authz e2e tests.");
+		}
+
+		return rows[1];
 	}
 
 	async createOpenCampaign(year: number): Promise<{ id: string }> {
@@ -1060,6 +1086,14 @@ export class DatabaseService {
 		if (wgReportRows.length > 0) {
 			const wgReportIds = wgReportRows.map((r) => r.id);
 			await this.db
+				.delete(schema.reportScreenComments)
+				.where(
+					and(
+						eq(schema.reportScreenComments.reportType, "working_group"),
+						inArray(schema.reportScreenComments.reportId, wgReportIds),
+					),
+				);
+			await this.db
 				.delete(schema.workingGroupReportAnswers)
 				.where(inArray(schema.workingGroupReportAnswers.workingGroupReportId, wgReportIds));
 			await this.db
@@ -1085,11 +1119,22 @@ export class DatabaseService {
 		if (countryReportRows.length > 0) {
 			const countryReportIds = countryReportRows.map((r) => r.id);
 			await this.db
+				.delete(schema.reportScreenComments)
+				.where(
+					and(
+						eq(schema.reportScreenComments.reportType, "country"),
+						inArray(schema.reportScreenComments.reportId, countryReportIds),
+					),
+				);
+			await this.db
 				.delete(schema.countryReportContributions)
 				.where(inArray(schema.countryReportContributions.countryReportId, countryReportIds));
 			await this.db
 				.delete(schema.countryReportSocialMediaKpis)
 				.where(inArray(schema.countryReportSocialMediaKpis.countryReportId, countryReportIds));
+			await this.db
+				.delete(schema.countryReportSocialMedia)
+				.where(inArray(schema.countryReportSocialMedia.countryReportId, countryReportIds));
 			await this.db
 				.delete(schema.countryReportServiceKpis)
 				.where(inArray(schema.countryReportServiceKpis.countryReportId, countryReportIds));
@@ -1269,7 +1314,35 @@ export class DatabaseService {
 	}
 
 	async deleteCountryReport(id: string): Promise<void> {
-		await this.db.delete(schema.countryReports).where(eq(schema.countryReports.id, id));
+		await this.db.transaction(async (tx) => {
+			await tx
+				.delete(schema.reportScreenComments)
+				.where(
+					and(
+						eq(schema.reportScreenComments.reportType, "country"),
+						eq(schema.reportScreenComments.reportId, id),
+					),
+				);
+			await tx
+				.delete(schema.countryReportContributions)
+				.where(eq(schema.countryReportContributions.countryReportId, id));
+			await tx
+				.delete(schema.countryReportSocialMediaKpis)
+				.where(eq(schema.countryReportSocialMediaKpis.countryReportId, id));
+			await tx
+				.delete(schema.countryReportSocialMedia)
+				.where(eq(schema.countryReportSocialMedia.countryReportId, id));
+			await tx
+				.delete(schema.countryReportServiceKpis)
+				.where(eq(schema.countryReportServiceKpis.countryReportId, id));
+			await tx
+				.delete(schema.countryReportProjectContributions)
+				.where(eq(schema.countryReportProjectContributions.countryReportId, id));
+			await tx
+				.delete(schema.countryReportInstitutions)
+				.where(eq(schema.countryReportInstitutions.countryReportId, id));
+			await tx.delete(schema.countryReports).where(eq(schema.countryReports.id, id));
+		});
 	}
 
 	async getWorkingGroupReportByCampaignAndGroup(
@@ -1311,8 +1384,102 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
+	async createWorkingGroupReport(params: {
+		campaignId: string;
+		workingGroupDocumentId: string;
+		status?: "accepted" | "draft" | "submitted";
+	}): Promise<{ id: string }> {
+		const { campaignId, workingGroupDocumentId, status = "draft" } = params;
+		const [row] = await this.db
+			.insert(schema.workingGroupReports)
+			.values({ campaignId, workingGroupDocumentId, status })
+			.returning({ id: schema.workingGroupReports.id });
+
+		if (row == null) {
+			throw new Error("Failed to create working group report.");
+		}
+
+		return row;
+	}
+
 	async deleteWorkingGroupReport(id: string): Promise<void> {
 		await this.db.delete(schema.workingGroupReports).where(eq(schema.workingGroupReports.id, id));
+	}
+
+	/**
+	 * Seeds a working-group-report question for a campaign. `question` is a minimal tiptap document
+	 * wrapping the given text. Cleaned up with the campaign via `cleanupCampaignSubTables`.
+	 */
+	async createWorkingGroupReportQuestion(params: {
+		campaignId: string;
+		questionText: string;
+		position: number;
+	}): Promise<{ id: string }> {
+		const { campaignId, questionText, position } = params;
+		const [row] = await this.db
+			.insert(schema.workingGroupReportQuestions)
+			.values({
+				campaignId,
+				position,
+				question: {
+					type: "doc",
+					content: [{ type: "paragraph", content: [{ type: "text", text: questionText }] }],
+				},
+			})
+			.returning({ id: schema.workingGroupReportQuestions.id });
+
+		if (row == null) {
+			throw new Error("Failed to create working group report question.");
+		}
+
+		return row;
+	}
+
+	async createWorkingGroupReportEvent(params: {
+		workingGroupReportId: string;
+		title: string;
+		role?: "organiser" | "presenter";
+		date?: Date;
+	}): Promise<{ id: string }> {
+		const { workingGroupReportId, title, role = "organiser", date = new Date() } = params;
+		const [row] = await this.db
+			.insert(schema.workingGroupReportEvents)
+			.values({ workingGroupReportId, title, role, date })
+			.returning({ id: schema.workingGroupReportEvents.id });
+
+		if (row == null) {
+			throw new Error("Failed to create working group report event.");
+		}
+
+		return row;
+	}
+
+	async getWorkingGroupReportEventById(id: string): Promise<{ id: string } | null> {
+		const [row] = await this.db
+			.select({ id: schema.workingGroupReportEvents.id })
+			.from(schema.workingGroupReportEvents)
+			.where(eq(schema.workingGroupReportEvents.id, id))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getWorkingGroupReportAnswer(
+		workingGroupReportId: string,
+		questionId: string,
+	): Promise<{ answer: unknown } | null> {
+		const [row] = await this.db
+			.select({ answer: schema.workingGroupReportAnswers.answer })
+			.from(schema.workingGroupReportAnswers)
+			.where(
+				and(
+					eq(schema.workingGroupReportAnswers.workingGroupReportId, workingGroupReportId),
+					eq(schema.workingGroupReportAnswers.questionId, questionId),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
 	}
 
 	async getUserByName(name: string): Promise<{
@@ -3390,14 +3557,13 @@ export class DatabaseService {
 			await this.cleanupWorkerAssets(workerIndex);
 		}
 
-		// Reporting campaigns use year 3100+workerIndex as their identifier (no [e2e-worker-N] prefix),
-		// so they are not discovered by the name scan above. Delete any leftover campaigns in the
-		// reserved year range directly.
+		// Reporting campaigns use reserved years as their identifier (no [e2e-worker-N] prefix), so
+		// they are not discovered by the name scan above. Delete leftovers in that range directly.
 		const leakedCampaigns = await this.db
 			.select({ id: schema.reportingCampaigns.id })
 			.from(schema.reportingCampaigns)
 			.where(
-				sql`${schema.reportingCampaigns.year} >= 3100 AND ${schema.reportingCampaigns.year} < 3200`,
+				sql`${schema.reportingCampaigns.year} >= 3100 AND ${schema.reportingCampaigns.year} < 3300`,
 			);
 		for (const campaign of leakedCampaigns) {
 			await this.deleteReportingCampaign(campaign.id);

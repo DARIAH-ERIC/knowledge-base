@@ -230,6 +230,18 @@ export class WebsiteDocumentsPoliciesPage {
 		await this.page.waitForURL(`**${BASE_PATH}/**/details`);
 	}
 
+	async gotoEditFromList(title: string): Promise<void> {
+		const row = this.rowByTitle(title);
+		const editHref = await row.getByRole("link", { name: "Content" }).getAttribute("href");
+
+		if (editHref == null) {
+			throw new Error(`Could not find content edit link for document or policy "${title}".`);
+		}
+
+		await this.page.goto(editHref);
+		await this.page.waitForURL(`**${BASE_PATH}/**/edit`);
+	}
+
 	async gotoEditFromDetails(): Promise<void> {
 		const editHref = await this.page.getByRole("link", { name: "Edit" }).getAttribute("href");
 

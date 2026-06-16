@@ -49,6 +49,20 @@ export const countryReportInstitutionRepresentationEnum = [
 	"is_partner_institution_of",
 ] as const;
 
+/**
+ * The compensated contribution roles. Each carries a per-campaign € amount ({@link
+ * reportingCampaignContributionAmounts}); a country report's contributions are classified into
+ * these (coordinator/deputy are snapshotted from relations, the rest claimed manually).
+ */
+export const reportingCampaignContributionRoleEnum = [
+	"national_coordinator",
+	"national_coordinator_deputy",
+	"is_chair_of_jrc",
+	"is_chair_of_ncc",
+	"is_chair_of_wg",
+	"is_member_of_jrc",
+] as const;
+
 export const reportScreenCommentTypeEnum = ["country", "working_group"] as const;
 export const reportScreenCommentKeyEnum = [
 	"institutions",
@@ -180,8 +194,20 @@ export const countryReportContributions = p.snakeCase.table(
 			.uuid("person_to_org_unit_id")
 			.notNull()
 			.references(() => personsToOrganisationalUnits.id),
+		// Frozen compensation role at capture/claim time (classified from the relation's role + org).
+		// Nullable: legacy rows captured before this column existed stay null until re-captured.
+		contributionRole: p.text("contribution_role", {
+			enum: reportingCampaignContributionRoleEnum,
+		}),
 	},
-	(t) => [p.unique().on(t.countryReportId, t.personToOrgUnitId)],
+	(t) => [
+		p.unique().on(t.countryReportId, t.personToOrgUnitId),
+		// A CHECK only fails on FALSE, so NULL (legacy rows) passes.
+		p.check(
+			"country_report_contributions_contribution_role_enum_check",
+			inArray(t.contributionRole, reportingCampaignContributionRoleEnum),
+		),
+	],
 );
 
 export type CountryReportContribution = typeof countryReportContributions.$inferSelect;
@@ -242,6 +268,35 @@ export const CountryReportSocialMediaKpiInsertSchema = createInsertSchema(
 export const CountryReportSocialMediaKpiUpdateSchema = createUpdateSchema(
 	countryReportSocialMediaKpis,
 );
+
+/**
+ * The set of social media accounts a country report covers. Curated per report (carried over from
+ * the previous year, then added to), rather than derived from the country org-unit's own accounts —
+ * a country may report KPIs for a partner institution's account or a one-off event website. KPIs in
+ * {@link countryReportSocialMediaKpis} hang off these (report, social media) pairs.
+ */
+export const countryReportSocialMedia = p.snakeCase.table(
+	"country_report_social_media",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		countryReportId: p
+			.uuid("country_report_id")
+			.notNull()
+			.references(() => countryReports.id),
+		socialMediaId: p
+			.uuid("social_media_id")
+			.notNull()
+			.references(() => socialMedia.id),
+	},
+	(t) => [p.unique().on(t.countryReportId, t.socialMediaId)],
+);
+
+export type CountryReportSocialMedia = typeof countryReportSocialMedia.$inferSelect;
+export type CountryReportSocialMediaInput = typeof countryReportSocialMedia.$inferInsert;
+
+export const CountryReportSocialMediaSelectSchema = createSelectSchema(countryReportSocialMedia);
+export const CountryReportSocialMediaInsertSchema = createInsertSchema(countryReportSocialMedia);
+export const CountryReportSocialMediaUpdateSchema = createUpdateSchema(countryReportSocialMedia);
 
 export const serviceKpiCategoryEnum = [
 	"downloads",
@@ -527,15 +582,6 @@ export const ReportingCampaignSocialMediaAmountSelectSchema = createSelectSchema
 export const ReportingCampaignSocialMediaAmountInsertSchema = createInsertSchema(
 	reportingCampaignSocialMediaAmounts,
 );
-
-export const reportingCampaignContributionRoleEnum = [
-	"national_coordinator",
-	"national_coordinator_deputy",
-	"is_chair_of_jrc",
-	"is_chair_of_ncc",
-	"is_chair_of_wg",
-	"is_member_of_jrc",
-] as const;
 
 export const reportingCampaignContributionAmounts = p.snakeCase.table(
 	"reporting_campaign_contribution_amounts",

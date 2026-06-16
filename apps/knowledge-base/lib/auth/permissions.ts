@@ -145,3 +145,41 @@ export async function assertCan(user: User, action: Action, resource: Resource) 
 		redirect({ href: "/dashboard", locale });
 	}
 }
+
+export type ReportResource =
+	| { type: "country_report"; id: string }
+	| { type: "working_group_report"; id: string };
+
+/**
+ * Whether a report's _content_ may be edited right now. Distinct from `can(update)` (who may edit):
+ * reporters and NCs may only edit while the report is a `draft` and its campaign is `open`; once it
+ * is submitted/accepted (or the campaign closes) editing is frozen. Admins may always edit.
+ */
+export async function isReportEditable(user: User, resource: ReportResource): Promise<boolean> {
+	if (user.role === "admin") {
+		return true;
+	}
+
+	const report =
+		resource.type === "country_report"
+			? await db.query.countryReports.findFirst({
+					where: { id: resource.id },
+					columns: { status: true },
+					with: { campaign: { columns: { status: true } } },
+				})
+			: await db.query.workingGroupReports.findFirst({
+					where: { id: resource.id },
+					columns: { status: true },
+					with: { campaign: { columns: { status: true } } },
+				});
+
+	return report?.status === "draft" && report.campaign.status === "open";
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export async function assertReportEditable(user: User, resource: ReportResource) {
+	if (!(await isReportEditable(user, resource))) {
+		const locale = await getLocale();
+		redirect({ href: "/dashboard", locale });
+	}
+}
