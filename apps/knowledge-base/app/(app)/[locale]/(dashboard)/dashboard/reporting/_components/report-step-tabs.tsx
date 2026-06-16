@@ -32,7 +32,7 @@ export function ReportStepTabs(props: Readonly<ReportStepTabsProps>): ReactNode 
 	const selectedKey = active?.href ?? steps[0]?.href;
 
 	return (
-		<Tabs aria-label={ariaLabel} className="overflow-x-auto" selectedKey={selectedKey}>
+		<Tabs aria-label={ariaLabel} className="-mx-2 overflow-x-auto px-2" selectedKey={selectedKey}>
 			<TabList>
 				{steps.map((step) => (
 					<Tab key={step.href} href={step.href} id={step.href}>

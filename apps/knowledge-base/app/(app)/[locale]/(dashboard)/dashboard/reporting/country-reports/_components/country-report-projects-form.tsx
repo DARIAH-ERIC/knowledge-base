@@ -13,6 +13,7 @@ import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import { LocaleLink } from "@/lib/navigation/navigation";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface Contribution {
@@ -29,6 +30,8 @@ interface CountryReportProjectsFormProps {
 	};
 	/** `id` is the project document id (entities.id). */
 	allProjects: Array<{ id: string; name: string }>;
+	/** Admins get a link to the projects overview; coordinators do not (yet) have those screens. */
+	canManageRelations: boolean;
 	addAction: ServerAction;
 	deleteAction: (formData: FormData) => Promise<void>;
 }
@@ -36,7 +39,7 @@ interface CountryReportProjectsFormProps {
 export function CountryReportProjectsForm(
 	props: Readonly<CountryReportProjectsFormProps>,
 ): ReactNode {
-	const { report, allProjects, addAction, deleteAction } = props;
+	const { report, allProjects, canManageRelations, addAction, deleteAction } = props;
 
 	const t = useExtracted();
 	const [state, action, isPending] = useActionState(addAction, createActionStateInitial());
@@ -47,6 +50,15 @@ export function CountryReportProjectsForm(
 
 	return (
 		<div className="flex flex-col gap-y-8">
+			{canManageRelations && (
+				<LocaleLink
+					className="self-start text-sm text-fg underline underline-offset-4"
+					href="/dashboard/administrator/projects"
+				>
+					{t("Manage projects")}
+				</LocaleLink>
+			)}
+
 			{report.projectContributions.length > 0 && (
 				<section className="flex flex-col gap-y-3">
 					<h2 className="text-sm font-semibold text-fg">{t("Project contributions")}</h2>
@@ -65,7 +77,12 @@ export function CountryReportProjectsForm(
 								<form action={deleteAction}>
 									<input name="contributionId" type="hidden" value={contribution.id} />
 									<input name="countryReportId" type="hidden" value={report.id} />
-									<Button intent="danger" size="sm" type="submit">
+									<Button
+										className="text-danger hover:bg-danger/10 hover:text-danger"
+										intent="plain"
+										size="sm"
+										type="submit"
+									>
 										{t("Remove")}
 									</Button>
 								</form>

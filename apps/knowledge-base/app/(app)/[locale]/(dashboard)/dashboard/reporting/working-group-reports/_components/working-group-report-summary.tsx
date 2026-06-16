@@ -47,7 +47,7 @@ export async function WorkingGroupReportSummary(
 	const t = await getExtracted();
 
 	return (
-		<div className="flex flex-col gap-y-10">
+		<div className="flex max-inline-3xl flex-col gap-y-10">
 			<section className="flex flex-col gap-y-4">
 				<h2 className="text-sm font-semibold text-fg">{t("Working group data")}</h2>
 				<dl className="grid max-inline-sm grid-cols-[auto_1fr] gap-x-8 gap-y-3 text-sm">
@@ -137,11 +137,11 @@ export async function WorkingGroupReportSummary(
 					{data.questions.map((q) => (
 						<div key={q.id} className="flex flex-col gap-y-3">
 							<div className="rounded-md border border-border bg-muted/30 p-4">
-								<RichTextView ariaLabel={t("Question")} content={q.question} />
+								<RichTextView ariaLabel={t("Question")} content={q.question} size="sm" />
 							</div>
 							{q.answer != null ? (
 								<div className="px-4">
-									<RichTextView ariaLabel={t("Answer")} content={q.answer} />
+									<RichTextView ariaLabel={t("Answer")} content={q.answer} size="sm" />
 								</div>
 							) : (
 								<p className="px-4 text-sm text-muted-fg">{t("No answer provided.")}</p>

@@ -47,6 +47,7 @@ export function WorkingGroupReportQuestionsForm(
 								aria-label={`Question ${String(question.position)}`}
 								content={question.question as JSONContent}
 								isEditable={false}
+								size="sm"
 							/>
 						</div>
 						<RichTextEditor

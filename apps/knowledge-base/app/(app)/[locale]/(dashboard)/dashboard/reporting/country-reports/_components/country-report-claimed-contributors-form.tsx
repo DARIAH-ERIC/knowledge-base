@@ -7,7 +7,12 @@ import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import {
+	SearchableSelect,
+	SearchableSelectContent,
+	SearchableSelectInput,
+	SearchableSelectItem,
+} from "@dariah-eric/ui/searchable-select";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -82,7 +87,12 @@ export function CountryReportClaimedContributorsForm(
 								<form action={deleteAction}>
 									<input name="contributionId" type="hidden" value={contribution.id} />
 									<input name="countryReportId" type="hidden" value={report.id} />
-									<Button intent="danger" size="sm" type="submit">
+									<Button
+										className="text-danger hover:bg-danger/10 hover:text-danger"
+										intent="plain"
+										size="sm"
+										type="submit"
+									>
 										{t("Remove")}
 									</Button>
 								</form>
@@ -98,29 +108,33 @@ export function CountryReportClaimedContributorsForm(
 					<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
 						<input name="countryReportId" type="hidden" value={report.id} />
 
-						<Select
+						<SearchableSelect
 							isRequired={true}
 							onChange={(key) => {
-								setSelectedId(String(key));
+								setSelectedId(key != null ? String(key) : "");
 							}}
 							value={selectedId || null}
 						>
 							<Label>{t("Person")}</Label>
-							<SelectTrigger />
+							<SearchableSelectInput placeholder={t("Search people...")} />
 							<FieldError />
-							<SelectContent>
-								{availableContributions.map((candidate) => (
-									<SelectItem key={candidate.personToOrgUnitId} id={candidate.personToOrgUnitId}>
-										{candidate.personName}
-										{" — "}
-										{getCompensationRoleLabel(t, candidate.compensationRole)}
-										{" ("}
-										{candidate.organisationalUnitName}
-										{")"}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+							<SearchableSelectContent>
+								{availableContributions.map((candidate) => {
+									const roleLabel = getCompensationRoleLabel(t, candidate.compensationRole) ?? "";
+									const label = `${candidate.personName} — ${roleLabel} (${candidate.organisationalUnitName})`;
+
+									return (
+										<SearchableSelectItem
+											key={candidate.personToOrgUnitId}
+											id={candidate.personToOrgUnitId}
+											textValue={label}
+										>
+											{label}
+										</SearchableSelectItem>
+									);
+								})}
+							</SearchableSelectContent>
+						</SearchableSelect>
 						<input name="personToOrgUnitId" type="hidden" value={selectedId} />
 
 						<Button className="self-start" isPending={isPending} type="submit">
