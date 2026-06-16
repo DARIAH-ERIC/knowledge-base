@@ -47,7 +47,10 @@ test.describe("non-associated user report access", () => {
 	test("cannot open an unrelated country report", async ({ page }) => {
 		await page.goto(`/en/dashboard/reporting/country-reports/${year!}/${countrySlug!}/edit/events`);
 
-		await expect(page.getByText("Error 404")).toBeVisible();
+		await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
+		await expect(
+			page.getByRole("heading", { name: "This page could not be found." }),
+		).toBeVisible();
 		await expect(page.getByLabel("Small events")).toBeHidden();
 	});
 
@@ -56,7 +59,10 @@ test.describe("non-associated user report access", () => {
 			`/en/dashboard/reporting/working-group-reports/${year!}/${workingGroupSlug!}/edit/data`,
 		);
 
-		await expect(page.getByText("Error 404")).toBeVisible();
+		await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
+		await expect(
+			page.getByRole("heading", { name: "This page could not be found." }),
+		).toBeVisible();
 		await expect(page.getByLabel("Number of members")).toBeHidden();
 	});
 });

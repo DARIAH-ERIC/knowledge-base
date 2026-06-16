@@ -3,7 +3,7 @@ import { expect, test } from "@/e2e/lib/test";
 /**
  * Authorization boundaries for the `nc` persona (national coordinator of the first published
  * country). Pins `can(country_report, ...)` in `permissions.ts`: an active `national_coordinator`
- * relation grants access to *that* country's report only, and a non-admin user is still locked out
+ * relation grants access to _that_ country's report only, and a non-admin user is still locked out
  * of the `/administrator` tree.
  *
  * Two reports are seeded under one campaign — one for the coordinator's own country, one for

@@ -174,11 +174,14 @@ export class AdminProjectsPage {
 		const option = this.page.getByRole("option", { name: unitName, exact: true });
 		await expect(option).toBeVisible();
 		await option.click();
+		await expect(this.page.getByRole("option", { name: unitName, exact: true })).toBeHidden();
 		const roleControl = dialog
 			.locator('[data-slot="control"]')
 			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Role" }) });
 		await roleControl.locator("button[aria-expanded]:not([slot])").click();
-		await this.page.getByRole("option").first().click();
+		const roleOption = this.page.getByRole("option").first();
+		await roleOption.click();
+		await expect(roleOption).toBeHidden();
 		await this.fillProjectPartnerDate("Start date", 2024, 3, 1);
 		await this.fillProjectPartnerDate("End date", 2024, 9, 30);
 		await waitForActionSuccess({

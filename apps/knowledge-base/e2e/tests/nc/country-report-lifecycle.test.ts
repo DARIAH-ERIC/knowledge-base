@@ -1,14 +1,14 @@
 import { expect, test } from "@/e2e/lib/test";
 
 /**
- * Country-report lifecycle as a national coordinator (the `nc` persona — see `seedReportingPersonas`
- * in global-setup). Pins the server-side state machine hardened in `permissions.ts` +
- * `submit-country-report.action.ts`:
+ * Country-report lifecycle as a national coordinator (the `nc` persona — see
+ * `seedReportingPersonas` in global-setup). Pins the server-side state machine hardened in
+ * `permissions.ts` + `submit-country-report.action.ts`:
  *
- * - a national coordinator may submit a `draft` report while the campaign is `open` (draft ->
+ * - A national coordinator may submit a `draft` report while the campaign is `open` (draft ->
  *   submitted);
- * - once submitted there is no re-submit (the Submit button is gone);
- * - editing is frozen after submit — a content mutation redirects to `/dashboard` (the
+ * - Once submitted there is no re-submit (the Submit button is gone);
+ * - Editing is frozen after submit — a content mutation redirects to `/dashboard` (the
  *   `assertReportEditable` guard) and persists nothing.
  *
  * Test data is isolated by the worker's own campaign year and cleaned up afterwards.

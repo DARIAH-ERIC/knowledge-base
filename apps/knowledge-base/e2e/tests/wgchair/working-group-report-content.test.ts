@@ -57,7 +57,9 @@ test.describe("working group report content (chair)", () => {
 	});
 
 	test("saves a rich-text answer", async ({ page, db }) => {
-		await page.goto(`/en/dashboard/reporting/working-group-reports/${year!}/${slug!}/edit/questions`);
+		await page.goto(
+			`/en/dashboard/reporting/working-group-reports/${year!}/${slug!}/edit/questions`,
+		);
 
 		// The seeded question is shown (read-only) and offers an answer editor.
 		await expect(page.getByText("What did the working group achieve this year?")).toBeVisible();

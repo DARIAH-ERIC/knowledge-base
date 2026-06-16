@@ -245,7 +245,7 @@ export default async function globalSetup(): Promise<void> {
 		}
 
 		/**
-		 * A bare person *document* (an `entities` row of type `persons`, no version). Sufficient for
+		 * A bare person _document_ (an `entities` row of type `persons`, no version). Sufficient for
 		 * authorization — `hasActiveRelation` and `users.person_document_id` only need a valid
 		 * `entities.id` — without polluting public person listings/search with a published version.
 		 */

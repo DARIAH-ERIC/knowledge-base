@@ -928,7 +928,10 @@ export class DatabaseService {
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 			.where(
-				and(eq(schema.organisationalUnitTypes.type, unitType), eq(schema.entityStatus.type, "published")),
+				and(
+					eq(schema.organisationalUnitTypes.type, unitType),
+					eq(schema.entityStatus.type, "published"),
+				),
 			)
 			.orderBy(schema.organisationalUnits.name)
 			.limit(limit);
@@ -968,7 +971,10 @@ export class DatabaseService {
 		return rows[1];
 	}
 
-	/** A published working group other than {@link getWorkingGroupOption}. See {@link getOtherCountryOption}. */
+	/**
+	 * A published working group other than {@link getWorkingGroupOption}. See
+	 * {@link getOtherCountryOption}.
+	 */
 	async getOtherWorkingGroupOption(): Promise<{ id: string; name: string; slug: string }> {
 		const rows = await this.getPublishedOrgUnitOptions("working_group", 2);
 
@@ -1033,6 +1039,14 @@ export class DatabaseService {
 		if (wgReportRows.length > 0) {
 			const wgReportIds = wgReportRows.map((r) => r.id);
 			await this.db
+				.delete(schema.reportScreenComments)
+				.where(
+					and(
+						eq(schema.reportScreenComments.reportType, "working_group"),
+						inArray(schema.reportScreenComments.reportId, wgReportIds),
+					),
+				);
+			await this.db
 				.delete(schema.workingGroupReportAnswers)
 				.where(inArray(schema.workingGroupReportAnswers.workingGroupReportId, wgReportIds));
 			await this.db
@@ -1058,11 +1072,22 @@ export class DatabaseService {
 		if (countryReportRows.length > 0) {
 			const countryReportIds = countryReportRows.map((r) => r.id);
 			await this.db
+				.delete(schema.reportScreenComments)
+				.where(
+					and(
+						eq(schema.reportScreenComments.reportType, "country"),
+						inArray(schema.reportScreenComments.reportId, countryReportIds),
+					),
+				);
+			await this.db
 				.delete(schema.countryReportContributions)
 				.where(inArray(schema.countryReportContributions.countryReportId, countryReportIds));
 			await this.db
 				.delete(schema.countryReportSocialMediaKpis)
 				.where(inArray(schema.countryReportSocialMediaKpis.countryReportId, countryReportIds));
+			await this.db
+				.delete(schema.countryReportSocialMedia)
+				.where(inArray(schema.countryReportSocialMedia.countryReportId, countryReportIds));
 			await this.db
 				.delete(schema.countryReportServiceKpis)
 				.where(inArray(schema.countryReportServiceKpis.countryReportId, countryReportIds));
@@ -1242,7 +1267,35 @@ export class DatabaseService {
 	}
 
 	async deleteCountryReport(id: string): Promise<void> {
-		await this.db.delete(schema.countryReports).where(eq(schema.countryReports.id, id));
+		await this.db.transaction(async (tx) => {
+			await tx
+				.delete(schema.reportScreenComments)
+				.where(
+					and(
+						eq(schema.reportScreenComments.reportType, "country"),
+						eq(schema.reportScreenComments.reportId, id),
+					),
+				);
+			await tx
+				.delete(schema.countryReportContributions)
+				.where(eq(schema.countryReportContributions.countryReportId, id));
+			await tx
+				.delete(schema.countryReportSocialMediaKpis)
+				.where(eq(schema.countryReportSocialMediaKpis.countryReportId, id));
+			await tx
+				.delete(schema.countryReportSocialMedia)
+				.where(eq(schema.countryReportSocialMedia.countryReportId, id));
+			await tx
+				.delete(schema.countryReportServiceKpis)
+				.where(eq(schema.countryReportServiceKpis.countryReportId, id));
+			await tx
+				.delete(schema.countryReportProjectContributions)
+				.where(eq(schema.countryReportProjectContributions.countryReportId, id));
+			await tx
+				.delete(schema.countryReportInstitutions)
+				.where(eq(schema.countryReportInstitutions.countryReportId, id));
+			await tx.delete(schema.countryReports).where(eq(schema.countryReports.id, id));
+		});
 	}
 
 	async getWorkingGroupReportByCampaignAndGroup(
@@ -3423,14 +3476,13 @@ export class DatabaseService {
 			await this.cleanupWorkerAssets(workerIndex);
 		}
 
-		// Reporting campaigns use year 3100+workerIndex as their identifier (no [e2e-worker-N] prefix),
-		// so they are not discovered by the name scan above. Delete any leftover campaigns in the
-		// reserved year range directly.
+		// Reporting campaigns use reserved years as their identifier (no [e2e-worker-N] prefix), so
+		// they are not discovered by the name scan above. Delete leftovers in that range directly.
 		const leakedCampaigns = await this.db
 			.select({ id: schema.reportingCampaigns.id })
 			.from(schema.reportingCampaigns)
 			.where(
-				sql`${schema.reportingCampaigns.year} >= 3100 AND ${schema.reportingCampaigns.year} < 3200`,
+				sql`${schema.reportingCampaigns.year} >= 3100 AND ${schema.reportingCampaigns.year} < 3300`,
 			);
 		for (const campaign of leakedCampaigns) {
 			await this.deleteReportingCampaign(campaign.id);

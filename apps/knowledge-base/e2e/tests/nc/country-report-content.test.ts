@@ -1,8 +1,8 @@
 import { expect, test } from "@/e2e/lib/test";
 
 /**
- * Country-report content editing as a national coordinator. Covers the Events tab: a normal
- * save round-trip (values persist), and the server-side guard that rejects a purely numeric
+ * Country-report content editing as a national coordinator. Covers the Events tab: a normal save
+ * round-trip (values persist), and the server-side guard that rejects a purely numeric
  * `dariahCommissionedEvent` title (`update-country-report-events.schema.ts`).
  *
  * The report is a draft in an open campaign so editing is allowed; it is cleaned up afterwards.

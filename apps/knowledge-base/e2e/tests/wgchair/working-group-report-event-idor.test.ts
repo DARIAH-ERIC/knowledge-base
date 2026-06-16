@@ -4,7 +4,7 @@ import { expect, test } from "@/e2e/lib/test";
  * Regression guard for the scoped delete in `delete-working-group-report-event.action.ts`. The
  * delete is a plain `<form>` server action whose `eventId` / `workingGroupReportId` are real form
  * fields, so a forged request is reproducible: we override the rendered `eventId` with an event id
- * belonging to *another* report (one the chair has no access to) while keeping the authorized
+ * belonging to _another_ report (one the chair has no access to) while keeping the authorized
  * `workingGroupReportId`.
  *
  * Authorization passes (the chair may update their own report), so a delete scoped by `eventId`

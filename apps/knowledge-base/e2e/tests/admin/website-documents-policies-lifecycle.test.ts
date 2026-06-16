@@ -181,7 +181,6 @@ test.describe("website documents-policies lifecycle", () => {
 	});
 
 	test("should clear optional document or policy fields", async ({
-		page,
 		createWebsiteDocumentsPoliciesPage,
 		db,
 	}) => {
@@ -199,11 +198,7 @@ test.describe("website documents-policies lifecycle", () => {
 		await docPoliciesPage.submitForm();
 
 		await docPoliciesPage.searchByTitle(title);
-		const row = docPoliciesPage.rowByTitle(title);
-		await Promise.all([
-			page.waitForURL("**/edit"),
-			row.getByRole("link", { name: "Content" }).click(),
-		]);
+		await docPoliciesPage.gotoEditFromList(title);
 
 		await docPoliciesPage.fillUrl("");
 		await docPoliciesPage.selectNoGroup();
