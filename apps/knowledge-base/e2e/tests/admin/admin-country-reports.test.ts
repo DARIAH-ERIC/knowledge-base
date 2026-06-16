@@ -18,6 +18,7 @@ test.describe("country reports admin", () => {
 		const workerIndex = test.info().workerIndex;
 		const campaignYear = campaignYearForTest(0);
 		const reportsPage = createAdminCountryReportsPage(workerIndex);
+		// oxlint-disable-next-line no-useless-assignment
 		let reportId: string | null = null;
 
 		const campaign = await db.createOpenCampaign(campaignYear);
@@ -36,6 +37,7 @@ test.describe("country reports admin", () => {
 			expect(created).toMatchObject({ status: "submitted" });
 			reportId = created!.id;
 		} finally {
+			// oxlint-disable-next-line playwright/no-conditional-in-test
 			if (reportId != null) {
 				await db.deleteCountryReport(reportId);
 			}
@@ -75,6 +77,7 @@ test.describe("country reports admin", () => {
 		const reportsPage = createAdminCountryReportsPage(workerIndex);
 		const campaign = await db.createOpenCampaign(campaignYear);
 		const country = await db.getCountryOption();
+		// oxlint-disable-next-line no-useless-assignment
 		let reportId: string | null = null;
 
 		try {
@@ -99,6 +102,7 @@ test.describe("country reports admin", () => {
 			expect(deleted).toBeNull();
 			reportId = null;
 		} finally {
+			// oxlint-disable-next-line playwright/no-conditional-in-test
 			if (reportId != null) {
 				await db.deleteCountryReport(reportId);
 			}
