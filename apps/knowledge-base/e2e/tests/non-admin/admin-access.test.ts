@@ -14,6 +14,8 @@ test.describe("non-admin admin access", () => {
 		"/en/dashboard/administrator/persons",
 		"/en/dashboard/administrator/persons/create",
 		"/en/dashboard/administrator/users",
+		"/en/dashboard/administrator/country-reports",
+		"/en/dashboard/administrator/working-group-reports",
 	];
 
 	for (const route of adminRoutes) {
