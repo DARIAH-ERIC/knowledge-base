@@ -42,7 +42,7 @@ export default async function DashboardAdministratorWorkingGroupReportEditLayout
 				</HeaderContent>
 			</Header>
 
-			<div className="flex flex-col gap-y-6 px-(--layout-padding) pbs-6">
+			<div className="flex max-inline-4xl flex-col gap-y-6 px-(--layout-padding) pbs-6">
 				<ReportEditGuard>
 					<WorkingGroupReportStepNav
 						editBasePath={`/dashboard/administrator/working-group-reports/${id}/edit`}

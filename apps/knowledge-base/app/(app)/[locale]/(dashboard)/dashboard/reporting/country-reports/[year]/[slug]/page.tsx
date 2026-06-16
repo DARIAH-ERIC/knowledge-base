@@ -80,7 +80,7 @@ export default async function DashboardReportingCountryReportPage(
 				</HeaderAction>
 			</Header>
 
-			<div className="mbs-8 px-(--layout-padding)">
+			<div className="mbs-8 max-inline-4xl px-(--layout-padding)">
 				<CountryReportSummary data={report.summary} />
 			</div>
 		</div>

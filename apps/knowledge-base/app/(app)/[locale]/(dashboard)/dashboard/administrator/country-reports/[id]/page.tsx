@@ -94,7 +94,7 @@ export default async function DashboardAdministratorCountryReportPage(
 				</HeaderAction>
 			</Header>
 
-			<div className="mbs-8 flex flex-col gap-y-10 px-(--layout-padding)">
+			<div className="mbs-8 flex max-inline-4xl flex-col gap-y-10 px-(--layout-padding)">
 				<CountryReportSummary data={report.summary} />
 				<LiveReportResourcesErrorBoundary
 					description={t(
