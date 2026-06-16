@@ -47,7 +47,7 @@ export async function WorkingGroupReportSummary(
 	const t = await getExtracted();
 
 	return (
-		<div className="flex flex-col gap-y-10">
+		<div className="flex max-inline-3xl flex-col gap-y-10">
 			<section className="flex flex-col gap-y-4">
 				<h2 className="text-sm font-semibold text-fg">{t("Working group data")}</h2>
 				<dl className="grid max-inline-sm grid-cols-[auto_1fr] gap-x-8 gap-y-3 text-sm">

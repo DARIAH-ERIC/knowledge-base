@@ -42,7 +42,7 @@ export async function CountryReportSummary(
 		data.reusableOutcomes != null;
 
 	return (
-		<div className="flex flex-col gap-y-10">
+		<div className="flex max-inline-3xl flex-col gap-y-10">
 			{data.institutions.length > 0 && (
 				<section className="flex flex-col gap-y-4">
 					<h2 className="text-sm font-semibold text-fg">{t("Institutions")}</h2>
