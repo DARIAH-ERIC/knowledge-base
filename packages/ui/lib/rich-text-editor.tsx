@@ -38,9 +38,19 @@ import { Input } from "@/lib/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
 import { Tooltip, TooltipContent } from "@/lib/tooltip";
 
+type RichTextSize = "sm" | "md" | "lg";
+
+const richtextSizeClass: Record<RichTextSize, string> = {
+	sm: "richtext-sm",
+	md: "richtext-base",
+	lg: "richtext-lg",
+};
+
 interface RichTextEditorProps {
 	"aria-label"?: string;
 	className?: string;
+	/** Scales the text of the content element. Defaults to the base `richtext` sizing when omitted. */
+	size?: RichTextSize;
 	content?: JSONContent;
 	isEditable?: boolean;
 	name?: string;
@@ -685,6 +695,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		isEditable = true,
 		name,
 		className,
+		size,
 		renderEmbedInsert,
 		renderImagePicker,
 	} = props;
@@ -713,7 +724,10 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		},
 		editorProps: {
 			attributes: {
-				class: "richtext max-w-none focus:outline-none px-4 py-3 min-h-37.5",
+				class: twMerge(
+					"richtext max-w-none focus:outline-none px-4 py-3 min-h-37.5",
+					size != null ? richtextSizeClass[size] : undefined,
+				),
 				role: "textbox",
 				"aria-multiline": "true",
 				...(ariaLabel != null ? { "aria-label": ariaLabel } : {}),

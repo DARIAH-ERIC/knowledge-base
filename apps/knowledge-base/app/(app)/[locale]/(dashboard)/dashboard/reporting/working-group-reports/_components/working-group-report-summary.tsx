@@ -137,11 +137,11 @@ export async function WorkingGroupReportSummary(
 					{data.questions.map((q) => (
 						<div key={q.id} className="flex flex-col gap-y-3">
 							<div className="rounded-md border border-border bg-muted/30 p-4">
-								<RichTextView ariaLabel={t("Question")} content={q.question} />
+								<RichTextView ariaLabel={t("Question")} content={q.question} size="sm" />
 							</div>
 							{q.answer != null ? (
 								<div className="px-4">
-									<RichTextView ariaLabel={t("Answer")} content={q.answer} />
+									<RichTextView ariaLabel={t("Answer")} content={q.answer} size="sm" />
 								</div>
 							) : (
 								<p className="px-4 text-sm text-muted-fg">{t("No answer provided.")}</p>
