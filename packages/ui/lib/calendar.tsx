@@ -3,7 +3,7 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { type CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
 import { useExtracted } from "next-intl";
-import { type ReactNode, use } from "react";
+import { type ComponentProps, type ContextType, type ReactNode, use } from "react";
 import { useDateFormatter } from "react-aria";
 import {
 	CalendarCell,
@@ -13,7 +13,6 @@ import {
 	CalendarHeaderCell,
 	Calendar as CalendarPrimitive,
 	type CalendarProps as CalendarPrimitiveProps,
-	type CalendarState,
 	CalendarStateContext,
 	type DateValue,
 	Heading,
@@ -24,6 +23,8 @@ import { twMerge } from "tailwind-merge";
 
 import { Button } from "./button";
 import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger } from "./select";
+
+type CalendarContextState = NonNullable<ContextType<typeof CalendarStateContext>>;
 
 export interface CalendarProps<T extends DateValue> extends Omit<
 	CalendarPrimitiveProps<T>,
@@ -70,7 +71,7 @@ export function CalendarHeader({
 	isRange,
 	className,
 	...props
-}: Readonly<React.ComponentProps<"header"> & { isRange?: boolean }>): ReactNode {
+}: Readonly<ComponentProps<"header"> & { isRange?: boolean }>): ReactNode {
 	const t = useExtracted("ui");
 	const { direction } = useLocale();
 	const state = use(CalendarStateContext)!;
@@ -123,7 +124,7 @@ export function CalendarHeader({
 	);
 }
 
-export function SelectMonth({ state }: Readonly<{ state: CalendarState }>): ReactNode {
+export function SelectMonth({ state }: Readonly<{ state: CalendarContextState }>): ReactNode {
 	const months = [];
 
 	const t = useExtracted("ui");
@@ -159,7 +160,7 @@ export function SelectMonth({ state }: Readonly<{ state: CalendarState }>): Reac
 	);
 }
 
-export function SelectYear({ state }: Readonly<{ state: CalendarState }>): ReactNode {
+export function SelectYear({ state }: Readonly<{ state: CalendarContextState }>): ReactNode {
 	const t = useExtracted("ui");
 	const years: Array<{ value: CalendarDate; formatted: string }> = [];
 	const formatter = useDateFormatter({

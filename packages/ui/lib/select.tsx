@@ -80,7 +80,7 @@ export function SelectContent<T extends object>(props: Readonly<SelectContentPro
 }
 
 export interface SelectTriggerProps extends ComponentProps<typeof AriaButton> {
-	prefix?: React.ReactNode;
+	prefix?: ReactNode;
 	className?: string;
 }
 

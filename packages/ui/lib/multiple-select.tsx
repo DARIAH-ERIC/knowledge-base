@@ -3,9 +3,11 @@
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { useResizeObserver } from "@react-aria/utils";
 import { useExtracted } from "next-intl";
-import React, {
+import {
+	type CSSProperties,
 	Children,
 	Fragment,
+	type ReactElement,
 	type ReactNode,
 	isValidElement,
 	useCallback,
@@ -41,13 +43,13 @@ interface MultipleSelectProps<T extends OptionBase> extends Omit<
 	placeholder?: string;
 	searchPlaceholder?: string;
 	className?: string;
-	children?: React.ReactNode;
+	children?: ReactNode;
 	name?: string;
 }
 
 interface MultipleSelectContentProps<T extends OptionBase> {
 	items: Iterable<T>;
-	children: (item: T) => React.ReactNode;
+	children: (item: T) => ReactNode;
 }
 
 export function MultipleSelectContent<T extends OptionBase>(
@@ -95,7 +97,7 @@ export function MultipleSelect<T extends OptionBase>(
 		if (idx === -1) {
 			return { before: arr, after: [], list: null as null | MultipleSelectContentProps<T> };
 		}
-		const el = arr[idx] as React.ReactElement<MultipleSelectContentProps<T>>;
+		const el = arr[idx] as ReactElement<MultipleSelectContentProps<T>>;
 		return { before: arr.slice(0, idx), after: arr.slice(idx + 1), list: el.props };
 	}, [children]);
 
@@ -151,7 +153,7 @@ export function MultipleSelect<T extends OptionBase>(
 						placement="bottom"
 						style={
 							triggerWidth != null
-								? ({ "--trigger-width": triggerWidth } as React.CSSProperties)
+								? ({ "--trigger-width": triggerWidth } as CSSProperties)
 								: undefined
 						}
 						triggerRef={triggerRef}

@@ -1,9 +1,7 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 
-export interface HeadingProps extends React.ComponentProps<
-	"h1" | "h2" | "h3" | "h4" | "h5" | "h6"
-> {
+export interface HeadingProps extends ComponentProps<"h1" | "h2" | "h3" | "h4" | "h5" | "h6"> {
 	level?: 1 | 2 | 3 | 4 | 5 | 6;
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
-import { Fragment, type ReactNode, use } from "react";
+import { type ComponentProps, Fragment, type ReactNode, type Ref, use } from "react";
 import {
 	Button as AriaButton,
 	type ButtonProps as AriaButtonProps,
@@ -181,7 +181,7 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 	);
 }
 
-export interface MenuHeaderProps extends React.ComponentProps<typeof AriaHeader> {
+export interface MenuHeaderProps extends ComponentProps<typeof AriaHeader> {
 	separator?: boolean;
 }
 
@@ -203,7 +203,7 @@ export function MenuHeader(props: Readonly<MenuHeaderProps>): ReactNode {
 const { section, header } = dropdownSectionStyles();
 
 export interface MenuSectionProps<T> extends AriaMenuSectionProps<T> {
-	ref?: React.Ref<HTMLDivElement>;
+	ref?: Ref<HTMLDivElement>;
 	label?: string;
 }
 

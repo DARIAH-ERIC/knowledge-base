@@ -22,7 +22,7 @@ import { cx } from "@/lib/primitive";
 import { UiContext } from "./ui-provider";
 
 export interface TabsProps extends TabsPrimitiveProps {
-	ref?: React.RefObject<HTMLDivElement>;
+	ref?: RefObject<HTMLDivElement>;
 }
 
 export function Tabs(props: Readonly<TabsProps>): ReactNode {
@@ -45,7 +45,7 @@ export function Tabs(props: Readonly<TabsProps>): ReactNode {
 }
 
 export interface TabListProps<T extends object> extends TabListPrimitiveProps<T> {
-	ref?: React.RefObject<HTMLDivElement>;
+	ref?: RefObject<HTMLDivElement>;
 }
 
 export function TabList<T extends object>(props: Readonly<TabListProps<T>>): ReactNode {

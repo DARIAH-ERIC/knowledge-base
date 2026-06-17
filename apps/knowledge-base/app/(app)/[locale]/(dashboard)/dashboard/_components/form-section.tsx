@@ -1,12 +1,12 @@
 import { Description } from "@dariah-eric/ui/field";
-import { Fragment, type ReactNode, createContext, use } from "react";
+import { type ComponentProps, Fragment, type ReactNode, createContext, use } from "react";
 import { twMerge } from "tailwind-merge";
 
 type FormLayoutVariant = "two-column" | "stacked";
 
 const FormLayoutContext = createContext<FormLayoutVariant>("two-column");
 
-interface FormLayoutProps extends React.ComponentProps<"div"> {
+interface FormLayoutProps extends ComponentProps<"div"> {
 	variant?: FormLayoutVariant;
 }
 
@@ -25,7 +25,7 @@ export function FormLayout({
 	);
 }
 
-interface FormSectionProps extends React.ComponentProps<"section"> {
+interface FormSectionProps extends ComponentProps<"section"> {
 	title?: string;
 	description?: string;
 	variant?: FormLayoutVariant;
@@ -79,7 +79,7 @@ export function FormSection({
 }
 
 interface FormSectionTitleProps
-	extends Pick<FormSectionProps, "isRequired" | "title">, React.ComponentProps<"h2"> {}
+	extends Pick<FormSectionProps, "isRequired" | "title">, ComponentProps<"h2"> {}
 
 export function FormSectionTitle({
 	title,
@@ -101,7 +101,7 @@ export function FormSectionTitle({
 }
 
 interface FormSectionDescription
-	extends Pick<FormSectionProps, "description">, React.ComponentProps<typeof Description> {}
+	extends Pick<FormSectionProps, "description">, ComponentProps<typeof Description> {}
 
 export function FormSectionDescription({
 	description,
@@ -111,7 +111,7 @@ export function FormSectionDescription({
 	return <Description {...props}>{description ?? children}</Description>;
 }
 
-interface FormActionsProps extends React.ComponentProps<"div"> {}
+interface FormActionsProps extends ComponentProps<"div"> {}
 
 export function FormActions({
 	children,
