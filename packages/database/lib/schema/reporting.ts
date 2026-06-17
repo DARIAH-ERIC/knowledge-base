@@ -1,5 +1,5 @@
 import type { JSONContent } from "@tiptap/core";
-import { inArray } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
@@ -9,6 +9,7 @@ import { entities } from "./entities";
 import { personsToOrganisationalUnits } from "./persons";
 import { services } from "./services";
 import { socialMedia } from "./social-media";
+import { users } from "./users";
 
 export const reportingCampaignStatusEnum = ["draft", "open", "closed"] as const;
 
@@ -149,6 +150,120 @@ export type WorkingGroupReportInput = typeof workingGroupReports.$inferInsert;
 export const WorkingGroupReportSelectSchema = createSelectSchema(workingGroupReports);
 export const WorkingGroupReportInsertSchema = createInsertSchema(workingGroupReports);
 export const WorkingGroupReportUpdateSchema = createUpdateSchema(workingGroupReports);
+
+export const reportExternalResourceSnapshotSectionEnum = [
+	"country_sshoc_resources",
+	"country_zotero_publications",
+	"working_group_sshoc_resources",
+	"working_group_zotero_publications",
+] as const;
+
+/**
+ * A frozen per-report snapshot of externally indexed SSHOC/Zotero resources. The external search
+ * query can be refreshed while a report is editable; submitted/accepted reports render this stored
+ * snapshot rather than live search-index state.
+ */
+export const reportExternalResourceSnapshots = p.snakeCase.table(
+	"report_external_resource_snapshots",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		countryReportId: p.uuid("country_report_id").references(() => countryReports.id),
+		workingGroupReportId: p
+			.uuid("working_group_report_id")
+			.references(() => workingGroupReports.id),
+		section: p.text("section", { enum: reportExternalResourceSnapshotSectionEnum }).notNull(),
+		filterBy: p.text("filter_by").notNull(),
+		actorSlugs: p.jsonb("actor_slugs").$type<Array<string>>().notNull(),
+		capturedAt: f.timestamp("captured_at").notNull().defaultNow(),
+		capturedByUserId: p.uuid("captured_by_user_id").references(() => users.id),
+		...f.timestamps(),
+	},
+	(t) => [
+		p
+			.unique("report_external_resource_snapshots_country_report_section_unique")
+			.on(t.countryReportId, t.section),
+		p
+			.unique("report_external_resource_snapshots_working_group_report_section_unique")
+			.on(t.workingGroupReportId, t.section),
+		p.check(
+			"report_external_resource_snapshots_section_enum_check",
+			inArray(t.section, reportExternalResourceSnapshotSectionEnum),
+		),
+		p.check(
+			"report_external_resource_snapshots_report_owner_xor_check",
+			sql`
+				(
+					CASE WHEN ${t.countryReportId} IS NULL THEN 0 ELSE 1 END
+					+ CASE WHEN ${t.workingGroupReportId} IS NULL THEN 0 ELSE 1 END
+				) = 1
+			`,
+		),
+	],
+);
+
+export type ReportExternalResourceSnapshot = typeof reportExternalResourceSnapshots.$inferSelect;
+export type ReportExternalResourceSnapshotInput =
+	typeof reportExternalResourceSnapshots.$inferInsert;
+
+export const ReportExternalResourceSnapshotSelectSchema = createSelectSchema(
+	reportExternalResourceSnapshots,
+);
+export const ReportExternalResourceSnapshotInsertSchema = createInsertSchema(
+	reportExternalResourceSnapshots,
+);
+export const ReportExternalResourceSnapshotUpdateSchema = createUpdateSchema(
+	reportExternalResourceSnapshots,
+);
+
+export const reportExternalResourceSnapshotItems = p.snakeCase.table(
+	"report_external_resource_snapshot_items",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		snapshotId: p
+			.uuid("snapshot_id")
+			.notNull()
+			.references(() => reportExternalResourceSnapshots.id, { onDelete: "cascade" }),
+		position: p.integer("position").notNull(),
+		searchDocumentId: p.text("search_document_id").notNull(),
+		source: p.text("source").notNull(),
+		sourceId: p.text("source_id").notNull(),
+		sourceUpdatedAt: p.bigint("source_updated_at", { mode: "number" }),
+		importedAt: p.bigint("imported_at", { mode: "number" }).notNull(),
+		type: p.text("type").notNull(),
+		sshocCategory: p.text("sshoc_category"),
+		label: p.text("label").notNull(),
+		description: p.text("description").notNull(),
+		keywords: p.jsonb("keywords").$type<Array<string>>().notNull(),
+		kind: p.text("kind"),
+		links: p.jsonb("links").$type<Array<string>>().notNull(),
+		authors: p.jsonb("authors").$type<Array<string>>(),
+		year: p.integer("year"),
+		pid: p.text("pid"),
+	},
+	(t) => [
+		p
+			.unique("report_external_resource_snapshot_items_snapshot_document_unique")
+			.on(t.snapshotId, t.searchDocumentId),
+		p
+			.unique("report_external_resource_snapshot_items_snapshot_position_unique")
+			.on(t.snapshotId, t.position),
+	],
+);
+
+export type ReportExternalResourceSnapshotItem =
+	typeof reportExternalResourceSnapshotItems.$inferSelect;
+export type ReportExternalResourceSnapshotItemInput =
+	typeof reportExternalResourceSnapshotItems.$inferInsert;
+
+export const ReportExternalResourceSnapshotItemSelectSchema = createSelectSchema(
+	reportExternalResourceSnapshotItems,
+);
+export const ReportExternalResourceSnapshotItemInsertSchema = createInsertSchema(
+	reportExternalResourceSnapshotItems,
+);
+export const ReportExternalResourceSnapshotItemUpdateSchema = createUpdateSchema(
+	reportExternalResourceSnapshotItems,
+);
 
 export const reportScreenComments = p.snakeCase.table(
 	"report_screen_comments",

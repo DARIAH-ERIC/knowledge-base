@@ -14,7 +14,7 @@ interface CountryReportSummaryProps {
 	data: CountryReportSummaryData;
 	/**
 	 * Additional "On this page" nav links for sections rendered as siblings of this summary (e.g. the
-	 * admin "Live external data" block). Appended after the stored-data sections.
+	 * admin "External data snapshots" block). Appended after the stored-data sections.
 	 */
 	extraSectionLinks?: ReadonlyArray<ReportSummarySectionLink>;
 }

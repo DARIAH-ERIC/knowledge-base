@@ -670,6 +670,10 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.countryReports.id,
 				to: r.countryReportInstitutions.countryReportId,
 			}),
+			externalResourceSnapshots: r.many.reportExternalResourceSnapshots({
+				from: r.countryReports.id,
+				to: r.reportExternalResourceSnapshots.countryReportId,
+			}),
 		},
 		countryReportContributions: {
 			countryReport: r.one.countryReports({
@@ -769,6 +773,38 @@ export const relations = defineRelations(schema, (r) => {
 			answers: r.many.workingGroupReportAnswers({
 				from: r.workingGroupReports.id,
 				to: r.workingGroupReportAnswers.workingGroupReportId,
+			}),
+			externalResourceSnapshots: r.many.reportExternalResourceSnapshots({
+				from: r.workingGroupReports.id,
+				to: r.reportExternalResourceSnapshots.workingGroupReportId,
+			}),
+		},
+		reportExternalResourceSnapshots: {
+			countryReport: r.one.countryReports({
+				from: r.reportExternalResourceSnapshots.countryReportId,
+				to: r.countryReports.id,
+				optional: true,
+			}),
+			workingGroupReport: r.one.workingGroupReports({
+				from: r.reportExternalResourceSnapshots.workingGroupReportId,
+				to: r.workingGroupReports.id,
+				optional: true,
+			}),
+			capturedByUser: r.one.users({
+				from: r.reportExternalResourceSnapshots.capturedByUserId,
+				to: r.users.id,
+				optional: true,
+			}),
+			items: r.many.reportExternalResourceSnapshotItems({
+				from: r.reportExternalResourceSnapshots.id,
+				to: r.reportExternalResourceSnapshotItems.snapshotId,
+			}),
+		},
+		reportExternalResourceSnapshotItems: {
+			snapshot: r.one.reportExternalResourceSnapshots({
+				from: r.reportExternalResourceSnapshotItems.snapshotId,
+				to: r.reportExternalResourceSnapshots.id,
+				optional: false,
 			}),
 		},
 		workingGroupReportSocialMedia: {

@@ -3,6 +3,10 @@ import type { NextRequest } from "next/server";
 import { getCountryReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { type PdfSection, createTextPdf } from "@/app/api/reporting/_lib/text-pdf";
 import { getCurrentSession } from "@/lib/auth/session";
+import {
+	type ReportExternalResourceSnapshot,
+	getCountryExternalResourceSnapshots,
+} from "@/lib/data/report-marketplace-resources";
 
 function value(value: number | string | null): string {
 	return value == null || value === "" ? "-" : String(value);
@@ -17,6 +21,37 @@ function formatRole(role: string): string {
 
 function formatKpi(kpi: string): string {
 	return kpi.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatExternalSectionTitle(section: string): string {
+	return section.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function externalResourceSnapshotToPdfSection(
+	snapshot: ReportExternalResourceSnapshot,
+): PdfSection {
+	return {
+		title: formatExternalSectionTitle(snapshot.section),
+		lines:
+			snapshot.items.length > 0
+				? [
+						`Captured: ${snapshot.capturedAt.toISOString()}`,
+						...snapshot.items.map((item) => {
+							const meta = [
+								item.sshocCategory,
+								item.source,
+								item.year == null ? null : String(item.year),
+								item.kind,
+							]
+								.filter(Boolean)
+								.join(" - ");
+							const link = item.links[0] == null ? "" : ` - ${item.links[0]}`;
+
+							return `${item.label}${meta === "" ? "" : ` - ${meta}`}${link}`;
+						}),
+					]
+				: [`Captured: ${snapshot.capturedAt.toISOString()}`, "No external resources recorded."],
+	};
 }
 
 const eurFormatter = new Intl.NumberFormat("en", {
@@ -47,6 +82,7 @@ export async function GET(
 		}
 		case "ok": {
 			const report = result.data;
+			const externalResourceSnapshots = await getCountryExternalResourceSnapshots(report.id);
 			const sections: Array<PdfSection> = [
 				{
 					title: "Overview",
@@ -129,6 +165,9 @@ export async function GET(
 								)
 							: ["No project contributions recorded."],
 				},
+				...externalResourceSnapshots.map((snapshot) =>
+					externalResourceSnapshotToPdfSection(snapshot),
+				),
 			];
 			const pdf = await createTextPdf(`Country report - ${report.country.name}`, sections);
 

@@ -45,6 +45,8 @@ async function main() {
 			pages: schema.pages,
 			persons: schema.persons,
 			richTextContentBlocks: schema.richTextContentBlocks,
+			reportExternalResourceSnapshotItems: schema.reportExternalResourceSnapshotItems,
+			reportExternalResourceSnapshots: schema.reportExternalResourceSnapshots,
 			spotlightArticles: schema.spotlightArticles,
 			users: schema.users,
 			workingGroupReports: schema.workingGroupReports,

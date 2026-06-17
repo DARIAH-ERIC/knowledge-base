@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { getWorkingGroupReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { getCurrentSession } from "@/lib/auth/session";
+import { getWorkingGroupExternalResourceSnapshots } from "@/lib/data/report-marketplace-resources";
 
 export async function GET(
 	_request: NextRequest,
@@ -25,6 +26,7 @@ export async function GET(
 		}
 		case "ok": {
 			const report = result.data;
+			const externalResourceSnapshots = await getWorkingGroupExternalResourceSnapshots(report.id);
 
 			const payload = {
 				id: report.id,
@@ -44,6 +46,33 @@ export async function GET(
 				}),
 				questions: report.summary.questions.map((q) => {
 					return { question: q.question, answer: q.answer };
+				}),
+				externalResources: externalResourceSnapshots.map((snapshot) => {
+					return {
+						section: snapshot.section,
+						capturedAt: snapshot.capturedAt.toISOString(),
+						capturedBy: snapshot.capturedByUserName,
+						filterBy: snapshot.filterBy,
+						actorSlugs: snapshot.actorSlugs,
+						items: snapshot.items.map((item) => {
+							return {
+								source: item.source,
+								sourceId: item.sourceId,
+								sourceUpdatedAt: item.sourceUpdatedAt,
+								importedAt: item.importedAt,
+								type: item.type,
+								sshocCategory: item.sshocCategory,
+								label: item.label,
+								description: item.description,
+								keywords: item.keywords,
+								kind: item.kind,
+								links: item.links,
+								authors: item.authors,
+								year: item.year,
+								pid: item.pid,
+							};
+						}),
+					};
 				}),
 			};
 
