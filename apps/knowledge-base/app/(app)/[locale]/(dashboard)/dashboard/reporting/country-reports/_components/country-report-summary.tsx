@@ -36,6 +36,18 @@ const eurFormatter = new Intl.NumberFormat("en", {
 	maximumFractionDigits: 0,
 });
 
+function formatOperationalCostLabel(label: string): string {
+	const separatorIndex = label.indexOf(": ");
+	if (separatorIndex === -1) {
+		return label;
+	}
+
+	const prefix = label.slice(0, separatorIndex);
+	const value = label.slice(separatorIndex + 2);
+
+	return `${prefix}: ${formatRole(value)}`;
+}
+
 export async function CountryReportSummary(
 	props: Readonly<CountryReportSummaryProps>,
 ): Promise<ReactNode> {
@@ -57,8 +69,11 @@ export async function CountryReportSummary(
 	const socialMediaLabel = t("Social media");
 	const servicesLabel = t("Services");
 	const projectContributionsLabel = t("Project contributions");
+	const operationalCostLabel = t("Operational cost");
 
-	const sectionLinks: Array<ReportSummarySectionLink> = [];
+	const sectionLinks: Array<ReportSummarySectionLink> = [
+		{ id: "country-report-operational-cost", label: operationalCostLabel },
+	];
 
 	if (data.institutions.length > 0) {
 		sectionLinks.push({ id: "country-report-institutions", label: institutionsLabel });
@@ -98,6 +113,54 @@ export async function CountryReportSummary(
 			/>
 
 			<div className="flex flex-col">
+				<ReportSummarySection
+					contentClassName="gap-y-4"
+					id="country-report-operational-cost"
+					title={operationalCostLabel}
+				>
+					<div className="rounded-md border border-border">
+						<div className="flex items-baseline justify-between gap-x-6 border-be border-border px-4 py-3">
+							<span className="text-sm font-medium text-fg">{t("Total operational cost")}</span>
+							<span className="text-lg font-semibold text-fg">
+								{eurFormatter.format(data.operationalCost.total)}
+							</span>
+						</div>
+						<div className="flex items-baseline justify-between gap-x-6 border-be border-border px-4 py-3">
+							<span className="text-sm font-medium text-fg">{t("Operational cost threshold")}</span>
+							<span className="text-sm font-medium text-fg">
+								{data.operationalCost.threshold == null
+									? "—"
+									: eurFormatter.format(data.operationalCost.threshold)}
+							</span>
+						</div>
+						{data.operationalCost.lines.length > 0 ? (
+							<ul className="divide-y divide-border">
+								{data.operationalCost.lines.map((line) => (
+									<li
+										key={line.key}
+										className="grid gap-x-4 gap-y-1 px-4 py-3 text-sm sm:grid-cols-[1fr_auto_auto_auto]"
+									>
+										<span className="font-medium text-fg">
+											{formatOperationalCostLabel(line.label)}
+										</span>
+										<span className="text-muted-fg">
+											{t("Quantity")}: {line.quantity.toLocaleString()}
+										</span>
+										<span className="text-muted-fg">
+											{t("Unit")}: {eurFormatter.format(line.unitAmount)}
+										</span>
+										<span className="font-medium text-fg">{eurFormatter.format(line.total)}</span>
+									</li>
+								))}
+							</ul>
+						) : (
+							<p className="px-4 py-3 text-sm text-muted-fg">
+								{t("No operational cost line items recorded.")}
+							</p>
+						)}
+					</div>
+				</ReportSummarySection>
+
 				{data.institutions.length > 0 && (
 					<ReportSummarySection id="country-report-institutions" title={institutionsLabel}>
 						<ul className="divide-y rounded-md border">
