@@ -9,6 +9,7 @@ export const impactCaseStudiesLifecycleAdapter: EntityLifecycleAdapter = {
 			.select({
 				title: schema.impactCaseStudies.title,
 				summary: schema.impactCaseStudies.summary,
+				publicationDate: schema.impactCaseStudies.publicationDate,
 				imageId: schema.impactCaseStudies.imageId,
 			})
 			.from(schema.impactCaseStudies)

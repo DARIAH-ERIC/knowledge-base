@@ -35,6 +35,7 @@ export async function getSpotlightArticles(
 			},
 			columns: {
 				id: true,
+				publicationDate: true,
 				title: true,
 				summary: true,
 			},
@@ -64,7 +65,7 @@ export async function getSpotlightArticles(
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
+				return [desc(t.publicationDate), desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -83,8 +84,9 @@ export async function getSpotlightArticles(
 
 	const data = items.map((item) => {
 		const image = generateImageUrl(item.image, imageWidth.preview);
+		const { publicationDate, ...data } = flattenEntityVersion(item);
 
-		return { ...flattenEntityVersion(item), image };
+		return { ...data, image, publishedAt: publicationDate.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -172,6 +174,7 @@ export async function getSpotlightArticleById(
 			},
 			columns: {
 				id: true,
+				publicationDate: true,
 				title: true,
 				summary: true,
 			},
@@ -215,11 +218,13 @@ export async function getSpotlightArticleById(
 	]);
 
 	const image = generateImageUrl(item.image, imageWidth.featured);
+	const { publicationDate, ...data } = flattenEntityVersion(item);
 
 	return {
-		...flattenEntityVersion(item),
+		...data,
 		contributors,
 		image,
+		publishedAt: publicationDate.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,
@@ -252,6 +257,7 @@ export async function getSpotlightArticleSlugs(
 			},
 			columns: {
 				id: true,
+				publicationDate: true,
 			},
 			with: {
 				entityVersion: {
@@ -279,7 +285,7 @@ export async function getSpotlightArticleSlugs(
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
+				return [desc(t.publicationDate), desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -328,6 +334,7 @@ export async function getSpotlightArticleBySlug(
 		},
 		columns: {
 			id: true,
+			publicationDate: true,
 			title: true,
 			summary: true,
 		},
@@ -365,6 +372,7 @@ export async function getSpotlightArticleBySlug(
 	const contributors = await getContributors(db, item.id);
 
 	const image = generateImageUrl(item.image, imageWidth.featured);
+	const { publicationDate, ...data } = flattenEntityVersion(item);
 
 	const [fields, relatedEntities, relatedResources] = await Promise.all([
 		getContentBlocks(db, item.id),
@@ -373,9 +381,10 @@ export async function getSpotlightArticleBySlug(
 	]);
 
 	return {
-		...flattenEntityVersion(item),
+		...data,
 		contributors,
 		image,
+		publishedAt: publicationDate.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,

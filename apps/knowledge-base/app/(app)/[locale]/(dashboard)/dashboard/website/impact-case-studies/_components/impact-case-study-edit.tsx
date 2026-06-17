@@ -27,7 +27,7 @@ interface ImpactCaseStudyEditFormProps {
 	documentId: string;
 	hasDraftChanges: boolean;
 	isPublished: boolean;
-	impactCaseStudy: Pick<schema.ImpactCaseStudy, "id" | "title" | "summary"> & {
+	impactCaseStudy: Pick<schema.ImpactCaseStudy, "id" | "publicationDate" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	initialRelatedEntityIds: Array<string>;

@@ -5,6 +5,7 @@ import { ContentBlockInputSchema } from "@/lib/content-block-input";
 
 export const CreateSpotlightArticleActionInputSchema = v.object({
 	...v.pick(SpotlightArticleInsertSchema, ["title", "summary"]).entries,
+	publicationDate: v.pipe(v.string(), v.isoDate(), v.toDate()),
 	imageKey: v.pipe(v.string(), v.nonEmpty()),
 	contentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),

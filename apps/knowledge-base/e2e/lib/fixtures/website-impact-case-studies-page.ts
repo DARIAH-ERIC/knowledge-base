@@ -1,6 +1,7 @@
 import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
+import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/website/impact-case-studies";
@@ -37,6 +38,25 @@ export class WebsiteImpactCaseStudiesPage {
 
 	async fillSummary(summary: string): Promise<void> {
 		await this.page.getByLabel("Summary").fill(summary);
+	}
+
+	async fillPublicationDate(year: number, month: number, day: number): Promise<void> {
+		await clearDateSegments(this.page, "Publication date");
+
+		const group = this.page.getByRole("group", { name: "Publication date" });
+
+		const daySegment = group.getByRole("spinbutton", { name: /day/i });
+		const monthSegment = group.getByRole("spinbutton", { name: /month/i });
+		const yearSegment = group.getByRole("spinbutton", { name: /year/i });
+
+		await daySegment.click();
+		await this.page.keyboard.type(String(day).padStart(2, "0"));
+
+		await monthSegment.click();
+		await this.page.keyboard.type(String(month).padStart(2, "0"));
+
+		await yearSegment.click();
+		await this.page.keyboard.type(String(year));
 	}
 
 	private contentBlockEditor(): Locator {

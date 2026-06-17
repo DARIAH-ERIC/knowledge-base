@@ -83,6 +83,7 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 			where: { id: draftVersionId },
 			columns: {
 				id: true,
+				publicationDate: true,
 				title: true,
 				summary: true,
 			},

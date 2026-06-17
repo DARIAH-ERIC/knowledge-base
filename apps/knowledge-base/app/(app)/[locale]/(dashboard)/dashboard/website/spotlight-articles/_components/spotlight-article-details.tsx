@@ -6,7 +6,7 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
@@ -20,7 +20,10 @@ interface SpotlightArticleDetailsProps {
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
-	spotlightArticle: Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
+	spotlightArticle: Pick<
+		schema.SpotlightArticle,
+		"id" | "publicationDate" | "title" | "summary"
+	> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
@@ -44,6 +47,7 @@ export function SpotlightArticleDetails(props: Readonly<SpotlightArticleDetailsP
 	} = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	return (
 		<Fragment>
@@ -73,6 +77,14 @@ export function SpotlightArticleDetails(props: Readonly<SpotlightArticleDetailsP
 
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{spotlightArticle.summary}</DescriptionDetails>
+
+				<DescriptionTerm>{t("Publication date")}</DescriptionTerm>
+				<DescriptionDetails>
+					{format.dateTime(spotlightArticle.publicationDate, {
+						dateStyle: "short",
+						timeZone: "UTC",
+					})}
+				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>

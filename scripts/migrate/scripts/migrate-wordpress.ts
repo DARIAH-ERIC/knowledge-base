@@ -775,6 +775,7 @@ async function main() {
 					title: toPlaintext(page.title.rendered),
 					summary: toSummary(page.excerpt.rendered),
 					imageId: imageId ?? placeholderImage.id,
+					publicationDate: new Date(page.date_gmt),
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
 				});
@@ -788,6 +789,7 @@ async function main() {
 					title: toPlaintext(page.title.rendered),
 					summary: toSummary(page.excerpt.rendered),
 					imageId: imageId ?? placeholderImage.id,
+					publicationDate: new Date(page.date_gmt),
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
 				});
@@ -801,6 +803,7 @@ async function main() {
 					title: toPlaintext(page.title.rendered),
 					summary: toSummary(page.excerpt.rendered),
 					imageId,
+					publicationDate: new Date(page.date_gmt),
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
 				});
@@ -1300,6 +1303,7 @@ async function main() {
 				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 				summary: toSummary(page.excerpt?.rendered ?? ""),
 				imageId,
+				publicationDate: new Date(page.date_gmt),
 				createdAt: new Date(page.date_gmt),
 				updatedAt: new Date(page.modified_gmt),
 			});

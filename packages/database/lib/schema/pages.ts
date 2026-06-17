@@ -12,6 +12,7 @@ export const pages = p.snakeCase.table("pages", {
 		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
+	publicationDate: f.timestamp("publication_date").notNull(),
 	imageId: p.uuid("image_id").references(() => assets.id),
 	...f.timestamps(),
 });

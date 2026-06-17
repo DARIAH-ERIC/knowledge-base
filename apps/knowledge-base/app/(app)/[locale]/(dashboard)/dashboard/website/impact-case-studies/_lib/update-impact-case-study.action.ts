@@ -38,7 +38,12 @@ export const updateImpactCaseStudyAction = createMutationAction({
 
 		await tx
 			.update(schema.impactCaseStudies)
-			.set({ imageId: asset.id, title: input.title, summary: input.summary })
+			.set({
+				imageId: asset.id,
+				publicationDate: input.publicationDate,
+				title: input.title,
+				summary: input.summary,
+			})
 			.where(eq(schema.impactCaseStudies.id, draftVersionId));
 
 		const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");

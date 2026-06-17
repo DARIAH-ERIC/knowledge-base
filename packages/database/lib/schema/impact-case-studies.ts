@@ -12,6 +12,7 @@ export const impactCaseStudies = p.snakeCase.table("impact_case_studies", {
 		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
+	publicationDate: f.timestamp("publication_date").notNull(),
 	imageId: p
 		.uuid("image_id")
 		.notNull()

@@ -33,8 +33,8 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 				? schema.spotlightArticles.title
 				: desc(schema.spotlightArticles.title)
 			: dir === "asc"
-				? schema.entityVersions.updatedAt
-				: desc(schema.entityVersions.updatedAt);
+				? schema.spotlightArticles.publicationDate
+				: desc(schema.spotlightArticles.publicationDate);
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 
@@ -46,6 +46,7 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 				slug: schema.entities.slug,
 				summary: schema.spotlightArticles.summary,
 				title: schema.spotlightArticles.title,
+				publicationDate: schema.spotlightArticles.publicationDate,
 				isPublished: sql<boolean>`${schema.documentLifecycle.publishedId} IS NOT NULL`,
 				hasDraft: schema.documentLifecycle.hasDraftChanges,
 				status: schema.entityStatus.type,
@@ -85,6 +86,7 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 			summary: item.summary,
 			title: item.title,
 			isPublished: item.isPublished,
+			publicationDate: item.publicationDate,
 			status: item.status,
 			updatedAt: item.updatedAt,
 		};

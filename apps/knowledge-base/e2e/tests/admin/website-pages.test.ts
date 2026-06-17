@@ -30,6 +30,7 @@ test.describe("website pages admin", () => {
 
 		await pagesPage.fillTitle(title);
 		await pagesPage.fillSummary(summary);
+		await pagesPage.fillPublicationDate(2025, 1, 15);
 		await pagesPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await pagesPage.submitForm();
@@ -38,7 +39,11 @@ test.describe("website pages admin", () => {
 		await expect(pagesPage.pageRowByTitle(title)).toBeVisible();
 
 		const created = await db.getPageItemByTitle(title);
-		expect(created).toMatchObject({ imageId: testAsset.id, summary });
+		expect(created).toMatchObject({
+			imageId: testAsset.id,
+			publicationDate: new Date("2025-01-15T00:00:00.000Z"),
+			summary,
+		});
 	});
 
 	test("should edit all page form fields", async ({ page, createWebsitePagesPage, db }) => {
@@ -67,6 +72,7 @@ test.describe("website pages admin", () => {
 		const updatedSummary = "Updated E2E test page summary";
 		await page.getByLabel("Title").fill(updatedTitle);
 		await pagesPage.fillSummary(updatedSummary);
+		await pagesPage.fillPublicationDate(2026, 2, 16);
 		await pagesPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await pagesPage.submitForm();
@@ -77,7 +83,11 @@ test.describe("website pages admin", () => {
 		await expect(pagesPage.pageRowByTitle(originalTitle)).toBeHidden();
 
 		const updated = await db.getPageItemByTitle(updatedTitle);
-		expect(updated).toMatchObject({ imageId: testAsset.id, summary: updatedSummary });
+		expect(updated).toMatchObject({
+			imageId: testAsset.id,
+			publicationDate: new Date("2026-02-16T00:00:00.000Z"),
+			summary: updatedSummary,
+		});
 	});
 
 	test("should clear an optional image when editing a page", async ({

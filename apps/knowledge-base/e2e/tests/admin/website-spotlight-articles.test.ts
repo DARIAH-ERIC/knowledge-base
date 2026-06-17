@@ -31,6 +31,7 @@ test.describe("website spotlight articles admin", () => {
 
 		await spotlightArticlesPage.fillTitle(title);
 		await spotlightArticlesPage.fillSummary(summary);
+		await spotlightArticlesPage.fillPublicationDate(2025, 1, 15);
 		await spotlightArticlesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await spotlightArticlesPage.addContentBlock(content);
 
@@ -40,7 +41,11 @@ test.describe("website spotlight articles admin", () => {
 		await expect(spotlightArticlesPage.rowByTitle(title)).toBeVisible();
 
 		const created = await db.getSpotlightArticleByTitle(title);
-		expect(created).toMatchObject({ imageId: testAsset.id, summary });
+		expect(created).toMatchObject({
+			imageId: testAsset.id,
+			publicationDate: new Date("2025-01-15T00:00:00.000Z"),
+			summary,
+		});
 		const contentBlocks = await db.getSpotlightArticleContentBlocksByTitle(title);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
@@ -78,6 +83,7 @@ test.describe("website spotlight articles admin", () => {
 		const testAsset = await db.getTestAsset();
 		await page.getByLabel("Title").fill(updatedTitle);
 		await spotlightArticlesPage.fillSummary(updatedSummary);
+		await spotlightArticlesPage.fillPublicationDate(2026, 2, 16);
 		await spotlightArticlesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await spotlightArticlesPage.updateContentBlockText(updatedContent);
 
@@ -89,7 +95,11 @@ test.describe("website spotlight articles admin", () => {
 		await expect(spotlightArticlesPage.rowByTitle(originalTitle)).toBeHidden();
 
 		const updated = await db.getSpotlightArticleByTitle(updatedTitle);
-		expect(updated).toMatchObject({ imageId: testAsset.id, summary: updatedSummary });
+		expect(updated).toMatchObject({
+			imageId: testAsset.id,
+			publicationDate: new Date("2026-02-16T00:00:00.000Z"),
+			summary: updatedSummary,
+		});
 		const contentBlocks = await db.getSpotlightArticleContentBlocksByTitle(updatedTitle);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);

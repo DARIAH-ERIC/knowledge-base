@@ -1510,13 +1510,17 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
-	async getPageItemByTitle(
-		title: string,
-	): Promise<{ id: string; imageId: string | null; summary: string } | null> {
+	async getPageItemByTitle(title: string): Promise<{
+		id: string;
+		imageId: string | null;
+		publicationDate: Date;
+		summary: string;
+	} | null> {
 		const [row] = await this.db
 			.select({
 				id: schema.entityVersions.entityId,
 				imageId: schema.pages.imageId,
+				publicationDate: schema.pages.publicationDate,
 				summary: schema.pages.summary,
 			})
 			.from(schema.pages)
@@ -1615,12 +1619,14 @@ export class DatabaseService {
 	async getImpactCaseStudyByTitle(title: string): Promise<{
 		id: string;
 		imageId: string;
+		publicationDate: Date;
 		summary: string;
 	} | null> {
 		const [row] = await this.db
 			.select({
 				id: schema.impactCaseStudies.id,
 				imageId: schema.impactCaseStudies.imageId,
+				publicationDate: schema.impactCaseStudies.publicationDate,
 				summary: schema.impactCaseStudies.summary,
 			})
 			.from(schema.impactCaseStudies)
@@ -1645,12 +1651,14 @@ export class DatabaseService {
 	async getSpotlightArticleByTitle(title: string): Promise<{
 		id: string;
 		imageId: string;
+		publicationDate: Date;
 		summary: string;
 	} | null> {
 		const [row] = await this.db
 			.select({
 				id: schema.spotlightArticles.id,
 				imageId: schema.spotlightArticles.imageId,
+				publicationDate: schema.spotlightArticles.publicationDate,
 				summary: schema.spotlightArticles.summary,
 			})
 			.from(schema.spotlightArticles)

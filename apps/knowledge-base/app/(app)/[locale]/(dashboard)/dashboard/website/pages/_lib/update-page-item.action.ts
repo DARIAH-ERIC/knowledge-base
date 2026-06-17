@@ -38,7 +38,12 @@ export const updatePageItemAction = createMutationAction({
 
 		await tx
 			.update(schema.pages)
-			.set({ imageId, title: input.title, summary: input.summary })
+			.set({
+				imageId,
+				publicationDate: input.publicationDate,
+				title: input.title,
+				summary: input.summary,
+			})
 			.where(eq(schema.pages.id, draftVersionId));
 
 		const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");

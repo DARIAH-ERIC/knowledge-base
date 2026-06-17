@@ -7,6 +7,7 @@ export const UpdateSpotlightArticleActionInputSchema = v.object({
 	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(SpotlightArticleUpdateSchema, ["title"]).entries,
 	...v.pick(SpotlightArticleUpdateSchema, ["summary"]).entries,
+	publicationDate: v.pipe(v.string(), v.isoDate(), v.toDate()),
 	imageKey: v.pipe(v.string(), v.nonEmpty()),
 	contentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),

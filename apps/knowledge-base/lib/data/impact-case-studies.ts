@@ -33,8 +33,8 @@ export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
 				? schema.impactCaseStudies.title
 				: desc(schema.impactCaseStudies.title)
 			: dir === "asc"
-				? schema.entityVersions.updatedAt
-				: desc(schema.entityVersions.updatedAt);
+				? schema.impactCaseStudies.publicationDate
+				: desc(schema.impactCaseStudies.publicationDate);
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 
@@ -46,6 +46,7 @@ export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
 				slug: schema.entities.slug,
 				summary: schema.impactCaseStudies.summary,
 				title: schema.impactCaseStudies.title,
+				publicationDate: schema.impactCaseStudies.publicationDate,
 				isPublished: sql<boolean>`${schema.documentLifecycle.publishedId} IS NOT NULL`,
 				hasDraft: schema.documentLifecycle.hasDraftChanges,
 				status: schema.entityStatus.type,
@@ -85,6 +86,7 @@ export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
 			summary: item.summary,
 			title: item.title,
 			isPublished: item.isPublished,
+			publicationDate: item.publicationDate,
 			status: item.status,
 			updatedAt: item.updatedAt,
 		};

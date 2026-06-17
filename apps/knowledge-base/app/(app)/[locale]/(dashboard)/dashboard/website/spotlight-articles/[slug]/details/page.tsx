@@ -91,6 +91,7 @@ export default async function DashboardWebsiteSpotlightArticleDetailsPage(
 		where: { id: versionId },
 		columns: {
 			id: true,
+			publicationDate: true,
 			title: true,
 			summary: true,
 		},

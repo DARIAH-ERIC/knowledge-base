@@ -92,6 +92,7 @@ export default async function DashboardWebsiteImpactCaseStudyDetailsPage(
 		where: { id: versionId },
 		columns: {
 			id: true,
+			publicationDate: true,
 			title: true,
 			summary: true,
 		},

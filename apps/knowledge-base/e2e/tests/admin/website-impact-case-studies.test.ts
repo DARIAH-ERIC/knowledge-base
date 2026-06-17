@@ -31,6 +31,7 @@ test.describe("website impact case studies admin", () => {
 
 		await impactCaseStudiesPage.fillTitle(title);
 		await impactCaseStudiesPage.fillSummary(summary);
+		await impactCaseStudiesPage.fillPublicationDate(2025, 1, 15);
 		await impactCaseStudiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await impactCaseStudiesPage.addContentBlock(content);
 
@@ -40,7 +41,11 @@ test.describe("website impact case studies admin", () => {
 		await expect(impactCaseStudiesPage.rowByTitle(title)).toBeVisible();
 
 		const created = await db.getImpactCaseStudyByTitle(title);
-		expect(created).toMatchObject({ imageId: testAsset.id, summary });
+		expect(created).toMatchObject({
+			imageId: testAsset.id,
+			publicationDate: new Date("2025-01-15T00:00:00.000Z"),
+			summary,
+		});
 		const contentBlocks = await db.getImpactCaseStudyContentBlocksByTitle(title);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
@@ -78,6 +83,7 @@ test.describe("website impact case studies admin", () => {
 		const testAsset = await db.getTestAsset();
 		await page.getByLabel("Title").fill(updatedTitle);
 		await impactCaseStudiesPage.fillSummary(updatedSummary);
+		await impactCaseStudiesPage.fillPublicationDate(2026, 2, 16);
 		await impactCaseStudiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await impactCaseStudiesPage.updateContentBlockText(updatedContent);
 
@@ -89,7 +95,11 @@ test.describe("website impact case studies admin", () => {
 		await expect(impactCaseStudiesPage.rowByTitle(originalTitle)).toBeHidden();
 
 		const updated = await db.getImpactCaseStudyByTitle(updatedTitle);
-		expect(updated).toMatchObject({ imageId: testAsset.id, summary: updatedSummary });
+		expect(updated).toMatchObject({
+			imageId: testAsset.id,
+			publicationDate: new Date("2026-02-16T00:00:00.000Z"),
+			summary: updatedSummary,
+		});
 		const contentBlocks = await db.getImpactCaseStudyContentBlocksByTitle(updatedTitle);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);
