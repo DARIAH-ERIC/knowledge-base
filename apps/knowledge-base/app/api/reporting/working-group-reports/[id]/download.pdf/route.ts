@@ -4,6 +4,10 @@ import { getWorkingGroupReportDataForUser } from "@/app/(app)/[locale]/(dashboar
 import { richTextToText } from "@/app/api/reporting/_lib/rich-text-to-text";
 import { type PdfSection, createTextPdf } from "@/app/api/reporting/_lib/text-pdf";
 import { getCurrentSession } from "@/lib/auth/session";
+import {
+	type ReportExternalResourceSnapshot,
+	getWorkingGroupExternalResourceSnapshots,
+} from "@/lib/data/report-marketplace-resources";
 
 function value(value: number | string | null): string {
 	return value == null || value === "" ? "-" : String(value);
@@ -14,6 +18,37 @@ function formatRole(role: string): string {
 		.replaceAll("_", " ")
 		.replace(/^is /, "")
 		.replaceAll(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatExternalSectionTitle(section: string): string {
+	return section.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function externalResourceSnapshotToPdfSection(
+	snapshot: ReportExternalResourceSnapshot,
+): PdfSection {
+	return {
+		title: formatExternalSectionTitle(snapshot.section),
+		lines:
+			snapshot.items.length > 0
+				? [
+						`Captured: ${snapshot.capturedAt.toISOString()}`,
+						...snapshot.items.map((item) => {
+							const meta = [
+								item.sshocCategory,
+								item.source,
+								item.year == null ? null : String(item.year),
+								item.kind,
+							]
+								.filter(Boolean)
+								.join(" - ");
+							const link = item.links[0] == null ? "" : ` - ${item.links[0]}`;
+
+							return `${item.label}${meta === "" ? "" : ` - ${meta}`}${link}`;
+						}),
+					]
+				: [`Captured: ${snapshot.capturedAt.toISOString()}`, "No external resources recorded."],
+	};
 }
 
 const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "medium" });
@@ -40,6 +75,7 @@ export async function GET(
 		}
 		case "ok": {
 			const report = result.data;
+			const externalResourceSnapshots = await getWorkingGroupExternalResourceSnapshots(report.id);
 			const sections: Array<PdfSection> = [
 				{
 					title: "Overview",
@@ -94,6 +130,9 @@ export async function GET(
 								])
 							: ["No questions recorded."],
 				},
+				...externalResourceSnapshots.map((snapshot) =>
+					externalResourceSnapshotToPdfSection(snapshot),
+				),
 			];
 			const pdf = await createTextPdf(
 				`Working group report - ${report.workingGroup.name}`,

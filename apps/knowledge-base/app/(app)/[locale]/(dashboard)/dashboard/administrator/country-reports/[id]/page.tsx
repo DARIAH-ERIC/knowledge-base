@@ -99,10 +99,10 @@ export default async function DashboardAdministratorCountryReportPage(
 				<CountryReportSummary data={report.summary} extraSectionLinks={liveResourceNavLinks} />
 				<LiveReportResourcesErrorBoundary
 					description={t(
-						"Live external data could not be loaded. Stored report data is unaffected.",
+						"External data snapshots could not be loaded. Stored report data is unaffected.",
 					)}
 					retryLabel={t("Retry")}
-					title={t("Live external data")}
+					title={t("External data snapshots")}
 				>
 					<LiveReportResources reportId={id} reportKind="country" />
 				</LiveReportResourcesErrorBoundary>

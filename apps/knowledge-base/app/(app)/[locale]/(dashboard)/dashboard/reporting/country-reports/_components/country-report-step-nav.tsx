@@ -30,7 +30,7 @@ export function CountryReportStepNav(props: Readonly<CountryReportStepNavProps>)
 		{ href: `${editBasePath}/events`, label: t("Events") },
 		{ href: `${editBasePath}/social-media`, label: t("Social media") },
 		{ href: `${editBasePath}/services`, label: t("Services") },
-		{ href: `${editBasePath}/software`, label: t("Software") },
+		{ href: `${editBasePath}/software`, label: t("SSHOC resources") },
 		{ href: `${editBasePath}/publications`, label: t("Publications") },
 		{ href: `${editBasePath}/projects`, label: t("Projects") },
 		...(variant === "reporting" ? [{ href: `${editBasePath}/confirm`, label: t("Confirm") }] : []),
