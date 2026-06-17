@@ -3,7 +3,7 @@ import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
 import {
 	Header,
@@ -13,8 +13,8 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import {
+	getLiveReportResourceNavLinks,
 	LiveReportResources,
-	LiveReportResourcesFallback,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources";
 import { LiveReportResourcesErrorBoundary } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources-error-boundary";
 import { CountryReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary";
@@ -62,6 +62,7 @@ export default async function DashboardAdministratorCountryReportPage(
 	const report = result.data;
 
 	const t = await getExtracted();
+	const liveResourceNavLinks = await getLiveReportResourceNavLinks("country");
 
 	return (
 		<div>
@@ -95,7 +96,7 @@ export default async function DashboardAdministratorCountryReportPage(
 			</Header>
 
 			<div className="mbs-8 flex max-inline-4xl flex-col gap-y-10 px-(--layout-padding)">
-				<CountryReportSummary data={report.summary} />
+				<CountryReportSummary data={report.summary} extraSectionLinks={liveResourceNavLinks} />
 				<LiveReportResourcesErrorBoundary
 					description={t(
 						"Live external data could not be loaded. Stored report data is unaffected.",
@@ -103,19 +104,7 @@ export default async function DashboardAdministratorCountryReportPage(
 					retryLabel={t("Retry")}
 					title={t("Live external data")}
 				>
-					<Suspense
-						fallback={
-							<LiveReportResourcesFallback
-								description={t(
-									"This fetches current search-index data on demand. These results are not stored as a report snapshot in the database.",
-								)}
-								loadingLabel={t("Loading live external data…")}
-								title={t("Live external data")}
-							/>
-						}
-					>
-						<LiveReportResources reportId={id} reportKind="country" />
-					</Suspense>
+					<LiveReportResources reportId={id} reportKind="country" />
 				</LiveReportResourcesErrorBoundary>
 			</div>
 		</div>

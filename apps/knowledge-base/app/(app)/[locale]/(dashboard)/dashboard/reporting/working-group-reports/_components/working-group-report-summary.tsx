@@ -33,6 +33,11 @@ export interface WorkingGroupReportSummaryData {
 
 interface WorkingGroupReportSummaryProps {
 	data: WorkingGroupReportSummaryData;
+	/**
+	 * Additional "On this page" nav links for sections rendered as siblings of this summary (e.g. the
+	 * admin "Live external data" block). Appended after the stored-data sections.
+	 */
+	extraSectionLinks?: ReadonlyArray<ReportSummarySectionLink>;
 }
 
 function formatRole(role: string): string {
@@ -47,7 +52,7 @@ const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "medium" });
 export async function WorkingGroupReportSummary(
 	props: Readonly<WorkingGroupReportSummaryProps>,
 ): Promise<ReactNode> {
-	const { data } = props;
+	const { data, extraSectionLinks } = props;
 
 	const t = await getExtracted();
 
@@ -75,6 +80,10 @@ export async function WorkingGroupReportSummary(
 
 	if (data.questions.length > 0) {
 		sectionLinks.push({ id: "working-group-report-questions", label: questionsLabel });
+	}
+
+	if (extraSectionLinks != null) {
+		sectionLinks.push(...extraSectionLinks);
 	}
 
 	return (
