@@ -68,7 +68,7 @@ export default async function DashboardReportingAdministratorPage(
 				</HeaderContent>
 			</Header>
 
-			<div className="grid gap-4 px-(--layout-padding) pbs-2 md:grid-cols-4">
+			<div className="grid gap-4 px-(--layout-padding) pbs-2 sm:grid-cols-2 xl:grid-cols-4">
 				{items.map((item) => (
 					<section
 						key={item.href}

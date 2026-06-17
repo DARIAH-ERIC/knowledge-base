@@ -6,40 +6,40 @@ msgstr ""
 "X-Generator: next-intl\n"
 "X-Crowdin-SourceKey: msgstr\n"
 
-#: lib/async-multiple-select.tsx:163
+#: lib/async-multiple-select.tsx:171
 #: lib/async-select.tsx:131
 msgctxt "ui"
 msgid "JDP92p"
 msgstr "Could not load options."
 
-#: lib/async-multiple-select.tsx:193
-#: lib/multiple-select.tsx:121
+#: lib/async-multiple-select.tsx:201
+#: lib/multiple-select.tsx:123
 msgctxt "ui"
 msgid "ch1L7M"
 msgstr "Selected items"
 
-#: lib/async-multiple-select.tsx:207
+#: lib/async-multiple-select.tsx:215
 msgctxt "ui"
 msgid "Klxvi/"
 msgstr "No selected items"
 
-#: lib/async-multiple-select.tsx:215
-#: lib/multiple-select.tsx:141
+#: lib/async-multiple-select.tsx:223
+#: lib/multiple-select.tsx:143
 #: lib/searchable-select.tsx:92
 msgctxt "ui"
 msgid "hBhV8k"
 msgstr "Open options"
 
-#: lib/async-multiple-select.tsx:240
+#: lib/async-multiple-select.tsx:248
 #: lib/async-select.tsx:193
-#: lib/multiple-select.tsx:166
+#: lib/multiple-select.tsx:168
 #: lib/search-field.tsx:26
 msgctxt "ui"
 msgid "xmcVZ0"
 msgstr "Search"
 
-#: lib/async-multiple-select.tsx:289
-#: lib/async-multiple-select.tsx:295
+#: lib/async-multiple-select.tsx:297
+#: lib/async-multiple-select.tsx:303
 #: lib/async-select.tsx:239
 #: lib/async-select.tsx:245
 #: lib/loader.tsx:95
@@ -47,42 +47,42 @@ msgctxt "ui"
 msgid "99OtWT"
 msgstr "Pending..."
 
-#: lib/async-multiple-select.tsx:299
+#: lib/async-multiple-select.tsx:307
 #: lib/async-select.tsx:249
 msgctxt "ui"
 msgid "GEi2T8"
 msgstr "No options found."
 
-#: lib/async-multiple-select.tsx:311
+#: lib/async-multiple-select.tsx:319
 #: lib/async-select.tsx:261
 #: lib/pagination.tsx:153
 msgctxt "ui"
 msgid "k9hDFZ"
 msgstr "Previous page"
 
-#: lib/async-multiple-select.tsx:319
+#: lib/async-multiple-select.tsx:327
 #: lib/async-select.tsx:269
 #: lib/pagination.tsx:199
 msgctxt "ui"
 msgid "rBj9Ib"
 msgstr "Next page"
 
-#: lib/calendar.tsx:102
+#: lib/calendar.tsx:103
 msgctxt "ui"
 msgid "8mRNBD"
 msgstr "Previous month"
 
-#: lib/calendar.tsx:112
+#: lib/calendar.tsx:113
 msgctxt "ui"
 msgid "PqmLVn"
 msgstr "Next month"
 
-#: lib/calendar.tsx:143
+#: lib/calendar.tsx:144
 msgctxt "ui"
 msgid "pig+2F"
 msgstr "Select month"
 
-#: lib/calendar.tsx:179
+#: lib/calendar.tsx:180
 msgctxt "ui"
 msgid "HppWvq"
 msgstr "Select year"
@@ -112,12 +112,12 @@ msgctxt "ui"
 msgid "0BUTMv"
 msgstr "Search..."
 
-#: lib/date-picker.tsx:67
+#: lib/date-picker.tsx:69
 msgctxt "ui"
 msgid "WZXD9N"
 msgstr "Date picker"
 
-#: lib/date-picker.tsx:102
+#: lib/date-picker.tsx:104
 msgctxt "ui"
 msgid "OHAWov"
 msgstr "Open calendar"
@@ -159,63 +159,63 @@ msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: lib/rich-text-editor.tsx:848
+#: lib/rich-text-editor.tsx:870
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
-#: lib/rich-text-editor.tsx:856
+#: lib/rich-text-editor.tsx:878
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
 
-#: lib/rich-text-editor.tsx:864
+#: lib/rich-text-editor.tsx:886
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: lib/rich-text-editor.tsx:873
+#: lib/rich-text-editor.tsx:895
 msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
-#: lib/rich-text-editor.tsx:881
+#: lib/rich-text-editor.tsx:903
 msgctxt "ui"
 msgid "BDbgCL"
 msgstr "Heading 3"
 
-#: lib/rich-text-editor.tsx:889
+#: lib/rich-text-editor.tsx:911
 msgctxt "ui"
 msgid "BKF2fN"
 msgstr "Heading 4"
 
-#: lib/rich-text-editor.tsx:898
+#: lib/rich-text-editor.tsx:920
 msgctxt "ui"
 msgid "6sdKFe"
 msgstr "Bullet List"
 
-#: lib/rich-text-editor.tsx:906
+#: lib/rich-text-editor.tsx:928
 msgctxt "ui"
 msgid "rU4xig"
 msgstr "Ordered List"
 
-#: lib/rich-text-editor.tsx:914
+#: lib/rich-text-editor.tsx:936
 msgctxt "ui"
 msgid "+RDJVD"
 msgstr "Blockquote"
 
-#: lib/rich-text-editor.tsx:925
-#: lib/rich-text-editor.tsx:933
+#: lib/rich-text-editor.tsx:947
+#: lib/rich-text-editor.tsx:955
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
-#: lib/rich-text-editor.tsx:955
+#: lib/rich-text-editor.tsx:977
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
 
-#: lib/rich-text-editor.tsx:959
+#: lib/rich-text-editor.tsx:981
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
