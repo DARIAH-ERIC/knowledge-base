@@ -12,6 +12,11 @@ export type { CountryReportSummaryData };
 
 interface CountryReportSummaryProps {
 	data: CountryReportSummaryData;
+	/**
+	 * Additional "On this page" nav links for sections rendered as siblings of this summary (e.g. the
+	 * admin "Live external data" block). Appended after the stored-data sections.
+	 */
+	extraSectionLinks?: ReadonlyArray<ReportSummarySectionLink>;
 }
 
 function formatRole(role: string): string {
@@ -34,7 +39,7 @@ const eurFormatter = new Intl.NumberFormat("en", {
 export async function CountryReportSummary(
 	props: Readonly<CountryReportSummaryProps>,
 ): Promise<ReactNode> {
-	const { data } = props;
+	const { data, extraSectionLinks } = props;
 
 	const t = await getExtracted();
 
@@ -78,6 +83,10 @@ export async function CountryReportSummary(
 			id: "country-report-project-contributions",
 			label: projectContributionsLabel,
 		});
+	}
+
+	if (extraSectionLinks != null) {
+		sectionLinks.push(...extraSectionLinks);
 	}
 
 	return (
@@ -129,7 +138,7 @@ export async function CountryReportSummary(
 
 				{hasEvents && (
 					<ReportSummarySection id="country-report-events" title={eventsLabel}>
-						<dl className="grid max-inline-xs grid-cols-[auto_1fr] gap-x-8 gap-y-2 text-sm">
+						<dl className="grid grid-cols-[auto_1fr] gap-x-8 gap-y-2 text-sm">
 							<dt className="text-muted-fg">{t("Small")}</dt>
 							<dd>{data.smallEvents ?? "—"}</dd>
 							<dt className="text-muted-fg">{t("Medium")}</dt>
@@ -156,7 +165,7 @@ export async function CountryReportSummary(
 
 				{data.socialMediaAccounts.length > 0 && (
 					<ReportSummarySection
-						contentClassName="gap-y-6"
+						contentClassName="gap-y-3"
 						id="country-report-social-media"
 						title={socialMediaLabel}
 					>
@@ -164,7 +173,10 @@ export async function CountryReportSummary(
 							const nonZeroKpis = account.kpis.filter((k) => k.value > 0);
 
 							return (
-								<div key={account.socialMediaId} className="flex flex-col gap-y-3">
+								<div
+									key={account.socialMediaId}
+									className="flex flex-col gap-y-3 rounded-md border border-border p-4"
+								>
 									<div className="space-y-0.5">
 										<p className="text-sm font-medium text-fg">{account.name}</p>
 										<a
@@ -196,7 +208,7 @@ export async function CountryReportSummary(
 
 				{data.services.length > 0 && (
 					<ReportSummarySection
-						contentClassName="gap-y-6"
+						contentClassName="gap-y-3"
 						id="country-report-services"
 						title={servicesLabel}
 					>
@@ -204,7 +216,10 @@ export async function CountryReportSummary(
 							const nonZeroKpis = service.kpis.filter((k) => k.value > 0);
 
 							return (
-								<div key={service.serviceId} className="flex flex-col gap-y-3">
+								<div
+									key={service.serviceId}
+									className="flex flex-col gap-y-3 rounded-md border border-border p-4"
+								>
 									<p className="text-sm font-medium text-fg">{service.name}</p>
 									{nonZeroKpis.length > 0 ? (
 										<dl className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-3 lg:grid-cols-4">
