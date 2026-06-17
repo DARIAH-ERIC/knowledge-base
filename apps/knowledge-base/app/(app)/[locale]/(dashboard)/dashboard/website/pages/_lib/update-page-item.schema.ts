@@ -7,6 +7,7 @@ export const UpdatePageItemActionInputSchema = v.object({
 	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(PageUpdateSchema, ["title"]).entries,
 	...v.pick(PageUpdateSchema, ["summary"]).entries,
+	publicationDate: v.pipe(v.string(), v.isoDate(), v.toDate()),
 	imageKey: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	contentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),

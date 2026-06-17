@@ -33,7 +33,7 @@ interface PagesPageProps {
 	page: number;
 	pages: {
 		data: Array<
-			Pick<schema.Page, "id" | "title" | "summary"> & {
+			Pick<schema.Page, "id" | "publicationDate" | "title" | "summary"> & {
 				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
 				hasDraft: boolean;
@@ -93,7 +93,7 @@ export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
 					</TableColumn>
 					<TableColumn>{t("Summary")}</TableColumn>
 					<TableColumn allowsSorting={true} id="updatedAt">
-						{t("Updated")}
+						{t("Publication date")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
@@ -107,7 +107,9 @@ export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
 							<TableCell>
 								<div className="max-inline-xs truncate">{item.summary}</div>
 							</TableCell>
-							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+							<TableCell>
+								{format.dateTime(item.publicationDate, { dateStyle: "short", timeZone: "UTC" })}
+							</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
 									hasDraft={item.hasDraft}

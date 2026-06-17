@@ -9,6 +9,7 @@ export const spotlightArticlesLifecycleAdapter: EntityLifecycleAdapter = {
 			.select({
 				title: schema.spotlightArticles.title,
 				summary: schema.spotlightArticles.summary,
+				publicationDate: schema.spotlightArticles.publicationDate,
 				imageId: schema.spotlightArticles.imageId,
 			})
 			.from(schema.spotlightArticles)

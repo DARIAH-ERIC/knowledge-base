@@ -730,6 +730,7 @@ async function main() {
 				id: pageVersionId,
 				title: "Kitchen Sink Page",
 				summary: "A page seeded for API contract testing.",
+				publicationDate: new Date("2024-01-15T00:00:00.000Z"),
 				imageId: createId("asset:image"),
 			});
 			await upsertById(tx, schema.news, {
@@ -760,12 +761,14 @@ async function main() {
 				id: spotlightVersionId,
 				title: "Kitchen Sink Spotlight Article",
 				summary: "A spotlight article seeded for API contract testing.",
+				publicationDate: new Date("2024-01-15T00:00:00.000Z"),
 				imageId: createId("asset:image"),
 			});
 			await upsertById(tx, schema.impactCaseStudies, {
 				id: impactVersionId,
 				title: "Kitchen Sink Impact Case Study",
 				summary: "An impact case study seeded for API contract testing.",
+				publicationDate: new Date("2024-01-15T00:00:00.000Z"),
 				imageId: createId("asset:image"),
 			});
 			await upsertById(tx, schema.documentsPolicies, {

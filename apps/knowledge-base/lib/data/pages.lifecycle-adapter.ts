@@ -9,6 +9,7 @@ export const pagesLifecycleAdapter: EntityLifecycleAdapter = {
 			.select({
 				title: schema.pages.title,
 				summary: schema.pages.summary,
+				publicationDate: schema.pages.publicationDate,
 				imageId: schema.pages.imageId,
 			})
 			.from(schema.pages)

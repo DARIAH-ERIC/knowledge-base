@@ -6,7 +6,7 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
@@ -20,7 +20,7 @@ interface PageItemDetailsProps {
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
-	pageItem: Pick<schema.Page, "id" | "title" | "summary"> & {
+	pageItem: Pick<schema.Page, "id" | "publicationDate" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
@@ -44,6 +44,7 @@ export function PageItemDetails(props: Readonly<PageItemDetailsProps>): ReactNod
 	} = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	return (
 		<Fragment>
@@ -73,6 +74,11 @@ export function PageItemDetails(props: Readonly<PageItemDetailsProps>): ReactNod
 
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{pageItem.summary}</DescriptionDetails>
+
+				<DescriptionTerm>{t("Publication date")}</DescriptionTerm>
+				<DescriptionDetails>
+					{format.dateTime(pageItem.publicationDate, { dateStyle: "short", timeZone: "UTC" })}
+				</DescriptionDetails>
 
 				{pageItem.image != null ? (
 					<Fragment>

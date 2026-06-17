@@ -31,6 +31,7 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 			},
 			columns: {
 				id: true,
+				publicationDate: true,
 				title: true,
 				summary: true,
 			},
@@ -60,7 +61,7 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
+				return [desc(t.publicationDate), desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -79,8 +80,9 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 
 	const data = items.map((item) => {
 		const image = generateImageUrl(item.image, imageWidth.preview);
+		const { publicationDate, ...data } = flattenEntityVersion(item);
 
-		return { ...flattenEntityVersion(item), image };
+		return { ...data, image, publishedAt: publicationDate.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -107,6 +109,7 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 			},
 			columns: {
 				id: true,
+				publicationDate: true,
 				title: true,
 				summary: true,
 			},
@@ -149,10 +152,12 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 	]);
 
 	const image = generateImageUrl(item.image, imageWidth.featured);
+	const { publicationDate, ...data } = flattenEntityVersion(item);
 
 	return {
-		...flattenEntityVersion(item),
+		...data,
 		image,
+		publishedAt: publicationDate.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,
@@ -182,6 +187,7 @@ export async function getPageSlugs(db: Database | Transaction, params: GetPageSl
 			},
 			columns: {
 				id: true,
+				publicationDate: true,
 			},
 			with: {
 				entityVersion: {
@@ -209,7 +215,7 @@ export async function getPageSlugs(db: Database | Transaction, params: GetPageSl
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
+				return [desc(t.publicationDate), desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -255,6 +261,7 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 		},
 		columns: {
 			id: true,
+			publicationDate: true,
 			title: true,
 			summary: true,
 		},
@@ -297,9 +304,12 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 		getRelatedResources(db, item.id),
 	]);
 
+	const { publicationDate, ...data } = flattenEntityVersion(item);
+
 	return {
-		...flattenEntityVersion(item),
+		...data,
 		image,
+		publishedAt: publicationDate.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,

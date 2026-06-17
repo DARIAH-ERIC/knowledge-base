@@ -31,8 +31,8 @@ export async function getPages(params: GetPagesParams) {
 				? schema.pages.title
 				: desc(schema.pages.title)
 			: dir === "asc"
-				? schema.entityVersions.updatedAt
-				: desc(schema.entityVersions.updatedAt);
+				? schema.pages.publicationDate
+				: desc(schema.pages.publicationDate);
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 
@@ -44,6 +44,7 @@ export async function getPages(params: GetPagesParams) {
 				slug: schema.entities.slug,
 				summary: schema.pages.summary,
 				title: schema.pages.title,
+				publicationDate: schema.pages.publicationDate,
 				isPublished: sql<boolean>`${schema.documentLifecycle.publishedId} IS NOT NULL`,
 				hasDraft: schema.documentLifecycle.hasDraftChanges,
 				status: schema.entityStatus.type,
@@ -83,6 +84,7 @@ export async function getPages(params: GetPagesParams) {
 			summary: item.summary,
 			title: item.title,
 			isPublished: item.isPublished,
+			publicationDate: item.publicationDate,
 			status: item.status,
 			updatedAt: item.updatedAt,
 		};

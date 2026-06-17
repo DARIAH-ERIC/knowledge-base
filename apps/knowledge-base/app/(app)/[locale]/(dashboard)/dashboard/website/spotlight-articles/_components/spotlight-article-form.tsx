@@ -2,12 +2,14 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { Input } from "@dariah-eric/ui/input";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
+import { CalendarDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -27,7 +29,10 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface SpotlightArticleFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
-	spotlightArticle?: Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
+	spotlightArticle?: Pick<
+		schema.SpotlightArticle,
+		"id" | "publicationDate" | "title" | "summary"
+	> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	formId?: string;
@@ -68,6 +73,7 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
 		spotlightArticle?.image ?? null,
 	);
+	const now = new Date();
 	return (
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" id={formId} state={state}>
@@ -87,6 +93,24 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
+
+					<DatePicker
+						defaultValue={
+							spotlightArticle != null
+								? new CalendarDate(
+										spotlightArticle.publicationDate.getUTCFullYear(),
+										spotlightArticle.publicationDate.getUTCMonth() + 1,
+										spotlightArticle.publicationDate.getUTCDate(),
+									)
+								: new CalendarDate(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate())
+						}
+						granularity="day"
+						isRequired={true}
+						name="publicationDate"
+					>
+						<Label>{t("Publication date")}</Label>
+						<DatePickerTrigger />
+					</DatePicker>
 				</FormSection>
 
 				<Separator className="my-6" />

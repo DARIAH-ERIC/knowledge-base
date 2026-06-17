@@ -2,12 +2,14 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { Input } from "@dariah-eric/ui/input";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
+import { CalendarDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -27,7 +29,7 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface ImpactCaseStudyFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
-	impactCaseStudy?: Pick<schema.ImpactCaseStudy, "id" | "title" | "summary"> & {
+	impactCaseStudy?: Pick<schema.ImpactCaseStudy, "id" | "publicationDate" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	formId?: string;
@@ -68,6 +70,7 @@ export function ImpactCaseStudyForm(props: Readonly<ImpactCaseStudyFormProps>): 
 	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
 		impactCaseStudy?.image ?? null,
 	);
+	const now = new Date();
 	return (
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" id={formId} state={state}>
@@ -87,6 +90,24 @@ export function ImpactCaseStudyForm(props: Readonly<ImpactCaseStudyFormProps>): 
 						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
+
+					<DatePicker
+						defaultValue={
+							impactCaseStudy != null
+								? new CalendarDate(
+										impactCaseStudy.publicationDate.getUTCFullYear(),
+										impactCaseStudy.publicationDate.getUTCMonth() + 1,
+										impactCaseStudy.publicationDate.getUTCDate(),
+									)
+								: new CalendarDate(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate())
+						}
+						granularity="day"
+						isRequired={true}
+						name="publicationDate"
+					>
+						<Label>{t("Publication date")}</Label>
+						<DatePickerTrigger />
+					</DatePicker>
 				</FormSection>
 
 				<Separator className="my-6" />

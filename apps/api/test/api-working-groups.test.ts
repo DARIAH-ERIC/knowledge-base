@@ -101,7 +101,12 @@ function createRelatedPage() {
 	return {
 		entity: { id: entityId, slug },
 		version: { id: versionId, entityId },
-		page: { id: versionId, title, summary: f.lorem.paragraph() },
+		page: {
+			id: versionId,
+			title,
+			summary: f.lorem.paragraph(),
+			publicationDate: f.date.past(),
+		},
 	};
 }
 

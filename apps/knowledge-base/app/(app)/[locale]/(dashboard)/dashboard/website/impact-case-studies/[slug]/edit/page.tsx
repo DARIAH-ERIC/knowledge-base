@@ -83,6 +83,7 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 			where: { id: draftVersionId },
 			columns: {
 				id: true,
+				publicationDate: true,
 				title: true,
 				summary: true,
 			},

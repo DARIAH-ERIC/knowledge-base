@@ -3,12 +3,14 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
+import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { Input } from "@dariah-eric/ui/input";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
+import { CalendarDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -28,7 +30,7 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface PageItemFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
-	pageItem?: Pick<schema.Page, "id" | "title" | "summary"> & {
+	pageItem?: Pick<schema.Page, "id" | "publicationDate" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	formId?: string;
@@ -71,6 +73,7 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 	);
 
 	const [imageKeyError, setImageKeyError] = useState(false);
+	const now = new Date();
 
 	return (
 		<FormLayout>
@@ -87,6 +90,24 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
+
+					<DatePicker
+						defaultValue={
+							pageItem != null
+								? new CalendarDate(
+										pageItem.publicationDate.getUTCFullYear(),
+										pageItem.publicationDate.getUTCMonth() + 1,
+										pageItem.publicationDate.getUTCDate(),
+									)
+								: new CalendarDate(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate())
+						}
+						granularity="day"
+						isRequired={true}
+						name="publicationDate"
+					>
+						<Label>{t("Publication date")}</Label>
+						<DatePickerTrigger />
+					</DatePicker>
 				</FormSection>
 
 				<Separator className="my-6" />

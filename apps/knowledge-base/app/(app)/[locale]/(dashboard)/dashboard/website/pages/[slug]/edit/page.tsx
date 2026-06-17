@@ -72,6 +72,7 @@ export default async function DashboardWebsiteEditPageItemPage(
 				where: { id: draftVersionId },
 				columns: {
 					id: true,
+					publicationDate: true,
 					title: true,
 					summary: true,
 				},

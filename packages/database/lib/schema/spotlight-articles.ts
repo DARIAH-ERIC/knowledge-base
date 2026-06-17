@@ -13,6 +13,7 @@ export const spotlightArticles = p.snakeCase.table("spotlight_articles", {
 		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
+	publicationDate: f.timestamp("publication_date").notNull(),
 	imageId: p
 		.uuid("image_id")
 		.notNull()

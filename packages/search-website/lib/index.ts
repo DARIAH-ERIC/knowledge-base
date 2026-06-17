@@ -709,6 +709,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						},
 					},
 					columns: {
+						publicationDate: true,
 						summary: true,
 						title: true,
 						updatedAt: true,
@@ -735,7 +736,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					importedAt,
 					type: "impact-case-study",
 					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
+					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: item.summary,
 					link: `/about/impact-case-studies/${item.entityVersion.entity.slug}`,
@@ -800,6 +801,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						},
 					},
 					columns: {
+						publicationDate: true,
 						summary: true,
 						title: true,
 						updatedAt: true,
@@ -846,6 +848,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						},
 					},
 					columns: {
+						publicationDate: true,
 						summary: true,
 						title: true,
 						updatedAt: true,
@@ -874,7 +877,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					importedAt,
 					type: "page",
 					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
+					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: mergeDescription(content.get(entityId), item.summary),
 					link: `/${item.entityVersion.entity.slug}`,
@@ -987,6 +990,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						},
 					},
 					columns: {
+						publicationDate: true,
 						summary: true,
 						title: true,
 						updatedAt: true,
@@ -1015,7 +1019,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					importedAt,
 					type: "spotlight-article",
 					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
+					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: mergeDescription(content.get(entityId), item.summary),
 					link: `/spotlights/${item.entityVersion.entity.slug}`,
@@ -1302,6 +1306,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		const impactCaseStudies = await db.query.impactCaseStudies.findMany({
 			columns: {
 				id: true,
+				publicationDate: true,
 				summary: true,
 				title: true,
 				updatedAt: true,
@@ -1333,7 +1338,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					importedAt,
 					type: "impact-case-study",
 					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
+					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: item.summary,
 					link: `/about/impact-case-studies/${item.entityVersion.entity.slug}`,
@@ -1780,6 +1785,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		const pages = await db.query.pages.findMany({
 			columns: {
 				id: true,
+				publicationDate: true,
 				summary: true,
 				title: true,
 				updatedAt: true,
@@ -1811,7 +1817,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					importedAt,
 					type: "page",
 					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
+					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: mergeDescription(pageContent.get(item.id), item.summary),
 					link: `/${item.entityVersion.entity.slug}`,
@@ -1905,6 +1911,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		const spotlightArticles = await db.query.spotlightArticles.findMany({
 			columns: {
 				id: true,
+				publicationDate: true,
 				summary: true,
 				title: true,
 				updatedAt: true,
@@ -1936,7 +1943,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					importedAt,
 					type: "spotlight-article",
 					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
+					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: mergeDescription(spotlightContent.get(item.id), item.summary),
 					link: `/spotlights/${item.entityVersion.entity.slug}`,
