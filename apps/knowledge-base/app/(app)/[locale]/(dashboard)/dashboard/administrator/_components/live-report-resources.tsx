@@ -123,10 +123,9 @@ export async function LiveReportResources(
 	const t = await getExtracted();
 	const descriptors = await getLiveSectionDescriptors(reportKind);
 	const snapshots = await Promise.all(
-		descriptors.map(async (descriptor) => [
-			descriptor.section,
-			await getSnapshot(reportId, descriptor),
-		] as const),
+		descriptors.map(
+			async (descriptor) => [descriptor.section, await getSnapshot(reportId, descriptor)] as const,
+		),
 	);
 	const snapshotsBySection = new Map(snapshots);
 

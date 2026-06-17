@@ -322,7 +322,10 @@ async function replaceExternalResourceSnapshot(
 	const ownerPredicate =
 		params.countryReportId != null
 			? eq(schema.reportExternalResourceSnapshots.countryReportId, params.countryReportId)
-			: eq(schema.reportExternalResourceSnapshots.workingGroupReportId, params.workingGroupReportId!);
+			: eq(
+					schema.reportExternalResourceSnapshots.workingGroupReportId,
+					params.workingGroupReportId!,
+				);
 
 	await tx
 		.delete(schema.reportExternalResourceSnapshots)
@@ -434,7 +437,9 @@ export async function getCountryExternalResourceSnapshots(
 		),
 	);
 
-	return snapshots.filter((snapshot): snapshot is ReportExternalResourceSnapshot => snapshot != null);
+	return snapshots.filter(
+		(snapshot): snapshot is ReportExternalResourceSnapshot => snapshot != null,
+	);
 }
 
 export async function getWorkingGroupExternalResourceSnapshots(
@@ -446,7 +451,9 @@ export async function getWorkingGroupExternalResourceSnapshots(
 		),
 	);
 
-	return snapshots.filter((snapshot): snapshot is ReportExternalResourceSnapshot => snapshot != null);
+	return snapshots.filter(
+		(snapshot): snapshot is ReportExternalResourceSnapshot => snapshot != null,
+	);
 }
 
 async function getExternalResourceSnapshot(params: {

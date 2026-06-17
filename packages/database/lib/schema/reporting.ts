@@ -171,9 +171,7 @@ export const reportExternalResourceSnapshots = p.snakeCase.table(
 		workingGroupReportId: p
 			.uuid("working_group_report_id")
 			.references(() => workingGroupReports.id),
-		section: p
-			.text("section", { enum: reportExternalResourceSnapshotSectionEnum })
-			.notNull(),
+		section: p.text("section", { enum: reportExternalResourceSnapshotSectionEnum }).notNull(),
 		filterBy: p.text("filter_by").notNull(),
 		actorSlugs: p.jsonb("actor_slugs").$type<Array<string>>().notNull(),
 		capturedAt: f.timestamp("captured_at").notNull().defaultNow(),
@@ -203,8 +201,7 @@ export const reportExternalResourceSnapshots = p.snakeCase.table(
 	],
 );
 
-export type ReportExternalResourceSnapshot =
-	typeof reportExternalResourceSnapshots.$inferSelect;
+export type ReportExternalResourceSnapshot = typeof reportExternalResourceSnapshots.$inferSelect;
 export type ReportExternalResourceSnapshotInput =
 	typeof reportExternalResourceSnapshots.$inferInsert;
 
@@ -247,10 +244,9 @@ export const reportExternalResourceSnapshotItems = p.snakeCase.table(
 		p
 			.unique("report_external_resource_snapshot_items_snapshot_document_unique")
 			.on(t.snapshotId, t.searchDocumentId),
-		p.unique("report_external_resource_snapshot_items_snapshot_position_unique").on(
-			t.snapshotId,
-			t.position,
-		),
+		p
+			.unique("report_external_resource_snapshot_items_snapshot_position_unique")
+			.on(t.snapshotId, t.position),
 	],
 );
 
