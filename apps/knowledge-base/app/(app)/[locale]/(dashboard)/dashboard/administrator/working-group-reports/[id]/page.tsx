@@ -13,8 +13,8 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import {
-	getLiveReportResourceNavLinks,
 	LiveReportResources,
+	getLiveReportResourceNavLinks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources";
 import { LiveReportResourcesErrorBoundary } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources-error-boundary";
 import { WorkingGroupReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
