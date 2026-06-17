@@ -25,7 +25,6 @@ export function CountryReportStepNav(props: Readonly<CountryReportStepNavProps>)
 
 	const steps: Array<ReportStep> = [
 		...(variant === "admin" ? [{ href: editBasePath, label: t("Status") }] : []),
-		{ href: `${editBasePath}/summary`, label: t("Summary") },
 		{ href: `${editBasePath}/institutions`, label: t("Institutions") },
 		{ href: `${editBasePath}/contributors`, label: t("Contributors") },
 		{ href: `${editBasePath}/events`, label: t("Events") },
@@ -34,6 +33,7 @@ export function CountryReportStepNav(props: Readonly<CountryReportStepNavProps>)
 		{ href: `${editBasePath}/software`, label: t("SSHOC resources") },
 		{ href: `${editBasePath}/publications`, label: t("Publications") },
 		{ href: `${editBasePath}/projects`, label: t("Projects") },
+		{ href: `${editBasePath}/summary`, label: t("Summary") },
 	];
 
 	return <ReportStepTabs aria-label={t("Report sections")} steps={steps} />;

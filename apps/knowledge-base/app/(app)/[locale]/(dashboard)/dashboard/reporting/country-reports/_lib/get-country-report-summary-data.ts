@@ -2,23 +2,18 @@ import { assert } from "@acdh-oeaw/lib";
 import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 
+import {
+	calculateOperationalCost,
+	type OperationalCost,
+	type OperationalCostCampaignData,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/calculate-operational-cost";
 import { type Action, can } from "@/lib/auth/permissions";
 import { classifyCompensationRole } from "@/lib/data/report-contributions";
 import { db } from "@/lib/db";
 import { alias, eq, sql } from "@/lib/db/sql";
 
 export interface CountryReportSummaryData {
-	operationalCost: {
-		total: number;
-		threshold: number | null;
-		lines: Array<{
-			key: string;
-			label: string;
-			quantity: number;
-			unitAmount: number;
-			total: number;
-		}>;
-	};
+	operationalCost: OperationalCost;
 	totalContributors: number | null;
 	smallEvents: number | null;
 	mediumEvents: number | null;
@@ -68,14 +63,6 @@ export interface CountryReportData {
 	country: { name: string };
 	campaign: { year: number; status: string };
 	summary: CountryReportSummaryData;
-}
-
-interface OperationalCostCampaignData {
-	contributionAmounts: Array<{ roleType: string; amount: number }>;
-	countryThresholds: Array<{ countryDocumentId: string; amount: number }>;
-	eventAmounts: Array<{ eventType: string; amount: number }>;
-	serviceSizes: Array<{ serviceSize: string; visitsThreshold: number | null; amount: number }>;
-	socialMediaAmounts: Array<{ category: string; amount: number }>;
 }
 
 export interface CountryReportHeaderData {
@@ -306,141 +293,6 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			operationalCost,
 			...summary,
 		},
-	};
-}
-
-type OperationalCostLine = CountryReportSummaryData["operationalCost"]["lines"][number];
-
-function addOperationalCostLine(
-	lines: Array<OperationalCostLine>,
-	key: string,
-	label: string,
-	quantity: number,
-	unitAmount: number | undefined,
-): void {
-	if (quantity <= 0 || unitAmount == null) {
-		return;
-	}
-
-	lines.push({ key, label, quantity, unitAmount, total: quantity * unitAmount });
-}
-
-function calculateOperationalCost(
-	summary: Omit<CountryReportSummaryData, "operationalCost"> & {
-		campaign: OperationalCostCampaignData;
-		countryDocumentId: string;
-	},
-): CountryReportSummaryData["operationalCost"] {
-	const contributionAmounts = new Map(
-		summary.campaign.contributionAmounts.map((amount) => [amount.roleType, amount.amount]),
-	);
-	const eventAmounts = new Map(
-		summary.campaign.eventAmounts.map((amount) => [amount.eventType, amount.amount]),
-	);
-	const socialMediaAmounts = new Map(
-		summary.campaign.socialMediaAmounts.map((amount) => [amount.category, amount.amount]),
-	);
-	const lines: Array<OperationalCostLine> = [];
-
-	const contributionCounts = new Map<string, number>();
-	for (const contribution of summary.contributions) {
-		if (contribution.compensationRole != null) {
-			contributionCounts.set(
-				contribution.compensationRole,
-				(contributionCounts.get(contribution.compensationRole) ?? 0) + 1,
-			);
-		}
-	}
-	for (const [role, quantity] of contributionCounts) {
-		addOperationalCostLine(
-			lines,
-			`contribution-${role}`,
-			`Contribution: ${role}`,
-			quantity,
-			contributionAmounts.get(role),
-		);
-	}
-
-	addOperationalCostLine(
-		lines,
-		"events-small",
-		"Small events",
-		summary.smallEvents ?? 0,
-		eventAmounts.get("small"),
-	);
-	addOperationalCostLine(
-		lines,
-		"events-medium",
-		"Medium events",
-		summary.mediumEvents ?? 0,
-		eventAmounts.get("medium"),
-	);
-	addOperationalCostLine(
-		lines,
-		"events-large",
-		"Large events",
-		summary.largeEvents ?? 0,
-		eventAmounts.get("large"),
-	);
-	addOperationalCostLine(
-		lines,
-		"events-very-large",
-		"Very large events",
-		summary.veryLargeEvents ?? 0,
-		eventAmounts.get("very_large"),
-	);
-	addOperationalCostLine(
-		lines,
-		"events-dariah-commissioned",
-		"DARIAH commissioned event",
-		summary.dariahCommissionedEvent == null || summary.dariahCommissionedEvent === "" ? 0 : 1,
-		eventAmounts.get("dariah_commissioned"),
-	);
-
-	for (const account of summary.socialMediaAccounts) {
-		const category = account.type === "website" ? "website" : "other";
-		const hasKpis = account.kpis.some((kpi) => kpi.value > 0);
-		addOperationalCostLine(
-			lines,
-			`social-media-${account.socialMediaId}`,
-			`Social media: ${account.name}`,
-			hasKpis ? 1 : 0,
-			socialMediaAmounts.get(category),
-		);
-	}
-
-	const serviceSizeAmounts = summary.campaign.serviceSizes.toSorted(
-		(left, right) => (right.visitsThreshold ?? 0) - (left.visitsThreshold ?? 0),
-	);
-	for (const service of summary.services) {
-		const visits = service.kpis.find((kpi) => kpi.kpi === "visits")?.value ?? 0;
-		const size = serviceSizeAmounts.find((candidate) => visits >= (candidate.visitsThreshold ?? 0));
-		addOperationalCostLine(
-			lines,
-			`service-${service.serviceId}`,
-			`Service: ${service.name}`,
-			size == null ? 0 : 1,
-			size?.amount,
-		);
-	}
-
-	for (const contribution of summary.projectContributions) {
-		addOperationalCostLine(
-			lines,
-			`project-${contribution.id}`,
-			`Project contribution: ${contribution.projectName}`,
-			1,
-			contribution.amountEuros,
-		);
-	}
-
-	return {
-		total: lines.reduce((sum, line) => sum + line.total, 0),
-		threshold:
-			summary.campaign.countryThresholds.find(
-				(threshold) => threshold.countryDocumentId === summary.countryDocumentId,
-			)?.amount ?? null,
-		lines,
 	};
 }
 
