@@ -42,6 +42,7 @@ export const createNewsItemAction = createMutationAction({
 		await tx.insert(schema.news).values({
 			id: versionId,
 			imageId: asset.id,
+			publicationDate: input.publicationDate,
 			title: input.title,
 			summary: input.summary,
 		});

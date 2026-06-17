@@ -17,7 +17,7 @@ interface NewsItemEditFormProps {
 	documentId: string;
 	hasDraftChanges: boolean;
 	isPublished: boolean;
-	newsItem: Pick<schema.NewsItem, "id" | "title" | "summary"> & {
+	newsItem: Pick<schema.NewsItem, "id" | "publicationDate" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string }; status: { type: string } };
 	} & { image: { key: string; label: string; url: string } };
 	initialRelatedEntityIds: Array<string>;

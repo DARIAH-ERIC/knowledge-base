@@ -736,6 +736,7 @@ async function main() {
 				id: newsVersionId,
 				title: "Kitchen Sink News",
 				summary: "A news item seeded for API contract testing.",
+				publicationDate: new Date("2024-01-15T00:00:00.000Z"),
 				imageId: createId("asset:image"),
 			});
 			await upsertById(tx, schema.fundingCalls, {

@@ -284,6 +284,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 				return {
 					title,
 					summary: f.lorem.paragraph(),
+					publicationDate: f.date.past(),
 					imageId: f.helpers.arrayElement(imageIds).id,
 				};
 			},

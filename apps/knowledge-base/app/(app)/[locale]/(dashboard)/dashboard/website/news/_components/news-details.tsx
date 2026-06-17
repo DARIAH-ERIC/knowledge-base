@@ -6,7 +6,7 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
@@ -20,7 +20,7 @@ interface NewsItemDetailsProps {
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
-	newsItem: Pick<schema.NewsItem, "id" | "title" | "summary"> & {
+	newsItem: Pick<schema.NewsItem, "id" | "publicationDate" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	publishAction: (documentId: string) => Promise<unknown>;
@@ -44,6 +44,7 @@ export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNod
 	} = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	return (
 		<Fragment>
@@ -73,6 +74,11 @@ export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNod
 
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{newsItem.summary}</DescriptionDetails>
+
+				<DescriptionTerm>{t("Publication date")}</DescriptionTerm>
+				<DescriptionDetails>
+					{format.dateTime(newsItem.publicationDate, { dateStyle: "short", timeZone: "UTC" })}
+				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>

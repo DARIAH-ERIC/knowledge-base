@@ -32,7 +32,7 @@ interface NewsPageProps {
 	dir: "asc" | "desc";
 	news: {
 		data: Array<
-			Pick<schema.NewsItem, "id" | "title" | "summary"> & {
+			Pick<schema.NewsItem, "id" | "publicationDate" | "title" | "summary"> & {
 				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
 				hasDraft: boolean;
@@ -92,7 +92,7 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 						{t("Title")}
 					</TableColumn>
 					<TableColumn allowsSorting={true} id="updatedAt">
-						{t("Updated")}
+						{t("Publication date")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
@@ -103,7 +103,9 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 							<TableCell>
 								<div className="max-inline-96 truncate">{item.title}</div>
 							</TableCell>
-							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+							<TableCell>
+								{format.dateTime(item.publicationDate, { dateStyle: "short", timeZone: "UTC" })}
+							</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
 									hasDraft={item.hasDraft}
