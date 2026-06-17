@@ -14,6 +14,7 @@ export const newsLifecycleAdapter: EntityLifecycleAdapter = {
 			.select({
 				title: schema.news.title,
 				summary: schema.news.summary,
+				publicationDate: schema.news.publicationDate,
 				imageId: schema.news.imageId,
 			})
 			.from(schema.news)

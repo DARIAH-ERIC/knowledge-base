@@ -753,6 +753,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						},
 					},
 					columns: {
+						publicationDate: true,
 						summary: true,
 						title: true,
 						updatedAt: true,
@@ -781,7 +782,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					importedAt,
 					type: "news-item",
 					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
+					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: mergeDescription(content.get(entityId), item.summary),
 					link: `/news/${item.entityVersion.entity.slug}`,
@@ -1694,6 +1695,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		const news = await db.query.news.findMany({
 			columns: {
 				id: true,
+				publicationDate: true,
 				summary: true,
 				title: true,
 				updatedAt: true,
@@ -1725,7 +1727,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					importedAt,
 					type: "news-item",
 					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
+					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: mergeDescription(newsContent.get(item.id), item.summary),
 					link: `/news/${item.entityVersion.entity.slug}`,

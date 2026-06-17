@@ -129,11 +129,12 @@ export class DatabaseService {
 	 */
 	async getNewsItemByTitle(
 		title: string,
-	): Promise<{ id: string; imageId: string; summary: string } | null> {
+	): Promise<{ id: string; imageId: string; publicationDate: Date; summary: string } | null> {
 		const [row] = await this.db
 			.select({
 				id: schema.entityVersions.entityId,
 				imageId: schema.news.imageId,
+				publicationDate: schema.news.publicationDate,
 				summary: schema.news.summary,
 			})
 			.from(schema.news)
@@ -1734,6 +1735,7 @@ export class DatabaseService {
 				id: version.id,
 				title,
 				summary: "Colliding slug news item",
+				publicationDate: new Date("2024-01-15T00:00:00.000Z"),
 				imageId,
 			});
 

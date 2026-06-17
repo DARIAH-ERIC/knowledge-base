@@ -31,6 +31,7 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 			},
 			columns: {
 				id: true,
+				publicationDate: true,
 				title: true,
 				summary: true,
 			},
@@ -60,7 +61,7 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
+				return [desc(t.publicationDate), desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -79,8 +80,9 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 
 	const data = items.map((item) => {
 		const image = generateImageUrl(item.image, imageWidth.preview);
+		const { publicationDate, ...data } = flattenEntityVersion(item);
 
-		return { ...flattenEntityVersion(item), image };
+		return { ...data, image, publishedAt: publicationDate.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -107,6 +109,7 @@ export async function getNewsItemById(db: Database | Transaction, params: GetNew
 			},
 			columns: {
 				id: true,
+				publicationDate: true,
 				title: true,
 				summary: true,
 			},
@@ -149,10 +152,12 @@ export async function getNewsItemById(db: Database | Transaction, params: GetNew
 	]);
 
 	const image = generateImageUrl(item.image, imageWidth.featured);
+	const { publicationDate, ...data } = flattenEntityVersion(item);
 
 	return {
-		...flattenEntityVersion(item),
+		...data,
 		image,
+		publishedAt: publicationDate.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,
@@ -182,6 +187,7 @@ export async function getNewsItemSlugs(db: Database | Transaction, params: GetNe
 			},
 			columns: {
 				id: true,
+				publicationDate: true,
 			},
 			with: {
 				entityVersion: {
@@ -209,7 +215,7 @@ export async function getNewsItemSlugs(db: Database | Transaction, params: GetNe
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
+				return [desc(t.publicationDate), desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -258,6 +264,7 @@ export async function getNewsItemBySlug(
 		},
 		columns: {
 			id: true,
+			publicationDate: true,
 			title: true,
 			summary: true,
 		},
@@ -293,6 +300,7 @@ export async function getNewsItemBySlug(
 	}
 
 	const image = generateImageUrl(item.image, imageWidth.featured);
+	const { publicationDate, ...data } = flattenEntityVersion(item);
 
 	const [fields, relatedEntities, relatedResources] = await Promise.all([
 		getContentBlocks(db, item.id),
@@ -301,8 +309,9 @@ export async function getNewsItemBySlug(
 	]);
 
 	return {
-		...flattenEntityVersion(item),
+		...data,
 		image,
+		publishedAt: publicationDate.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,

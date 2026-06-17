@@ -33,8 +33,8 @@ export async function getNews(params: GetNewsParams, queryDb: Database | Transac
 				? schema.news.title
 				: desc(schema.news.title)
 			: dir === "asc"
-				? schema.entityVersions.updatedAt
-				: desc(schema.entityVersions.updatedAt);
+				? schema.news.publicationDate
+				: desc(schema.news.publicationDate);
 
 	// Pick the draft version when one exists, otherwise the published version — one row per
 	// document. The document_lifecycle view already collapses the two-version-per-document shape
@@ -49,6 +49,7 @@ export async function getNews(params: GetNewsParams, queryDb: Database | Transac
 				slug: schema.entities.slug,
 				summary: schema.news.summary,
 				title: schema.news.title,
+				publicationDate: schema.news.publicationDate,
 				isPublished: sql<boolean>`${schema.documentLifecycle.publishedId} IS NOT NULL`,
 				hasDraft: schema.documentLifecycle.hasDraftChanges,
 				status: schema.entityStatus.type,
@@ -88,6 +89,7 @@ export async function getNews(params: GetNewsParams, queryDb: Database | Transac
 			summary: item.summary,
 			title: item.title,
 			isPublished: item.isPublished,
+			publicationDate: item.publicationDate,
 			status: item.status,
 			updatedAt: item.updatedAt,
 		};

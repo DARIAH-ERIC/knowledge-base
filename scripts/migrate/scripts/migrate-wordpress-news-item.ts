@@ -211,6 +211,7 @@ async function main() {
 				title: toPlaintext(post.title.rendered),
 				summary: toSummary(post.excerpt.rendered),
 				imageId: imageId ?? placeholderImageId,
+				publicationDate: new Date(post.date_gmt),
 				createdAt: new Date(post.date_gmt),
 				updatedAt: new Date(post.modified_gmt),
 			});

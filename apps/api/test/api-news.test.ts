@@ -32,6 +32,7 @@ function createItems(count: number) {
 				id: versionId,
 				title,
 				summary: f.lorem.paragraph(),
+				publicationDate: f.date.past(),
 			};
 
 			return { entity, version, newsItem };
@@ -131,7 +132,10 @@ describe("news", () => {
 				const data = await response.json();
 
 				assert("content" in data);
-				expect(data).toMatchObject({ title });
+				expect(data).toMatchObject({
+					publishedAt: item.newsItem.publicationDate.toISOString(),
+					title,
+				});
 				expect(data.content).toHaveLength(1);
 				expect(data.content[0]).toMatchObject({ type: "rich_text" });
 			});
@@ -234,7 +238,10 @@ describe("news", () => {
 				const data = await response.json();
 
 				assert("content" in data);
-				expect(data).toMatchObject({ title });
+				expect(data).toMatchObject({
+					publishedAt: item.newsItem.publicationDate.toISOString(),
+					title,
+				});
 				expect(data.content).toHaveLength(1);
 				expect(data.content[0]).toMatchObject({ type: "rich_text" });
 			});
