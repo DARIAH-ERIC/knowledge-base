@@ -43,7 +43,7 @@ test.describe("country report lifecycle (national coordinator)", () => {
 	});
 
 	test("a coordinator submits a draft report", async ({ page, db }) => {
-		await page.goto(`/en/dashboard/reporting/country-reports/${year!}/${slug!}/edit/confirm`);
+		await page.goto(`/en/dashboard/reporting/country-reports/${year!}/${slug!}/edit/summary`);
 
 		// The draft is submittable by the coordinator.
 		const submitButton = page.getByRole("button", { name: "Submit report" });
@@ -51,7 +51,7 @@ test.describe("country report lifecycle (national coordinator)", () => {
 
 		await submitButton.click();
 
-		// After the action redirects back to the confirm screen the report is submitted and there is no
+		// After the action redirects back to the summary screen the report is submitted and there is no
 		// re-submit affordance.
 		await expect(page.getByRole("button", { name: "Submit report" })).toBeHidden();
 		await expect(page.getByText("Submitted", { exact: true })).toBeVisible();
