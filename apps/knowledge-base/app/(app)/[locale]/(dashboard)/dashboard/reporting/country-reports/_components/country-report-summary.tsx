@@ -125,6 +125,14 @@ export async function CountryReportSummary(
 								{eurFormatter.format(data.operationalCost.total)}
 							</span>
 						</div>
+						<div className="flex items-baseline justify-between gap-x-6 border-be border-border px-4 py-3">
+							<span className="text-sm font-medium text-fg">{t("Operational cost threshold")}</span>
+							<span className="text-sm font-medium text-fg">
+								{data.operationalCost.threshold == null
+									? "—"
+									: eurFormatter.format(data.operationalCost.threshold)}
+							</span>
+						</div>
 						{data.operationalCost.lines.length > 0 ? (
 							<ul className="divide-y divide-border">
 								{data.operationalCost.lines.map((line) => (

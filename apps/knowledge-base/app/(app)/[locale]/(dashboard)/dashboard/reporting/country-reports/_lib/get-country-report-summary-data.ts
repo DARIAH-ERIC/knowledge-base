@@ -10,6 +10,7 @@ import { alias, eq, sql } from "@/lib/db/sql";
 export interface CountryReportSummaryData {
 	operationalCost: {
 		total: number;
+		threshold: number | null;
 		lines: Array<{
 			key: string;
 			label: string;
@@ -341,17 +342,6 @@ function calculateOperationalCost(
 	);
 	const lines: Array<OperationalCostLine> = [];
 
-	const countryThreshold = summary.campaign.countryThresholds.find(
-		(threshold) => threshold.countryDocumentId === summary.countryDocumentId,
-	);
-	addOperationalCostLine(
-		lines,
-		"country-threshold",
-		"Country threshold",
-		1,
-		countryThreshold?.amount,
-	);
-
 	const contributionCounts = new Map<string, number>();
 	for (const contribution of summary.contributions) {
 		if (contribution.compensationRole != null) {
@@ -446,6 +436,10 @@ function calculateOperationalCost(
 
 	return {
 		total: lines.reduce((sum, line) => sum + line.total, 0),
+		threshold:
+			summary.campaign.countryThresholds.find(
+				(threshold) => threshold.countryDocumentId === summary.countryDocumentId,
+			)?.amount ?? null,
 		lines,
 	};
 }
