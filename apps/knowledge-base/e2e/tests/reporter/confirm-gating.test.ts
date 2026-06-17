@@ -3,10 +3,10 @@ import { expect, test } from "@/e2e/lib/test";
 /**
  * The `reporter` persona is a working-group _member_ and country _coordination staff_ — it may edit
  * report content but must not be able to submit (submitting is reserved for chairs / national
- * coordinators via `can(confirm, ...)`). This pins that the Confirm screen offers no Submit button
+ * coordinators via `can(confirm, ...)`). This pins that the review screen offers no Submit button
  * to a reporter while the content editor still renders.
  */
-test.describe("confirm-screen submit gating (reporter)", () => {
+test.describe("report submit gating (reporter)", () => {
 	test.describe.configure({ mode: "default" });
 
 	let campaignId: string | null = null;
@@ -44,10 +44,10 @@ test.describe("confirm-screen submit gating (reporter)", () => {
 
 	test("country coordination staff can edit but cannot submit", async ({ page }) => {
 		await page.goto(
-			`/en/dashboard/reporting/country-reports/${year!}/${countrySlug!}/edit/confirm`,
+			`/en/dashboard/reporting/country-reports/${year!}/${countrySlug!}/edit/summary`,
 		);
 
-		// The confirm screen renders (read access) but offers no Submit affordance.
+		// The summary screen renders (read access) but offers no Submit affordance.
 		await expect(page.getByText("Draft", { exact: true })).toBeVisible();
 		await expect(page.getByRole("button", { name: "Submit report" })).toBeHidden();
 

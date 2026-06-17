@@ -12,7 +12,7 @@ interface CountryReportStepNavProps {
 	/** The `/edit` base path; per-screen routes are appended to it. */
 	editBasePath: string;
 	/**
-	 * - `reporting`: the user-facing flow — ends with a "Confirm" step.
+	 * - `reporting`: the user-facing flow.
 	 * - `admin`: starts with a "Status" tab (status editor at the edit index) and has no confirm step.
 	 */
 	variant: "admin" | "reporting";
@@ -34,7 +34,6 @@ export function CountryReportStepNav(props: Readonly<CountryReportStepNavProps>)
 		{ href: `${editBasePath}/software`, label: t("SSHOC resources") },
 		{ href: `${editBasePath}/publications`, label: t("Publications") },
 		{ href: `${editBasePath}/projects`, label: t("Projects") },
-		...(variant === "reporting" ? [{ href: `${editBasePath}/confirm`, label: t("Confirm") }] : []),
 	];
 
 	return <ReportStepTabs aria-label={t("Report sections")} steps={steps} />;
