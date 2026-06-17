@@ -3,9 +3,8 @@ import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 
 import {
-	calculateOperationalCost,
 	type OperationalCost,
-	type OperationalCostCampaignData,
+	calculateOperationalCost,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/calculate-operational-cost";
 import { type Action, can } from "@/lib/auth/permissions";
 import { classifyCompensationRole } from "@/lib/data/report-contributions";

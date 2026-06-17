@@ -135,12 +135,11 @@ export function calculateOperationalCost(input: OperationalCostInput): Operation
 	// The national website and social media are each a single lump sum per category, regardless of
 	// how many individual accounts a country reports. An account counts towards its category when it
 	// has at least one positive KPI.
-	const hasActivePresence = (category: "website" | "other"): boolean => {
-		return input.socialMediaAccounts.some((account) => {
+	const hasActivePresence = (category: "website" | "other"): boolean =>
+		input.socialMediaAccounts.some((account) => {
 			const accountCategory = account.type === "website" ? "website" : "other";
 			return accountCategory === category && account.kpis.some((kpi) => kpi.value > 0);
 		});
-	};
 	addOperationalCostLine(
 		lines,
 		"social-media-website",
