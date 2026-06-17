@@ -11,7 +11,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { type ReactNode, useOptimistic, useTransition } from "react";
 import type { Key } from "react-aria-components";
 
@@ -50,42 +50,41 @@ function fromSelectedKey(key: Key | null): string {
 	return key == null || key === ALL_OPTION ? "" : String(key);
 }
 
-const eurFormatter = new Intl.NumberFormat("en", {
+/** Shared currency options for next-intl's number formatter. */
+const eurFormat = {
 	style: "currency",
 	currency: "EUR",
 	maximumFractionDigits: 0,
-});
+} as const;
 
 function formatStatus(status: string): string {
 	return status.charAt(0).toUpperCase() + status.slice(1);
-}
-
-function formatSignedNumber(
-	value: number | null,
-	format: "number" | "currency" = "number",
-): string {
-	if (value == null) {
-		return "—";
-	}
-
-	const sign = value > 0 ? "+" : "";
-
-	if (format === "currency") {
-		return `${sign}${eurFormatter.format(value)}`;
-	}
-
-	return `${sign}${value.toLocaleString()}`;
 }
 
 export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageProps>): ReactNode {
 	const { data, filters } = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const [isPending, startTransition] = useTransition();
 	const [optimisticFilters, setOptimisticFilters] = useOptimistic(filters);
+
+	/** Render a delta with an explicit sign, or an em dash when the value is unavailable. */
+	function formatSignedNumber(
+		value: number | null,
+		kind: "number" | "currency" = "number",
+	): string {
+		if (value == null) {
+			return "—";
+		}
+
+		return kind === "currency"
+			? format.number(value, { ...eurFormat, signDisplay: "exceptZero" })
+			: format.number(value, { signDisplay: "exceptZero" });
+	}
 
 	/** Sync the filters to the search params, refetching the page data server-side. */
 	function applyFilters(next: Filters) {
@@ -206,7 +205,7 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 								{t("Campaigns")}
 							</p>
 							<p className="mbs-2 text-2xl font-semibold text-fg">
-								{data.overview.campaignCount.toLocaleString()}
+								{format.number(data.overview.campaignCount)}
 							</p>
 							<p className="mbs-1 text-sm text-muted-fg">
 								{t("Reporting campaigns in the system")}
@@ -218,11 +217,11 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 								{t("Country reports")}
 							</p>
 							<p className="mbs-2 text-2xl font-semibold text-fg">
-								{data.overview.totalCountryReports.toLocaleString()}
+								{format.number(data.overview.totalCountryReports)}
 							</p>
 							<p className="mbs-1 text-sm text-muted-fg">
 								{t("{count} contributors reported", {
-									count: data.overview.totalContributors.toLocaleString(),
+									count: format.number(data.overview.totalContributors),
 								})}
 							</p>
 						</div>
@@ -232,14 +231,14 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 								{t("Events")}
 							</p>
 							<p className="mbs-2 text-2xl font-semibold text-fg">
-								{(
-									data.overview.totalCountryEvents + data.overview.totalWorkingGroupEvents
-								).toLocaleString()}
+								{format.number(
+									data.overview.totalCountryEvents + data.overview.totalWorkingGroupEvents,
+								)}
 							</p>
 							<p className="mbs-1 text-sm text-muted-fg">
 								{t("{country} country, {workingGroups} working group", {
-									country: data.overview.totalCountryEvents.toLocaleString(),
-									workingGroups: data.overview.totalWorkingGroupEvents.toLocaleString(),
+									country: format.number(data.overview.totalCountryEvents),
+									workingGroups: format.number(data.overview.totalWorkingGroupEvents),
 								})}
 							</p>
 						</div>
@@ -249,11 +248,11 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 								{t("Project contributions")}
 							</p>
 							<p className="mbs-2 text-2xl font-semibold text-fg">
-								{eurFormatter.format(data.overview.totalProjectContributions)}
+								{format.number(data.overview.totalProjectContributions, eurFormat)}
 							</p>
 							<p className="mbs-1 text-sm text-muted-fg">
 								{t("{count} working group reports", {
-									count: data.overview.totalWorkingGroupReports.toLocaleString(),
+									count: format.number(data.overview.totalWorkingGroupReports),
 								})}
 							</p>
 						</div>
@@ -291,15 +290,17 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 										<TableCell>
 											<div className="flex flex-col gap-y-0.5">
 												<span>
-													{item.countryDraftCount +
-														item.countrySubmittedCount +
-														item.countryAcceptedCount}
+													{format.number(
+														item.countryDraftCount +
+															item.countrySubmittedCount +
+															item.countryAcceptedCount,
+													)}
 												</span>
 												<span className="text-xs text-muted-fg">
 													{t("{draft}/{submitted}/{accepted}", {
-														accepted: String(item.countryAcceptedCount),
-														draft: String(item.countryDraftCount),
-														submitted: String(item.countrySubmittedCount),
+														accepted: format.number(item.countryAcceptedCount),
+														draft: format.number(item.countryDraftCount),
+														submitted: format.number(item.countrySubmittedCount),
 													})}
 												</span>
 											</div>
@@ -307,23 +308,27 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 										<TableCell>
 											<div className="flex flex-col gap-y-0.5">
 												<span>
-													{item.workingGroupDraftCount +
-														item.workingGroupSubmittedCount +
-														item.workingGroupAcceptedCount}
+													{format.number(
+														item.workingGroupDraftCount +
+															item.workingGroupSubmittedCount +
+															item.workingGroupAcceptedCount,
+													)}
 												</span>
 												<span className="text-xs text-muted-fg">
 													{t("{draft}/{submitted}/{accepted}", {
-														accepted: String(item.workingGroupAcceptedCount),
-														draft: String(item.workingGroupDraftCount),
-														submitted: String(item.workingGroupSubmittedCount),
+														accepted: format.number(item.workingGroupAcceptedCount),
+														draft: format.number(item.workingGroupDraftCount),
+														submitted: format.number(item.workingGroupSubmittedCount),
 													})}
 												</span>
 											</div>
 										</TableCell>
-										<TableCell>{item.totalContributors.toLocaleString()}</TableCell>
-										<TableCell>{item.totalCountryEvents.toLocaleString()}</TableCell>
-										<TableCell>{item.totalWorkingGroupEvents.toLocaleString()}</TableCell>
-										<TableCell>{eurFormatter.format(item.totalProjectContributions)}</TableCell>
+										<TableCell>{format.number(item.totalContributors)}</TableCell>
+										<TableCell>{format.number(item.totalCountryEvents)}</TableCell>
+										<TableCell>{format.number(item.totalWorkingGroupEvents)}</TableCell>
+										<TableCell>
+											{format.number(item.totalProjectContributions, eurFormat)}
+										</TableCell>
 									</TableRow>
 								)}
 							</TableBody>
@@ -366,11 +371,11 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 										<TableCell>{item.countryName}</TableCell>
 										<TableCell>{item.campaignYear}</TableCell>
 										<TableCell>{formatStatus(item.status)}</TableCell>
-										<TableCell>{item.totalContributors.toLocaleString()}</TableCell>
-										<TableCell>{item.totalEvents.toLocaleString()}</TableCell>
-										<TableCell>{item.institutions.toLocaleString()}</TableCell>
-										<TableCell>{item.services.toLocaleString()}</TableCell>
-										<TableCell>{eurFormatter.format(item.projectContributions)}</TableCell>
+										<TableCell>{format.number(item.totalContributors)}</TableCell>
+										<TableCell>{format.number(item.totalEvents)}</TableCell>
+										<TableCell>{format.number(item.institutions)}</TableCell>
+										<TableCell>{format.number(item.services)}</TableCell>
+										<TableCell>{format.number(item.projectContributions, eurFormat)}</TableCell>
 										<TableCell>{formatSignedNumber(item.contributorsDelta)}</TableCell>
 										<TableCell>{formatSignedNumber(item.eventsDelta)}</TableCell>
 										<TableCell>
@@ -416,19 +421,19 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 									{(item) => (
 										<TableRow id={String(item.campaignYear)}>
 											<TableCell>{item.campaignYear}</TableCell>
-											<TableCell>{item.reportCount.toLocaleString()}</TableCell>
+											<TableCell>{format.number(item.reportCount)}</TableCell>
 											<TableCell>
 												{t("{draft}/{submitted}/{accepted}", {
-													accepted: String(item.acceptedCount),
-													draft: String(item.draftCount),
-													submitted: String(item.submittedCount),
+													accepted: format.number(item.acceptedCount),
+													draft: format.number(item.draftCount),
+													submitted: format.number(item.submittedCount),
 												})}
 											</TableCell>
-											<TableCell>{item.totalMembers.toLocaleString()}</TableCell>
-											<TableCell>{item.totalEvents.toLocaleString()}</TableCell>
-											<TableCell>{item.organiserEvents.toLocaleString()}</TableCell>
-											<TableCell>{item.presenterEvents.toLocaleString()}</TableCell>
-											<TableCell>{item.socialMediaAccounts.toLocaleString()}</TableCell>
+											<TableCell>{format.number(item.totalMembers)}</TableCell>
+											<TableCell>{format.number(item.totalEvents)}</TableCell>
+											<TableCell>{format.number(item.organiserEvents)}</TableCell>
+											<TableCell>{format.number(item.presenterEvents)}</TableCell>
+											<TableCell>{format.number(item.socialMediaAccounts)}</TableCell>
 										</TableRow>
 									)}
 								</TableBody>
