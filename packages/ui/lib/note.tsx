@@ -3,10 +3,10 @@ import {
 	ExclamationCircleIcon,
 	InformationCircleIcon,
 } from "@heroicons/react/24/solid";
-import type { ReactNode } from "react";
+import type { ElementType, HtmlHTMLAttributes, ReactNode } from "react";
 import { twJoin, twMerge } from "tailwind-merge";
 
-export interface NoteProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
+export interface NoteProps extends HtmlHTMLAttributes<HTMLDivElement> {
 	intent?: "default" | "info" | "warning" | "danger" | "success";
 	indicator?: boolean;
 }
@@ -14,7 +14,7 @@ export interface NoteProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
 export function Note(props: Readonly<NoteProps>): ReactNode {
 	const { children, indicator = true, intent = "default", className, ...rest } = props;
 
-	const iconMap: Record<string, React.ElementType | null> = {
+	const iconMap: Record<string, ElementType | null> = {
 		info: InformationCircleIcon,
 		warning: ExclamationCircleIcon,
 		danger: ExclamationCircleIcon,

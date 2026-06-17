@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckIcon } from "@heroicons/react/16/solid";
-import { Fragment, type ReactNode } from "react";
+import { type ComponentProps, Fragment, type ReactNode, type Ref } from "react";
 import {
 	Collection,
 	Header,
@@ -143,7 +143,7 @@ export function DropdownItem({
 }
 
 export interface DropdownLabelProps extends TextProps {
-	ref?: React.Ref<HTMLDivElement>;
+	ref?: Ref<HTMLDivElement>;
 }
 
 export function DropdownLabel({
@@ -155,7 +155,7 @@ export function DropdownLabel({
 }
 
 export interface DropdownDescriptionProps extends TextProps {
-	ref?: React.Ref<HTMLDivElement>;
+	ref?: Ref<HTMLDivElement>;
 }
 
 export function DropdownDescription({
@@ -183,8 +183,8 @@ export function DropdownSeparator({ className, ...props }: Readonly<SeparatorPro
 	);
 }
 
-export type DropdownKeyboardProps = React.ComponentProps<typeof Keyboard> & {
-	keys?: React.ReactNode;
+export type DropdownKeyboardProps = ComponentProps<typeof Keyboard> & {
+	keys?: ReactNode;
 };
 
 export function DropdownKeyboard({

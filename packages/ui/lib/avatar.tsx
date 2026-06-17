@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 
 export interface AvatarProps {
@@ -31,7 +31,7 @@ export function Avatar({
 	alt = "",
 	className,
 	...props
-}: Readonly<AvatarProps & React.ComponentPropsWithoutRef<"span">>): ReactNode {
+}: Readonly<AvatarProps & ComponentPropsWithoutRef<"span">>): ReactNode {
 	return (
 		<span
 			data-slot="avatar"

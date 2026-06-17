@@ -3,13 +3,13 @@
 "use client";
 
 import cn from "clsx/lite";
-import type { ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { composeRenderProps } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
 import { Link } from "./link";
 
-export function Text({ className, ...props }: React.ComponentPropsWithoutRef<"p">): ReactNode {
+export function Text({ className, ...props }: ComponentPropsWithoutRef<"p">): ReactNode {
 	return (
 		<p
 			data-slot="text"
@@ -22,7 +22,7 @@ export function Text({ className, ...props }: React.ComponentPropsWithoutRef<"p"
 export function TextLink({
 	className,
 	...props
-}: React.ComponentPropsWithoutRef<typeof Link>): ReactNode {
+}: ComponentPropsWithoutRef<typeof Link>): ReactNode {
 	return (
 		<Link
 			{...props}
@@ -36,14 +36,11 @@ export function TextLink({
 	);
 }
 
-export function Strong({
-	className,
-	...props
-}: React.ComponentPropsWithoutRef<"strong">): ReactNode {
+export function Strong({ className, ...props }: ComponentPropsWithoutRef<"strong">): ReactNode {
 	return <strong {...props} className={twMerge("font-medium", className)} />;
 }
 
-export function Code({ className, ...props }: React.ComponentPropsWithoutRef<"code">): ReactNode {
+export function Code({ className, ...props }: ComponentPropsWithoutRef<"code">): ReactNode {
 	return (
 		<code
 			{...props}

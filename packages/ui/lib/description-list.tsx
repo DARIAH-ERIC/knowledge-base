@@ -1,13 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 
 export function DescriptionList({
 	className,
 	ref,
 	...props
-}: Readonly<React.ComponentProps<"dl">>): ReactNode {
+}: Readonly<ComponentProps<"dl">>): ReactNode {
 	return (
 		<dl
 			ref={ref}
@@ -24,7 +24,7 @@ export function DescriptionTerm({
 	className,
 	ref,
 	...props
-}: Readonly<React.ComponentProps<"dt">>): ReactNode {
+}: Readonly<ComponentProps<"dt">>): ReactNode {
 	return (
 		<dt
 			ref={ref}
@@ -40,7 +40,7 @@ export function DescriptionTerm({
 export function DescriptionDetails({
 	className,
 	...props
-}: Readonly<React.ComponentProps<"dd">>): ReactNode {
+}: Readonly<ComponentProps<"dd">>): ReactNode {
 	return (
 		<dd
 			{...props}

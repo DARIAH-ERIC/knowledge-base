@@ -29,7 +29,15 @@ import {
 	Trash2Icon,
 } from "lucide-react";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useCallback, useId, useMemo, useRef, useState } from "react";
+import {
+	type ComponentType,
+	type ReactNode,
+	useCallback,
+	useId,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { Button as ButtonPrimitive } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
@@ -75,7 +83,7 @@ type ImagePickerRenderer = NonNullable<RichTextEditorProps["renderImagePicker"]>
 
 export interface RichTextEditorToolbarButtonProps {
 	"aria-label": string;
-	icon: React.ComponentType<{ className?: string }>;
+	icon: ComponentType<{ className?: string }>;
 	isActive?: boolean;
 	onClick: () => void;
 }
@@ -725,7 +733,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		editorProps: {
 			attributes: {
 				class: twMerge(
-					"richtext max-w-none focus:outline-none px-4 py-3 min-h-37.5",
+					"richtext max-inline-none px-4 py-3 min-block-37.5 focus:outline-none",
 					size != null ? richtextSizeClass[size] : undefined,
 				),
 				role: "textbox",

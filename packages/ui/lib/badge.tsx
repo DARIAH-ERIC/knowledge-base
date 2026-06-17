@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { type VariantProps, tv } from "tailwind-variants";
 
 export const badgeStyles = tv({
@@ -46,9 +46,9 @@ export const badgeStyles = tv({
 });
 
 export interface BadgeProps
-	extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeStyles> {
+	extends HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeStyles> {
 	className?: string;
-	children: React.ReactNode;
+	children: ReactNode;
 }
 
 export function Badge({

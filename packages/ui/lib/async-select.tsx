@@ -3,7 +3,7 @@
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useResizeObserver } from "@react-aria/utils";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useCallback, useRef, useState } from "react";
+import { type CSSProperties, Fragment, type ReactNode, useCallback, useRef, useState } from "react";
 import {
 	Button as AriaButton,
 	DialogTrigger as AriaDialogTrigger,
@@ -184,7 +184,7 @@ function AsyncSelectInner<T extends AsyncOption>(
 					placement="bottom"
 					style={
 						triggerWidth != null
-							? ({ "--trigger-width": triggerWidth } as React.CSSProperties)
+							? ({ "--trigger-width": triggerWidth } as CSSProperties)
 							: undefined
 					}
 				>

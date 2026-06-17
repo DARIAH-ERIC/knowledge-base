@@ -2,7 +2,7 @@
 
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useExtracted } from "next-intl";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import {
 	Button as AriaButton,
 	ComboBox as AriaComboBox,
@@ -79,7 +79,7 @@ export function SearchableSelectContent<T extends object>(
 	);
 }
 
-export interface SearchableSelectInputProps extends React.ComponentProps<typeof Input> {}
+export interface SearchableSelectInputProps extends ComponentProps<typeof Input> {}
 
 export function SearchableSelectInput(props: Readonly<SearchableSelectInputProps>): ReactNode {
 	const { className, ...rest } = props;

@@ -53,8 +53,10 @@ export interface DatePickerOverlayProps extends Omit<PopoverProps, "children"> {
 	pageBehavior?: "visible" | "single";
 }
 
+const defaultVisibleDuration = { months: 1 };
+
 export function DatePickerOverlay({
-	visibleDuration = { months: 1 },
+	visibleDuration = defaultVisibleDuration,
 	pageBehavior = "visible",
 	placement = "bottom",
 	range,

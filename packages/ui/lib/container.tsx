@@ -1,7 +1,7 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 
-export interface ContainerProps extends React.ComponentProps<"div"> {
+export interface ContainerProps extends ComponentProps<"div"> {
 	constrained?: boolean;
 }
 
