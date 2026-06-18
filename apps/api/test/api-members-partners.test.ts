@@ -322,6 +322,7 @@ async function seedContributor(
 	db: Database,
 	countryId: string,
 	items: ReturnType<typeof createPersonItems>,
+	role: (typeof schema.personRoleTypesEnum)[number] = "national_coordinator",
 ) {
 	const [
 		status,
@@ -342,7 +343,7 @@ async function seedContributor(
 		}),
 		db.query.personRoleTypes.findFirst({
 			columns: { id: true },
-			where: { type: "national_coordinator" },
+			where: { type: role },
 		}),
 		db.query.personRoleTypes.findFirst({
 			columns: { id: true },
@@ -771,6 +772,13 @@ describe("members-partners", () => {
 				const representativeInstitution = representativeInstitutionItems[0]!;
 				const contributorItems = createPersonItems(1);
 				const contributor = await seedContributor(db, countryId, contributorItems);
+				const contactContributorItems = createPersonItems(1);
+				const contactContributor = await seedContributor(
+					db,
+					countryId,
+					contactContributorItems,
+					"is_contact_for",
+				);
 				const nationalConsortiumItems = createItems(1);
 				const nationalConsortium = await seedNationalConsortium(
 					db,
@@ -809,23 +817,43 @@ describe("members-partners", () => {
 					name: representativeInstitution.organisationalUnit.name,
 					slug: representativeInstitution.entity.slug,
 				});
-				expect(data.contributors).toHaveLength(1);
-				expect(data.contributors[0]).toMatchObject({
-					id: contributor.person.id,
-					name: contributor.person.name,
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					position: expect.arrayContaining([
+				expect(data.contributors).toHaveLength(2);
+				expect(data.contributors).toEqual(
+					expect.arrayContaining([
 						expect.objectContaining({
-							role: "is_affiliated_with",
-							name: contributor.affiliation.organisationalUnit.name,
+							id: contributor.person.id,
+							name: contributor.person.name,
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+							position: expect.arrayContaining([
+								expect.objectContaining({
+									role: "is_affiliated_with",
+									name: contributor.affiliation.organisationalUnit.name,
+								}),
+								expect.objectContaining({
+									role: "national_coordinator",
+									name: item.organisationalUnit.name,
+								}),
+							]),
+							role: "national_coordinator",
 						}),
 						expect.objectContaining({
-							role: "national_coordinator",
-							name: item.organisationalUnit.name,
+							id: contactContributor.person.id,
+							name: contactContributor.person.name,
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+							position: expect.arrayContaining([
+								expect.objectContaining({
+									role: "is_affiliated_with",
+									name: contactContributor.affiliation.organisationalUnit.name,
+								}),
+								expect.objectContaining({
+									role: "is_contact_for",
+									name: item.organisationalUnit.name,
+								}),
+							]),
+							role: "is_contact_for",
 						}),
 					]),
-					role: "national_coordinator",
-				});
+				);
 				expect(data.nationalConsortium).toMatchObject({
 					name: nationalConsortium.organisationalUnit.name,
 				});
@@ -1323,6 +1351,13 @@ describe("members-partners", () => {
 				const partnerInstitution = partnerInstitutionItems[0]!;
 				const contributorItems = createPersonItems(1);
 				const contributor = await seedContributor(db, countryId, contributorItems);
+				const contactContributorItems = createPersonItems(1);
+				const contactContributor = await seedContributor(
+					db,
+					countryId,
+					contactContributorItems,
+					"is_contact_for",
+				);
 				const nationalConsortiumItems = createItems(1);
 				const nationalConsortium = await seedNationalConsortium(
 					db,
@@ -1350,23 +1385,43 @@ describe("members-partners", () => {
 					slug: partnerInstitution.entity.slug,
 					website: null,
 				});
-				expect(data.contributors).toHaveLength(1);
-				expect(data.contributors[0]).toMatchObject({
-					id: contributor.person.id,
-					name: contributor.person.name,
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					position: expect.arrayContaining([
+				expect(data.contributors).toHaveLength(2);
+				expect(data.contributors).toEqual(
+					expect.arrayContaining([
 						expect.objectContaining({
-							role: "is_affiliated_with",
-							name: contributor.affiliation.organisationalUnit.name,
+							id: contributor.person.id,
+							name: contributor.person.name,
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+							position: expect.arrayContaining([
+								expect.objectContaining({
+									role: "is_affiliated_with",
+									name: contributor.affiliation.organisationalUnit.name,
+								}),
+								expect.objectContaining({
+									role: "national_coordinator",
+									name: item.organisationalUnit.name,
+								}),
+							]),
+							role: "national_coordinator",
 						}),
 						expect.objectContaining({
-							role: "national_coordinator",
-							name: item.organisationalUnit.name,
+							id: contactContributor.person.id,
+							name: contactContributor.person.name,
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+							position: expect.arrayContaining([
+								expect.objectContaining({
+									role: "is_affiliated_with",
+									name: contactContributor.affiliation.organisationalUnit.name,
+								}),
+								expect.objectContaining({
+									role: "is_contact_for",
+									name: item.organisationalUnit.name,
+								}),
+							]),
+							role: "is_contact_for",
 						}),
 					]),
-					role: "national_coordinator",
-				});
+				);
 				expect(data.nationalConsortium).toMatchObject({
 					name: nationalConsortium.organisationalUnit.name,
 				});

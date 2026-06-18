@@ -434,6 +434,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
           "role": {
             "enum": [
+              "is_contact_for",
               "national_coordinator",
               "national_coordinator_deputy",
               "national_representative",

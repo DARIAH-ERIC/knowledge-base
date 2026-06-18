@@ -59,6 +59,7 @@ export const ContributorSchema = v.pipe(
 		image: v.nullable(ImageSchema),
 		slug: v.string(),
 		role: v.picklist([
+			"is_contact_for",
 			"national_coordinator",
 			"national_coordinator_deputy",
 			"national_representative",

@@ -580,6 +580,7 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
 				sql`
 					${schema.personRoleTypes.type} IN (
+						'is_contact_for',
 						'national_coordinator',
 						'national_coordinator_deputy',
 						'national_representative',
@@ -589,10 +590,10 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 			),
 		);
 
-	// national_coordinator(_deputy) and national_representative(_deputy) are non-exclusive: a person may
-	// legitimately hold a coordinator and a representative relation, and should then be listed once per
-	// role. Collapse only exact duplicates (same person and role) so a stray duplicate relation row
-	// cannot list the same contributor twice with an identical role.
+	// Contact, coordinator, and representative roles are non-exclusive: a person may legitimately
+	// hold multiple contributor relations and should then be listed once per role. Collapse only exact
+	// duplicates (same person and role) so a stray duplicate relation row cannot list the same
+	// contributor twice with an identical role.
 	const rowsByPersonAndRole = new Map<string, (typeof rows)[number]>();
 	for (const row of rows) {
 		const key = `${row.id}:${row.role}`;
