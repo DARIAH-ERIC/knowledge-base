@@ -108,7 +108,10 @@ export async function getMembersAndPartners(
 					? await getNationalConsortium(db, item.id)
 					: null;
 			const image = nationalConsortium?.image ?? generateImageUrl(item.image, imageWidth.preview);
-			const socialMedia = mapSocialMedia(item.socialMedia);
+			const socialMedia = preferNonEmptyArray(
+				nationalConsortium?.socialMedia,
+				mapSocialMedia(item.socialMedia),
+			);
 
 			return { ...flattenEntityVersion(item), image, socialMedia };
 		}),
@@ -201,6 +204,10 @@ function hasRichTextContent(content: unknown): boolean {
 
 function hasContentBlocks(blocks: Array<ContentBlock> | undefined): blocks is Array<ContentBlock> {
 	return blocks?.some((block) => hasContent(block)) === true;
+}
+
+function preferNonEmptyArray<T>(preferred: Array<T> | undefined, fallback: Array<T>): Array<T> {
+	return preferred != null && preferred.length > 0 ? preferred : fallback;
 }
 
 type RelationStatus =
@@ -433,7 +440,12 @@ async function getNationalRepresentativeInstitution(
 async function getNationalConsortium(
 	db: Database | Transaction,
 	countryId: string,
-	options?: { imageSize?: number; includeDescription?: boolean },
+	options?: {
+		imageSize?: number;
+		includeDescription?: boolean;
+		includeRelations?: boolean;
+		includeResources?: boolean;
+	},
 ) {
 	const item = await db.query.organisationalUnits.findFirst({
 		where: {
@@ -485,7 +497,10 @@ async function getNationalConsortium(
 			},
 			socialMedia: {
 				columns: {
+					id: true,
+					name: true,
 					url: true,
+					duration: true,
 				},
 				with: {
 					type: {
@@ -502,8 +517,15 @@ async function getNationalConsortium(
 		return null;
 	}
 
-	const fields =
-		options?.includeDescription === true ? await getContentBlocks(db, item.entityVersion.id) : {};
+	const [fields, relatedEntities, relatedResources] = await Promise.all([
+		options?.includeDescription === true
+			? (getContentBlocks(db, item.entityVersion.id) as Promise<
+					Record<string, Array<ContentBlock>>
+				>)
+			: Promise.resolve({} as Record<string, Array<ContentBlock>>),
+		options?.includeRelations === true ? getRelatedEntities(db, item.entityVersion.id) : [],
+		options?.includeResources === true ? getRelatedResources(db, item.entityVersion.id) : [],
+	]);
 	const website = item.socialMedia.find((sm) => sm.type.type === "website")?.url ?? null;
 
 	return {
@@ -512,7 +534,10 @@ async function getNationalConsortium(
 		ror: item.ror,
 		website,
 		image: generateImageUrl(item.image, options?.imageSize ?? imageWidth.preview),
+		socialMedia: mapSocialMedia(item.socialMedia),
 		description: fields.description,
+		relatedEntities,
+		relatedResources,
 	};
 }
 
@@ -695,19 +720,33 @@ export async function getMemberOrPartnerById(
 			getNationalConsortium(db, item.id, {
 				imageSize: imageWidth.featured,
 				includeDescription: true,
+				includeRelations: true,
+				includeResources: true,
 			}),
 		]);
 
 		const image = nationalConsortium?.image ?? generateImageUrl(item.image, imageWidth.featured);
+		const socialMedia = preferNonEmptyArray(nationalConsortium?.socialMedia, base.socialMedia);
 		const description = hasContentBlocks(nationalConsortium?.description)
 			? nationalConsortium.description
 			: fields.description;
+		const preferredRelatedEntities = preferNonEmptyArray(
+			nationalConsortium?.relatedEntities,
+			relatedEntities,
+		);
+		const preferredRelatedResources = preferNonEmptyArray(
+			nationalConsortium?.relatedResources,
+			relatedResources,
+		);
 
 		return {
 			...base,
 			status: item.status,
 			image,
+			socialMedia,
 			description,
+			relatedEntities: preferredRelatedEntities,
+			relatedResources: preferredRelatedResources,
 			contributors,
 			institutions,
 			nationalCoordinatingInstitution,
@@ -908,19 +947,33 @@ export async function getMemberOrPartnerBySlug(
 			getNationalConsortium(db, item.id, {
 				imageSize: imageWidth.featured,
 				includeDescription: true,
+				includeRelations: true,
+				includeResources: true,
 			}),
 		]);
 
 		const image = nationalConsortium?.image ?? generateImageUrl(item.image, imageWidth.featured);
+		const socialMedia = preferNonEmptyArray(nationalConsortium?.socialMedia, base.socialMedia);
 		const description = hasContentBlocks(nationalConsortium?.description)
 			? nationalConsortium.description
 			: fields.description;
+		const preferredRelatedEntities = preferNonEmptyArray(
+			nationalConsortium?.relatedEntities,
+			relatedEntities,
+		);
+		const preferredRelatedResources = preferNonEmptyArray(
+			nationalConsortium?.relatedResources,
+			relatedResources,
+		);
 
 		return {
 			...base,
 			status: item.status,
 			image,
+			socialMedia,
 			description,
+			relatedEntities: preferredRelatedEntities,
+			relatedResources: preferredRelatedResources,
 			contributors,
 			institutions,
 			nationalCoordinatingInstitution,
