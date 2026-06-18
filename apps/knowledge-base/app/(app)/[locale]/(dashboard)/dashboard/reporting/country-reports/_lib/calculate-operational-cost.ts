@@ -14,7 +14,9 @@
 export interface OperationalCostLine {
 	key: string;
 	label: string;
+	bucket?: string;
 	quantity: number;
+	showQuantity: boolean;
 	unitAmount: number;
 	total: number;
 }
@@ -46,7 +48,12 @@ export interface OperationalCostInput {
 		type: string;
 		kpis: Array<{ value: number }>;
 	}>;
-	services: Array<{ serviceId: string; name: string; kpis: Array<{ kpi: string; value: number }> }>;
+	services: Array<{
+		serviceId: string;
+		name: string;
+		serviceType: string;
+		kpis: Array<{ kpi: string; value: number }>;
+	}>;
 	campaign: OperationalCostCampaignData;
 	countryDocumentId: string;
 }
@@ -57,12 +64,25 @@ function addOperationalCostLine(
 	label: string,
 	quantity: number,
 	unitAmount: number | undefined,
+	options: { bucket?: string; showQuantity?: boolean } = {},
 ): void {
 	if (quantity <= 0 || unitAmount == null) {
 		return;
 	}
 
-	lines.push({ key, label, quantity, unitAmount, total: quantity * unitAmount });
+	const line: OperationalCostLine = {
+		key,
+		label,
+		quantity,
+		showQuantity: options.showQuantity ?? true,
+		unitAmount,
+		total: quantity * unitAmount,
+	};
+	if (options.bucket != null) {
+		line.bucket = options.bucket;
+	}
+
+	lines.push(line);
 }
 
 export function calculateOperationalCost(input: OperationalCostInput): OperationalCost {
@@ -130,6 +150,7 @@ export function calculateOperationalCost(input: OperationalCostInput): Operation
 		"DARIAH commissioned event",
 		input.dariahCommissionedEvent == null || input.dariahCommissionedEvent === "" ? 0 : 1,
 		eventAmounts.get("dariah_commissioned"),
+		{ showQuantity: false },
 	);
 
 	// The national website and social media are each a single lump sum per category, regardless of
@@ -146,6 +167,7 @@ export function calculateOperationalCost(input: OperationalCostInput): Operation
 		"National website",
 		hasActivePresence("website") ? 1 : 0,
 		socialMediaAmounts.get("website"),
+		{ showQuantity: false },
 	);
 	addOperationalCostLine(
 		lines,
@@ -153,20 +175,27 @@ export function calculateOperationalCost(input: OperationalCostInput): Operation
 		"Social media",
 		hasActivePresence("other") ? 1 : 0,
 		socialMediaAmounts.get("other"),
+		{ showQuantity: false },
 	);
 
-	const serviceSizeAmounts = input.campaign.serviceSizes.toSorted(
-		(left, right) => (right.visitsThreshold ?? 0) - (left.visitsThreshold ?? 0),
-	);
+	const visitBasedServiceSizeAmounts = input.campaign.serviceSizes
+		.filter((candidate) => candidate.serviceSize !== "core")
+		.toSorted((left, right) => (right.visitsThreshold ?? 0) - (left.visitsThreshold ?? 0));
 	for (const service of input.services) {
 		const visits = service.kpis.find((kpi) => kpi.kpi === "visits")?.value ?? 0;
-		const size = serviceSizeAmounts.find((candidate) => visits >= (candidate.visitsThreshold ?? 0));
+		const size =
+			service.serviceType === "core"
+				? input.campaign.serviceSizes.find((candidate) => candidate.serviceSize === "core")
+				: visitBasedServiceSizeAmounts.find(
+						(candidate) => visits >= (candidate.visitsThreshold ?? 0),
+					);
 		addOperationalCostLine(
 			lines,
 			`service-${service.serviceId}`,
 			`Service: ${service.name}`,
 			size == null ? 0 : 1,
 			size?.amount,
+			{ bucket: size?.serviceSize, showQuantity: false },
 		);
 	}
 

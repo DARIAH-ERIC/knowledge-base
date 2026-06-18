@@ -86,10 +86,16 @@ describe("calculateOperationalCost", () => {
 					{ socialMediaId: "s2", name: "Bluesky", type: "bluesky", kpis: [{ value: 80 }] },
 				],
 				services: [
-					{ serviceId: "svc-small", name: "Small service", kpis: [{ kpi: "visits", value: 5000 }] },
+					{
+						serviceId: "svc-small",
+						name: "Small service",
+						serviceType: "community",
+						kpis: [{ kpi: "visits", value: 5000 }],
+					},
 					{
 						serviceId: "svc-large",
 						name: "Large service",
+						serviceType: "community",
 						kpis: [{ kpi: "visits", value: 200000 }],
 					},
 				],
@@ -168,20 +174,72 @@ describe("calculateOperationalCost", () => {
 		const result = calculateOperationalCost(
 			makeInput({
 				services: [
-					{ serviceId: "a", name: "Below medium", kpis: [{ kpi: "visits", value: 6999 }] },
-					{ serviceId: "b", name: "Medium", kpis: [{ kpi: "visits", value: 7000 }] },
-					{ serviceId: "c", name: "Large", kpis: [{ kpi: "visits", value: 170000 }] },
+					{
+						serviceId: "a",
+						name: "Below medium",
+						serviceType: "community",
+						kpis: [{ kpi: "visits", value: 6999 }],
+					},
+					{
+						serviceId: "b",
+						name: "Medium",
+						serviceType: "community",
+						kpis: [{ kpi: "visits", value: 7000 }],
+					},
+					{
+						serviceId: "c",
+						name: "Large",
+						serviceType: "community",
+						kpis: [{ kpi: "visits", value: 170000 }],
+					},
 					// No visits KPI → treated as 0 visits → smallest size.
-					{ serviceId: "d", name: "No visits", kpis: [{ kpi: "downloads", value: 999999 }] },
+					{
+						serviceId: "d",
+						name: "No visits",
+						serviceType: "community",
+						kpis: [{ kpi: "downloads", value: 999999 }],
+					},
 				],
 			}),
 		);
 
 		const byKey = new Map(result.lines.map((line) => [line.key, line]));
 		expect(byKey.get("service-a")?.unitAmount).toBe(6875); // small
+		expect(byKey.get("service-a")?.bucket).toBe("small");
+		expect(byKey.get("service-a")?.showQuantity).toBe(false);
 		expect(byKey.get("service-b")?.unitAmount).toBe(20625); // medium
+		expect(byKey.get("service-b")?.bucket).toBe("medium");
 		expect(byKey.get("service-c")?.unitAmount).toBe(41250); // large
+		expect(byKey.get("service-c")?.bucket).toBe("large");
 		expect(byKey.get("service-d")?.unitAmount).toBe(6875); // small (no visits)
+	});
+
+	it("counts core services with the core lump sum regardless of visits", () => {
+		const result = calculateOperationalCost(
+			makeInput({
+				services: [
+					{
+						serviceId: "core-low-visits",
+						name: "Core service",
+						serviceType: "core",
+						kpis: [{ kpi: "visits", value: 12 }],
+					},
+					{
+						serviceId: "community-high-visits",
+						name: "Community service",
+						serviceType: "community",
+						kpis: [{ kpi: "visits", value: 200000 }],
+					},
+				],
+			}),
+		);
+
+		const byKey = new Map(result.lines.map((line) => [line.key, line]));
+		expect(byKey.get("service-core-low-visits")?.unitAmount).toBe(82500);
+		expect(byKey.get("service-core-low-visits")?.bucket).toBe("core");
+		expect(byKey.get("service-core-low-visits")?.showQuantity).toBe(false);
+		expect(byKey.get("service-community-high-visits")?.unitAmount).toBe(41250);
+		expect(result.total).toBe(82500 + 41250);
 	});
 
 	it("returns a null threshold when the country has no configured threshold", () => {
