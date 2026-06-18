@@ -47,6 +47,7 @@ export interface CountryReportSummaryData {
 	services: Array<{
 		serviceId: string;
 		name: string;
+		serviceType: string;
 		kpis: Array<{ kpi: string; value: number }>;
 	}>;
 	projectContributions: Array<{
@@ -122,7 +123,10 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			serviceKpis: {
 				columns: { serviceId: true, kpi: true, value: true },
 				with: {
-					service: { columns: { name: true } },
+					service: {
+						columns: { name: true },
+						with: { type: { columns: { type: true } } },
+					},
 				},
 			},
 			projectContributions: {
@@ -229,13 +233,14 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 
 	const serviceMap = new Map<
 		string,
-		{ name: string; kpis: Array<{ kpi: string; value: number }> }
+		{ name: string; serviceType: string; kpis: Array<{ kpi: string; value: number }> }
 	>();
 	for (const row of report.serviceKpis) {
 		const existing = serviceMap.get(row.serviceId);
 		if (existing == null) {
 			serviceMap.set(row.serviceId, {
 				name: row.service.name,
+				serviceType: row.service.type.type,
 				kpis: [{ kpi: row.kpi, value: row.value }],
 			});
 		} else {

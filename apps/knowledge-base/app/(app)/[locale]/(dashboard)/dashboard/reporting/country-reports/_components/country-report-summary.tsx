@@ -48,6 +48,10 @@ function formatOperationalCostLabel(label: string): string {
 	return `${prefix}: ${formatRole(value)}`;
 }
 
+function formatOperationalCostBucket(bucket: string): string {
+	return formatRole(bucket);
+}
+
 export async function CountryReportSummary(
 	props: Readonly<CountryReportSummaryProps>,
 ): Promise<ReactNode> {
@@ -143,9 +147,16 @@ export async function CountryReportSummary(
 										<span className="font-medium text-fg">
 											{formatOperationalCostLabel(line.label)}
 										</span>
-										<span className="text-muted-fg">
-											{t("Quantity")}: {line.quantity.toLocaleString()}
-										</span>
+										{line.bucket != null ? (
+											<span className="text-muted-fg">
+												{t("Bucket")}: {formatOperationalCostBucket(line.bucket)}
+											</span>
+										) : null}
+										{line.showQuantity ? (
+											<span className="text-muted-fg">
+												{t("Quantity")}: {line.quantity.toLocaleString()}
+											</span>
+										) : null}
 										<span className="text-muted-fg">
 											{t("Unit")}: {eurFormatter.format(line.unitAmount)}
 										</span>
