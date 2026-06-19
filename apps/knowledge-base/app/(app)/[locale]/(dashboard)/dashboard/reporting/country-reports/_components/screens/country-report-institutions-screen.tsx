@@ -104,7 +104,9 @@ export async function CountryReportInstitutionsScreen(
 		<div className="flex flex-col gap-y-12">
 			<CountryReportInstitutionsForm
 				canManageRelations={user.role === "admin"}
+				campaignYear={year}
 				countryReportId={report.id}
+				currentPartnerCount={currentPartners.length}
 				institutions={institutions}
 				missing={missing}
 				refreshAction={refreshCountryReportInstitutionsAction}

@@ -71,7 +71,7 @@ export function CountryReportProjectsForm(
 								<div>
 									<p className="text-sm font-medium text-fg">{contribution.project?.name ?? ""}</p>
 									<p className="text-xs text-muted-fg">
-										{t("Amount")}: {contribution.amountEuros.toLocaleString()} {"EUR"}
+										{t("Total funding amount (EUR)")}: {contribution.amountEuros.toLocaleString()}
 									</p>
 								</div>
 								<form action={deleteAction}>
@@ -119,7 +119,7 @@ export function CountryReportProjectsForm(
 						<input name="projectDocumentId" type="hidden" value={selectedProjectId} />
 
 						<TextField isRequired={true} name="amountEuros" type="number">
-							<Label>{t("Amount (EUR)")}</Label>
+							<Label>{t("Total funding amount (EUR)")}</Label>
 							<Input min={0} step="0.01" />
 							<FieldError />
 						</TextField>

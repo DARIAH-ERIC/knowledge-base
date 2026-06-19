@@ -25,8 +25,8 @@ export function CountryReportStepNav(props: Readonly<CountryReportStepNavProps>)
 
 	const steps: Array<ReportStep> = [
 		...(variant === "admin" ? [{ href: editBasePath, label: t("Status") }] : []),
-		{ href: `${editBasePath}/institutions`, label: t("Institutions") },
 		{ href: `${editBasePath}/contributors`, label: t("Contributors") },
+		{ href: `${editBasePath}/institutions`, label: t("Partner institutions") },
 		{ href: `${editBasePath}/events`, label: t("Events") },
 		{ href: `${editBasePath}/social-media`, label: t("Social media") },
 		{ href: `${editBasePath}/services`, label: t("Services") },

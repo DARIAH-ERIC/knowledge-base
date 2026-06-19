@@ -67,7 +67,7 @@ export async function CountryReportSummary(
 		data.dariahCommissionedEvent != null ||
 		data.reusableOutcomes != null;
 
-	const institutionsLabel = t("Institutions");
+	const partnerInstitutionsLabel = t("Partner institutions");
 	const contributorsLabel = t("Contributors");
 	const eventsLabel = t("Events");
 	const socialMediaLabel = t("Social media");
@@ -77,13 +77,9 @@ export async function CountryReportSummary(
 
 	const sectionLinks: Array<ReportSummarySectionLink> = [
 		{ id: "country-report-operational-cost", label: operationalCostLabel },
+		{ id: "country-report-contributors", label: contributorsLabel },
+		{ id: "country-report-institutions", label: partnerInstitutionsLabel },
 	];
-
-	if (data.institutions.length > 0) {
-		sectionLinks.push({ id: "country-report-institutions", label: institutionsLabel });
-	}
-
-	sectionLinks.push({ id: "country-report-contributors", label: contributorsLabel });
 
 	if (hasEvents) {
 		sectionLinks.push({ id: "country-report-events", label: eventsLabel });
@@ -142,25 +138,27 @@ export async function CountryReportSummary(
 								{data.operationalCost.lines.map((line) => (
 									<li
 										key={line.key}
-										className="grid gap-x-4 gap-y-1 px-4 py-3 text-sm sm:grid-cols-[1fr_auto_auto_auto]"
+										className="grid gap-x-4 gap-y-1 px-4 py-3 text-sm sm:grid-cols-[minmax(0,1fr)_auto_auto_auto_auto]"
 									>
 										<span className="font-medium text-fg">
 											{formatOperationalCostLabel(line.label)}
 										</span>
 										{line.bucket != null ? (
-											<span className="text-muted-fg">
+											<span className="text-muted-fg sm:col-start-2">
 												{t("Bucket")}: {formatOperationalCostBucket(line.bucket)}
 											</span>
 										) : null}
 										{line.showQuantity ? (
-											<span className="text-muted-fg">
+											<span className="text-muted-fg sm:col-start-3">
 												{t("Quantity")}: {line.quantity.toLocaleString()}
 											</span>
 										) : null}
-										<span className="text-muted-fg">
+										<span className="text-muted-fg sm:col-start-4">
 											{t("Unit")}: {eurFormatter.format(line.unitAmount)}
 										</span>
-										<span className="font-medium text-fg">{eurFormatter.format(line.total)}</span>
+										<span className="font-medium text-fg sm:col-start-5 sm:justify-self-end">
+											{eurFormatter.format(line.total)}
+										</span>
 									</li>
 								))}
 							</ul>
@@ -171,23 +169,6 @@ export async function CountryReportSummary(
 						)}
 					</div>
 				</ReportSummarySection>
-
-				{data.institutions.length > 0 && (
-					<ReportSummarySection id="country-report-institutions" title={institutionsLabel}>
-						<ul className="divide-y rounded-md border">
-							{data.institutions.map((inst) => (
-								<li key={inst.id} className="px-4 py-3">
-									<p className="text-sm font-medium text-fg">
-										{inst.name}
-										{inst.acronym != null && (
-											<span className="ms-2 text-muted-fg">({inst.acronym})</span>
-										)}
-									</p>
-								</li>
-							))}
-						</ul>
-					</ReportSummarySection>
-				)}
 
 				<ReportSummarySection id="country-report-contributors" title={contributorsLabel}>
 					{data.contributions.length > 0 && (
@@ -208,6 +189,31 @@ export async function CountryReportSummary(
 						<dt className="text-muted-fg">{t("Total contributors")}</dt>
 						<dd>{data.totalContributors ?? "—"}</dd>
 					</dl>
+				</ReportSummarySection>
+
+				<ReportSummarySection
+					contentClassName="gap-y-4"
+					id="country-report-institutions"
+					title={partnerInstitutionsLabel}
+				>
+					<dl className="grid max-inline-xs grid-cols-[auto_1fr] gap-x-8 text-sm">
+						<dt className="text-muted-fg">{t("Total partner institutions")}</dt>
+						<dd>{data.institutions.length.toLocaleString()}</dd>
+					</dl>
+					{data.institutions.length > 0 && (
+						<ul className="divide-y rounded-md border">
+							{data.institutions.map((institution) => (
+								<li key={institution.id} className="px-4 py-3">
+									<p className="text-sm font-medium text-fg">
+										{institution.name}
+										{institution.acronym != null && (
+											<span className="ms-2 text-muted-fg">({institution.acronym})</span>
+										)}
+									</p>
+								</li>
+							))}
+						</ul>
+					)}
 				</ReportSummarySection>
 
 				{hasEvents && (

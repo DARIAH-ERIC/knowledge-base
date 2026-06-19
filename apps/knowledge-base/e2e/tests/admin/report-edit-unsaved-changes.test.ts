@@ -53,7 +53,7 @@ test.describe("report editor unsaved-changes guard", () => {
 			firstDialog = { message: dialog.message(), type: dialog.type() };
 			await dialog.dismiss();
 		});
-		await page.getByRole("tab", { name: "Institutions" }).click();
+		await page.getByRole("tab", { name: "Partner institutions" }).click();
 
 		expect(firstDialog).not.toBeNull();
 		expect(firstDialog!.type).toBe("confirm");
@@ -71,7 +71,7 @@ test.describe("report editor unsaved-changes guard", () => {
 		page.once("dialog", async (dialog) => {
 			await dialog.accept();
 		});
-		await page.getByRole("tab", { name: "Institutions" }).click();
+		await page.getByRole("tab", { name: "Partner institutions" }).click();
 		await expect(page).toHaveURL(new RegExp(`${reportId!}/edit/institutions`));
 	});
 

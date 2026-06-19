@@ -1,6 +1,6 @@
 import * as schema from "@dariah-eric/database/schema";
 
-import { db } from "@/lib/db";
+import { type Database, type Transaction, db } from "@/lib/db";
 import { notInArray } from "@/lib/db/sql";
 
 export type SocialMediaKpiCategory = (typeof schema.socialMediaKpiCategoryEnum)[number];
@@ -96,10 +96,37 @@ export async function getSocialMediaTypes(): Promise<
  */
 export async function getCarriedOverReportSocialMedia(
 	previousReportId: string,
+	queryDb: Database | Transaction = db,
 ): Promise<Array<string>> {
-	const rows = await db.query.countryReportSocialMedia.findMany({
+	const rows = await queryDb.query.countryReportSocialMedia.findMany({
 		where: { countryReportId: previousReportId },
 		columns: { socialMediaId: true },
 	});
+	return rows.map((row) => row.socialMediaId);
+}
+
+/**
+ * Social media accounts linked to the country's published version. Country reports must not include
+ * social media changes that still exist only in a draft.
+ */
+export async function getCountrySocialMedia(
+	countryDocumentId: string,
+	queryDb: Database | Transaction = db,
+): Promise<Array<string>> {
+	const lifecycle = await queryDb.query.documentLifecycle.findFirst({
+		where: { documentId: countryDocumentId },
+		columns: { publishedId: true },
+	});
+	const organisationalUnitId = lifecycle?.publishedId;
+
+	if (organisationalUnitId == null) {
+		return [];
+	}
+
+	const rows = await queryDb.query.organisationalUnitsToSocialMedia.findMany({
+		where: { organisationalUnitId },
+		columns: { socialMediaId: true },
+	});
+
 	return rows.map((row) => row.socialMediaId);
 }

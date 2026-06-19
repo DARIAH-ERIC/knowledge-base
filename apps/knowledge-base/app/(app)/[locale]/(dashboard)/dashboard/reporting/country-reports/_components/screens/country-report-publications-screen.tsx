@@ -6,6 +6,7 @@ import { ReportExternalResourcesSnapshotSection } from "@/app/(app)/[locale]/(da
 import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { refreshCountryReportExternalResourceSnapshotAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/refresh-country-report-external-resource-snapshot.action";
+import { isReportEditable } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getCountryExternalResourceSnapshot } from "@/lib/data/report-marketplace-resources";
 import { db } from "@/lib/db";
@@ -41,6 +42,7 @@ export async function CountryReportPublicationsScreen(
 	}
 
 	const t = await getExtracted();
+	const canRefresh = await isReportEditable(user, { type: "country_report", id: report.id });
 	const snapshot = await getCountryExternalResourceSnapshot(
 		report.id,
 		"country_zotero_publications",
@@ -49,6 +51,7 @@ export async function CountryReportPublicationsScreen(
 	return (
 		<div className="flex flex-col gap-y-12">
 			<ReportExternalResourcesSnapshotSection
+				canRefresh={canRefresh}
 				capturedAt={snapshot?.capturedAt.toISOString() ?? null}
 				capturedByUserName={snapshot?.capturedByUserName ?? null}
 				description={t(

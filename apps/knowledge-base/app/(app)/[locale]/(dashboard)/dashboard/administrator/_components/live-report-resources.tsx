@@ -147,6 +147,7 @@ export async function LiveReportResources(
 					return (
 						<ReportExternalResourcesSnapshotSection
 							key={descriptor.section}
+							canRefresh={true}
 							capturedAt={snapshot?.capturedAt.toISOString() ?? null}
 							capturedByUserName={snapshot?.capturedByUserName ?? null}
 							description={descriptor.description}

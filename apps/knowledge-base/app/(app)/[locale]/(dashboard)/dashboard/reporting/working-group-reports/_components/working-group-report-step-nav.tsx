@@ -31,6 +31,8 @@ export function WorkingGroupReportStepNav(
 		{ href: `${editBasePath}/data`, label: t("Data") },
 		{ href: `${editBasePath}/events`, label: t("Events") },
 		{ href: `${editBasePath}/questions`, label: t("Questions") },
+		{ href: `${editBasePath}/software`, label: t("SSHOC resources") },
+		{ href: `${editBasePath}/publications`, label: t("Publications") },
 	];
 
 	return <ReportStepTabs aria-label={t("Report sections")} steps={steps} />;
