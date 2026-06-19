@@ -17,6 +17,11 @@ import {
 	getLiveReportResourceNavLinks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources";
 import { LiveReportResourcesErrorBoundary } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources-error-boundary";
+import {
+	ReportCommentsSection,
+	reportCommentsSectionId,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-comments-section";
+import { getReportScreenComments } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_lib/report-screen-comments";
 import { WorkingGroupReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
 import { getWorkingGroupReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
@@ -63,6 +68,11 @@ export default async function DashboardAdministratorWorkingGroupReportPage(
 
 	const t = await getExtracted();
 	const liveResourceNavLinks = await getLiveReportResourceNavLinks("workingGroup");
+	const comments = await getReportScreenComments("working_group", report.id);
+	const extraSectionLinks = [
+		...liveResourceNavLinks,
+		...(comments.length > 0 ? [{ id: reportCommentsSectionId, label: t("Comments") }] : []),
+	];
 
 	return (
 		<div>
@@ -96,7 +106,7 @@ export default async function DashboardAdministratorWorkingGroupReportPage(
 			</Header>
 
 			<div className="mbs-8 flex max-inline-4xl flex-col gap-y-10 px-(--layout-padding)">
-				<WorkingGroupReportSummary data={report.summary} extraSectionLinks={liveResourceNavLinks} />
+				<WorkingGroupReportSummary data={report.summary} extraSectionLinks={extraSectionLinks} />
 				<LiveReportResourcesErrorBoundary
 					description={t(
 						"External data snapshots could not be loaded. Stored report data is unaffected.",
@@ -106,6 +116,7 @@ export default async function DashboardAdministratorWorkingGroupReportPage(
 				>
 					<LiveReportResources reportId={id} reportKind="workingGroup" />
 				</LiveReportResourcesErrorBoundary>
+				<ReportCommentsSection comments={comments} />
 			</div>
 		</div>
 	);
