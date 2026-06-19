@@ -58,7 +58,7 @@ test.describe("report submit gating (reporter)", () => {
 
 	test("a working group member can edit but cannot submit", async ({ page }) => {
 		await page.goto(
-			`/en/dashboard/reporting/working-group-reports/${year!}/${workingGroupSlug!}/edit/confirm`,
+			`/en/dashboard/reporting/working-group-reports/${year!}/${workingGroupSlug!}/edit/summary`,
 		);
 
 		await expect(page.getByText("Draft", { exact: true })).toBeVisible();

@@ -36,7 +36,7 @@ test.describe("working group report lifecycle (chair)", () => {
 	});
 
 	test("a chair submits a draft report", async ({ page, db }) => {
-		await page.goto(`/en/dashboard/reporting/working-group-reports/${year!}/${slug!}/edit/confirm`);
+		await page.goto(`/en/dashboard/reporting/working-group-reports/${year!}/${slug!}/edit/summary`);
 
 		const submitButton = page.getByRole("button", { name: "Submit report" });
 		await expect(submitButton).toBeVisible();

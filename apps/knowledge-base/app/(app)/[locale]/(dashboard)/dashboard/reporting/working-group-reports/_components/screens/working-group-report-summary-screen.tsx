@@ -13,7 +13,7 @@ import { submitWorkingGroupReportAction } from "@/app/(app)/[locale]/(dashboard)
 import { can } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 
-interface WorkingGroupReportConfirmScreenProps {
+interface WorkingGroupReportSummaryScreenProps {
 	reportId: string;
 }
 
@@ -21,12 +21,8 @@ function formatStatus(status: string): string {
 	return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
-/**
- * Shared "confirm" screen (reporting flow). See {@link getWorkingGroupReportDataForUser} for
- * authorization.
- */
-export async function WorkingGroupReportConfirmScreen(
-	props: Readonly<WorkingGroupReportConfirmScreenProps>,
+export async function WorkingGroupReportSummaryScreen(
+	props: Readonly<WorkingGroupReportSummaryScreenProps>,
 ): Promise<ReactNode> {
 	const { reportId } = props;
 
@@ -41,6 +37,7 @@ export async function WorkingGroupReportConfirmScreen(
 	const t = await getExtracted();
 	const canConfirm = await can(user, "confirm", { type: "working_group_report", id: reportId });
 	const isAdmin = user.role === "admin";
+	const canDownload = report.status === "submitted" || report.status === "accepted";
 
 	return (
 		<div className="flex flex-col gap-y-10">
@@ -71,14 +68,26 @@ export async function WorkingGroupReportConfirmScreen(
 						<p className="text-sm text-muted-fg">{t("This report has been accepted.")}</p>
 					)}
 
-					<a
-						className={buttonStyles({ intent: "plain", size: "sm" })}
-						download={`working-group-report-${reportId}.json`}
-						href={`/api/reporting/working-group-reports/${reportId}/download`}
-					>
-						<ArrowDownTrayIcon className="me-2 block-4 inline-4" />
-						{t("Download JSON")}
-					</a>
+					{canDownload && (
+						<>
+							<a
+								className={buttonStyles({ intent: "plain", size: "sm" })}
+								download={`working-group-report-${reportId}.pdf`}
+								href={`/api/reporting/working-group-reports/${reportId}/download.pdf`}
+							>
+								<ArrowDownTrayIcon className="me-2 block-4 inline-4" />
+								{t("Download PDF")}
+							</a>
+							<a
+								className={buttonStyles({ intent: "plain", size: "sm" })}
+								download={`working-group-report-${reportId}.json`}
+								href={`/api/reporting/working-group-reports/${reportId}/download`}
+							>
+								<ArrowDownTrayIcon className="me-2 block-4 inline-4" />
+								{t("Download JSON")}
+							</a>
+						</>
+					)}
 				</div>
 			</div>
 
