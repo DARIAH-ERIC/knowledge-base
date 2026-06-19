@@ -81,15 +81,15 @@ export const createCountryReportAction = createMutationAction({
 
 			if (partners.length > 0) {
 				await tx.insert(schema.countryReportInstitutions).values(
-					partners.flatMap((partner) => {
-						return partner.representationTypes.map((representationType) => {
+					partners.flatMap((partner) =>
+						partner.representationTypes.map((representationType) => {
 							return {
 								countryReportId: created.id,
 								organisationalUnitDocumentId: partner.institutionDocumentId,
 								representationType,
 							};
-						});
-					}),
+						}),
+					),
 				);
 			}
 

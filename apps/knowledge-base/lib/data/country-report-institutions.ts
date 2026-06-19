@@ -10,12 +10,11 @@ export type CountryReportInstitutionRepresentation =
 export function sortCountryReportInstitutionRepresentationTypes(
 	types: Iterable<CountryReportInstitutionRepresentation>,
 ): Array<CountryReportInstitutionRepresentation> {
-	return Array.from(new Set(types)).toSorted((left, right) => {
-		return (
+	return Array.from(new Set(types)).toSorted(
+		(left, right) =>
 			countryReportInstitutionRepresentationPrecedence[left] -
-			countryReportInstitutionRepresentationPrecedence[right]
-		);
-	});
+			countryReportInstitutionRepresentationPrecedence[right],
+	);
 }
 
 export interface CountryReportInstitutionSummaryRow {

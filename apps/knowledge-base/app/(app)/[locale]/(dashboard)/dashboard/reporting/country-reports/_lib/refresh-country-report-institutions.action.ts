@@ -52,15 +52,15 @@ export const refreshCountryReportInstitutionsAction = createMutationAction({
 
 		if (partners.length > 0) {
 			await tx.insert(schema.countryReportInstitutions).values(
-				partners.flatMap((partner) => {
-					return partner.representationTypes.map((representationType) => {
+				partners.flatMap((partner) =>
+					partner.representationTypes.map((representationType) => {
 						return {
 							countryReportId: input.countryReportId,
 							organisationalUnitDocumentId: partner.institutionDocumentId,
 							representationType,
 						};
-					});
-				}),
+					}),
+				),
 			);
 		}
 
