@@ -12,6 +12,12 @@ import { classifyCompensationRole } from "@/lib/data/report-contributions";
 import { db } from "@/lib/db";
 import { alias, eq, sql } from "@/lib/db/sql";
 
+const institutionRepresentationTypeOrder: Readonly<Record<string, number>> = {
+	is_national_representative_institution_in: 0,
+	is_national_coordinating_institution_in: 1,
+	is_partner_institution_of: 2,
+};
+
 export interface CountryReportSummaryData {
 	operationalCost: OperationalCost;
 	totalContributors: number | null;
@@ -261,14 +267,23 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 		veryLargeEvents: report.veryLargeEvents,
 		dariahCommissionedEvent: report.dariahCommissionedEvent,
 		reusableOutcomes: report.reusableOutcomes,
-		institutions: report.institutions.map((i) => {
-			return {
-				id: i.id,
-				name: i.organisationalUnit?.name ?? "",
-				acronym: i.organisationalUnit?.acronym ?? null,
-				representationType: i.representationType,
-			};
-		}),
+		institutions: report.institutions
+			.map((i) => {
+				return {
+					id: i.id,
+					name: i.organisationalUnit?.name ?? "",
+					acronym: i.organisationalUnit?.acronym ?? null,
+					representationType: i.representationType,
+				};
+			})
+			.toSorted((left, right) => {
+				const leftTypeOrder =
+					institutionRepresentationTypeOrder[left.representationType ?? ""] ?? Number.MAX_VALUE;
+				const rightTypeOrder =
+					institutionRepresentationTypeOrder[right.representationType ?? ""] ?? Number.MAX_VALUE;
+
+				return leftTypeOrder - rightTypeOrder || left.name.localeCompare(right.name);
+			}),
 		contributions: reportContributions,
 		socialMediaAccounts: Array.from(socialMediaMap.entries()).map(([socialMediaId, data]) => {
 			return { socialMediaId, ...data };
