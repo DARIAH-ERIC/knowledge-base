@@ -294,7 +294,14 @@ export async function CountryReportSummary(
 									key={service.serviceId}
 									className="flex flex-col gap-y-3 rounded-md border border-border p-4"
 								>
-									<p className="text-sm font-medium text-fg">{service.name}</p>
+									<div className="flex items-baseline justify-between gap-x-4">
+										<p className="text-sm font-medium text-fg">{service.name}</p>
+										{service.costBucket != null ? (
+											<p className="shrink-0 text-xs text-muted-fg">
+												{t("Bucket")}: {formatOperationalCostBucket(service.costBucket)}
+											</p>
+										) : null}
+									</div>
 									{nonZeroKpis.length > 0 ? (
 										<dl className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-3 lg:grid-cols-4">
 											{nonZeroKpis.map((k) => (

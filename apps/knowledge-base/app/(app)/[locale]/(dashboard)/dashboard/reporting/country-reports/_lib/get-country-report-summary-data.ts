@@ -5,6 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import {
 	type OperationalCost,
 	calculateOperationalCost,
+	getOperationalCostServiceSize,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/calculate-operational-cost";
 import { type Action, can } from "@/lib/auth/permissions";
 import { classifyCompensationRole } from "@/lib/data/report-contributions";
@@ -48,6 +49,7 @@ export interface CountryReportSummaryData {
 		serviceId: string;
 		name: string;
 		serviceType: string;
+		costBucket: string | null;
 		kpis: Array<{ kpi: string; value: number }>;
 	}>;
 	projectContributions: Array<{
@@ -287,6 +289,29 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 		campaign: report.campaign,
 		countryDocumentId: report.countryDocumentId,
 	});
+	const serviceSizesByBucket: ReadonlyMap<string, { amount: number }> = new Map(
+		report.campaign.serviceSizes.map((size) => [size.serviceSize, size]),
+	);
+	const services = summary.services
+		.map((service) => {
+			return {
+				...service,
+				costBucket:
+					getOperationalCostServiceSize(service, report.campaign.serviceSizes)?.serviceSize ?? null,
+			};
+		})
+		.toSorted((left, right) => {
+			const leftAmount =
+				left.costBucket == null
+					? Number.POSITIVE_INFINITY
+					: (serviceSizesByBucket.get(left.costBucket)?.amount ?? Number.POSITIVE_INFINITY);
+			const rightAmount =
+				right.costBucket == null
+					? Number.POSITIVE_INFINITY
+					: (serviceSizesByBucket.get(right.costBucket)?.amount ?? Number.POSITIVE_INFINITY);
+
+			return leftAmount - rightAmount || left.name.localeCompare(right.name);
+		});
 
 	return {
 		id: report.id,
@@ -296,6 +321,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 		summary: {
 			operationalCost,
 			...summary,
+			services,
 		},
 	};
 }
