@@ -16,6 +16,7 @@ import type {
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface ReportExternalResourcesSnapshotSectionProps {
+	canRefresh: boolean;
 	capturedAt: string | null;
 	capturedByUserName: string | null;
 	description: string;
@@ -50,6 +51,7 @@ export function ReportExternalResourcesSnapshotSection(
 	props: Readonly<ReportExternalResourcesSnapshotSectionProps>,
 ): ReactNode {
 	const {
+		canRefresh,
 		capturedAt,
 		capturedByUserName,
 		description,
@@ -122,21 +124,25 @@ export function ReportExternalResourcesSnapshotSection(
 				<p className="text-sm text-muted-fg italic">{emptyMessage}</p>
 			)}
 
-			<Form action={action} className="flex flex-col gap-y-3 max-inline-sm" state={state}>
-				<input name={reportIdFieldName} type="hidden" value={reportId} />
-				<input name="section" type="hidden" value={section} />
-				<Button className="self-start" isPending={isPending} type="submit">
-					{isPending ? (
-						<Fragment>
-							<ProgressCircle aria-label={t("Refreshing...")} isIndeterminate={true} />
-							<span aria-hidden={true}>{t("Refreshing...")}</span>
-						</Fragment>
-					) : (
-						t("Refresh snapshot")
-					)}
-				</Button>
-				<FormStatus className="self-start" state={state} />
-			</Form>
+			{canRefresh ? (
+				<Form action={action} className="flex flex-col gap-y-3 max-inline-sm" state={state}>
+					<input name={reportIdFieldName} type="hidden" value={reportId} />
+					<input name="section" type="hidden" value={section} />
+					<Button className="self-start" isPending={isPending} type="submit">
+						{isPending ? (
+							<Fragment>
+								<ProgressCircle aria-label={t("Refreshing...")} isIndeterminate={true} />
+								<span aria-hidden={true}>{t("Refreshing...")}</span>
+							</Fragment>
+						) : capturedAt == null ? (
+							t("Capture snapshot")
+						) : (
+							t("Refresh snapshot")
+						)}
+					</Button>
+					<FormStatus className="self-start" state={state} />
+				</Form>
+			) : null}
 		</section>
 	);
 }

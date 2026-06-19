@@ -10,7 +10,10 @@ import {
 	getCarriedOverManualContributions,
 	getSnapshotContributionCandidates,
 } from "@/lib/data/report-contributions";
-import { getCarriedOverReportSocialMedia } from "@/lib/data/report-social-media";
+import {
+	getCarriedOverReportSocialMedia,
+	getCountrySocialMedia,
+} from "@/lib/data/report-social-media";
 import { getCurrentPartnerInstitutions } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
@@ -138,14 +141,16 @@ export const createCountryReportAction = createMutationAction({
 				await tx.insert(schema.countryReportContributions).values(contributionRows);
 			}
 
-			// Carry over the social media coverage set from last year's report (accounts only; KPI values
-			// are re-entered each year).
+			// Seed social media from both last year's report and the accounts currently linked to the
+			// country. Carry over accounts only; KPI values are re-entered each year.
 			const carriedSocialMediaIds =
-				previousReport == null ? [] : await getCarriedOverReportSocialMedia(previousReport.id);
+				previousReport == null ? [] : await getCarriedOverReportSocialMedia(previousReport.id, tx);
+			const countrySocialMediaIds = await getCountrySocialMedia(input.countryId, tx);
+			const socialMediaIds = [...new Set([...carriedSocialMediaIds, ...countrySocialMediaIds])];
 
-			if (carriedSocialMediaIds.length > 0) {
+			if (socialMediaIds.length > 0) {
 				await tx.insert(schema.countryReportSocialMedia).values(
-					carriedSocialMediaIds.map((socialMediaId) => {
+					socialMediaIds.map((socialMediaId) => {
 						return { countryReportId: created.id, socialMediaId };
 					}),
 				);

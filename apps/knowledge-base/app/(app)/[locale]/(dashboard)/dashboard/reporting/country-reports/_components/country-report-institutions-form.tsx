@@ -37,6 +37,8 @@ interface MissingInstitution {
 
 interface CountryReportInstitutionsFormProps {
 	countryReportId: string;
+	campaignYear: number;
+	currentPartnerCount: number;
 	institutions: Array<ListedInstitution>;
 	/** Current partner institutions not (yet) in the frozen snapshot. */
 	missing: Array<MissingInstitution>;
@@ -78,7 +80,15 @@ function institutionLabel(name: string, acronym: string | null): string {
 export function CountryReportInstitutionsForm(
 	props: Readonly<CountryReportInstitutionsFormProps>,
 ): ReactNode {
-	const { countryReportId, institutions, missing, canManageRelations, refreshAction } = props;
+	const {
+		countryReportId,
+		campaignYear,
+		currentPartnerCount,
+		institutions,
+		missing,
+		canManageRelations,
+		refreshAction,
+	} = props;
 
 	const t = useExtracted();
 	const representationLabel = useRepresentationLabel();
@@ -89,10 +99,13 @@ export function CountryReportInstitutionsForm(
 	return (
 		<div className="flex flex-col gap-y-8">
 			<div className="flex flex-col gap-y-2">
-				<h2 className="text-sm font-semibold text-fg">{t("Institutions")}</h2>
+				<h2 className="text-sm font-semibold text-fg">
+					{t("Partner institutions")} ({currentPartnerCount.toLocaleString()})
+				</h2>
 				<p className="max-inline-md text-sm text-muted-fg">
 					{t(
-						"The partner institutions recorded for this report. Edit the underlying relations on the institution itself, then refresh to update this snapshot.",
+						"The partner institutions connected to this country in the {year} reporting campaign. Edit the underlying relations on the institution itself, then refresh to update this snapshot.",
+						{ year: String(campaignYear) },
 					)}
 				</p>
 				{canManageRelations && (
@@ -189,7 +202,9 @@ export function CountryReportInstitutionsForm(
 				</section>
 			)}
 
-			{!hasContent && <p className="text-sm text-muted-fg">{t("No institutions recorded.")}</p>}
+			{!hasContent && (
+				<p className="text-sm text-muted-fg">{t("No partner institutions recorded.")}</p>
+			)}
 
 			<Form action={action} className="flex flex-col gap-y-3 max-inline-sm" state={state}>
 				<input name="countryReportId" type="hidden" value={countryReportId} />
