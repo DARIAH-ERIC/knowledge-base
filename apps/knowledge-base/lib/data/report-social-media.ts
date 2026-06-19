@@ -1,6 +1,6 @@
 import * as schema from "@dariah-eric/database/schema";
 
-import { db, type Database, type Transaction } from "@/lib/db";
+import { type Database, type Transaction, db } from "@/lib/db";
 import { notInArray } from "@/lib/db/sql";
 
 export type SocialMediaKpiCategory = (typeof schema.socialMediaKpiCategoryEnum)[number];
