@@ -44,7 +44,7 @@ interface NewsPageProps {
 	};
 	page: number;
 	q: string;
-	sort: "title" | "updatedAt";
+	sort: "publicationDate" | "title";
 }
 
 const pageSize = dashboardPageSize;
@@ -91,7 +91,7 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 					<TableColumn allowsSorting={true} id="title" isRowHeader={true}>
 						{t("Title")}
 					</TableColumn>
-					<TableColumn allowsSorting={true} id="updatedAt">
+					<TableColumn allowsSorting={true} id="publicationDate">
 						{t("Publication date")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>

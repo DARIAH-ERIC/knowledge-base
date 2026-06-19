@@ -8,7 +8,7 @@ import { unaccentIlike } from "@/lib/db/search";
 import { and, count, desc, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
-export type SpotlightArticlesSort = "title" | "updatedAt";
+export type SpotlightArticlesSort = "publicationDate" | "title";
 
 interface GetSpotlightArticlesParams {
 	/** @default 10 */
@@ -21,7 +21,7 @@ interface GetSpotlightArticlesParams {
 }
 
 export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
-	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
+	const { limit = 10, offset = 0, q, sort = "publicationDate", dir = "desc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""

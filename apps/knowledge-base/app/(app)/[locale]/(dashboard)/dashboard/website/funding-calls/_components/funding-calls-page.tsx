@@ -37,14 +37,13 @@ interface FundingCallsPageProps {
 				entity: Pick<schema.Entity, "slug">;
 				hasDraft: boolean;
 				isPublished: boolean;
-				updatedAt: schema.Entity["updatedAt"];
 			}
 		>;
 		total: number;
 	};
 	page: number;
 	q: string;
-	sort: "title" | "updatedAt";
+	sort: "duration" | "title";
 }
 
 const pageSize = dashboardPageSize;
@@ -97,9 +96,8 @@ export function FundingCallsPage(props: Readonly<FundingCallsPageProps>): ReactN
 					<TableColumn allowsSorting={true} id="title" isRowHeader={true}>
 						{t("Title")}
 					</TableColumn>
-					<TableColumn>{t("Duration")}</TableColumn>
-					<TableColumn allowsSorting={true} id="updatedAt">
-						{t("Updated")}
+					<TableColumn allowsSorting={true} id="duration">
+						{t("Duration")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
@@ -117,7 +115,6 @@ export function FundingCallsPage(props: Readonly<FundingCallsPageProps>): ReactN
 										})
 									: format.dateTime(item.duration.start, { dateStyle: "short" })}
 							</TableCell>
-							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
 									hasDraft={item.hasDraft}

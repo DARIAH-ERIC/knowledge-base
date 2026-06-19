@@ -10,7 +10,7 @@ import { unaccentIlike } from "@/lib/db/search";
 import { and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images/";
 
-export type NewsSort = "title" | "updatedAt";
+export type NewsSort = "publicationDate" | "title";
 
 interface GetNewsParams {
 	/** @default 10 */
@@ -23,7 +23,7 @@ interface GetNewsParams {
 }
 
 export async function getNews(params: GetNewsParams, queryDb: Database | Transaction = db) {
-	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
+	const { limit = 10, offset = 0, q, sort = "publicationDate", dir = "desc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== "" ? unaccentIlike(schema.news.title, `%${query}%`) : undefined;

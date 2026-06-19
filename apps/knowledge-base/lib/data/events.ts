@@ -8,7 +8,7 @@ import { unaccentIlike } from "@/lib/db/search";
 import { and, count, desc, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
-export type EventsSort = "title" | "updatedAt";
+export type EventsSort = "duration" | "title";
 
 interface GetEventsParams {
 	/** @default 10 */
@@ -21,7 +21,7 @@ interface GetEventsParams {
 }
 
 export async function getEvents(params: GetEventsParams) {
-	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
+	const { limit = 10, offset = 0, q, sort = "duration", dir = "desc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== "" ? unaccentIlike(schema.events.title, `%${query}%`) : undefined;
@@ -31,8 +31,8 @@ export async function getEvents(params: GetEventsParams) {
 				? schema.events.title
 				: desc(schema.events.title)
 			: dir === "asc"
-				? schema.entityVersions.updatedAt
-				: desc(schema.entityVersions.updatedAt);
+				? sql<Date>`lower(${schema.events.duration})`
+				: desc(sql<Date>`lower(${schema.events.duration})`);
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 
@@ -46,7 +46,6 @@ export async function getEvents(params: GetEventsParams) {
 				slug: schema.entities.slug,
 				summary: schema.events.summary,
 				title: schema.events.title,
-				updatedAt: schema.entityVersions.updatedAt,
 				website: schema.events.website,
 				isPublished: sql<boolean>`${schema.documentLifecycle.publishedId} IS NOT NULL`,
 				hasDraft: schema.documentLifecycle.hasDraftChanges,
@@ -87,7 +86,6 @@ export async function getEvents(params: GetEventsParams) {
 			hasDraft: item.hasDraft,
 			summary: item.summary,
 			title: item.title,
-			updatedAt: item.updatedAt,
 			isPublished: item.isPublished,
 			website: item.website,
 		};

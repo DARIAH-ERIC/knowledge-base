@@ -44,7 +44,7 @@ interface PagesPageProps {
 		total: number;
 	};
 	q: string;
-	sort: "title" | "updatedAt";
+	sort: "publicationDate" | "title";
 }
 
 const pageSize = dashboardPageSize;
@@ -92,7 +92,7 @@ export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
 						{t("Title")}
 					</TableColumn>
 					<TableColumn>{t("Summary")}</TableColumn>
-					<TableColumn allowsSorting={true} id="updatedAt">
+					<TableColumn allowsSorting={true} id="publicationDate">
 						{t("Publication date")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>

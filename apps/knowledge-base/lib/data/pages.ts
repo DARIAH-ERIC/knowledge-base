@@ -8,7 +8,7 @@ import { unaccentIlike } from "@/lib/db/search";
 import { and, count, desc, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
-export type PagesSort = "title" | "updatedAt";
+export type PagesSort = "publicationDate" | "title";
 
 interface GetPagesParams {
 	/** @default 10 */
@@ -21,7 +21,7 @@ interface GetPagesParams {
 }
 
 export async function getPages(params: GetPagesParams) {
-	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
+	const { limit = 10, offset = 0, q, sort = "publicationDate", dir = "desc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== "" ? unaccentIlike(schema.pages.title, `%${query}%`) : undefined;
