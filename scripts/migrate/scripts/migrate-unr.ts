@@ -68,9 +68,22 @@ interface ReportComment {
 	software: string;
 }
 
+type ReportScreenCommentKey = (typeof schema.reportScreenCommentKeyEnum)[number];
+
+const COUNTRY_REPORT_COMMENT_SCREEN_KEYS = {
+	comments: "confirm",
+	contributions: "contributors",
+	institutions: "institutions",
+	eventReports: "events",
+	outreach: "social-media",
+	projectFundingLeverages: "projects",
+	publications: "publications",
+	serviceReports: "services",
+	software: "software",
+} as const satisfies Record<keyof ReportComment, ReportScreenCommentKey>;
+
 type ServiceSizeThreshold = Record<string, number>;
 
-type ReportScreenCommentKey = (typeof schema.reportScreenCommentKeyEnum)[number];
 type SocialMediaType = (typeof schema.socialMediaTypesEnum)[number];
 type ReportingCampaignContributionAmountRoleType =
 	(typeof schema.reportingCampaignContributionRoleEnum)[number];
@@ -1613,35 +1626,19 @@ async function main() {
 			});
 
 			if (report.comments != null) {
-				for (const [k, v] of Object.entries(report.comments as ReportComment)) {
-					let screenKey = k;
-					switch (k) {
-						case "outreach": {
-							screenKey = "social-media";
-							break;
-						}
-						case "contributions": {
-							screenKey = "contributors";
-							break;
-						}
-						case "eventReports": {
-							screenKey = "events";
-							break;
-						}
-						case "serviceReports": {
-							screenKey = "services";
-							break;
-						}
-						case "projectFundingLeverages": {
-							screenKey = "projects";
-						}
+				const comments = report.comments as Partial<ReportComment>;
+
+				for (const key of Object.keys(comments) as Array<keyof ReportComment>) {
+					const comment = comments[key];
+					if (comment == null) {
+						continue;
 					}
 
 					await tx.insert(schema.reportScreenComments).values({
-						comment: generateJSON(String(v), [StarterKit]),
+						comment: generateJSON(comment, [StarterKit]),
 						reportType: "country",
-						reportId: report.id,
-						screenKey: screenKey as ReportScreenCommentKey,
+						reportId: countryReportId.id,
+						screenKey: COUNTRY_REPORT_COMMENT_SCREEN_KEYS[key],
 						createdAt: report.createdAt,
 						updatedAt: report.updatedAt,
 					});
@@ -1803,11 +1800,17 @@ async function main() {
 			}
 
 			if (workingGroupReport.comments != null) {
-				for (const comment of Object.values(workingGroupReport.comments as ReportComment)) {
+				const comments = Object.values(workingGroupReport.comments as Record<string, unknown>);
+				assert(comments.length <= 1, "Expected one comment per working group report.");
+
+				const [comment] = comments;
+				if (comment != null) {
+					assert(typeof comment === "string", "Expected working group report comment to be text.");
+
 					await tx.insert(schema.reportScreenComments).values({
-						comment: generateJSON(String(comment), [StarterKit]),
+						comment: generateJSON(comment, [StarterKit]),
 						reportType: "working_group",
-						reportId: workingGroupReport.id,
+						reportId: kbWorkingGroupReport.id,
 						screenKey: "data",
 						createdAt: workingGroupReport.createdAt,
 						updatedAt: workingGroupReport.updatedAt,
