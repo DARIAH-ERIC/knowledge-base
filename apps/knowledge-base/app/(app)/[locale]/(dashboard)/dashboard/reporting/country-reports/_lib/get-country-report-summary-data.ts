@@ -8,15 +8,13 @@ import {
 	getOperationalCostServiceSize,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/calculate-operational-cost";
 import { type Action, can } from "@/lib/auth/permissions";
+import {
+	type CountryReportInstitutionSummaryItem,
+	groupCountryReportInstitutionSummaryRows,
+} from "@/lib/data/country-report-institutions";
 import { classifyCompensationRole } from "@/lib/data/report-contributions";
 import { db } from "@/lib/db";
 import { alias, eq, sql } from "@/lib/db/sql";
-
-const institutionRepresentationTypeOrder: Readonly<Record<string, number>> = {
-	is_national_representative_institution_in: 0,
-	is_national_coordinating_institution_in: 1,
-	is_partner_institution_of: 2,
-};
 
 export interface CountryReportSummaryData {
 	operationalCost: OperationalCost;
@@ -27,12 +25,7 @@ export interface CountryReportSummaryData {
 	veryLargeEvents: number | null;
 	dariahCommissionedEvent: string | null;
 	reusableOutcomes: string | null;
-	institutions: Array<{
-		id: string;
-		name: string;
-		acronym: string | null;
-		representationType: string | null;
-	}>;
+	institutions: Array<CountryReportInstitutionSummaryItem>;
 	contributions: Array<{
 		id: string;
 		personName: string;
@@ -113,7 +106,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			},
 			country: { columns: { name: true } },
 			institutions: {
-				columns: { id: true, representationType: true },
+				columns: { id: true, organisationalUnitDocumentId: true, representationType: true },
 				with: {
 					organisationalUnit: { columns: { name: true, acronym: true } },
 				},
@@ -267,23 +260,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 		veryLargeEvents: report.veryLargeEvents,
 		dariahCommissionedEvent: report.dariahCommissionedEvent,
 		reusableOutcomes: report.reusableOutcomes,
-		institutions: report.institutions
-			.map((i) => {
-				return {
-					id: i.id,
-					name: i.organisationalUnit?.name ?? "",
-					acronym: i.organisationalUnit?.acronym ?? null,
-					representationType: i.representationType,
-				};
-			})
-			.toSorted((left, right) => {
-				const leftTypeOrder =
-					institutionRepresentationTypeOrder[left.representationType ?? ""] ?? Number.MAX_VALUE;
-				const rightTypeOrder =
-					institutionRepresentationTypeOrder[right.representationType ?? ""] ?? Number.MAX_VALUE;
-
-				return leftTypeOrder - rightTypeOrder || left.name.localeCompare(right.name);
-			}),
+		institutions: groupCountryReportInstitutionSummaryRows(report.institutions),
 		contributions: reportContributions,
 		socialMediaAccounts: Array.from(socialMediaMap.entries()).map(([socialMediaId, data]) => {
 			return { socialMediaId, ...data };

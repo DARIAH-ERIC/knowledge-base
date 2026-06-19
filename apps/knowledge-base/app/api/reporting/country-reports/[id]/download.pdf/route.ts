@@ -98,9 +98,9 @@ export async function GET(
 						report.summary.institutions.length > 0
 							? report.summary.institutions.map((i) => {
 									const label = i.acronym == null ? i.name : `${i.name} (${i.acronym})`;
-									return i.representationType == null
-										? label
-										: `${label} - ${formatRole(i.representationType)}`;
+									const representationTypes = i.representationTypes.map(formatRole).join(", ");
+
+									return representationTypes === "" ? label : `${label} - ${representationTypes}`;
 								})
 							: ["No institutions recorded."],
 				},

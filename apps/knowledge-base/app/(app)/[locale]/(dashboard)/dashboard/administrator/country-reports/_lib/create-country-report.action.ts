@@ -81,12 +81,14 @@ export const createCountryReportAction = createMutationAction({
 
 			if (partners.length > 0) {
 				await tx.insert(schema.countryReportInstitutions).values(
-					partners.map((partner) => {
-						return {
-							countryReportId: created.id,
-							organisationalUnitDocumentId: partner.institutionDocumentId,
-							representationType: partner.representationType,
-						};
+					partners.flatMap((partner) => {
+						return partner.representationTypes.map((representationType) => {
+							return {
+								countryReportId: created.id,
+								organisationalUnitDocumentId: partner.institutionDocumentId,
+								representationType,
+							};
+						});
 					}),
 				);
 			}

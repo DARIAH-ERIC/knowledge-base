@@ -7,7 +7,11 @@ import { CountryReportInstitutionsForm } from "@/app/(app)/[locale]/(dashboard)/
 import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { refreshCountryReportInstitutionsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/refresh-country-report-institutions.action";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getCurrentPartnerInstitutions } from "@/lib/data/unit-relations";
+import {
+	type CountryReportInstitutionRepresentation,
+	getCurrentPartnerInstitutions,
+	sortCountryReportInstitutionRepresentationTypes,
+} from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
 import { inArray } from "@/lib/db/sql";
 
@@ -79,21 +83,49 @@ export async function CountryReportInstitutionsScreen(
 			: [];
 	const slugByDocumentId = new Map(slugRows.map((row) => [row.id, row.slug] as const));
 
-	const institutions = report.institutions.map((institution) => {
-		const current = currentByDocumentId.get(institution.organisationalUnitDocumentId) ?? null;
+	const institutionsByDocumentId = new Map<
+		string,
+		{
+			id: string;
+			documentId: string;
+			name: string;
+			acronym: string | null;
+			slug: string | null;
+			representationTypes: Array<CountryReportInstitutionRepresentation>;
+			isCurrent: boolean;
+			currentRepresentationTypes: Array<CountryReportInstitutionRepresentation>;
+		}
+	>();
 
-		return {
-			id: institution.id,
-			documentId: institution.organisationalUnitDocumentId,
-			name: institution.organisationalUnit?.name ?? current?.name ?? "",
-			acronym: institution.organisationalUnit?.acronym ?? current?.acronym ?? null,
-			slug: slugByDocumentId.get(institution.organisationalUnitDocumentId) ?? current?.slug ?? null,
-			// Frozen at capture; may be null for rows captured before representation type was tracked.
-			representationType: institution.representationType,
-			isCurrent: current != null,
-			currentRepresentationType: current?.representationType ?? null,
-		};
-	});
+	for (const institution of report.institutions) {
+		const current = currentByDocumentId.get(institution.organisationalUnitDocumentId) ?? null;
+		const existing = institutionsByDocumentId.get(institution.organisationalUnitDocumentId);
+
+		if (existing == null) {
+			institutionsByDocumentId.set(institution.organisationalUnitDocumentId, {
+				id: institution.id,
+				documentId: institution.organisationalUnitDocumentId,
+				name: institution.organisationalUnit?.name ?? current?.name ?? "",
+				acronym: institution.organisationalUnit?.acronym ?? current?.acronym ?? null,
+				slug:
+					slugByDocumentId.get(institution.organisationalUnitDocumentId) ?? current?.slug ?? null,
+				// Frozen at capture; may be empty for rows captured before representation type was tracked.
+				representationTypes:
+					institution.representationType == null
+						? []
+						: sortCountryReportInstitutionRepresentationTypes([institution.representationType]),
+				isCurrent: current != null,
+				currentRepresentationTypes: current?.representationTypes ?? [],
+			});
+		} else if (institution.representationType != null) {
+			existing.representationTypes = sortCountryReportInstitutionRepresentationTypes([
+				...existing.representationTypes,
+				institution.representationType,
+			]);
+		}
+	}
+
+	const institutions = Array.from(institutionsByDocumentId.values());
 
 	const snapshotDocumentIdSet = new Set(snapshotDocumentIds);
 	const missing = currentPartners.filter(

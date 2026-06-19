@@ -47,6 +47,14 @@ function formatInstitutionRelationType(representationType: string): string {
 	}
 }
 
+function formatInstitutionRelationTypes(representationTypes: ReadonlyArray<string>): string | null {
+	if (representationTypes.length === 0) {
+		return null;
+	}
+
+	return representationTypes.map(formatInstitutionRelationType).join(", ");
+}
+
 const eurFormatter = new Intl.NumberFormat("en", {
 	style: "currency",
 	currency: "EUR",
@@ -219,21 +227,25 @@ export async function CountryReportSummary(
 					</dl>
 					{data.institutions.length > 0 && (
 						<ul className="divide-y rounded-md border">
-							{data.institutions.map((institution) => (
-								<li key={institution.id} className="px-4 py-3">
-									<p className="text-sm font-medium text-fg">
-										{institution.name}
-										{institution.acronym != null && (
-											<span className="ms-2 text-muted-fg">({institution.acronym})</span>
-										)}
-									</p>
-									{institution.representationType != null && (
-										<p className="text-xs text-muted-fg">
-											{formatInstitutionRelationType(institution.representationType)}
+							{data.institutions.map((institution) => {
+								const representationTypes = formatInstitutionRelationTypes(
+									institution.representationTypes,
+								);
+
+								return (
+									<li key={institution.id} className="px-4 py-3">
+										<p className="text-sm font-medium text-fg">
+											{institution.name}
+											{institution.acronym != null && (
+												<span className="ms-2 text-muted-fg">({institution.acronym})</span>
+											)}
 										</p>
-									)}
-								</li>
-							))}
+										{representationTypes != null && (
+											<p className="text-xs text-muted-fg">{representationTypes}</p>
+										)}
+									</li>
+								);
+							})}
 						</ul>
 					)}
 				</ReportSummarySection>
