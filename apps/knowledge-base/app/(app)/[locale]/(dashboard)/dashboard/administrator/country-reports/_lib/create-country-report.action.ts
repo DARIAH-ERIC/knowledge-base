@@ -6,6 +6,7 @@ import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 
 import { CreateCountryReportActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/create-country-report.schema";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import {
 	getCarriedOverManualContributions,
 	getSnapshotContributionCandidates,
@@ -16,6 +17,7 @@ import {
 } from "@/lib/data/report-social-media";
 import { getCurrentPartnerInstitutions } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
+import { and, eq, sql } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 export const createCountryReportAction = createMutationAction({
@@ -139,6 +141,49 @@ export const createCountryReportAction = createMutationAction({
 
 			if (contributionRows.length > 0) {
 				await tx.insert(schema.countryReportContributions).values(contributionRows);
+			}
+
+			// Project contributions report the total lifetime funding amount, so carry both the project
+			// and amount forward while the currently published project remains active in this campaign.
+			if (previousReport != null) {
+				const projectContributions = await tx
+					.select({
+						amountEuros: schema.countryReportProjectContributions.amountEuros,
+						projectDocumentId: schema.countryReportProjectContributions.projectDocumentId,
+					})
+					.from(schema.countryReportProjectContributions)
+					.innerJoin(
+						schema.entityVersions,
+						eq(
+							schema.entityVersions.entityId,
+							schema.countryReportProjectContributions.projectDocumentId,
+						),
+					)
+					.innerJoin(
+						schema.entityStatus,
+						eq(schema.entityStatus.id, schema.entityVersions.statusId),
+					)
+					.innerJoin(schema.projects, eq(schema.projects.id, schema.entityVersions.id))
+					.where(
+						and(
+							eq(schema.countryReportProjectContributions.countryReportId, previousReport.id),
+							publishedEntityVersionWhere(),
+							sql`
+								${schema.projects.duration} && tstzrange (
+									MAKE_DATE(${campaign.year}, 1, 1)::TIMESTAMPTZ,
+									MAKE_DATE(${campaign.year + 1}, 1, 1)::TIMESTAMPTZ
+								)
+							`,
+						),
+					);
+
+				if (projectContributions.length > 0) {
+					await tx.insert(schema.countryReportProjectContributions).values(
+						projectContributions.map((contribution) => {
+							return { countryReportId: created.id, ...contribution };
+						}),
+					);
+				}
 			}
 
 			// Seed social media from both last year's report and the accounts currently linked to the

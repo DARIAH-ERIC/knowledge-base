@@ -3037,12 +3037,12 @@ msgstr "country report"
 msgid "oJDf5Q"
 msgstr "Could not delete country report. Please try again."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/create-country-report.action.ts:38
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/create-country-report.action.ts:40
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_lib/create-working-group-report.action.ts:30
 msgid "hyJ6PM"
 msgstr "Only open campaigns can be used for new reports."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/create-country-report.action.ts:50
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/create-country-report.action.ts:52
 msgid "4tqO+Q"
 msgstr "A report for this country and campaign already exists."
 
@@ -4939,16 +4939,13 @@ msgid "lkXX+k"
 msgstr "Manage projects"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx:74
-msgid "/0TOL5"
-msgstr "Amount"
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx:122
+msgid "wX34Ef"
+msgstr "Total funding amount (EUR)"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx:97
 msgid "tXaLlr"
 msgstr "Add project contribution"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx:122
-msgid "zatO3J"
-msgstr "Amount (EUR)"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx:144
 msgid "OPeXEU"
