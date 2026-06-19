@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { unaccentIlike } from "@/lib/db/search";
 import { and, count, desc, eq, sql } from "@/lib/db/sql";
 
-export type FundingCallsSort = "title" | "updatedAt";
+export type FundingCallsSort = "duration" | "title";
 
 interface GetFundingCallsParams {
 	/** @default 10 */
@@ -19,7 +19,7 @@ interface GetFundingCallsParams {
 }
 
 export async function getFundingCalls(params: GetFundingCallsParams) {
-	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
+	const { limit = 10, offset = 0, q, sort = "duration", dir = "desc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
@@ -31,8 +31,8 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 				? schema.fundingCalls.title
 				: desc(schema.fundingCalls.title)
 			: dir === "asc"
-				? schema.entityVersions.updatedAt
-				: desc(schema.entityVersions.updatedAt);
+				? sql<Date>`lower(${schema.fundingCalls.duration})`
+				: desc(sql<Date>`lower(${schema.fundingCalls.duration})`);
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 
@@ -48,7 +48,6 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 				isPublished: sql<boolean>`${schema.documentLifecycle.publishedId} IS NOT NULL`,
 				hasDraft: schema.documentLifecycle.hasDraftChanges,
 				status: schema.entityStatus.type,
-				updatedAt: schema.entityVersions.updatedAt,
 			})
 			.from(schema.fundingCalls)
 			.innerJoin(schema.entityVersions, eq(schema.fundingCalls.id, schema.entityVersions.id))
@@ -86,7 +85,6 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 			title: item.title,
 			isPublished: item.isPublished,
 			status: item.status,
-			updatedAt: item.updatedAt,
 		};
 	});
 

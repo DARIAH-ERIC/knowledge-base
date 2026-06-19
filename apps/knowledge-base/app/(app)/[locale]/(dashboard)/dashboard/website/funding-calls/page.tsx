@@ -17,8 +17,8 @@ import {
 interface DashboardWebsiteFundingCallsPageProps extends PageProps<"/[locale]/dashboard/website/funding-calls"> {}
 
 const pageSize = dashboardPageSize;
-const defaultSort = "updatedAt" as const;
-const validSorts = ["title", "updatedAt"] as const;
+const defaultSort = "duration" as const;
+const validSorts = ["duration", "title"] as const;
 
 function createListHref(
 	q: string,

@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { unaccentIlike } from "@/lib/db/search";
 import { and, count, desc, eq, sql } from "@/lib/db/sql";
 
-export type OpportunitiesSort = "title" | "source" | "updatedAt";
+export type OpportunitiesSort = "duration" | "source" | "title";
 
 interface GetOpportunitiesParams {
 	/** @default 10 */
@@ -19,7 +19,7 @@ interface GetOpportunitiesParams {
 }
 
 export async function getOpportunities(params: GetOpportunitiesParams) {
-	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
+	const { limit = 10, offset = 0, q, sort = "duration", dir = "desc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
@@ -35,8 +35,8 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 					? schema.opportunitySources.source
 					: desc(schema.opportunitySources.source)
 				: dir === "asc"
-					? schema.entityVersions.updatedAt
-					: desc(schema.entityVersions.updatedAt);
+					? sql<Date>`lower(${schema.opportunities.duration})`
+					: desc(sql<Date>`lower(${schema.opportunities.duration})`);
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 
@@ -51,7 +51,6 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 				slug: schema.entities.slug,
 				summary: schema.opportunities.summary,
 				title: schema.opportunities.title,
-				updatedAt: schema.entityVersions.updatedAt,
 				website: schema.opportunities.website,
 				isPublished: sql<boolean>`${schema.documentLifecycle.publishedId} IS NOT NULL`,
 				hasDraft: schema.documentLifecycle.hasDraftChanges,
@@ -100,7 +99,6 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 			hasDraft: item.hasDraft,
 			summary: item.summary,
 			title: item.title,
-			updatedAt: item.updatedAt,
 			isPublished: item.isPublished,
 			website: item.website,
 		};

@@ -39,14 +39,13 @@ interface OpportunitiesPageProps {
 				hasDraft: boolean;
 				isPublished: boolean;
 				source: Pick<schema.OpportunitySource, "id" | "source">;
-				updatedAt: schema.Entity["updatedAt"];
 			}
 		>;
 		total: number;
 	};
 	page: number;
 	q: string;
-	sort: "title" | "source" | "updatedAt";
+	sort: "duration" | "source" | "title";
 }
 
 const pageSize = dashboardPageSize;
@@ -102,9 +101,8 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 					<TableColumn allowsSorting={true} id="source">
 						{t("Source")}
 					</TableColumn>
-					<TableColumn>{t("Duration")}</TableColumn>
-					<TableColumn allowsSorting={true} id="updatedAt">
-						{t("Updated")}
+					<TableColumn allowsSorting={true} id="duration">
+						{t("Duration")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
@@ -127,7 +125,6 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 										})
 									: format.dateTime(item.duration.start, { dateStyle: "short" })}
 							</TableCell>
-							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
 									hasDraft={item.hasDraft}

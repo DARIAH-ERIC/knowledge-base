@@ -44,7 +44,7 @@ interface ImpactCaseStudiesPageProps {
 	};
 	page: number;
 	q: string;
-	sort: "title" | "updatedAt";
+	sort: "publicationDate" | "title";
 }
 
 const pageSize = dashboardPageSize;
@@ -99,7 +99,7 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 						{t("Title")}
 					</TableColumn>
 					<TableColumn>{t("Summary")}</TableColumn>
-					<TableColumn allowsSorting={true} id="updatedAt">
+					<TableColumn allowsSorting={true} id="publicationDate">
 						{t("Publication date")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>

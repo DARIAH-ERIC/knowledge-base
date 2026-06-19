@@ -8,7 +8,7 @@ import { unaccentIlike } from "@/lib/db/search";
 import { and, count, desc, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
-export type ImpactCaseStudiesSort = "title" | "updatedAt";
+export type ImpactCaseStudiesSort = "publicationDate" | "title";
 
 interface GetImpactCaseStudiesParams {
 	/** @default 10 */
@@ -21,7 +21,7 @@ interface GetImpactCaseStudiesParams {
 }
 
 export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
-	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
+	const { limit = 10, offset = 0, q, sort = "publicationDate", dir = "desc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""

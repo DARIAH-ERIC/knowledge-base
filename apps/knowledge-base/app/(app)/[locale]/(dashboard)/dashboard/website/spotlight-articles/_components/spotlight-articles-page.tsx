@@ -32,7 +32,7 @@ interface SpotlightArticlesPageProps {
 	dir: "asc" | "desc";
 	page: number;
 	q: string;
-	sort: "title" | "updatedAt";
+	sort: "publicationDate" | "title";
 	spotlightArticles: {
 		data: Array<
 			Pick<schema.SpotlightArticle, "id" | "publicationDate" | "title" | "summary"> & {
@@ -99,7 +99,7 @@ export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps
 						{t("Title")}
 					</TableColumn>
 					<TableColumn>{t("Summary")}</TableColumn>
-					<TableColumn allowsSorting={true} id="updatedAt">
+					<TableColumn allowsSorting={true} id="publicationDate">
 						{t("Publication date")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
