@@ -204,14 +204,15 @@ describe("calculateOperationalCost", () => {
 		);
 
 		const byKey = new Map(result.lines.map((line) => [line.key, line]));
-		expect(byKey.get("service-a")?.unitAmount).toBe(6875); // small
-		expect(byKey.get("service-a")?.bucket).toBe("small");
-		expect(byKey.get("service-a")?.showQuantity).toBe(false);
-		expect(byKey.get("service-b")?.unitAmount).toBe(20625); // medium
-		expect(byKey.get("service-b")?.bucket).toBe("medium");
-		expect(byKey.get("service-c")?.unitAmount).toBe(41250); // large
-		expect(byKey.get("service-c")?.bucket).toBe("large");
-		expect(byKey.get("service-d")?.unitAmount).toBe(6875); // small (no visits)
+		expect(byKey.get("services-small")).toMatchObject({
+			label: "Small services",
+			quantity: 2,
+			showQuantity: true,
+			unitAmount: 6875,
+			total: 13750,
+		});
+		expect(byKey.get("services-medium")).toMatchObject({ quantity: 1, unitAmount: 20625 });
+		expect(byKey.get("services-large")).toMatchObject({ quantity: 1, unitAmount: 41250 });
 	});
 
 	it("counts core services with the core lump sum regardless of visits", () => {
@@ -235,10 +236,8 @@ describe("calculateOperationalCost", () => {
 		);
 
 		const byKey = new Map(result.lines.map((line) => [line.key, line]));
-		expect(byKey.get("service-core-low-visits")?.unitAmount).toBe(82500);
-		expect(byKey.get("service-core-low-visits")?.bucket).toBe("core");
-		expect(byKey.get("service-core-low-visits")?.showQuantity).toBe(false);
-		expect(byKey.get("service-community-high-visits")?.unitAmount).toBe(41250);
+		expect(byKey.get("services-core")).toMatchObject({ quantity: 1, unitAmount: 82500 });
+		expect(byKey.get("services-large")).toMatchObject({ quantity: 1, unitAmount: 41250 });
 		expect(result.total).toBe(82500 + 41250);
 	});
 

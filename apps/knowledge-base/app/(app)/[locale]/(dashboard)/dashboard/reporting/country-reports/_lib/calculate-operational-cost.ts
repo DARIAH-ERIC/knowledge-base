@@ -58,6 +58,31 @@ export interface OperationalCostInput {
 	countryDocumentId: string;
 }
 
+type Service = OperationalCostInput["services"][number];
+type ServiceSize = OperationalCostCampaignData["serviceSizes"][number];
+
+export function getOperationalCostServiceSize(
+	service: Service,
+	serviceSizes: Array<ServiceSize>,
+): ServiceSize | undefined {
+	if (service.serviceType === "core") {
+		return serviceSizes.find((candidate) => candidate.serviceSize === "core");
+	}
+
+	const visits = service.kpis.find((kpi) => kpi.kpi === "visits")?.value ?? 0;
+
+	return serviceSizes
+		.filter((candidate) => candidate.serviceSize !== "core")
+		.toSorted((left, right) => (right.visitsThreshold ?? 0) - (left.visitsThreshold ?? 0))
+		.find((candidate) => visits >= (candidate.visitsThreshold ?? 0));
+}
+
+function formatServiceSize(serviceSize: string): string {
+	return serviceSize
+		.replaceAll("_", " ")
+		.replaceAll(/\b\w/g, (character) => character.toUpperCase());
+}
+
 function addOperationalCostLine(
 	lines: Array<OperationalCostLine>,
 	key: string,
@@ -178,24 +203,26 @@ export function calculateOperationalCost(input: OperationalCostInput): Operation
 		{ showQuantity: false },
 	);
 
-	const visitBasedServiceSizeAmounts = input.campaign.serviceSizes
-		.filter((candidate) => candidate.serviceSize !== "core")
-		.toSorted((left, right) => (right.visitsThreshold ?? 0) - (left.visitsThreshold ?? 0));
+	const serviceCountsBySize = new Map<string, { quantity: number; size: ServiceSize }>();
 	for (const service of input.services) {
-		const visits = service.kpis.find((kpi) => kpi.kpi === "visits")?.value ?? 0;
-		const size =
-			service.serviceType === "core"
-				? input.campaign.serviceSizes.find((candidate) => candidate.serviceSize === "core")
-				: visitBasedServiceSizeAmounts.find(
-						(candidate) => visits >= (candidate.visitsThreshold ?? 0),
-					);
+		const size = getOperationalCostServiceSize(service, input.campaign.serviceSizes);
+		if (size == null) {
+			continue;
+		}
+
+		const existing = serviceCountsBySize.get(size.serviceSize);
+		serviceCountsBySize.set(size.serviceSize, {
+			quantity: (existing?.quantity ?? 0) + 1,
+			size,
+		});
+	}
+	for (const { quantity, size } of serviceCountsBySize.values()) {
 		addOperationalCostLine(
 			lines,
-			`service-${service.serviceId}`,
-			`Service: ${service.name}`,
-			size == null ? 0 : 1,
-			size?.amount,
-			{ bucket: size?.serviceSize, showQuantity: false },
+			`services-${size.serviceSize}`,
+			`${formatServiceSize(size.serviceSize)} services`,
+			quantity,
+			size.amount,
 		);
 	}
 
