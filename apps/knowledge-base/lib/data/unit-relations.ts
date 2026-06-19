@@ -1,6 +1,11 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { relationOptionsPageSize } from "@/lib/constants/relations";
+import {
+	type CountryReportInstitutionRepresentation,
+	countryReportInstitutionRepresentationPrecedence,
+	sortCountryReportInstitutionRepresentationTypes,
+} from "@/lib/data/country-report-institutions";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import type { OrganisationalUnitType } from "@/lib/data/organisational-units";
 import { db } from "@/lib/db";
@@ -466,8 +471,8 @@ export type CountryEricInstitution = Awaited<
 /** Slug of the DARIAH ERIC organisational unit. Relations to ERIC are resolved against this. */
 const dariahEricSlug = "dariah-eu";
 
-export type CountryReportInstitutionRepresentation =
-	(typeof schema.countryReportInstitutionRepresentationEnum)[number];
+export type { CountryReportInstitutionRepresentation };
+export { sortCountryReportInstitutionRepresentationTypes };
 
 /**
  * Resolve the DARIAH ERIC organisational unit's document id (`entities.id`), explicitly by its
@@ -488,13 +493,12 @@ export async function getDariahEricDocumentId(): Promise<string | null> {
  * The institutions that count as current partner institutions of `countryDocumentId` for the given
  * reporting `year`: institutions `is_located_in` the country that also hold an `institution ->
  * eric` representation relation whose duration overlaps the reporting calendar year. One row per
- * institution — if it holds several representation relations that year, the most significant is
- * kept (coordinating > representative > partner > cooperating). Used to capture the country-report
- * institutions snapshot.
+ * institution with all distinct representation relations that year. Used to capture the
+ * country-report institutions snapshot.
  */
 export interface CurrentPartnerInstitution {
 	institutionDocumentId: string;
-	representationType: CountryReportInstitutionRepresentation;
+	representationTypes: Array<CountryReportInstitutionRepresentation>;
 	name: string;
 	acronym: string | null;
 	slug: string;
@@ -517,9 +521,9 @@ export async function getCurrentPartnerInstitutions(
 
 	const representationPrecedence = sql`
 		CASE ${ericStatus.status}
-			WHEN 'is_national_coordinating_institution_in' THEN 1
-			WHEN 'is_national_representative_institution_in' THEN 2
-			WHEN 'is_partner_institution_of' THEN 3
+			WHEN 'is_national_coordinating_institution_in' THEN ${countryReportInstitutionRepresentationPrecedence.is_national_coordinating_institution_in}
+			WHEN 'is_national_representative_institution_in' THEN ${countryReportInstitutionRepresentationPrecedence.is_national_representative_institution_in}
+			WHEN 'is_partner_institution_of' THEN ${countryReportInstitutionRepresentationPrecedence.is_partner_institution_of}
 			ELSE 4
 		END
 	`;
@@ -564,17 +568,21 @@ export async function getCurrentPartnerInstitutions(
 		)
 		.orderBy(representationPrecedence, schema.organisationalUnits.name);
 
-	// One row per institution; the precedence ordering keeps the most significant representation.
 	const byInstitution = new Map<string, CurrentPartnerInstitution>();
 	for (const row of rows) {
-		if (!byInstitution.has(row.institutionDocumentId)) {
+		const representationType = row.representationType as CountryReportInstitutionRepresentation;
+		const existing = byInstitution.get(row.institutionDocumentId);
+
+		if (existing == null) {
 			byInstitution.set(row.institutionDocumentId, {
 				institutionDocumentId: row.institutionDocumentId,
-				representationType: row.representationType as CountryReportInstitutionRepresentation,
+				representationTypes: [representationType],
 				name: row.name,
 				acronym: row.acronym,
 				slug: row.slug,
 			});
+		} else if (!existing.representationTypes.includes(representationType)) {
+			existing.representationTypes.push(representationType);
 		}
 	}
 

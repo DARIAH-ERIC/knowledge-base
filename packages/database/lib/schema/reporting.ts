@@ -510,7 +510,9 @@ export const countryReportInstitutions = p.snakeCase.table(
 		}),
 	},
 	(t) => [
-		p.unique().on(t.countryReportId, t.organisationalUnitDocumentId),
+		p
+			.unique("country_report_institutions_report_unit_document_type_unique")
+			.on(t.countryReportId, t.organisationalUnitDocumentId, t.representationType),
 		// A CHECK only fails on FALSE, so NULL (legacy rows) passes.
 		p.check(
 			"country_report_institutions_representation_type_enum_check",

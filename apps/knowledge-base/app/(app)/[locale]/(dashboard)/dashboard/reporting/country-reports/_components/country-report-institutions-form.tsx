@@ -19,12 +19,12 @@ interface ListedInstitution {
 	name: string;
 	acronym: string | null;
 	slug: string | null;
-	/** Frozen at capture; null for rows captured before representation type was tracked. */
-	representationType: CountryReportInstitutionRepresentation | null;
+	/** Frozen at capture; empty for rows captured before representation type was tracked. */
+	representationTypes: Array<CountryReportInstitutionRepresentation>;
 	/** Whether the institution is still a current partner of the country for the reporting year. */
 	isCurrent: boolean;
-	/** The institution's current representation, if it is still a partner. */
-	currentRepresentationType: CountryReportInstitutionRepresentation | null;
+	/** The institution's current representations, if it is still a partner. */
+	currentRepresentationTypes: Array<CountryReportInstitutionRepresentation>;
 }
 
 interface MissingInstitution {
@@ -32,7 +32,7 @@ interface MissingInstitution {
 	name: string;
 	acronym: string | null;
 	slug: string;
-	representationType: CountryReportInstitutionRepresentation;
+	representationTypes: Array<CountryReportInstitutionRepresentation>;
 }
 
 interface CountryReportInstitutionsFormProps {
@@ -75,6 +75,13 @@ function useRepresentationLabel(): (
 
 function institutionLabel(name: string, acronym: string | null): string {
 	return acronym == null ? name : `${name} (${acronym})`;
+}
+
+function areRepresentationTypesEqual(
+	left: ReadonlyArray<CountryReportInstitutionRepresentation>,
+	right: ReadonlyArray<CountryReportInstitutionRepresentation>,
+): boolean {
+	return left.length === right.length && left.every((type, index) => type === right[index]);
 }
 
 export function CountryReportInstitutionsForm(
@@ -121,10 +128,15 @@ export function CountryReportInstitutionsForm(
 			{institutions.length > 0 && (
 				<ul className="divide-y divide-border rounded-md border">
 					{institutions.map((institution) => {
-						const frozenLabel = representationLabel(institution.representationType);
 						const changed =
 							institution.isCurrent &&
-							institution.currentRepresentationType !== institution.representationType;
+							!areRepresentationTypesEqual(
+								institution.representationTypes,
+								institution.currentRepresentationTypes,
+							);
+						const currentLabels = institution.currentRepresentationTypes
+							.map((type) => representationLabel(type))
+							.filter((label) => label != null);
 
 						return (
 							<li
@@ -136,15 +148,22 @@ export function CountryReportInstitutionsForm(
 										{institutionLabel(institution.name, institution.acronym)}
 									</p>
 									<div className="flex flex-wrap items-center gap-2">
-										{frozenLabel != null && <Badge intent="secondary">{frozenLabel}</Badge>}
+										{institution.representationTypes.map((type) => {
+											const label = representationLabel(type);
+
+											return label == null ? null : (
+												<Badge key={type} intent="secondary">
+													{label}
+												</Badge>
+											);
+										})}
 										{!institution.isCurrent && (
 											<Badge intent="warning">{t("No longer a current partner")}</Badge>
 										)}
 										{changed && (
 											<Badge intent="warning">
 												{t("Representation changed to {role}", {
-													role:
-														representationLabel(institution.currentRepresentationType) ?? t("none"),
+													role: currentLabels.length > 0 ? currentLabels.join(", ") : t("none"),
 												})}
 											</Badge>
 										)}
@@ -183,9 +202,15 @@ export function CountryReportInstitutionsForm(
 										{institutionLabel(institution.name, institution.acronym)}
 									</p>
 									<div className="flex flex-wrap items-center gap-2">
-										<Badge intent="info">
-											{representationLabel(institution.representationType)}
-										</Badge>
+										{institution.representationTypes.map((type) => {
+											const label = representationLabel(type);
+
+											return label == null ? null : (
+												<Badge key={type} intent="info">
+													{label}
+												</Badge>
+											);
+										})}
 									</div>
 								</div>
 								{canManageRelations && (

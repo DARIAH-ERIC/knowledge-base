@@ -35,7 +35,11 @@ export async function GET(
 				campaign: report.campaign.year,
 				totalContributors: report.summary.totalContributors,
 				institutions: report.summary.institutions.map((i) => {
-					return { name: i.name, acronym: i.acronym, representationType: i.representationType };
+					return {
+						name: i.name,
+						acronym: i.acronym,
+						representationTypes: i.representationTypes,
+					};
 				}),
 				contributors: report.summary.contributions.map((c) => {
 					return {
