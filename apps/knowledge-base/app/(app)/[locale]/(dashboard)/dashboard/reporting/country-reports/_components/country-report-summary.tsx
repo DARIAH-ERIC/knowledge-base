@@ -30,6 +30,23 @@ function formatKpi(kpi: string): string {
 	return kpi.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
+function formatInstitutionRelationType(representationType: string): string {
+	switch (representationType) {
+		case "is_national_coordinating_institution_in": {
+			return "national_coordinating_institution";
+		}
+		case "is_national_representative_institution_in": {
+			return "national_representative_institution";
+		}
+		case "is_partner_institution_of": {
+			return "partner_institution";
+		}
+		default: {
+			return representationType;
+		}
+	}
+}
+
 const eurFormatter = new Intl.NumberFormat("en", {
 	style: "currency",
 	currency: "EUR",
@@ -67,7 +84,7 @@ export async function CountryReportSummary(
 		data.dariahCommissionedEvent != null ||
 		data.reusableOutcomes != null;
 
-	const partnerInstitutionsLabel = t("Partner institutions");
+	const institutionsLabel = t("Institutions");
 	const contributorsLabel = t("Contributors");
 	const eventsLabel = t("Events");
 	const socialMediaLabel = t("Social media");
@@ -78,7 +95,7 @@ export async function CountryReportSummary(
 	const sectionLinks: Array<ReportSummarySectionLink> = [
 		{ id: "country-report-operational-cost", label: operationalCostLabel },
 		{ id: "country-report-contributors", label: contributorsLabel },
-		{ id: "country-report-institutions", label: partnerInstitutionsLabel },
+		{ id: "country-report-institutions", label: institutionsLabel },
 	];
 
 	if (hasEvents) {
@@ -194,10 +211,10 @@ export async function CountryReportSummary(
 				<ReportSummarySection
 					contentClassName="gap-y-4"
 					id="country-report-institutions"
-					title={partnerInstitutionsLabel}
+					title={institutionsLabel}
 				>
 					<dl className="grid max-inline-xs grid-cols-[auto_1fr] gap-x-8 text-sm">
-						<dt className="text-muted-fg">{t("Total partner institutions")}</dt>
+						<dt className="text-muted-fg">{t("Number of institutions")}</dt>
 						<dd>{data.institutions.length.toLocaleString()}</dd>
 					</dl>
 					{data.institutions.length > 0 && (
@@ -210,6 +227,11 @@ export async function CountryReportSummary(
 											<span className="ms-2 text-muted-fg">({institution.acronym})</span>
 										)}
 									</p>
+									{institution.representationType != null && (
+										<p className="text-xs text-muted-fg">
+											{formatInstitutionRelationType(institution.representationType)}
+										</p>
+									)}
 								</li>
 							))}
 						</ul>
