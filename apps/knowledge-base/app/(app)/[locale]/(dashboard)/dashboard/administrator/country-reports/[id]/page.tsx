@@ -17,6 +17,11 @@ import {
 	getLiveReportResourceNavLinks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources";
 import { LiveReportResourcesErrorBoundary } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources-error-boundary";
+import {
+	ReportCommentsSection,
+	reportCommentsSectionId,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-comments-section";
+import { getReportScreenComments } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_lib/report-screen-comments";
 import { CountryReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary";
 import { getCountryReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
@@ -63,6 +68,11 @@ export default async function DashboardAdministratorCountryReportPage(
 
 	const t = await getExtracted();
 	const liveResourceNavLinks = await getLiveReportResourceNavLinks("country");
+	const comments = await getReportScreenComments("country", report.id);
+	const extraSectionLinks = [
+		...liveResourceNavLinks,
+		...(comments.length > 0 ? [{ id: reportCommentsSectionId, label: t("Comments") }] : []),
+	];
 
 	return (
 		<div>
@@ -96,7 +106,7 @@ export default async function DashboardAdministratorCountryReportPage(
 			</Header>
 
 			<div className="mbs-8 flex max-inline-4xl flex-col gap-y-10 px-(--layout-padding)">
-				<CountryReportSummary data={report.summary} extraSectionLinks={liveResourceNavLinks} />
+				<CountryReportSummary data={report.summary} extraSectionLinks={extraSectionLinks} />
 				<LiveReportResourcesErrorBoundary
 					description={t(
 						"External data snapshots could not be loaded. Stored report data is unaffected.",
@@ -106,6 +116,7 @@ export default async function DashboardAdministratorCountryReportPage(
 				>
 					<LiveReportResources reportId={id} reportKind="country" />
 				</LiveReportResourcesErrorBoundary>
+				<ReportCommentsSection comments={comments} />
 			</div>
 		</div>
 	);
