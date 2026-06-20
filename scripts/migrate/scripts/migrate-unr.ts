@@ -894,23 +894,21 @@ async function main() {
 				.where(eq(unrInstitutionToService.serviceId, service.id))
 				.limit(1);
 
-			if (institutionOfService?.institutionId == null) {
-				return;
+			if (institutionOfService?.institutionId != null) {
+				const { institutionId, role: unrRole } = institutionOfService;
+
+				const institutionOrgaUnitId = unrInstitutionIdToOrgUnitId.get(institutionId);
+				const role = organisationalUnitServiceRoles.find((r) => r.role === unrRole);
+
+				assert(institutionOrgaUnitId);
+				assert(role);
+
+				await tx.insert(schema.servicesToOrganisationalUnits).values({
+					serviceId: kbService.id,
+					organisationalUnitDocumentId: await documentIdOf(tx, institutionOrgaUnitId),
+					roleId: role.id,
+				});
 			}
-
-			const { institutionId, role: unrRole } = institutionOfService;
-
-			const institutionOrgaUnitId = unrInstitutionIdToOrgUnitId.get(institutionId);
-			const role = organisationalUnitServiceRoles.find((r) => r.role === unrRole);
-
-			assert(institutionOrgaUnitId);
-			assert(role);
-
-			await tx.insert(schema.servicesToOrganisationalUnits).values({
-				serviceId: kbService.id,
-				organisationalUnitDocumentId: await documentIdOf(tx, institutionOrgaUnitId),
-				roleId: role.id,
-			});
 
 			const [countryOfService] = await client
 				.select({ countryId: unrCountryToService.a })
@@ -918,21 +916,19 @@ async function main() {
 				.where(eq(unrCountryToService.b, service.id))
 				.limit(1);
 
-			if (countryOfService?.countryId == null) {
-				return;
+			if (countryOfService?.countryId != null) {
+				const { countryId } = countryOfService;
+
+				const countryOrgaUnitId = unrCountryIdToOrgUnitId.get(countryId);
+
+				assert(countryOrgaUnitId);
+
+				await tx.insert(schema.servicesToOrganisationalUnits).values({
+					serviceId: kbService.id,
+					organisationalUnitDocumentId: await documentIdOf(tx, countryOrgaUnitId),
+					roleId: organisationalUnitServiceRolesByRole.service_provider.id,
+				});
 			}
-
-			const { countryId } = countryOfService;
-
-			const countryOrgaUnitId = unrCountryIdToOrgUnitId.get(countryId);
-
-			assert(countryOrgaUnitId);
-
-			await tx.insert(schema.servicesToOrganisationalUnits).values({
-				serviceId: kbService.id,
-				organisationalUnitDocumentId: await documentIdOf(tx, countryOrgaUnitId),
-				roleId: organisationalUnitServiceRolesByRole.service_provider.id,
-			});
 		});
 	}
 
@@ -1225,46 +1221,44 @@ async function main() {
 				})
 				.returning({ id: schema.persons.id });
 
-			if (person.description == null) {
-				return;
+			if (person.description != null) {
+				const content = generateJSON(person.description, [StarterKit]);
+
+				const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
+					where: {
+						entityTypeId: entityTypesByType.persons.id,
+						fieldName: "biography",
+					},
+				});
+
+				assert(fieldName);
+
+				const [field] = await tx
+					.insert(schema.fields)
+					.values({
+						entityVersionId: version.id,
+						fieldNameId: fieldName.id,
+					})
+					.returning({ id: schema.fields.id });
+
+				assert(field);
+
+				const [contentBlock] = await tx
+					.insert(schema.contentBlocks)
+					.values({
+						position: 0,
+						fieldId: field.id,
+						typeId: contentBlockTypesByType.rich_text.id,
+					})
+					.returning({ id: schema.contentBlocks.id });
+
+				assert(contentBlock);
+
+				await tx.insert(schema.richTextContentBlocks).values({
+					content,
+					id: contentBlock.id,
+				});
 			}
-
-			const content = generateJSON(person.description, [StarterKit]);
-
-			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
-				where: {
-					entityTypeId: entityTypesByType.persons.id,
-					fieldName: "biography",
-				},
-			});
-
-			assert(fieldName);
-
-			const [field] = await tx
-				.insert(schema.fields)
-				.values({
-					entityVersionId: version.id,
-					fieldNameId: fieldName.id,
-				})
-				.returning({ id: schema.fields.id });
-
-			assert(field);
-
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
 
 			const institutionsOfPerson = await client
 				.select({ institutionId: unrInstitutionToPerson.a })

@@ -6,6 +6,7 @@ import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 
 import { CreateWorkingGroupReportActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_lib/create-working-group-report.schema";
+import { getWorkingGroupChairCandidates } from "@/lib/data/working-group-report-chairs";
 import { getCarriedOverWorkingGroupReportSocialMedia } from "@/lib/data/working-group-report-social-media";
 import { db } from "@/lib/db";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
@@ -65,6 +66,19 @@ export const createWorkingGroupReportAction = createMutationAction({
 		});
 
 		if (campaign != null) {
+			const chairs = await getWorkingGroupChairCandidates(input.workingGroupId, campaign.year, tx);
+			if (chairs.length > 0) {
+				await tx.insert(schema.workingGroupReportChairs).values(
+					chairs.map((chair) => {
+						return {
+							workingGroupReportId: created.id,
+							personToOrgUnitId: chair.personToOrgUnitId,
+							chairRole: chair.chairRole,
+						};
+					}),
+				);
+			}
+
 			const previousCampaign = await tx.query.reportingCampaigns.findFirst({
 				where: { year: campaign.year - 1 },
 				columns: { id: true },

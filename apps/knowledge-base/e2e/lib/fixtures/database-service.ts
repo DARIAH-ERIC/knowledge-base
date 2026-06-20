@@ -1104,6 +1104,12 @@ export class DatabaseService {
 				.delete(schema.workingGroupReportSocialMedia)
 				.where(inArray(schema.workingGroupReportSocialMedia.workingGroupReportId, wgReportIds));
 			await this.db
+				.delete(schema.workingGroupReportChairs)
+				.where(inArray(schema.workingGroupReportChairs.workingGroupReportId, wgReportIds));
+			await this.db
+				.delete(schema.reportExternalResourceSnapshots)
+				.where(inArray(schema.reportExternalResourceSnapshots.workingGroupReportId, wgReportIds));
+			await this.db
 				.delete(schema.workingGroupReports)
 				.where(inArray(schema.workingGroupReports.id, wgReportIds));
 		}
@@ -1139,6 +1145,9 @@ export class DatabaseService {
 			await this.db
 				.delete(schema.countryReportServiceKpis)
 				.where(inArray(schema.countryReportServiceKpis.countryReportId, countryReportIds));
+			await this.db
+				.delete(schema.countryReportServices)
+				.where(inArray(schema.countryReportServices.countryReportId, countryReportIds));
 			await this.db
 				.delete(schema.countryReportProjectContributions)
 				.where(inArray(schema.countryReportProjectContributions.countryReportId, countryReportIds));
@@ -1277,6 +1286,15 @@ export class DatabaseService {
 		return row;
 	}
 
+	async getCountryReportServiceIds(countryReportId: string): Promise<Array<string>> {
+		const rows = await this.db.query.countryReportServices.findMany({
+			where: { countryReportId },
+			columns: { serviceId: true },
+		});
+
+		return rows.map((row) => row.serviceId);
+	}
+
 	async createCountryReportProjectContribution(params: {
 		amountEuros: number;
 		countryReportId: string;
@@ -1336,6 +1354,9 @@ export class DatabaseService {
 			await tx
 				.delete(schema.countryReportServiceKpis)
 				.where(eq(schema.countryReportServiceKpis.countryReportId, id));
+			await tx
+				.delete(schema.countryReportServices)
+				.where(eq(schema.countryReportServices.countryReportId, id));
 			await tx
 				.delete(schema.countryReportProjectContributions)
 				.where(eq(schema.countryReportProjectContributions.countryReportId, id));
@@ -1404,7 +1425,32 @@ export class DatabaseService {
 	}
 
 	async deleteWorkingGroupReport(id: string): Promise<void> {
-		await this.db.delete(schema.workingGroupReports).where(eq(schema.workingGroupReports.id, id));
+		await this.db.transaction(async (tx) => {
+			await tx
+				.delete(schema.reportScreenComments)
+				.where(
+					and(
+						eq(schema.reportScreenComments.reportType, "working_group"),
+						eq(schema.reportScreenComments.reportId, id),
+					),
+				);
+			await tx
+				.delete(schema.workingGroupReportAnswers)
+				.where(eq(schema.workingGroupReportAnswers.workingGroupReportId, id));
+			await tx
+				.delete(schema.workingGroupReportEvents)
+				.where(eq(schema.workingGroupReportEvents.workingGroupReportId, id));
+			await tx
+				.delete(schema.workingGroupReportSocialMedia)
+				.where(eq(schema.workingGroupReportSocialMedia.workingGroupReportId, id));
+			await tx
+				.delete(schema.workingGroupReportChairs)
+				.where(eq(schema.workingGroupReportChairs.workingGroupReportId, id));
+			await tx
+				.delete(schema.reportExternalResourceSnapshots)
+				.where(eq(schema.reportExternalResourceSnapshots.workingGroupReportId, id));
+			await tx.delete(schema.workingGroupReports).where(eq(schema.workingGroupReports.id, id));
+		});
 	}
 
 	/**
@@ -2665,6 +2711,12 @@ export class DatabaseService {
 	async deleteService(serviceId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
 			await tx
+				.delete(schema.countryReportServiceKpis)
+				.where(eq(schema.countryReportServiceKpis.serviceId, serviceId));
+			await tx
+				.delete(schema.countryReportServices)
+				.where(eq(schema.countryReportServices.serviceId, serviceId));
+			await tx
 				.delete(schema.servicesToSocialMedia)
 				.where(eq(schema.servicesToSocialMedia.serviceId, serviceId));
 			await tx
@@ -2831,6 +2883,22 @@ export class DatabaseService {
 			.from(schema.documentPolicyGroups)
 			.where(sql`${schema.documentPolicyGroups.label} LIKE ${`${prefix}%`}`)
 			.orderBy(schema.documentPolicyGroups.position, schema.documentPolicyGroups.label);
+	}
+
+	async getDocumentPolicyGroupLabels(): Promise<Array<string>> {
+		const groups = await this.db
+			.select({ label: schema.documentPolicyGroups.label })
+			.from(schema.documentPolicyGroups)
+			.orderBy(schema.documentPolicyGroups.position, schema.documentPolicyGroups.label);
+
+		return groups.map((group) => group.label);
+	}
+
+	async setDocumentPolicyGroupPositions(labels: Array<string>, position: number): Promise<void> {
+		await this.db
+			.update(schema.documentPolicyGroups)
+			.set({ position })
+			.where(inArray(schema.documentPolicyGroups.label, labels));
 	}
 
 	async cleanupWorkerDocumentPolicyGroups(workerIndex: number): Promise<void> {

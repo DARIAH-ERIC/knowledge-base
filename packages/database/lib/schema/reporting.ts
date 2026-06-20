@@ -427,6 +427,35 @@ export const serviceKpiCategoryEnum = [
 	"websites_hosted",
 ] as const;
 
+/**
+ * The set of services a country report covers. Membership is snapshotted when the report is created
+ * (current live consortium services plus live services from the previous year's report), then
+ * curated independently of later consortium-relation changes. KPIs in
+ * {@link countryReportServiceKpis} hang off these (report, service) pairs.
+ */
+export const countryReportServices = p.snakeCase.table(
+	"country_report_services",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		countryReportId: p
+			.uuid("country_report_id")
+			.notNull()
+			.references(() => countryReports.id),
+		serviceId: p
+			.uuid("service_id")
+			.notNull()
+			.references(() => services.id),
+	},
+	(t) => [p.unique().on(t.countryReportId, t.serviceId)],
+);
+
+export type CountryReportService = typeof countryReportServices.$inferSelect;
+export type CountryReportServiceInput = typeof countryReportServices.$inferInsert;
+
+export const CountryReportServiceSelectSchema = createSelectSchema(countryReportServices);
+export const CountryReportServiceInsertSchema = createInsertSchema(countryReportServices);
+export const CountryReportServiceUpdateSchema = createUpdateSchema(countryReportServices);
+
 export const countryReportServiceKpis = p.snakeCase.table(
 	"country_report_service_kpis",
 	{
@@ -556,6 +585,43 @@ export const WorkingGroupReportSocialMediaInsertSchema = createInsertSchema(
 export const WorkingGroupReportSocialMediaUpdateSchema = createUpdateSchema(
 	workingGroupReportSocialMedia,
 );
+
+export const workingGroupReportChairRoleEnum = ["is_chair_of", "is_vice_chair_of"] as const;
+
+/**
+ * The chair relations captured for a working-group report. The relation identifies the person and
+ * working group; `chairRole` freezes the role at capture time so later relation edits do not change
+ * the reported state.
+ */
+export const workingGroupReportChairs = p.snakeCase.table(
+	"working_group_report_chairs",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		workingGroupReportId: p
+			.uuid("working_group_report_id")
+			.notNull()
+			.references(() => workingGroupReports.id),
+		personToOrgUnitId: p
+			.uuid("person_to_org_unit_id")
+			.notNull()
+			.references(() => personsToOrganisationalUnits.id),
+		chairRole: p.text("chair_role", { enum: workingGroupReportChairRoleEnum }).notNull(),
+	},
+	(t) => [
+		p.unique().on(t.workingGroupReportId, t.personToOrgUnitId),
+		p.check(
+			"working_group_report_chairs_role_enum_check",
+			inArray(t.chairRole, workingGroupReportChairRoleEnum),
+		),
+	],
+);
+
+export type WorkingGroupReportChair = typeof workingGroupReportChairs.$inferSelect;
+export type WorkingGroupReportChairInput = typeof workingGroupReportChairs.$inferInsert;
+
+export const WorkingGroupReportChairSelectSchema = createSelectSchema(workingGroupReportChairs);
+export const WorkingGroupReportChairInsertSchema = createInsertSchema(workingGroupReportChairs);
+export const WorkingGroupReportChairUpdateSchema = createUpdateSchema(workingGroupReportChairs);
 
 export const workingGroupEventRoleEnum = ["organiser", "presenter"] as const;
 

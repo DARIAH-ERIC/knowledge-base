@@ -33,6 +33,9 @@ export async function deleteCountryReportAction(id: string): Promise<void> {
 			.delete(schema.countryReportServiceKpis)
 			.where(eq(schema.countryReportServiceKpis.countryReportId, id));
 		await tx
+			.delete(schema.countryReportServices)
+			.where(eq(schema.countryReportServices.countryReportId, id));
+		await tx
 			.delete(schema.countryReportProjectContributions)
 			.where(eq(schema.countryReportProjectContributions.countryReportId, id));
 		await tx

@@ -662,6 +662,10 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.countryReports.id,
 				to: r.countryReportServiceKpis.countryReportId,
 			}),
+			services: r.many.countryReportServices({
+				from: r.countryReports.id,
+				to: r.countryReportServices.countryReportId,
+			}),
 			projectContributions: r.many.countryReportProjectContributions({
 				from: r.countryReports.id,
 				to: r.countryReportProjectContributions.countryReportId,
@@ -723,6 +727,18 @@ export const relations = defineRelations(schema, (r) => {
 				optional: false,
 			}),
 		},
+		countryReportServices: {
+			countryReport: r.one.countryReports({
+				from: r.countryReportServices.countryReportId,
+				to: r.countryReports.id,
+				optional: false,
+			}),
+			service: r.one.services({
+				from: r.countryReportServices.serviceId,
+				to: r.services.id,
+				optional: false,
+			}),
+		},
 		countryReportProjectContributions: {
 			countryReport: r.one.countryReports({
 				from: r.countryReportProjectContributions.countryReportId,
@@ -765,6 +781,10 @@ export const relations = defineRelations(schema, (r) => {
 			socialMedia: r.many.workingGroupReportSocialMedia({
 				from: r.workingGroupReports.id,
 				to: r.workingGroupReportSocialMedia.workingGroupReportId,
+			}),
+			chairs: r.many.workingGroupReportChairs({
+				from: r.workingGroupReports.id,
+				to: r.workingGroupReportChairs.workingGroupReportId,
 			}),
 			events: r.many.workingGroupReportEvents({
 				from: r.workingGroupReports.id,
@@ -816,6 +836,18 @@ export const relations = defineRelations(schema, (r) => {
 			socialMedia: r.one.socialMedia({
 				from: r.workingGroupReportSocialMedia.socialMediaId,
 				to: r.socialMedia.id,
+				optional: false,
+			}),
+		},
+		workingGroupReportChairs: {
+			workingGroupReport: r.one.workingGroupReports({
+				from: r.workingGroupReportChairs.workingGroupReportId,
+				to: r.workingGroupReports.id,
+				optional: false,
+			}),
+			personToOrgUnit: r.one.personsToOrganisationalUnits({
+				from: r.workingGroupReportChairs.personToOrgUnitId,
+				to: r.personsToOrganisationalUnits.id,
 				optional: false,
 			}),
 		},

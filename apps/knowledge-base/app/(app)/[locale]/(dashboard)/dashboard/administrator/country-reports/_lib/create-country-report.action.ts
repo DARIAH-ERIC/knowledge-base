@@ -12,6 +12,11 @@ import {
 	getSnapshotContributionCandidates,
 } from "@/lib/data/report-contributions";
 import {
+	getCarriedOverReportServices,
+	getCountryLiveConsortiumServices,
+	getCountryReportServiceSeedIds,
+} from "@/lib/data/report-services";
+import {
 	getCarriedOverReportSocialMedia,
 	getCountryNationalConsortiumSocialMedia,
 	getCountrySocialMedia,
@@ -116,6 +121,23 @@ export const createCountryReportAction = createMutationAction({
 				previousReport == null
 					? []
 					: await getCarriedOverManualContributions(previousReport.id, campaign.year);
+
+			// Freeze the service coverage set at report creation: current live services attached to the
+			// country's national consortium plus still-live memberships from the previous year's report.
+			// KPI values are deliberately not carried over.
+			const [consortiumServices, carriedServices] = await Promise.all([
+				getCountryLiveConsortiumServices(input.countryId, campaign.year, tx),
+				previousReport == null ? [] : getCarriedOverReportServices(previousReport.id, tx),
+			]);
+			const serviceIds = getCountryReportServiceSeedIds(consortiumServices, carriedServices);
+
+			if (serviceIds.length > 0) {
+				await tx.insert(schema.countryReportServices).values(
+					serviceIds.map((serviceId) => {
+						return { countryReportId: created.id, serviceId };
+					}),
+				);
+			}
 
 			// Dedupe by personToOrgUnitId (the report's unique key for a contribution).
 			const seen = new Set<string>();
