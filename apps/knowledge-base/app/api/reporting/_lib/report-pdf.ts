@@ -302,17 +302,21 @@ function drawRowGroup(document: Doc, rows: Array<Row>): void {
 				.stroke();
 		}
 
-		row.render(document.y);
-		document.y += row.height;
+		// `render` positions text absolutely but pdfkit still advances `document.y` past whatever it
+		// draws; capture the row top first and set `document.y` to the row's true bottom so a row
+		// consumes exactly its measured height (rather than its height plus the drawn-text advance).
+		const rowTop = document.y;
+		row.render(rowTop);
+		document.y = rowTop + row.height;
 		firstInBox = false;
 	}
 
 	closeBox(boxTop, document.y);
-	document.moveDown(0.8);
+	document.moveDown(1.1);
 }
 
 const ROW_PAD_X = 12;
-const ROW_PAD_Y = 6;
+const ROW_PAD_Y = 9;
 const ROW_SECONDARY_GAP = 2;
 
 function listItemRow(document: Doc, item: ListItem): Row {
@@ -391,12 +395,12 @@ function costSummaryRow(
 		.font("Helvetica-Bold")
 		.fontSize(valueSize)
 		.heightOfString(value, { width: valueWidth });
-	const height = 8 * 2 + Math.max(labelHeight, valueHeight);
+	const height = 11 * 2 + Math.max(labelHeight, valueHeight);
 
 	return {
 		height,
 		render: (top) => {
-			const y = top + 8;
+			const y = top + 11;
 
 			document
 				.font("Helvetica-Bold")
