@@ -16,6 +16,37 @@ import { classifyCompensationRole } from "@/lib/data/report-contributions";
 import { db } from "@/lib/db";
 import { alias, eq, sql } from "@/lib/db/sql";
 
+/**
+ * Display order for the contributors section: national coordinators, then their deputies, then
+ * governance-body members/chairs (e.g. JRC, NCC), then working-group chairs, then everything else.
+ */
+function contributorSortPriority(roleType: string, orgUnitType: string): number {
+	if (roleType === "national_coordinator") {
+		return 0;
+	}
+	if (roleType === "national_coordinator_deputy") {
+		return 1;
+	}
+	if (orgUnitType === "governance_body") {
+		return 2;
+	}
+	if (
+		(roleType === "is_chair_of" || roleType === "is_vice_chair_of") &&
+		orgUnitType === "working_group"
+	) {
+		return 3;
+	}
+	return 4;
+}
+
+/**
+ * Working-group org units read better with an explicit "Working Group" suffix in the contributors
+ * list.
+ */
+export function formatContributorOrgUnit(name: string, orgUnitType: string): string {
+	return orgUnitType === "working_group" ? `${name} Working Group` : name;
+}
+
 export interface CountryReportSummaryData {
 	operationalCost: OperationalCost;
 	totalContributors: number | null;
@@ -30,6 +61,7 @@ export interface CountryReportSummaryData {
 		id: string;
 		personName: string;
 		orgUnitName: string;
+		orgUnitType: string;
 		roleType: string;
 		/**
 		 * Effective compensation role (stored, or classified from the relation); null if not
@@ -204,16 +236,26 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 		)
 		.where(eq(schema.countryReportContributions.countryReportId, id));
 
-	const reportContributions = contributionRows.map((row) => {
-		return {
-			id: row.id,
-			personName: row.personName,
-			orgUnitName: row.orgUnitName,
-			roleType: row.roleType,
-			compensationRole:
-				row.storedRole ?? classifyCompensationRole(row.roleType, row.orgUnitSlug, row.orgUnitType),
-		};
-	});
+	const reportContributions = contributionRows
+		.map((row) => {
+			return {
+				id: row.id,
+				personName: row.personName,
+				orgUnitName: row.orgUnitName,
+				orgUnitType: row.orgUnitType,
+				roleType: row.roleType,
+				compensationRole:
+					row.storedRole ??
+					classifyCompensationRole(row.roleType, row.orgUnitSlug, row.orgUnitType),
+			};
+		})
+		.toSorted(
+			(left, right) =>
+				contributorSortPriority(left.roleType, left.orgUnitType) -
+					contributorSortPriority(right.roleType, right.orgUnitType) ||
+				left.orgUnitName.localeCompare(right.orgUnitName) ||
+				left.personName.localeCompare(right.personName),
+		);
 
 	const socialMediaMap = new Map<
 		string,

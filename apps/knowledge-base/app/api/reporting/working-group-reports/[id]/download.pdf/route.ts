@@ -176,10 +176,9 @@ export async function GET(
 
 			const pdf = await createReportPdf(
 				{
-					title: "Working group report",
 					subject: report.workingGroup.name,
 					meta: [
-						`Campaign ${report.campaign.year}`,
+						`Report ${report.campaign.year}`,
 						`Status: ${formatStatus(report.status)}`,
 						`Generated ${dateFormatter.format(new Date())}`,
 					],

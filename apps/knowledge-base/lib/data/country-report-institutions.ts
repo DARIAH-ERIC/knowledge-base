@@ -7,6 +7,19 @@ export const countryReportInstitutionRepresentationPrecedence = {
 export type CountryReportInstitutionRepresentation =
 	keyof typeof countryReportInstitutionRepresentationPrecedence;
 
+const countryReportInstitutionRepresentationLabels = {
+	is_national_coordinating_institution_in: "National coordinating institution",
+	is_national_representative_institution_in: "National representative institution",
+	is_partner_institution_of: "Partner institution",
+} as const satisfies Record<CountryReportInstitutionRepresentation, string>;
+
+/** Human-readable label for an institution's representation type. */
+export function formatCountryReportInstitutionRepresentationType(
+	type: CountryReportInstitutionRepresentation,
+): string {
+	return countryReportInstitutionRepresentationLabels[type];
+}
+
 export function sortCountryReportInstitutionRepresentationTypes(
 	types: Iterable<CountryReportInstitutionRepresentation>,
 ): Array<CountryReportInstitutionRepresentation> {

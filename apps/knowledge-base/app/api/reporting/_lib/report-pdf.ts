@@ -1,5 +1,7 @@
 import PDFDocument from "pdfkit";
 
+import { loadDariahWordmark } from "@/app/api/reporting/_lib/report-logo";
+
 /**
  * Branding shown in the top-right of the first page: a rasterized logo, or — when the unit has no
  * logo — its name (and acronym) rendered as text.
@@ -11,11 +13,9 @@ export interface ReportPdfBrand {
 }
 
 export interface ReportPdfHeader {
-	/** Report type, e.g. "Country report". */
-	title: string;
 	/** Subject of the report, e.g. the country or working-group name. */
 	subject: string;
-	/** Short facts rendered as a single muted line, e.g. ["Campaign 2025", "Status: Accepted"]. */
+	/** Short facts rendered as a single muted line, e.g. ["Report 2025", "Status: Accepted"]. */
 	meta: Array<string>;
 	brand: ReportPdfBrand;
 }
@@ -142,12 +142,21 @@ function drawDivider(document: Doc): void {
 		.stroke();
 }
 
-function drawHeader(document: Doc, header: ReportPdfHeader): void {
+function drawHeader(document: Doc, header: ReportPdfHeader, dariahLogo: Buffer | null): void {
 	const x = left(document);
 	const top = document.page.margins.top;
-	const logoSize = 42;
+	const logoRowHeight = 48;
 
-	drawDariahLogo(document, x, top, logoSize);
+	if (dariahLogo != null) {
+		try {
+			// The wordmark is wide (~3.3:1); fit it within a box and let it keep its aspect ratio.
+			document.image(dariahLogo, x, top, { fit: [180, 34] });
+		} catch {
+			drawDariahLogo(document, x, top, 36);
+		}
+	} else {
+		drawDariahLogo(document, x, top, 36);
+	}
 
 	if (header.brand.logoPng != null) {
 		const boxWidth = 160;
@@ -175,19 +184,13 @@ function drawHeader(document: Doc, header: ReportPdfHeader): void {
 			.text(label, right(document) - boxWidth, top + 4, { align: "right", width: boxWidth });
 	}
 
-	document.y = top + logoSize + 26;
+	document.y = top + logoRowHeight + 18;
 
 	document
 		.font("Helvetica-Bold")
-		.fontSize(22)
+		.fontSize(20)
 		.fillColor(COLOR.fg)
-		.text(header.title, x, document.y, { width: contentWidth(document) });
-	document.moveDown(0.2);
-	document
-		.font("Helvetica")
-		.fontSize(14)
-		.fillColor(COLOR.body)
-		.text(header.subject, { width: contentWidth(document) });
+		.text(header.subject, x, document.y, { width: contentWidth(document) });
 
 	if (header.meta.length > 0) {
 		document.moveDown(0.35);
@@ -200,11 +203,15 @@ function drawHeader(document: Doc, header: ReportPdfHeader): void {
 
 	document.moveDown(0.9);
 	drawDivider(document);
-	document.moveDown(1.2);
+	document.moveDown(0.4);
 }
 
 function drawHeading(document: Doc, text: string): void {
-	ensureSpace(document, 42);
+	// Extra breathing room above each section heading.
+	document.moveDown(1);
+	// Keep-with-next: reserve room for the heading plus the first rows of its content so a heading
+	// never sits alone at the bottom of a page.
+	ensureSpace(document, 96);
 	document
 		.font("Helvetica-Bold")
 		.fontSize(13)
@@ -305,7 +312,8 @@ function drawRowGroup(document: Doc, rows: Array<Row>): void {
 }
 
 const ROW_PAD_X = 12;
-const ROW_PAD_Y = 9;
+const ROW_PAD_Y = 6;
+const ROW_SECONDARY_GAP = 2;
 
 function listItemRow(document: Doc, item: ListItem): Row {
 	const x = left(document);
@@ -320,7 +328,7 @@ function listItemRow(document: Doc, item: ListItem): Row {
 	const secondaryHeight =
 		item.secondary == null
 			? 0
-			: 3 +
+			: ROW_SECONDARY_GAP +
 				document
 					.font("Helvetica")
 					.fontSize(9)
@@ -355,7 +363,9 @@ function listItemRow(document: Doc, item: ListItem): Row {
 					.font("Helvetica")
 					.fontSize(9)
 					.fillColor(COLOR.muted)
-					.text(item.secondary, x + ROW_PAD_X, y + primaryHeight + 3, { width: innerWidth });
+					.text(item.secondary, x + ROW_PAD_X, y + primaryHeight + ROW_SECONDARY_GAP, {
+						width: innerWidth,
+					});
 			}
 		},
 	};
@@ -381,12 +391,12 @@ function costSummaryRow(
 		.font("Helvetica-Bold")
 		.fontSize(valueSize)
 		.heightOfString(value, { width: valueWidth });
-	const height = 11 * 2 + Math.max(labelHeight, valueHeight);
+	const height = 8 * 2 + Math.max(labelHeight, valueHeight);
 
 	return {
 		height,
 		render: (top) => {
-			const y = top + 11;
+			const y = top + 8;
 
 			document
 				.font("Helvetica-Bold")
@@ -650,7 +660,8 @@ export async function createReportPdf(
 	});
 	const pdf = collectPdf(document);
 
-	drawHeader(document, header);
+	const dariahLogo = await loadDariahWordmark();
+	drawHeader(document, header, dariahLogo);
 
 	for (const block of blocks) {
 		drawBlock(document, block);
