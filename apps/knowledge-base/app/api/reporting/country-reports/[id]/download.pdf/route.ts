@@ -1,9 +1,13 @@
 import type { NextRequest } from "next/server";
 
-import { getCountryReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
+import {
+	formatContributorOrgUnit,
+	getCountryReportDataForUser,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { fetchBrandLogo } from "@/app/api/reporting/_lib/report-logo";
 import { type ReportBlock, createReportPdf } from "@/app/api/reporting/_lib/report-pdf";
 import { getCurrentSession } from "@/lib/auth/session";
+import { formatCountryReportInstitutionRepresentationType } from "@/lib/data/country-report-institutions";
 import {
 	type ReportExternalResourceSnapshot,
 	getCountryExternalResourceSnapshots,
@@ -131,7 +135,7 @@ export async function GET(
 					items: summary.contributions.map((c) => {
 						return {
 							primary: c.personName,
-							secondary: `${formatRole(c.roleType)} · ${c.orgUnitName}`,
+							secondary: `${formatRole(c.roleType)} · ${formatContributorOrgUnit(c.orgUnitName, c.orgUnitType)}`,
 						};
 					}),
 				});
@@ -143,18 +147,14 @@ export async function GET(
 
 			// Institutions
 			blocks.push({ kind: "heading", text: "Institutions" });
-			blocks.push({
-				kind: "definitionList",
-				rows: [
-					{ label: "Number of institutions", value: summary.institutions.length.toLocaleString() },
-				],
-			});
 			if (summary.institutions.length > 0) {
 				blocks.push({
 					kind: "itemList",
 					items: summary.institutions.map((i) => {
 						const primary = i.acronym == null ? i.name : `${i.name} (${i.acronym})`;
-						const representationTypes = i.representationTypes.map(formatRole).join(", ");
+						const representationTypes = i.representationTypes
+							.map(formatCountryReportInstitutionRepresentationType)
+							.join(", ");
 
 						return {
 							primary,
@@ -163,6 +163,12 @@ export async function GET(
 					}),
 				});
 			}
+			blocks.push({
+				kind: "definitionList",
+				rows: [
+					{ label: "Number of institutions", value: summary.institutions.length.toLocaleString() },
+				],
+			});
 
 			// Events
 			const hasEvents =
@@ -286,10 +292,9 @@ export async function GET(
 
 			const pdf = await createReportPdf(
 				{
-					title: "Country report",
 					subject: report.country.name,
 					meta: [
-						`Campaign ${report.campaign.year}`,
+						`Report ${report.campaign.year}`,
 						`Status: ${formatStatus(report.status)}`,
 						`Generated ${dateFormatter.format(new Date())}`,
 					],

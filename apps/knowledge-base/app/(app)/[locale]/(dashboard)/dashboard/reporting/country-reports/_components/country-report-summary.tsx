@@ -6,7 +6,14 @@ import {
 	ReportSummarySection,
 	type ReportSummarySectionLink,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-summary-section";
-import type { CountryReportSummaryData } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
+import {
+	type CountryReportSummaryData,
+	formatContributorOrgUnit,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
+import {
+	type CountryReportInstitutionRepresentation,
+	formatCountryReportInstitutionRepresentationType,
+} from "@/lib/data/country-report-institutions";
 
 export type { CountryReportSummaryData };
 
@@ -30,29 +37,16 @@ function formatKpi(kpi: string): string {
 	return kpi.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function formatInstitutionRelationType(representationType: string): string {
-	switch (representationType) {
-		case "is_national_coordinating_institution_in": {
-			return "national_coordinating_institution";
-		}
-		case "is_national_representative_institution_in": {
-			return "national_representative_institution";
-		}
-		case "is_partner_institution_of": {
-			return "partner_institution";
-		}
-		default: {
-			return representationType;
-		}
-	}
-}
-
-function formatInstitutionRelationTypes(representationTypes: ReadonlyArray<string>): string | null {
+function formatInstitutionRelationTypes(
+	representationTypes: ReadonlyArray<CountryReportInstitutionRepresentation>,
+): string | null {
 	if (representationTypes.length === 0) {
 		return null;
 	}
 
-	return representationTypes.map(formatInstitutionRelationType).join(", ");
+	return representationTypes
+		.map((type) => formatCountryReportInstitutionRepresentationType(type))
+		.join(", ");
 }
 
 const eurFormatter = new Intl.NumberFormat("en", {
@@ -204,7 +198,7 @@ export async function CountryReportSummary(
 									<p className="text-xs text-muted-fg">
 										{formatRole(c.roleType)}
 										{" · "}
-										{c.orgUnitName}
+										{formatContributorOrgUnit(c.orgUnitName, c.orgUnitType)}
 									</p>
 								</li>
 							))}
@@ -221,10 +215,6 @@ export async function CountryReportSummary(
 					id="country-report-institutions"
 					title={institutionsLabel}
 				>
-					<dl className="grid max-inline-xs grid-cols-[auto_1fr] gap-x-8 text-sm">
-						<dt className="text-muted-fg">{t("Number of institutions")}</dt>
-						<dd>{data.institutions.length.toLocaleString()}</dd>
-					</dl>
 					{data.institutions.length > 0 && (
 						<ul className="divide-y rounded-md border">
 							{data.institutions.map((institution) => {
@@ -248,6 +238,10 @@ export async function CountryReportSummary(
 							})}
 						</ul>
 					)}
+					<dl className="grid max-inline-xs grid-cols-[auto_1fr] gap-x-8 text-sm">
+						<dt className="text-muted-fg">{t("Number of institutions")}</dt>
+						<dd>{data.institutions.length.toLocaleString()}</dd>
+					</dl>
 				</ReportSummarySection>
 
 				{hasEvents && (
