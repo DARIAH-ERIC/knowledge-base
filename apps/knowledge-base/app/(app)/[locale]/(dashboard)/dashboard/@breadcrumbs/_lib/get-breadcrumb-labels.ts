@@ -125,6 +125,31 @@ async function getWorkingGroupReportLabelByRoute(
 	return report[0]?.name ?? null;
 }
 
+async function getOrganisationalUnitLabelByRoute(
+	slug: string,
+	type: "country" | "working_group",
+): Promise<string | null> {
+	const unit = await db
+		.select({ name: schema.organisationalUnits.name })
+		.from(schema.entities)
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.documentId, schema.entities.id),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`,
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.where(and(eq(schema.entities.slug, slug), eq(schema.organisationalUnitTypes.type, type)))
+		.limit(1);
+
+	return unit[0]?.name ?? null;
+}
+
 function getDynamicBreadcrumbResolver(
 	segments: BreadcrumbSegments,
 ): null | { id: string; resolve: (id: string) => Promise<string | null> } {
@@ -156,6 +181,14 @@ function getDynamicBreadcrumbResolver(
 export async function getBreadcrumbLabels(
 	segments: BreadcrumbSegments,
 ): Promise<Record<string, string>> {
+	if ((segments[0] === "countries" || segments[0] === "working-groups") && segments[1] != null) {
+		const label = await getOrganisationalUnitLabelByRoute(
+			segments[1],
+			segments[0] === "countries" ? "country" : "working_group",
+		);
+		return label == null ? {} : { [segments[1]]: label };
+	}
+
 	if (
 		segments[0] === "reporting" &&
 		segments[1] === "country-reports" &&

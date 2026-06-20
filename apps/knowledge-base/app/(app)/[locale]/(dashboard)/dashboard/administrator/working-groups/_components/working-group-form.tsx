@@ -48,6 +48,7 @@ interface WorkingGroupFormProps {
 	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
 	selectedSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
 	showRelationFields?: boolean;
+	showSaveAndPublish?: boolean;
 }
 
 export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactNode {
@@ -69,6 +70,7 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 		selectedRelatedResources,
 		selectedSocialMediaItems,
 		showRelationFields = true,
+		showSaveAndPublish,
 	} = props;
 
 	const t = useExtracted();
@@ -207,7 +209,12 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 					</Fragment>
 				) : null}
 
-				<EntityFormActions entityName={t("Working group")} isPending={isPending} state={state} />
+				<EntityFormActions
+					entityName={t("Working group")}
+					isPending={isPending}
+					showSaveAndPublish={showSaveAndPublish}
+					state={state}
+				/>
 			</Form>
 		</FormLayout>
 	);
