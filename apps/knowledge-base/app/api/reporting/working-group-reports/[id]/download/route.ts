@@ -2,7 +2,10 @@ import type { NextRequest } from "next/server";
 
 import { getWorkingGroupReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { getCurrentSession } from "@/lib/auth/session";
-import { getWorkingGroupExternalResourceSnapshots } from "@/lib/data/report-marketplace-resources";
+import {
+	getWorkingGroupBranding,
+	getWorkingGroupExternalResourceSnapshots,
+} from "@/lib/data/report-marketplace-resources";
 
 export async function GET(
 	_request: NextRequest,
@@ -26,12 +29,17 @@ export async function GET(
 		}
 		case "ok": {
 			const report = result.data;
-			const externalResourceSnapshots = await getWorkingGroupExternalResourceSnapshots(report.id);
+			const [externalResourceSnapshots, branding] = await Promise.all([
+				getWorkingGroupExternalResourceSnapshots(report.id),
+				getWorkingGroupBranding(report.workingGroupDocumentId),
+			]);
 
 			const payload = {
 				id: report.id,
 				status: report.status,
+				generatedAt: new Date().toISOString(),
 				workingGroup: report.workingGroup.name,
+				workingGroupAcronym: branding?.acronym ?? null,
 				campaign: report.campaign.year,
 				numberOfMembers: report.summary.numberOfMembers,
 				mailingList: report.summary.mailingList,

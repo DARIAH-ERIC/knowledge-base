@@ -2,7 +2,10 @@ import type { NextRequest } from "next/server";
 
 import { getCountryReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { getCurrentSession } from "@/lib/auth/session";
-import { getCountryExternalResourceSnapshots } from "@/lib/data/report-marketplace-resources";
+import {
+	getCountryExternalResourceSnapshots,
+	getCountryReportConsortiumBranding,
+} from "@/lib/data/report-marketplace-resources";
 
 export async function GET(
 	_request: NextRequest,
@@ -26,12 +29,18 @@ export async function GET(
 		}
 		case "ok": {
 			const report = result.data;
-			const externalResourceSnapshots = await getCountryExternalResourceSnapshots(report.id);
+			const [externalResourceSnapshots, consortium] = await Promise.all([
+				getCountryExternalResourceSnapshots(report.id),
+				getCountryReportConsortiumBranding(report.countryDocumentId, report.campaign.year),
+			]);
 
 			const payload = {
 				id: report.id,
 				status: report.status,
+				generatedAt: new Date().toISOString(),
 				country: report.country.name,
+				consortium:
+					consortium == null ? null : { name: consortium.name, acronym: consortium.acronym },
 				campaign: report.campaign.year,
 				totalContributors: report.summary.totalContributors,
 				institutions: report.summary.institutions.map((i) => {
@@ -69,6 +78,7 @@ export async function GET(
 				services: report.summary.services.map((s) => {
 					return {
 						name: s.name,
+						costBucket: s.costBucket,
 						kpis: Object.fromEntries(
 							s.kpis.filter((k) => k.value > 0).map((k) => [k.kpi, k.value]),
 						),
@@ -77,6 +87,21 @@ export async function GET(
 				projectContributions: report.summary.projectContributions.map((p) => {
 					return { project: p.projectName, amountEuros: p.amountEuros };
 				}),
+				operationalCost: {
+					total: report.summary.operationalCost.total,
+					threshold: report.summary.operationalCost.threshold,
+					lines: report.summary.operationalCost.lines.map((line) => {
+						return {
+							key: line.key,
+							label: line.label,
+							bucket: line.bucket ?? null,
+							quantity: line.quantity,
+							showQuantity: line.showQuantity,
+							unitAmount: line.unitAmount,
+							total: line.total,
+						};
+					}),
+				},
 				externalResources: externalResourceSnapshots.map((snapshot) => {
 					return {
 						section: snapshot.section,

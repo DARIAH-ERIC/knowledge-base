@@ -119,6 +119,95 @@ export async function getWorkingGroupSlug(workingGroupDocumentId: string): Promi
 	return rows[0]?.slug ?? null;
 }
 
+/** Display identity of the org unit that brands a report (consortium or working group). */
+export interface ReportBranding {
+	name: string;
+	acronym: string | null;
+	/** Storage key of the uploaded logo asset, or `null` when the unit has no image. */
+	imageKey: string | null;
+}
+
+/**
+ * Name, acronym, and logo asset key of the national consortium related to `countryDocumentId` and
+ * active in the campaign `year`. Mirrors {@link getCountryConsortiumSlugs}' relation join but
+ * resolves the unit's published-or-draft version and left-joins its image asset. Returns the first
+ * match, or `null` when the country has no consortium for that period.
+ */
+export async function getCountryReportConsortiumBranding(
+	countryDocumentId: string,
+	year: number,
+): Promise<ReportBranding | null> {
+	const rows = await db
+		.select({
+			name: schema.organisationalUnits.name,
+			acronym: schema.organisationalUnits.acronym,
+			imageKey: schema.assets.key,
+		})
+		.from(schema.organisationalUnitsRelations)
+		.innerJoin(
+			schema.organisationalUnitStatus,
+			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+		)
+		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, schema.organisationalUnitsRelations.unitDocumentId),
+		)
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.documentId, schema.entities.id),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.leftJoin(schema.assets, eq(schema.assets.id, schema.organisationalUnits.imageId))
+		.where(
+			and(
+				eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, countryDocumentId),
+				eq(schema.organisationalUnitStatus.status, "is_national_consortium_of"),
+				eq(
+					schema.organisationalUnitTypes.type,
+					"national_consortium" as typeof schema.organisationalUnitTypes.$inferSelect.type,
+				),
+				sql`
+					${schema.organisationalUnitsRelations.duration} && tstzrange (
+						MAKE_DATE(${year}, 1, 1)::TIMESTAMPTZ,
+						MAKE_DATE(${year + 1}, 1, 1)::TIMESTAMPTZ
+					)
+				`,
+			),
+		)
+		.limit(1);
+
+	return rows[0] ?? null;
+}
+
+/** Name, acronym, and logo asset key of the working group document. */
+export async function getWorkingGroupBranding(
+	workingGroupDocumentId: string,
+): Promise<ReportBranding | null> {
+	const rows = await db
+		.select({
+			name: schema.organisationalUnits.name,
+			acronym: schema.organisationalUnits.acronym,
+			imageKey: schema.assets.key,
+		})
+		.from(schema.documentLifecycle)
+		.innerJoin(
+			schema.organisationalUnits,
+			sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
+		)
+		.leftJoin(schema.assets, eq(schema.assets.id, schema.organisationalUnits.imageId))
+		.where(eq(schema.documentLifecycle.documentId, workingGroupDocumentId))
+		.limit(1);
+
+	return rows[0] ?? null;
+}
+
 /**
  * Fetches every page of a resources search and returns the flattened items. Returns `[]` if the
  * first page errors; individual later-page errors are skipped.
