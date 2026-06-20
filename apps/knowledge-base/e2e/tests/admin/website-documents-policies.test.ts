@@ -54,6 +54,7 @@ test.describe("website documents-policies admin", () => {
 			docPoliciesPage.workerPrefix,
 		);
 		const duplicatePosition = workerGroups.find((group) => group.label === renamedLabel)?.position;
+		// oxlint-disable-next-line playwright/no-conditional-in-test
 		if (duplicatePosition == null) {
 			throw new Error("Renamed document-policy group was not persisted.");
 		}
