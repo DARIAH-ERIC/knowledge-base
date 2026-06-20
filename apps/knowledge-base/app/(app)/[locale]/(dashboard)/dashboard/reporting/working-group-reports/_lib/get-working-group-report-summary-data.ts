@@ -9,6 +9,7 @@ import { db } from "@/lib/db";
 export interface WorkingGroupReportData {
 	id: string;
 	status: string;
+	workingGroupDocumentId: string;
 	workingGroup: { name: string };
 	campaign: { year: number; status: string };
 	summary: WorkingGroupReportSummaryData;
@@ -73,6 +74,7 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 	return {
 		id: report.id,
 		status: report.status,
+		workingGroupDocumentId: report.workingGroupDocumentId,
 		workingGroup: report.workingGroup,
 		campaign: report.campaign,
 		summary: {

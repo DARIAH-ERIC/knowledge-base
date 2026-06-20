@@ -61,6 +61,7 @@ export interface CountryReportSummaryData {
 export interface CountryReportData {
 	id: string;
 	status: string;
+	countryDocumentId: string;
 	country: { name: string };
 	campaign: { year: number; status: string };
 	summary: CountryReportSummaryData;
@@ -308,6 +309,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 	return {
 		id: report.id,
 		status: report.status,
+		countryDocumentId: report.countryDocumentId,
 		country: report.country,
 		campaign: report.campaign,
 		summary: {

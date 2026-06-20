@@ -1,16 +1,22 @@
 import type { NextRequest } from "next/server";
 
 import { getWorkingGroupReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
+import { fetchBrandLogo } from "@/app/api/reporting/_lib/report-logo";
+import { type ReportBlock, createReportPdf } from "@/app/api/reporting/_lib/report-pdf";
 import { richTextToText } from "@/app/api/reporting/_lib/rich-text-to-text";
-import { type PdfSection, createTextPdf } from "@/app/api/reporting/_lib/text-pdf";
 import { getCurrentSession } from "@/lib/auth/session";
 import {
 	type ReportExternalResourceSnapshot,
+	getWorkingGroupBranding,
 	getWorkingGroupExternalResourceSnapshots,
 } from "@/lib/data/report-marketplace-resources";
 
 function value(value: number | string | null): string {
-	return value == null || value === "" ? "-" : String(value);
+	return value == null || value === "" ? "—" : String(value);
+}
+
+function formatStatus(status: string): string {
+	return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
 function formatRole(role: string): string {
@@ -24,34 +30,47 @@ function formatExternalSectionTitle(section: string): string {
 	return section.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function externalResourceSnapshotToPdfSection(
-	snapshot: ReportExternalResourceSnapshot,
-): PdfSection {
-	return {
-		title: formatExternalSectionTitle(snapshot.section),
-		lines:
-			snapshot.items.length > 0
-				? [
-						`Captured: ${snapshot.capturedAt.toISOString()}`,
-						...snapshot.items.map((item) => {
-							const meta = [
-								item.sshocCategory,
-								item.source,
-								item.year == null ? null : String(item.year),
-								item.kind,
-							]
-								.filter(Boolean)
-								.join(" - ");
-							const link = item.links[0] == null ? "" : ` - ${item.links[0]}`;
-
-							return `${item.label}${meta === "" ? "" : ` - ${meta}`}${link}`;
-						}),
-					]
-				: [`Captured: ${snapshot.capturedAt.toISOString()}`, "No external resources recorded."],
-	};
-}
-
 const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "medium" });
+
+function externalResourceSnapshotBlocks(
+	snapshot: ReportExternalResourceSnapshot,
+): Array<ReportBlock> {
+	const captured = dateFormatter.format(snapshot.capturedAt);
+
+	if (snapshot.items.length === 0) {
+		return [
+			{ kind: "heading", text: formatExternalSectionTitle(snapshot.section) },
+			{ kind: "paragraphs", paragraphs: [{ text: `Captured ${captured}`, muted: true }] },
+			{
+				kind: "paragraphs",
+				paragraphs: [{ text: "No external resources recorded.", muted: true }],
+			},
+		];
+	}
+
+	return [
+		{ kind: "heading", text: formatExternalSectionTitle(snapshot.section) },
+		{ kind: "paragraphs", paragraphs: [{ text: `Captured ${captured}`, muted: true }] },
+		{
+			kind: "itemList",
+			items: snapshot.items.map((item) => {
+				const meta = [
+					item.sshocCategory,
+					item.source,
+					item.year == null ? null : String(item.year),
+					item.kind,
+				]
+					.filter(Boolean)
+					.join(" · ");
+
+				return {
+					primary: item.label,
+					secondary: [meta, item.links[0]].filter(Boolean).join(" · ") || undefined,
+				};
+			}),
+		},
+	];
+}
 
 export async function GET(
 	_request: NextRequest,
@@ -75,68 +94,102 @@ export async function GET(
 		}
 		case "ok": {
 			const report = result.data;
-			const externalResourceSnapshots = await getWorkingGroupExternalResourceSnapshots(report.id);
-			const sections: Array<PdfSection> = [
-				{
-					title: "Overview",
-					lines: [
-						`Working group: ${report.workingGroup.name}`,
-						`Campaign: ${report.campaign.year}`,
-						`Status: ${report.status}`,
-					],
-				},
-				{
-					title: "Working group data",
-					lines: [
-						`Number of members: ${value(report.summary.numberOfMembers)}`,
-						`Mailing list: ${value(report.summary.mailingList)}`,
-					],
-				},
-				{
-					title: "Chairs",
-					lines:
-						report.summary.chairs.length > 0
-							? report.summary.chairs.map((c) => `${c.personName} - ${formatRole(c.roleType)}`)
-							: ["No chairs recorded."],
-				},
-				{
-					title: "Social media",
-					lines:
-						report.summary.socialMedia.length > 0
-							? report.summary.socialMedia.map(
-									(item) => `${item.socialMedia.name} - ${item.socialMedia.url}`,
-								)
-							: ["No social media recorded."],
-				},
-				{
-					title: "Events",
-					lines:
-						report.summary.events.length > 0
-							? report.summary.events.map((event) => {
-									const date = dateFormatter.format(new Date(event.date));
-									const url = event.url == null ? "" : ` - ${event.url}`;
+			const summary = report.summary;
 
-									return `${event.title} - ${date} - ${event.role}${url}`;
-								})
-							: ["No events recorded."],
-				},
+			const [externalResourceSnapshots, branding] = await Promise.all([
+				getWorkingGroupExternalResourceSnapshots(report.id),
+				getWorkingGroupBranding(report.workingGroupDocumentId),
+			]);
+			const logoPng = await fetchBrandLogo(branding?.imageKey ?? null);
+
+			// Working group data
+			const blocks: Array<ReportBlock> = [
+				{ kind: "heading", text: "Working group data" },
 				{
-					title: "Questions",
-					lines:
-						report.summary.questions.length > 0
-							? report.summary.questions.flatMap((question) => [
-									`Question: ${richTextToText(question.question)}`,
-									`Answer: ${richTextToText(question.answer) || "No answer provided."}`,
-								])
-							: ["No questions recorded."],
+					kind: "definitionList",
+					rows: [
+						{ label: "Number of members", value: value(summary.numberOfMembers) },
+						{ label: "Mailing list", value: value(summary.mailingList) },
+					],
 				},
-				...externalResourceSnapshots.map((snapshot) =>
-					externalResourceSnapshotToPdfSection(snapshot),
-				),
 			];
-			const pdf = await createTextPdf(
-				`Working group report - ${report.workingGroup.name}`,
-				sections,
+
+			// Chairs
+			if (summary.chairs.length > 0) {
+				blocks.push({ kind: "heading", text: "Chairs" });
+				blocks.push({
+					kind: "itemList",
+					items: summary.chairs.map((chair) => {
+						return { primary: chair.personName, secondary: formatRole(chair.roleType) };
+					}),
+				});
+			}
+
+			// Social media
+			if (summary.socialMedia.length > 0) {
+				blocks.push({ kind: "heading", text: "Social media" });
+				blocks.push({
+					kind: "itemList",
+					items: summary.socialMedia.map((item) => {
+						return { primary: item.socialMedia.name, secondary: item.socialMedia.url };
+					}),
+				});
+			}
+
+			// Events
+			if (summary.events.length > 0) {
+				blocks.push({ kind: "heading", text: "Events" });
+				blocks.push({
+					kind: "itemList",
+					items: summary.events.map((event) => {
+						const secondary = [
+							dateFormatter.format(new Date(event.date)),
+							formatRole(event.role),
+							event.url,
+						]
+							.filter(Boolean)
+							.join(" · ");
+
+						return { primary: event.title, secondary };
+					}),
+				});
+			}
+
+			// Questions
+			if (summary.questions.length > 0) {
+				blocks.push({ kind: "heading", text: "Questions" });
+				blocks.push({
+					kind: "qa",
+					items: summary.questions.map((question) => {
+						return {
+							question: richTextToText(question.question),
+							answer: richTextToText(question.answer) || "No answer provided.",
+						};
+					}),
+				});
+			}
+
+			// External resources
+			for (const snapshot of externalResourceSnapshots) {
+				blocks.push(...externalResourceSnapshotBlocks(snapshot));
+			}
+
+			const pdf = await createReportPdf(
+				{
+					title: "Working group report",
+					subject: report.workingGroup.name,
+					meta: [
+						`Campaign ${report.campaign.year}`,
+						`Status: ${formatStatus(report.status)}`,
+						`Generated ${dateFormatter.format(new Date())}`,
+					],
+					brand: {
+						logoPng,
+						name: branding?.name ?? report.workingGroup.name,
+						acronym: branding?.acronym ?? null,
+					},
+				},
+				blocks,
 			);
 
 			return new Response(pdf, {
