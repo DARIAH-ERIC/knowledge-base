@@ -11,7 +11,21 @@ import { eq } from "@/lib/db/sql";
 export async function deleteServiceAction(id: string): Promise<void> {
 	const auditSession = await assertAdmin();
 
-	await db.delete(schema.services).where(eq(schema.services.id, id));
+	await db.transaction(async (tx) => {
+		await tx
+			.delete(schema.countryReportServiceKpis)
+			.where(eq(schema.countryReportServiceKpis.serviceId, id));
+		await tx
+			.delete(schema.countryReportServices)
+			.where(eq(schema.countryReportServices.serviceId, id));
+		await tx
+			.delete(schema.servicesToSocialMedia)
+			.where(eq(schema.servicesToSocialMedia.serviceId, id));
+		await tx
+			.delete(schema.servicesToOrganisationalUnits)
+			.where(eq(schema.servicesToOrganisationalUnits.serviceId, id));
+		await tx.delete(schema.services).where(eq(schema.services.id, id));
+	});
 
 	await recordAuditEvent(db, {
 		actorUserId: auditSession.user.id,

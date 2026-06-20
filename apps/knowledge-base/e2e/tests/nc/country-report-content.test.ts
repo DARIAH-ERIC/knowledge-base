@@ -11,6 +11,7 @@ test.describe("country report content (national coordinator)", () => {
 	test.describe.configure({ mode: "default" });
 
 	let campaignId: string | null = null;
+	let reportId: string | null = null;
 	let year: number | null = null;
 	let slug: string | null = null;
 
@@ -21,11 +22,12 @@ test.describe("country report content (national coordinator)", () => {
 
 		const country = await db.getCountryOption();
 		slug = country.slug;
-		await db.createCountryReport({
+		const report = await db.createCountryReport({
 			campaignId: campaign.id,
 			countryDocumentId: country.id,
 			status: "draft",
 		});
+		reportId = report.id;
 	});
 
 	test.afterAll(async ({ db }) => {
@@ -62,5 +64,23 @@ test.describe("country report content (national coordinator)", () => {
 
 		await page.reload();
 		await expect(page.getByLabel("Title")).toHaveValue("");
+	});
+
+	test("adds and removes a curated service membership", async ({ db, page }) => {
+		await page.goto(`/en/dashboard/reporting/country-reports/${year!}/${slug!}/edit/services`);
+
+		await page.getByRole("button", { name: "Service" }).click();
+		const option = page.getByRole("option").first();
+		const serviceName = await option.textContent();
+		expect(serviceName).not.toBeNull();
+		await option.click();
+		await page.getByRole("button", { name: "Add", exact: true }).click();
+
+		await expect(page.getByText(serviceName!, { exact: true })).toBeVisible();
+		expect(await db.getCountryReportServiceIds(reportId!)).toHaveLength(1);
+
+		await page.getByRole("button", { name: "Remove service" }).click();
+		await expect(page.getByText(serviceName!, { exact: true })).toBeHidden();
+		expect(await db.getCountryReportServiceIds(reportId!)).toHaveLength(0);
 	});
 });

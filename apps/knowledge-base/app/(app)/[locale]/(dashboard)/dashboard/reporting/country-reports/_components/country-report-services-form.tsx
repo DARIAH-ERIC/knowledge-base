@@ -2,6 +2,7 @@
 
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
+import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
@@ -9,7 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/u
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
-import type { ReportServiceWithKpis, ServiceKpiCategory } from "@/lib/data/report-services";
+import type {
+	AvailableReportService,
+	ReportServiceWithKpis,
+	ServiceKpiCategory,
+} from "@/lib/data/report-services";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 /** Id linking the per-service KPI inputs (rendered inside service cards) to the single Save form. */
@@ -22,14 +27,25 @@ function formatKpi(kpi: string): string {
 interface CountryReportServicesFormProps {
 	reportId: string;
 	services: Array<ReportServiceWithKpis>;
+	availableServices: Array<AvailableReportService>;
 	kpiCategories: ReadonlyArray<ServiceKpiCategory>;
 	saveKpisAction: ServerAction;
+	addAction: ServerAction;
+	deleteAction: (formData: FormData) => Promise<void>;
 }
 
 export function CountryReportServicesForm(
 	props: Readonly<CountryReportServicesFormProps>,
 ): ReactNode {
-	const { reportId, services, kpiCategories, saveKpisAction } = props;
+	const {
+		reportId,
+		services,
+		availableServices,
+		kpiCategories,
+		saveKpisAction,
+		addAction,
+		deleteAction,
+	} = props;
 
 	const t = useExtracted();
 	const [saveState, saveAction, isSaving] = useActionState(
@@ -37,56 +53,74 @@ export function CountryReportServicesForm(
 		createActionStateInitial(),
 	);
 
-	if (services.length === 0) {
-		return <p className="text-sm text-muted-fg">{t("No services linked to this country.")}</p>;
-	}
-
 	return (
 		<div className="flex flex-col gap-y-10">
 			<div className="flex flex-col gap-y-2">
 				<h2 className="text-sm font-semibold text-fg">{t("Services")}</h2>
 				<p className="max-inline-md text-sm text-muted-fg">
 					{t(
-						"The services run by this country's consortium. Add the relevant metrics per service — you only need to fill in the numbers you have.",
+						"The services this report covers. Add the relevant metrics per service — you only need to fill in the numbers you have.",
 					)}
 				</p>
 			</div>
 
-			<ul className="flex flex-col gap-y-4">
-				{services.map((service) => (
-					<li key={service.id}>
-						<ServiceCard kpiCategories={kpiCategories} service={service} />
-					</li>
-				))}
-			</ul>
+			{services.length > 0 ? (
+				<ul className="flex flex-col gap-y-4">
+					{services.map((service) => (
+						<li key={service.membershipId}>
+							<ServiceCard
+								deleteAction={deleteAction}
+								kpiCategories={kpiCategories}
+								reportId={reportId}
+								service={service}
+							/>
+						</li>
+					))}
+				</ul>
+			) : (
+				<p className="text-sm text-muted-fg">{t("No services added yet.")}</p>
+			)}
 
-			{/* The KPI inputs live inside the service cards above and link to this form via its `form` id. */}
-			<Form
-				action={saveAction}
-				className="flex flex-col gap-y-3"
-				id={KPI_FORM_ID}
-				state={saveState}
-			>
-				<input name="id" type="hidden" value={reportId} />
-				<Button className="self-start" isPending={isSaving} type="submit">
-					{isSaving ? (
-						<Fragment>
-							<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-							<span aria-hidden={true}>{t("Saving...")}</span>
-						</Fragment>
-					) : (
-						t("Save metrics")
-					)}
-				</Button>
-				<FormStatus className="self-start" state={saveState} />
-			</Form>
+			{services.length > 0 && (
+				// The KPI inputs live inside the service cards and link to this form by id, avoiding
+				// nested forms around each card's remove action.
+				<Form
+					action={saveAction}
+					className="flex flex-col gap-y-3"
+					id={KPI_FORM_ID}
+					state={saveState}
+				>
+					<input name="id" type="hidden" value={reportId} />
+					<Button className="self-start" isPending={isSaving} type="submit">
+						{isSaving ? (
+							<Fragment>
+								<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+								<span aria-hidden={true}>{t("Saving...")}</span>
+							</Fragment>
+						) : (
+							t("Save metrics")
+						)}
+					</Button>
+					<FormStatus className="self-start" state={saveState} />
+				</Form>
+			)}
+
+			<div className="flex flex-col gap-y-6 border-bs border-border pbs-8">
+				<AddExistingServiceForm
+					addAction={addAction}
+					availableServices={availableServices}
+					reportId={reportId}
+				/>
+			</div>
 		</div>
 	);
 }
 
 interface ServiceCardProps {
 	service: ReportServiceWithKpis;
+	reportId: string;
 	kpiCategories: ReadonlyArray<ServiceKpiCategory>;
+	deleteAction: (formData: FormData) => Promise<void>;
 }
 
 interface MetricRow {
@@ -95,7 +129,7 @@ interface MetricRow {
 }
 
 function ServiceCard(props: Readonly<ServiceCardProps>): ReactNode {
-	const { service, kpiCategories } = props;
+	const { service, reportId, kpiCategories, deleteAction } = props;
 
 	const t = useExtracted();
 	const [metrics, setMetrics] = useState<Array<MetricRow>>(() =>
@@ -123,7 +157,21 @@ function ServiceCard(props: Readonly<ServiceCardProps>): ReactNode {
 
 	return (
 		<div className="flex flex-col gap-y-4 rounded-md border border-border p-4">
-			<p className="text-sm font-medium text-fg">{service.name}</p>
+			<div className="flex items-start justify-between gap-x-4">
+				<p className="text-sm font-medium text-fg">{service.name}</p>
+				<form action={deleteAction}>
+					<input name="membershipId" type="hidden" value={service.membershipId} />
+					<input name="countryReportId" type="hidden" value={reportId} />
+					<Button
+						className="text-danger hover:bg-danger/10 hover:text-danger"
+						intent="plain"
+						size="sm"
+						type="submit"
+					>
+						{t("Remove service")}
+					</Button>
+				</form>
+			</div>
 
 			{metrics.length > 0 && (
 				<ul className="flex flex-col gap-y-2">
@@ -183,5 +231,65 @@ function ServiceCard(props: Readonly<ServiceCardProps>): ReactNode {
 				</Select>
 			)}
 		</div>
+	);
+}
+
+interface AddExistingServiceFormProps {
+	reportId: string;
+	availableServices: Array<AvailableReportService>;
+	addAction: ServerAction;
+}
+
+function AddExistingServiceForm(props: Readonly<AddExistingServiceFormProps>): ReactNode {
+	const { reportId, availableServices, addAction } = props;
+
+	const t = useExtracted();
+	const [state, action, isPending] = useActionState(addAction, createActionStateInitial());
+	const [selectedId, setSelectedId] = useState<string>("");
+
+	if (availableServices.length === 0) {
+		return null;
+	}
+
+	return (
+		<section className="flex flex-col gap-y-3">
+			<h3 className="text-sm font-semibold text-fg">{t("Add an existing service")}</h3>
+			<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
+				<input name="countryReportId" type="hidden" value={reportId} />
+
+				<Select
+					isRequired={true}
+					onChange={(key) => {
+						setSelectedId(String(key));
+					}}
+					value={selectedId || null}
+				>
+					<Label>{t("Service")}</Label>
+					<SelectTrigger />
+					<FieldError />
+					<SelectContent>
+						{availableServices.map((service) => (
+							<SelectItem key={service.id} id={service.id}>
+								{service.name}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+				<input name="serviceId" type="hidden" value={selectedId} />
+
+				<Button className="self-start" isPending={isPending} type="submit">
+					{isPending ? (
+						<Fragment>
+							<ProgressCircle aria-label={t("Adding...")} isIndeterminate={true} />
+							<span aria-hidden={true}>{t("Adding...")}</span>
+						</Fragment>
+					) : (
+						t("Add")
+					)}
+				</Button>
+
+				<FormStatus className="self-start" state={state} />
+			</Form>
+		</section>
 	);
 }

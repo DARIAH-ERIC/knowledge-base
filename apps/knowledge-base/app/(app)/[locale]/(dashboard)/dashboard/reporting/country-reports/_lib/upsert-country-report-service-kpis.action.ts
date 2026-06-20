@@ -1,13 +1,11 @@
 "use server";
 
-import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { serviceKpiCategoryEnum } from "@dariah-eric/database/schema";
 import { getExtracted } from "next-intl/server";
 import * as v from "valibot";
 
 import { assertCan, assertReportEditable } from "@/lib/auth/permissions";
-import { getCountryServices } from "@/lib/data/report-services";
 import { countryReportRevalidatePaths } from "@/lib/data/reporting-urls";
 import { and, eq, inArray } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
@@ -46,15 +44,11 @@ export const upsertCountryReportServiceKpisAction = createMutationAction({
 	async mutate(tx, input) {
 		const t = await getExtracted();
 
-		const report = await tx.query.countryReports.findFirst({
-			where: { id: input.id },
-			columns: { countryDocumentId: true },
-			with: { campaign: { columns: { year: true } } },
+		const memberships = await tx.query.countryReportServices.findMany({
+			where: { countryReportId: input.id },
+			columns: { serviceId: true },
 		});
-		assert(report, "Country report not found.");
-
-		const services = await getCountryServices(report.countryDocumentId, report.campaign.year);
-		const allowedServiceIds = new Set(services.map((service) => service.id));
+		const allowedServiceIds = new Set(memberships.map((membership) => membership.serviceId));
 
 		const rows = Object.entries(input.kpis ?? {}).flatMap(([serviceId, kpiValues]) => {
 			if (!allowedServiceIds.has(serviceId)) {

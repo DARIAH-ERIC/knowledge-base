@@ -48,19 +48,32 @@ test.describe("website documents-policies admin", () => {
 		await expect(docPoliciesPage.groupSection(firstLabel)).toBeHidden();
 		await expect(docPoliciesPage.groupSection(renamedLabel)).toBeVisible();
 
+		// Reproduce the position collision caused by concurrent count-then-insert requests. The old
+		// move action swapped equal values and returned 200 without changing the order.
+		const workerGroups = await db.getDocumentPolicyGroupsByLabelPrefix(
+			docPoliciesPage.workerPrefix,
+		);
+		const duplicatePosition = workerGroups.find((group) => group.label === renamedLabel)?.position;
+		if (duplicatePosition == null) {
+			throw new Error("Renamed document-policy group was not persisted.");
+		}
+		await db.setDocumentPolicyGroupPositions([renamedLabel, secondLabel], duplicatePosition);
+
+		const labelsBeforeMove = await db.getDocumentPolicyGroupLabels();
+		const secondIndexBeforeMove = labelsBeforeMove.indexOf(secondLabel);
+		expect(secondIndexBeforeMove).toBeGreaterThan(0);
+
 		await docPoliciesPage.moveGroup(secondLabel, "up");
 		await expect
 			.poll(async () => {
-				const groups = await db.getDocumentPolicyGroupsByLabelPrefix(docPoliciesPage.workerPrefix);
-				return groups.map((group) => group.label);
+				const labels = await db.getDocumentPolicyGroupLabels();
+				return labels.indexOf(secondLabel);
 			})
-			.toStrictEqual([secondLabel, renamedLabel]);
+			.toBeLessThan(secondIndexBeforeMove);
 		await docPoliciesPage.goto();
 		await expect
 			.poll(async () => docPoliciesPage.groupLabels(), { timeout: 15_000 })
 			.toContainEqual(secondLabel);
-		const orderedLabels = await docPoliciesPage.groupLabels();
-		expect(orderedLabels.indexOf(secondLabel)).toBeLessThan(orderedLabels.indexOf(renamedLabel));
 		await expect(docPoliciesPage.groupSection(secondLabel)).toBeVisible();
 		await expect(docPoliciesPage.groupSection(renamedLabel)).toBeVisible();
 
