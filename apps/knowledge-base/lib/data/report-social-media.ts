@@ -1,7 +1,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { type Database, type Transaction, db } from "@/lib/db";
-import { notInArray } from "@/lib/db/sql";
+import { and, eq, notInArray, sql } from "@/lib/db/sql";
 
 export type SocialMediaKpiCategory = (typeof schema.socialMediaKpiCategoryEnum)[number];
 
@@ -127,6 +127,58 @@ export async function getCountrySocialMedia(
 		where: { organisationalUnitId },
 		columns: { socialMediaId: true },
 	});
+
+	return rows.map((row) => row.socialMediaId);
+}
+
+/**
+ * Social media accounts linked to the published national consortium versions related to a country
+ * during the reporting year. Draft-only consortium accounts and inactive relations are excluded.
+ */
+export async function getCountryNationalConsortiumSocialMedia(
+	countryDocumentId: string,
+	year: number,
+	queryDb: Database | Transaction = db,
+): Promise<Array<string>> {
+	const rows = await queryDb
+		.selectDistinct({ socialMediaId: schema.organisationalUnitsToSocialMedia.socialMediaId })
+		.from(schema.organisationalUnitsRelations)
+		.innerJoin(
+			schema.organisationalUnitStatus,
+			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+		)
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.documentId, schema.organisationalUnitsRelations.unitDocumentId),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			eq(schema.organisationalUnits.id, schema.documentLifecycle.publishedId),
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.innerJoin(
+			schema.organisationalUnitsToSocialMedia,
+			eq(
+				schema.organisationalUnitsToSocialMedia.organisationalUnitId,
+				schema.organisationalUnits.id,
+			),
+		)
+		.where(
+			and(
+				eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, countryDocumentId),
+				eq(schema.organisationalUnitStatus.status, "is_national_consortium_of"),
+				eq(schema.organisationalUnitTypes.type, "national_consortium"),
+				sql`
+					${schema.organisationalUnitsRelations.duration} && tstzrange (
+						MAKE_DATE(${year}, 1, 1)::TIMESTAMPTZ,
+						MAKE_DATE(${year + 1}, 1, 1)::TIMESTAMPTZ
+					)
+				`,
+			),
+		);
 
 	return rows.map((row) => row.socialMediaId);
 }

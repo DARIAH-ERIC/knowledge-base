@@ -13,6 +13,7 @@ import {
 } from "@/lib/data/report-contributions";
 import {
 	getCarriedOverReportSocialMedia,
+	getCountryNationalConsortiumSocialMedia,
 	getCountrySocialMedia,
 } from "@/lib/data/report-social-media";
 import { getCurrentPartnerInstitutions } from "@/lib/data/unit-relations";
@@ -188,12 +189,24 @@ export const createCountryReportAction = createMutationAction({
 				}
 			}
 
-			// Seed social media from both last year's report and the accounts currently linked to the
-			// country. Carry over accounts only; KPI values are re-entered each year.
+			// Seed social media from last year's report and the accounts currently linked to the
+			// published country and national consortium versions. Carry over accounts only; KPI values
+			// are re-entered each year.
 			const carriedSocialMediaIds =
 				previousReport == null ? [] : await getCarriedOverReportSocialMedia(previousReport.id, tx);
 			const countrySocialMediaIds = await getCountrySocialMedia(input.countryId, tx);
-			const socialMediaIds = [...new Set([...carriedSocialMediaIds, ...countrySocialMediaIds])];
+			const nationalConsortiumSocialMediaIds = await getCountryNationalConsortiumSocialMedia(
+				input.countryId,
+				campaign.year,
+				tx,
+			);
+			const socialMediaIds = [
+				...new Set([
+					...carriedSocialMediaIds,
+					...countrySocialMediaIds,
+					...nationalConsortiumSocialMediaIds,
+				]),
+			];
 
 			if (socialMediaIds.length > 0) {
 				await tx.insert(schema.countryReportSocialMedia).values(
