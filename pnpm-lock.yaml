@@ -2052,6 +2052,9 @@ importers:
       '@faker-js/faker':
         specifier: 'catalog:'
         version: 10.4.0
+      '@node-rs/argon2':
+        specifier: 'catalog:'
+        version: 2.0.2
       '@sindresorhus/slugify':
         specifier: 'catalog:'
         version: 3.0.0
