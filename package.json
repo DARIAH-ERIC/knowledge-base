@@ -4,6 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"add:package": "turbo generate package",
+		"bootstrap:users:admin": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"seed\" run bootstrap:users:admin",
 		"build": "turbo run build",
 		"data:ingest:search": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"ingest\" run data:ingest:search",
 		"data:ingest:search:entities": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"ingest\" run data:ingest:search:entities",
@@ -18,8 +19,7 @@
 		"data:seed:kitchen-sink": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"seed\" run data:seed:kitchen-sink",
 		"data:seed:search": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"seed\" run data:seed:search",
 		"data:seed:storage": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"seed\" run data:seed:storage",
-		"data:seed:users:admin": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"seed\" run data:seed:users:admin",
-		"data:seed:users:non-admin": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"seed\" run data:seed:users:non-admin",
+		"data:seed:users": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"seed\" run data:seed:users",
 		"db:migrations:apply": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"database\" run db:migrations:apply",
 		"db:migrations:check": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"database\" run db:migrations:check",
 		"db:migrations:generate": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"database\" run db:migrations:generate",
