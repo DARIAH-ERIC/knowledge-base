@@ -61,7 +61,7 @@ async function main(): Promise<void> {
 				})
 				.where(eq(schema.users.id, user.id));
 
-			log.success(`Created initial admin user "${email}".`);
+			log.success(`Bootstrapped admin user "${email}".`);
 			return;
 		}
 
@@ -82,6 +82,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((error: unknown) => {
-	log.error("Failed to create admin user.\n", error);
+	log.error("Failed to bootstrap admin user.\n", error);
 	process.exitCode = 1;
 });

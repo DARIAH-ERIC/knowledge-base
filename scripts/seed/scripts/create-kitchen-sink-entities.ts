@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import * as fs from "node:fs/promises";
 import { join } from "node:path";
 
-import { log } from "@acdh-oeaw/lib";
+import { assert, log } from "@acdh-oeaw/lib";
 import { type Database, type Transaction, createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { eq, inArray } from "@dariah-eric/database/sql";
@@ -113,13 +113,13 @@ async function upsertById(
 	row: Record<string, unknown> & { id: string },
 ): Promise<void> {
 	const { id: _id, ...set } = row;
-	const _table = table;
+	const targetTable = table;
 
 	await db
-		.insert(_table)
+		.insert(targetTable)
 		.values(row as never)
 		.onConflictDoUpdate({
-			target: _table.id,
+			target: targetTable.id,
 			set: set as never,
 		});
 }
@@ -279,6 +279,9 @@ async function main() {
 				projectScopeRows,
 				opportunitySourceRows,
 				socialMediaTypeRows,
+				serviceTypeRows,
+				serviceStatusRows,
+				organisationalUnitServiceRoleRows,
 				contentBlockTypeRows,
 				dataContentBlockTypeRows,
 				licenseRows,
@@ -293,6 +296,9 @@ async function main() {
 				tx.select().from(schema.projectScopes),
 				tx.select().from(schema.opportunitySources),
 				tx.select().from(schema.socialMediaTypes),
+				tx.select().from(schema.serviceTypes),
+				tx.select().from(schema.serviceStatuses),
+				tx.select().from(schema.organisationalUnitServiceRoles),
 				tx.select().from(schema.contentBlockTypes),
 				tx.select().from(schema.dataContentBlockTypes),
 				tx.select().from(schema.licenses),
@@ -316,6 +322,11 @@ async function main() {
 				opportunitySourceRows.map((row) => [row.source, row.id]),
 			);
 			const socialMediaTypeIds = new Map(socialMediaTypeRows.map((row) => [row.type, row.id]));
+			const serviceTypeIds = new Map(serviceTypeRows.map((row) => [row.type, row.id]));
+			const serviceStatusIds = new Map(serviceStatusRows.map((row) => [row.status, row.id]));
+			const organisationalUnitServiceRoleIds = new Map(
+				organisationalUnitServiceRoleRows.map((row) => [row.role, row.id]),
+			);
 			const contentBlockTypeIds = new Map(contentBlockTypeRows.map((row) => [row.type, row.id]));
 			const dataContentBlockTypeIds = new Map(
 				dataContentBlockTypeRows.map((row) => [row.type, row.id]),
@@ -403,6 +414,10 @@ async function main() {
 				id: createId("entity:working-group"),
 				versionId: createId("version:working-group"),
 			};
+			const secondWorkingGroupDocument = {
+				id: createId("entity:working-group:second"),
+				versionId: createId("version:working-group:second"),
+			};
 			const governanceBodyDocument = {
 				id: createId("entity:governance-body"),
 				versionId: createId("version:governance-body"),
@@ -489,6 +504,16 @@ async function main() {
 					),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink-working-group",
+				},
+				{
+					id: secondWorkingGroupDocument.id,
+					versionId: secondWorkingGroupDocument.versionId,
+					typeId: assertLookupId(
+						entityTypeIds.get("organisational_units"),
+						'Missing entity type "organisational_units".',
+					),
+					statusId: publishedStatusId,
+					slug: "kitchen-sink-working-group-two",
 				},
 				{
 					id: governanceBodyDocument.id,
@@ -644,6 +669,12 @@ async function main() {
 			const dariahEricEntityId = entityIdsBySeedId.get(dariahEricDocument.id)!.documentId;
 			const workingGroupEntityId = entityIdsBySeedId.get(workingGroupDocument.id)!.documentId;
 			const workingGroupVersionId = entityIdsBySeedId.get(workingGroupDocument.id)!.versionId;
+			const secondWorkingGroupEntityId = entityIdsBySeedId.get(
+				secondWorkingGroupDocument.id,
+			)!.documentId;
+			const secondWorkingGroupVersionId = entityIdsBySeedId.get(
+				secondWorkingGroupDocument.id,
+			)!.versionId;
 			const governanceBodyEntityId = entityIdsBySeedId.get(governanceBodyDocument.id)!.documentId;
 			const governanceBodyVersionId = entityIdsBySeedId.get(governanceBodyDocument.id)!.versionId;
 			const memberCountryEntityId = entityIdsBySeedId.get(memberCountryDocument.id)!.documentId;
@@ -812,6 +843,24 @@ async function main() {
 				sshocMarketplaceActorId: 9002,
 			});
 			await upsertById(tx, schema.organisationalUnits, {
+				id: secondWorkingGroupVersionId,
+				name: "Kitchen Sink Working Group Two",
+				acronym: "KSWG2",
+				summary: "A second working group for testing users who chair multiple groups.",
+				metadata: {
+					activities: "Multi-group authorization testing",
+					disciplines: "Digital humanities",
+					mailingList: "kitchen-sink-working-group-two@example.org",
+					contactEmail: "kitchen-sink-working-group-two@example.org",
+				},
+				imageId: createId("asset:image"),
+				typeId: assertLookupId(
+					unitTypeIds.get("working_group"),
+					'Missing organisational unit type "working_group".',
+				),
+				sshocMarketplaceActorId: 9007,
+			});
+			await upsertById(tx, schema.organisationalUnits, {
 				id: governanceBodyVersionId,
 				name: "Kitchen Sink Governance Body",
 				acronym: "KSGB",
@@ -931,6 +980,7 @@ async function main() {
 				[dariahEricVersionId, createId("social-media:website")],
 				[workingGroupVersionId, createId("social-media:website")],
 				[workingGroupVersionId, createId("social-media:mastodon")],
+				[secondWorkingGroupVersionId, createId("social-media:website")],
 				[governanceBodyVersionId, createId("social-media:website")],
 				[governanceBodyVersionId, createId("social-media:linkedin")],
 				[memberCountryVersionId, createId("social-media:website")],
@@ -946,6 +996,27 @@ async function main() {
 					socialMediaId,
 				});
 			}
+
+			const reportingServiceId = createId("service:reporting");
+			await upsertById(tx, schema.services, {
+				id: reportingServiceId,
+				name: "Kitchen Sink Reporting Service",
+				typeId: assertLookupId(serviceTypeIds.get("internal"), 'Missing service type "internal".'),
+				statusId: assertLookupId(serviceStatusIds.get("live"), 'Missing service status "live".'),
+				comment: "A live national-consortium service used to prepopulate country reports.",
+				dariahBranding: true,
+				monitoring: true,
+				privateSupplier: false,
+			});
+			await upsertById(tx, schema.servicesToOrganisationalUnits, {
+				id: createId("service-org:reporting-consortium"),
+				serviceId: reportingServiceId,
+				organisationalUnitDocumentId: consortiumEntityId,
+				roleId: assertLookupId(
+					organisationalUnitServiceRoleIds.get("service_provider"),
+					'Missing organisational unit service role "service_provider".',
+				),
+			});
 
 			await tx
 				.delete(schema.projectsToOrganisationalUnits)
@@ -963,6 +1034,7 @@ async function main() {
 				.where(
 					inArray(schema.organisationalUnitsRelations.unitDocumentId, [
 						workingGroupEntityId,
+						secondWorkingGroupEntityId,
 						memberCountryEntityId,
 						institutionEntityId,
 						consortiumEntityId,
@@ -973,6 +1045,16 @@ async function main() {
 				{
 					id: createId("relation:working-group-to-eric"),
 					unitDocumentId: workingGroupEntityId,
+					relatedUnitDocumentId: dariahEricEntityId,
+					status: assertLookupId(
+						unitStatusIds.get("is_part_of"),
+						'Missing organisational unit status "is_part_of".',
+					),
+					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
+				},
+				{
+					id: createId("relation:working-group-two-to-eric"),
+					unitDocumentId: secondWorkingGroupEntityId,
 					relatedUnitDocumentId: dariahEricEntityId,
 					status: assertLookupId(
 						unitStatusIds.get("is_part_of"),
@@ -1075,6 +1157,120 @@ async function main() {
 				},
 			]);
 
+			const [earlierCampaign] = await tx
+				.insert(schema.reportingCampaigns)
+				.values({
+					id: createId("reporting-campaign:2025"),
+					year: 2025,
+					status: "closed",
+				})
+				.onConflictDoUpdate({
+					target: schema.reportingCampaigns.year,
+					set: { status: "closed" },
+				})
+				.returning({ id: schema.reportingCampaigns.id });
+			assert(earlierCampaign);
+
+			await tx
+				.insert(schema.reportingCampaigns)
+				.values({
+					id: createId("reporting-campaign:2026"),
+					year: 2026,
+					status: "open",
+				})
+				.onConflictDoUpdate({
+					target: schema.reportingCampaigns.year,
+					set: { status: "open" },
+				});
+
+			const [countryReport] = await tx
+				.insert(schema.countryReports)
+				.values({
+					id: createId("country-report:2025"),
+					campaignId: earlierCampaign.id,
+					countryDocumentId: memberCountryEntityId,
+					status: "draft",
+					totalContributors: 12,
+					smallEvents: 4,
+					mediumEvents: 2,
+					largeEvents: 1,
+					veryLargeEvents: 0,
+				})
+				.onConflictDoUpdate({
+					target: [schema.countryReports.campaignId, schema.countryReports.countryDocumentId],
+					set: {
+						status: "draft",
+						totalContributors: 12,
+						smallEvents: 4,
+						mediumEvents: 2,
+						largeEvents: 1,
+						veryLargeEvents: 0,
+					},
+				})
+				.returning({ id: schema.countryReports.id });
+			assert(countryReport);
+
+			const [workingGroupReport] = await tx
+				.insert(schema.workingGroupReports)
+				.values({
+					id: createId("working-group-report:2025"),
+					campaignId: earlierCampaign.id,
+					workingGroupDocumentId: workingGroupEntityId,
+					status: "draft",
+					numberOfMembers: 18,
+					mailingList: "kitchen-sink-working-group@example.org",
+				})
+				.onConflictDoUpdate({
+					target: [
+						schema.workingGroupReports.campaignId,
+						schema.workingGroupReports.workingGroupDocumentId,
+					],
+					set: {
+						status: "draft",
+						numberOfMembers: 18,
+						mailingList: "kitchen-sink-working-group@example.org",
+					},
+				})
+				.returning({ id: schema.workingGroupReports.id });
+			assert(workingGroupReport);
+
+			await tx
+				.insert(schema.countryReportProjectContributions)
+				.values({
+					id: createId("country-report-project-contribution:2025"),
+					countryReportId: countryReport.id,
+					projectDocumentId: projectEntityId,
+					amountEuros: 48_500,
+				})
+				.onConflictDoUpdate({
+					target: [
+						schema.countryReportProjectContributions.countryReportId,
+						schema.countryReportProjectContributions.projectDocumentId,
+					],
+					set: { amountEuros: 48_500 },
+				});
+
+			await tx
+				.insert(schema.workingGroupReportSocialMedia)
+				.values([
+					{
+						id: createId("working-group-report-social:2025:website"),
+						workingGroupReportId: workingGroupReport.id,
+						socialMediaId: createId("social-media:website"),
+					},
+					{
+						id: createId("working-group-report-social:2025:mastodon"),
+						workingGroupReportId: workingGroupReport.id,
+						socialMediaId: createId("social-media:mastodon"),
+					},
+				])
+				.onConflictDoNothing({
+					target: [
+						schema.workingGroupReportSocialMedia.workingGroupReportId,
+						schema.workingGroupReportSocialMedia.socialMediaId,
+					],
+				});
+
 			await tx.insert(schema.projectsToOrganisationalUnits).values([
 				{
 					id: createId("project-org:coordinator-eric"),
@@ -1164,7 +1360,12 @@ async function main() {
 				["persons", [kitchenSinkPersonVersionId]],
 				[
 					"organisational_units",
-					[workingGroupVersionId, governanceBodyVersionId, memberCountryVersionId],
+					[
+						workingGroupVersionId,
+						secondWorkingGroupVersionId,
+						governanceBodyVersionId,
+						memberCountryVersionId,
+					],
 				],
 			]);
 
@@ -1359,6 +1560,7 @@ async function main() {
 			const relatedEntityOwners = [
 				projectEntityId,
 				workingGroupEntityId,
+				secondWorkingGroupEntityId,
 				governanceBodyEntityId,
 				memberCountryEntityId,
 				eventEntityId,

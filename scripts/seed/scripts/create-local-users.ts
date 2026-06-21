@@ -14,6 +14,11 @@ const recoveryCode = "LOCALPERSONARECOVERY";
 
 const personas = [
 	{
+		email: "local-admin@example.com",
+		name: "Local Administrator",
+		actor: { type: "admin" as const },
+	},
+	{
 		email: "local-country@example.com",
 		name: "Local Country Account",
 		actor: { type: "country" as const },
@@ -69,7 +74,7 @@ const personas = [
 		actor: {
 			type: "person" as const,
 			role: "is_chair_of" as const,
-			target: "working_group" as const,
+			target: "working_groups" as const,
 		},
 	},
 	{
@@ -154,9 +159,10 @@ async function main(): Promise<void> {
 	assert(encryptionKey.length === 16, "AUTH_ENCRYPTION_KEY must be 16 bytes encoded as hex.");
 	assert(totpKey.length === 20);
 
-	const [country, workingGroup, passwordHash] = await Promise.all([
+	const [country, workingGroup, secondWorkingGroup, passwordHash] = await Promise.all([
 		getKitchenSinkUnit("kitchen-sink-country", "country"),
 		getKitchenSinkUnit("kitchen-sink-working-group", "working_group"),
+		getKitchenSinkUnit("kitchen-sink-working-group-two", "working_group"),
 		hash(password, { memoryCost: 19_456, timeCost: 2, outputLen: 32, parallelism: 1 }),
 	]);
 
@@ -167,7 +173,10 @@ async function main(): Promise<void> {
 		if (persona.actor.type === "country") {
 			organisationalUnitDocumentId = country.documentId;
 		} else if (persona.actor.type === "person") {
-			personDocumentId = await getOrCreatePersonDocument(`local-persona-${persona.actor.role}`);
+			const personaPersonDocumentId = await getOrCreatePersonDocument(
+				`local-persona-${persona.actor.role}`,
+			);
+			personDocumentId = personaPersonDocumentId;
 			const role = await db.query.personRoleTypes.findFirst({
 				where: { type: persona.actor.role },
 				columns: { id: true },
@@ -176,20 +185,30 @@ async function main(): Promise<void> {
 
 			await db
 				.delete(schema.personsToOrganisationalUnits)
-				.where(eq(schema.personsToOrganisationalUnits.personDocumentId, personDocumentId));
-			await db.insert(schema.personsToOrganisationalUnits).values({
-				personDocumentId,
-				organisationalUnitDocumentId:
-					persona.actor.target === "country" ? country.documentId : workingGroup.documentId,
-				roleTypeId: role.id,
-				duration: { start: new Date("2025-01-01T00:00:00.000Z") },
-			});
+				.where(eq(schema.personsToOrganisationalUnits.personDocumentId, personaPersonDocumentId));
+			const targetDocumentIds =
+				persona.actor.target === "country"
+					? [country.documentId]
+					: persona.actor.target === "working_groups"
+						? [workingGroup.documentId, secondWorkingGroup.documentId]
+						: [workingGroup.documentId];
+			await db.insert(schema.personsToOrganisationalUnits).values(
+				targetDocumentIds.map((organisationalUnitDocumentId) => {
+					return {
+						personDocumentId: personaPersonDocumentId,
+						organisationalUnitDocumentId,
+						roleTypeId: role.id,
+						duration: { start: new Date("2025-01-01T00:00:00.000Z") },
+					};
+				}),
+			);
 		}
 
+		const isAdmin = persona.actor.type === "admin";
 		const userValues = {
 			name: persona.name,
-			role: "user" as const,
-			canManageAdmins: false,
+			role: isAdmin ? ("admin" as const) : ("user" as const),
+			canManageAdmins: isAdmin,
 			isEmailVerified: true,
 			passwordHash,
 			twoFactorTotpKey: encrypt(totpKey, encryptionKey),
@@ -220,12 +239,12 @@ async function main(): Promise<void> {
 		log.info(`Seeded ${persona.email}.`);
 	}
 
-	log.success(`Seeded ${personas.length} local non-admin personas.`);
+	log.success(`Seeded ${personas.length} local users.`);
 }
 
 main()
 	.catch((error: unknown) => {
-		log.error("Failed to create local non-admin personas.\n", error);
+		log.error("Failed to create local users.\n", error);
 		process.exitCode = 1;
 	})
 	// oxlint-disable-next-line typescript/no-misused-promises
