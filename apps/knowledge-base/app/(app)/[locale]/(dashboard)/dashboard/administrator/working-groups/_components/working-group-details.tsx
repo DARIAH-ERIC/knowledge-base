@@ -50,8 +50,11 @@ interface WorkingGroupDetailsProps {
 	}>;
 	personRelations: Array<PersonRelation>;
 	relations: Array<UnitRelation>;
-	publishAction: (documentId: string) => Promise<unknown>;
+	publishAction?: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
+	detailHref?: string;
+	editHref?: string | null;
+	enableAdminEntityLinks?: boolean;
 }
 
 export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): ReactNode {
@@ -68,6 +71,9 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 		selectedRelatedResources,
 		selectedSocialMediaItems,
 		selectedVersion,
+		detailHref = `/dashboard/administrator/working-groups/${workingGroup.entityVersion.entity.slug}/details`,
+		editHref = `/dashboard/administrator/working-groups/${workingGroup.entityVersion.entity.slug}/edit`,
+		enableAdminEntityLinks = true,
 	} = props;
 
 	const t = useExtracted();
@@ -76,16 +82,16 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 		<Fragment>
 			<div className="flex items-center justify-between">
 				<VersionSelector
-					draftHref={`/dashboard/administrator/working-groups/${workingGroup.entityVersion.entity.slug}/details`}
+					draftHref={detailHref}
 					hasDraft={hasDraft}
 					isPublished={isPublished}
-					publishedHref={`/dashboard/administrator/working-groups/${workingGroup.entityVersion.entity.slug}/details?version=published`}
+					publishedHref={`${detailHref}?version=published`}
 					selectedVersion={selectedVersion}
 				/>
 				<EntityLifecycleBar
 					discardDraftAction={discardDraftAction}
 					documentId={documentId}
-					editHref={`/dashboard/administrator/working-groups/${workingGroup.entityVersion.entity.slug}/edit`}
+					editHref={editHref ?? undefined}
 					hasDraft={hasDraft}
 					isPublished={isPublished}
 					publishAction={publishAction}
@@ -166,16 +172,20 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 						<ul className="flex flex-col gap-1">
 							{selectedRelatedEntities.map((relatedEntity) => (
 								<li key={relatedEntity.id} className="text-sm">
-									<RelationLink
-										className="font-medium"
-										href={getEntityDetailHref({
-											entityType: relatedEntity.entityType,
-											slug: relatedEntity.slug,
-											unitType: relatedEntity.unitType,
-										})}
-									>
-										{relatedEntity.name}
-									</RelationLink>
+									{enableAdminEntityLinks ? (
+										<RelationLink
+											className="font-medium"
+											href={getEntityDetailHref({
+												entityType: relatedEntity.entityType,
+												slug: relatedEntity.slug,
+												unitType: relatedEntity.unitType,
+											})}
+										>
+											{relatedEntity.name}
+										</RelationLink>
+									) : (
+										<span className="font-medium">{relatedEntity.name}</span>
+									)}
 								</li>
 							))}
 						</ul>
@@ -203,10 +213,14 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 								<RelationStatement
 									key={relation.id}
 									source={relation.personName}
-									sourceHref={getEntityDetailHref({
-										entityType: "persons",
-										slug: relation.personSlug,
-									})}
+									sourceHref={
+										enableAdminEntityLinks
+											? getEntityDetailHref({
+													entityType: "persons",
+													slug: relation.personSlug,
+												})
+											: undefined
+									}
 									relation={formatRoleType(relation.roleType)}
 									target={workingGroup.name}
 									targetType={formatRoleType(relation.targetUnitType)}
@@ -227,10 +241,14 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 									source={workingGroup.name}
 									relation={formatRoleType(relation.statusType)}
 									target={relation.relatedUnitName}
-									targetHref={getOrganisationalUnitDetailHref(
-										relation.relatedUnitType,
-										relation.relatedUnitSlug,
-									)}
+									targetHref={
+										enableAdminEntityLinks
+											? getOrganisationalUnitDetailHref(
+													relation.relatedUnitType,
+													relation.relatedUnitSlug,
+												)
+											: undefined
+									}
 									targetType={formatRoleType(relation.relatedUnitType)}
 									duration={relation.duration}
 								/>

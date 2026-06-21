@@ -13,11 +13,13 @@ import { useExtracted } from "next-intl";
 import { type ReactNode, useEffect, useState } from "react";
 
 import { useSidebarMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar";
+import type { UserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface CommandPaletteProps {
 	isAdmin: boolean;
 	isOpen: boolean;
+	organisationalUnitScopes: UserOrganisationalUnitScopes;
 	setIsOpen: (isOpen: boolean) => void;
 }
 
@@ -30,10 +32,10 @@ interface DashboardSearchResult {
 }
 
 export function CommandPalette(props: Readonly<CommandPaletteProps>): ReactNode {
-	const { isAdmin, isOpen, setIsOpen } = props;
+	const { isAdmin, isOpen, organisationalUnitScopes, setIsOpen } = props;
 
 	const t = useExtracted();
-	const sidebarMenu = useSidebarMenu(isAdmin);
+	const sidebarMenu = useSidebarMenu(isAdmin, organisationalUnitScopes);
 
 	const [searchInput, setSearchInput] = useState("");
 	const [searchResults, setSearchResults] = useState<Array<DashboardSearchResult>>([]);

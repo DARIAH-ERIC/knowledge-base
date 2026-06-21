@@ -24,6 +24,7 @@ import { Fragment, type ReactNode, useEffect } from "react";
 
 import { useDashboardCommandPalette } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-command-palette-context";
 import { Logo } from "@/components/logo";
+import type { UserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
 import { useMetadata } from "@/lib/i18n/metadata";
 import { usePathname } from "@/lib/navigation/navigation";
 
@@ -39,7 +40,10 @@ interface SidebarMenuSection {
 	items: Array<SidebarMenuItem>;
 }
 
-export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
+export function useSidebarMenu(
+	isAdmin: boolean,
+	organisationalUnitScopes: UserOrganisationalUnitScopes,
+): Array<SidebarMenuSection> {
 	const t = useExtracted();
 
 	const adminSection: SidebarMenuSection = {
@@ -306,6 +310,36 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 	return [
 		...(isAdmin ? [adminSection] : []),
 		...(isAdmin ? [knowledgeBaseSection] : []),
+		...(!isAdmin
+			? organisationalUnitScopes.countries.map((country) => {
+					return {
+						title: country.name,
+						items: [
+							{
+								href: `/dashboard/countries/${country.slug}`,
+								tooltip: t("National consortium"),
+								label: t("National consortium"),
+								icon: <ListBulletIcon />,
+							},
+						],
+					};
+				})
+			: []),
+		...(!isAdmin
+			? organisationalUnitScopes.workingGroups.map((workingGroup) => {
+					return {
+						title: workingGroup.name,
+						items: [
+							{
+								href: `/dashboard/working-groups/${workingGroup.slug}`,
+								tooltip: t("Working group"),
+								label: t("Working group"),
+								icon: <ListBulletIcon />,
+							},
+						],
+					};
+				})
+			: []),
 		reportingSection,
 		...(isAdmin ? [websiteSection] : []),
 	] satisfies Array<SidebarMenuSection>;
@@ -337,14 +371,15 @@ function getCurrentSidebarHref(
 
 interface DashboardSidebarProps extends SidebarProps {
 	isAdmin: boolean;
+	organisationalUnitScopes: UserOrganisationalUnitScopes;
 }
 
 export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactNode {
-	const { isAdmin, ...sidebarProps } = props;
+	const { isAdmin, organisationalUnitScopes, ...sidebarProps } = props;
 	const { state, isMobile, setIsOpenOnMobile } = useSidebar();
 	const { openCommandPalette } = useDashboardCommandPalette();
 	const pathname = usePathname();
-	const sidebarMenu = useSidebarMenu(isAdmin);
+	const sidebarMenu = useSidebarMenu(isAdmin, organisationalUnitScopes);
 	const currentHref = getCurrentSidebarHref(pathname, sidebarMenu);
 	const meta = useMetadata();
 	const t = useExtracted();

@@ -26,14 +26,11 @@ function assertAdminUser(user: Pick<User, "role">): void {
 	}
 }
 
-async function getOrganisationalUnitBySlugForAdmin(
-	currentUser: Pick<User, "role">,
+async function getOrganisationalUnitBySlug(
 	unitType: ManagedOrganisationalUnitType,
 	slug: string,
 	versionId?: string,
 ) {
-	assertAdminUser(currentUser);
-
 	return db.query.organisationalUnits.findFirst({
 		where:
 			versionId != null
@@ -81,9 +78,20 @@ export async function getOrganisationalUnitEditDataForAdmin(
 		publishedVersionId?: string | null;
 	},
 ) {
+	assertAdminUser(currentUser);
+	return getOrganisationalUnitEditData(params);
+}
+
+/** Caller must perform its own page-level authorisation before using this data loader. */
+export async function getOrganisationalUnitEditData(params: {
+	slug: string;
+	unitType: ManagedOrganisationalUnitType;
+	versionId?: string;
+	publishedVersionId?: string | null;
+}) {
 	const { slug, unitType, versionId } = params;
 
-	const unit = await getOrganisationalUnitBySlugForAdmin(currentUser, unitType, slug, versionId);
+	const unit = await getOrganisationalUnitBySlug(unitType, slug, versionId);
 
 	if (unit == null) {
 		return null;

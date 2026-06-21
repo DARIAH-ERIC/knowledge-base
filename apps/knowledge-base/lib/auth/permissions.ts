@@ -18,6 +18,51 @@ const memberRoles = ["is_member_of"] as const;
 const coordinatorRoles = ["national_coordinator", "national_coordinator_deputy"] as const;
 const coordinationStaffRoles = ["national_coordination_staff"] as const;
 const representativeRoles = ["national_representative", "national_representative_deputy"] as const;
+const countryReadRoles = [
+	...coordinatorRoles,
+	...coordinationStaffRoles,
+	...representativeRoles,
+] as const;
+
+async function getOrganisationalUnitPermissionTarget(documentId: string) {
+	const unit = await db
+		.select({ type: schema.organisationalUnitTypes.type })
+		.from(schema.documentLifecycle)
+		.innerJoin(
+			schema.organisationalUnits,
+			sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`,
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.where(eq(schema.documentLifecycle.documentId, documentId))
+		.limit(1)
+		.then((rows) => rows[0] ?? null);
+
+	if (unit?.type !== "national_consortium") {
+		return unit == null ? null : { documentId, type: unit.type };
+	}
+
+	const country = await db
+		.select({ documentId: schema.organisationalUnitsRelations.relatedUnitDocumentId })
+		.from(schema.organisationalUnitsRelations)
+		.innerJoin(
+			schema.organisationalUnitStatus,
+			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+		)
+		.where(
+			and(
+				eq(schema.organisationalUnitsRelations.unitDocumentId, documentId),
+				eq(schema.organisationalUnitStatus.status, "is_national_consortium_of"),
+				sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
+			),
+		)
+		.limit(1)
+		.then((rows) => rows[0] ?? null);
+
+	return country == null ? null : { documentId: country.documentId, type: "country" as const };
+}
 
 async function hasActiveRelation(
 	personDocumentId: string,
@@ -52,13 +97,40 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 	}
 
 	if (resource.type === "organisational_unit") {
-		if (action !== "update") {
+		if (action !== "read" && action !== "update") {
+			return false;
+		}
+
+		const target = await getOrganisationalUnitPermissionTarget(resource.id);
+		if (target == null) {
+			return false;
+		}
+
+		if (target.type === "country") {
+			if (action === "read" && user.organisationalUnitDocumentId === target.documentId) {
+				return true;
+			}
+			if (user.personDocumentId == null) {
+				return false;
+			}
+			return hasActiveRelation(
+				user.personDocumentId,
+				target.documentId,
+				action === "update" ? coordinatorRoles : countryReadRoles,
+			);
+		}
+
+		if (target.type !== "working_group") {
 			return false;
 		}
 		if (user.personDocumentId == null) {
 			return false;
 		}
-		return hasActiveRelation(user.personDocumentId, resource.id, chairRoles);
+		return hasActiveRelation(
+			user.personDocumentId,
+			resource.id,
+			action === "update" ? chairRoles : [...chairRoles, ...memberRoles],
+		);
 	}
 
 	if (resource.type === "working_group_report") {

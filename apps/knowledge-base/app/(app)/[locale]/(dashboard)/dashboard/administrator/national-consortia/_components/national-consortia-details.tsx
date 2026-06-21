@@ -48,8 +48,11 @@ interface NationalConsortiumDetailsProps {
 		description?: string;
 	}>;
 	relations: Array<UnitRelation>;
-	publishAction: (documentId: string) => Promise<unknown>;
+	publishAction?: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
+	detailHref?: string;
+	editHref?: string | null;
+	enableAdminEntityLinks?: boolean;
 }
 
 export function NationalConsortiumDetails(
@@ -67,6 +70,9 @@ export function NationalConsortiumDetails(
 		selectedRelatedResources,
 		selectedSocialMediaItems,
 		selectedVersion,
+		detailHref = `/dashboard/administrator/national-consortia/${nationalConsortium.entityVersion.entity.slug}/details`,
+		editHref = `/dashboard/administrator/national-consortia/${nationalConsortium.entityVersion.entity.slug}/edit`,
+		enableAdminEntityLinks = true,
 	} = props;
 
 	const t = useExtracted();
@@ -75,16 +81,16 @@ export function NationalConsortiumDetails(
 		<Fragment>
 			<div className="flex items-center justify-between">
 				<VersionSelector
-					draftHref={`/dashboard/administrator/national-consortia/${nationalConsortium.entityVersion.entity.slug}/details`}
+					draftHref={detailHref}
 					hasDraft={hasDraft}
 					isPublished={isPublished}
-					publishedHref={`/dashboard/administrator/national-consortia/${nationalConsortium.entityVersion.entity.slug}/details?version=published`}
+					publishedHref={`${detailHref}?version=published`}
 					selectedVersion={selectedVersion}
 				/>
 				<EntityLifecycleBar
 					discardDraftAction={discardDraftAction}
 					documentId={documentId}
-					editHref={`/dashboard/administrator/national-consortia/${nationalConsortium.entityVersion.entity.slug}/edit`}
+					editHref={editHref ?? undefined}
 					hasDraft={hasDraft}
 					isPublished={isPublished}
 					publishAction={publishAction}
@@ -168,16 +174,20 @@ export function NationalConsortiumDetails(
 						<ul className="flex flex-col gap-1">
 							{selectedRelatedEntities.map((relatedEntity) => (
 								<li key={relatedEntity.id} className="text-sm">
-									<RelationLink
-										className="font-medium"
-										href={getEntityDetailHref({
-											entityType: relatedEntity.entityType,
-											slug: relatedEntity.slug,
-											unitType: relatedEntity.unitType,
-										})}
-									>
-										{relatedEntity.name}
-									</RelationLink>
+									{enableAdminEntityLinks ? (
+										<RelationLink
+											className="font-medium"
+											href={getEntityDetailHref({
+												entityType: relatedEntity.entityType,
+												slug: relatedEntity.slug,
+												unitType: relatedEntity.unitType,
+											})}
+										>
+											{relatedEntity.name}
+										</RelationLink>
+									) : (
+										<span className="font-medium">{relatedEntity.name}</span>
+									)}
 								</li>
 							))}
 						</ul>
@@ -207,10 +217,14 @@ export function NationalConsortiumDetails(
 									source={nationalConsortium.name}
 									relation={formatRoleType(relation.statusType)}
 									target={relation.relatedUnitName}
-									targetHref={getOrganisationalUnitDetailHref(
-										relation.relatedUnitType,
-										relation.relatedUnitSlug,
-									)}
+									targetHref={
+										enableAdminEntityLinks
+											? getOrganisationalUnitDetailHref(
+													relation.relatedUnitType,
+													relation.relatedUnitSlug,
+												)
+											: undefined
+									}
 									targetType={formatRoleType(relation.relatedUnitType)}
 									duration={relation.duration}
 								/>

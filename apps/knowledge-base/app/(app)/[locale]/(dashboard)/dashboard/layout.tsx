@@ -10,6 +10,7 @@ import { DashboardSidebarNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/main";
 import { SkipLink } from "@/components/skip-link";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { getUserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
 
 interface DashbardLayoutProps extends LayoutProps<"/[locale]/dashboard"> {
 	breadcrumbs: ReactNode;
@@ -33,14 +34,22 @@ export default async function DashbardLayout(
 	const defaultOpen = sidebarState ? sidebarState.value === "true" : true;
 
 	const { user } = await assertAuthenticated();
+	const organisationalUnitScopes = await getUserOrganisationalUnitScopes(user);
 
 	return (
 		<Fragment>
 			<SkipLink href={`#${mainContentId}`}>{t("Skip to main content")}</SkipLink>
 
 			<SidebarProvider defaultOpen={defaultOpen}>
-				<DashboardCommandPaletteProvider isAdmin={user.role === "admin"}>
-					<DashboardSidebar collapsible="dock" isAdmin={user.role === "admin"} />
+				<DashboardCommandPaletteProvider
+					isAdmin={user.role === "admin"}
+					organisationalUnitScopes={organisationalUnitScopes}
+				>
+					<DashboardSidebar
+						collapsible="dock"
+						isAdmin={user.role === "admin"}
+						organisationalUnitScopes={organisationalUnitScopes}
+					/>
 
 					<SidebarInset>
 						<DashboardSidebarNav breadcrumbs={breadcrumbs} user={user} />
