@@ -8,10 +8,13 @@ import { createCampusCurriculum, createCampusResource } from "./campus";
 import { createEpisciencesDocument } from "./episciences";
 import { createSshocItem } from "./sshoc";
 import {
-	type ZoteroCollectionLookup,
 	type ZoteroJsonItemData,
-	createZoteroItem,
-	isZoteroItemInCollection,
+	// NOTE: Zotero -> Typesense sync is temporarily disabled while the data in Zotero is being
+	// curated for quality. To re-enable, restore these imports, `buildZoteroCollectionLookup`, and
+	// the zotero mapping in `createSearchIndexResourceDocuments` below.
+	// type ZoteroCollectionLookup,
+	// createZoteroItem,
+	// isZoteroItemInCollection,
 } from "./zotero";
 
 export interface SearchIndexResourceSourceData {
@@ -37,15 +40,16 @@ export interface CreateSearchIndexResourceDocumentsParams {
 	orgUnits: OrgUnitResourceLookups;
 }
 
-function buildZoteroCollectionLookup(
-	zoteroCollections: Array<ZoteroCollection>,
-): ZoteroCollectionLookup {
-	const namesByKey = new Map<string, string>();
-	for (const collection of zoteroCollections) {
-		namesByKey.set(collection.key, collection.data.name);
-	}
-	return { namesByKey };
-}
+// NOTE: temporarily disabled together with the zotero source (see note above).
+// function buildZoteroCollectionLookup(
+// 	zoteroCollections: Array<ZoteroCollection>,
+// ): ZoteroCollectionLookup {
+// 	const namesByKey = new Map<string, string>();
+// 	for (const collection of zoteroCollections) {
+// 		namesByKey.set(collection.key, collection.data.name);
+// 	}
+// 	return { namesByKey };
+// }
 
 export function createSearchIndexResourceDocuments(
 	params: CreateSearchIndexResourceDocumentsParams,
@@ -56,20 +60,22 @@ export function createSearchIndexResourceDocuments(
 		campusResources,
 		episciencesDocuments,
 		sshocItems,
-		zoteroItems,
-		zoteroCollections,
+		// NOTE: zotero source temporarily disabled (see note above).
+		// zoteroItems,
+		// zoteroCollections,
 	} = sourceData;
 
-	const zoteroCollectionLookup = buildZoteroCollectionLookup(zoteroCollections);
+	// const zoteroCollectionLookup = buildZoteroCollectionLookup(zoteroCollections);
 
 	return [
 		...sshocItems.map((item) => createSshocItem(item, sshocMarketplaceBaseUrl, orgUnits)),
 		...campusResources.map((item) => createCampusResource(item)),
 		...campusCurricula.map((item) => createCampusCurriculum(item)),
 		...episciencesDocuments.map((item) => createEpisciencesDocument(item)),
-		...zoteroItems
-			.filter((item) => isZoteroItemInCollection(item))
-			.map((item) => createZoteroItem(item, zoteroCollectionLookup, orgUnits)),
+		// NOTE: zotero source temporarily disabled (see note above).
+		// ...zoteroItems
+		// 	.filter((item) => isZoteroItemInCollection(item))
+		// 	.map((item) => createZoteroItem(item, zoteroCollectionLookup, orgUnits)),
 	];
 }
 
