@@ -1323,12 +1323,14 @@ async function main() {
 								["is_chair_of_wg", 5_500],
 								["is_member_of_jrc", 8_250],
 							] as const
-						).map(([roleType, amount]) => {return {
-							id: createId(`reporting-campaign-contribution-amount:${campaign.year}:${roleType}`),
-							campaignId: campaign.id,
-							roleType,
-							amount,
-						}}),
+						).map(([roleType, amount]) => {
+							return {
+								id: createId(`reporting-campaign-contribution-amount:${campaign.year}:${roleType}`),
+								campaignId: campaign.id,
+								roleType,
+								amount,
+							};
+						}),
 					)
 					.onConflictDoUpdate({
 						target: [
@@ -1349,12 +1351,14 @@ async function main() {
 								["very_large", 10_000],
 								["dariah_commissioned", 50_000],
 							] as const
-						).map(([eventType, amount]) => {return {
-							id: createId(`reporting-campaign-event-amount:${campaign.year}:${eventType}`),
-							campaignId: campaign.id,
-							eventType,
-							amount,
-						}}),
+						).map(([eventType, amount]) => {
+							return {
+								id: createId(`reporting-campaign-event-amount:${campaign.year}:${eventType}`),
+								campaignId: campaign.id,
+								eventType,
+								amount,
+							};
+						}),
 					)
 					.onConflictDoUpdate({
 						target: [
@@ -1372,12 +1376,14 @@ async function main() {
 								["website", 5_000],
 								["other", 2_000],
 							] as const
-						).map(([category, amount]) => {return {
-							id: createId(`reporting-campaign-social-media-amount:${campaign.year}:${category}`),
-							campaignId: campaign.id,
-							category,
-							amount,
-						}}),
+						).map(([category, amount]) => {
+							return {
+								id: createId(`reporting-campaign-social-media-amount:${campaign.year}:${category}`),
+								campaignId: campaign.id,
+								category,
+								amount,
+							};
+						}),
 					)
 					.onConflictDoUpdate({
 						target: [
@@ -1398,13 +1404,15 @@ async function main() {
 								["very_large", 500_000, 61_875],
 								["core", null, 82_500],
 							] as const
-						).map(([serviceSize, visitsThreshold, amount]) => {return {
-							id: createId(`reporting-campaign-service-size:${campaign.year}:${serviceSize}`),
-							campaignId: campaign.id,
-							serviceSize,
-							visitsThreshold,
-							amount,
-						}}),
+						).map(([serviceSize, visitsThreshold, amount]) => {
+							return {
+								id: createId(`reporting-campaign-service-size:${campaign.year}:${serviceSize}`),
+								campaignId: campaign.id,
+								serviceSize,
+								visitsThreshold,
+								amount,
+							};
+						}),
 					)
 					.onConflictDoUpdate({
 						target: [
