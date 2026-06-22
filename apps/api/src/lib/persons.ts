@@ -7,6 +7,8 @@ export interface PersonPosition {
 	role: (typeof schema.personRoleTypesEnum)[number];
 	name: string;
 	type: (typeof schema.organisationalUnitTypesEnum)[number];
+	/** Optional free-text note describing the person↔org relation. */
+	description: string | null;
 }
 
 // Positions are surfaced in a fixed hierarchy of relation types so the order is consistent across
@@ -61,6 +63,7 @@ export async function getPersonPositions(
 			role: schema.personRoleTypes.type,
 			name: schema.organisationalUnits.name,
 			type: schema.organisationalUnitTypes.type,
+			description: schema.personsToOrganisationalUnits.description,
 		})
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(
@@ -97,7 +100,12 @@ export async function getPersonPositions(
 
 	for (const row of rows) {
 		const items = rowsByPerson.get(row.personId) ?? [];
-		items.push({ role: row.role, name: row.name, type: row.type });
+		items.push({
+			role: row.role,
+			name: row.name,
+			type: row.type,
+			description: row.description,
+		});
 		rowsByPerson.set(row.personId, items);
 	}
 

@@ -176,6 +176,7 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 			licenseName: schema.licenses.name,
 			licenseUrl: schema.licenses.url,
 			roleType: schema.personRoleTypes.type,
+			description: schema.personsToOrganisationalUnits.description,
 		})
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(

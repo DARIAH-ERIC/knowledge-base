@@ -31,6 +31,7 @@ interface GovernanceBodyPerson {
 	slug: string;
 	role: (typeof schema.personRoleTypesEnum)[number];
 	duration: { start: string; end: string | null };
+	description: string | null;
 }
 
 // Governance bodies use a single role vocabulary, and a person is not expected to hold more than one
@@ -80,6 +81,7 @@ function mapGovernanceBodyPerson(
 		licenseUrl: string | null;
 		role: (typeof schema.personRoleTypesEnum)[number];
 		duration: { start: Date; end?: Date | null };
+		description: string | null;
 	},
 	positions: Awaited<ReturnType<typeof getPersonPositions>>,
 ): GovernanceBodyPerson {
@@ -106,6 +108,7 @@ function mapGovernanceBodyPerson(
 			start: row.duration.start.toISOString(),
 			end: row.duration.end?.toISOString() ?? null,
 		},
+		description: row.description,
 	};
 }
 
@@ -144,6 +147,7 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			licenseUrl: schema.licenses.url,
 			role: schema.personRoleTypes.type,
 			duration: schema.personsToOrganisationalUnits.duration,
+			description: schema.personsToOrganisationalUnits.description,
 		})
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(
@@ -264,6 +268,7 @@ async function getActiveGovernanceBodyPersons(
 			licenseUrl: schema.licenses.url,
 			role: schema.personRoleTypes.type,
 			duration: schema.personsToOrganisationalUnits.duration,
+			description: schema.personsToOrganisationalUnits.description,
 		})
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(
