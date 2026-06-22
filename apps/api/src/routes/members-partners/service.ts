@@ -133,8 +133,12 @@ function mapPersonContributors(
 		licenseName: string | null;
 		licenseUrl: string | null;
 		role: string;
+		description: string | null;
 	}>,
-	positions: Map<string, Array<{ role: string; name: string; type: string }> | null>,
+	positions: Map<
+		string,
+		Array<{ role: string; name: string; type: string; description: string | null }> | null
+	>,
 ) {
 	return rows.map(({ imageKey, imageAlt, imageCaption, licenseName, licenseUrl, role, ...row }) => {
 		return {
@@ -555,6 +559,7 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 			licenseName: schema.licenses.name,
 			licenseUrl: schema.licenses.url,
 			role: schema.personRoleTypes.type,
+			description: schema.personsToOrganisationalUnits.description,
 		})
 		.from(schema.personsToOrganisationalUnits)
 		// person↔org relations are document-level; resolve the person to its published version and

@@ -51,6 +51,7 @@ function createItems(count: number) {
 					name: affiliationName,
 					summary: f.lorem.paragraph(),
 				},
+				description: f.lorem.sentence(),
 			};
 
 			return { entity, version, asset, person, affiliation };
@@ -127,6 +128,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 				organisationalUnitDocumentId: item.affiliation.entity.id,
 				roleTypeId: affiliatedRoleType.id,
 				duration: { start: f.date.past({ years: 5 }) },
+				description: item.affiliation.description,
 			};
 		}),
 	);
@@ -155,6 +157,7 @@ describe("persons", () => {
 					expect.objectContaining({
 						role: "is_affiliated_with",
 						name: item.affiliation.organisationalUnit.name,
+						description: item.affiliation.description,
 					}),
 				]);
 
@@ -196,6 +199,7 @@ describe("persons", () => {
 					expect.objectContaining({
 						role: "is_affiliated_with",
 						name: item.affiliation.organisationalUnit.name,
+						description: item.affiliation.description,
 					}),
 				]);
 
@@ -294,6 +298,7 @@ describe("persons", () => {
 					expect.objectContaining({
 						role: "is_affiliated_with",
 						name: item.affiliation.organisationalUnit.name,
+						description: item.affiliation.description,
 					}),
 				]);
 

@@ -48,6 +48,7 @@ export const SpotlightArticleSchema = v.pipe(
 							role: v.picklist(schema.personRoleTypesEnum),
 							name: v.string(),
 							type: v.picklist(schema.organisationalUnitTypesEnum),
+							description: v.nullable(v.string()),
 						}),
 					),
 				),

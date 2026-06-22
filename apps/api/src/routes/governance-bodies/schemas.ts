@@ -18,6 +18,7 @@ const GovernanceBodyPersonSchema = v.object({
 				role: v.picklist(schema.personRoleTypesEnum),
 				name: v.string(),
 				type: v.picklist(schema.organisationalUnitTypesEnum),
+				description: v.nullable(v.string()),
 			}),
 		),
 	),
@@ -28,6 +29,7 @@ const GovernanceBodyPersonSchema = v.object({
 		start: v.string(),
 		end: v.nullable(v.string()),
 	}),
+	description: v.nullable(v.string()),
 });
 
 export const GovernanceBodyBaseSchema = v.pipe(
