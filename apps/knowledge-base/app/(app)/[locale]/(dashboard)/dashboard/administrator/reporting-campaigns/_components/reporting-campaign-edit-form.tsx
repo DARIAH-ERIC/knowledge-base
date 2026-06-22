@@ -15,5 +15,11 @@ export function ReportingCampaignEditForm(
 ): ReactNode {
 	const { campaign } = props;
 
-	return <ReportingCampaignForm campaign={campaign} formAction={updateReportingCampaignAction} />;
+	return (
+		<ReportingCampaignForm
+			key={campaign.status}
+			campaign={campaign}
+			formAction={updateReportingCampaignAction}
+		/>
+	);
 }

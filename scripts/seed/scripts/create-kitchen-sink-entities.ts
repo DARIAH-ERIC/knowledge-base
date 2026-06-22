@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { assert, log } from "@acdh-oeaw/lib";
 import { type Database, type Transaction, createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
-import { eq, inArray } from "@dariah-eric/database/sql";
+import { eq, inArray, sql } from "@dariah-eric/database/sql";
 import { type ResourceDocument, resourceSources, resourceTypes } from "@dariah-eric/search";
 import { createSearchAdminService } from "@dariah-eric/search/admin";
 import { createStorageService } from "@dariah-eric/storage";
@@ -430,6 +430,14 @@ async function main() {
 				id: createId("entity:institution"),
 				versionId: createId("version:institution"),
 			};
+			const coordinatingInstitutionDocument = {
+				id: createId("entity:institution:coordinating"),
+				versionId: createId("version:institution:coordinating"),
+			};
+			const representativeInstitutionDocument = {
+				id: createId("entity:institution:representative"),
+				versionId: createId("version:institution:representative"),
+			};
 			const consortiumDocument = {
 				id: createId("entity:national-consortium"),
 				versionId: createId("version:national-consortium"),
@@ -544,6 +552,26 @@ async function main() {
 					),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink-institution",
+				},
+				{
+					id: coordinatingInstitutionDocument.id,
+					versionId: coordinatingInstitutionDocument.versionId,
+					typeId: assertLookupId(
+						entityTypeIds.get("organisational_units"),
+						'Missing entity type "organisational_units".',
+					),
+					statusId: publishedStatusId,
+					slug: "kitchen-sink-coordinating-institution",
+				},
+				{
+					id: representativeInstitutionDocument.id,
+					versionId: representativeInstitutionDocument.versionId,
+					typeId: assertLookupId(
+						entityTypeIds.get("organisational_units"),
+						'Missing entity type "organisational_units".',
+					),
+					statusId: publishedStatusId,
+					slug: "kitchen-sink-representative-institution",
 				},
 				{
 					id: consortiumDocument.id,
@@ -681,6 +709,18 @@ async function main() {
 			const memberCountryVersionId = entityIdsBySeedId.get(memberCountryDocument.id)!.versionId;
 			const institutionVersionId = entityIdsBySeedId.get(institutionDocument.id)!.versionId;
 			const institutionEntityId = entityIdsBySeedId.get(institutionDocument.id)!.documentId;
+			const coordinatingInstitutionVersionId = entityIdsBySeedId.get(
+				coordinatingInstitutionDocument.id,
+			)!.versionId;
+			const coordinatingInstitutionEntityId = entityIdsBySeedId.get(
+				coordinatingInstitutionDocument.id,
+			)!.documentId;
+			const representativeInstitutionVersionId = entityIdsBySeedId.get(
+				representativeInstitutionDocument.id,
+			)!.versionId;
+			const representativeInstitutionEntityId = entityIdsBySeedId.get(
+				representativeInstitutionDocument.id,
+			)!.documentId;
 			const consortiumVersionId = entityIdsBySeedId.get(consortiumDocument.id)!.versionId;
 			const consortiumEntityId = entityIdsBySeedId.get(consortiumDocument.id)!.documentId;
 			const kitchenSinkPersonEntityId = entityIdsBySeedId.get(
@@ -900,6 +940,32 @@ async function main() {
 				sshocMarketplaceActorId: 9005,
 			});
 			await upsertById(tx, schema.organisationalUnits, {
+				id: coordinatingInstitutionVersionId,
+				name: "Kitchen Sink Coordinating Institution",
+				acronym: "KSCI",
+				summary: "The national coordinating institution of the member country in the ERIC.",
+				metadata: { city: "Vienna" },
+				imageId: createId("asset:image"),
+				typeId: assertLookupId(
+					unitTypeIds.get("institution"),
+					'Missing organisational unit type "institution".',
+				),
+				sshocMarketplaceActorId: 9008,
+			});
+			await upsertById(tx, schema.organisationalUnits, {
+				id: representativeInstitutionVersionId,
+				name: "Kitchen Sink Representative Institution",
+				acronym: "KSRI",
+				summary: "The national representative institution of the member country in the ERIC.",
+				metadata: { city: "Vienna" },
+				imageId: createId("asset:image"),
+				typeId: assertLookupId(
+					unitTypeIds.get("institution"),
+					'Missing organisational unit type "institution".',
+				),
+				sshocMarketplaceActorId: 9009,
+			});
+			await upsertById(tx, schema.organisationalUnits, {
 				id: consortiumVersionId,
 				name: "Kitchen Sink National Consortium",
 				acronym: "KSNC",
@@ -1037,6 +1103,8 @@ async function main() {
 						secondWorkingGroupEntityId,
 						memberCountryEntityId,
 						institutionEntityId,
+						coordinatingInstitutionEntityId,
+						representativeInstitutionEntityId,
 						consortiumEntityId,
 					]),
 				);
@@ -1093,6 +1161,46 @@ async function main() {
 					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
 				},
 				{
+					id: createId("relation:coordinating-institution-to-eric"),
+					unitDocumentId: coordinatingInstitutionEntityId,
+					relatedUnitDocumentId: dariahEricEntityId,
+					status: assertLookupId(
+						unitStatusIds.get("is_national_coordinating_institution_in"),
+						'Missing organisational unit status "is_national_coordinating_institution_in".',
+					),
+					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
+				},
+				{
+					id: createId("relation:coordinating-institution-to-country"),
+					unitDocumentId: coordinatingInstitutionEntityId,
+					relatedUnitDocumentId: memberCountryEntityId,
+					status: assertLookupId(
+						unitStatusIds.get("is_located_in"),
+						'Missing organisational unit status "is_located_in".',
+					),
+					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
+				},
+				{
+					id: createId("relation:representative-institution-to-eric"),
+					unitDocumentId: representativeInstitutionEntityId,
+					relatedUnitDocumentId: dariahEricEntityId,
+					status: assertLookupId(
+						unitStatusIds.get("is_national_representative_institution_in"),
+						'Missing organisational unit status "is_national_representative_institution_in".',
+					),
+					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
+				},
+				{
+					id: createId("relation:representative-institution-to-country"),
+					unitDocumentId: representativeInstitutionEntityId,
+					relatedUnitDocumentId: memberCountryEntityId,
+					status: assertLookupId(
+						unitStatusIds.get("is_located_in"),
+						'Missing organisational unit status "is_located_in".',
+					),
+					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
+				},
+				{
 					id: createId("relation:consortium-to-country"),
 					unitDocumentId: consortiumEntityId,
 					relatedUnitDocumentId: memberCountryEntityId,
@@ -1109,6 +1217,16 @@ async function main() {
 					id: createId("person-org:wg-chair"),
 					personDocumentId: kitchenSinkPersonEntityId,
 					organisationalUnitDocumentId: workingGroupEntityId,
+					roleTypeId: assertLookupId(
+						personRoleIds.get("is_chair_of"),
+						'Missing person role type "is_chair_of".',
+					),
+					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
+				},
+				{
+					id: createId("person-org:working-group-two-chair"),
+					personDocumentId: relatedPersonEntityId,
+					organisationalUnitDocumentId: secondWorkingGroupEntityId,
 					roleTypeId: assertLookupId(
 						personRoleIds.get("is_chair_of"),
 						'Missing person role type "is_chair_of".',
@@ -1171,7 +1289,7 @@ async function main() {
 				.returning({ id: schema.reportingCampaigns.id });
 			assert(earlierCampaign);
 
-			await tx
+			const [laterCampaign] = await tx
 				.insert(schema.reportingCampaigns)
 				.values({
 					id: createId("reporting-campaign:2026"),
@@ -1181,7 +1299,140 @@ async function main() {
 				.onConflictDoUpdate({
 					target: schema.reportingCampaigns.year,
 					set: { status: "open" },
-				});
+				})
+				.returning({ id: schema.reportingCampaigns.id });
+			assert(laterCampaign);
+
+			// Campaign configuration (DARIAH "Policy on the financial value of services" lump sums).
+			// Seeded for both campaigns so the country report's operational-cost calculation produces a
+			// real total that can be compared against the per-country threshold. Amounts mirror the
+			// policy fixture used in `test/reporting/calculate-operational-cost.test.ts`.
+			for (const campaign of [
+				{ id: earlierCampaign.id, year: 2025 },
+				{ id: laterCampaign.id, year: 2026 },
+			]) {
+				await tx
+					.insert(schema.reportingCampaignContributionAmounts)
+					.values(
+						(
+							[
+								["national_coordinator", 11_000],
+								["national_coordinator_deputy", 2_500],
+								["is_chair_of_jrc", 5_500],
+								["is_chair_of_ncc", 5_500],
+								["is_chair_of_wg", 5_500],
+								["is_member_of_jrc", 8_250],
+							] as const
+						).map(([roleType, amount]) => ({
+							id: createId(`reporting-campaign-contribution-amount:${campaign.year}:${roleType}`),
+							campaignId: campaign.id,
+							roleType,
+							amount,
+						})),
+					)
+					.onConflictDoUpdate({
+						target: [
+							schema.reportingCampaignContributionAmounts.campaignId,
+							schema.reportingCampaignContributionAmounts.roleType,
+						],
+						set: { amount: sql`excluded.amount` },
+					});
+
+				await tx
+					.insert(schema.reportingCampaignEventAmounts)
+					.values(
+						(
+							[
+								["small", 500],
+								["medium", 2_500],
+								["large", 5_000],
+								["very_large", 10_000],
+								["dariah_commissioned", 50_000],
+							] as const
+						).map(([eventType, amount]) => ({
+							id: createId(`reporting-campaign-event-amount:${campaign.year}:${eventType}`),
+							campaignId: campaign.id,
+							eventType,
+							amount,
+						})),
+					)
+					.onConflictDoUpdate({
+						target: [
+							schema.reportingCampaignEventAmounts.campaignId,
+							schema.reportingCampaignEventAmounts.eventType,
+						],
+						set: { amount: sql`excluded.amount` },
+					});
+
+				await tx
+					.insert(schema.reportingCampaignSocialMediaAmounts)
+					.values(
+						(
+							[
+								["website", 5_000],
+								["other", 2_000],
+							] as const
+						).map(([category, amount]) => ({
+							id: createId(`reporting-campaign-social-media-amount:${campaign.year}:${category}`),
+							campaignId: campaign.id,
+							category,
+							amount,
+						})),
+					)
+					.onConflictDoUpdate({
+						target: [
+							schema.reportingCampaignSocialMediaAmounts.campaignId,
+							schema.reportingCampaignSocialMediaAmounts.category,
+						],
+						set: { amount: sql`excluded.amount` },
+					});
+
+				await tx
+					.insert(schema.reportingCampaignServiceSizes)
+					.values(
+						(
+							[
+								["small", null, 6_875],
+								["medium", 7_000, 20_625],
+								["large", 170_000, 41_250],
+								["very_large", 500_000, 61_875],
+								["core", null, 82_500],
+							] as const
+						).map(([serviceSize, visitsThreshold, amount]) => ({
+							id: createId(`reporting-campaign-service-size:${campaign.year}:${serviceSize}`),
+							campaignId: campaign.id,
+							serviceSize,
+							visitsThreshold,
+							amount,
+						})),
+					)
+					.onConflictDoUpdate({
+						target: [
+							schema.reportingCampaignServiceSizes.campaignId,
+							schema.reportingCampaignServiceSizes.serviceSize,
+						],
+						set: {
+							visitsThreshold: sql`excluded.visits_threshold`,
+							amount: sql`excluded.amount`,
+						},
+					});
+
+				await tx
+					.insert(schema.reportingCampaignCountryThresholds)
+					.values({
+						id: createId(`reporting-campaign-country-threshold:${campaign.year}`),
+						campaignId: campaign.id,
+						countryDocumentId: memberCountryEntityId,
+						amount: 50_000,
+					})
+					.onConflictDoUpdate({
+						target: [
+							schema.reportingCampaignCountryThresholds.campaignId,
+							schema.reportingCampaignCountryThresholds.countryDocumentId,
+						],
+						set: { amount: 50_000 },
+					});
+			}
 
 			const [countryReport] = await tx
 				.insert(schema.countryReports)
