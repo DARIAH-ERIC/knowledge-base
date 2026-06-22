@@ -76,8 +76,10 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		sshoc,
 		sshocMarketplaceBaseUrl,
 		zenodo,
-		zotero,
-		zoteroGroupId,
+		// NOTE: zotero source temporarily disabled (see note in `resources.ts`). To re-enable, restore
+		// these and the zotero fetch in `fetchSearchIndexResourceSourceData` below.
+		// zotero,
+		// zoteroGroupId,
 		orgUnits,
 	} = params;
 
@@ -95,8 +97,10 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				campusCurriculaResult,
 				episciencesDocumentsResult,
 				zenodoRecordsResult,
-				zoteroItemsResult,
-				zoteroCollectionsResult,
+				// NOTE: zotero source temporarily disabled (see note in `resources.ts`). To re-enable,
+				// restore these results, the `yield*` unwrapping, and the return fields below.
+				// zoteroItemsResult,
+				// zoteroCollectionsResult,
 			] = await Promise.all([
 				getOrFetch(cache, "sshoc/items", () =>
 					sshoc.items.searchAll({
@@ -109,10 +113,12 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				getOrFetch(cache, "campus/curricula", () => campus.curricula.listAll()),
 				getOrFetch(cache, "episciences/documents", () => episciences.search.listAll()),
 				getOrFetch(cache, "zenodo/records", () => zenodo.records.listAll()),
-				getOrFetch(cache, "zotero/items", () => zotero.items.listAll({ groupId: zoteroGroupId })),
-				getOrFetch(cache, "zotero/collections", () =>
-					zotero.collections.listAll({ groupId: zoteroGroupId }),
-				),
+				// NOTE: zotero source temporarily disabled (see note above). The zotero api is prone to
+				// timeout errors, so we avoid fetching data we currently do not index.
+				// getOrFetch(cache, "zotero/items", () => zotero.items.listAll({ groupId: zoteroGroupId })),
+				// getOrFetch(cache, "zotero/collections", () =>
+				// 	zotero.collections.listAll({ groupId: zoteroGroupId }),
+				// ),
 			]);
 
 			const sshocItems = yield* sshocItemsResult;
@@ -120,8 +126,9 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 			const campusCurricula = yield* campusCurriculaResult;
 			const episciencesDocuments = yield* episciencesDocumentsResult;
 			const zenodoRecords = yield* zenodoRecordsResult;
-			const zoteroItems = yield* zoteroItemsResult;
-			const zoteroCollections = yield* zoteroCollectionsResult;
+			// NOTE: zotero source temporarily disabled (see note above).
+			// const zoteroItems = yield* zoteroItemsResult;
+			// const zoteroCollections = yield* zoteroCollectionsResult;
 
 			return Result.ok({
 				campusCurricula,
@@ -129,8 +136,9 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				episciencesDocuments,
 				sshocItems,
 				zenodoRecords,
-				zoteroItems,
-				zoteroCollections,
+				// NOTE: zotero source temporarily disabled (see note above).
+				// zoteroItems,
+				// zoteroCollections,
 			});
 		});
 

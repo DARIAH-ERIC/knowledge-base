@@ -612,6 +612,9 @@ importers:
       '@dariah-eric/client-sshoc':
         specifier: workspace:^
         version: link:../../packages/client-sshoc
+      '@dariah-eric/client-zenodo':
+        specifier: workspace:^
+        version: link:../../packages/client-zenodo
       '@dariah-eric/client-zotero':
         specifier: workspace:^
         version: link:../../packages/client-zotero
