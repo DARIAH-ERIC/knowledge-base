@@ -55,6 +55,7 @@ export async function syncResourcesSearchIndex(): Promise<SyncResourcesSearchInd
 
 	const zenodo = createZenodoClient({
 		baseUrl: env.ZENODO_API_BASE_URL,
+		apiKey: env.ZENODO_API_KEY,
 	});
 
 	const zotero = createZoteroClient({
