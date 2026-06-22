@@ -47,8 +47,7 @@ export async function WorkingGroupReportsListPage(
 						// Mirrors `isReportEditable` (lib/auth/permissions): admins always; otherwise
 						// only while the report is a `draft` and its campaign is `open`.
 						const isEditable =
-							isAdmin ||
-							(report.reportStatus === "draft" && report.campaignStatus === "open");
+							isAdmin || (report.reportStatus === "draft" && report.campaignStatus === "open");
 
 						return (
 							<li

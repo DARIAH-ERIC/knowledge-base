@@ -1621,6 +1621,7 @@ msgstr "Governance bodies"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-edit-form.tsx:95
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-edit-form.tsx:145
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx:361
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-step-nav.tsx:29
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx:89
 msgid "/XO6LE"
 msgstr "Institutions"
@@ -1870,8 +1871,8 @@ msgstr "Save and publish"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:124
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:119
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:144
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-reports-list-page.tsx:70
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-reports-list-page.tsx:70
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-reports-list-page.tsx:69
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-reports-list-page.tsx:69
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:109
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:118
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:132
@@ -2748,8 +2749,8 @@ msgstr "Observer"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx:128
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:113
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:138
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-reports-list-page.tsx:66
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-reports-list-page.tsx:66
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-reports-list-page.tsx:65
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-reports-list-page.tsx:65
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:130
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:132
@@ -3133,16 +3134,18 @@ msgstr "Comments"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/[id]/page.tsx:95
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/[id]/page.tsx:95
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-summary-screen.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/page.tsx:86
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-summary-screen.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/page.tsx:86
 msgid "TclprG"
 msgstr "Download PDF"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/[id]/page.tsx:103
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/[id]/page.tsx:103
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-summary-screen.tsx:87
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/page.tsx:86
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/page.tsx:94
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-summary-screen.tsx:87
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/page.tsx:86
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/page.tsx:94
 msgid "JudhTj"
 msgstr "Download JSON"
 
@@ -4727,7 +4730,6 @@ msgstr "Skip to main content"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-comments-section.tsx:28
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:110
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-step-nav.tsx:29
 msgid "z8XEBy"
 msgstr "Partner institutions"
 
