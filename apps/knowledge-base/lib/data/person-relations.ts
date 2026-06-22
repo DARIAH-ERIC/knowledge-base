@@ -27,6 +27,7 @@ export async function getPersonRelations(organisationalUnitDocumentId: string) {
 			roleType: schema.personRoleTypes.type,
 			duration: schema.personsToOrganisationalUnits.duration,
 			targetUnitType: schema.organisationalUnitTypes.type,
+			description: schema.personsToOrganisationalUnits.description,
 		})
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(

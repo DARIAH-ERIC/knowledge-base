@@ -8,6 +8,7 @@ import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
+import { Input } from "@dariah-eric/ui/input";
 import {
 	ModalBody,
 	ModalClose,
@@ -25,6 +26,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import { TextField } from "@dariah-eric/ui/text-field";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
@@ -72,6 +74,7 @@ interface ContributionDialogState {
 	organisationalUnit: AsyncOption | null;
 	durationStart: CalendarDate | null;
 	durationEnd: CalendarDate | null;
+	description: string;
 }
 
 const emptyDialog: ContributionDialogState = {
@@ -82,6 +85,7 @@ const emptyDialog: ContributionDialogState = {
 	organisationalUnit: null,
 	durationStart: null,
 	durationEnd: null,
+	description: "",
 };
 
 function formatRoleType(type: string): string {
@@ -253,6 +257,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 			},
 			durationStart: dateToCalendarDate(item.durationStart),
 			durationEnd: dateToCalendarDate(item.durationEnd),
+			description: item.description ?? "",
 		});
 	}
 
@@ -509,6 +514,19 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 							<DatePickerTrigger />
 							<FieldError />
 						</DatePicker>
+						<TextField
+							name="description"
+							onChange={(value) => {
+								setDialog((prev) => {
+									return { ...prev, description: value };
+								});
+							}}
+							value={dialog.description}
+						>
+							<Label>{t("Description")}</Label>
+							<Input />
+							<FieldError />
+						</TextField>
 						<FormStatus state={formState} />
 					</ModalBody>
 					<ModalFooter>

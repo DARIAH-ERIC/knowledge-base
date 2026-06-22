@@ -459,6 +459,7 @@ export class DatabaseService {
 			organisationalUnitId: string;
 			roleType: string;
 			duration: { start: Date; end?: Date };
+			description: string | null;
 		}>
 	> {
 		return this.db
@@ -467,6 +468,7 @@ export class DatabaseService {
 				organisationalUnitId: schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
 				roleType: schema.personRoleTypes.type,
 				duration: schema.personsToOrganisationalUnits.duration,
+				description: schema.personsToOrganisationalUnits.description,
 			})
 			.from(schema.personsToOrganisationalUnits)
 			.innerJoin(
@@ -484,6 +486,7 @@ export class DatabaseService {
 			relatedUnitId: string;
 			statusType: string;
 			duration: { start: Date; end?: Date };
+			description: string | null;
 		}>
 	> {
 		return this.db
@@ -493,6 +496,7 @@ export class DatabaseService {
 				relatedUnitId: schema.organisationalUnits.id,
 				statusType: schema.organisationalUnitStatus.status,
 				duration: schema.organisationalUnitsRelations.duration,
+				description: schema.organisationalUnitsRelations.description,
 			})
 			.from(schema.organisationalUnitsRelations)
 			.innerJoin(

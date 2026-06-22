@@ -8,6 +8,7 @@ import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
+import { Input } from "@dariah-eric/ui/input";
 import {
 	ModalBody,
 	ModalClose,
@@ -25,6 +26,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import { TextField } from "@dariah-eric/ui/text-field";
 import type { AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
@@ -119,6 +121,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 	const [editPerson, setEditPerson] = useState<ContributionPersonOption | null>(null);
 	const [editStartDate, setEditStartDate] = useState<CalendarDate | null>(null);
 	const [editEndDate, setEditEndDate] = useState<CalendarDate | null>(null);
+	const [editDescription, setEditDescription] = useState("");
 
 	const table = useClientTable({
 		items: localRelations,
@@ -156,6 +159,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							id: string;
 							durationStart: string;
 							durationEnd: string | null;
+							description: PersonRelation["description"];
 							targetUnitType: PersonRelation["targetUnitType"];
 							personSlug: PersonRelation["personSlug"];
 					  }
@@ -177,6 +181,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 								start: new Date(data.durationStart),
 								...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
 							},
+							description: data.description,
 						},
 					]);
 				}
@@ -198,6 +203,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 		});
 		setEditStartDate(dateToCalendarDate(relation.duration.start));
 		setEditEndDate(dateToCalendarDate(relation.duration.end));
+		setEditDescription(relation.description ?? "");
 	}
 
 	function editFormAction(formData: FormData) {
@@ -223,6 +229,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 									roleTypeId: option.roleTypeId,
 									roleType: option.roleType as PersonRelation["roleType"],
 									duration: { start, ...(end != null ? { end } : {}) },
+									description: editDescription.trim() !== "" ? editDescription.trim() : null,
 								}
 							: relation,
 					),
@@ -407,6 +414,12 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 									<FieldError />
 								</DatePicker>
 
+								<TextField name="description">
+									<Label>{t("Description")}</Label>
+									<Input />
+									<FieldError />
+								</TextField>
+
 								<input
 									name="organisationalUnitDocumentId"
 									type="hidden"
@@ -568,6 +581,11 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							<DatePickerTrigger />
 							<FieldError />
 						</DatePicker>
+						<TextField name="description" onChange={setEditDescription} value={editDescription}>
+							<Label>{t("Description")}</Label>
+							<Input />
+							<FieldError />
+						</TextField>
 						<FormStatus className="self-start" state={editState} />
 					</ModalBody>
 					<ModalFooter>

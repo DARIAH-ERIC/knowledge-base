@@ -170,6 +170,10 @@ export class AdminPersonsPage {
 		await this.page.keyboard.type(String(year));
 	}
 
+	async fillContributionDescription(value: string): Promise<void> {
+		await this.page.getByRole("textbox", { name: "Description" }).fill(value);
+	}
+
 	async submitAddContribution(): Promise<void> {
 		await waitForActionSuccess({
 			page: this.page,
@@ -230,6 +234,11 @@ export class AdminPersonsPage {
 		await this.page.keyboard.type(String(month).padStart(2, "0"));
 		await group.getByRole("spinbutton", { name: /year/i }).click();
 		await this.page.keyboard.type(String(year));
+	}
+
+	async fillEditContributionDescription(value: string): Promise<void> {
+		const dialog = this.page.getByRole("dialog", { name: "Edit contribution" });
+		await dialog.getByRole("textbox", { name: "Description" }).fill(value);
 	}
 
 	async saveEditContribution(): Promise<void> {

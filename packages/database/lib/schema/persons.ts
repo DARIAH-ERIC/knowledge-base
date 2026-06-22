@@ -75,6 +75,8 @@ export const personsToOrganisationalUnits = p.snakeCase.table(
 			.notNull()
 			.references(() => personRoleTypes.id),
 		duration: f.timestampRange("duration").notNull(),
+		/** Optional free-text note describing the relation. */
+		description: p.text("description"),
 		...f.timestamps(),
 	},
 	// The same (person, org, role) relation may recur over non-overlapping periods, so uniqueness is
