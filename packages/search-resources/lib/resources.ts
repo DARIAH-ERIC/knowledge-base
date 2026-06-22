@@ -1,12 +1,14 @@
 import type { DariahCampusCurriculum, DariahCampusResource } from "@dariah-eric/client-campus";
 import type { EpisciencesSearchDocument } from "@dariah-eric/client-episciences";
 import type { SearchItem } from "@dariah-eric/client-sshoc";
+import type { ZenodoRecord } from "@dariah-eric/client-zenodo";
 import type { ZoteroCollection, ZoteroJsonItem } from "@dariah-eric/client-zotero";
 import type { ResourceDocument, WebsiteDocument } from "@dariah-eric/search";
 
 import { createCampusCurriculum, createCampusResource } from "./campus";
 import { createEpisciencesDocument } from "./episciences";
 import { createSshocItem } from "./sshoc";
+import { createZenodoRecord } from "./zenodo";
 import type {
 	ZoteroJsonItemData,
 	// NOTE: Zotero -> Typesense sync is temporarily disabled while the data in Zotero is being
@@ -22,6 +24,7 @@ export interface SearchIndexResourceSourceData {
 	campusResources: Array<DariahCampusResource>;
 	episciencesDocuments: Array<EpisciencesSearchDocument>;
 	sshocItems: Array<SearchItem>;
+	zenodoRecords: Array<ZenodoRecord>;
 	zoteroItems: Array<ZoteroJsonItem<ZoteroJsonItemData>>;
 	zoteroCollections: Array<ZoteroCollection>;
 }
@@ -60,6 +63,7 @@ export function createSearchIndexResourceDocuments(
 		campusResources,
 		episciencesDocuments,
 		sshocItems,
+		zenodoRecords,
 		// NOTE: zotero source temporarily disabled (see note above).
 		// zoteroItems,
 		// zoteroCollections,
@@ -72,6 +76,7 @@ export function createSearchIndexResourceDocuments(
 		...campusResources.map((item) => createCampusResource(item)),
 		...campusCurricula.map((item) => createCampusCurriculum(item)),
 		...episciencesDocuments.map((item) => createEpisciencesDocument(item)),
+		...zenodoRecords.map((item) => createZenodoRecord(item)),
 		// NOTE: zotero source temporarily disabled (see note above).
 		// ...zoteroItems
 		// 	.filter((item) => isZoteroItemInCollection(item))

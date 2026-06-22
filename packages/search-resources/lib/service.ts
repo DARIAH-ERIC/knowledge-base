@@ -2,6 +2,7 @@ import { log } from "@acdh-oeaw/lib";
 import type { DariahCampusClient } from "@dariah-eric/client-campus";
 import type { EpisciencesClient } from "@dariah-eric/client-episciences";
 import type { SshocClient } from "@dariah-eric/client-sshoc";
+import type { ZenodoClient } from "@dariah-eric/client-zenodo";
 import type { ZoteroClient } from "@dariah-eric/client-zotero";
 import {
 	type ResourceDocument,
@@ -33,6 +34,7 @@ export interface CreateSearchResourcesServiceParams {
 	searchService: SearchService;
 	sshoc: SshocClient;
 	sshocMarketplaceBaseUrl: string;
+	zenodo: ZenodoClient;
 	zotero: ZoteroClient;
 	zoteroGroupId: string;
 	/**
@@ -73,6 +75,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		searchService,
 		sshoc,
 		sshocMarketplaceBaseUrl,
+		zenodo,
 		zotero,
 		zoteroGroupId,
 		orgUnits,
@@ -91,6 +94,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				campusResourcesResult,
 				campusCurriculaResult,
 				episciencesDocumentsResult,
+				zenodoRecordsResult,
 				zoteroItemsResult,
 				zoteroCollectionsResult,
 			] = await Promise.all([
@@ -104,6 +108,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				getOrFetch(cache, "campus/resources", () => campus.resources.listAll()),
 				getOrFetch(cache, "campus/curricula", () => campus.curricula.listAll()),
 				getOrFetch(cache, "episciences/documents", () => episciences.search.listAll()),
+				getOrFetch(cache, "zenodo/records", () => zenodo.records.listAll()),
 				getOrFetch(cache, "zotero/items", () => zotero.items.listAll({ groupId: zoteroGroupId })),
 				getOrFetch(cache, "zotero/collections", () =>
 					zotero.collections.listAll({ groupId: zoteroGroupId }),
@@ -114,6 +119,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 			const campusResources = yield* campusResourcesResult;
 			const campusCurricula = yield* campusCurriculaResult;
 			const episciencesDocuments = yield* episciencesDocumentsResult;
+			const zenodoRecords = yield* zenodoRecordsResult;
 			const zoteroItems = yield* zoteroItemsResult;
 			const zoteroCollections = yield* zoteroCollectionsResult;
 
@@ -122,6 +128,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				campusResources,
 				episciencesDocuments,
 				sshocItems,
+				zenodoRecords,
 				zoteroItems,
 				zoteroCollections,
 			});
