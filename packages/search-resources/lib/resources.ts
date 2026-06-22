@@ -7,8 +7,8 @@ import type { ResourceDocument, WebsiteDocument } from "@dariah-eric/search";
 import { createCampusCurriculum, createCampusResource } from "./campus";
 import { createEpisciencesDocument } from "./episciences";
 import { createSshocItem } from "./sshoc";
-import {
-	type ZoteroJsonItemData,
+import type {
+	ZoteroJsonItemData,
 	// NOTE: Zotero -> Typesense sync is temporarily disabled while the data in Zotero is being
 	// curated for quality. To re-enable, restore these imports, `buildZoteroCollectionLookup`, and
 	// the zotero mapping in `createSearchIndexResourceDocuments` below.
