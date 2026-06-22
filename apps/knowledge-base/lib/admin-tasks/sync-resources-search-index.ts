@@ -2,6 +2,7 @@ import { assert } from "@acdh-oeaw/lib";
 import { createDariahCampusClient } from "@dariah-eric/client-campus";
 import { createEpisciencesClient } from "@dariah-eric/client-episciences";
 import { createSshocClient } from "@dariah-eric/client-sshoc";
+import { createZenodoClient } from "@dariah-eric/client-zenodo";
 import { createZoteroClient } from "@dariah-eric/client-zotero";
 import { createSearchService } from "@dariah-eric/search";
 import { createSearchResourcesService, loadOrgUnitLookups } from "@dariah-eric/search-resources";
@@ -27,6 +28,7 @@ export async function syncResourcesSearchIndex(): Promise<SyncResourcesSearchInd
 		env.SSHOC_MARKETPLACE_BASE_URL,
 		"Missing environment variable: `SSHOC_MARKETPLACE_BASE_URL`.",
 	);
+	assert(env.ZENODO_API_BASE_URL, "Missing environment variable: `ZENODO_API_BASE_URL`.");
 	assert(env.ZOTERO_API_BASE_URL, "Missing environment variable: `ZOTERO_API_BASE_URL`.");
 	assert(env.ZOTERO_GROUP_ID, "Missing environment variable: `ZOTERO_GROUP_ID`.");
 
@@ -49,6 +51,10 @@ export async function syncResourcesSearchIndex(): Promise<SyncResourcesSearchInd
 		config: {
 			baseUrl: env.SSHOC_MARKETPLACE_API_BASE_URL,
 		},
+	});
+
+	const zenodo = createZenodoClient({
+		baseUrl: env.ZENODO_API_BASE_URL,
 	});
 
 	const zotero = createZoteroClient({
@@ -82,6 +88,7 @@ export async function syncResourcesSearchIndex(): Promise<SyncResourcesSearchInd
 		searchService,
 		sshoc,
 		sshocMarketplaceBaseUrl,
+		zenodo,
 		zotero,
 		zoteroGroupId,
 		orgUnits,

@@ -38,6 +38,7 @@
 		"@dariah-eric/client-campus": "workspace:^",
 		"@dariah-eric/client-episciences": "workspace:^",
 		"@dariah-eric/client-sshoc": "workspace:^",
+		"@dariah-eric/client-zenodo": "workspace:^",
 		"@dariah-eric/client-zotero": "workspace:^",
 		"@dariah-eric/database": "workspace:^",
 		"@dariah-eric/email": "workspace:^",

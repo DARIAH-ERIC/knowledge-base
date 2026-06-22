@@ -2,6 +2,7 @@ import { log } from "@acdh-oeaw/lib";
 import type { DariahCampusClient } from "@dariah-eric/client-campus";
 import type { EpisciencesClient } from "@dariah-eric/client-episciences";
 import type { SshocClient } from "@dariah-eric/client-sshoc";
+import type { ZenodoClient } from "@dariah-eric/client-zenodo";
 import type { ZoteroClient } from "@dariah-eric/client-zotero";
 import {
 	type ResourceDocument,
@@ -33,6 +34,7 @@ export interface CreateSearchResourcesServiceParams {
 	searchService: SearchService;
 	sshoc: SshocClient;
 	sshocMarketplaceBaseUrl: string;
+	zenodo: ZenodoClient;
 	zotero: ZoteroClient;
 	zoteroGroupId: string;
 	/**
@@ -73,8 +75,11 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		searchService,
 		sshoc,
 		sshocMarketplaceBaseUrl,
-		zotero,
-		zoteroGroupId,
+		zenodo,
+		// NOTE: zotero source temporarily disabled (see note in `resources.ts`). To re-enable, restore
+		// these and the zotero fetch in `fetchSearchIndexResourceSourceData` below.
+		// zotero,
+		// zoteroGroupId,
 		orgUnits,
 	} = params;
 
@@ -91,8 +96,11 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				campusResourcesResult,
 				campusCurriculaResult,
 				episciencesDocumentsResult,
-				zoteroItemsResult,
-				zoteroCollectionsResult,
+				zenodoRecordsResult,
+				// NOTE: zotero source temporarily disabled (see note in `resources.ts`). To re-enable,
+				// restore these results, the `yield*` unwrapping, and the return fields below.
+				// zoteroItemsResult,
+				// zoteroCollectionsResult,
 			] = await Promise.all([
 				getOrFetch(cache, "sshoc/items", () =>
 					sshoc.items.searchAll({
@@ -104,26 +112,33 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				getOrFetch(cache, "campus/resources", () => campus.resources.listAll()),
 				getOrFetch(cache, "campus/curricula", () => campus.curricula.listAll()),
 				getOrFetch(cache, "episciences/documents", () => episciences.search.listAll()),
-				getOrFetch(cache, "zotero/items", () => zotero.items.listAll({ groupId: zoteroGroupId })),
-				getOrFetch(cache, "zotero/collections", () =>
-					zotero.collections.listAll({ groupId: zoteroGroupId }),
-				),
+				getOrFetch(cache, "zenodo/records", () => zenodo.records.listAll()),
+				// NOTE: zotero source temporarily disabled (see note above). The zotero api is prone to
+				// timeout errors, so we avoid fetching data we currently do not index.
+				// getOrFetch(cache, "zotero/items", () => zotero.items.listAll({ groupId: zoteroGroupId })),
+				// getOrFetch(cache, "zotero/collections", () =>
+				// 	zotero.collections.listAll({ groupId: zoteroGroupId }),
+				// ),
 			]);
 
 			const sshocItems = yield* sshocItemsResult;
 			const campusResources = yield* campusResourcesResult;
 			const campusCurricula = yield* campusCurriculaResult;
 			const episciencesDocuments = yield* episciencesDocumentsResult;
-			const zoteroItems = yield* zoteroItemsResult;
-			const zoteroCollections = yield* zoteroCollectionsResult;
+			const zenodoRecords = yield* zenodoRecordsResult;
+			// NOTE: zotero source temporarily disabled (see note above).
+			// const zoteroItems = yield* zoteroItemsResult;
+			// const zoteroCollections = yield* zoteroCollectionsResult;
 
 			return Result.ok({
 				campusCurricula,
 				campusResources,
 				episciencesDocuments,
 				sshocItems,
-				zoteroItems,
-				zoteroCollections,
+				zenodoRecords,
+				// NOTE: zotero source temporarily disabled (see note above).
+				// zoteroItems,
+				// zoteroCollections,
 			});
 		});
 

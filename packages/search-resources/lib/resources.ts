@@ -1,29 +1,34 @@
 import type { DariahCampusCurriculum, DariahCampusResource } from "@dariah-eric/client-campus";
 import type { EpisciencesSearchDocument } from "@dariah-eric/client-episciences";
 import type { SearchItem } from "@dariah-eric/client-sshoc";
-import type { ZoteroCollection, ZoteroJsonItem } from "@dariah-eric/client-zotero";
+import type { ZenodoRecord } from "@dariah-eric/client-zenodo";
+// NOTE: zotero source temporarily disabled (see note below). To re-enable, restore these imports.
+// import type { ZoteroCollection, ZoteroJsonItem } from "@dariah-eric/client-zotero";
 import type { ResourceDocument, WebsiteDocument } from "@dariah-eric/search";
 
 import { createCampusCurriculum, createCampusResource } from "./campus";
 import { createEpisciencesDocument } from "./episciences";
 import { createSshocItem } from "./sshoc";
-import type {
-	ZoteroJsonItemData,
-	// NOTE: Zotero -> Typesense sync is temporarily disabled while the data in Zotero is being
-	// curated for quality. To re-enable, restore these imports, `buildZoteroCollectionLookup`, and
-	// the zotero mapping in `createSearchIndexResourceDocuments` below.
-	// type ZoteroCollectionLookup,
-	// createZoteroItem,
-	// isZoteroItemInCollection,
-} from "./zotero";
+import { createZenodoRecord } from "./zenodo";
+// NOTE: Zotero -> Typesense sync is temporarily disabled while the data in Zotero is being
+// curated for quality. To re-enable, restore these imports, `buildZoteroCollectionLookup`, and
+// the zotero mapping in `createSearchIndexResourceDocuments` below.
+// import type {
+// 	ZoteroJsonItemData,
+// 	type ZoteroCollectionLookup,
+// 	createZoteroItem,
+// 	isZoteroItemInCollection,
+// } from "./zotero";
 
 export interface SearchIndexResourceSourceData {
 	campusCurricula: Array<DariahCampusCurriculum>;
 	campusResources: Array<DariahCampusResource>;
 	episciencesDocuments: Array<EpisciencesSearchDocument>;
 	sshocItems: Array<SearchItem>;
-	zoteroItems: Array<ZoteroJsonItem<ZoteroJsonItemData>>;
-	zoteroCollections: Array<ZoteroCollection>;
+	zenodoRecords: Array<ZenodoRecord>;
+	// NOTE: zotero source temporarily disabled (see note above). To re-enable, restore these fields.
+	// zoteroItems: Array<ZoteroJsonItem<ZoteroJsonItemData>>;
+	// zoteroCollections: Array<ZoteroCollection>;
 }
 
 export interface OrgUnitResourceLookups {
@@ -60,6 +65,7 @@ export function createSearchIndexResourceDocuments(
 		campusResources,
 		episciencesDocuments,
 		sshocItems,
+		zenodoRecords,
 		// NOTE: zotero source temporarily disabled (see note above).
 		// zoteroItems,
 		// zoteroCollections,
@@ -72,6 +78,7 @@ export function createSearchIndexResourceDocuments(
 		...campusResources.map((item) => createCampusResource(item)),
 		...campusCurricula.map((item) => createCampusCurriculum(item)),
 		...episciencesDocuments.map((item) => createEpisciencesDocument(item)),
+		...zenodoRecords.map((item) => createZenodoRecord(item)),
 		// NOTE: zotero source temporarily disabled (see note above).
 		// ...zoteroItems
 		// 	.filter((item) => isZoteroItemInCollection(item))

@@ -538,7 +538,7 @@ importers:
         version: 10.3.1
       typesense:
         specifier: 'catalog:'
-        version: 3.0.6(@babel/runtime@7.29.2)
+        version: 3.0.6(@babel/runtime@7.29.7)
       valibot:
         specifier: 'catalog:'
         version: 1.4.1(typescript@6.0.3)
@@ -612,6 +612,9 @@ importers:
       '@dariah-eric/client-sshoc':
         specifier: workspace:^
         version: link:../../packages/client-sshoc
+      '@dariah-eric/client-zenodo':
+        specifier: workspace:^
+        version: link:../../packages/client-zenodo
       '@dariah-eric/client-zotero':
         specifier: workspace:^
         version: link:../../packages/client-zotero
@@ -1567,7 +1570,7 @@ importers:
         version: 6.0.3
       typesense:
         specifier: 'catalog:'
-        version: 3.0.6(@babel/runtime@7.29.2)
+        version: 3.0.6(@babel/runtime@7.29.7)
       valibot:
         specifier: 'catalog:'
         version: 1.4.1(typescript@6.0.3)
@@ -1583,9 +1586,18 @@ importers:
       '@dariah-eric/client-episciences':
         specifier: workspace:^
         version: link:../client-episciences
+      '@dariah-eric/client-hal':
+        specifier: workspace:^
+        version: link:../client-hal
+      '@dariah-eric/client-openaire':
+        specifier: workspace:^
+        version: link:../client-openaire
       '@dariah-eric/client-sshoc':
         specifier: workspace:^
         version: link:../client-sshoc
+      '@dariah-eric/client-zenodo':
+        specifier: workspace:^
+        version: link:../client-zenodo
       '@dariah-eric/client-zotero':
         specifier: workspace:^
         version: link:../client-zotero
@@ -2205,10 +2217,6 @@ packages:
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
-
-  '@babel/runtime@7.29.2':
-    resolution: {integrity: sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==}
-    engines: {node: '>=6.9.0'}
 
   '@babel/runtime@7.29.7':
     resolution: {integrity: sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==}
@@ -9514,8 +9522,6 @@ snapshots:
       '@babel/core': 7.29.0
       '@babel/helper-plugin-utils': 7.28.6
 
-  '@babel/runtime@7.29.2': {}
-
   '@babel/runtime@7.29.7': {}
 
   '@babel/template@7.28.6':
@@ -15758,9 +15764,9 @@ snapshots:
 
   typescript@6.0.3: {}
 
-  typesense@3.0.6(@babel/runtime@7.29.2):
+  typesense@3.0.6(@babel/runtime@7.29.7):
     dependencies:
-      '@babel/runtime': 7.29.2
+      '@babel/runtime': 7.29.7
       axios: 1.16.0
       loglevel: 1.9.2
       tslib: 2.8.1
