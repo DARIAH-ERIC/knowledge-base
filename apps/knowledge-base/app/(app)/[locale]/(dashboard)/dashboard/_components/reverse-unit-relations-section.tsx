@@ -8,6 +8,7 @@ import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
+import { Input } from "@dariah-eric/ui/input";
 import {
 	ModalBody,
 	ModalClose,
@@ -25,6 +26,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import { TextField } from "@dariah-eric/ui/text-field";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
@@ -137,6 +139,7 @@ export function ReverseUnitRelationsSection(
 	const [editUnitItem, setEditUnitItem] = useState<AsyncOption | null>(null);
 	const [editStartDate, setEditStartDate] = useState<CalendarDate | null>(null);
 	const [editEndDate, setEditEndDate] = useState<CalendarDate | null>(null);
+	const [editDescription, setEditDescription] = useState("");
 
 	const [selectedStatusId, setSelectedStatusId] = useState<string | null>(
 		singleStatus?.statusId ?? null,
@@ -172,7 +175,12 @@ export function ReverseUnitRelationsSection(
 
 			if (newState.status === "success" && option != null && sourceUnit != null) {
 				const data = newState.data as
-					| { id: string; durationStart: string; durationEnd: string | null }
+					| {
+							id: string;
+							durationStart: string;
+							durationEnd: string | null;
+							description: ReverseUnitRelation["description"];
+					  }
 					| undefined;
 
 				if (data != null) {
@@ -190,6 +198,7 @@ export function ReverseUnitRelationsSection(
 								start: new Date(data.durationStart),
 								...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
 							},
+							description: data.description,
 						},
 					]);
 				}
@@ -207,6 +216,7 @@ export function ReverseUnitRelationsSection(
 		setEditUnitItem({ id: relation.unitDocumentId, name: relation.unitName });
 		setEditStartDate(dateToCalendarDate(relation.duration.start));
 		setEditEndDate(dateToCalendarDate(relation.duration.end));
+		setEditDescription(relation.description ?? "");
 	}
 
 	function editFormAction(formData: FormData) {
@@ -236,6 +246,7 @@ export function ReverseUnitRelationsSection(
 									unitDocumentId: sourceUnit.id,
 									unitName: sourceUnit.name,
 									duration: { start, ...(end != null ? { end } : {}) },
+									description: editDescription.trim() !== "" ? editDescription.trim() : null,
 								}
 							: relation,
 					),
@@ -417,6 +428,12 @@ export function ReverseUnitRelationsSection(
 									<FieldError />
 								</DatePicker>
 
+								<TextField name="description">
+									<Label>{t("Description")}</Label>
+									<Input />
+									<FieldError />
+								</TextField>
+
 								<input name="relatedUnitDocumentId" type="hidden" value={relatedUnitDocumentId} />
 							</FormSection>
 
@@ -576,6 +593,11 @@ export function ReverseUnitRelationsSection(
 							<DatePickerTrigger />
 							<FieldError />
 						</DatePicker>
+						<TextField name="description" onChange={setEditDescription} value={editDescription}>
+							<Label>{t("Description")}</Label>
+							<Input />
+							<FieldError />
+						</TextField>
 						<FormStatus className="self-start" state={editState} />
 					</ModalBody>
 					<ModalFooter>

@@ -38,6 +38,7 @@ export interface ContributionsResult {
 		organisationalUnitType: string;
 		durationStart: Date;
 		durationEnd: Date | undefined;
+		description: string | null;
 	}>;
 	limit: number;
 	offset: number;
@@ -117,6 +118,7 @@ export async function getContributions(
 				organisationalUnitSlug: organisationalUnitEntities.slug,
 				organisationalUnitType: schema.organisationalUnitTypes.type,
 				duration: schema.personsToOrganisationalUnits.duration,
+				description: schema.personsToOrganisationalUnits.description,
 			})
 			.from(schema.personsToOrganisationalUnits)
 			.innerJoin(
@@ -202,6 +204,7 @@ export async function getContributions(
 				organisationalUnitType: row.organisationalUnitType,
 				durationStart: row.duration.start,
 				durationEnd: row.duration.end,
+				description: row.description,
 			};
 		}),
 		limit,
@@ -241,6 +244,7 @@ export async function getPersonContributions(personDocumentId: string) {
 			organisationalUnitName: schema.organisationalUnits.name,
 			organisationalUnitSlug: schema.entities.slug,
 			organisationalUnitType: schema.organisationalUnitTypes.type,
+			description: schema.personsToOrganisationalUnits.description,
 		})
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(

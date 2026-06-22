@@ -8,6 +8,7 @@ import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
+import { Input } from "@dariah-eric/ui/input";
 import {
 	ModalBody,
 	ModalClose,
@@ -25,6 +26,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import { TextField } from "@dariah-eric/ui/text-field";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
@@ -58,6 +60,7 @@ interface CreateContributionActionData {
 	durationEnd: string | null;
 	targetUnitType: PersonContribution["organisationalUnitType"];
 	organisationalUnitSlug: PersonContribution["organisationalUnitSlug"];
+	description: PersonContribution["description"];
 }
 
 async function fetchOrganisationalUnitOptionsPage(
@@ -122,6 +125,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 	const [editUnit, setEditUnit] = useState<AsyncOption | null>(null);
 	const [editStartDate, setEditStartDate] = useState<CalendarDate | null>(null);
 	const [editEndDate, setEditEndDate] = useState<CalendarDate | null>(null);
+	const [editDescription, setEditDescription] = useState("");
 
 	const table = useClientTable({
 		items: localContributions,
@@ -171,6 +175,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 							start: new Date(data.durationStart),
 							...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
 						},
+						description: data.description,
 					},
 				]);
 
@@ -191,6 +196,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 		});
 		setEditStartDate(dateToCalendarDate(contribution.duration.start));
 		setEditEndDate(dateToCalendarDate(contribution.duration.end));
+		setEditDescription(contribution.description ?? "");
 	}
 
 	function editFormAction(formData: FormData) {
@@ -215,6 +221,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									organisationalUnitDocumentId: unit.id,
 									organisationalUnitName: unit.name,
 									duration: { start, ...(end != null ? { end } : {}) },
+									description: editDescription.trim() !== "" ? editDescription.trim() : null,
 								}
 							: contribution,
 					),
@@ -423,6 +430,12 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									<FieldError />
 								</DatePicker>
 
+								<TextField name="description">
+									<Label>{t("Description")}</Label>
+									<Input />
+									<FieldError />
+								</TextField>
+
 								<input name="personDocumentId" type="hidden" value={personDocumentId} />
 							</FormSection>
 
@@ -588,6 +601,11 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 							<DatePickerTrigger />
 							<FieldError />
 						</DatePicker>
+						<TextField name="description" onChange={setEditDescription} value={editDescription}>
+							<Label>{t("Description")}</Label>
+							<Input />
+							<FieldError />
+						</TextField>
 						<FormStatus className="self-start" state={editState} />
 					</ModalBody>
 					<ModalFooter>

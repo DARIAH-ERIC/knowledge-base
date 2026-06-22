@@ -34,8 +34,14 @@ export const updateContributionAction = createServerAction(
 			});
 		}
 
-		const { id, personDocumentId, roleTypeId, organisationalUnitDocumentId, duration } =
-			result.output;
+		const {
+			id,
+			personDocumentId,
+			roleTypeId,
+			organisationalUnitDocumentId,
+			duration,
+			description,
+		} = result.output;
 
 		try {
 			const returned = await db.transaction(async (tx) => {
@@ -81,6 +87,7 @@ export const updateContributionAction = createServerAction(
 						organisationalUnitDocumentId,
 						roleTypeId,
 						duration,
+						description,
 					})
 					.where(eq(schema.personsToOrganisationalUnits.id, id));
 

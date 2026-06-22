@@ -34,6 +34,7 @@ export async function getUnitRelations(unitDocumentId: string) {
 			relatedUnitName: schema.organisationalUnits.name,
 			relatedUnitSlug: schema.entities.slug,
 			relatedUnitType: schema.organisationalUnitTypes.type,
+			description: schema.organisationalUnitsRelations.description,
 		})
 		.from(schema.organisationalUnitsRelations)
 		.innerJoin(
@@ -305,6 +306,7 @@ export async function getReverseUnitRelations(
 			unitName: schema.organisationalUnits.name,
 			unitSlug: schema.entities.slug,
 			unitType: schema.organisationalUnitTypes.type,
+			description: schema.organisationalUnitsRelations.description,
 		})
 		.from(schema.organisationalUnitsRelations)
 		.innerJoin(
@@ -428,6 +430,7 @@ export async function getEricInstitutionsForCountry(countryDocumentId: string) {
 			statusId: ericStatus.id,
 			statusType: ericStatus.status,
 			duration: ericRelations.duration,
+			description: ericRelations.description,
 		})
 		.from(ericRelations)
 		.innerJoin(ericStatus, eq(ericStatus.id, ericRelations.status))

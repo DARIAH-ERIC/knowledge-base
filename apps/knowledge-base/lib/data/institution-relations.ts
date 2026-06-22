@@ -35,6 +35,7 @@ export interface InstitutionRelationsResult {
 		relatedUnitType: string;
 		durationStart: Date;
 		durationEnd: Date | undefined;
+		description: string | null;
 	}>;
 	limit: number;
 	offset: number;
@@ -123,6 +124,7 @@ export async function getInstitutionRelations(
 				relatedUnitName: relatedOrganisationalUnits.name,
 				relatedUnitType: relatedOrganisationalUnitTypes.type,
 				duration: schema.organisationalUnitsRelations.duration,
+				description: schema.organisationalUnitsRelations.description,
 			})
 			.from(schema.organisationalUnitsRelations)
 			.innerJoin(
@@ -218,6 +220,7 @@ export async function getInstitutionRelations(
 				relatedUnitType: row.relatedUnitType,
 				durationStart: row.duration.start,
 				durationEnd: row.duration.end,
+				description: row.description,
 			};
 		}),
 		limit,

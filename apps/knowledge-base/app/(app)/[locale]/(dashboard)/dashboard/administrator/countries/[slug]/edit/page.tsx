@@ -115,6 +115,7 @@ export default async function DashboardAdministratorEditCountryPage(
 			unitSlug: institution.institutionSlug,
 			unitType: institution.institutionType,
 			duration: institution.duration,
+			description: institution.description,
 		};
 	});
 

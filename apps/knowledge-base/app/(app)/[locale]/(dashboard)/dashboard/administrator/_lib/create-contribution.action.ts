@@ -36,7 +36,8 @@ export const createContributionAction = createServerAction(
 			});
 		}
 
-		const { personDocumentId, roleTypeId, organisationalUnitDocumentId, duration } = result.output;
+		const { personDocumentId, roleTypeId, organisationalUnitDocumentId, duration, description } =
+			result.output;
 
 		try {
 			const returned = await db.transaction(async (tx) => {
@@ -93,6 +94,7 @@ export const createContributionAction = createServerAction(
 						organisationalUnitDocumentId,
 						roleTypeId,
 						duration,
+						description,
 					})
 					.returning({ id: schema.personsToOrganisationalUnits.id })
 					.then((rows) => rows[0]!);
@@ -131,6 +133,7 @@ export const createContributionAction = createServerAction(
 					id: returned.row.id,
 					durationStart: duration.start.toISOString(),
 					durationEnd: duration.end?.toISOString() ?? null,
+					description,
 					targetUnitType: returned.targetUnitType,
 					organisationalUnitSlug: returned.organisationalUnitSlug,
 					personSlug: returned.personSlug,

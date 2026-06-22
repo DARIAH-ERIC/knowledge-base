@@ -110,6 +110,8 @@ export const organisationalUnitsRelations = p.snakeCase.table(
 			.uuid("status")
 			.notNull()
 			.references(() => organisationalUnitStatus.id),
+		/** Optional free-text note describing the relation. */
+		description: p.text("description"),
 	},
 	// The same (unit, related unit, status) relation may recur over non-overlapping periods, so
 	// uniqueness is enforced by a GiST exclusion constraint on the duration (drizzle has no builder

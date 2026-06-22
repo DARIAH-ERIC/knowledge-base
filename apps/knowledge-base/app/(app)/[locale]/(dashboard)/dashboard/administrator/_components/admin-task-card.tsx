@@ -84,7 +84,7 @@ export function AdminTaskCard(props: Readonly<AdminTaskCardProps>): ReactNode {
 							<div>
 								<dt className="font-medium">{t("Result")}:</dt>
 								<dd className="font-mono text-[11px] break-all">
-									{JSON.stringify(latestJob.result)}
+									<pre>{JSON.stringify(latestJob.result)}</pre>
 								</dd>
 							</div>
 						) : null}

@@ -184,11 +184,14 @@ test.describe("admin relation management", () => {
 		await selectFirstOptionFromSelect(dialog, "Role");
 		await selectAsyncOption(page, dialog, "No organisation selected");
 		await fillDatePicker(page, dialog, "Start date", 2025, 1, 1);
+		const description = "Coordinates the steering committee.";
+		await dialog.getByRole("textbox", { name: "Description" }).fill(description);
 		await saveAddRelationDialog(page);
 
 		const relations = await db.getContributionsByPersonVersionId(person!.id);
 		expect(relations).toHaveLength(1);
 		expect(relations[0]!.duration.start).toStrictEqual(new Date("2025-01-01T00:00:00.000Z"));
+		expect(relations[0]!.description).toBe(description);
 	});
 
 	test("should edit and delete an institution relation from the standalone list", async ({
@@ -271,11 +274,14 @@ test.describe("admin relation management", () => {
 		await selectOptionFromSelect(dialog, "Relation type", "is located in");
 		await selectAsyncOption(page, dialog, "No related unit selected");
 		await fillDatePicker(page, dialog, "Start date", 2025, 1, 1);
+		const description = "Headquarters located in the partner country.";
+		await dialog.getByRole("textbox", { name: "Description" }).fill(description);
 		await saveAddRelationDialog(page);
 
 		const relations = await db.getUnitRelationsByUnitVersionId(institution!.id);
 		expect(relations).toHaveLength(1);
 		expect(relations[0]!.duration.start).toStrictEqual(new Date("2025-01-01T00:00:00.000Z"));
+		expect(relations[0]!.description).toBe(description);
 	});
 
 	test("should allow the same person, role and body over non-overlapping periods", async ({
@@ -751,6 +757,7 @@ test.describe("admin relation management", () => {
 		await personsPage.selectFirstContributionRole();
 		await personsPage.selectFirstContributionOrg();
 		await personsPage.fillContributionDatePicker("Start date", 2025, 1, 1);
+		await personsPage.fillContributionDescription("Initial relation description.");
 		await personsPage.submitAddContribution();
 
 		await personsPage
@@ -767,12 +774,23 @@ test.describe("admin relation management", () => {
 		await personsPage.page.keyboard.press("Escape");
 
 		const person = await db.getPersonByName(name);
+		let contributions = await db.getContributionsByPersonVersionId(person!.id);
+		expect(contributions[0]!.description).toBe("Initial relation description.");
+
 		await personsPage.clickEditContribution();
+		// The edit dialog should prefill the stored description.
+		await expect(
+			personsPage.page
+				.getByRole("dialog", { name: "Edit contribution" })
+				.getByRole("textbox", { name: "Description" }),
+		).toHaveValue("Initial relation description.");
 		await personsPage.fillEditContributionDate("End date", 2025, 6, 30);
+		await personsPage.fillEditContributionDescription("Updated relation description.");
 		await personsPage.saveEditContribution();
 
-		let contributions = await db.getContributionsByPersonVersionId(person!.id);
+		contributions = await db.getContributionsByPersonVersionId(person!.id);
 		expect(contributions[0]!.duration.end).toStrictEqual(new Date("2025-06-30T00:00:00.000Z"));
+		expect(contributions[0]!.description).toBe("Updated relation description.");
 
 		await personsPage.clickDeleteContribution();
 		await personsPage.confirmDeleteContribution();
