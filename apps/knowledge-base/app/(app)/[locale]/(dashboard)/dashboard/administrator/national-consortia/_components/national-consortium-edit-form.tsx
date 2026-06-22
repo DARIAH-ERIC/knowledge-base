@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Link } from "@dariah-eric/ui/link";
 import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
@@ -84,6 +85,13 @@ export function NationalConsortiumEditForm(
 	const t = useExtracted();
 	const formId = "national-consortium-edit-form";
 
+	// Membership in this national consortium is edited here; partner institutions (members and
+	// cooperating partners of the country) are edited on the country instead. Link there when we can
+	// resolve the consortium's country via its `is_national_consortium_of` relation.
+	const countrySlug =
+		relations.find((relation) => relation.statusType === "is_national_consortium_of")
+			?.relatedUnitSlug ?? null;
+
 	return (
 		<Fragment>
 			<EntityFormHeader title={t("Edit national consortium")} />
@@ -139,7 +147,31 @@ export function NationalConsortiumEditForm(
 					/>
 				</TabPanel>
 
-				<TabPanel id="institutions" shouldPreserveState={true}>
+				<TabPanel
+					className="flex flex-col gap-y-(--layout-padding)"
+					id="institutions"
+					shouldPreserveState={true}
+				>
+					<p className="max-inline-3xl text-sm text-neutral-500">
+						{countrySlug != null
+							? t.rich(
+									'Institutions listed here are members of this national consortium. To edit "partner institutions", the "national coordinating institution", or the "national representative institution", go to the country\'s <link>institutions</link>.',
+									{
+										link(chunks) {
+											return (
+												<Link
+													className="underline"
+													href={`/dashboard/administrator/countries/${countrySlug}/edit?tab=institutions`}
+												>
+													{chunks}
+												</Link>
+											);
+										},
+									},
+								)
+							: t("Institutions listed here are members of this national consortium.")}
+					</p>
+
 					<ReverseUnitRelationsSection
 						messages={{
 							title: t("Institutions"),
