@@ -984,6 +984,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "sourceUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -999,6 +1009,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "id",
                 "label",
                 "type",
+                "sourceUrl",
                 "links",
               ],
               "type": "object",
@@ -1645,6 +1656,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "sourceUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -1660,6 +1681,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "id",
                 "label",
                 "type",
+                "sourceUrl",
                 "links",
               ],
               "type": "object",
@@ -3295,6 +3317,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "sourceUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -3310,6 +3342,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "id",
                 "label",
                 "type",
+                "sourceUrl",
                 "links",
               ],
               "type": "object",
@@ -4002,6 +4035,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "sourceUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -4017,6 +4060,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "id",
                 "label",
                 "type",
+                "sourceUrl",
                 "links",
               ],
               "type": "object",
@@ -5759,6 +5803,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "sourceUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -5774,6 +5828,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "id",
                 "label",
                 "type",
+                "sourceUrl",
                 "links",
               ],
               "type": "object",
@@ -6964,6 +7019,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "sourceUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -6979,6 +7044,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "id",
                 "label",
                 "type",
+                "sourceUrl",
                 "links",
               ],
               "type": "object",
@@ -7900,6 +7966,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "sourceUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -7915,6 +7991,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "id",
                 "label",
                 "type",
+                "sourceUrl",
                 "links",
               ],
               "type": "object",
@@ -9148,6 +9225,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "sourceUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -9163,6 +9250,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "id",
                 "label",
                 "type",
+                "sourceUrl",
                 "links",
               ],
               "type": "object",
@@ -9795,6 +9883,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "sourceUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -9810,6 +9908,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "id",
                 "label",
                 "type",
+                "sourceUrl",
                 "links",
               ],
               "type": "object",
@@ -10487,6 +10586,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "sourceUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -10502,6 +10611,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "id",
                 "label",
                 "type",
+                "sourceUrl",
                 "links",
               ],
               "type": "object",
@@ -13202,6 +13312,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "sourceUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -13217,6 +13337,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "id",
                 "label",
                 "type",
+                "sourceUrl",
                 "links",
               ],
               "type": "object",
@@ -14102,6 +14223,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "type": "array",
                 },
+                "sourceUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
                 "type": {
                   "anyOf": [
                     {
@@ -14117,6 +14248,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "id",
                 "label",
                 "type",
+                "sourceUrl",
                 "links",
               ],
               "type": "object",

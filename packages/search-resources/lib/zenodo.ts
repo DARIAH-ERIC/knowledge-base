@@ -27,11 +27,14 @@ export function createZenodoRecord(item: ZenodoRecord): ResourceDocument {
 		return typeof link === "string" ? link : link.href;
 	}
 
-	const links = [
+	/** Zenodo record page (the ingest source website). Zenodo hosts the record itself. */
+	const sourceUrl =
 		resolveLink(item.links.html) ??
-			resolveLink(item.links.self) ??
-			`https://zenodo.org/records/${String(item.id)}`,
-	];
+		resolveLink(item.links.self) ??
+		`https://zenodo.org/records/${String(item.id)}`;
+
+	/** External url pointing to where the record is citable. */
+	const links = isNonEmptyString(item.doi) ? [`https://doi.org/${item.doi}`] : [];
 
 	const description = isNonEmptyString(item.metadata.description)
 		? toPlainText(item.metadata.description)
@@ -54,6 +57,7 @@ export function createZenodoRecord(item: ZenodoRecord): ResourceDocument {
 		type: "publication",
 		label: item.metadata.title,
 		description,
+		source_url: sourceUrl,
 		links,
 		keywords,
 		kind: item.metadata.resource_type?.type ?? null,

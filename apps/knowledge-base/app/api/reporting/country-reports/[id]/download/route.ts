@@ -121,6 +121,7 @@ export async function GET(
 								description: item.description,
 								keywords: item.keywords,
 								kind: item.kind,
+								sourceUrl: item.sourceUrl,
 								links: item.links,
 								authors: item.authors,
 								year: item.year,

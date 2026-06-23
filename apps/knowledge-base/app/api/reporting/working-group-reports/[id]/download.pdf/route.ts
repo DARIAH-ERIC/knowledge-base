@@ -65,7 +65,8 @@ function externalResourceSnapshotBlocks(
 
 				return {
 					primary: item.label,
-					secondary: [meta, item.links[0]].filter(Boolean).join(" · ") || undefined,
+					secondary:
+						[meta, item.sourceUrl ?? item.links[0]].filter(Boolean).join(" · ") || undefined,
 				};
 			}),
 		},

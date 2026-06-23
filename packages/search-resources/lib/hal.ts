@@ -27,7 +27,7 @@ function toArray(value: Array<string> | string | undefined): Array<string> {
 export function createHalItem(item: HalIngestDocument): ResourceDocument {
 	const authors = toArray(item.authFullName_s).filter((value) => isNonEmptyString(value));
 	const keywords = toArray(item.keyword_s).filter((value) => isNonEmptyString(value));
-	const links = toArray(item.uri_s).filter((value) => isNonEmptyString(value));
+	const uris = toArray(item.uri_s).filter((value) => isNonEmptyString(value));
 	const year =
 		(typeof item.producedDateY_i === "number"
 			? item.producedDateY_i
@@ -45,9 +45,8 @@ export function createHalItem(item: HalIngestDocument): ResourceDocument {
 	const sourceId = String(item.docid);
 	const id = [source, sourceId].join(":");
 
-	if (links.length === 0) {
-		links.push(`https://hal.science/hal-${sourceId}`);
-	}
+	const sourceUrl = uris[0] ?? `https://hal.science/hal-${sourceId}`;
+	const links = uris.slice(1);
 
 	return {
 		id,
@@ -58,6 +57,7 @@ export function createHalItem(item: HalIngestDocument): ResourceDocument {
 		type: "publication",
 		label: item.title_s ?? item.label_s ?? "",
 		description: item.abstract_s ?? "",
+		source_url: sourceUrl,
 		links,
 		keywords,
 		kind: item.docType_s ?? null,

@@ -81,6 +81,7 @@ export const RelatedResourcesSchema = v.array(
 		id: v.string(),
 		label: v.string(),
 		type: v.nullable(v.string()),
+		sourceUrl: v.nullable(v.string()),
 		links: v.array(v.string()),
 	}),
 );
