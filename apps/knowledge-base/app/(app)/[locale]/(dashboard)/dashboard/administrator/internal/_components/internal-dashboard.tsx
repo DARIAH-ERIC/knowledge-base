@@ -1,5 +1,6 @@
 "use client";
 
+import { auditLogActionEnum } from "@dariah-eric/database/schema";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import {
 	Table,
@@ -20,7 +21,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { dashboardPageSize } from "@/config/pagination.config";
-import { type AuditLogAction, type AuditLogResult, auditLogActions } from "@/lib/data/audit-log";
+import type { AuditLogAction, AuditLogResult } from "@/lib/data/audit-log";
 import type { ExpensiveStatementsResult } from "@/lib/data/pg-stat-statements";
 
 interface InternalDashboardProps {
@@ -77,7 +78,7 @@ export function InternalDashboard(props: Readonly<InternalDashboardProps>): Reac
 							<SelectTrigger />
 							<SelectContent>
 								<SelectItem id="all">{t("All actions")}</SelectItem>
-								{auditLogActions.map((value) => (
+								{auditLogActionEnum.map((value) => (
 									<SelectItem key={value} id={value}>
 										{humanizeAction(value)}
 									</SelectItem>
