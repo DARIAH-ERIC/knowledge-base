@@ -56,7 +56,7 @@ export function InternalDashboard(props: Readonly<InternalDashboardProps>): Reac
 		<Fragment>
 			<EntityListHeader
 				title={t("Internal")}
-				description={t("Internal diagnostics for administrators. Not linked from the menu.")}
+				description={t("Internal diagnostics for administrators.")}
 			/>
 
 			<Tabs onSelectionChange={setSelectedTab} selectedKey={selectedTab}>
@@ -65,8 +65,8 @@ export function InternalDashboard(props: Readonly<InternalDashboardProps>): Reac
 					<Tab id="statements">{t("Expensive queries")}</Tab>
 				</TabList>
 
-				<TabPanel id="audit">
-					<div className="my-4 flex justify-end">
+				<TabPanel id="audit" className="flex flex-col gap-y-(--layout-padding)">
+					<div className="flex justify-end">
 						<Select
 							aria-label={t("Filter by action")}
 							onChange={(key) => {

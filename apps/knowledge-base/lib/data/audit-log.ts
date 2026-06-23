@@ -2,7 +2,7 @@ import { unique } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
-import { count, desc, eq, inArray, sql } from "@/lib/db/sql";
+import { alias, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 
 export type AuditLogAction = (typeof schema.auditLogActionEnum)[number];
 
@@ -149,6 +149,108 @@ async function resolveCampaignLabels(campaignIds: Array<string>): Promise<Map<st
 	return new Map(rows.map((row) => [row.id, `Reporting campaign ${String(row.year)}`]));
 }
 
+/**
+ * Resolves contribution ids (`persons_to_organisational_units.id`) to "<person> — <role> at <org
+ * unit>". Both endpoints are `entities.id` document ids, so each is resolved through its
+ * draft-or-published version, matching the admin-side reads.
+ */
+async function resolveContributionLabels(ids: Array<string>): Promise<Map<string, string>> {
+	if (ids.length === 0) {
+		return new Map();
+	}
+
+	const personLifecycle = alias(schema.documentLifecycle, "contribution_person_lifecycle");
+	const unitLifecycle = alias(schema.documentLifecycle, "contribution_unit_lifecycle");
+	const personVersionId = sql`COALESCE(${personLifecycle.draftId}, ${personLifecycle.publishedId})`;
+	const unitVersionId = sql`COALESCE(${unitLifecycle.draftId}, ${unitLifecycle.publishedId})`;
+
+	const rows = await db
+		.select({
+			id: schema.personsToOrganisationalUnits.id,
+			personName: schema.persons.name,
+			unitName: schema.organisationalUnits.name,
+			role: schema.personRoleTypes.type,
+		})
+		.from(schema.personsToOrganisationalUnits)
+		.leftJoin(
+			schema.personRoleTypes,
+			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+		)
+		.leftJoin(
+			personLifecycle,
+			eq(personLifecycle.documentId, schema.personsToOrganisationalUnits.personDocumentId),
+		)
+		.leftJoin(schema.persons, eq(schema.persons.id, personVersionId))
+		.leftJoin(
+			unitLifecycle,
+			eq(
+				unitLifecycle.documentId,
+				schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+			),
+		)
+		.leftJoin(schema.organisationalUnits, eq(schema.organisationalUnits.id, unitVersionId))
+		.where(inArray(schema.personsToOrganisationalUnits.id, ids));
+
+	const labels = new Map<string, string>();
+	for (const row of rows) {
+		const person = row.personName ?? "Unknown person";
+		const unit = row.unitName ?? "unknown organisation";
+		const role = row.role != null ? humanizeSubjectType(row.role) : "contributor";
+		labels.set(row.id, `${person} — ${role} at ${unit}`);
+	}
+	return labels;
+}
+
+/**
+ * Resolves unit-relation ids (`organisational_units_to_units.id`) to "<unit> → <related unit>
+ * (<status>)". Both endpoints are `entities.id` document ids, resolved through their
+ * draft-or-published versions.
+ */
+async function resolveUnitRelationLabels(ids: Array<string>): Promise<Map<string, string>> {
+	if (ids.length === 0) {
+		return new Map();
+	}
+
+	const unitLifecycle = alias(schema.documentLifecycle, "unit_relation_unit_lifecycle");
+	const relatedLifecycle = alias(schema.documentLifecycle, "unit_relation_related_lifecycle");
+	const relatedUnits = alias(schema.organisationalUnits, "related_organisational_units");
+	const unitVersionId = sql`COALESCE(${unitLifecycle.draftId}, ${unitLifecycle.publishedId})`;
+	const relatedVersionId = sql`COALESCE(${relatedLifecycle.draftId}, ${relatedLifecycle.publishedId})`;
+
+	const rows = await db
+		.select({
+			id: schema.organisationalUnitsRelations.id,
+			unitName: schema.organisationalUnits.name,
+			relatedUnitName: relatedUnits.name,
+			status: schema.organisationalUnitStatus.status,
+		})
+		.from(schema.organisationalUnitsRelations)
+		.leftJoin(
+			schema.organisationalUnitStatus,
+			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+		)
+		.leftJoin(
+			unitLifecycle,
+			eq(unitLifecycle.documentId, schema.organisationalUnitsRelations.unitDocumentId),
+		)
+		.leftJoin(schema.organisationalUnits, eq(schema.organisationalUnits.id, unitVersionId))
+		.leftJoin(
+			relatedLifecycle,
+			eq(relatedLifecycle.documentId, schema.organisationalUnitsRelations.relatedUnitDocumentId),
+		)
+		.leftJoin(relatedUnits, eq(relatedUnits.id, relatedVersionId))
+		.where(inArray(schema.organisationalUnitsRelations.id, ids));
+
+	const labels = new Map<string, string>();
+	for (const row of rows) {
+		const unit = row.unitName ?? "Unknown unit";
+		const related = row.relatedUnitName ?? "unknown unit";
+		const status = row.status != null ? humanizeSubjectType(row.status) : "related";
+		labels.set(row.id, `${unit} → ${related} (${status})`);
+	}
+	return labels;
+}
+
 async function resolveActorLabels(actorIds: Array<string>): Promise<Map<string, string>> {
 	if (actorIds.length === 0) {
 		return new Map();
@@ -203,12 +305,22 @@ export async function getAuditLogEntries(
 	// falls through to the `<type> #<id>` fallback label.
 	const uuidSubjectIds = subjectIds.filter((id) => isUuid(id));
 
-	// The subject id spaces are disjoint (entity document ids vs report ids vs campaign ids), so each
-	// resolver is given every id and contributes only the ones it owns.
-	const [entityTitles, reportLabels, campaignLabels, actorLabels] = await Promise.all([
+	// The subject id spaces are disjoint (entity document ids vs report ids vs campaign ids vs
+	// contribution ids vs unit-relation ids), so each resolver is given every id and contributes only
+	// the ones it owns.
+	const [
+		entityTitles,
+		reportLabels,
+		campaignLabels,
+		contributionLabels,
+		unitRelationLabels,
+		actorLabels,
+	] = await Promise.all([
 		resolveEntityDocumentTitles(uuidSubjectIds),
 		resolveReportLabels(uuidSubjectIds),
 		resolveCampaignLabels(uuidSubjectIds),
+		resolveContributionLabels(uuidSubjectIds),
+		resolveUnitRelationLabels(uuidSubjectIds),
 		resolveActorLabels(actorIds),
 	]);
 
@@ -217,6 +329,8 @@ export async function getAuditLogEntries(
 			entityTitles.get(item.subjectId) ??
 			reportLabels.get(item.subjectId) ??
 			campaignLabels.get(item.subjectId) ??
+			contributionLabels.get(item.subjectId) ??
+			unitRelationLabels.get(item.subjectId) ??
 			`${humanizeSubjectType(item.subjectType)} #${item.subjectId}`;
 
 		const actorLabel =
