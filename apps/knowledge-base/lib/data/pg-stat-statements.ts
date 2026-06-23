@@ -38,6 +38,7 @@ export async function getExpensiveStatements(limit = 20): Promise<ExpensiveState
 			sql`
 				SELECT query, calls, total_exec_time, mean_exec_time, rows
 				FROM pg_stat_statements
+				WHERE dbid = (SELECT oid FROM pg_database WHERE datname = current_database())
 				ORDER BY total_exec_time DESC
 				LIMIT ${limit}
 			`,
