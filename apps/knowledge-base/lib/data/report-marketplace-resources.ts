@@ -33,6 +33,7 @@ export interface ReportExternalResourceSnapshotItem {
 	description: string;
 	keywords: Array<string>;
 	kind: string | null;
+	sourceUrl: string | null;
 	links: Array<string>;
 	authors: Array<string> | null;
 	year: number | null;
@@ -389,6 +390,7 @@ function toSnapshotItemInput(
 		description: document.description,
 		keywords: document.keywords,
 		kind: document.kind,
+		sourceUrl: document.source_url ?? null,
 		links: document.links,
 		authors: document.authors,
 		year: document.year,
@@ -587,6 +589,7 @@ async function getExternalResourceSnapshot(params: {
 					description: true,
 					keywords: true,
 					kind: true,
+					sourceUrl: true,
 					links: true,
 					authors: true,
 					year: true,

@@ -16,6 +16,12 @@ export function createOpenAirePublication(item: ResearchProduct): ResourceDocume
 	const sourceId = item.id;
 	const id = [source, sourceId].join(":");
 
+	/** OpenAIRE Explore result page (the ingest source website / aggregator). */
+	const source_url = `https://explore.openaire.eu/search/result?id=${sourceId}`;
+
+	/** External urls pointing to where the actual resource lives. */
+	const links = [...new Set((item.instances ?? []).flatMap((instance) => instance.urls ?? []))];
+
 	return {
 		id,
 		source,
@@ -25,8 +31,8 @@ export function createOpenAirePublication(item: ResearchProduct): ResourceDocume
 		type: "publication",
 		label: item.mainTitle,
 		description: item.descriptions?.join("\n") ?? "",
-		source_url: null,
-		links: [],
+		source_url,
+		links,
 		keywords,
 		kind: null,
 		national_consortia: [],

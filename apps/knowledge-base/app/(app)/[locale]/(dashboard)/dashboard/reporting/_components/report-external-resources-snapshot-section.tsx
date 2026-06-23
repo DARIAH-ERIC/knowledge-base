@@ -94,10 +94,10 @@ export function ReportExternalResourcesSnapshotSection(
 					{items.map((item) => (
 						<li key={item.id} className="rounded-md border border-border p-4">
 							<div className="flex flex-col gap-y-2">
-								{item.links[0] != null ? (
+								{(item.sourceUrl ?? item.links[0]) != null ? (
 									<a
 										className="text-sm font-semibold text-fg underline-offset-4 hover:underline"
-										href={item.links[0]}
+										href={item.sourceUrl ?? item.links[0]}
 										rel="noreferrer"
 										target="_blank"
 									>

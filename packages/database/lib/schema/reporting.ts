@@ -235,6 +235,7 @@ export const reportExternalResourceSnapshotItems = p.snakeCase.table(
 		description: p.text("description").notNull(),
 		keywords: p.jsonb("keywords").$type<Array<string>>().notNull(),
 		kind: p.text("kind"),
+		sourceUrl: p.text("source_url"),
 		links: p.jsonb("links").$type<Array<string>>().notNull(),
 		authors: p.jsonb("authors").$type<Array<string>>(),
 		year: p.integer("year"),

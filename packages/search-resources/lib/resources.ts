@@ -1,5 +1,5 @@
 import type { DariahCampusCurriculum, DariahCampusResource } from "@dariah-eric/client-campus";
-import type { EpisciencesSearchDocument } from "@dariah-eric/client-episciences";
+import type { EpisciencesPaper, EpisciencesSearchDocument } from "@dariah-eric/client-episciences";
 import type { SearchItem } from "@dariah-eric/client-sshoc";
 import type { ZenodoRecord } from "@dariah-eric/client-zenodo";
 // NOTE: zotero source temporarily disabled (see note below). To re-enable, restore these imports.
@@ -20,10 +20,23 @@ import { createZenodoRecord } from "./zenodo";
 // 	isZoteroItemInCollection,
 // } from "./zotero";
 
+/**
+ * A full paper record paired with the search document `docid` it was fetched for. The pairing is
+ * kept explicit because a search `docid` can be a version id that differs from the canonical
+ * `paperid` on the returned record, so the record cannot be matched back to its search document by
+ * id alone.
+ */
+export interface EpisciencesPaperEntry {
+	docId: number;
+	paper: EpisciencesPaper;
+}
+
 export interface SearchIndexResourceSourceData {
 	campusCurricula: Array<DariahCampusCurriculum>;
 	campusResources: Array<DariahCampusResource>;
 	episciencesDocuments: Array<EpisciencesSearchDocument>;
+	/** Full paper records, fetched per document to obtain the journal DOI and repository links. */
+	episciencesPapers: Array<EpisciencesPaperEntry>;
 	sshocItems: Array<SearchItem>;
 	zenodoRecords: Array<ZenodoRecord>;
 	// NOTE: zotero source temporarily disabled (see note above). To re-enable, restore these fields.
@@ -64,6 +77,7 @@ export function createSearchIndexResourceDocuments(
 		campusCurricula,
 		campusResources,
 		episciencesDocuments,
+		episciencesPapers,
 		sshocItems,
 		zenodoRecords,
 		// NOTE: zotero source temporarily disabled (see note above).
@@ -72,12 +86,20 @@ export function createSearchIndexResourceDocuments(
 	} = sourceData;
 
 	// const zoteroCollectionLookup = buildZoteroCollectionLookup(zoteroCollections);
+	const episciencesPaperByDocId = new Map(
+		episciencesPapers.map((entry) => [entry.docId, entry.paper]),
+	);
 
 	return [
 		...sshocItems.map((item) => createSshocItem(item, sshocMarketplaceBaseUrl, orgUnits)),
 		...campusResources.map((item) => createCampusResource(item)),
 		...campusCurricula.map((item) => createCampusCurriculum(item)),
-		...episciencesDocuments.map((item) => createEpisciencesDocument(item)),
+		...episciencesDocuments.map((item) =>
+			createEpisciencesDocument(
+				item,
+				item.docid != null ? episciencesPaperByDocId.get(item.docid) : undefined,
+			),
+		),
 		...zenodoRecords.map((item) => createZenodoRecord(item)),
 		// NOTE: zotero source temporarily disabled (see note above).
 		// ...zoteroItems
