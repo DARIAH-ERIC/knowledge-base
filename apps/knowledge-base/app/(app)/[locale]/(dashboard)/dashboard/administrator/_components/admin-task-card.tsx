@@ -16,6 +16,7 @@ import { SubmitButton } from "@dariah-eric/ui/submit-button";
 import { useExtracted, useFormatter } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 
+import type { BackgroundJobError } from "@/lib/admin-tasks/background-job-error";
 import type { LatestBackgroundJob } from "@/lib/admin-tasks/get-latest-background-jobs";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
@@ -84,15 +85,15 @@ export function AdminTaskCard(props: Readonly<AdminTaskCardProps>): ReactNode {
 							<div>
 								<dt className="font-medium">{t("Result")}:</dt>
 								<dd className="font-mono text-[11px] break-all">
-									<pre>{JSON.stringify(latestJob.result)}</pre>
+									<pre className="overflow-auto">{JSON.stringify(latestJob.result, null, 2)}</pre>
 								</dd>
 							</div>
 						) : null}
 						{latestJob.status === "failed" && latestJob.error != null ? (
 							<div>
 								<dt className="font-medium">{t("Error")}:</dt>
-								<dd className="font-mono text-[11px] break-all whitespace-pre-wrap">
-									{latestJob.error.split("\n").slice(0, 3).join("\n")}
+								<dd className="wrap-break-word whitespace-pre-wrap">
+									<BackgroundJobErrorMessage error={latestJob.error} />
 								</dd>
 							</div>
 						) : null}
@@ -123,4 +124,46 @@ function JobStatusBadge(props: { job: LatestBackgroundJob; isStuck: boolean }): 
 		return <Badge intent="success">{t("Succeeded")}</Badge>;
 	}
 	return <Badge intent="danger">{t("Failed")}</Badge>;
+}
+
+function BackgroundJobErrorMessage(props: { error: BackgroundJobError }): ReactNode {
+	const t = useExtracted();
+	const { error } = props;
+
+	switch (error.kind) {
+		case "http": {
+			const reason =
+				error.statusText.length > 0
+					? `${String(error.status)} ${error.statusText}`
+					: String(error.status);
+			return t("The server at {host} responded with an error ({reason}).", {
+				host: error.host,
+				reason,
+			});
+		}
+		case "timeout": {
+			return t("The request to {host} timed out.", { host: error.host });
+		}
+		case "network": {
+			return t("Could not reach {host}. The service may be down or unreachable.", {
+				host: error.host,
+			});
+		}
+		case "parse": {
+			return t("Received an unexpected response from {host} that could not be parsed.", {
+				host: error.host,
+			});
+		}
+		case "abort": {
+			return t("The request to {host} was aborted.", { host: error.host });
+		}
+		case "stuck": {
+			return t(
+				"The previous run was marked as failed after exceeding its maximum runtime (the worker most likely terminated).",
+			);
+		}
+		case "unknown": {
+			return error.message;
+		}
+	}
 }
