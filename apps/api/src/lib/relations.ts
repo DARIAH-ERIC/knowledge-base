@@ -131,6 +131,7 @@ export async function getRelatedResources(db: Database | Transaction, entityId: 
 			id: hit.document.id,
 			label: hit.document.label,
 			type: hit.document.type,
+			sourceUrl: hit.document.source_url ?? null,
 			links: hit.document.links,
 		};
 	});

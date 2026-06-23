@@ -13,7 +13,7 @@ export function createCampusResource(item: DariahCampusResource): ResourceDocume
 	const year = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getFullYear()
 		: null;
-	const links = isNonEmptyString(item.pid) ? [item.pid] : [];
+	const sourceUrl = isNonEmptyString(item.pid) ? item.pid : null;
 	const sourceUpdatedAt = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getTime()
 		: null;
@@ -27,7 +27,8 @@ export function createCampusResource(item: DariahCampusResource): ResourceDocume
 		type: "training-material",
 		label: item.title,
 		description: toPlainText(item.summary.content),
-		links,
+		source_url: sourceUrl,
+		links: [],
 		keywords,
 		kind: null,
 		national_consortia: [],
@@ -49,7 +50,7 @@ export function createCampusCurriculum(item: DariahCampusCurriculum): ResourceDo
 	const year = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getFullYear()
 		: null;
-	const links = isNonEmptyString(item.pid) ? [item.pid] : [];
+	const sourceUrl = isNonEmptyString(item.pid) ? item.pid : null;
 	const sourceUpdatedAt = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getTime()
 		: null;
@@ -63,7 +64,8 @@ export function createCampusCurriculum(item: DariahCampusCurriculum): ResourceDo
 		type: "training-material",
 		label: item.title,
 		description: toPlainText(item.summary.content),
-		links,
+		source_url: sourceUrl,
+		links: [],
 		keywords,
 		kind: null,
 		national_consortia: [],

@@ -25,6 +25,7 @@ export function createOpenAirePublication(item: ResearchProduct): ResourceDocume
 		type: "publication",
 		label: item.mainTitle,
 		description: item.descriptions?.join("\n") ?? "",
+		source_url: null,
 		links: [],
 		keywords,
 		kind: null,
