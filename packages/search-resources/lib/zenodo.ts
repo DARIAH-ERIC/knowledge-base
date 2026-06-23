@@ -2,6 +2,8 @@ import { isNonEmptyArray, isNonEmptyString } from "@acdh-oeaw/lib";
 import type { ZenodoRecord } from "@dariah-eric/client-zenodo";
 import type { ResourceDocument } from "@dariah-eric/search";
 
+import { toPlainText } from "./html/to-plain-text";
+
 /**
  * @see {@link https://developers.zenodo.org/}
  * @see {@link https://zenodo.org/communities/dariah}
@@ -31,6 +33,10 @@ export function createZenodoRecord(item: ZenodoRecord): ResourceDocument {
 			`https://zenodo.org/records/${String(item.id)}`,
 	];
 
+	const description = isNonEmptyString(item.metadata.description)
+		? toPlainText(item.metadata.description)
+		: "";
+
 	const publicationDate = item.metadata.publication_date ?? item.metadata.published;
 	const year = isNonEmptyString(publicationDate) ? new Date(publicationDate).getFullYear() : null;
 	const sourceUpdatedAt = isNonEmptyString(item.modified)
@@ -47,7 +53,7 @@ export function createZenodoRecord(item: ZenodoRecord): ResourceDocument {
 		imported_at: Date.now(),
 		type: "publication",
 		label: item.metadata.title,
-		description: item.metadata.description ?? "",
+		description,
 		links,
 		keywords,
 		kind: item.metadata.resource_type?.type ?? null,
