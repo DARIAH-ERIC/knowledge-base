@@ -6,6 +6,10 @@ import { count, desc, eq, inArray, sql } from "@/lib/db/sql";
 
 export type AuditLogAction = (typeof schema.auditLogActionEnum)[number];
 
+function isUuid(value: string): boolean {
+	return /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/iu.test(value);
+}
+
 export const auditLogActions = schema.auditLogActionEnum;
 
 export interface AuditLogEntry {
@@ -193,12 +197,18 @@ export async function getAuditLogEntries(
 		items.map((item) => item.actorUserId).filter((id): id is string => id != null),
 	);
 
+	// `subjectId` is a free-form text column, so it can hold non-uuid sentinels (e.g. "all" for
+	// global/bulk actions). The resolvers below all match against uuid-typed columns, so feeding them
+	// a non-uuid would make Postgres fail casting it to uuid. Filter to uuid-shaped ids; anything else
+	// falls through to the `<type> #<id>` fallback label.
+	const uuidSubjectIds = subjectIds.filter((id) => isUuid(id));
+
 	// The subject id spaces are disjoint (entity document ids vs report ids vs campaign ids), so each
 	// resolver is given every id and contributes only the ones it owns.
 	const [entityTitles, reportLabels, campaignLabels, actorLabels] = await Promise.all([
-		resolveEntityDocumentTitles(subjectIds),
-		resolveReportLabels(subjectIds),
-		resolveCampaignLabels(subjectIds),
+		resolveEntityDocumentTitles(uuidSubjectIds),
+		resolveReportLabels(uuidSubjectIds),
+		resolveCampaignLabels(uuidSubjectIds),
 		resolveActorLabels(actorIds),
 	]);
 
