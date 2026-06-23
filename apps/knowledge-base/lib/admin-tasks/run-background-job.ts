@@ -2,6 +2,7 @@ import { log } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { after } from "next/server";
 
+import { formatBackgroundJobError } from "@/lib/admin-tasks/format-background-job-error";
 import { db } from "@/lib/db";
 import { and, eq, lt, sql } from "@/lib/db/sql";
 
@@ -87,13 +88,7 @@ export async function runBackgroundJob<T>(
 				.set({
 					status: "failed",
 					finishedAt: new Date(),
-					error:
-						// oxlint-disable-next-line unicorn/no-instanceof-builtins
-						error instanceof Error
-							? (error.stack ?? error.message)
-							: typeof error === "string"
-								? error
-								: JSON.stringify(error),
+					error: formatBackgroundJobError(error),
 				})
 				.where(eq(schema.backgroundJobs.id, jobId));
 		}

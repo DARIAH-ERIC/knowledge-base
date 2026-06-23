@@ -84,16 +84,14 @@ export function AdminTaskCard(props: Readonly<AdminTaskCardProps>): ReactNode {
 							<div>
 								<dt className="font-medium">{t("Result")}:</dt>
 								<dd className="font-mono text-[11px] break-all">
-									<pre>{JSON.stringify(latestJob.result)}</pre>
+									<pre className="overflow-auto">{JSON.stringify(latestJob.result, null, 2)}</pre>
 								</dd>
 							</div>
 						) : null}
 						{latestJob.status === "failed" && latestJob.error != null ? (
 							<div>
 								<dt className="font-medium">{t("Error")}:</dt>
-								<dd className="font-mono text-[11px] break-all whitespace-pre-wrap">
-									{latestJob.error.split("\n").slice(0, 3).join("\n")}
-								</dd>
+								<dd className="wrap-break-word whitespace-pre-wrap">{latestJob.error}</dd>
 							</div>
 						) : null}
 					</dl>
