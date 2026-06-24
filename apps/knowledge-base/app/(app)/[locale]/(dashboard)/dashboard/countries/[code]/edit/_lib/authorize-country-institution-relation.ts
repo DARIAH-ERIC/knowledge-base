@@ -4,7 +4,7 @@ import { getLocale } from "next-intl/server";
 
 import { can } from "@/lib/auth/permissions";
 import { getDariahEricDocumentId } from "@/lib/data/unit-relations";
-import { db } from "@/lib/db";
+import { type Database, type Transaction, db } from "@/lib/db";
 import { and, eq, sql } from "@/lib/db/sql";
 import { redirect } from "@/lib/navigation/navigation";
 
@@ -21,6 +21,7 @@ import { redirect } from "@/lib/navigation/navigation";
 export async function assertCanManageCountryInstitutionRelation(
 	user: User,
 	params: Readonly<{ institutionDocumentId: string; relatedUnitDocumentId: string }>,
+	executor: Database | Transaction = db,
 ): Promise<void> {
 	if (user.role !== "admin") {
 		const ericDocumentId = await getDariahEricDocumentId();
@@ -28,7 +29,7 @@ export async function assertCanManageCountryInstitutionRelation(
 		const targetsEric = ericDocumentId != null && params.relatedUnitDocumentId === ericDocumentId;
 
 		const countries = targetsEric
-			? await db
+			? await executor
 					.select({ documentId: schema.organisationalUnitsRelations.relatedUnitDocumentId })
 					.from(schema.organisationalUnitsRelations)
 					.innerJoin(
@@ -47,7 +48,7 @@ export async function assertCanManageCountryInstitutionRelation(
 		const canEditSomeCountry = (
 			await Promise.all(
 				countries.map((country) =>
-					can(user, "update", { type: "organisational_unit", id: country.documentId }),
+					can(user, "update", { type: "organisational_unit", id: country.documentId }, executor),
 				),
 			)
 		).some(Boolean);
@@ -67,12 +68,13 @@ export async function assertCanManageCountryInstitutionRelation(
 export async function assertCanEditCountryInstitution(
 	user: User,
 	institutionDocumentId: string,
+	executor: Database | Transaction = db,
 ): Promise<void> {
 	if (user.role === "admin") {
 		return;
 	}
 
-	const countries = await db
+	const countries = await executor
 		.select({ documentId: schema.organisationalUnitsRelations.relatedUnitDocumentId })
 		.from(schema.organisationalUnitsRelations)
 		.innerJoin(
@@ -90,7 +92,7 @@ export async function assertCanEditCountryInstitution(
 	const canEditSomeCountry = (
 		await Promise.all(
 			countries.map((country) =>
-				can(user, "update", { type: "organisational_unit", id: country.documentId }),
+				can(user, "update", { type: "organisational_unit", id: country.documentId }, executor),
 			),
 		)
 	).some(Boolean);

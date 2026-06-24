@@ -463,12 +463,22 @@ export async function discardDraftVersion(
 	documentId: string,
 	adapter: EntityLifecycleAdapter,
 ): Promise<void> {
-	const { draftId } = await getDocumentVersions(tx, documentId);
+	const { draftId, publishedId } = await getDocumentVersions(tx, documentId);
 	if (draftId == null) {
 		return;
 	}
 
 	await adapter.wipeSubtype(tx, draftId);
+
+	// A never-published document has no published version to revert to, so discarding its only draft
+	// removes the whole document — including its document-level relations. Otherwise the `entities` row
+	// would survive with no version (`document_lifecycle` is a view derived from `entity_versions`),
+	// leaving e.g. a person↔unit relation pointing at a versionless "ghost" document.
+	if (publishedId == null) {
+		await deleteDocumentVersionTail(tx, draftId, documentId);
+		return;
+	}
+
 	await wipeVersionContent(tx, draftId);
 	await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, draftId));
 }

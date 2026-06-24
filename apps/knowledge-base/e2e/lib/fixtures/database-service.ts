@@ -519,6 +519,33 @@ export class DatabaseService {
 			);
 	}
 
+	/**
+	 * Unit relations where `documentId` is the **source** (`unit_document_id`), keyed by document id
+	 * so it also resolves relations of a draft-only unit (e.g. a delegated, never-published
+	 * institution and its `is_located_in` / partner edges). Returns the raw related-unit document id
+	 * and status type.
+	 */
+	async getUnitRelationsBySourceDocumentId(documentId: string): Promise<
+		Array<{
+			id: string;
+			relatedUnitDocumentId: string;
+			statusType: string;
+		}>
+	> {
+		return this.db
+			.select({
+				id: schema.organisationalUnitsRelations.id,
+				relatedUnitDocumentId: schema.organisationalUnitsRelations.relatedUnitDocumentId,
+				statusType: schema.organisationalUnitStatus.status,
+			})
+			.from(schema.organisationalUnitsRelations)
+			.innerJoin(
+				schema.organisationalUnitStatus,
+				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+			)
+			.where(eq(schema.organisationalUnitsRelations.unitDocumentId, documentId));
+	}
+
 	async getPublishedVersionId(documentId: string): Promise<string | null> {
 		const [row] = await this.db
 			.select({ id: schema.entityVersions.id })

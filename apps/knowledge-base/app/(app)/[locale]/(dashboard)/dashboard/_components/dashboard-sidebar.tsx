@@ -62,6 +62,12 @@ export function useSidebarMenu(
 				icon: <ListBulletIcon />,
 			},
 			{
+				href: "/dashboard/administrator/drafts",
+				tooltip: t("Drafts"),
+				label: t("Drafts"),
+				icon: <ListBulletIcon />,
+			},
+			{
 				href: "/dashboard/administrator/eric",
 				tooltip: t("DARIAH ERIC"),
 				label: t("DARIAH ERIC"),
