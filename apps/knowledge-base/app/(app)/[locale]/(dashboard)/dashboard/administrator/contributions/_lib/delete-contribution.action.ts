@@ -4,12 +4,28 @@ import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
 import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
+import { assertCan } from "@/lib/auth/permissions";
+import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 
 export async function deleteContributionAction(id: string): Promise<void> {
-	const auditSession = await assertAdmin();
+	const { user } = await assertAuthenticated();
+
+	const contribution = await db.query.personsToOrganisationalUnits.findFirst({
+		where: { id },
+		columns: { organisationalUnitDocumentId: true },
+	});
+
+	if (contribution == null) {
+		return;
+	}
+
+	// Admins always pass; delegated callers may only manage people on units they are scoped to edit.
+	await assertCan(user, "update", {
+		type: "organisational_unit",
+		id: contribution.organisationalUnitDocumentId,
+	});
 
 	await db.transaction(async (tx) => {
 		await tx
@@ -22,7 +38,7 @@ export async function deleteContributionAction(id: string): Promise<void> {
 	});
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession.user.id,
+		actorUserId: user.id,
 		action: "delete",
 		subjectType: "contributions",
 		subjectId: id,

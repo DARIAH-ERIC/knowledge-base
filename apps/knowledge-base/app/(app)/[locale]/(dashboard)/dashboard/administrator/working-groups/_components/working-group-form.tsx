@@ -14,7 +14,6 @@ import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
-import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import {
 	FormLayout,
 	FormSection,
@@ -35,20 +34,13 @@ interface WorkingGroupFormProps {
 	} & { image: { key: string; label: string; url: string } | null };
 	formId?: string;
 	formAction: ServerAction;
-	initialRelatedEntityIds?: Array<string>;
-	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
-	initialRelatedEntityTotal: number;
-	initialRelatedResourceIds?: Array<string>;
-	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
-	initialRelatedResourceTotal: number;
 	initialSocialMediaIds?: Array<string>;
 	initialSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
 	initialSocialMediaTotal?: number;
-	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
-	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
 	selectedSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
-	showRelationFields?: boolean;
 	showSaveAndPublish?: boolean;
+	/** Optional composed sections (e.g. related entities/resources) rendered before the form actions. */
+	children?: ReactNode;
 }
 
 export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactNode {
@@ -57,20 +49,12 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 		formAction,
 		formId,
 		workingGroup,
-		initialRelatedEntityIds,
-		initialRelatedEntityItems,
-		initialRelatedEntityTotal,
-		initialRelatedResourceIds,
-		initialRelatedResourceItems,
-		initialRelatedResourceTotal,
 		initialSocialMediaIds,
 		initialSocialMediaItems,
 		initialSocialMediaTotal,
-		selectedRelatedEntities,
-		selectedRelatedResources,
 		selectedSocialMediaItems,
-		showRelationFields = true,
 		showSaveAndPublish,
+		children,
 	} = props;
 
 	const t = useExtracted();
@@ -188,19 +172,7 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 					</Fragment>
 				) : null}
 
-				{showRelationFields ? (
-					<EntityRelationsFields
-						formId={formId}
-						initialRelatedEntityIds={initialRelatedEntityIds}
-						initialRelatedEntityItems={initialRelatedEntityItems}
-						initialRelatedEntityTotal={initialRelatedEntityTotal}
-						initialRelatedResourceIds={initialRelatedResourceIds}
-						initialRelatedResourceItems={initialRelatedResourceItems}
-						initialRelatedResourceTotal={initialRelatedResourceTotal}
-						selectedRelatedEntities={selectedRelatedEntities}
-						selectedRelatedResources={selectedRelatedResources}
-					/>
-				) : null}
+				{children}
 
 				{workingGroup != null ? (
 					<Fragment>

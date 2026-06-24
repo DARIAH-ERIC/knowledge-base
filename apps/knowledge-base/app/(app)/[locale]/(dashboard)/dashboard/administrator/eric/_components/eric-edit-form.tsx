@@ -13,6 +13,7 @@ import {
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { ReverseUnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section";
+import { adminUnitRelationActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/admin-relation-actions";
 import { EricForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-form";
 import { discardEricDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_lib/discard-eric-draft.action";
 import { publishEricAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_lib/publish-eric.action";
@@ -122,6 +123,7 @@ export function EricEditForm(props: Readonly<EricEditFormProps>): ReactNode {
 
 				<TabPanel id="countries" shouldPreserveState={true}>
 					<ReverseUnitRelationsSection
+						actions={adminUnitRelationActions}
 						messages={{
 							title: t("Countries"),
 							memberLabel: t("Country"),
@@ -137,6 +139,7 @@ export function EricEditForm(props: Readonly<EricEditFormProps>): ReactNode {
 
 				<TabPanel id="institutions" shouldPreserveState={true}>
 					<ReverseUnitRelationsSection
+						actions={adminUnitRelationActions}
 						messages={{
 							title: t("Institutions"),
 							memberLabel: t("Institution"),
@@ -152,6 +155,7 @@ export function EricEditForm(props: Readonly<EricEditFormProps>): ReactNode {
 
 				<TabPanel id="working-groups" shouldPreserveState={true}>
 					<ReverseUnitRelationsSection
+						actions={adminUnitRelationActions}
 						messages={{
 							title: t("Working groups"),
 							memberLabel: t("Working group"),
@@ -167,6 +171,7 @@ export function EricEditForm(props: Readonly<EricEditFormProps>): ReactNode {
 
 				<TabPanel id="governance-bodies" shouldPreserveState={true}>
 					<ReverseUnitRelationsSection
+						actions={adminUnitRelationActions}
 						messages={{
 							title: t("Governance bodies"),
 							memberLabel: t("Governance body"),

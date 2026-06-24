@@ -1,19 +1,24 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Fragment, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
-import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
-import { NationalConsortiumForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form";
-import { updateDelegatedNationalConsortiumAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/update-national-consortium.action";
+import { DelegatedCountryEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_components/delegated-country-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getOrganisationalUnitEditData } from "@/lib/data/admin-organisational-units";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { getContributionPersonOptions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
+import { getPersonRelationRoleOptions, getPersonRelations } from "@/lib/data/person-relations";
 import { getSocialMediaOptions } from "@/lib/data/social-media";
+import {
+	getDariahEricDocumentId,
+	getEricInstitutionsForCountry,
+	getReverseUnitRelationStatusOptions,
+} from "@/lib/data/unit-relations";
 import { getUserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
@@ -33,7 +38,6 @@ export default async function CountryEditPage(
 	props: Readonly<CountryEditPageProps>,
 ): Promise<ReactNode> {
 	const [{ code }, { user }] = await Promise.all([props.params, assertAuthenticated()]);
-	const t = await getExtracted();
 	const scopes = await getUserOrganisationalUnitScopes(user);
 	const country = scopes.countries.find((item) => item.slug === code);
 	const consortium = country?.nationalConsortium;
@@ -52,7 +56,19 @@ export default async function CountryEditPage(
 		return { draftVersionId, publishedId: lifecycle.publishedId };
 	});
 
-	const [{ items: initialAssets }, initialSocialMedia, data] = await Promise.all([
+	// People and partner institutions are attached to the country document (matching the admin model),
+	// while the Details tab edits the national consortium. Relations are document-level and need no draft.
+	const [
+		{ items: initialAssets },
+		initialSocialMedia,
+		data,
+		personRelations,
+		personRelationRoleOptions,
+		{ items: initialPersonItems, total: initialPersonTotal },
+		ericDocumentId,
+		ericInstitutions,
+		ericInstitutionStatusOptions,
+	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
 		getSocialMediaOptions(),
 		getOrganisationalUnitEditData({
@@ -61,10 +77,32 @@ export default async function CountryEditPage(
 			versionId: draftVersionId,
 			publishedVersionId: publishedId,
 		}),
+		getPersonRelations(country.documentId),
+		getPersonRelationRoleOptions("country"),
+		getContributionPersonOptions(),
+		getDariahEricDocumentId(),
+		getEricInstitutionsForCountry(country.documentId),
+		getReverseUnitRelationStatusOptions("eric", "institution"),
 	]);
 	if (data == null) {
 		notFound();
 	}
+
+	// The ERIC representation relations are stored as `institution -> ERIC` edges; surface them on the
+	// country as the reverse-relation section's source units, scoped to this country.
+	const ericInstitutionRelations = ericInstitutions.map((institution) => {
+		return {
+			id: institution.id,
+			statusId: institution.statusId,
+			statusType: institution.statusType,
+			unitDocumentId: institution.institutionId,
+			unitName: institution.institutionName,
+			unitSlug: institution.institutionSlug,
+			unitType: institution.institutionType,
+			duration: institution.duration,
+			description: institution.description,
+		};
+	});
 
 	const image =
 		data.unit.image == null
@@ -78,24 +116,21 @@ export default async function CountryEditPage(
 				};
 
 	return (
-		<Fragment>
-			<EntityFormHeader title={t("Edit national consortium")} />
-			<NationalConsortiumForm
-				formAction={updateDelegatedNationalConsortiumAction}
-				formId="delegated-national-consortium-edit-form"
-				initialAssets={initialAssets}
-				initialRelatedEntityItems={[]}
-				initialRelatedEntityTotal={0}
-				initialRelatedResourceItems={[]}
-				initialRelatedResourceTotal={0}
-				initialSocialMediaIds={data.socialMediaIds}
-				initialSocialMediaItems={initialSocialMedia.items}
-				initialSocialMediaTotal={initialSocialMedia.total}
-				nationalConsortium={{ ...data.unit, image }}
-				selectedSocialMediaItems={data.selectedSocialMediaItems}
-				showRelationFields={false}
-				showSaveAndPublish={false}
-			/>
-		</Fragment>
+		<DelegatedCountryEditForm
+			countryDocumentId={country.documentId}
+			ericDocumentId={ericDocumentId}
+			ericInstitutionRelations={ericInstitutionRelations}
+			ericInstitutionStatusOptions={ericInstitutionStatusOptions}
+			initialAssets={initialAssets}
+			initialPersonItems={initialPersonItems}
+			initialPersonTotal={initialPersonTotal}
+			initialSocialMediaIds={data.socialMediaIds}
+			initialSocialMediaItems={initialSocialMedia.items}
+			initialSocialMediaTotal={initialSocialMedia.total}
+			nationalConsortium={{ ...data.unit, image }}
+			personRelationRoleOptions={personRelationRoleOptions}
+			personRelations={personRelations}
+			selectedSocialMediaItems={data.selectedSocialMediaItems}
+		/>
 	);
 }

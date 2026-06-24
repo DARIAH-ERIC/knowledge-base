@@ -15,6 +15,10 @@ import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
 import { ReverseUnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
+import {
+	adminUnitRelationActions,
+	personRelationActions,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/admin-relation-actions";
 import { CountryForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form";
 import { discardCountryDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/discard-country-draft.action";
 import { publishCountryAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/publish-country.action";
@@ -143,6 +147,7 @@ export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNod
 
 				<TabPanel id="people" shouldPreserveState={true}>
 					<PersonRelationsSection
+						actions={personRelationActions}
 						initialPersonItems={initialPersonItems}
 						initialPersonTotal={initialPersonTotal}
 						relations={personRelations}
@@ -154,6 +159,7 @@ export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNod
 				<TabPanel id="institutions" shouldPreserveState={true}>
 					{ericDocumentId != null ? (
 						<ReverseUnitRelationsSection
+							actions={adminUnitRelationActions}
 							messages={{
 								title: t("Institutions"),
 								memberLabel: t("Institution"),
