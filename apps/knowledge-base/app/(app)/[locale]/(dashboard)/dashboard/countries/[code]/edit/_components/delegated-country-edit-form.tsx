@@ -12,6 +12,8 @@ import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_co
 import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
 import { ReverseUnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section";
 import { createDelegatedPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/_lib/create-delegated-person.action";
+import { getDelegatedPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/_lib/get-delegated-person.action";
+import { updateDelegatedPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/_lib/update-delegated-person.action";
 import { personRelationActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/admin-relation-actions";
 import { NationalConsortiumForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form";
 import { createDelegatedInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/create-delegated-institution.action";
@@ -103,6 +105,13 @@ export function DelegatedCountryEditForm(
 					<PersonRelationsSection
 						actions={personRelationActions}
 						createPersonAction={createDelegatedPersonAction}
+						includeDraftPersons={true}
+						personEditor={{
+							updateAction: updateDelegatedPersonAction,
+							getFields: getDelegatedPersonAction,
+							rowActionLabel: t("Edit person"),
+							title: t("Edit person"),
+						}}
 						initialPersonItems={initialPersonItems}
 						initialPersonTotal={initialPersonTotal}
 						organisationalUnitDocumentId={countryDocumentId}

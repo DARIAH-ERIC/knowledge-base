@@ -58,6 +58,20 @@ export interface PersonRelationActions {
 	delete: (id: string) => Promise<void>;
 }
 
+/** Core, editable metadata of a person, used by the optional edit affordance. */
+export interface EditablePersonFields {
+	name: string;
+	sortName: string;
+}
+
+/** Optional affordance to edit an existing person's own metadata from their row. */
+export interface EditPerson {
+	updateAction: ServerAction;
+	getFields: (documentId: string) => Promise<EditablePersonFields | null>;
+	rowActionLabel: string;
+	title: string;
+}
+
 interface PersonRelationsSectionProps {
 	organisationalUnitDocumentId: string;
 	relations: Array<PersonRelation & { lifecycleStatus?: "changed" | "new" }>;
@@ -71,10 +85,15 @@ interface PersonRelationsSectionProps {
 	 * the system.
 	 */
 	createPersonAction?: ServerAction;
+	/** When provided, a row action edits the selected person's own metadata (saved as a draft). */
+	personEditor?: EditPerson;
+	/** When true, the person picker also offers draft persons (e.g. ones the caller just created). */
+	includeDraftPersons?: boolean;
 }
 
 async function fetchPersonOptionsPage(
 	params: Readonly<AsyncOptionsFetchPageParams>,
+	includeDrafts = false,
 ): Promise<{ items: Array<ContributionPersonOption>; total: number }> {
 	const searchParams = new URLSearchParams({
 		limit: String(params.limit),
@@ -84,6 +103,10 @@ async function fetchPersonOptionsPage(
 
 	if (params.q !== "") {
 		searchParams.set("q", params.q);
+	}
+
+	if (includeDrafts) {
+		searchParams.set("includeDrafts", "true");
 	}
 
 	const response = await fetch(`/api/contributions/options?${searchParams.toString()}`, {
@@ -121,6 +144,8 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 		initialPersonTotal,
 		actions,
 		createPersonAction,
+		personEditor,
+		includeDraftPersons = false,
 	} = props;
 
 	const t = useExtracted();
@@ -284,6 +309,58 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 		});
 	}
 
+	const [personToEdit, setPersonToEdit] = useState<{ id: string } | null>(null);
+	const [editPersonFields, setEditPersonFields] = useState<EditablePersonFields | null>(null);
+	const [isEditPersonFieldsLoading, setIsEditPersonFieldsLoading] = useState(false);
+	const [editPersonState, setEditPersonState] = useState<ActionState>(() =>
+		createActionStateInitial(),
+	);
+	const [isEditPersonPending, startEditPersonTransition] = useTransition();
+
+	function openEditPersonDialog(relation: PersonRelation) {
+		if (personEditor == null) {
+			return;
+		}
+
+		setEditPersonState(createActionStateInitial());
+		setPersonToEdit({ id: relation.personDocumentId });
+		setEditPersonFields(null);
+		setIsEditPersonFieldsLoading(true);
+
+		startTransition(async () => {
+			const fields = await personEditor.getFields(relation.personDocumentId);
+			setEditPersonFields(
+				fields ?? { name: relation.personName, sortName: relation.personSortName },
+			);
+			setIsEditPersonFieldsLoading(false);
+		});
+	}
+
+	function editPersonFormAction(formData: FormData) {
+		if (personEditor == null) {
+			return;
+		}
+
+		startEditPersonTransition(async () => {
+			const newState = await personEditor.updateAction(editPersonState, formData);
+			setEditPersonState(newState);
+
+			if (newState.status === "success" && personToEdit != null) {
+				const data = newState.data as { name: string; sortName: string } | undefined;
+				if (data != null) {
+					setLocalRelations((prev) =>
+						prev.map((relation) =>
+							relation.personDocumentId === personToEdit.id
+								? { ...relation, personName: data.name, personSortName: data.sortName }
+								: relation,
+						),
+					);
+				}
+				setPersonToEdit(null);
+			}
+		});
+	}
+
 	return (
 		<Fragment>
 			<div className="max-inline-3xl space-y-6">
@@ -360,6 +437,16 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 											>
 												{t("Edit person relation")}
 											</RowActionsMenu.Action>
+											{personEditor != null && (
+												<RowActionsMenu.Action
+													icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
+													onAction={() => {
+														openEditPersonDialog(relation);
+													}}
+												>
+													{personEditor.rowActionLabel}
+												</RowActionsMenu.Action>
+											)}
 											{relation.duration.end == null && (
 												<RowActionsMenu.Action
 													icon={<ArchiveBoxXMarkIcon className="me-2 block-4 inline-4" />}
@@ -436,7 +523,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 											? validationErrors.personDocumentId
 											: undefined
 									}
-									fetchPage={fetchPersonOptionsPage}
+									fetchPage={(params) => fetchPersonOptionsPage(params, includeDraftPersons)}
 									initialItems={initialPersonItems}
 									initialTotal={initialPersonTotal}
 									isRequired={true}
@@ -604,7 +691,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 									? editValidationErrors.personDocumentId
 									: undefined
 							}
-							fetchPage={fetchPersonOptionsPage}
+							fetchPage={(params) => fetchPersonOptionsPage(params, includeDraftPersons)}
 							initialItems={initialPersonItems}
 							initialTotal={initialPersonTotal}
 							isRequired={true}
@@ -744,6 +831,61 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							</Button>
 						</ModalFooter>
 					</Form>
+				</ModalContent>
+			) : null}
+
+			{personEditor != null ? (
+				<ModalContent
+					isOpen={personToEdit != null}
+					onOpenChange={(open) => {
+						if (!open) {
+							setPersonToEdit(null);
+						}
+					}}
+				>
+					<ModalHeader
+						description={t("Edit the details of the selected person.")}
+						title={personEditor.title}
+					/>
+					{isEditPersonFieldsLoading || editPersonFields == null ? (
+						<ModalBody>
+							<ProgressCircle aria-label={t("Loading...")} isIndeterminate={true} />
+						</ModalBody>
+					) : (
+						<Form action={editPersonFormAction} state={editPersonState}>
+							<ModalBody className="flex flex-col gap-y-4">
+								<input name="documentId" type="hidden" value={personToEdit?.id ?? ""} />
+								<TextField defaultValue={editPersonFields.name} isRequired={true} name="name">
+									<Label>{t("Name")}</Label>
+									<Input />
+									<FieldError />
+								</TextField>
+								<TextField
+									defaultValue={editPersonFields.sortName}
+									isRequired={true}
+									name="sortName"
+								>
+									<Label>{t("Sort name")}</Label>
+									<Input />
+									<FieldError />
+								</TextField>
+								<FormStatus className="self-start" state={editPersonState} />
+							</ModalBody>
+							<ModalFooter>
+								<ModalClose>{t("Cancel")}</ModalClose>
+								<Button isPending={isEditPersonPending} type="submit">
+									{isEditPersonPending ? (
+										<Fragment>
+											<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+											<span aria-hidden={true}>{t("Saving...")}</span>
+										</Fragment>
+									) : (
+										t("Save")
+									)}
+								</Button>
+							</ModalFooter>
+						</Form>
+					)}
 				</ModalContent>
 			) : null}
 		</Fragment>

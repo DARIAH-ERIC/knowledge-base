@@ -11,6 +11,8 @@ import {
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
 import { createDelegatedPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/_lib/create-delegated-person.action";
+import { getDelegatedPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/_lib/get-delegated-person.action";
+import { updateDelegatedPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/_lib/update-delegated-person.action";
 import { personRelationActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/admin-relation-actions";
 import { WorkingGroupForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form";
 import { updateDelegatedWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/edit/_lib/update-working-group.action";
@@ -87,6 +89,13 @@ export function DelegatedWorkingGroupEditForm(
 					<PersonRelationsSection
 						actions={personRelationActions}
 						createPersonAction={createDelegatedPersonAction}
+						includeDraftPersons={true}
+						personEditor={{
+							updateAction: updateDelegatedPersonAction,
+							getFields: getDelegatedPersonAction,
+							rowActionLabel: t("Edit person"),
+							title: t("Edit person"),
+						}}
 						initialPersonItems={initialPersonItems}
 						initialPersonTotal={initialPersonTotal}
 						organisationalUnitDocumentId={documentId}

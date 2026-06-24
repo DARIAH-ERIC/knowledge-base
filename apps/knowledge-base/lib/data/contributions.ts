@@ -3,7 +3,10 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { contributionOptionsPageSize } from "@/lib/constants/contributions";
-import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
+import {
+	latestEditableEntityVersionWhere,
+	publishedEntityVersionWhere,
+} from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { unaccentIlike } from "@/lib/db/search";
 import { alias, and, count, desc, eq, inArray, or, sql } from "@/lib/db/sql";
@@ -329,8 +332,10 @@ interface GetContributionOptionsParams {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function getContributionPersonOptions(params: GetContributionOptionsParams = {}) {
-	const { limit = contributionOptionsPageSize, offset = 0, q } = params;
+export async function getContributionPersonOptions(
+	params: GetContributionOptionsParams & { includeDrafts?: boolean } = {},
+) {
+	const { limit = contributionOptionsPageSize, offset = 0, q, includeDrafts = false } = params;
 	const query = q?.trim();
 	const searchWhere =
 		query != null && query !== ""
@@ -339,7 +344,11 @@ export async function getContributionPersonOptions(params: GetContributionOption
 					unaccentIlike(schema.persons.sortName, `%${query}%`),
 				)
 			: undefined;
-	const lifecycleWhere = publishedEntityVersionWhere();
+	// Pickers normally offer published persons only. Delegated dashboards opt in to draft-or-published so
+	// a coordinator can relate a person they just created (still a draft) — one row per document.
+	const lifecycleWhere = includeDrafts
+		? latestEditableEntityVersionWhere()
+		: publishedEntityVersionWhere();
 	const where = and(lifecycleWhere, searchWhere);
 
 	const [items, aggregate] = await Promise.all([
