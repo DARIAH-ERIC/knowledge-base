@@ -119,7 +119,7 @@ export function createWebsiteResourceDocument(resource: ResourceDocument): Websi
 		type: resource.type,
 		label: resource.label,
 		description: resource.description,
-		link: resource.source_url ?? resource.links[0],
+		link: resource.links[0] ?? resource.source_url,
 	};
 }
 
