@@ -11,6 +11,7 @@ import { expect, test } from "@/e2e/lib/test";
 test.describe("non-admin admin access", () => {
 	const adminRoutes = [
 		"/en/dashboard/administrator",
+		"/en/dashboard/administrator/tasks",
 		"/en/dashboard/administrator/persons",
 		"/en/dashboard/administrator/persons/create",
 		"/en/dashboard/administrator/users",
