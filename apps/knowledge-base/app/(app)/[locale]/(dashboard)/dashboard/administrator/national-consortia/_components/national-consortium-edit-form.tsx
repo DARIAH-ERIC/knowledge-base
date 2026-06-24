@@ -13,8 +13,10 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import { ReverseUnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
+import { adminUnitRelationActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/admin-relation-actions";
 import { NationalConsortiumForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form";
 import { discardNationalConsortiumDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/discard-national-consortium-draft.action";
 import { publishNationalConsortiumAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/publish-national-consortium.action";
@@ -122,21 +124,25 @@ export function NationalConsortiumEditForm(
 						formAction={updateNationalConsortiumAction}
 						formId={formId}
 						initialAssets={initialAssets}
-						initialRelatedEntityIds={initialRelatedEntityIds}
-						initialRelatedEntityItems={initialRelatedEntityItems}
-						initialRelatedEntityTotal={initialRelatedEntityTotal}
-						initialRelatedResourceIds={initialRelatedResourceIds}
-						initialRelatedResourceItems={initialRelatedResourceItems}
-						initialRelatedResourceTotal={initialRelatedResourceTotal}
 						initialSocialMediaIds={initialSocialMediaIds}
 						initialSocialMediaItems={initialSocialMediaItems}
 						initialSocialMediaTotal={initialSocialMediaTotal}
 						nationalConsortium={nationalConsortium}
-						selectedRelatedEntities={selectedRelatedEntities}
-						selectedRelatedResources={selectedRelatedResources}
 						selectedSocialMediaItems={selectedSocialMediaItems}
 						showSaveAndPublish={true}
-					/>
+					>
+						<EntityRelationsFields
+							formId={formId}
+							initialRelatedEntityIds={initialRelatedEntityIds}
+							initialRelatedEntityItems={initialRelatedEntityItems}
+							initialRelatedEntityTotal={initialRelatedEntityTotal}
+							initialRelatedResourceIds={initialRelatedResourceIds}
+							initialRelatedResourceItems={initialRelatedResourceItems}
+							initialRelatedResourceTotal={initialRelatedResourceTotal}
+							selectedRelatedEntities={selectedRelatedEntities}
+							selectedRelatedResources={selectedRelatedResources}
+						/>
+					</NationalConsortiumForm>
 				</TabPanel>
 
 				<TabPanel id="relations" shouldPreserveState={true}>
@@ -173,6 +179,7 @@ export function NationalConsortiumEditForm(
 					</p>
 
 					<ReverseUnitRelationsSection
+						actions={adminUnitRelationActions}
 						messages={{
 							title: t("Institutions"),
 							memberLabel: t("Institution"),

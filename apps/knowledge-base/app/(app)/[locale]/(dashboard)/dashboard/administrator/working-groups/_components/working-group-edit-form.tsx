@@ -12,8 +12,10 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
+import { personRelationActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/admin-relation-actions";
 import { WorkingGroupForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form";
 import { discardWorkingGroupDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/discard-working-group-draft.action";
 import { publishWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/publish-working-group.action";
@@ -114,24 +116,29 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 						formAction={updateWorkingGroupAction}
 						formId={formId}
 						initialAssets={initialAssets}
-						initialRelatedEntityIds={initialRelatedEntityIds}
-						initialRelatedEntityItems={initialRelatedEntityItems}
-						initialRelatedEntityTotal={initialRelatedEntityTotal}
-						initialRelatedResourceIds={initialRelatedResourceIds}
-						initialRelatedResourceItems={initialRelatedResourceItems}
-						initialRelatedResourceTotal={initialRelatedResourceTotal}
 						initialSocialMediaIds={initialSocialMediaIds}
 						initialSocialMediaItems={initialSocialMediaItems}
 						initialSocialMediaTotal={initialSocialMediaTotal}
-						selectedRelatedEntities={selectedRelatedEntities}
-						selectedRelatedResources={selectedRelatedResources}
 						selectedSocialMediaItems={selectedSocialMediaItems}
 						workingGroup={workingGroup}
-					/>
+					>
+						<EntityRelationsFields
+							formId={formId}
+							initialRelatedEntityIds={initialRelatedEntityIds}
+							initialRelatedEntityItems={initialRelatedEntityItems}
+							initialRelatedEntityTotal={initialRelatedEntityTotal}
+							initialRelatedResourceIds={initialRelatedResourceIds}
+							initialRelatedResourceItems={initialRelatedResourceItems}
+							initialRelatedResourceTotal={initialRelatedResourceTotal}
+							selectedRelatedEntities={selectedRelatedEntities}
+							selectedRelatedResources={selectedRelatedResources}
+						/>
+					</WorkingGroupForm>
 				</TabPanel>
 
 				<TabPanel id="people" shouldPreserveState={true}>
 					<PersonRelationsSection
+						actions={personRelationActions}
 						initialPersonItems={initialPersonItems}
 						initialPersonTotal={initialPersonTotal}
 						relations={personRelations}

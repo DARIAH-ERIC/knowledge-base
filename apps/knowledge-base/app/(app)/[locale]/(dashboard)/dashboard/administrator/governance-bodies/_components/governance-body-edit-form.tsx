@@ -14,6 +14,7 @@ import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_co
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
+import { personRelationActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/admin-relation-actions";
 import { GovernanceBodyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form";
 import { discardGovernanceBodyDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/discard-governance-body-draft.action";
 import { publishGovernanceBodyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/publish-governance-body.action";
@@ -129,6 +130,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 
 				<TabPanel id="people" shouldPreserveState={true}>
 					<PersonRelationsSection
+						actions={personRelationActions}
 						initialPersonItems={initialPersonItems}
 						initialPersonTotal={initialPersonTotal}
 						relations={personRelations}

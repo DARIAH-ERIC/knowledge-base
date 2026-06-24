@@ -4,6 +4,7 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
+import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import { NationalConsortiumForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form";
 import { createNationalConsortiumAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/create-national-consortium.action";
 
@@ -35,12 +36,15 @@ export function NationalConsortiumCreateForm(
 			<NationalConsortiumForm
 				formAction={createNationalConsortiumAction}
 				initialAssets={initialAssets}
-				initialRelatedEntityItems={initialRelatedEntityItems}
-				initialRelatedEntityTotal={initialRelatedEntityTotal}
-				initialRelatedResourceItems={initialRelatedResourceItems}
-				initialRelatedResourceTotal={initialRelatedResourceTotal}
 				showSaveAndPublish={true}
-			/>
+			>
+				<EntityRelationsFields
+					initialRelatedEntityItems={initialRelatedEntityItems}
+					initialRelatedEntityTotal={initialRelatedEntityTotal}
+					initialRelatedResourceItems={initialRelatedResourceItems}
+					initialRelatedResourceTotal={initialRelatedResourceTotal}
+				/>
+			</NationalConsortiumForm>
 		</Fragment>
 	);
 }

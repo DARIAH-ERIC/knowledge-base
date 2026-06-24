@@ -18,6 +18,7 @@ import {
 	UnitProjectsSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-projects-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
+import { personRelationActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/admin-relation-actions";
 import { InstitutionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form";
 import { discardInstitutionDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/discard-institution-draft.action";
 import { publishInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/publish-institution.action";
@@ -141,6 +142,7 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 
 				<TabPanel id="people" shouldPreserveState={true}>
 					<PersonRelationsSection
+						actions={personRelationActions}
 						initialPersonItems={initialPersonItems}
 						initialPersonTotal={initialPersonTotal}
 						relations={personRelations}

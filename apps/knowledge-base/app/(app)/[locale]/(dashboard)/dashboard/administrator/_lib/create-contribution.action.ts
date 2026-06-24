@@ -1,6 +1,6 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
+import { assert, getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
 import { getExtracted, getLocale } from "next-intl/server";
@@ -9,6 +9,7 @@ import * as v from "valibot";
 
 import { CreateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.schema";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
+import { assertCan } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 import { isExclusionViolation } from "@/lib/db/errors";
 import { and, eq, sql } from "@/lib/db/sql";
@@ -17,7 +18,7 @@ import { createServerAction } from "@/lib/server/create-server-action";
 
 /** Uses createServerAction because the success response carries typed data. */
 export const createContributionAction = createServerAction(
-	{ requireAdmin: true },
+	{ requireAuth: true },
 	async function createContributionAction(state, formData, { user }) {
 		const locale = await getLocale();
 		const t = await getExtracted();
@@ -38,6 +39,14 @@ export const createContributionAction = createServerAction(
 
 		const { personDocumentId, roleTypeId, organisationalUnitDocumentId, duration, description } =
 			result.output;
+
+		// Admins always pass; delegated callers (working-group chairs, national coordinators) may manage
+		// people only on organisational units they are scoped to edit.
+		assert(user != null);
+		await assertCan(user, "update", {
+			type: "organisational_unit",
+			id: organisationalUnitDocumentId,
+		});
 
 		try {
 			const returned = await db.transaction(async (tx) => {

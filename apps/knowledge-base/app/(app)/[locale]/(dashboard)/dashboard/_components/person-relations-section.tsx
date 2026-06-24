@@ -41,13 +41,22 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
-import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
-import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
-import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
-import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
 import type { ContributionPersonOption } from "@/lib/data/contributions";
 import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
 import { dateToCalendarDate } from "@/lib/date";
+import type { ServerAction } from "@/lib/server/create-server-action";
+
+/**
+ * The mutations this section performs, injected by the caller so the same UI can be wired to either
+ * the admin actions (`requireAdmin`) or the delegated, scope-authorized actions used on non-admin
+ * dashboards.
+ */
+export interface PersonRelationActions {
+	create: ServerAction;
+	update: ServerAction;
+	end: (id: string, end: Date) => Promise<void>;
+	delete: (id: string) => Promise<void>;
+}
 
 interface PersonRelationsSectionProps {
 	organisationalUnitDocumentId: string;
@@ -55,6 +64,13 @@ interface PersonRelationsSectionProps {
 	roleOptions: Array<PersonRelationRoleOption>;
 	initialPersonItems: Array<ContributionPersonOption>;
 	initialPersonTotal: number;
+	actions: PersonRelationActions;
+	/**
+	 * When provided, an "Add new person" affordance creates a draft person via this action and
+	 * selects it. Used on delegated dashboards where a coordinator may need to add someone not yet in
+	 * the system.
+	 */
+	createPersonAction?: ServerAction;
 }
 
 async function fetchPersonOptionsPage(
@@ -103,6 +119,8 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 		roleOptions,
 		initialPersonItems,
 		initialPersonTotal,
+		actions,
+		createPersonAction,
 	} = props;
 
 	const t = useExtracted();
@@ -150,7 +168,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 		const option = selectedRoleOption;
 
 		startFormTransition(async () => {
-			const newState = await createContributionAction(state, formData);
+			const newState = await actions.create(state, formData);
 			setState(newState);
 
 			if (newState.status === "success" && option != null && person != null) {
@@ -211,7 +229,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 		const option = editRoleOption;
 
 		startEditTransition(async () => {
-			const newState = await updateContributionAction(editState, formData);
+			const newState = await actions.update(editState, formData);
 			setEditState(newState);
 
 			if (newState.status === "success" && itemToEdit != null && option != null && person != null) {
@@ -235,6 +253,33 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 					),
 				);
 				setItemToEdit(null);
+			}
+		});
+	}
+
+	const [isCreatePersonOpen, setIsCreatePersonOpen] = useState(false);
+	const [createPersonState, setCreatePersonState] = useState<ActionState>(() =>
+		createActionStateInitial(),
+	);
+	const [isCreatePersonPending, startCreatePersonTransition] = useTransition();
+
+	function createPersonFormAction(formData: FormData) {
+		if (createPersonAction == null) {
+			return;
+		}
+
+		startCreatePersonTransition(async () => {
+			const newState = await createPersonAction(createPersonState, formData);
+			setCreatePersonState(newState);
+
+			if (newState.status === "success") {
+				const data = newState.data as { id: string; name: string; sortName: string } | undefined;
+
+				if (data != null) {
+					setSelectedPerson({ id: data.id, name: data.name, sortName: data.sortName });
+					setIsCreatePersonOpen(false);
+					setCreatePersonState(createActionStateInitial());
+				}
 			}
 		});
 	}
@@ -402,6 +447,19 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 								/>
 								<input name="personDocumentId" type="hidden" value={selectedPerson?.id ?? ""} />
 
+								{createPersonAction != null ? (
+									<Button
+										className="self-start"
+										intent="outline"
+										onPress={() => {
+											setCreatePersonState(createActionStateInitial());
+											setIsCreatePersonOpen(true);
+										}}
+									>
+										{t("Add new person")}
+									</Button>
+								) : null}
+
 								<DatePicker granularity="day" isRequired={true} name="duration.start">
 									<Label>{t("Start date")}</Label>
 									<DatePickerTrigger />
@@ -482,7 +540,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							const end = selectedEndDate.toDate("UTC");
 
 							startTransition(async () => {
-								await endContributionAction(itemToEnd.id, end);
+								await actions.end(itemToEnd.id, end);
 								setLocalRelations((prev) =>
 									prev.map((relation) =>
 										relation.id === itemToEnd.id
@@ -629,7 +687,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 
 							const id = itemToDelete.id;
 							startTransition(async () => {
-								await deleteContributionAction(id);
+								await actions.delete(id);
 								setLocalRelations((prev) => prev.filter((relation) => relation.id !== id));
 								setItemToDelete(null);
 							});
@@ -639,6 +697,55 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 					</Button>
 				</ModalFooter>
 			</ModalContent>
+
+			{createPersonAction != null ? (
+				<ModalContent
+					isOpen={isCreatePersonOpen}
+					onOpenChange={(open) => {
+						if (!open) {
+							setIsCreatePersonOpen(false);
+						}
+					}}
+				>
+					<ModalHeader
+						description={t("Create a new person, then select them above.")}
+						title={t("Add new person")}
+					/>
+					<Form action={createPersonFormAction} state={createPersonState}>
+						<ModalBody className="flex flex-col gap-y-4">
+							<input
+								name="organisationalUnitDocumentId"
+								type="hidden"
+								value={organisationalUnitDocumentId}
+							/>
+							<TextField isRequired={true} name="name">
+								<Label>{t("Name")}</Label>
+								<Input />
+								<FieldError />
+							</TextField>
+							<TextField isRequired={true} name="sortName">
+								<Label>{t("Sort name")}</Label>
+								<Input />
+								<FieldError />
+							</TextField>
+							<FormStatus className="self-start" state={createPersonState} />
+						</ModalBody>
+						<ModalFooter>
+							<ModalClose>{t("Cancel")}</ModalClose>
+							<Button isPending={isCreatePersonPending} type="submit">
+								{isCreatePersonPending ? (
+									<Fragment>
+										<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+										<span aria-hidden={true}>{t("Saving...")}</span>
+									</Fragment>
+								) : (
+									t("Add person")
+								)}
+							</Button>
+						</ModalFooter>
+					</Form>
+				</ModalContent>
+			) : null}
 		</Fragment>
 	);
 }
