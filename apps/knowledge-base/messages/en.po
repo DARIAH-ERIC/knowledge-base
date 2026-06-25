@@ -392,6 +392,7 @@ msgstr "Forgot password"
 #: app/(app)/[locale]/(default)/_components/default-header.tsx:25
 #: app/(app)/[locale]/error-page.tsx:32
 #: app/(app)/[locale]/forbidden.tsx:37
+#: app/(app)/[locale]/not-found.tsx:37
 #: app/(app)/[locale]/unauthorized.tsx:37
 #: app/global-not-found.tsx:49
 msgid "ejEGdx"
@@ -6502,6 +6503,7 @@ msgstr "An unexpected error interrupted this page. You can retry the request or 
 
 #: app/(app)/[locale]/error-page.tsx:31
 #: app/(app)/[locale]/forbidden.tsx:36
+#: app/(app)/[locale]/not-found.tsx:36
 #: app/(app)/[locale]/unauthorized.tsx:36
 #: app/global-not-found.tsx:48
 msgid "aIRWQB"
@@ -6536,6 +6538,23 @@ msgstr "Error 403"
 msgid "tW7xtV"
 msgstr "You don't have permission to access this page. If you believe this is a mistake, please contact your administrator."
 
+#: app/(app)/[locale]/not-found.tsx:12
+#: app/(app)/[locale]/not-found.tsx:38
+#: app/global-not-found.tsx:20
+#: app/global-not-found.tsx:50
+msgid "QRccCM"
+msgstr "Page not found"
+
+#: app/(app)/[locale]/not-found.tsx:31
+#: app/global-not-found.tsx:43
+msgid "1HohzV"
+msgstr "Error 404"
+
+#: app/(app)/[locale]/not-found.tsx:32
+#: app/global-not-found.tsx:44
+msgid "yO9r9N"
+msgstr "The page you requested could not be found. It may have been moved, renamed, or never existed in this part of the knowledge base."
+
 #: app/(app)/[locale]/unauthorized.tsx:12
 #: app/(app)/[locale]/unauthorized.tsx:40
 msgid "rfioQa"
@@ -6548,19 +6567,6 @@ msgstr "Error 401"
 #: app/(app)/[locale]/unauthorized.tsx:32
 msgid "N1Yb+F"
 msgstr "You need to sign in to access this page. If you already have an account, please sign in below."
-
-#: app/global-not-found.tsx:20
-#: app/global-not-found.tsx:50
-msgid "QRccCM"
-msgstr "Page not found"
-
-#: app/global-not-found.tsx:43
-msgid "1HohzV"
-msgstr "Error 404"
-
-#: app/global-not-found.tsx:44
-msgid "yO9r9N"
-msgstr "The page you requested could not be found. It may have been moved, renamed, or never existed in this part of the knowledge base."
 
 #: lib/server/create-command-action.ts:135
 #: lib/server/create-server-action.ts:112
