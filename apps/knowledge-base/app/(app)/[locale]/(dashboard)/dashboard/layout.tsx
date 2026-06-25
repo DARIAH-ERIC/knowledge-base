@@ -40,7 +40,7 @@ export default async function DashbardLayout(
 		<Fragment>
 			<SkipLink href={`#${mainContentId}`}>{t("Skip to main content")}</SkipLink>
 
-			<SidebarProvider defaultOpen={defaultOpen}>
+			<SidebarProvider className="min-block-svh" defaultOpen={defaultOpen}>
 				<DashboardCommandPaletteProvider
 					isAdmin={user.role === "admin"}
 					organisationalUnitScopes={organisationalUnitScopes}
@@ -54,7 +54,7 @@ export default async function DashbardLayout(
 					<SidebarInset>
 						<DashboardSidebarNav breadcrumbs={breadcrumbs} user={user} />
 
-						<div className="flex flex-col gap-y-(--layout-padding) p-(--layout-padding) [--layout-padding:--spacing(4)] sm:[--layout-padding:--spacing(6)]">
+						<div className="flex flex-1 flex-col gap-y-(--layout-padding) p-(--layout-padding) [--layout-padding:--spacing(4)] sm:[--layout-padding:--spacing(6)]">
 							{children}
 						</div>
 					</SidebarInset>
