@@ -79,7 +79,7 @@ export default async function CountryEditPage(
 		}),
 		getPersonRelations(country.documentId),
 		getPersonRelationRoleOptions("country"),
-		getContributionPersonOptions(),
+		getContributionPersonOptions({ includeDrafts: true }),
 		getDariahEricDocumentId(),
 		getEricInstitutionsForCountry(country.documentId),
 		getReverseUnitRelationStatusOptions("eric", "institution"),

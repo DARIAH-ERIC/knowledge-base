@@ -48,7 +48,10 @@ test.describe("country people and institutions (delegated national coordinator)"
 		await expect(page.getByRole("tab", { name: "People" })).toBeVisible();
 	}
 
-	test("adds a person on the country document", async ({ page, db }, testInfo) => {
+	test("person tab: selects a freshly created draft person without reloading", async ({
+		page,
+		db,
+	}, testInfo) => {
 		const prefix = `[e2e-worker-${String(testInfo.workerIndex)}]`;
 		const name = `${prefix} Country Person ${randomUUID()}`;
 		const sortName = `${prefix}, Country Person`;
@@ -97,7 +100,49 @@ test.describe("country people and institutions (delegated national coordinator)"
 		expect(relations.some((relation) => relation.personId === person!.documentId)).toBe(true);
 	});
 
-	test("creates a draft institution located in the country and links it as a partner", async ({
+	test("person tab: lists a freshly created draft person in the picker after reload", async ({
+		page,
+		db,
+	}, testInfo) => {
+		const prefix = `[e2e-worker-${String(testInfo.workerIndex)}]`;
+		const name = `${prefix} Reload Person ${randomUUID()}`;
+		// A `0000`-prefixed sort name collates first under the db's en_US.utf8 collation, so the new
+		// draft lands on the first page of the picker's options — which is capped and ordered by sort
+		// name — regardless of how many other persons are seeded.
+		const sortName = `0000 ${prefix} Reload Person`;
+
+		await gotoEdit(page);
+		await page.getByRole("tab", { name: "People" }).click();
+
+		await page.getByRole("button", { name: "Add new person" }).click();
+		const dialog = page.getByRole("dialog", { name: "Add new person" });
+		await dialog.getByRole("textbox", { name: "Name" }).fill(name);
+		await dialog.getByRole("textbox", { name: "Sort name" }).fill(sortName);
+		await dialog.getByRole("button", { name: "Add person" }).click();
+		await dialog.waitFor({ state: "hidden" });
+
+		const person = await db.getPersonByName(name);
+		expect(person, "the created draft person exists").not.toBeNull();
+		expect(await db.getPublishedVersionId(person!.documentId)).toBeNull();
+
+		// Reload to discard the client-side selection and exercise the SERVER-rendered initial options.
+		// Regression: the page server-fetched published persons only, so after a refresh the picker
+		// dropped the just-created draft even though the (draft-aware) options api would still find it.
+		await gotoEdit(page);
+		await page.getByRole("tab", { name: "People" }).click();
+
+		// Open the picker WITHOUT typing: searching would hit the draft-aware api and mask the bug,
+		// which only affects the initial, server-provided option list.
+		const personControl = page
+			.locator('[data-slot="control"]')
+			.filter({ has: page.getByText("Person", { exact: true }) });
+		await personControl.getByRole("button").first().click();
+
+		const listbox = page.getByRole("listbox", { name: "Person" });
+		await expect(listbox.getByRole("option", { name, exact: true })).toBeVisible();
+	});
+
+	test("institution tab: creates and links a freshly created draft institution without reloading", async ({
 		page,
 		db,
 	}, testInfo) => {
@@ -164,5 +209,47 @@ test.describe("country people and institutions (delegated national coordinator)"
 					relation.relatedUnitDocumentId !== countryDocumentId,
 			),
 		).toBe(true);
+	});
+
+	test("institution tab: lists a freshly created draft institution in the picker after reload", async ({
+		page,
+		db,
+	}, testInfo) => {
+		const prefix = `[e2e-worker-${String(testInfo.workerIndex)}]`;
+		const name = `${prefix} Reload Institution ${randomUUID()}`;
+
+		await gotoEdit(page);
+		await page.getByRole("tab", { name: "Institutions" }).click();
+
+		// Creating the draft institution also adds its `is_located_in` edge to the country, so it is in
+		// scope for the country-scoped picker even without completing a partner relation.
+		await page.getByRole("button", { name: "Add new institution" }).click();
+		const dialog = page.getByRole("dialog", { name: "Add new institution" });
+		await dialog.getByRole("textbox", { name: "Name" }).fill(name);
+		await dialog.getByRole("button", { name: "Save" }).click();
+		await dialog.waitFor({ state: "hidden" });
+
+		const institution = await db.getInstitutionByName(name);
+		expect(institution, "the created draft institution exists").not.toBeNull();
+		expect(await db.getPublishedVersionId(institution!.documentId)).toBeNull();
+
+		// Reload to drop the client-side selection. Unlike the person picker, this one always fetches
+		// from the options api, so the regression here is the api filtering to published-only — a draft
+		// institution the coordinator just created would vanish from the picker after a refresh.
+		await gotoEdit(page);
+		await page.getByRole("tab", { name: "Institutions" }).click();
+
+		const institutionControl = page
+			.locator('[data-slot="control"]')
+			.filter({ has: page.getByText("Institution", { exact: true }) });
+		await institutionControl.getByRole("button").first().click();
+
+		// Search by the unique name so the assertion is independent of how many institutions are located
+		// in the country; the query still hits the draft-aware, country-scoped options api. The picker's
+		// search input is autofocused when the popover opens, so typing lands there.
+		const listbox = page.getByRole("listbox", { name: "Institution" });
+		await listbox.waitFor();
+		await page.keyboard.type(name);
+		await expect(listbox.getByRole("option", { name, exact: true })).toBeVisible();
 	});
 });

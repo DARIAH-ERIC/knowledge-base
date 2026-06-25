@@ -16,7 +16,8 @@ import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 
 const CreateDelegatedInstitutionActionInputSchema = v.object({
-	countryDocumentId: v.pipe(v.string(), v.uuid()),
+	// The section posts the country document id as a generic hidden `scopeDocumentId` field.
+	scopeDocumentId: v.pipe(v.string(), v.uuid()),
 	name: v.pipe(v.string(), v.nonEmpty()),
 	acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	ror: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
@@ -48,7 +49,7 @@ export const createDelegatedInstitutionAction = createServerAction(
 			});
 		}
 
-		const { countryDocumentId, name, acronym, ror, summary } = result.output;
+		const { scopeDocumentId: countryDocumentId, name, acronym, ror, summary } = result.output;
 
 		assert(user != null);
 		await assertCan(user, "update", { type: "organisational_unit", id: countryDocumentId });
