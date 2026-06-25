@@ -153,6 +153,11 @@ export class AdminPersonsPage {
 		await this.page.getByRole("button", { name: "Select an organisation" }).click();
 		await this.page.getByRole("option").first().waitFor({ state: "visible" });
 		await this.page.getByRole("option").first().click();
+		// Wait for the selection to commit so a later submit isn't blocked by an empty required field
+		// (which would fire no POST and time out `waitForActionSuccess`).
+		await this.page
+			.getByRole("button", { name: "Select an organisation" })
+			.waitFor({ state: "hidden" });
 	}
 
 	async fillContributionDatePicker(
