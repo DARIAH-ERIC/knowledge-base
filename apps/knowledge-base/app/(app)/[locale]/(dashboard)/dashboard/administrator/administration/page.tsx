@@ -11,29 +11,29 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorPageProps extends PageProps<"/[locale]/dashboard/administrator"> {}
+interface DashboardAdministrationPageProps extends PageProps<"/[locale]/dashboard/administrator/administration"> {}
 
 export async function generateMetadata(
-	_props: Readonly<DashboardAdministratorPageProps>,
+	_props: Readonly<DashboardAdministrationPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Organisation & governance"),
+		title: t("Administration"),
 	});
 
 	return metadata;
 }
 
-export default async function DashboardAdministratorPage(
-	_props: Readonly<DashboardAdministratorPageProps>,
+export default async function DashboardAdministrationPage(
+	_props: Readonly<DashboardAdministrationPageProps>,
 ): Promise<ReactNode> {
 	const t = await getExtracted();
 
 	return (
 		<Fragment>
-			<Heading>{t("Organisation & governance")}</Heading>
+			<Heading>{t("Administration")}</Heading>
 			<Header className="my-(--layout-gutter) border-bs">
 				<HeaderContent>
 					<HeaderTitle>{t("Lorem ipsum")}</HeaderTitle>
