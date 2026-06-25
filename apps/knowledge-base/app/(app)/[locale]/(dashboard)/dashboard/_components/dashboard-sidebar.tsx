@@ -46,11 +46,11 @@ export function useSidebarMenu(
 ): Array<SidebarMenuSection> {
 	const t = useExtracted();
 
-	const adminSection: SidebarMenuSection = {
-		title: t("Administrator"),
+	const administrationSection: SidebarMenuSection = {
+		title: t("Administration"),
 		items: [
 			{
-				href: "/dashboard/administrator",
+				href: "/dashboard/administrator/administration",
 				tooltip: t("Overview"),
 				label: t("Overview"),
 				icon: <ListBulletIcon />,
@@ -65,6 +65,30 @@ export function useSidebarMenu(
 				href: "/dashboard/administrator/drafts",
 				tooltip: t("Drafts"),
 				label: t("Drafts"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/newsletters",
+				tooltip: t("Newsletters"),
+				label: t("Newsletters"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/users",
+				tooltip: t("Users"),
+				label: t("Users"),
+				icon: <ListBulletIcon />,
+			},
+		],
+	};
+
+	const adminSection: SidebarMenuSection = {
+		title: t("Organisation & governance"),
+		items: [
+			{
+				href: "/dashboard/administrator",
+				tooltip: t("Overview"),
+				label: t("Overview"),
 				icon: <ListBulletIcon />,
 			},
 			{
@@ -101,12 +125,6 @@ export function useSidebarMenu(
 				href: "/dashboard/administrator/national-consortia",
 				tooltip: t("National consortia"),
 				label: t("National consortia"),
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/newsletters",
-				tooltip: t("Newsletters"),
-				label: t("Newsletters"),
 				icon: <ListBulletIcon />,
 			},
 			{
@@ -149,12 +167,6 @@ export function useSidebarMenu(
 				href: "/dashboard/administrator/social-media",
 				tooltip: t("Social media"),
 				label: t("Social media"),
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/users",
-				tooltip: t("Users"),
-				label: t("Users"),
 				icon: <ListBulletIcon />,
 			},
 			{
@@ -320,6 +332,7 @@ export function useSidebarMenu(
 	};
 
 	return [
+		...(isAdmin ? [administrationSection] : []),
 		...(isAdmin ? [adminSection] : []),
 		...(isAdmin ? [knowledgeBaseSection] : []),
 		...(!isAdmin
