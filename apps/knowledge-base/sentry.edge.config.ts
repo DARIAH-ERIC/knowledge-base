@@ -11,5 +11,9 @@ Sentry.init({
 	 * @see {@link https://docs.sentry.io/platforms/javascript/guides/nextjs/data-management/data-collected/}
 	 */
 	sendDefaultPii: env.NEXT_PUBLIC_APP_SENTRY_PII === "enabled",
-	tracesSampleRate: 0.1,
+	/**
+	 * Tracing is handled by our own OpenTelemetry collector, not by Sentry. See
+	 * `sentry.server.config.ts`.
+	 */
+	tracesSampleRate: 0,
 });

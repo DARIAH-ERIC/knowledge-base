@@ -67,6 +67,16 @@ const validate = define({
 		MAILCHIMP_LIST_ID: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		MAILPIT_API_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
 		NEXT_RUNTIME: v.optional(v.picklist(["edge", "nodejs"])),
+		/**
+		 * Base URL of our own OpenTelemetry collector. When set, traces are exported there via
+		 * `@vercel/otel`. Read directly by the OTLP exporter; declared here so it is documented and so
+		 * `instrumentation.ts` can gate registration on its presence.
+		 *
+		 * @see {@link https://opentelemetry.io/docs/specs/otel/protocol/exporter/#configuration-options}
+		 */
+		OTEL_EXPORTER_OTLP_ENDPOINT: v.optional(v.pipe(v.string(), v.url())),
+		/** Optional headers (e.g. for authentication) sent to the collector, as `key=value,key=value`. */
+		OTEL_EXPORTER_OTLP_HEADERS: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		REVALIDATION_WEBHOOK_SECRET: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		REVALIDATION_WEBHOOK_URL: v.optional(v.pipe(v.string(), v.url())),
 		S3_ACCESS_KEY: v.pipe(v.string(), v.nonEmpty()),
@@ -136,6 +146,8 @@ export const env = validate({
 		NEXT_PUBLIC_TYPESENSE_PROTOCOL: process.env.NEXT_PUBLIC_TYPESENSE_PROTOCOL,
 		NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY: process.env.NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY,
 		NEXT_RUNTIME: process.env.NEXT_RUNTIME,
+		OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+		OTEL_EXPORTER_OTLP_HEADERS: process.env.OTEL_EXPORTER_OTLP_HEADERS,
 		REVALIDATION_WEBHOOK_SECRET: process.env.REVALIDATION_WEBHOOK_SECRET,
 		REVALIDATION_WEBHOOK_URL: process.env.REVALIDATION_WEBHOOK_URL,
 		S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
