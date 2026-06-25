@@ -1,3 +1,4 @@
+import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { expect, test } from "@/e2e/lib/test";
 
 /**
@@ -47,7 +48,19 @@ test.describe("working group report content (chair)", () => {
 
 		await page.getByLabel("Number of members").fill("15");
 		await page.getByLabel("Mailing list").fill("wg-list@example.org");
-		await page.getByRole("button", { name: "Save" }).click();
+		// Scope to the data form: the screen also renders a comment section with its own "Save". Wait for
+		// the (non-redirecting) save action to finish before reloading, otherwise the reload aborts the
+		// in-flight POST and nothing is persisted.
+		await waitForActionSuccess({
+			page,
+			trigger: async () => {
+				await page
+					.locator("form")
+					.filter({ has: page.getByLabel("Number of members") })
+					.getByRole("button", { name: "Save" })
+					.click();
+			},
+		});
 
 		await expect(page.getByLabel("Number of members")).toHaveValue("15");
 
@@ -68,7 +81,12 @@ test.describe("working group report content (chair)", () => {
 		await answer.click();
 		await page.keyboard.type("We ran three workshops.");
 
-		await page.getByRole("button", { name: "Save" }).click();
+		// Scope to the questions form: the screen also renders a comment section with its own "Save".
+		await page
+			.locator("form")
+			.filter({ has: answer })
+			.getByRole("button", { name: "Save" })
+			.click();
 
 		// The batched upsert persists the answer for this report + question.
 		await expect(async () => {

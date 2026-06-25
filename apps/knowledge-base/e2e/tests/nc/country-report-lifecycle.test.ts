@@ -68,7 +68,12 @@ test.describe("country report lifecycle (national coordinator)", () => {
 		// successful save would instead stay on the events screen, so the redirect is the signal that
 		// the edit was rejected and nothing was persisted.
 		await page.getByLabel("Small events").fill("7");
-		await page.getByRole("button", { name: "Save" }).click();
+		// Scope to the events form: the screen also renders a comment section with its own "Save".
+		await page
+			.locator("form")
+			.filter({ has: page.getByLabel("Small events") })
+			.getByRole("button", { name: "Save" })
+			.click();
 
 		await expect(page).toHaveURL(/\/en\/dashboard$/);
 	});

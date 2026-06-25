@@ -106,6 +106,8 @@ interface ReverseUnitRelationsSectionProps {
 	 * scope, for example, a country edit form to its own institutions.
 	 */
 	sourceUnitLocatedInCountryDocumentId?: string;
+	/** When true, the source-unit picker also offers draft units (e.g. ones the caller just created). */
+	includeDraftSourceUnits?: boolean;
 	/** Entity-specific copy, kept in the parent so message extraction works. */
 	messages: {
 		title: string;
@@ -123,6 +125,7 @@ async function fetchSourceUnitOptionsPage(
 	unitType: string,
 	params: Readonly<AsyncOptionsFetchPageParams>,
 	locatedInCountryDocumentId?: string,
+	includeDrafts = false,
 ): Promise<{ items: Array<AsyncOption>; total: number }> {
 	const searchParams = new URLSearchParams({
 		limit: String(params.limit),
@@ -136,6 +139,10 @@ async function fetchSourceUnitOptionsPage(
 
 	if (locatedInCountryDocumentId != null) {
 		searchParams.set("locatedInCountryDocumentId", locatedInCountryDocumentId);
+	}
+
+	if (includeDrafts) {
+		searchParams.set("includeDrafts", "true");
 	}
 
 	const response = await fetch(`/api/organisational-units/options?${searchParams.toString()}`, {
@@ -164,6 +171,7 @@ export function ReverseUnitRelationsSection(
 		statusOptions,
 		sourceUnitType,
 		sourceUnitLocatedInCountryDocumentId,
+		includeDraftSourceUnits = false,
 		messages,
 		actions,
 		createSourceUnit,
@@ -534,6 +542,7 @@ export function ReverseUnitRelationsSection(
 											sourceUnitType,
 											params,
 											sourceUnitLocatedInCountryDocumentId,
+											includeDraftSourceUnits,
 										)
 									}
 									initialItems={[]}
@@ -700,6 +709,7 @@ export function ReverseUnitRelationsSection(
 									sourceUnitType,
 									params,
 									sourceUnitLocatedInCountryDocumentId,
+									includeDraftSourceUnits,
 								)
 							}
 							initialItems={[]}

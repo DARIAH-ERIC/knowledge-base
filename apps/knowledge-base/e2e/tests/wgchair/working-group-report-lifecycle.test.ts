@@ -54,7 +54,12 @@ test.describe("working group report lifecycle (chair)", () => {
 		await page.goto(`/en/dashboard/reporting/working-group-reports/${year!}/${slug!}/edit/data`);
 
 		await page.getByLabel("Number of members").fill("12");
-		await page.getByRole("button", { name: "Save" }).click();
+		// Scope to the data form: the screen also renders a comment section with its own "Save".
+		await page
+			.locator("form")
+			.filter({ has: page.getByLabel("Number of members") })
+			.getByRole("button", { name: "Save" })
+			.click();
 
 		await expect(page).toHaveURL(/\/en\/dashboard$/);
 	});

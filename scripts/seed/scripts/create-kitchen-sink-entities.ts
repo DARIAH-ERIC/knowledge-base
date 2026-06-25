@@ -428,6 +428,10 @@ async function main() {
 				id: createId("entity:country"),
 				versionId: createId("version:country"),
 			};
+			const secondMemberCountryDocument = {
+				id: createId("entity:country:second"),
+				versionId: createId("version:country:second"),
+			};
 			const institutionDocument = {
 				id: createId("entity:institution"),
 				versionId: createId("version:institution"),
@@ -544,6 +548,16 @@ async function main() {
 					),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink-country",
+				},
+				{
+					id: secondMemberCountryDocument.id,
+					versionId: secondMemberCountryDocument.versionId,
+					typeId: assertLookupId(
+						entityTypeIds.get("organisational_units"),
+						'Missing entity type "organisational_units".',
+					),
+					statusId: publishedStatusId,
+					slug: "kitchen-sink-country-two",
 				},
 				{
 					id: institutionDocument.id,
@@ -709,6 +723,9 @@ async function main() {
 			const governanceBodyVersionId = entityIdsBySeedId.get(governanceBodyDocument.id)!.versionId;
 			const memberCountryEntityId = entityIdsBySeedId.get(memberCountryDocument.id)!.documentId;
 			const memberCountryVersionId = entityIdsBySeedId.get(memberCountryDocument.id)!.versionId;
+			const secondMemberCountryVersionId = entityIdsBySeedId.get(
+				secondMemberCountryDocument.id,
+			)!.versionId;
 			const institutionVersionId = entityIdsBySeedId.get(institutionDocument.id)!.versionId;
 			const institutionEntityId = entityIdsBySeedId.get(institutionDocument.id)!.documentId;
 			const coordinatingInstitutionVersionId = entityIdsBySeedId.get(
@@ -927,6 +944,19 @@ async function main() {
 					'Missing organisational unit type "country".',
 				),
 				sshocMarketplaceActorId: 9004,
+			});
+			await upsertById(tx, schema.organisationalUnits, {
+				id: secondMemberCountryVersionId,
+				name: "Kitchen Sink Country Two",
+				acronym: "KSC2",
+				summary: "A second member country for testing cross-tenant report authorization.",
+				metadata: { isoCode: "K2", continent: "Europe" },
+				imageId: createId("asset:image"),
+				typeId: assertLookupId(
+					unitTypeIds.get("country"),
+					'Missing organisational unit type "country".',
+				),
+				sshocMarketplaceActorId: 9008,
 			});
 			await upsertById(tx, schema.organisationalUnits, {
 				id: institutionVersionId,

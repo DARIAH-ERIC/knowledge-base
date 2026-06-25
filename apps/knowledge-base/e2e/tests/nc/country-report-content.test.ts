@@ -1,3 +1,6 @@
+import type { Locator, Page } from "@playwright/test";
+
+import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { expect, test } from "@/e2e/lib/test";
 
 /**
@@ -7,6 +10,12 @@ import { expect, test } from "@/e2e/lib/test";
  *
  * The report is a draft in an open campaign so editing is allowed; it is cleaned up afterwards.
  */
+
+/** The events content form, scoped away from the screen's comment form (which has its own "Save"). */
+function eventsForm(page: Page): Locator {
+	return page.locator("form").filter({ has: page.getByLabel("Small events") });
+}
+
 test.describe("country report content (national coordinator)", () => {
 	test.describe.configure({ mode: "default" });
 
@@ -41,7 +50,15 @@ test.describe("country report content (national coordinator)", () => {
 
 		await page.getByLabel("Small events").fill("4");
 		await page.getByLabel("Medium events").fill("2");
-		await page.getByRole("button", { name: "Save" }).click();
+		// Scope to the events form: the screen also renders a comment section with its own "Save". Wait
+		// for the (non-redirecting) save action to finish before reloading, otherwise the reload aborts
+		// the in-flight POST and nothing is persisted.
+		await waitForActionSuccess({
+			page,
+			trigger: async () => {
+				await eventsForm(page).getByRole("button", { name: "Save" }).click();
+			},
+		});
 
 		// Stays on the editor (a successful content save does not redirect) and the values survive a
 		// reload — i.e. they were persisted to the report.
@@ -56,7 +73,7 @@ test.describe("country report content (national coordinator)", () => {
 		await page.goto(`/en/dashboard/reporting/country-reports/${year!}/${slug!}/edit/events`);
 
 		await page.getByLabel("Title").fill("123");
-		await page.getByRole("button", { name: "Save" }).click();
+		await eventsForm(page).getByRole("button", { name: "Save" }).click();
 
 		// The schema's `v.check` rejects a purely numeric title; the field error is shown and nothing
 		// is persisted (the title field is empty again after a reload).
@@ -76,11 +93,14 @@ test.describe("country report content (national coordinator)", () => {
 		await option.click();
 		await page.getByRole("button", { name: "Add", exact: true }).click();
 
-		await expect(page.getByText(serviceName!, { exact: true })).toBeVisible();
+		// Assert against the membership card, not the page: the picker keeps the selected service in its
+		// combobox label (and a hidden native <option>), which would otherwise also match the name.
+		const serviceCard = page.getByRole("listitem").filter({ hasText: serviceName! });
+		await expect(serviceCard).toBeVisible();
 		expect(await db.getCountryReportServiceIds(reportId!)).toHaveLength(1);
 
 		await page.getByRole("button", { name: "Remove service" }).click();
-		await expect(page.getByText(serviceName!, { exact: true })).toBeHidden();
+		await expect(serviceCard).toHaveCount(0);
 		expect(await db.getCountryReportServiceIds(reportId!)).toHaveLength(0);
 	});
 });

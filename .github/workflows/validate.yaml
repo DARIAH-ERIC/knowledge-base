@@ -285,7 +285,9 @@ jobs:
         run: pnpm exec turbo run build
 
       - name: Run e2e tests
-        run: pnpm exec turbo run --filter "@dariah-eric/knowledge-base" test:e2e -- --project=admin --project=non-admin
+        # Includes the relation-derived reporting personas (nc / wgchair / reporter); their auth
+        # states are seeded in global-setup, so they run with the same setup as the admin projects.
+        run: pnpm exec turbo run --filter "@dariah-eric/knowledge-base" test:e2e -- --project=admin --project=non-admin --project=nc --project=wgchair --project=reporter
 
       - uses: actions/upload-artifact@v7
         if: ${{ failure() }}
