@@ -287,7 +287,9 @@ export class AdminGovernanceBodiesPage {
 		// Wait for the selection to commit (the placeholder is replaced by the person's name). Without
 		// this, a click landing mid-refresh can leave the field empty, so a later submit silently fails
 		// client validation and fires no POST — surfacing as a `waitForActionSuccess` timeout.
-		await this.page.getByRole("button", { name: "No person selected" }).waitFor({ state: "hidden" });
+		await this.page
+			.getByRole("button", { name: "No person selected" })
+			.waitFor({ state: "hidden" });
 	}
 
 	async selectPersonByName(searchText: string): Promise<void> {
@@ -296,7 +298,9 @@ export class AdminGovernanceBodiesPage {
 		await this.page.keyboard.press("Enter");
 		await this.page.getByRole("option").first().waitFor({ state: "visible" });
 		await this.page.getByRole("option").first().click();
-		await this.page.getByRole("button", { name: "No person selected" }).waitFor({ state: "hidden" });
+		await this.page
+			.getByRole("button", { name: "No person selected" })
+			.waitFor({ state: "hidden" });
 	}
 
 	async fillPersonRelationDatePicker(
