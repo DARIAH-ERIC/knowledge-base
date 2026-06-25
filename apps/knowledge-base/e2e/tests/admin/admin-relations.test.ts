@@ -93,6 +93,10 @@ async function selectAsyncOption(
 	const option = page.getByRole("option").first();
 	await option.waitFor({ state: "visible" });
 	await option.click();
+	// Wait for the selection to commit (the trigger no longer shows its placeholder) before the caller
+	// submits — otherwise an option clicked mid-refresh leaves the field empty, the submit fires no POST,
+	// and `waitForActionSuccess` times out.
+	await scope.getByRole("button", { name: triggerName }).waitFor({ state: "hidden" });
 }
 
 test.describe("admin relation management", () => {

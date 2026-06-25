@@ -133,6 +133,11 @@ export class AdminWorkingGroupsPage {
 		await this.page.getByRole("button", { name: "No related unit selected" }).click();
 		await this.page.getByRole("option").first().waitFor({ state: "visible" });
 		await this.page.getByRole("option").first().click();
+		// Wait for the selection to commit (placeholder replaced) so a later submit isn't blocked by an
+		// empty required field — which would silently fire no POST and time out `waitForActionSuccess`.
+		await this.page
+			.getByRole("button", { name: "No related unit selected" })
+			.waitFor({ state: "hidden" });
 	}
 
 	async fillRelationDatePicker(
@@ -220,6 +225,8 @@ export class AdminWorkingGroupsPage {
 		await this.page.keyboard.press("Enter");
 		await this.page.getByRole("option").first().waitFor({ state: "visible" });
 		await this.page.getByRole("option").first().click();
+		// Wait for the selection to commit before the caller submits (see selectFirstRelatedUnit).
+		await form.getByRole("button", { name: "No person selected" }).waitFor({ state: "hidden" });
 	}
 
 	async fillPersonRelationDatePicker(
