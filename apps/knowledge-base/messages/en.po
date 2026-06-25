@@ -645,7 +645,7 @@ msgstr "Forgot password?"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:101
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-details.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:86
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:119
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:123
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx:106
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-form.tsx:87
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-page.tsx:46
@@ -1249,7 +1249,7 @@ msgstr "Role"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx:167
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx:253
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:319
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:122
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:300
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx:114
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx:276
@@ -1632,8 +1632,8 @@ msgid "xXbJso"
 msgstr "Sign out"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:50
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/administration/page.tsx:24
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/administration/page.tsx:37
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/administration/page.tsx:23
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/administration/page.tsx:36
 msgid "f+sh2j"
 msgstr "Administration"
 
@@ -1658,8 +1658,8 @@ msgstr "Tasks"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:66
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:67
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:75
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:107
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:76
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:111
 msgid "2atspc"
 msgstr "Drafts"
 
@@ -2601,7 +2601,7 @@ msgstr "Relations"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-edit-form.tsx:65
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:98
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:125
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:129
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-page.tsx:47
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:102
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:103
@@ -2668,14 +2668,14 @@ msgstr "Welcome, {name}"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/(index)/page.tsx:23
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/(index)/page.tsx:39
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/administration/page.tsx:40
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/administration/page.tsx:39
 #: app/(app)/[locale]/(dashboard)/dashboard/website/(index)/page.tsx:40
 msgid "4unN3g"
 msgstr "Lorem ipsum"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/(index)/page.tsx:25
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/(index)/page.tsx:41
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/administration/page.tsx:42
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/administration/page.tsx:41
 #: app/(app)/[locale]/(dashboard)/dashboard/website/(index)/page.tsx:42
 msgid "T8onXc"
 msgstr "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
@@ -3328,35 +3328,39 @@ msgstr "Administrator dashboard - Create documentation page"
 msgid "UWxgPo"
 msgstr "Administrator dashboard - Documentation pages"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:76
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:77
 msgid "IaqTd3"
 msgstr "Unpublished documents awaiting review — new drafts and changes on top of published versions."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:82
-msgid "3Sp0nu"
-msgstr "No drafts awaiting review."
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:84
+msgid "utlUi+"
+msgstr "Unpublished documents awaiting review will appear here."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:87
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:85
+msgid "89PwOf"
+msgstr "No drafts awaiting review"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:91
 msgid "uAOtqE"
 msgstr "Filter by type"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:96
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:100
 msgid "orEaKq"
 msgstr "All types"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:128
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:132
 msgid "MGmJmm"
 msgstr "Last edited"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:138
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:142
 msgid "3kbIhS"
 msgstr "Untitled"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:156
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:160
 msgid "h+Wx2l"
 msgstr "New draft"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:156
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:160
 msgid "rnbLiY"
 msgstr "Draft changes"
 
