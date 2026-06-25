@@ -63,6 +63,7 @@
 		"@tiptap/starter-kit": "catalog:",
 		"@tiptap/static-renderer": "catalog:",
 		"@valibot/i18n": "catalog:",
+		"@vercel/otel": "catalog:",
 		"better-result": "catalog:",
 		"client-only": "catalog:",
 		"clsx": "catalog:",
