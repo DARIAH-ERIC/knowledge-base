@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@dariah-eric/ui/badge";
+import { EmptyState } from "@dariah-eric/ui/empty-state";
 import { Link } from "@dariah-eric/ui/link";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import {
@@ -79,7 +80,10 @@ export function DraftsList(props: Readonly<DraftsListProps>): ReactNode {
 			/>
 
 			{rows.length === 0 ? (
-				<p className="text-sm text-neutral-500">{t("No drafts awaiting review.")}</p>
+				<EmptyState
+					description={t("Unpublished documents awaiting review will appear here.")}
+					title={t("No drafts awaiting review")}
+				/>
 			) : (
 				<Fragment>
 					<div className="flex justify-end">
