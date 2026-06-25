@@ -2,9 +2,15 @@ import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 import { getLocale } from "next-intl/server";
 
-import { db } from "@/lib/db";
+import { type Database, type Transaction, db } from "@/lib/db";
 import { and, eq, inArray, sql } from "@/lib/db/sql";
 import { redirect } from "@/lib/navigation/navigation";
+
+/**
+ * Read executor for permission checks. Defaults to the shared `db`; tests pass a (rolled-back)
+ * transaction so seeded org units / relations are visible to the same checks the app runs.
+ */
+type Executor = Database | Transaction;
 
 export type Action = "read" | "create" | "update" | "delete" | "confirm";
 
@@ -24,8 +30,8 @@ const countryReadRoles = [
 	...representativeRoles,
 ] as const;
 
-async function getOrganisationalUnitPermissionTarget(documentId: string) {
-	const unit = await db
+async function getOrganisationalUnitPermissionTarget(executor: Executor, documentId: string) {
+	const unit = await executor
 		.select({ type: schema.organisationalUnitTypes.type })
 		.from(schema.documentLifecycle)
 		.innerJoin(
@@ -44,7 +50,7 @@ async function getOrganisationalUnitPermissionTarget(documentId: string) {
 		return unit == null ? null : { documentId, type: unit.type };
 	}
 
-	const country = await db
+	const country = await executor
 		.select({ documentId: schema.organisationalUnitsRelations.relatedUnitDocumentId })
 		.from(schema.organisationalUnitsRelations)
 		.innerJoin(
@@ -65,13 +71,14 @@ async function getOrganisationalUnitPermissionTarget(documentId: string) {
 }
 
 async function hasActiveRelation(
+	executor: Executor,
 	personDocumentId: string,
 	orgUnitDocumentId: string,
 	roleTypes: ReadonlyArray<(typeof schema.personRoleTypesEnum)[number]>,
 ): Promise<boolean> {
 	// The user's person actor and the report's org-unit target are both document ids now, matching the
 	// relation table directly.
-	const rows = await db
+	const rows = await executor
 		.select({ id: schema.personsToOrganisationalUnits.id })
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(
@@ -91,7 +98,12 @@ async function hasActiveRelation(
 	return rows.length > 0;
 }
 
-export async function can(user: User, action: Action, resource: Resource): Promise<boolean> {
+export async function can(
+	user: User,
+	action: Action,
+	resource: Resource,
+	executor: Executor = db,
+): Promise<boolean> {
 	if (user.role === "admin") {
 		return true;
 	}
@@ -101,7 +113,7 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 			return false;
 		}
 
-		const target = await getOrganisationalUnitPermissionTarget(resource.id);
+		const target = await getOrganisationalUnitPermissionTarget(executor, resource.id);
 		if (target == null) {
 			return false;
 		}
@@ -114,6 +126,7 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 				return false;
 			}
 			return hasActiveRelation(
+				executor,
 				user.personDocumentId,
 				target.documentId,
 				action === "update" ? coordinatorRoles : countryReadRoles,
@@ -127,6 +140,7 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 			return false;
 		}
 		return hasActiveRelation(
+			executor,
 			user.personDocumentId,
 			resource.id,
 			action === "update" ? chairRoles : [...chairRoles, ...memberRoles],
@@ -141,7 +155,7 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 			return false;
 		}
 
-		const report = await db.query.workingGroupReports.findFirst({
+		const report = await executor.query.workingGroupReports.findFirst({
 			where: { id: resource.id },
 			columns: { workingGroupDocumentId: true },
 		});
@@ -150,12 +164,22 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 		}
 
 		if (action === "confirm") {
-			return hasActiveRelation(user.personDocumentId, report.workingGroupDocumentId, chairRoles);
+			return hasActiveRelation(
+				executor,
+				user.personDocumentId,
+				report.workingGroupDocumentId,
+				chairRoles,
+			);
 		}
 
 		return (
-			(await hasActiveRelation(user.personDocumentId, report.workingGroupDocumentId, chairRoles)) ||
-			hasActiveRelation(user.personDocumentId, report.workingGroupDocumentId, memberRoles)
+			(await hasActiveRelation(
+				executor,
+				user.personDocumentId,
+				report.workingGroupDocumentId,
+				chairRoles,
+			)) ||
+			hasActiveRelation(executor, user.personDocumentId, report.workingGroupDocumentId, memberRoles)
 		);
 	}
 
@@ -165,7 +189,7 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 			return false;
 		}
 
-		const report = await db.query.countryReports.findFirst({
+		const report = await executor.query.countryReports.findFirst({
 			where: { id: resource.id },
 			columns: { countryDocumentId: true },
 		});
@@ -186,22 +210,34 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 		}
 
 		if (action === "confirm") {
-			return hasActiveRelation(user.personDocumentId, report.countryDocumentId, coordinatorRoles);
+			return hasActiveRelation(
+				executor,
+				user.personDocumentId,
+				report.countryDocumentId,
+				coordinatorRoles,
+			);
 		}
 
 		// `national_coordination_staff` may read and edit country reports, but not confirm them.
 		return (
 			(await hasActiveRelation(
+				executor,
 				user.personDocumentId,
 				report.countryDocumentId,
 				coordinatorRoles,
 			)) ||
 			(await hasActiveRelation(
+				executor,
 				user.personDocumentId,
 				report.countryDocumentId,
 				coordinationStaffRoles,
 			)) ||
-			hasActiveRelation(user.personDocumentId, report.countryDocumentId, representativeRoles)
+			hasActiveRelation(
+				executor,
+				user.personDocumentId,
+				report.countryDocumentId,
+				representativeRoles,
+			)
 		);
 	}
 

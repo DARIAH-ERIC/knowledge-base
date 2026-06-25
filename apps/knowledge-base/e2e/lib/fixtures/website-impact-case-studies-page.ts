@@ -194,7 +194,7 @@ export class WebsiteImpactCaseStudiesPage {
 	// ---------------------------------------------------------------------------
 
 	versionSelectorDraftLink(): Locator {
-		return this.page.getByRole("link", { name: "Draft" });
+		return this.page.getByRole("link", { name: "Draft", exact: true });
 	}
 
 	versionSelectorPublishedLink(): Locator {
