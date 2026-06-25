@@ -62,7 +62,7 @@ test.describe("working group people (delegated chair)", () => {
 		// in the "Add person" form's picker.
 		await page.getByRole("button", { name: "Add new person" }).click();
 		const dialog = page.getByRole("dialog", { name: "Add new person" });
-		await dialog.getByRole("textbox", { name: "Name" }).fill(input.name);
+		await dialog.getByLabel("Name", { exact: true }).fill(input.name);
 		await dialog.getByRole("textbox", { name: "Sort name" }).fill(input.sortName);
 		await dialog.getByRole("button", { name: "Add person" }).click();
 		await dialog.waitFor({ state: "hidden" });
@@ -132,10 +132,10 @@ test.describe("working group people (delegated chair)", () => {
 			.filter({ hasText: name })
 			.getByRole("button", { name: "Open actions menu" })
 			.click();
-		await page.getByRole("menuitem", { name: "Edit person" }).click();
+		await page.getByRole("menuitem", { name: "Edit person", exact: true }).click();
 
 		const dialog = page.getByRole("dialog", { name: "Edit person" });
-		const nameField = dialog.getByRole("textbox", { name: "Name" });
+		const nameField = dialog.getByLabel("Name", { exact: true });
 		await nameField.fill(correctedName);
 		await waitForActionSuccess({
 			page,
@@ -166,7 +166,7 @@ test.describe("working group people (delegated chair)", () => {
 		// Create the draft person but do NOT link them — the create alone persists the draft document.
 		await page.getByRole("button", { name: "Add new person" }).click();
 		const dialog = page.getByRole("dialog", { name: "Add new person" });
-		await dialog.getByRole("textbox", { name: "Name" }).fill(name);
+		await dialog.getByLabel("Name", { exact: true }).fill(name);
 		await dialog.getByRole("textbox", { name: "Sort name" }).fill(sortName);
 		await waitForActionSuccess({
 			page,

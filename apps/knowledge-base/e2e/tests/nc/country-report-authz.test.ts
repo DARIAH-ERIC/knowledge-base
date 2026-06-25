@@ -52,15 +52,15 @@ test.describe("country report authorization (national coordinator)", () => {
 
 		await expect(page.getByRole("heading", { name: ownCountryName! })).toBeVisible();
 		await expect(page.getByLabel("Small events")).toBeVisible();
-		await expect(page.getByText("Error 404")).toBeHidden();
+		await expect(page.getByText("This page could not be found.")).toBeHidden();
 	});
 
 	test("is not found for another country's report", async ({ page }) => {
 		await page.goto(`/en/dashboard/reporting/country-reports/${year!}/${otherSlug!}/edit/events`);
 
 		// The report exists, but the coordinator has no relation to that country, so the editor's
-		// authorization helper returns `forbidden` and the layout renders the 404 page.
-		await expect(page.getByText("Error 404")).toBeVisible();
+		// authorization helper returns `forbidden` and `notFound()` renders the (default) 404 page.
+		await expect(page.getByText("This page could not be found.")).toBeVisible();
 		await expect(page.getByLabel("Small events")).toBeHidden();
 	});
 

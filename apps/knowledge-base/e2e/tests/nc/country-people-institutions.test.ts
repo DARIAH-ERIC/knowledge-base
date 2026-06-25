@@ -61,7 +61,7 @@ test.describe("country people and institutions (delegated national coordinator)"
 
 		await page.getByRole("button", { name: "Add new person" }).click();
 		const dialog = page.getByRole("dialog", { name: "Add new person" });
-		await dialog.getByRole("textbox", { name: "Name" }).fill(name);
+		await dialog.getByLabel("Name", { exact: true }).fill(name);
 		await dialog.getByRole("textbox", { name: "Sort name" }).fill(sortName);
 		await dialog.getByRole("button", { name: "Add person" }).click();
 		await dialog.waitFor({ state: "hidden" });
@@ -116,7 +116,7 @@ test.describe("country people and institutions (delegated national coordinator)"
 
 		await page.getByRole("button", { name: "Add new person" }).click();
 		const dialog = page.getByRole("dialog", { name: "Add new person" });
-		await dialog.getByRole("textbox", { name: "Name" }).fill(name);
+		await dialog.getByLabel("Name", { exact: true }).fill(name);
 		await dialog.getByRole("textbox", { name: "Sort name" }).fill(sortName);
 		await dialog.getByRole("button", { name: "Add person" }).click();
 		await dialog.waitFor({ state: "hidden" });
