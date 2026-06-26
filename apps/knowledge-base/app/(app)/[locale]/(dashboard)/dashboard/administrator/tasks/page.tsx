@@ -1,4 +1,3 @@
-import { Heading } from "@dariah-eric/ui/heading";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
@@ -40,7 +39,6 @@ export default async function DashboardAdministratorTasksPage(
 
 	return (
 		<Fragment>
-			<Heading>{t("Admin tasks")}</Heading>
 			<Header className="my-(--layout-gutter) border-bs">
 				<HeaderContent>
 					<HeaderTitle>{t("Admin tasks")}</HeaderTitle>
