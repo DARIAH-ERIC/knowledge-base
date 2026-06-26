@@ -1,8 +1,8 @@
 /**
  * Human-readable labels for entity types, used e.g. as the secondary line in relation pickers.
  *
- * For `organisational_units` the generic label is replaced by the specific subtype label
- * (e.g. "Working group", "National consortium"), resolved from the unit's `organisationalUnitType`.
+ * For `organisational_units` the generic label is replaced by the specific subtype label (e.g.
+ * "Working group", "National consortium"), resolved from the unit's `organisationalUnitType`.
  */
 
 /** Entity type -> singular, human-readable label. */
@@ -49,10 +49,7 @@ function humanize(type: string): string {
 	return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
-export function getEntityTypeLabel(args: {
-	entityType: string;
-	unitType?: string | null;
-}): string {
+export function getEntityTypeLabel(args: { entityType: string; unitType?: string | null }): string {
 	const { entityType, unitType } = args;
 
 	if (entityType === "organisational_units" && unitType != null) {

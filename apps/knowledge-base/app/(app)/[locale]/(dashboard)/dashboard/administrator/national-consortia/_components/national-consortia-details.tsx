@@ -14,6 +14,7 @@ import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
+import { RelationTypeSuffix } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-type-suffix";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { UnitRelation } from "@/lib/data/unit-relations";
 import { getEntityDetailHref, getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
@@ -188,6 +189,7 @@ export function NationalConsortiumDetails(
 									) : (
 										<span className="font-medium">{relatedEntity.name}</span>
 									)}
+									<RelationTypeSuffix type={relatedEntity.description} />
 								</li>
 							))}
 						</ul>
@@ -201,6 +203,7 @@ export function NationalConsortiumDetails(
 							{selectedRelatedResources.map((relatedResource) => (
 								<li key={relatedResource.id} className="text-sm">
 									<span className="font-medium">{relatedResource.name}</span>
+									<RelationTypeSuffix type={relatedResource.description} />
 								</li>
 							))}
 						</ul>
