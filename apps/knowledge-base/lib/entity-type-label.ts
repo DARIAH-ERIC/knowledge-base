@@ -62,3 +62,30 @@ export function getEntityTypeLabel(args: { entityType: string; unitType?: string
 export function getResourceTypeLabel(resourceType: string): string {
 	return resourceTypeLabels[resourceType] ?? humanize(resourceType);
 }
+
+/**
+ * Reverse lookup for type search in the entity relation picker. Returns the raw enum tokens whose
+ * human-readable label contains `query` (case-insensitive), so typing e.g. "working group" or
+ * "event" matches the labels shown in the list rather than only the raw `entity_types.type` token.
+ */
+export function getEntityTypeTokensMatchingLabel(query: string): {
+	entityTypes: Array<string>;
+	unitTypes: Array<string>;
+} {
+	const q = query.trim().toLowerCase();
+
+	if (q === "") {
+		return { entityTypes: [], unitTypes: [] };
+	}
+
+	const matches = (label: string): boolean => label.toLowerCase().includes(q);
+
+	return {
+		entityTypes: Object.entries(entityTypeLabels)
+			.filter(([, label]) => matches(label))
+			.map(([token]) => token),
+		unitTypes: Object.entries(organisationalUnitTypeLabels)
+			.filter(([, label]) => matches(label))
+			.map(([token]) => token),
+	};
+}

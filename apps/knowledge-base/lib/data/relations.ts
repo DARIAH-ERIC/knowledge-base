@@ -7,7 +7,11 @@ import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { type Transaction, db } from "@/lib/db";
 import { unaccentIlike } from "@/lib/db/search";
 import { and, eq, inArray, or, sql } from "@/lib/db/sql";
-import { getEntityTypeLabel, getResourceTypeLabel } from "@/lib/entity-type-label";
+import {
+	getEntityTypeLabel,
+	getEntityTypeTokensMatchingLabel,
+	getResourceTypeLabel,
+} from "@/lib/entity-type-label";
 import { search } from "@/lib/search";
 
 export interface RelationOptionItem {
@@ -27,11 +31,27 @@ export async function getEntityRelationOptions(
 ): Promise<{ items: Array<RelationOptionItem>; total: number }> {
 	const { limit = relationOptionsPageSize, offset = 0, q } = params;
 	const query = q?.trim();
+	// Search slug (a real column) plus the human-readable type labels: typing "working group" or
+	// "event" is reverse-mapped to the matching `entity_types` / `organisational_unit_types` tokens
+	// so it matches what the list actually shows, not just the raw stored token.
+	const { entityTypes: matchedEntityTypes, unitTypes: matchedUnitTypes } =
+		getEntityTypeTokensMatchingLabel(query ?? "");
 	const searchWhere =
 		query != null && query !== ""
 			? or(
 					unaccentIlike(schema.entities.slug, `%${query}%`),
-					unaccentIlike(schema.entityTypes.type, `%${query}%`),
+					matchedEntityTypes.length > 0
+						? inArray(
+								schema.entityTypes.type,
+								matchedEntityTypes as Array<typeof schema.entityTypes.$inferSelect.type>,
+							)
+						: undefined,
+					matchedUnitTypes.length > 0
+						? inArray(
+								schema.organisationalUnitTypes.type,
+								matchedUnitTypes as Array<typeof schema.organisationalUnitTypes.$inferSelect.type>,
+							)
+						: undefined,
 				)
 			: undefined;
 	const where = and(publishedEntityVersionWhere(), searchWhere);
@@ -66,6 +86,14 @@ export async function getEntityRelationOptions(
 			.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
 			.innerJoin(schema.entityVersions, eq(schema.entityVersions.entityId, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.leftJoin(
+				schema.organisationalUnits,
+				eq(schema.organisationalUnits.id, schema.entityVersions.id),
+			)
+			.leftJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
 			.where(where),
 	]);
 
@@ -151,7 +179,7 @@ export async function getResourceRelationOptions(
 			page,
 			perPage: limit,
 			query: query != null && query !== "" ? query : "*",
-			queryBy: ["label"],
+			queryBy: ["label", "type"],
 			sortBy: [{ field: "label", direction: "asc" }],
 		});
 
