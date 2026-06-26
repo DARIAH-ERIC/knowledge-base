@@ -122,8 +122,11 @@ export class WebsiteNewsPage {
 	async removeRelatedEntity(entityName: string): Promise<void> {
 		const section = this.relatedEntitiesSection();
 		const dialog = this.relatedEntitiesDialog();
-		await section.getByText(entityName, { exact: true }).waitFor({ state: "visible" });
-		await section.getByRole("button", { name: entityName }).click();
+		// The selected tag now reads "<slug> (<Type>)", so match the remove button by its composed
+		// accessible name (which still contains the slug) rather than an exact tag-text lookup.
+		const removeButton = section.getByRole("button", { name: entityName });
+		await removeButton.waitFor({ state: "visible" });
+		await removeButton.click();
 		await this.closeRelatedEntitiesDialog(dialog);
 	}
 
