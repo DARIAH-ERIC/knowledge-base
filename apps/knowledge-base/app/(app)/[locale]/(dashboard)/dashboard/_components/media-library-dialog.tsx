@@ -46,6 +46,7 @@ interface MediaLibraryDialogProps<T extends AssetPrefix> {
 	defaultPrefix: T;
 	prefixes: ReadonlyArray<T>;
 	trigger?: ComponentType<{ open: () => void }>;
+	triggerLabel?: string;
 }
 
 type ActiveTab = "select" | "upload";
@@ -68,6 +69,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		onSelect,
 		prefixes,
 		trigger,
+		triggerLabel,
 	} = props;
 
 	const t = useExtracted();
@@ -282,6 +284,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 
 	const isPending = isUploading || isFetching;
 	const Trigger = trigger;
+	const licensesById = new Map(licenseOptions.map((license) => [license.id, license]));
 
 	return (
 		<Fragment>
@@ -289,7 +292,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 				<Trigger open={handleOpen} />
 			) : (
 				<Button intent="outline" onPress={handleOpen}>
-					{t("Select image")}
+					{triggerLabel ?? t("Select image")}
 				</Button>
 			)}
 
@@ -404,38 +407,73 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 									) : (
 										<GridList
 											aria-label={t("Media library")}
-											className={cn("flex flex-col gap-1.5", isPending && "opacity-50")}
+											className={cn("flex flex-col gap-2", isPending && "opacity-50")}
 											items={displayedAssets}
 											onSelectionChange={handleSelectionChange}
 											selectedKeys={selectedKeys}
 											selectionBehavior="replace"
 											selectionMode="single"
 										>
-											{(asset) => (
-												<GridListItem
-													className="flex flex-row items-center gap-3 p-1.5"
-													id={asset.key}
-													textValue={asset.label}
-												>
-													<AssetPreview
-														alt={asset.label}
-														className="block-12 inline-16 shrink-0"
-														imageClassName="rounded-sm object-contain"
-														kindLabelClassName="bg-background/90 text-xs"
-														mimeType={asset.mimeType}
-														src={asset.url}
-														storageKey={asset.key}
-													/>
-													<div className="flex min-inline-0 flex-1 flex-col gap-y-0.5">
-														<span className="truncate text-sm/tight font-medium">
-															{asset.label}
-														</span>
-														{asset.mimeType != null ? (
-															<span className="text-xs text-muted-fg">{asset.mimeType}</span>
-														) : null}
-													</div>
-												</GridListItem>
-											)}
+											{(asset) => {
+												const prefix = asset.key.split("/")[0] ?? "";
+												const license =
+													asset.licenseId != null ? licensesById.get(asset.licenseId) : undefined;
+												return (
+													<GridListItem
+														className="flex flex-row items-start gap-3 p-2.5"
+														id={asset.key}
+														textValue={asset.label}
+													>
+														<div className="block-16 inline-24 shrink-0 overflow-hidden rounded-md bg-muted">
+															<AssetPreview
+																alt={asset.alt ?? asset.label}
+																className="block-full inline-full"
+																imageClassName="object-contain"
+																kindLabelClassName="bg-background/90 text-xs"
+																mimeType={asset.mimeType}
+																src={asset.url}
+																storageKey={asset.key}
+															/>
+														</div>
+														<div className="flex min-inline-0 flex-1 flex-col gap-y-1">
+															<div className="flex flex-row items-baseline gap-x-2">
+																<span className="truncate text-sm/tight font-medium">
+																	{asset.label}
+																</span>
+																{prefix !== "" ? (
+																	<span className="shrink-0 text-xs text-muted-fg">{prefix}</span>
+																) : null}
+															</div>
+															{asset.alt != null && asset.alt !== "" ? (
+																<span className="line-clamp-1 text-xs text-muted-fg">
+																	<span className="font-medium">{t("Alt text")}:</span> {asset.alt}
+																</span>
+															) : null}
+															{asset.caption != null && asset.caption !== "" ? (
+																<span className="line-clamp-2 text-xs text-muted-fg">
+																	<span className="font-medium">{t("Caption")}:</span>{" "}
+																	{asset.caption}
+																</span>
+															) : null}
+															<div className="flex flex-row flex-wrap items-center gap-x-1.5 text-xs text-muted-fg">
+																{license != null ? (
+																	<Fragment>
+																		<span>{license.code}</span>
+																		<span aria-hidden={true}>{"·"}</span>
+																	</Fragment>
+																) : null}
+																{asset.mimeType != null ? <span>{asset.mimeType}</span> : null}
+																{asset.size != null ? (
+																	<Fragment>
+																		<span aria-hidden={true}>{"·"}</span>
+																		<span>{formatFileSize(asset.size)}</span>
+																	</Fragment>
+																) : null}
+															</div>
+														</div>
+													</GridListItem>
+												);
+											}}
 										</GridList>
 									)}
 

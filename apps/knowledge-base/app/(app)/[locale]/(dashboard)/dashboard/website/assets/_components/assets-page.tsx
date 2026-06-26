@@ -1,9 +1,10 @@
 "use client";
 
 import { assetPrefixes } from "@dariah-eric/storage/config";
+import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
-import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+import { ArrowDownTrayIcon, ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useState } from "react";
 
@@ -221,14 +222,24 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 											) : null}
 										</div>
 									</figcaption>
-									<EditAssetMetadataDialog
-										asset={asset}
-										licenses={licenses}
-										onSuccess={() => {
-											router.refresh();
-										}}
-										triggerClassName="shrink-0"
-									/>
+									<div className="flex shrink-0 items-start gap-x-1.5">
+										<a
+											aria-label={t("Download")}
+											className={buttonStyles({ intent: "plain", size: "sq-sm" })}
+											download={true}
+											href={`/api/assets/download?key=${encodeURIComponent(asset.key)}`}
+										>
+											<ArrowDownTrayIcon aria-hidden={true} className="block-4 inline-4" />
+										</a>
+										<EditAssetMetadataDialog
+											asset={asset}
+											licenses={licenses}
+											onSuccess={() => {
+												router.refresh();
+											}}
+											triggerClassName=""
+										/>
+									</div>
 								</figure>
 							</li>
 						);
