@@ -111,6 +111,7 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 						setSelectedDocument({ key, label: asset?.label ?? key });
 					}}
 					prefixes={["documents"]}
+					triggerLabel={t("Select document")}
 				/>
 
 				<input

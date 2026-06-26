@@ -82,9 +82,14 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 	const [assets, total] = await Promise.all([
 		db.query.assets.findMany({
 			columns: {
+				id: true,
 				key: true,
 				label: true,
+				alt: true,
+				caption: true,
+				licenseId: true,
 				mimeType: true,
+				size: true,
 			},
 			limit,
 			offset,
@@ -102,7 +107,17 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 			options: imageUrlOptions,
 		});
 
-		return { key: asset.key, label: asset.label, mimeType: asset.mimeType, url };
+		return {
+			id: asset.id,
+			key: asset.key,
+			label: asset.label,
+			alt: asset.alt,
+			caption: asset.caption,
+			licenseId: asset.licenseId,
+			mimeType: asset.mimeType,
+			size: asset.size,
+			url,
+		};
 	});
 
 	return { items, total };

@@ -134,6 +134,7 @@ function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): React
 							setSelectedDocument({ key, label: asset?.label ?? key });
 						}}
 						prefixes={["documents"]}
+						triggerLabel={t("Select document")}
 					/>
 					<input
 						aria-hidden={true}
