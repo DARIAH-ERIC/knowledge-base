@@ -7,6 +7,7 @@ import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { type Transaction, db } from "@/lib/db";
 import { unaccentIlike } from "@/lib/db/search";
 import { and, eq, inArray, or, sql } from "@/lib/db/sql";
+import { getEntityTypeLabel, getResourceTypeLabel } from "@/lib/entity-type-label";
 import { search } from "@/lib/search";
 
 export interface RelationOptionItem {
@@ -41,11 +42,20 @@ export async function getEntityRelationOptions(
 				entityType: schema.entityTypes.type,
 				id: schema.entities.id,
 				slug: schema.entities.slug,
+				unitType: schema.organisationalUnitTypes.type,
 			})
 			.from(schema.entities)
 			.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
 			.innerJoin(schema.entityVersions, eq(schema.entityVersions.entityId, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.leftJoin(
+				schema.organisationalUnits,
+				eq(schema.organisationalUnits.id, schema.entityVersions.id),
+			)
+			.leftJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
 			.where(where)
 			.orderBy(schema.entities.slug)
 			.limit(limit)
@@ -61,7 +71,11 @@ export async function getEntityRelationOptions(
 
 	return {
 		items: rows.map((row) => {
-			return { id: row.id, name: row.slug, description: row.entityType };
+			return {
+				id: row.id,
+				name: row.slug,
+				description: getEntityTypeLabel({ entityType: row.entityType, unitType: row.unitType }),
+			};
 		}),
 		total: aggregate.at(0)?.total ?? 0,
 	};
@@ -102,7 +116,10 @@ export async function getEntityRelationOptionsByIds(ids: ReadonlyArray<string>) 
 					{
 						id: row.id,
 						name: row.slug,
-						description: row.entityType,
+						description: getEntityTypeLabel({
+							entityType: row.entityType,
+							unitType: row.unitType,
+						}),
 						slug: row.slug,
 						entityType: row.entityType,
 						unitType: row.unitType,
@@ -145,7 +162,7 @@ export async function getResourceRelationOptions(
 		return {
 			items: result.value.items.map((hit) => {
 				return {
-					description: hit.document.type,
+					description: getResourceTypeLabel(hit.document.type),
 					id: hit.document.id,
 					name: hit.document.label,
 				};
@@ -181,7 +198,7 @@ export async function getResourceRelationOptionsByIds(ids: ReadonlyArray<string>
 					[
 						hit.document.id,
 						{
-							description: hit.document.type,
+							description: getResourceTypeLabel(hit.document.type),
 							id: hit.document.id,
 							name: hit.document.label,
 						},

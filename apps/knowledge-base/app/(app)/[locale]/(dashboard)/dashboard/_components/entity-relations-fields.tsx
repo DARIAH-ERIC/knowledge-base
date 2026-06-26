@@ -79,6 +79,11 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 						setSelectedEntityIds(ids);
 					}}
 					placeholder={t("No related entities")}
+					renderTag={(item) =>
+						item.description != null && item.description !== ""
+							? `${item.name} (${item.description})`
+							: item.name
+					}
 					selectedItems={selectedRelatedEntities}
 					value={selectedEntityIds}
 				/>
@@ -106,6 +111,11 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 						setSelectedResourceIds(ids);
 					}}
 					placeholder={t("No related resources")}
+					renderTag={(item) =>
+						item.description != null && item.description !== ""
+							? `${item.name} (${item.description})`
+							: item.name
+					}
 					selectedItems={selectedRelatedResources}
 					value={selectedResourceIds}
 				/>

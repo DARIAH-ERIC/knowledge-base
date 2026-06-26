@@ -49,6 +49,7 @@ export interface AsyncMultipleSelectProps<T extends AsyncOption> {
 	pageSize?: number;
 	placeholder?: string;
 	renderItem?: (item: T) => ReactNode;
+	renderTag?: (item: AsyncOption) => ReactNode;
 	selectedItems?: Array<T>;
 	value: Array<string>;
 	cacheKey?: string | number;
@@ -97,6 +98,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 		pageSize = defaultPageSize,
 		placeholder,
 		renderItem,
+		renderTag,
 		selectedItems = emptySelectedItems,
 		value,
 	} = props;
@@ -216,7 +218,9 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 								</i>
 							)}
 						>
-							{(item) => <Tag className="rounded-md">{item.name}</Tag>}
+							{(item) => (
+								<Tag className="rounded-md">{renderTag != null ? renderTag(item) : item.name}</Tag>
+							)}
 						</TagList>
 					</TagGroup>
 					<AriaButton
