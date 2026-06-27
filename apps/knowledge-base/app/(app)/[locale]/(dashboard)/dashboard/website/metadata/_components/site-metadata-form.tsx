@@ -1,23 +1,19 @@
 "use client";
 
-import { keyBy } from "@acdh-oeaw/lib";
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { AsyncListSelect } from "@dariah-eric/ui/async-list-select";
 import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
-import { GridList, GridListItem } from "@dariah-eric/ui/grid-list";
 import { Input } from "@dariah-eric/ui/input";
-import { ListBox, ListBoxItem } from "@dariah-eric/ui/list-box";
-import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import type { AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useActionState, useMemo, useState } from "react";
-import { useDragAndDrop, useListData } from "react-aria-components";
+import { type ReactNode, useActionState, useState } from "react";
 
 import {
 	FormLayout,
@@ -29,9 +25,34 @@ import type { NewsItemOption } from "@/lib/data/news";
 
 const MAX_ALLOWED_FEATURED_ITEMS = 3;
 
+async function fetchNewsItemsPage(
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<NewsItemOption>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/news/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load news items.");
+	}
+
+	return (await response.json()) as { items: Array<NewsItemOption>; total: number };
+}
+
 interface SiteMetadataFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	initialFeaturedItemsOptions: { items: Array<NewsItemOption>; total: number };
+	/** The currently-featured news items, resolved by id and ordered, for labelling the selection. */
+	selectedFeaturedItems: Array<NewsItemOption>;
 	siteMetadata:
 		| (Pick<
 				schema.SiteMetadata,
@@ -43,9 +64,7 @@ interface SiteMetadataFormProps {
 }
 
 export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactNode {
-	const { initialAssets, initialFeaturedItemsOptions, siteMetadata } = props;
-
-	const optionsById = keyBy(initialFeaturedItemsOptions.items, (item) => item.id);
+	const { initialAssets, initialFeaturedItemsOptions, selectedFeaturedItems, siteMetadata } = props;
 
 	const t = useExtracted();
 
@@ -58,48 +77,9 @@ export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactN
 		siteMetadata?.ogImage ?? null,
 	);
 
-	const selectedItemsList = useListData<NewsItemOption>({
-		initialItems: ((siteMetadata?.featuredItemIds as Array<string> | null | undefined) ?? [])
-			.map((fI) => optionsById[fI])
-			.filter((item): item is NewsItemOption => item !== undefined),
-		getKey(item) {
-			return item.id;
-		},
-	});
-
-	const [query, setQuery] = useState("");
-	const [entries, setEntries] = useState<Array<NewsItemOption>>();
-
-	async function fetchEntries(q: string) {
-		const params = new URLSearchParams({ limit: "20" });
-		if (q.trim() !== "") {
-			params.set("q", q.trim());
-		}
-		const res = await fetch(`/api/news/options?${params.toString()}`);
-		const data = (await res.json()) as { items: Array<NewsItemOption> };
-		setEntries(data.items);
-	}
-
-	const { dragAndDropHooks } = useDragAndDrop({
-		getItems: (keys, items: typeof selectedItemsList.items) =>
-			items.map((item) => {
-				return { "text/plain": item.name };
-			}),
-		onReorder(e) {
-			if (e.target.dropPosition === "before") {
-				selectedItemsList.moveBefore(e.target.key, e.keys);
-			} else if (e.target.dropPosition === "after") {
-				selectedItemsList.moveAfter(e.target.key, e.keys);
-			}
-		},
-	});
-
-	const disabledKeys = useMemo(() => {
-		if (selectedItemsList.items.length >= MAX_ALLOWED_FEATURED_ITEMS) {
-			return entries?.map((r) => r.id);
-		}
-		return selectedItemsList.items.map((s) => s.id);
-	}, [selectedItemsList, entries]);
+	const [featuredItemIds, setFeaturedItemIds] = useState<Array<string>>(
+		() => (siteMetadata?.featuredItemIds as Array<string> | null | undefined) ?? [],
+	);
 
 	return (
 		<FormLayout>
@@ -193,80 +173,25 @@ export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactN
 				<Separator className="my-6" />
 
 				<FormSection
-					description={t("Featured News Items on the landing page.")}
+					description={t("Featured News Items on the landing page. Drag to reorder.")}
 					title={t("Featured News Items")}
 				>
-					<div className="flex flex-col gap-y-3">
-						<div className="flex flex-col gap-y-3">
-							<SearchField
-								aria-label={t("Search entries")}
-								onChange={(q) => {
-									setQuery(q);
-									void fetchEntries(q);
-								}}
-								value={query}
-							>
-								<SearchInput />
-							</SearchField>
-							<div className="flex max-block-64 flex-col gap-y-2 overflow-y-auto p-2">
-								<div className="relative">
-									{query && entries !== undefined && entries.length > 0 && (
-										<ListBox
-											selectedKeys={selectedItemsList.items.map((s) => s.id)}
-											aria-label={"News Items"}
-											disabledKeys={disabledKeys}
-											items={entries}
-											selectionMode="none"
-											onAction={(key) => {
-												const entry = entries.find((item) => item.id === key);
-												if (entry) {
-													selectedItemsList.append(entry);
-												}
-											}}
-										>
-											{(item) => (
-												<ListBoxItem id={item.id} textValue={item.name}>
-													{item.name}
-												</ListBoxItem>
-											)}
-										</ListBox>
-									)}
-								</div>
-							</div>
-						</div>
-						{selectedItemsList.items.length === 0 ? (
-							<p className="text-muted-fg p-2 text-xs">{t("No featured items yet.")}</p>
-						) : (
-							<GridList
-								items={selectedItemsList.items}
-								aria-label={"Featured Items"}
-								dragAndDropHooks={dragAndDropHooks}
-							>
-								{(item) => (
-									<GridListItem id={item.id} textValue={item.name}>
-										<span>{item.name}</span>
-										<Button
-											className="ms-auto"
-											intent="plain"
-											onPress={() => {
-												selectedItemsList.remove(item.id);
-											}}
-										>
-											<TrashIcon className="me-2 block-4 inline-4" />
-										</Button>
-									</GridListItem>
-								)}
-							</GridList>
-						)}
-						{selectedItemsList.items.map((item, idx) => (
-							<input
-								key={`item-${String(idx)}`}
-								name={`featuredItemIds.${String(idx)}`}
-								type="hidden"
-								value={item.id}
-							/>
-						))}
-					</div>
+					<AsyncListSelect
+						addLabel={t("Add news item")}
+						aria-label={t("Featured news items")}
+						emptySelectionMessage={t("No featured items yet.")}
+						fetchPage={fetchNewsItemsPage}
+						initialItems={initialFeaturedItemsOptions.items}
+						initialTotal={initialFeaturedItemsOptions.total}
+						isOrderable={true}
+						maxItems={MAX_ALLOWED_FEATURED_ITEMS}
+						onChange={setFeaturedItemIds}
+						selectedItems={selectedFeaturedItems}
+						value={featuredItemIds}
+					/>
+					{featuredItemIds.map((id, index) => (
+						<input key={id} name={`featuredItemIds.${String(index)}`} type="hidden" value={id} />
+					))}
 				</FormSection>
 
 				<div className="flex items-center justify-end gap-x-3">

@@ -470,6 +470,23 @@ async function main() {
 			};
 			const pageDocument = { id: createId("entity:page"), versionId: createId("version:page") };
 			const newsDocument = { id: createId("entity:news"), versionId: createId("version:news") };
+			/**
+			 * Extra published news items so the featured-news-items e2e test has enough options. Titles
+			 * are distinct and non-prefixing (no one is a substring of another) so Playwright's
+			 * substring-based role locators stay unambiguous, and they sort before "Kitchen Sink News".
+			 */
+			const featuredNewsDocuments = [
+				{ slug: "featured-test-news-alpha", title: "Featured Test News Alpha" },
+				{ slug: "featured-test-news-bravo", title: "Featured Test News Bravo" },
+				{ slug: "featured-test-news-charlie", title: "Featured Test News Charlie" },
+				{ slug: "featured-test-news-delta", title: "Featured Test News Delta" },
+			].map((entry) => {
+				return {
+					...entry,
+					id: createId(`entity:news:${entry.slug}`),
+					versionId: createId(`version:news:${entry.slug}`),
+				};
+			});
 			const fundingCallDocument = {
 				id: createId("entity:funding-call"),
 				versionId: createId("version:funding-call"),
@@ -698,6 +715,15 @@ async function main() {
 					statusId: publishedStatusId,
 					slug: "kitchen-sink",
 				},
+				...featuredNewsDocuments.map((doc) => {
+					return {
+						id: doc.id,
+						versionId: doc.versionId,
+						typeId: assertLookupId(entityTypeIds.get("news"), 'Missing entity type "news".'),
+						statusId: publishedStatusId,
+						slug: doc.slug,
+					};
+				}),
 			];
 
 			const entityIdsBySeedId = new Map<string, { documentId: string; versionId: string }>();
@@ -830,6 +856,15 @@ async function main() {
 				publicationDate: new Date("2024-01-15T00:00:00.000Z"),
 				imageId: createId("asset:image"),
 			});
+			for (const doc of featuredNewsDocuments) {
+				await upsertById(tx, schema.news, {
+					id: entityIdsBySeedId.get(doc.id)!.versionId,
+					title: doc.title,
+					summary: "A published news item seeded for the featured-items e2e tests.",
+					publicationDate: new Date("2024-01-15T00:00:00.000Z"),
+					imageId: createId("asset:image"),
+				});
+			}
 			await upsertById(tx, schema.fundingCalls, {
 				id: fundingCallVersionId,
 				title: "Kitchen Sink Funding Call",
