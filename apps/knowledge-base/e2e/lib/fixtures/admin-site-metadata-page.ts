@@ -115,6 +115,7 @@ export class AdminSiteMetadataPage {
 		const { mouse } = this.page;
 		// React Aria's pointer drag-and-drop needs real gaps between pointer events (firing them
 		// back-to-back does not register the drag), so the moves are paced.
+		// oxlint-disable-next-line playwright/no-wait-for-timeout
 		const pause = (): Promise<void> => this.page.waitForTimeout(120);
 
 		await mouse.move(startX, startY);
