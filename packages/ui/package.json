@@ -10,6 +10,7 @@
 	"type": "module",
 	"sideEffects": false,
 	"exports": {
+		"./async-list-select": "./dist/async-list-select.mjs",
 		"./async-multiple-select": "./dist/async-multiple-select.mjs",
 		"./async-select": "./dist/async-select.mjs",
 		"./avatar": "./dist/avatar.mjs",
@@ -153,7 +154,6 @@
 		"tw-animate-css": "catalog:",
 		"typescript": "catalog:",
 		"vite": "catalog:",
-		"vite-tsconfig-paths": "catalog:",
 		"vitest": "catalog:"
 	},
 	"peerDependencies": {

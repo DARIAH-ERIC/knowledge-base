@@ -218,9 +218,18 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 								</i>
 							)}
 						>
-							{(item) => (
-								<Tag className="rounded-md">{renderTag != null ? renderTag(item) : item.name}</Tag>
-							)}
+							{(item) => {
+								const content = renderTag != null ? renderTag(item) : item.name;
+								const text = typeof content === "string" ? content : item.name;
+
+								return (
+									<Tag className="max-inline-64 rounded-md" textValue={text}>
+										<span className="min-inline-0 truncate" title={text}>
+											{content}
+										</span>
+									</Tag>
+								);
+							}}
 						</TagList>
 					</TagGroup>
 					<AriaButton

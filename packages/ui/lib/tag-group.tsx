@@ -42,11 +42,13 @@ export function TagList<T extends object>(props: Readonly<TagListProps<T>>): Rea
 export interface TagProps extends AriaTagProps {}
 
 export function Tag(props: Readonly<TagProps>): ReactNode {
-	const { children, className, ...rest } = props;
+	const { children, className, textValue: textValueProp, ...rest } = props;
 
 	const t = useExtracted("ui");
 
-	const textValue = typeof children === "string" ? children : undefined;
+	// Respect an explicit `textValue` (e.g. when children are wrapped for truncation), otherwise
+	// derive it from string children.
+	const textValue = textValueProp ?? (typeof children === "string" ? children : undefined);
 
 	return (
 		<AriaTag

@@ -84,6 +84,58 @@ export class DatabaseService {
 		});
 	}
 
+	/**
+	 * Returns published news items (id = published version id, matching what the featured-items
+	 * picker uses) ordered by title, the same order as the picker's first page.
+	 */
+	async getPublishedNewsItems(count: number): Promise<Array<{ id: string; name: string }>> {
+		const rows = await this.db
+			.select({ id: schema.news.id, name: schema.news.title })
+			.from(schema.news)
+			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(eq(schema.entityStatus.type, "published"))
+			.orderBy(schema.news.title)
+			.limit(count);
+
+		if (rows.length < count) {
+			throw new Error(
+				`Expected at least ${String(count)} published news items for featured tests.`,
+			);
+		}
+
+		return rows;
+	}
+
+	/** Reads the singleton site_metadata row's `featuredItemIds` (empty array when unset). */
+	async getSiteMetadataFeaturedItemIds(): Promise<Array<string>> {
+		const row = await this.db.query.siteMetadata.findFirst({
+			columns: { featuredItemIds: true },
+		});
+
+		return (row?.featuredItemIds as Array<string> | null) ?? [];
+	}
+
+	/**
+	 * Upserts the singleton site_metadata row, setting `featuredItemIds` (and ensuring title +
+	 * description exist so the form can be saved without filling them). Used to put the page into a
+	 * known state before/after the featured-items tests.
+	 */
+	async resetSiteMetadataFeaturedItems(featuredItemIds: Array<string> = []): Promise<void> {
+		await this.db
+			.insert(schema.siteMetadata)
+			.values({
+				id: 1,
+				title: "E2E Site Title",
+				description: "E2E Site Description",
+				featuredItemIds,
+			})
+			.onConflictDoUpdate({
+				target: schema.siteMetadata.id,
+				set: { featuredItemIds, updatedAt: sql`NOW()` },
+			});
+	}
+
 	/** Returns related entity and resource IDs for a given entity (by its document DB id). */
 	async getEntityRelations(
 		entityId: string,
