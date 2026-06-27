@@ -64,9 +64,9 @@ export class AdminSiteMetadataPage {
 
 	async removeFeatured(name: string): Promise<void> {
 		const row = this.featuredRow(name);
-		// The remove button is the last button in the row (after the drag handle). Its aria-label is
-		// not locator-friendly in the e2e build, so target it by position.
-		await row.getByRole("button").last().click();
+		// The button aria-labels are not locator-friendly in the e2e build, so distinguish by slot:
+		// the drag handle has slot="drag", the remove button does not.
+		await row.locator('button:not([slot="drag"])').click();
 		await row.waitFor({ state: "hidden" });
 	}
 
@@ -84,16 +84,52 @@ export class AdminSiteMetadataPage {
 	}
 
 	/**
-	 * Moves a featured row one position down using React Aria's keyboard drag-and-drop: focus the
-	 * drag handle, press Enter to pick up, ArrowDown to move past the next row, Enter to drop.
+	 * Moves a featured row one position down via pointer drag-and-drop. React Aria's keyboard DnD is
+	 * hard to drive deterministically here (the grid's roving focus + i18n-broken drop-target
+	 * labels), so we drag the row's handle down past the next row, dropping near its bottom edge so
+	 * the dragged item lands after it.
 	 */
 	async moveFeaturedDown(name: string): Promise<void> {
-		// The drag handle is the first button in the row (rendered before the content / remove button).
-		const handle = this.featuredRow(name).getByRole("button").first();
-		await handle.focus();
-		await this.page.keyboard.press("Enter");
-		await this.page.keyboard.press("ArrowDown");
-		await this.page.keyboard.press("Enter");
+		const names = await this.getFeaturedNames();
+		const belowName = names[names.indexOf(name) + 1];
+		if (belowName === undefined) {
+			throw new Error(`No row below "${name}" to move past.`);
+		}
+
+		// The drag handle is the button with slot="drag". Coordinate-based mouse moves do not
+		// auto-scroll, so bring it into view first.
+		const handle = this.featuredRow(name).locator('button[slot="drag"]');
+		await handle.scrollIntoViewIfNeeded();
+
+		const handleBox = await handle.boundingBox();
+		const belowBox = await this.featuredRow(belowName).boundingBox();
+		if (handleBox == null || belowBox == null) {
+			throw new Error("Could not resolve bounding boxes for reorder.");
+		}
+
+		const startX = handleBox.x + handleBox.width / 2;
+		const startY = handleBox.y + handleBox.height / 2;
+		const dropY = belowBox.y + belowBox.height - 4;
+
+		const dragging = this.page.locator('[data-dragging="true"]').first();
+		const { mouse } = this.page;
+		// React Aria's pointer drag-and-drop needs real gaps between pointer events (firing them
+		// back-to-back does not register the drag), so the moves are paced.
+		const pause = (): Promise<void> => this.page.waitForTimeout(120);
+
+		await mouse.move(startX, startY);
+		await mouse.down();
+		await pause();
+		await mouse.move(startX, startY + 8);
+		await pause();
+		await dragging.waitFor({ state: "visible" });
+		await mouse.move(startX, (startY + dropY) / 2);
+		await pause();
+		await mouse.move(startX, dropY);
+		await pause();
+		await mouse.up();
+		// Wait for the drop to complete so the reordered list has rendered.
+		await dragging.waitFor({ state: "hidden" });
 	}
 
 	async save(): Promise<void> {
