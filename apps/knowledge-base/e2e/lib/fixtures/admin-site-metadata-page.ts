@@ -46,7 +46,9 @@ export class AdminSiteMetadataPage {
 	}
 
 	private async closeOptions(): Promise<void> {
-		await this.page.keyboard.press("Escape");
+		// Escape only clears the React Aria SearchField, and this DialogTrigger popover does not close
+		// on Escape — toggle the trigger button to close it.
+		await this.page.getByRole("button", { name: "Add news item" }).click();
 		await this.page.getByRole("searchbox").waitFor({ state: "hidden" });
 	}
 
@@ -64,7 +66,9 @@ export class AdminSiteMetadataPage {
 
 	async removeFeatured(name: string): Promise<void> {
 		const row = this.featuredRow(name);
-		await row.getByRole("button", { name: "Remove" }).click();
+		// The remove button is the last button in the row (after the drag handle). Its aria-label is
+		// not locator-friendly in the e2e build, so target it by position.
+		await row.getByRole("button").last().click();
 		await row.waitFor({ state: "hidden" });
 	}
 
@@ -86,7 +90,8 @@ export class AdminSiteMetadataPage {
 	 * drag handle, press Enter to pick up, ArrowDown to move past the next row, Enter to drop.
 	 */
 	async moveFeaturedDown(name: string): Promise<void> {
-		const handle = this.featuredRow(name).getByRole("button", { name: "Reorder item" });
+		// The drag handle is the first button in the row (rendered before the content / remove button).
+		const handle = this.featuredRow(name).getByRole("button").first();
 		await handle.focus();
 		await this.page.keyboard.press("Enter");
 		await this.page.keyboard.press("ArrowDown");
