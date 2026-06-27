@@ -40,13 +40,11 @@ const meta = {
 	component: AsyncListSelect<Item>,
 	parameters: { layout: "centered" },
 	decorators: [
-		(Story) => {
-			return (
-				<div style={{ inlineSize: 360 }}>
-					<Story />
-				</div>
-			);
-		},
+		(Story) => (
+			<div style={{ inlineSize: 360 }}>
+				<Story />
+			</div>
+		),
 	],
 	tags: ["autodocs"],
 	args: {
