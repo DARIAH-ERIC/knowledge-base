@@ -7,10 +7,12 @@ import tailwindcssPlugin from "@tailwindcss/vite";
 import reactPlugin from "@vitejs/plugin-react";
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vite";
-import tsConfigPathsPlugin from "vite-tsconfig-paths";
 
 export default defineConfig({
-	plugins: [reactPlugin(), tailwindcssPlugin(), tsConfigPathsPlugin()],
+	plugins: [reactPlugin(), tailwindcssPlugin()],
+	resolve: {
+		tsconfigPaths: true,
+	},
 	test: {
 		projects: [
 			{

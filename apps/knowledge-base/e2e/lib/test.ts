@@ -16,6 +16,7 @@ import { AdminPersonsPage } from "@/e2e/lib/fixtures/admin-persons-page";
 import { AdminProjectsPage } from "@/e2e/lib/fixtures/admin-projects-page";
 import { AdminReportingCampaignsPage } from "@/e2e/lib/fixtures/admin-reporting-campaigns-page";
 import { AdminServicesPage } from "@/e2e/lib/fixtures/admin-services-page";
+import { AdminSiteMetadataPage } from "@/e2e/lib/fixtures/admin-site-metadata-page";
 import { AdminSocialMediaPage } from "@/e2e/lib/fixtures/admin-social-media-page";
 import { AdminUsersPage } from "@/e2e/lib/fixtures/admin-users-page";
 import { AdminWorkingGroupReportsPage } from "@/e2e/lib/fixtures/admin-working-group-reports-page";
@@ -57,6 +58,7 @@ interface TestFixtures {
 	createAdminProjectsPage: (workerIndex: number) => AdminProjectsPage;
 	createAdminReportingCampaignsPage: (workerIndex: number) => AdminReportingCampaignsPage;
 	createAdminServicesPage: (workerIndex: number) => AdminServicesPage;
+	createAdminSiteMetadataPage: () => AdminSiteMetadataPage;
 	createAdminSocialMediaPage: (workerIndex: number) => AdminSocialMediaPage;
 	createAdminUsersPage: (workerIndex: number) => AdminUsersPage;
 	createAdminWorkingGroupReportsPage: (workerIndex: number) => AdminWorkingGroupReportsPage;
@@ -192,6 +194,10 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 
 	async createAdminServicesPage({ page }, use) {
 		await use((workerIndex: number) => new AdminServicesPage(page, workerIndex));
+	},
+
+	async createAdminSiteMetadataPage({ page }, use) {
+		await use(() => new AdminSiteMetadataPage(page));
 	},
 
 	async createAdminSocialMediaPage({ page }, use) {

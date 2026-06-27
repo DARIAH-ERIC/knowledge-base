@@ -1,31 +1,31 @@
 "use client";
 
-import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import { useResizeObserver } from "@react-aria/utils";
+import { XMarkIcon } from "@heroicons/react/16/solid";
+import { PlusIcon } from "@heroicons/react/20/solid";
 import { useExtracted } from "next-intl";
-import {
-	type CSSProperties,
-	Fragment,
-	type ReactNode,
-	useCallback,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import {
 	Button as AriaButton,
 	DialogTrigger as AriaDialogTrigger,
 	Popover as AriaPopover,
+	type Key,
+	useDragAndDrop,
 } from "react-aria-components";
-import { twMerge } from "tailwind-merge";
 
 import { Button } from "@/lib/button";
 import { Label, fieldErrorStyles, fieldStyles } from "@/lib/field";
+import {
+	GridList,
+	GridListDescription,
+	GridListItem,
+	GridListLabel,
+	GridListSpacer,
+	GridListStart,
+} from "@/lib/grid-list";
 import { ListBox, ListBoxDescription, ListBoxItem, ListBoxLabel } from "@/lib/list-box";
 import { cx } from "@/lib/primitive";
 import { ProgressCircle } from "@/lib/progress-circle";
 import { SearchField, SearchInput } from "@/lib/search-field";
-import { Tag, TagGroup, TagList } from "@/lib/tag-group";
 import {
 	type AsyncOption,
 	type AsyncOptionsFetchPage,
@@ -35,87 +35,91 @@ import {
 const defaultPageSize = 20;
 const emptySelectedItems: Array<never> = [];
 
-export interface AsyncMultipleSelectProps<T extends AsyncOption> {
+export interface AsyncListSelectProps<T extends AsyncOption> {
 	"aria-label": string;
+	/** Label for the "add" button that opens the options popover. */
+	addLabel?: string;
+	cacheKey?: string | number;
+	/** Empty state shown in the options popover when a search yields nothing. */
 	emptyMessage?: string;
+	/** Message shown in place of the list when nothing is selected yet. */
+	emptySelectionMessage?: string;
 	errorMessage?: string;
 	fetchPage: AsyncOptionsFetchPage<T>;
 	initialItems: Array<T>;
 	initialTotal: number;
 	inputPlaceholder?: string;
 	isDisabled?: boolean;
+	/** When true, selected rows can be reordered by drag-and-drop and `onChange` preserves order. */
+	isOrderable?: boolean;
 	label?: string;
+	/** Cap on the number of selected items. Further options are disabled once reached. */
+	maxItems?: number;
 	onChange: (ids: Array<string>) => void;
 	pageSize?: number;
-	placeholder?: string;
+	/** Renders an option row inside the popover. Defaults to name + description. */
 	renderItem?: (item: T) => ReactNode;
-	renderTag?: (item: T) => ReactNode;
+	/** Renders a selected row in the list. Defaults to name + description. */
+	renderSelectedItem?: (item: AsyncOption) => ReactNode;
 	selectedItems?: Array<T>;
 	value: Array<string>;
-	cacheKey?: string | number;
 }
 
-function renderDefaultItem(item: AsyncOption): ReactNode {
+function renderDefaultOption(item: AsyncOption): ReactNode {
 	if (item.description == null || item.description === "") {
 		return <ListBoxLabel>{item.name}</ListBoxLabel>;
 	}
 
 	return (
-		<Fragment>
+		<>
 			<ListBoxLabel>{item.name}</ListBoxLabel>
 			<ListBoxDescription>{item.description}</ListBoxDescription>
-		</Fragment>
+		</>
 	);
 }
 
-export function AsyncMultipleSelect<T extends AsyncOption>(
-	props: Readonly<AsyncMultipleSelectProps<T>>,
+export function AsyncListSelect<T extends AsyncOption>(
+	props: Readonly<AsyncListSelectProps<T>>,
 ): ReactNode {
 	const { cacheKey, ...rest } = props;
 
-	return <AsyncMultipleSelectInner key={String(cacheKey ?? "default")} {...rest} />;
+	return <AsyncListSelectInner key={String(cacheKey ?? "default")} {...rest} />;
 }
 
-interface AsyncMultipleSelectInnerProps<T extends AsyncOption> extends Omit<
-	AsyncMultipleSelectProps<T>,
+interface AsyncListSelectInnerProps<T extends AsyncOption> extends Omit<
+	AsyncListSelectProps<T>,
 	"cacheKey"
 > {}
 
-function AsyncMultipleSelectInner<T extends AsyncOption>(
-	props: Readonly<AsyncMultipleSelectInnerProps<T>>,
+function AsyncListSelectInner<T extends AsyncOption>(
+	props: Readonly<AsyncListSelectInnerProps<T>>,
 ): ReactNode {
 	const {
 		"aria-label": ariaLabel,
+		addLabel,
 		emptyMessage,
+		emptySelectionMessage,
 		errorMessage,
 		fetchPage,
 		initialItems,
 		initialTotal,
 		inputPlaceholder,
 		isDisabled = false,
+		isOrderable = false,
 		label,
+		maxItems,
 		onChange,
 		pageSize = defaultPageSize,
-		placeholder,
 		renderItem,
-		renderTag,
+		renderSelectedItem,
 		selectedItems = emptySelectedItems,
 		value,
 	} = props;
 
 	const t = useExtracted("ui");
 
-	const triggerRef = useRef<HTMLDivElement | null>(null);
-	const [triggerWidth, setTriggerWidth] = useState<string | undefined>();
 	const [isOpen, setIsOpen] = useState(false);
 	const [localSelectedItems, setLocalSelectedItems] = useState<Array<T>>(emptySelectedItems);
-
-	const onResize = useCallback(() => {
-		if (triggerRef.current) {
-			setTriggerWidth(`${triggerRef.current.offsetWidth}px`);
-		}
-	}, []);
-	useResizeObserver({ ref: triggerRef, onResize });
 
 	const {
 		displayedItems,
@@ -128,30 +132,22 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 		loadError,
 		searchText,
 		setSearchText,
-	} = useAsyncOptions({
-		fetchPage,
-		initialItems,
-		initialTotal,
-		pageSize,
-	});
+	} = useAsyncOptions({ fetchPage, initialItems, initialTotal, pageSize });
 
 	const selectedItemMap = useMemo(() => {
-		const map = new Map<string, T>();
+		const map = new Map<string, AsyncOption>();
 
 		for (const item of selectedItems) {
 			map.set(item.id, item);
 		}
-
 		for (const item of localSelectedItems) {
 			map.set(item.id, item);
 		}
-
 		for (const item of initialItems) {
 			if (value.includes(item.id)) {
 				map.set(item.id, item);
 			}
 		}
-
 		for (const item of displayedItems) {
 			if (value.includes(item.id)) {
 				map.set(item.id, item);
@@ -162,102 +158,108 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 	}, [displayedItems, initialItems, localSelectedItems, selectedItems, value]);
 
 	const resolvedSelectedItems = useMemo(
-		() => value.map((id) => selectedItemMap.get(id) ?? ({ id, name: id } as T)),
+		() => value.map((id) => selectedItemMap.get(id) ?? { id, name: id }),
 		[selectedItemMap, value],
 	);
 
-	const renderOption = renderItem ?? renderDefaultItem;
+	const remove = useCallback(
+		(id: string) => {
+			onChange(value.filter((selectedId) => selectedId !== id));
+		},
+		[onChange, value],
+	);
+
+	const { dragAndDropHooks } = useDragAndDrop({
+		getItems: (keys) =>
+			[...keys].map((key) => {
+				return { "text/plain": String(key) };
+			}),
+		onReorder(event) {
+			const moving = value.filter((id) => event.keys.has(id as Key));
+			const remaining = value.filter((id) => !event.keys.has(id as Key));
+			const targetIndex = remaining.indexOf(String(event.target.key));
+			const insertAt = event.target.dropPosition === "before" ? targetIndex : targetIndex + 1;
+
+			onChange([...remaining.slice(0, insertAt), ...moving, ...remaining.slice(insertAt)]);
+		},
+	});
+
+	const isAtMax = maxItems != null && value.length >= maxItems;
+	const disabledOptionKeys = isAtMax
+		? displayedItems.filter((item) => !value.includes(item.id)).map((item) => item.id)
+		: undefined;
+
+	const renderOption = renderItem ?? renderDefaultOption;
 	const loadErrorMessage =
 		loadError != null && loadError.message !== ""
 			? loadError.message
 			: t("Could not load options.");
 
 	return (
-		<div className={fieldStyles({ className: "group/select" })} data-slot="control">
+		<div className={fieldStyles({ className: "group/select space-y-2" })} data-slot="control">
 			{label != null ? <Label>{label}</Label> : null}
 
-			<AriaDialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
-				<div
-					ref={triggerRef}
-					className={twMerge(
-						"flex inline-full items-center gap-2 rounded-lg border border-input p-1",
-						"has-[:focus-visible]:border-ring/70 has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/20",
-						isOpen ? "border-ring/70 ring-3 ring-ring/20" : undefined,
-						isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
-					)}
-					data-slot="control"
-					onClick={(event) => {
-						if (isDisabled) {
-							return;
-						}
-
-						const target = event.target as HTMLElement;
-						if (target.closest("button, [role='row'], [role='gridcell']") != null) {
-							return;
-						}
-
-						setIsOpen(true);
-					}}
+			{resolvedSelectedItems.length > 0 ? (
+				<GridList
+					aria-label={ariaLabel}
+					className="inline-full min-inline-56"
+					dragAndDropHooks={isOrderable && !isDisabled ? dragAndDropHooks : undefined}
+					items={resolvedSelectedItems}
 				>
-					<TagGroup
-						aria-label={t("Selected items")}
-						className="min-inline-0 flex-1"
-						onRemove={
-							isDisabled
-								? undefined
-								: (keys) => {
-										onChange(value.filter((id) => !keys.has(id)));
-									}
-						}
-					>
-						<TagList
-							items={resolvedSelectedItems}
-							renderEmptyState={() => (
-								<i className="ps-2 text-muted-fg text-sm not-italic">
-									{placeholder ?? t("No selected items")}
-								</i>
-							)}
-						>
-							{(item) => {
-								const content = renderTag != null ? renderTag(item) : item.name;
-								const text = typeof content === "string" ? content : item.name;
+					{(item) => {
+						const content =
+							renderSelectedItem != null ? (
+								renderSelectedItem(item)
+							) : item.description != null && item.description !== "" ? (
+								<>
+									<GridListLabel className="truncate">{item.name}</GridListLabel>
+									<GridListDescription className="truncate">{item.description}</GridListDescription>
+								</>
+							) : (
+								<GridListLabel className="truncate">{item.name}</GridListLabel>
+							);
 
-								return (
-									<Tag className="max-inline-64 rounded-md" textValue={text}>
-										<span className="min-inline-0 truncate" title={text}>
-											{content}
-										</span>
-									</Tag>
-								);
-							}}
-						</TagList>
-					</TagGroup>
-					<AriaButton
-						aria-label={t("Open options")}
-						className="grid block-7 inline-7 shrink-0 cursor-default place-content-center rounded-[calc(var(--radius-lg)-(--spacing(1)))] text-muted-fg hover:bg-muted hover:text-fg"
-						isDisabled={isDisabled}
-					>
-						<ChevronUpDownIcon className="block-4 inline-4" data-slot="chevron" />
-					</AriaButton>
-				</div>
+						return (
+							<GridListItem className="inline-full" id={item.id} textValue={item.name}>
+								<GridListStart className="min-inline-0 flex-1">
+									<div className="flex min-inline-0 flex-col">{content}</div>
+								</GridListStart>
+								<GridListSpacer />
+								{!isDisabled ? (
+									<AriaButton
+										aria-label={t("Remove")}
+										className="grid block-7 inline-7 shrink-0 cursor-default place-content-center rounded-md text-muted-fg hover:bg-muted hover:text-fg"
+										onPress={() => {
+											remove(item.id);
+										}}
+									>
+										<XMarkIcon className="block-4 inline-4" />
+									</AriaButton>
+								) : null}
+							</GridListItem>
+						);
+					}}
+				</GridList>
+			) : (
+				<p className="text-muted-fg text-sm">{emptySelectionMessage ?? t("No selected items")}</p>
+			)}
+
+			<AriaDialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
+				<Button className="self-start" intent="outline" isDisabled={isDisabled}>
+					<PlusIcon />
+					{addLabel ?? t("Add")}
+				</Button>
 
 				<AriaPopover
 					className={cx(
-						"group/popover origin-(--trigger-anchor-point) rounded-xl border border-fg/10 bg-overlay text-overlay-fg shadow-xs outline-hidden",
-						"inline-(--trigger-width)",
+						"group/popover flex min-inline-72 origin-(--trigger-anchor-point) flex-col overflow-hidden rounded-xl border border-fg/10 bg-overlay text-overlay-fg shadow-xs outline-hidden",
 						"entering:fade-in entering:animate-in",
 						"exiting:fade-out exiting:animate-out",
 					)}
-					placement="bottom"
-					style={
-						triggerWidth != null
-							? ({ "--trigger-width": triggerWidth } as CSSProperties)
-							: undefined
-					}
-					triggerRef={triggerRef}
+					placement="bottom start"
 				>
 					<div
-						className="flex flex-col gap-3 p-3"
+						className="flex min-block-0 flex-1 flex-col gap-3 p-3"
 						// Close on Escape. Captured before the search field (clears its value) and the list box
 						// (clears selection) can consume the key, so Escape reliably dismisses the popover.
 						onKeyDownCapture={(event) => {
@@ -274,35 +276,36 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 						{loadError != null ? (
 							<p className="py-3 text-center text-danger-subtle-fg text-sm">{loadErrorMessage}</p>
 						) : displayedItems.length > 0 ? (
-							<div className="relative">
+							<div className="relative flex min-block-0 flex-1">
 								<ListBox
 									aria-label={ariaLabel}
 									className={cx(
-										"max-block-72 [&::-webkit-scrollbar]:block-2! [&::-webkit-scrollbar]:inline-2!",
+										"max-block-none inline-full min-block-0 flex-1 [&::-webkit-scrollbar]:block-2! [&::-webkit-scrollbar]:inline-2!",
 										isPending ? "opacity-50" : undefined,
 									)}
+									disabledKeys={disabledOptionKeys}
 									items={displayedItems}
 									onSelectionChange={(keys) => {
 										if (keys === "all") {
 											return;
 										}
 
-										const nextValue = [...keys].map(String);
-										const nextSelectedKeys = new Set(nextValue);
+										const nextSelectedKeys = new Set([...keys].map(String));
 
 										setLocalSelectedItems((previousItems) => {
 											const map = new Map(previousItems.map((item) => [item.id, item] as const));
-
 											for (const item of displayedItems) {
 												if (nextSelectedKeys.has(item.id)) {
 													map.set(item.id, item);
 												}
 											}
-
 											return [...map.values()];
 										});
 
-										onChange(nextValue);
+										// Preserve existing order; append newly selected ids at the end.
+										const kept = value.filter((id) => nextSelectedKeys.has(id));
+										const added = [...nextSelectedKeys].filter((id) => !value.includes(id));
+										onChange([...kept, ...added]);
 									}}
 									selectedKeys={new Set(value)}
 									selectionBehavior="toggle"
