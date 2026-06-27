@@ -30,6 +30,7 @@ catalog:
   "@imgproxy/imgproxy-node": ^1.1.0
   "@internationalized/date": ^3.12.2
   "@node-rs/argon2": ^2.0.2
+  "@opentelemetry/sdk-trace-base": ^2.7.1
   "@oslojs/binary": ^1.0.0
   "@oslojs/crypto": ^1.0.1
   "@oslojs/encoding": ^1.1.0

@@ -56,6 +56,7 @@
 		"@dariah-eric/ui": "workspace:^",
 		"@heroicons/react": "catalog:",
 		"@internationalized/date": "catalog:",
+		"@opentelemetry/sdk-trace-base": "catalog:",
 		"@react-aria/utils": "catalog:",
 		"@sentry/nextjs": "catalog:",
 		"@sindresorhus/slugify": "catalog:",
