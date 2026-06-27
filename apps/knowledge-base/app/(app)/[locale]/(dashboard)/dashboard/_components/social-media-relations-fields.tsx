@@ -29,10 +29,16 @@ import {
 	type CreatedSocialMedia,
 	createSocialMediaAction,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.action";
+import { getSocialMediaTypeLabel } from "@/lib/social-media-type-label";
+
+/** Social media options carry a human-readable `type` label, shown as the tag suffix. */
+interface SocialMediaOption extends AsyncOption {
+	type?: string;
+}
 
 async function fetchSocialMediaOptionsPage(
 	params: Readonly<AsyncOptionsFetchPageParams>,
-): Promise<{ items: Array<AsyncOption>; total: number }> {
+): Promise<{ items: Array<SocialMediaOption>; total: number }> {
 	const searchParams = new URLSearchParams({
 		limit: String(params.limit),
 		offset: String(params.offset),
@@ -50,15 +56,15 @@ async function fetchSocialMediaOptionsPage(
 		throw new Error("Failed to load social media options.");
 	}
 
-	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+	return (await response.json()) as { items: Array<SocialMediaOption>; total: number };
 }
 
 interface SocialMediaRelationsFieldsProps {
 	description: string;
 	initialSocialMediaIds?: Array<string>;
-	initialSocialMediaItems: Array<AsyncOption>;
+	initialSocialMediaItems: Array<SocialMediaOption>;
 	initialSocialMediaTotal: number;
-	selectedSocialMediaItems?: Array<AsyncOption>;
+	selectedSocialMediaItems?: Array<SocialMediaOption>;
 }
 
 export function SocialMediaRelationsFields(
@@ -77,7 +83,7 @@ export function SocialMediaRelationsFields(
 	const [selectedSocialMediaIds, setSelectedSocialMediaIds] = useState<Array<string>>(
 		initialSocialMediaIds ?? [],
 	);
-	const [localSocialMediaItems, setLocalSocialMediaItems] = useState<Array<AsyncOption>>(
+	const [localSocialMediaItems, setLocalSocialMediaItems] = useState<Array<SocialMediaOption>>(
 		() => selectedSocialMediaItems ?? [],
 	);
 	const [isCreateSocialMediaOpen, setIsCreateSocialMediaOpen] = useState(false);
@@ -95,9 +101,10 @@ export function SocialMediaRelationsFields(
 				setLocalSocialMediaItems((prev) => [
 					...prev,
 					{
-						description: `${result.data.type.type} · ${result.data.url}`,
+						description: `${getSocialMediaTypeLabel(result.data.type.type)} · ${result.data.url}`,
 						id: result.data.id,
 						name: result.data.name,
+						type: getSocialMediaTypeLabel(result.data.type.type),
 					},
 				]);
 				setSelectedSocialMediaIds((prev) => [...prev, result.data.id]);
@@ -116,6 +123,9 @@ export function SocialMediaRelationsFields(
 				initialTotal={initialSocialMediaTotal}
 				onChange={setSelectedSocialMediaIds}
 				placeholder={t("No social media linked")}
+				renderTag={(item) =>
+					item.type != null && item.type !== "" ? `${item.name} (${item.type})` : item.name
+				}
 				selectedItems={localSocialMediaItems}
 				value={selectedSocialMediaIds}
 			/>

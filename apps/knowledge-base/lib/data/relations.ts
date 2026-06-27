@@ -16,7 +16,9 @@ import { search } from "@/lib/search";
 
 export interface RelationOptionItem {
 	id: string;
+	/** Display label: the published title/name, falling back to the slug. */
 	name: string;
+	/** Human-readable type label (e.g. "Event", "Working group"). */
 	description?: string;
 }
 
@@ -31,15 +33,17 @@ export async function getEntityRelationOptions(
 ): Promise<{ items: Array<RelationOptionItem>; total: number }> {
 	const { limit = relationOptionsPageSize, offset = 0, q } = params;
 	const query = q?.trim();
-	// Search slug (a real column) plus the human-readable type labels: typing "working group" or
-	// "event" is reverse-mapped to the matching `entity_types` / `organisational_unit_types` tokens
-	// so it matches what the list actually shows, not just the raw stored token.
+	// Search the document slug and its denormalized published title/name (`entities.label`), plus the
+	// human-readable type labels: typing "working group" or "event" is reverse-mapped to the matching
+	// `entity_types` / `organisational_unit_types` tokens so it matches what the list actually shows,
+	// not just the raw stored token.
 	const { entityTypes: matchedEntityTypes, unitTypes: matchedUnitTypes } =
 		getEntityTypeTokensMatchingLabel(query ?? "");
 	const searchWhere =
 		query != null && query !== ""
 			? or(
 					unaccentIlike(schema.entities.slug, `%${query}%`),
+					unaccentIlike(schema.entities.label, `%${query}%`),
 					matchedEntityTypes.length > 0
 						? inArray(
 								schema.entityTypes.type,
@@ -62,6 +66,7 @@ export async function getEntityRelationOptions(
 				entityType: schema.entityTypes.type,
 				id: schema.entities.id,
 				slug: schema.entities.slug,
+				label: schema.entities.label,
 				unitType: schema.organisationalUnitTypes.type,
 			})
 			.from(schema.entities)
@@ -101,7 +106,7 @@ export async function getEntityRelationOptions(
 		items: rows.map((row) => {
 			return {
 				id: row.id,
-				name: row.slug,
+				name: row.label ?? row.slug,
 				description: getEntityTypeLabel({ entityType: row.entityType, unitType: row.unitType }),
 			};
 		}),
@@ -119,6 +124,7 @@ export async function getEntityRelationOptionsByIds(ids: ReadonlyArray<string>) 
 			entityType: schema.entityTypes.type,
 			id: schema.entities.id,
 			slug: schema.entities.slug,
+			label: schema.entities.label,
 			unitType: schema.organisationalUnitTypes.type,
 		})
 		.from(schema.entities)
@@ -143,7 +149,7 @@ export async function getEntityRelationOptionsByIds(ids: ReadonlyArray<string>) 
 					row.id,
 					{
 						id: row.id,
-						name: row.slug,
+						name: row.label ?? row.slug,
 						description: getEntityTypeLabel({
 							entityType: row.entityType,
 							unitType: row.unitType,

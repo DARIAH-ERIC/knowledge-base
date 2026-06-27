@@ -55,7 +55,7 @@ export class DatabaseService {
 	 */
 	async getTestEntity(): Promise<{ id: string; name: string }> {
 		const entity = await this.db.query.entities.findFirst({
-			columns: { id: true, slug: true },
+			columns: { id: true, slug: true, label: true },
 			with: { type: { columns: { type: true } } },
 			orderBy: { slug: "asc" },
 		});
@@ -64,12 +64,13 @@ export class DatabaseService {
 			throw new Error("No entities found in database — required for relation tests.");
 		}
 
-		return { id: entity.id, name: entity.slug };
+		// The picker displays the denormalized label (published title), falling back to the slug.
+		return { id: entity.id, name: entity.label ?? entity.slug };
 	}
 
 	async getTestEntities(count: number): Promise<Array<{ id: string; name: string }>> {
 		const entities = await this.db.query.entities.findMany({
-			columns: { id: true, slug: true },
+			columns: { id: true, slug: true, label: true },
 			orderBy: { slug: "asc" },
 			limit: count,
 		});
@@ -79,7 +80,7 @@ export class DatabaseService {
 		}
 
 		return entities.map((entity) => {
-			return { id: entity.id, name: entity.slug };
+			return { id: entity.id, name: entity.label ?? entity.slug };
 		});
 	}
 

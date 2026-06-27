@@ -49,7 +49,7 @@ export interface AsyncMultipleSelectProps<T extends AsyncOption> {
 	pageSize?: number;
 	placeholder?: string;
 	renderItem?: (item: T) => ReactNode;
-	renderTag?: (item: AsyncOption) => ReactNode;
+	renderTag?: (item: T) => ReactNode;
 	selectedItems?: Array<T>;
 	value: Array<string>;
 	cacheKey?: string | number;
@@ -136,7 +136,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 	});
 
 	const selectedItemMap = useMemo(() => {
-		const map = new Map<string, AsyncOption>();
+		const map = new Map<string, T>();
 
 		for (const item of selectedItems) {
 			map.set(item.id, item);
@@ -162,7 +162,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 	}, [displayedItems, initialItems, localSelectedItems, selectedItems, value]);
 
 	const resolvedSelectedItems = useMemo(
-		() => value.map((id) => selectedItemMap.get(id) ?? { id, name: id }),
+		() => value.map((id) => selectedItemMap.get(id) ?? ({ id, name: id } as T)),
 		[selectedItemMap, value],
 	);
 

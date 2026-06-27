@@ -7,11 +7,14 @@ import { forbidden } from "next/navigation";
 import { db } from "@/lib/db";
 import { unaccentIlike } from "@/lib/db/search";
 import { count, desc, eq, inArray, or } from "@/lib/db/sql";
+import { getSocialMediaTypeLabel } from "@/lib/social-media-type-label";
 
 export interface SocialMediaOption {
 	id: string;
 	name: string;
 	description: string;
+	/** Human-readable account type label (e.g. "Bluesky", "Website"). */
+	type: string;
 }
 
 export type SocialMediaSort = "name" | "type";
@@ -151,10 +154,12 @@ export async function getSocialMediaOptions(
 
 	return {
 		items: rows.map((row) => {
+			const typeLabel = getSocialMediaTypeLabel(row.type);
 			return {
-				description: `${row.type} · ${row.url}`,
+				description: `${typeLabel} · ${row.url}`,
 				id: row.id,
 				name: row.name,
+				type: typeLabel,
 			};
 		}),
 		total: aggregate.at(0)?.total ?? 0,
@@ -183,10 +188,10 @@ export async function getSocialMediaOptionsByIds(ids: ReadonlyArray<string>) {
 				[
 					row.id,
 					{
-						description: `${row.type} · ${row.url}`,
+						description: `${getSocialMediaTypeLabel(row.type)} · ${row.url}`,
 						id: row.id,
 						name: row.name,
-						type: row.type,
+						type: getSocialMediaTypeLabel(row.type),
 						url: row.url,
 					},
 				] as const,
