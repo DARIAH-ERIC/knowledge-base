@@ -258,7 +258,17 @@ function AsyncListSelectInner<T extends AsyncOption>(
 					)}
 					placement="bottom start"
 				>
-					<div className="flex min-block-0 flex-1 flex-col gap-3 p-3">
+					<div
+						className="flex min-block-0 flex-1 flex-col gap-3 p-3"
+						// Close on Escape. Captured before the search field (clears its value) and the list box
+						// (clears selection) can consume the key, so Escape reliably dismisses the popover.
+						onKeyDownCapture={(event) => {
+							if (event.key === "Escape") {
+								event.stopPropagation();
+								setIsOpen(false);
+							}
+						}}
+					>
 						<SearchField onChange={setSearchText} onSubmit={handleSearch} value={searchText}>
 							<SearchInput autoFocus={true} placeholder={inputPlaceholder ?? t("Search")} />
 						</SearchField>

@@ -46,9 +46,7 @@ export class AdminSiteMetadataPage {
 	}
 
 	private async closeOptions(): Promise<void> {
-		// Escape only clears the React Aria SearchField, and this DialogTrigger popover does not close
-		// on Escape — toggle the trigger button to close it.
-		await this.page.getByRole("button", { name: "Add news item" }).click();
+		await this.page.keyboard.press("Escape");
 		await this.page.getByRole("searchbox").waitFor({ state: "hidden" });
 	}
 
