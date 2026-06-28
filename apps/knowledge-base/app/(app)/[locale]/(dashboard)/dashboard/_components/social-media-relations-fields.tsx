@@ -2,7 +2,7 @@
 
 import { socialMediaTypesEnum } from "@dariah-eric/database/schema";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { AsyncMultipleSelect } from "@dariah-eric/ui/async-multiple-select";
+import { AsyncListSelect } from "@dariah-eric/ui/async-list-select";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -116,16 +116,14 @@ export function SocialMediaRelationsFields(
 
 	return (
 		<FormSection description={description} title={t("Social media")}>
-			<AsyncMultipleSelect
+			<AsyncListSelect
+				addLabel={t("Add social media")}
 				aria-label={t("Social media")}
+				emptySelectionMessage={t("No social media linked")}
 				fetchPage={fetchSocialMediaOptionsPage}
 				initialItems={initialSocialMediaItems}
 				initialTotal={initialSocialMediaTotal}
 				onChange={setSelectedSocialMediaIds}
-				placeholder={t("No social media linked")}
-				renderTag={(item) =>
-					item.type != null && item.type !== "" ? `${item.name} (${item.type})` : item.name
-				}
 				selectedItems={localSocialMediaItems}
 				value={selectedSocialMediaIds}
 			/>

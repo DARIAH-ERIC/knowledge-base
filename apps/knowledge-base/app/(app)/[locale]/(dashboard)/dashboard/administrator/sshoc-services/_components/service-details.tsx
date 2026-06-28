@@ -11,6 +11,7 @@ import type { ReactNode } from "react";
 
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
+import { getServiceStatusLabel } from "@/lib/service-status-label";
 
 interface ServiceDetailsProps {
 	service: Pick<
@@ -50,7 +51,7 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 			<DescriptionTerm>{t("Type")}</DescriptionTerm>
 			<DescriptionDetails>{service.type.type}</DescriptionDetails>
 			<DescriptionTerm>{t("Status")}</DescriptionTerm>
-			<DescriptionDetails>{service.status.status}</DescriptionDetails>
+			<DescriptionDetails>{getServiceStatusLabel(service.status.status)}</DescriptionDetails>
 			<DescriptionTerm>{t("SSHOC Marketplace ID")}</DescriptionTerm>
 			<DescriptionDetails>{service.sshocMarketplaceId}</DescriptionDetails>
 			<DescriptionTerm>{t("Comment")}</DescriptionTerm>

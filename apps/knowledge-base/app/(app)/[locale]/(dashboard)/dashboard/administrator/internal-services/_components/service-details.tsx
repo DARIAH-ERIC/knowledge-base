@@ -1,16 +1,20 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import {
 	DescriptionDetails,
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
+import { Link } from "@dariah-eric/ui/link";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
+import { getServiceStatusLabel } from "@/lib/service-status-label";
 
 interface ServiceDetailsProps {
 	service: Pick<
@@ -31,6 +35,8 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 
 	const t = useExtracted();
 
+	const status = serviceStatuses.find((s) => s.id === service.statusId)?.status;
+
 	const owners = selectedOrganisationalUnits.filter((orgaUnit) =>
 		service.ownerUnitDocumentIds.includes(orgaUnit.id),
 	);
@@ -40,13 +46,22 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 
 	return (
 		<Fragment>
+			<div className="flex items-center justify-end">
+				<Link
+					className={buttonStyles({ intent: "secondary", size: "sm" })}
+					href={`/dashboard/administrator/internal-services/${service.id}/edit`}
+				>
+					<PencilSquareIcon data-slot="icon" />
+					{t("Edit")}
+				</Link>
+			</div>
 			<DescriptionList>
 				<DescriptionTerm>{t("Name")}</DescriptionTerm>
 				<DescriptionDetails>{service.name}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Status")}</DescriptionTerm>
 				<DescriptionDetails>
-					{serviceStatuses.find((s) => s.id === service.statusId)?.status}
+					{status != null ? getServiceStatusLabel(status) : null}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Comment")}</DescriptionTerm>

@@ -145,13 +145,11 @@ export class AdminProjectsPage {
 		await this.page.getByRole("button", { name: "Remove image" }).click();
 	}
 
-	async removeAllTagsInControl(label: string): Promise<void> {
-		const control = this.page
-			.locator('[data-slot="control"]')
-			.filter({ has: this.page.getByText(label, { exact: true }) })
-			.last();
-		// Remove tag's aria-label extracts as "ui" (i18n build bug); match by slot="remove" instead.
-		const removeButtons = control.locator('button[slot="remove"]');
+	async removeAllSelectedInControl(label: string): Promise<void> {
+		// Selected items render as rows in a grid list (aria-label === the control label); each row has
+		// a single Remove button (its aria-label extracts as "ui" in the e2e build, so target by row).
+		const list = this.page.getByRole("grid", { name: label });
+		const removeButtons = list.getByRole("row").getByRole("button");
 		while ((await removeButtons.count()) > 0) {
 			await removeButtons.first().click();
 		}

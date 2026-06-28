@@ -1,6 +1,6 @@
 "use client";
 
-import { AsyncMultipleSelect } from "@dariah-eric/ui/async-multiple-select";
+import { AsyncListSelect } from "@dariah-eric/ui/async-list-select";
 import { Separator } from "@dariah-eric/ui/separator";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { useExtracted } from "next-intl";
@@ -69,21 +69,17 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 	return (
 		<Fragment>
 			<FormSection description={t("Link related entities.")} title={t("Related entities")}>
-				<AsyncMultipleSelect
+				<AsyncListSelect
+					addLabel={t("Add related entity")}
 					aria-label={t("Related entities")}
 					emptyMessage={t("No related entities found.")}
+					emptySelectionMessage={t("No related entities")}
 					fetchPage={(params) => fetchRelationOptionsPage("entities", params)}
 					initialItems={initialRelatedEntityItems}
 					initialTotal={initialRelatedEntityTotal}
 					onChange={(ids) => {
 						setSelectedEntityIds(ids);
 					}}
-					placeholder={t("No related entities")}
-					renderTag={(item) =>
-						item.description != null && item.description !== ""
-							? `${item.name} (${item.description})`
-							: item.name
-					}
 					selectedItems={selectedRelatedEntities}
 					value={selectedEntityIds}
 				/>
@@ -101,21 +97,17 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 			<Separator className="my-6" />
 
 			<FormSection description={t("Link related resources.")} title={t("Related resources")}>
-				<AsyncMultipleSelect
+				<AsyncListSelect
+					addLabel={t("Add related resource")}
 					aria-label={t("Related resources")}
 					emptyMessage={t("No related resources found.")}
+					emptySelectionMessage={t("No related resources")}
 					fetchPage={(params) => fetchRelationOptionsPage("resources", params)}
 					initialItems={initialRelatedResourceItems}
 					initialTotal={initialRelatedResourceTotal}
 					onChange={(ids) => {
 						setSelectedResourceIds(ids);
 					}}
-					placeholder={t("No related resources")}
-					renderTag={(item) =>
-						item.description != null && item.description !== ""
-							? `${item.name} (${item.description})`
-							: item.name
-					}
 					selectedItems={selectedRelatedResources}
 					value={selectedResourceIds}
 				/>
