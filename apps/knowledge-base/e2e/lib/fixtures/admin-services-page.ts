@@ -63,8 +63,8 @@ export class AdminServicesPage {
 			.locator('[data-slot="control"]')
 			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: label }) });
 
-		// The chevron trigger's aria-label currently extracts as "ui" (i18n build bug in
-		// packages/ui), so target it by `aria-expanded` instead.
+		// The "Add" trigger button (a DialogTrigger) carries `aria-expanded`; its aria-label extracts
+		// as "ui" (i18n build bug in packages/ui), so target it by `aria-expanded` instead.
 		await control.locator("button[aria-expanded]:not([slot])").click();
 		await this.page.getByRole("searchbox").fill(name);
 		await this.page.keyboard.press("Enter");
@@ -73,7 +73,7 @@ export class AdminServicesPage {
 		await expect(option).toBeVisible();
 		await option.click();
 		await expect(control.getByText(name, { exact: true })).toBeVisible();
-		// Multi-select popover stays open after picking an item; toggle the trigger to dismiss it.
+		// The options popover stays open after picking an item; toggle the trigger to dismiss it.
 		// `force` is required because the popover's modal overlay intercepts pointer events even
 		// over the trigger button itself.
 		// oxlint-disable-next-line playwright/no-force-option
@@ -120,23 +120,13 @@ export class AdminServicesPage {
 	async removeSelectedOrganisationalUnits(
 		label: "Service owners" | "Service providers",
 	): Promise<void> {
-		const control = this.page
-			.locator('[data-slot="control"]')
-			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: label }) });
-		// Remove tag's aria-label extracts as "ui" (i18n build bug); match by slot="remove" instead.
-		// The Remove button is inside the AsyncMultipleSelect's DialogTrigger, so clicking it also
-		// toggles the popover open. Close it after each removal so subsequent clicks aren't blocked.
-		const removeButtons = control.locator('button[slot="remove"]');
+		// Selected items render as rows in a grid list (aria-label === the control label); each row has
+		// a single Remove button (its aria-label extracts as "ui" in the e2e build, so target by row).
+		// The Remove button sits outside the popover trigger, so removing does not open the popover.
+		const list = this.page.getByRole("grid", { name: label });
+		const removeButtons = list.getByRole("row").getByRole("button");
 		while ((await removeButtons.count()) > 0) {
 			await removeButtons.first().click();
-			const trigger = control.locator("button[aria-expanded]:not([slot])");
-			if ((await trigger.getAttribute("aria-expanded")) === "true") {
-				// `force` for the same reason as in `selectOrganisationalUnit` — the popover
-				// overlay intercepts pointer events even over the trigger.
-				// oxlint-disable-next-line playwright/no-force-option
-				await trigger.click({ force: true });
-				await expect(this.page.getByRole("listbox", { name: label })).toBeHidden();
-			}
 		}
 	}
 

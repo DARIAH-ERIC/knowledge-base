@@ -2,7 +2,7 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { AsyncMultipleSelect } from "@dariah-eric/ui/async-multiple-select";
+import { AsyncListSelect } from "@dariah-eric/ui/async-list-select";
 import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -160,14 +160,15 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 					description={t("Link organisational units as service owners or providers.")}
 					title={t("Organisational units")}
 				>
-					<AsyncMultipleSelect
+					<AsyncListSelect
+						addLabel={t("Add service owner")}
 						aria-label={t("Service owners")}
+						emptySelectionMessage={t("No service owners")}
 						fetchPage={fetchOrganisationalUnitOptionsPage}
 						initialItems={initialOrganisationalUnitItems}
 						initialTotal={initialOrganisationalUnitTotal}
 						label={t("Service owners")}
 						onChange={setSelectedOwnerUnitDocumentIds}
-						placeholder={t("No service owners")}
 						selectedItems={selectedOrganisationalUnits}
 						value={selectedOwnerUnitDocumentIds}
 					/>
@@ -180,14 +181,15 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						/>
 					))}
 
-					<AsyncMultipleSelect
+					<AsyncListSelect
+						addLabel={t("Add service provider")}
 						aria-label={t("Service providers")}
+						emptySelectionMessage={t("No service providers")}
 						fetchPage={fetchOrganisationalUnitOptionsPage}
 						initialItems={initialOrganisationalUnitItems}
 						initialTotal={initialOrganisationalUnitTotal}
 						label={t("Service providers")}
 						onChange={setSelectedProviderUnitDocumentIds}
-						placeholder={t("No service providers")}
 						selectedItems={selectedOrganisationalUnits}
 						value={selectedProviderUnitDocumentIds}
 					/>

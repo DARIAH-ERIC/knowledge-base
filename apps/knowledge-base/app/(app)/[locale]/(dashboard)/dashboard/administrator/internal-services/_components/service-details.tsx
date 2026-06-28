@@ -1,11 +1,14 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import {
 	DescriptionDetails,
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
+import { Link } from "@dariah-eric/ui/link";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -40,6 +43,15 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 
 	return (
 		<Fragment>
+			<div className="flex items-center justify-end">
+				<Link
+					className={buttonStyles({ intent: "secondary", size: "sm" })}
+					href={`/dashboard/administrator/internal-services/${service.id}/edit`}
+				>
+					<PencilSquareIcon data-slot="icon" />
+					{t("Edit")}
+				</Link>
+			</div>
 			<DescriptionList>
 				<DescriptionTerm>{t("Name")}</DescriptionTerm>
 				<DescriptionDetails>{service.name}</DescriptionDetails>

@@ -95,7 +95,7 @@ export class WebsiteNewsPage {
 	}
 
 	private relatedEntitiesControl(): Locator {
-		return this.relatedEntitiesSection().locator('button:has([data-slot="chevron"])');
+		return this.relatedEntitiesSection().getByRole("button", { name: "Add related entity" });
 	}
 
 	private async closeRelatedEntitiesDialog(dialog: Locator): Promise<void> {
@@ -120,14 +120,12 @@ export class WebsiteNewsPage {
 	}
 
 	async removeRelatedEntity(entityName: string): Promise<void> {
-		const section = this.relatedEntitiesSection();
-		const dialog = this.relatedEntitiesDialog();
-		// The selected tag now reads "<slug> (<Type>)", so match the remove button by its composed
-		// accessible name (which still contains the slug) rather than an exact tag-text lookup.
-		const removeButton = section.getByRole("button", { name: entityName });
-		await removeButton.waitFor({ state: "visible" });
-		await removeButton.click();
-		await this.closeRelatedEntitiesDialog(dialog);
+		// Selected items now render as rows in a grid list; each row has a single Remove button (the
+		// button aria-labels are not locator-friendly in the e2e build, so target the row by name).
+		const row = this.relatedEntitiesSection().getByRole("row", { name: entityName });
+		await row.waitFor({ state: "visible" });
+		await row.getByRole("button").click();
+		await row.waitFor({ state: "hidden" });
 	}
 
 	private contentBlockEditor(): Locator {

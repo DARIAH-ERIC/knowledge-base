@@ -3,7 +3,7 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { socialMediaTypesEnum } from "@dariah-eric/database/schema";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { AsyncMultipleSelect } from "@dariah-eric/ui/async-multiple-select";
+import { AsyncListSelect } from "@dariah-eric/ui/async-list-select";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { Description, FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
@@ -310,13 +310,14 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					description={t("Link social media accounts to this project.")}
 					title={t("Social media")}
 				>
-					<AsyncMultipleSelect
+					<AsyncListSelect
+						addLabel={t("Add social media")}
 						aria-label={t("Social media")}
+						emptySelectionMessage={t("No social media linked")}
 						fetchPage={fetchSocialMediaOptionsPage}
 						initialItems={initialSocialMediaItems}
 						initialTotal={initialSocialMediaTotal}
 						onChange={setSelectedSocialMediaIds}
-						placeholder={t("No social media linked")}
 						selectedItems={localSocialMediaItems}
 						value={selectedSocialMediaIds}
 					/>

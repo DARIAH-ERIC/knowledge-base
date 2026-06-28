@@ -262,7 +262,7 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.fillCall("");
 		await adminProjectsPage.clearDatePicker("End date");
 		await adminProjectsPage.removeImage();
-		await adminProjectsPage.removeAllTagsInControl("Social media");
+		await adminProjectsPage.removeAllSelectedInControl("Social media");
 		await adminProjectsPage.submitForm();
 
 		const updated = await db.getProjectByName(updatedName);
