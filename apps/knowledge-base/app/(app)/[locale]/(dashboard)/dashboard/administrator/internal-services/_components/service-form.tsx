@@ -27,6 +27,7 @@ import {
 	toOrganisationalUnitDocumentOptionsPage,
 } from "@/lib/organisational-unit-options";
 import type { ServerAction } from "@/lib/server/create-server-action";
+import { getServiceStatusLabel } from "@/lib/service-status-label";
 
 interface ServiceFormProps {
 	service?: Pick<
@@ -66,10 +67,6 @@ async function fetchOrganisationalUnitOptionsPage(
 	return toOrganisationalUnitDocumentOptionsPage(
 		(await response.json()) as { items: Array<OrganisationalUnitOption>; total: number },
 	);
-}
-
-function formatServiceStatus(status: string): string {
-	return status.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
@@ -116,7 +113,7 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						<SelectContent>
 							{serviceStatuses.map((status) => (
 								<SelectItem key={status.id} id={status.id}>
-									{formatServiceStatus(status.status)}
+									{getServiceStatusLabel(status.status)}
 								</SelectItem>
 							))}
 						</SelectContent>

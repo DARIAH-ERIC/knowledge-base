@@ -73,11 +73,10 @@ export class AdminServicesPage {
 		await expect(option).toBeVisible();
 		await option.click();
 		await expect(control.getByText(name, { exact: true })).toBeVisible();
-		// The options popover stays open after picking an item; toggle the trigger to dismiss it.
-		// `force` is required because the popover's modal overlay intercepts pointer events even
-		// over the trigger button itself.
-		// oxlint-disable-next-line playwright/no-force-option
-		await control.locator("button[aria-expanded]:not([slot])").click({ force: true });
+		// The options popover stays open after picking an item. Dismiss it with Escape, which the
+		// component handles explicitly (see AsyncListSelect's onKeyDownCapture); clicking the trigger
+		// is unreliable because the popover's modal overlay intercepts the pointer event.
+		await this.page.keyboard.press("Escape");
 		await expect(this.page.getByRole("listbox", { name: label })).toBeHidden();
 	}
 

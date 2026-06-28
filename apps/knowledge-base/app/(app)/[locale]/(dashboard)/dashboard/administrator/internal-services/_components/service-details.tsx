@@ -14,6 +14,7 @@ import { Fragment, type ReactNode } from "react";
 
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
+import { getServiceStatusLabel } from "@/lib/service-status-label";
 
 interface ServiceDetailsProps {
 	service: Pick<
@@ -33,6 +34,8 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 	const { service, serviceStatuses, selectedOrganisationalUnits } = props;
 
 	const t = useExtracted();
+
+	const status = serviceStatuses.find((s) => s.id === service.statusId)?.status;
 
 	const owners = selectedOrganisationalUnits.filter((orgaUnit) =>
 		service.ownerUnitDocumentIds.includes(orgaUnit.id),
@@ -58,7 +61,7 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 
 				<DescriptionTerm>{t("Status")}</DescriptionTerm>
 				<DescriptionDetails>
-					{serviceStatuses.find((s) => s.id === service.statusId)?.status}
+					{status != null ? getServiceStatusLabel(status) : null}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Comment")}</DescriptionTerm>

@@ -22,6 +22,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { dashboardPageSize } from "@/config/pagination.config";
+import { getServiceStatusLabel } from "@/lib/service-status-label";
 
 interface ServicesPageProps {
 	dir: "asc" | "desc";
@@ -37,10 +38,6 @@ interface ServicesPageProps {
 		total: number;
 	};
 	sort: "name" | "type" | "status" | "sshocMarketplaceId";
-}
-
-function formatServiceStatus(status: string): string {
-	return status.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function statusIntent(status: string): "success" | "warning" | "danger" | "info" {
@@ -115,7 +112,7 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 							<TableCell>{item.type.type}</TableCell>
 							<TableCell>
 								<Badge intent={statusIntent(item.status.status)}>
-									{formatServiceStatus(item.status.status)}
+									{getServiceStatusLabel(item.status.status)}
 								</Badge>
 							</TableCell>
 							<TableCell>{item.sshocMarketplaceId ?? "—"}</TableCell>
