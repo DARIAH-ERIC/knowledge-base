@@ -16,7 +16,7 @@ export async function deleteNavigationMenuAction(id: string): Promise<void> {
 	await db.delete(schema.navigationMenus).where(eq(schema.navigationMenus.id, id));
 
 	after(async () => {
-		await dispatchWebhook({ type: "navigation" });
+		await dispatchWebhook({ events: ["navigation"] });
 	});
 
 	await recordAuditEvent(db, {

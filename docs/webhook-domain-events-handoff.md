@@ -34,7 +34,7 @@ The branch already moves the KB side in the right direction:
 
 - `apps/knowledge-base/lib/webhook/dispatch-webhook.ts`
   - Adds `WebhookEntityType`.
-  - Adds organisational-unit subtype events as ``organisational-units:${OrganisationalUnitType}``.
+  - Adds organisational-unit subtype events as `organisational-units:${OrganisationalUnitType}`.
   - Allows `dispatchWebhook({ type })` to accept a single type or an array.
   - Deduplicates types and posts `{ types }`.
 
@@ -115,8 +115,8 @@ Suggested next step: introduce something like:
 
 ```ts
 type WebhookRegistration = {
-  url: string;
-  secret: string;
+	url: string;
+	secret: string;
 };
 ```
 
@@ -129,6 +129,29 @@ Avoid keeping `REVALIDATION_` terminology in new names. Prefer something like:
 - `KB_CHANGE_WEBHOOKS`
 
 Exact env format needs a repo-style decision.
+
+#### Alternative fan-out: Redis message bus
+
+Once more than one website is driven from the same KB data (likely future, possibly several apps in this monorepo), a hand-maintained webhook URL registry ages badly: the producer must track every consumer URL, retry, and log per-URL failure. A message bus inverts this — the KB publishes change events to one place and consumers self-subscribe, so the KB never knows who is listening.
+
+Important: this does **not** change the event contract. `KnowledgeBaseChangeEvent` and consumer-side cache-tag mapping stay exactly as designed above; only the transport beneath them changes. Webhook, Redis, or a managed HTTP queue are interchangeable, so the contract can ship now and the transport decision can be deferred until the second consumer is real.
+
+Stack note: the repo currently self-hosts its stateful services via the `.devcontainer` compose files (Postgres, Typesense, MinIO, imgproxy, Mailpit). There is **no Redis today**, so a bus is net-new infra — one more container in the same ops pattern.
+
+Why a bus rather than `LISTEN/NOTIFY`: Postgres notify looks free but forces a long-lived DB connection (and DB credentials) back into each website, which undoes the read boundary the API provides; it also breaks under PgBouncer transaction pooling and has no replay. Prefer it only if consumers already hold a direct DB connection.
+
+Redis options:
+
+- **Pub/sub** — fire-and-forget, multi-subscriber for free. No persistence: a consumer that is down (e.g. mid-redeploy) misses the event.
+- **Streams** — persistent log + consumer groups + acks + replay; a redeploying consumer catches up on reconnect. One Redis instance with AOF persistence covers this.
+
+Delivery semantics: cache invalidation is idempotent and low-stakes — a dropped event only means a stale page until the next edit. So durable delivery may be unnecessary if cached entries carry a `revalidate` max-age as a backstop (missed invalidations self-heal within the TTL). That also keeps the bus non-critical: if it is down, pages go briefly stale rather than erroring, so no HA heroics are needed.
+
+Operational additions a bus implies: a container per environment, persistence/backup config if using Streams, a client with reconnect/resubscribe logic in each app, a health check + alert, publish/subscribe access control (dashboard publishes, websites only subscribe), and one more service in local dev compose.
+
+Managed escape hatch: if consumers ever move off self-host to serverless, self-hosted Redis pub/sub gets awkward (connection-holding). Upstash QStash (managed HTTP fan-out with retries) or Upstash Redis (HTTP-based) are connection-less alternatives that keep the same event contract.
+
+Lowest-infra interim: if adding a service now is premature, keep the HTTP webhook but make fan-out reliable — retries plus a small consumer registry — and add the `revalidate` TTL backstop. Treat the bus as a later upgrade triggered by the second real consumer.
 
 ### 5. `featured-entities` is emitted but not consumed
 
@@ -162,27 +185,27 @@ If keeping string events, a likely mapping is:
 
 ```ts
 const eventToCacheTags = {
-  projects: [cacheTags.projects, cacheTags.dariahProjects],
-  documents_policies: [cacheTags.documentsPolicies],
-  events: [cacheTags.events],
-  featured_entities: [cacheTags.home],
-  funding_calls: [cacheTags.fundingCalls],
-  impact_case_studies: [cacheTags.impactCaseStudies],
-  navigation: [cacheTags.navigation],
-  news: [cacheTags.news],
-  opportunities: [cacheTags.opportunities],
-  pages: [cacheTags.pages],
-  persons: [cacheTags.persons],
-  site_metadata: [cacheTags.siteMetadata],
-  spotlight_articles: [cacheTags.spotlightArticles],
+	projects: [cacheTags.projects, cacheTags.dariahProjects],
+	documents_policies: [cacheTags.documentsPolicies],
+	events: [cacheTags.events],
+	featured_entities: [cacheTags.home],
+	funding_calls: [cacheTags.fundingCalls],
+	impact_case_studies: [cacheTags.impactCaseStudies],
+	navigation: [cacheTags.navigation],
+	news: [cacheTags.news],
+	opportunities: [cacheTags.opportunities],
+	pages: [cacheTags.pages],
+	persons: [cacheTags.persons],
+	site_metadata: [cacheTags.siteMetadata],
+	spotlight_articles: [cacheTags.spotlightArticles],
 
-  "organisational_units:country": [cacheTags.membersAndPartners],
-  "organisational_units:institution": [cacheTags.membersAndPartners],
-  "organisational_units:national_consortium": [cacheTags.membersAndPartners],
-  "organisational_units:eric": [cacheTags.membersAndPartners],
-  "organisational_units:governance_body": [cacheTags.governanceBodies],
-  "organisational_units:working_group": [cacheTags.workingGroups],
-  "organisational_units:regional_hub": [],
+	"organisational_units:country": [cacheTags.membersAndPartners],
+	"organisational_units:institution": [cacheTags.membersAndPartners],
+	"organisational_units:national_consortium": [cacheTags.membersAndPartners],
+	"organisational_units:eric": [cacheTags.membersAndPartners],
+	"organisational_units:governance_body": [cacheTags.governanceBodies],
+	"organisational_units:working_group": [cacheTags.workingGroups],
+	"organisational_units:regional_hub": [],
 } as const;
 ```
 
@@ -194,7 +217,7 @@ Minimal string-array version:
 
 ```json
 {
-  "events": ["projects", "organisational_units:institution", "persons"]
+	"events": ["projects", "organisational_units:institution", "persons"]
 }
 ```
 
@@ -202,11 +225,11 @@ Better structured version:
 
 ```json
 {
-  "events": [
-    { "kind": "entity", "type": "projects" },
-    { "kind": "organisational_unit", "type": "institution" },
-    { "kind": "entity", "type": "persons" }
-  ]
+	"events": [
+		{ "kind": "entity", "type": "projects" },
+		{ "kind": "organisational_unit", "type": "institution" },
+		{ "kind": "entity", "type": "persons" }
+	]
 }
 ```
 

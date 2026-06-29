@@ -15,7 +15,7 @@ import { eq, sql } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
-import { resolveOrganisationalUnitWebhookTypes } from "@/lib/webhook/resolve-organisational-unit-webhook-types";
+import { resolveOrganisationalUnitChangeEvents } from "@/lib/webhook/resolve-organisational-unit-change-events";
 
 /** Uses createServerAction because the success response carries typed data. */
 export const createUnitRelationAction = createServerAction(
@@ -92,7 +92,7 @@ export const createUnitRelationAction = createServerAction(
 
 			revalidatePath("/[locale]/dashboard/administrator", "layout");
 			await dispatchWebhook({
-				type: await resolveOrganisationalUnitWebhookTypes(db, [
+				events: await resolveOrganisationalUnitChangeEvents(db, [
 					unitDocumentId,
 					relatedUnitDocumentId,
 				]),

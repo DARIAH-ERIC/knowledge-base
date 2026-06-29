@@ -4,7 +4,7 @@ import { publishVersion } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createCommandAction } from "@/lib/server/create-command-action";
-import { dispatchWebhook, organisationalUnitWebhookType } from "@/lib/webhook/dispatch-webhook";
+import { dispatchWebhook, organisationalUnitChangeEvent } from "@/lib/webhook/dispatch-webhook";
 
 export const publishCountryAction = createCommandAction({
 	requireAdmin: true,
@@ -19,6 +19,6 @@ export const publishCountryAction = createCommandAction({
 
 	async postCommit({ result }) {
 		await syncWebsiteDocumentForEntity(result.subjectId);
-		await dispatchWebhook({ type: organisationalUnitWebhookType("country") });
+		await dispatchWebhook({ events: [organisationalUnitChangeEvent("country")] });
 	},
 });

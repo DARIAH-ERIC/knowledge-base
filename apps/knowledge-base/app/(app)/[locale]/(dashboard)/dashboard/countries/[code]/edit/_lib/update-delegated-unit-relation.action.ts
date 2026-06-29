@@ -16,7 +16,7 @@ import { eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
-import { resolveOrganisationalUnitWebhookTypes } from "@/lib/webhook/resolve-organisational-unit-webhook-types";
+import { resolveOrganisationalUnitChangeEvents } from "@/lib/webhook/resolve-organisational-unit-change-events";
 
 /**
  * Delegated counterpart of `updateUnitRelationAction` for the partner-institution relations on a
@@ -86,7 +86,7 @@ export const updateDelegatedUnitRelationAction = createServerAction(
 
 			revalidatePath("/[locale]/dashboard/countries", "layout");
 			await dispatchWebhook({
-				type: await resolveOrganisationalUnitWebhookTypes(db, [
+				events: await resolveOrganisationalUnitChangeEvents(db, [
 					unitDocumentId,
 					relatedUnitDocumentId,
 					...(existing != null ? [existing.unitDocumentId, existing.relatedUnitDocumentId] : []),

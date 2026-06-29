@@ -103,6 +103,6 @@ export const updateEventAction = createMutationAction({
 			return;
 		}
 		await syncWebsiteDocumentForEntity(result.subjectId);
-		await dispatchWebhook({ type: "events" });
+		await dispatchWebhook({ events: ["events"] });
 	},
 });

@@ -12,7 +12,7 @@ import { eq, inArray } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
-import { dispatchWebhook, organisationalUnitWebhookType } from "@/lib/webhook/dispatch-webhook";
+import { dispatchWebhook, organisationalUnitChangeEvent } from "@/lib/webhook/dispatch-webhook";
 
 export const updateWorkingGroupAction = createMutationAction({
 	schema: UpdateWorkingGroupActionInputSchema,
@@ -110,6 +110,6 @@ export const updateWorkingGroupAction = createMutationAction({
 			return;
 		}
 		await syncWebsiteDocumentForEntity(result.subjectId);
-		await dispatchWebhook({ type: organisationalUnitWebhookType("working_group") });
+		await dispatchWebhook({ events: [organisationalUnitChangeEvent("working_group")] });
 	},
 });

@@ -3,20 +3,20 @@ import * as schema from "@dariah-eric/database/schema";
 import type { Database, Transaction } from "@/lib/db";
 import { eq, inArray, sql } from "@/lib/db/sql";
 import {
-	type WebhookEntityType,
-	organisationalUnitWebhookType,
+	type KnowledgeBaseChangeEvent,
+	organisationalUnitChangeEvent,
 } from "@/lib/webhook/dispatch-webhook";
 
 /**
- * Resolves organisational-unit document ids to their per-unit-type revalidation entity types, so a
- * relation mutation can tell the website which unit-type pages embed the affected units. Each
- * document is resolved to its current (published-or-draft) version to read its unit type; duplicate
- * types collapse to a single entry.
+ * Resolves organisational-unit document ids to their per-subtype change events, so a relation
+ * mutation can tell consumers which unit-subtype data the affected units belong to. Each document
+ * is resolved to its current (published-or-draft) version to read its unit type; duplicate events
+ * collapse to a single entry.
  */
-export async function resolveOrganisationalUnitWebhookTypes(
+export async function resolveOrganisationalUnitChangeEvents(
 	client: Database | Transaction,
 	documentIds: Array<string>,
-): Promise<Array<WebhookEntityType>> {
+): Promise<Array<KnowledgeBaseChangeEvent>> {
 	if (documentIds.length === 0) {
 		return [];
 	}
@@ -34,5 +34,5 @@ export async function resolveOrganisationalUnitWebhookTypes(
 		)
 		.where(inArray(schema.documentLifecycle.documentId, documentIds));
 
-	return [...new Set(rows.map((row) => organisationalUnitWebhookType(row.type)))];
+	return [...new Set(rows.map((row) => organisationalUnitChangeEvent(row.type)))];
 }

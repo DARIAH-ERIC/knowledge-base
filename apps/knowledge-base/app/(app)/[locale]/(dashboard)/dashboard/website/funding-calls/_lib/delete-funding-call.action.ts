@@ -78,6 +78,6 @@ export const deleteFundingCallAction = createCommandAction({
 		if (result.descriptor != null) {
 			await deleteWebsiteDocument(result.descriptor);
 		}
-		await dispatchWebhook({ type: "funding-calls" });
+		await dispatchWebhook({ events: ["funding_calls"] });
 	},
 });

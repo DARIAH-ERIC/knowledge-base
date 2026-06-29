@@ -79,7 +79,7 @@ export async function deleteDocumentOrPolicyAction(documentId: string): Promise<
 			await deleteWebsiteDocument(descriptor);
 		}
 
-		await dispatchWebhook({ type: "documents-policies" });
+		await dispatchWebhook({ events: ["documents_policies"] });
 	});
 
 	await recordAuditEvent(db, {

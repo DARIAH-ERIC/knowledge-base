@@ -9,7 +9,7 @@ import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
-import { resolveOrganisationalUnitWebhookTypes } from "@/lib/webhook/resolve-organisational-unit-webhook-types";
+import { resolveOrganisationalUnitChangeEvents } from "@/lib/webhook/resolve-organisational-unit-change-events";
 
 export async function deleteContributionAction(id: string): Promise<void> {
 	const { user } = await assertAuthenticated();
@@ -49,8 +49,8 @@ export async function deleteContributionAction(id: string): Promise<void> {
 
 	revalidatePath("/[locale]/dashboard/administrator/contributions", "layout");
 	revalidatePath("/[locale]/dashboard/administrator/person-relations", "layout");
-	const unitTypes = await resolveOrganisationalUnitWebhookTypes(db, [
+	const unitTypes = await resolveOrganisationalUnitChangeEvents(db, [
 		contribution.organisationalUnitDocumentId,
 	]);
-	await dispatchWebhook({ type: ["persons", ...unitTypes] });
+	await dispatchWebhook({ events: ["persons", ...unitTypes] });
 }

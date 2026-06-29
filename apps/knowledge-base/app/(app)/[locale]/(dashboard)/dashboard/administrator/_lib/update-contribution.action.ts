@@ -15,7 +15,7 @@ import { isExclusionViolation } from "@/lib/db/errors";
 import { and, eq, sql } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
-import { dispatchWebhook, organisationalUnitWebhookType } from "@/lib/webhook/dispatch-webhook";
+import { dispatchWebhook, organisationalUnitChangeEvent } from "@/lib/webhook/dispatch-webhook";
 
 export const updateContributionAction = createServerAction(
 	{ requireAuth: true },
@@ -131,7 +131,7 @@ export const updateContributionAction = createServerAction(
 
 			revalidatePath("/[locale]/dashboard/administrator", "layout");
 			await dispatchWebhook({
-				type: ["persons", organisationalUnitWebhookType(returned.unitType)],
+				events: ["persons", organisationalUnitChangeEvent(returned.unitType)],
 			});
 			return createActionStateSuccess({});
 		} catch (error) {

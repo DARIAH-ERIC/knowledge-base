@@ -11,7 +11,7 @@ import {
 	getWebsiteDocumentDescriptorByEntityId,
 } from "@/lib/search/website-index";
 import { createCommandAction } from "@/lib/server/create-command-action";
-import { dispatchWebhook, organisationalUnitWebhookType } from "@/lib/webhook/dispatch-webhook";
+import { dispatchWebhook, organisationalUnitChangeEvent } from "@/lib/webhook/dispatch-webhook";
 
 export const deleteNationalConsortiumAction = createCommandAction({
 	requireAdmin: true,
@@ -81,6 +81,6 @@ export const deleteNationalConsortiumAction = createCommandAction({
 		if (result.descriptor != null) {
 			await deleteWebsiteDocument(result.descriptor);
 		}
-		await dispatchWebhook({ type: organisationalUnitWebhookType("national_consortium") });
+		await dispatchWebhook({ events: [organisationalUnitChangeEvent("national_consortium")] });
 	},
 });

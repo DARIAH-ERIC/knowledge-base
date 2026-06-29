@@ -78,6 +78,6 @@ export const deleteOpportunityAction = createCommandAction({
 		if (result.descriptor != null) {
 			await deleteWebsiteDocument(result.descriptor);
 		}
-		await dispatchWebhook({ type: "opportunities" });
+		await dispatchWebhook({ events: ["opportunities"] });
 	},
 });
