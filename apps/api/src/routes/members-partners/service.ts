@@ -588,6 +588,7 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 						'is_contact_for',
 						'national_coordinator',
 						'national_coordinator_deputy',
+						'national_coordination_staff',
 						'national_representative',
 						'national_representative_deputy'
 					)
