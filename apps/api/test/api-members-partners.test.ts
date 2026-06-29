@@ -1358,6 +1358,13 @@ describe("members-partners", () => {
 					contactContributorItems,
 					"is_contact_for",
 				);
+				const staffContributorItems = createPersonItems(1);
+				const staffContributor = await seedContributor(
+					db,
+					countryId,
+					staffContributorItems,
+					"national_coordination_staff",
+				);
 				const nationalConsortiumItems = createItems(1);
 				const nationalConsortium = await seedNationalConsortium(
 					db,
@@ -1385,7 +1392,7 @@ describe("members-partners", () => {
 					slug: partnerInstitution.entity.slug,
 					website: null,
 				});
-				expect(data.contributors).toHaveLength(2);
+				expect(data.contributors).toHaveLength(3);
 				expect(data.contributors).toEqual(
 					expect.arrayContaining([
 						expect.objectContaining({
@@ -1419,6 +1426,22 @@ describe("members-partners", () => {
 								}),
 							]),
 							role: "is_contact_for",
+						}),
+						expect.objectContaining({
+							id: staffContributor.person.id,
+							name: staffContributor.person.name,
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+							position: expect.arrayContaining([
+								expect.objectContaining({
+									role: "is_affiliated_with",
+									name: staffContributor.affiliation.organisationalUnit.name,
+								}),
+								expect.objectContaining({
+									role: "national_coordination_staff",
+									name: item.organisationalUnit.name,
+								}),
+							]),
+							role: "national_coordination_staff",
 						}),
 					]),
 				);
