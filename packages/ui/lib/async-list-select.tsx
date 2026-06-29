@@ -3,7 +3,7 @@
 import { XMarkIcon } from "@heroicons/react/16/solid";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import {
 	Button as AriaButton,
 	DialogTrigger as AriaDialogTrigger,
@@ -161,11 +161,18 @@ function AsyncListSelectInner<T extends AsyncOption>(
 		[selectedItemMap, value],
 	);
 
+	// Read `value` through a ref so the remove handler is never stale. React Aria's GridList caches
+	// each row's rendered content by item reference and does not re-invoke the render function while
+	// references stay stable, which would otherwise freeze an outdated `value` into this closure and
+	// resurrect previously-removed ids on the next removal.
+	const valueRef = useRef(value);
+	valueRef.current = value;
+
 	const remove = useCallback(
 		(id: string) => {
-			onChange(value.filter((selectedId) => selectedId !== id));
+			onChange(valueRef.current.filter((selectedId) => selectedId !== id));
 		},
-		[onChange, value],
+		[onChange],
 	);
 
 	const { dragAndDropHooks } = useDragAndDrop({

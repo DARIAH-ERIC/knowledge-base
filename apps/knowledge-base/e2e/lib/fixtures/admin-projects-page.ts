@@ -155,6 +155,15 @@ export class AdminProjectsPage {
 		}
 	}
 
+	async removeSelectedInControlByName(label: string, name: string): Promise<void> {
+		// Remove a single selected row identified by its visible name. Each row has one Remove button
+		// (its aria-label extracts as "ui" in the e2e build, so target the row's only button).
+		const list = this.page.getByRole("grid", { name: label });
+		const row = list.getByRole("row").filter({ hasText: name });
+		await row.getByRole("button").click();
+		await expect(row).toBeHidden();
+	}
+
 	async createSocialMediaInForm(name: string, url: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Create social media" }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Create social media" });
