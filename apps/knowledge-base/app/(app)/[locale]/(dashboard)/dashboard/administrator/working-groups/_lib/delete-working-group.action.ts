@@ -11,7 +11,7 @@ import {
 	getWebsiteDocumentDescriptorByEntityId,
 } from "@/lib/search/website-index";
 import { createCommandAction } from "@/lib/server/create-command-action";
-import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import { dispatchWebhook, organisationalUnitWebhookType } from "@/lib/webhook/dispatch-webhook";
 
 export const deleteWorkingGroupAction = createCommandAction({
 	requireAdmin: true,
@@ -81,6 +81,6 @@ export const deleteWorkingGroupAction = createCommandAction({
 		if (result.descriptor != null) {
 			await deleteWebsiteDocument(result.descriptor);
 		}
-		await dispatchWebhook({ type: "working-groups" });
+		await dispatchWebhook({ type: organisationalUnitWebhookType("working_group") });
 	},
 });

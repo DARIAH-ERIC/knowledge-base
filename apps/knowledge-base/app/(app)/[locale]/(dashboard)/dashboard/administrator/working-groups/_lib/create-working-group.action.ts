@@ -11,7 +11,7 @@ import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-u
 import { filterToPublishedDocumentIds } from "@/lib/data/relations";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
-import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import { dispatchWebhook, organisationalUnitWebhookType } from "@/lib/webhook/dispatch-webhook";
 
 export const createWorkingGroupAction = createMutationAction({
 	schema: CreateWorkingGroupActionInputSchema,
@@ -100,6 +100,6 @@ export const createWorkingGroupAction = createMutationAction({
 		if (!shouldSaveAndPublish(ctx.formData)) {
 			return;
 		}
-		await dispatchWebhook({ type: "working-groups" });
+		await dispatchWebhook({ type: organisationalUnitWebhookType("working_group") });
 	},
 });

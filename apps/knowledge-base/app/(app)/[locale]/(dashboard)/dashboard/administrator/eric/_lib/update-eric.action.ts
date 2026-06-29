@@ -12,7 +12,7 @@ import { eq, inArray } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
-import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import { dispatchWebhook, organisationalUnitWebhookType } from "@/lib/webhook/dispatch-webhook";
 
 export const updateEricAction = createMutationAction({
 	schema: UpdateEricActionInputSchema,
@@ -111,6 +111,6 @@ export const updateEricAction = createMutationAction({
 			return;
 		}
 		await syncWebsiteDocumentForEntity(result.subjectId);
-		await dispatchWebhook({ type: "members-partners" });
+		await dispatchWebhook({ type: organisationalUnitWebhookType("eric") });
 	},
 });

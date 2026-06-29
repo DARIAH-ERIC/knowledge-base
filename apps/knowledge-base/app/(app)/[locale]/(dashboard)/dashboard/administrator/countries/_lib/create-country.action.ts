@@ -11,7 +11,7 @@ import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-u
 import { filterToPublishedDocumentIds } from "@/lib/data/relations";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
-import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import { dispatchWebhook, organisationalUnitWebhookType } from "@/lib/webhook/dispatch-webhook";
 
 export const createCountryAction = createMutationAction({
 	schema: CreateCountryActionInputSchema,
@@ -99,6 +99,6 @@ export const createCountryAction = createMutationAction({
 		if (!shouldSaveAndPublish(ctx.formData)) {
 			return;
 		}
-		await dispatchWebhook({ type: "members-partners" });
+		await dispatchWebhook({ type: organisationalUnitWebhookType("country") });
 	},
 });
