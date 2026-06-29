@@ -14260,26 +14260,33 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "items": {
               "properties": {
                 "duration": {
-                  "properties": {
-                    "end": {
-                      "anyOf": [
-                        {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "end": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "start": {
                           "type": "string",
                         },
-                        {
-                          "type": "null",
-                        },
+                      },
+                      "required": [
+                        "start",
+                        "end",
                       ],
+                      "type": "object",
                     },
-                    "start": {
-                      "type": "string",
+                    {
+                      "type": "null",
                     },
-                  },
-                  "required": [
-                    "start",
-                    "end",
                   ],
-                  "type": "object",
                 },
                 "id": {
                   "format": "uuid",
@@ -14496,26 +14503,33 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "items": {
               "properties": {
                 "duration": {
-                  "properties": {
-                    "end": {
-                      "anyOf": [
-                        {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "end": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "start": {
                           "type": "string",
                         },
-                        {
-                          "type": "null",
-                        },
+                      },
+                      "required": [
+                        "start",
+                        "end",
                       ],
+                      "type": "object",
                     },
-                    "start": {
-                      "type": "string",
+                    {
+                      "type": "null",
                     },
-                  },
-                  "required": [
-                    "start",
-                    "end",
                   ],
-                  "type": "object",
                 },
                 "id": {
                   "format": "uuid",
