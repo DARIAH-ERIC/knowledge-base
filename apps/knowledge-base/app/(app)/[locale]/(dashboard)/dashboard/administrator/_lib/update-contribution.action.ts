@@ -15,6 +15,7 @@ import { isExclusionViolation } from "@/lib/db/errors";
 import { and, eq, sql } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateContributionAction = createServerAction(
 	{ requireAuth: true },
@@ -129,6 +130,7 @@ export const updateContributionAction = createServerAction(
 			}
 
 			revalidatePath("/[locale]/dashboard/administrator", "layout");
+			await dispatchWebhook({ type: "persons" });
 			return createActionStateSuccess({});
 		} catch (error) {
 			// A person may hold the same role at the same org over several non-overlapping periods; the

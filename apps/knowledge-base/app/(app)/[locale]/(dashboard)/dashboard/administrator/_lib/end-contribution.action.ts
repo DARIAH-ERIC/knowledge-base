@@ -8,6 +8,7 @@ import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function endContributionAction(id: string, end: Date): Promise<void> {
 	const { user } = await assertAuthenticated();
@@ -41,4 +42,5 @@ export async function endContributionAction(id: string, end: Date): Promise<void
 	});
 
 	revalidatePath("/[locale]/dashboard/administrator", "layout");
+	await dispatchWebhook({ type: "persons" });
 }
