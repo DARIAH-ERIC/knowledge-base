@@ -458,6 +458,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "is_contact_for",
               "national_coordinator",
               "national_coordinator_deputy",
+              "national_coordination_staff",
               "national_representative",
               "national_representative_deputy",
             ],
