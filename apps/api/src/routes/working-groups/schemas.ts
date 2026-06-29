@@ -26,10 +26,12 @@ export const WorkingGroupBaseSchema = v.pipe(
 		socialMedia: v.array(
 			v.object({
 				...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
-				duration: v.object({
-					start: v.string(),
-					end: v.nullable(v.string()),
-				}),
+				duration: v.nullable(
+					v.object({
+						start: v.string(),
+						end: v.nullable(v.string()),
+					}),
+				),
 				type: v.picklist(schema.socialMediaTypesEnum),
 			}),
 		),
@@ -64,10 +66,12 @@ export const WorkingGroupSchema = v.pipe(
 		socialMedia: v.array(
 			v.object({
 				...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
-				duration: v.object({
-					start: v.string(),
-					end: v.nullable(v.string()),
-				}),
+				duration: v.nullable(
+					v.object({
+						start: v.string(),
+						end: v.nullable(v.string()),
+					}),
+				),
 				type: v.picklist(schema.socialMediaTypesEnum),
 			}),
 		),
