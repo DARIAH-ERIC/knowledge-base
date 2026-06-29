@@ -46,6 +46,6 @@ export const updateFeaturedItemsAction = createMutationAction({
 	},
 
 	async postCommit() {
-		await dispatchWebhook({ type: "site-metadata" });
+		await dispatchWebhook({ type: "featured-entities" });
 	},
 });
