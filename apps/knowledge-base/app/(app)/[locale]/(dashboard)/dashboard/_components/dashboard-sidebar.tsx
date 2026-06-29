@@ -224,6 +224,12 @@ export function useSidebarMenu(
 				icon: <ListBulletIcon />,
 			},
 			{
+				href: "/dashboard/website/featured",
+				tooltip: t("Featured items"),
+				label: t("Featured items"),
+				icon: <ListBulletIcon />,
+			},
+			{
 				href: "/dashboard/website/funding-calls",
 				tooltip: t("Funding Calls"),
 				label: t("Funding Calls"),

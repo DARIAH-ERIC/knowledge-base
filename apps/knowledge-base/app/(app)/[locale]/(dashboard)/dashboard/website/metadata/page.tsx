@@ -11,7 +11,6 @@ import {
 import { SiteMetadataForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import { getNewsItemOptions, getNewsItemOptionsByIds } from "@/lib/data/news";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -44,7 +43,6 @@ export default async function DashboardWebsiteMetadataPage(
 				description: true,
 				ogTitle: true,
 				ogDescription: true,
-				featuredItemIds: true,
 			},
 			with: {
 				ogImage: {
@@ -74,17 +72,11 @@ export default async function DashboardWebsiteMetadataPage(
 			? {
 					title: siteMetadataRow.title,
 					description: siteMetadataRow.description,
-					featuredItemIds: siteMetadataRow.featuredItemIds,
 					ogTitle: siteMetadataRow.ogTitle,
 					ogDescription: siteMetadataRow.ogDescription,
 					ogImage,
 				}
 			: null;
-
-	const [initialFeaturedItemsOptions, selectedFeaturedItems] = await Promise.all([
-		getNewsItemOptions(),
-		getNewsItemOptionsByIds((siteMetadataRow?.featuredItemIds as Array<string> | null) ?? []),
-	]);
 
 	return (
 		<div className="flex flex-col gap-y-6">
@@ -96,12 +88,7 @@ export default async function DashboardWebsiteMetadataPage(
 			</Header>
 
 			<div className="p-(--layout-padding)">
-				<SiteMetadataForm
-					initialAssets={initialAssets}
-					initialFeaturedItemsOptions={initialFeaturedItemsOptions}
-					selectedFeaturedItems={selectedFeaturedItems}
-					siteMetadata={siteMetadata}
-				/>
+				<SiteMetadataForm initialAssets={initialAssets} siteMetadata={siteMetadata} />
 			</div>
 		</div>
 	);

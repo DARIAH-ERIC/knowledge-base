@@ -7,6 +7,7 @@ export type WebhookEntityType =
 	| "dariah-projects"
 	| "documents-policies"
 	| "events"
+	| "featured-entities"
 	| "funding-calls"
 	| "governance-bodies"
 	| "impact-case-studies"
