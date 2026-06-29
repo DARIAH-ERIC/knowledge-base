@@ -119,7 +119,6 @@
 		"tsx": "catalog:",
 		"tw-animate-css": "catalog:",
 		"typescript": "catalog:",
-		"vite-tsconfig-paths": "catalog:",
 		"vitest": "catalog:"
 	},
 	"stylelint": {

@@ -152,7 +152,6 @@ catalog:
   uuid: ^14.0.1
   valibot: ^1.4.1
   vite: ^8.1.0
-  vite-tsconfig-paths: ^6.1.1
   vitest: ^4.1.9
   wp-types: ^4.70.1
   xast-util-feed: ^2.0.0

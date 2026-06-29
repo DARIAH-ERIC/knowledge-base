@@ -209,13 +209,13 @@ catalogs:
       version: 0.10.0
     drizzle-kit:
       specifier: rc
-      version: 1.0.0-rc.3
+      version: 1.0.0-rc.4
     drizzle-orm:
       specifier: rc
-      version: 1.0.0-rc.3
+      version: 1.0.0-rc.4
     drizzle-seed:
       specifier: rc
-      version: 1.0.0-rc.3
+      version: 1.0.0-rc.4
     embla-carousel-react:
       specifier: ^8.6.0
       version: 8.6.0
@@ -224,7 +224,7 @@ catalogs:
       version: 4.6.0
     eslint-plugin-drizzle:
       specifier: rc
-      version: 1.0.0-rc.3
+      version: 1.0.0-rc.4
     eslint-plugin-playwright:
       specifier: ^2.10.4
       version: 2.10.4
@@ -423,9 +423,6 @@ catalogs:
     vite:
       specifier: ^8.1.0
       version: 8.1.0
-    vite-tsconfig-paths:
-      specifier: ^6.1.1
-      version: 6.1.1
     vitest:
       specifier: ^4.1.9
       version: 4.1.9
@@ -609,9 +606,6 @@ importers:
       uuid:
         specifier: 'catalog:'
         version: 14.0.1
-      vite-tsconfig-paths:
-        specifier: 'catalog:'
-        version: 6.1.1(typescript@6.0.3)(vite@8.1.0(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
         version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@24.13.2)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(happy-dom@20.9.0)(vite@8.1.0(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))
@@ -877,9 +871,6 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
-      vite-tsconfig-paths:
-        specifier: 'catalog:'
-        version: 6.1.1(typescript@6.0.3)(vite@8.1.0(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))
       vitest:
         specifier: 'catalog:'
         version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@24.13.2)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(happy-dom@20.9.0)(vite@8.1.0(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))
@@ -1326,7 +1317,7 @@ importers:
         version: 4.6.0(eslint@9.39.4(jiti@2.7.0))(oxlint@1.71.0(oxlint-tsgolint@0.23.0))(tailwindcss@4.3.1)(typescript@6.0.3)
       eslint-plugin-drizzle:
         specifier: 'catalog:'
-        version: 1.0.0-rc.3(eslint@9.39.4(jiti@2.7.0))
+        version: 1.0.0-rc.4(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-playwright:
         specifier: 'catalog:'
         version: 2.10.4(eslint@9.39.4(jiti@2.7.0))
@@ -1374,7 +1365,7 @@ importers:
         version: 2.9.2
       drizzle-orm:
         specifier: 'catalog:'
-        version: 1.0.0-rc.3(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3)
+        version: 1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3)
       pg:
         specifier: 'catalog:'
         version: 8.22.0
@@ -1402,13 +1393,13 @@ importers:
         version: 10.0.3
       drizzle-dbml-generator:
         specifier: 'catalog:'
-        version: 0.10.0(drizzle-orm@1.0.0-rc.3(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3))
+        version: 0.10.0(drizzle-orm@1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3))
       drizzle-kit:
         specifier: 'catalog:'
-        version: 1.0.0-rc.3
+        version: 1.0.0-rc.4
       drizzle-seed:
         specifier: 'catalog:'
-        version: 1.0.0-rc.3(drizzle-orm@1.0.0-rc.3(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3))
+        version: 1.0.0-rc.4(drizzle-orm@1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3))
       tsdown:
         specifier: 'catalog:'
         version: 0.22.3(oxc-resolver@11.21.3)(tsx@4.22.4)(typescript@6.0.3)
@@ -2041,7 +2032,7 @@ importers:
         version: 3.27.1
       drizzle-orm:
         specifier: 'catalog:'
-        version: 1.0.0-rc.3(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3)
+        version: 1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3)
       hast-util-to-text:
         specifier: 'catalog:'
         version: 4.0.2
@@ -2063,7 +2054,7 @@ importers:
         version: 24.13.2
       drizzle-kit:
         specifier: 'catalog:'
-        version: 1.0.0-rc.3
+        version: 1.0.0-rc.4
       tsx:
         specifier: 'catalog:'
         version: 4.22.4
@@ -2343,8 +2334,8 @@ packages:
   '@dotenvx/primitives@0.8.0':
     resolution: {integrity: sha512-VYJy0uhFm9zTJ1TxBaW/pA8bjbOM/OttaNMwZ1RHG4JKyRG7DhSdiqD1ipQoAyoD22olUtxbP78W9xY3Wd11bg==}
 
-  '@drizzle-team/brocli@0.11.0':
-    resolution: {integrity: sha512-hD3pekGiPg0WPCCGAZmusBBJsDqGUR66Y452YgQsZOnkdQ7ViEPKuyP4huUGEZQefp8g34RRodXYmJ2TbCH+tg==}
+  '@drizzle-team/brocli@0.12.0':
+    resolution: {integrity: sha512-mlUE+rZ8CatQekLhnaiN91Iemdd+e2gFKooGlnRB3oPTL3VghLfX24dx7HrzMNeC1JrIB/0kpsfyty3f5HNfxQ==}
 
   '@emnapi/core@1.10.0':
     resolution: {integrity: sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==}
@@ -6620,16 +6611,24 @@ packages:
     peerDependencies:
       drizzle-orm: '>=0.36.0'
 
-  drizzle-kit@1.0.0-rc.3:
-    resolution: {integrity: sha512-lwGIi6GTlEYzrtac1Szecns+zrAxjaOoNysfBCKRQOXQE7nMJ8IU2I2S6ek3FHEm1N30dQb5YrTdqV7zNH6n7A==}
+  drizzle-kit@1.0.0-rc.4:
+    resolution: {integrity: sha512-KZCpjRyu+oYHLj/UJogfFlOkWhHVkaEI2EOT1U3NDVXUzLoTyPjqwFxwOrlQxsY6jzRyxcz4EacqboGfhEeYrA==}
     hasBin: true
 
-  drizzle-orm@1.0.0-rc.3:
-    resolution: {integrity: sha512-akZOa5UxapFbdBG8IDkfBRpSZJpMHaOJtGgp7oi1oHaiU8S3KN92waHo2l5aRuv1D9tMGYpv3BQFOsiGcNjLTQ==}
+  drizzle-orm@1.0.0-rc.4:
+    resolution: {integrity: sha512-BT+pf+qoiYHqltoA88Jmf6ilGMXPlpfE0hEJKc2adRtMCAl25Swk/t5gXcWxZNAwdtf3F5gCd2FpeOyP/pT0Hw==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=4'
-      '@effect/sql-pg': '>=4.0.0-beta.58 || >=4.0.0'
+      '@effect/sql-d1': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-libsql': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-mysql2': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-pg': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-pglite': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-sqlite-bun': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-sqlite-do': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-sqlite-node': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-sqlite-wasm': '>=4.0.0-beta.83 || >=4.0.0'
       '@electric-sql/pglite': '>=0.2.0'
       '@libsql/client': '>=0.10.0'
       '@libsql/client-wasm': '>=0.10.0'
@@ -6640,9 +6639,11 @@ packages:
       '@sinclair/typebox': '>=0.34.8'
       '@sqlitecloud/drivers': '>=1.0.653'
       '@tidbcloud/serverless': '*'
-      '@tursodatabase/database': '>=0.2.1'
-      '@tursodatabase/database-common': '>=0.2.1'
-      '@tursodatabase/database-wasm': '>=0.2.1'
+      '@tursodatabase/database': '>=0.6.0-pre.28 || >=0.6.0'
+      '@tursodatabase/database-common': '>=0.6.0-pre.28 || >=0.6.0'
+      '@tursodatabase/database-wasm': '>=0.6.0-pre.28 || >=0.6.0'
+      '@tursodatabase/serverless': '>=1.1.3'
+      '@tursodatabase/sync': '>=0.6.0-pre.28 || >=0.6.0'
       '@types/better-sqlite3': '*'
       '@types/mssql': ^9.1.4
       '@types/pg': '*'
@@ -6653,7 +6654,7 @@ packages:
       arktype: '>=2.0.0'
       better-sqlite3: '>=9.3.0'
       bun-types: '*'
-      effect: '>=4.0.0-beta.58 || >=4.0.0'
+      effect: '>=4.0.0-beta.83 || >=4.0.0'
       expo-sqlite: '>=14.0.0'
       mssql: ^11.0.1
       mysql2: '>=2'
@@ -6669,7 +6670,23 @@ packages:
         optional: true
       '@cloudflare/workers-types':
         optional: true
+      '@effect/sql-d1':
+        optional: true
+      '@effect/sql-libsql':
+        optional: true
+      '@effect/sql-mysql2':
+        optional: true
       '@effect/sql-pg':
+        optional: true
+      '@effect/sql-pglite':
+        optional: true
+      '@effect/sql-sqlite-bun':
+        optional: true
+      '@effect/sql-sqlite-do':
+        optional: true
+      '@effect/sql-sqlite-node':
+        optional: true
+      '@effect/sql-sqlite-wasm':
         optional: true
       '@electric-sql/pglite':
         optional: true
@@ -6696,6 +6713,10 @@ packages:
       '@tursodatabase/database-common':
         optional: true
       '@tursodatabase/database-wasm':
+        optional: true
+      '@tursodatabase/serverless':
+        optional: true
+      '@tursodatabase/sync':
         optional: true
       '@types/better-sqlite3':
         optional: true
@@ -6740,8 +6761,8 @@ packages:
       zod:
         optional: true
 
-  drizzle-seed@1.0.0-rc.3:
-    resolution: {integrity: sha512-oqBUEGoAjyriu5V3OxubfzBe+ebYb5nCslY0YqGCUY2MzRJLJid4+qW3zCuvtGbNy0vmd1MUPloyIVtrFrH75A==}
+  drizzle-seed@1.0.0-rc.4:
+    resolution: {integrity: sha512-WztS8tuuWV9Wqx5rMIhFlFuIfE0DPf7Zher3WtCumhSRgsAo5dASRmzS/w+6h22hEfOF/YJk6f3vKIqltKhUEg==}
     peerDependencies:
       drizzle-orm: '>=1.0.0-beta.2'
 
@@ -6892,8 +6913,8 @@ packages:
       oxlint:
         optional: true
 
-  eslint-plugin-drizzle@1.0.0-rc.3:
-    resolution: {integrity: sha512-Mt5dAxuGJlMWz2aUxL56/QBIdT2DLnQbM5WAoy1B6D/VhA2J/K9VL+YKchJzt0P8tL5amv51DwCCwfbuqeykXw==}
+  eslint-plugin-drizzle@1.0.0-rc.4:
+    resolution: {integrity: sha512-bXxOn9HBWI3Ico5zFshPHMyN6DZUA9LOvFAgugIges2rLLIX3t470L9adHxiyqtkymnELr7YWhCXaeA8F4s/CA==}
     peerDependencies:
       eslint: '>=8.0.0'
 
@@ -7250,9 +7271,6 @@ packages:
 
   globjoin@0.1.4:
     resolution: {integrity: sha512-xYfnw62CKG8nLkZBfWbhWwDw02CHty86jfPcc2cr3ZfeuK9ysoVPPEUxf21bAD/rWAgk52SuBrLJlefNy8mvFg==}
-
-  globrex@0.1.2:
-    resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
 
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
@@ -9320,17 +9338,6 @@ packages:
     resolution: {integrity: sha512-JfJeIHke7y2egdGGgRAvpCwYFUsHlM2gPcrVOxFkznt/4uzQ7HFmvE63iFHVLBJNDuyDOQgijDK/tXH/f6Msjg==}
     engines: {node: '>=6.10'}
 
-  tsconfck@3.1.6:
-    resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
-    engines: {node: ^18 || >=20}
-    deprecated: unmaintained
-    hasBin: true
-    peerDependencies:
-      typescript: ^5.0.0
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-
   tsconfig-paths-webpack-plugin@4.2.0:
     resolution: {integrity: sha512-zbem3rfRS8BgeNK50Zz5SIQgXzLafiHjOwUAvk/38/o1jHn/V5QAgVUcz884or7WYcPaH3N2CIfUc2u0ul7UcA==}
     engines: {node: '>=10.13.0'}
@@ -9533,11 +9540,6 @@ packages:
 
   victory-vendor@37.3.6:
     resolution: {integrity: sha512-SbPDPdDBYp+5MJHhBCAyI7wKM3d5ivekigc2Dk2s7pgbZ9wIgIBYGVw4zGHBml/qTFbexrofXW6Gu4noGxrOwQ==}
-
-  vite-tsconfig-paths@6.1.1:
-    resolution: {integrity: sha512-2cihq7zliibCCZ8P9cKJrQBkfgdvcFkOOc3Y02o3GWUDLgqjWsZudaoiuOwO/gzTzy17cS5F7ZPo4bsnS4DGkg==}
-    peerDependencies:
-      vite: '*'
 
   vite@8.1.0:
     resolution: {integrity: sha512-BuJcQK/56NQTWDGn4ABea3q4SSBdNPWwNZKTkkUpcMPnLoquSYH8llRtSUIgoL1KSCpHt5eghLShn50mH36y7Q==}
@@ -10082,7 +10084,7 @@ snapshots:
 
   '@dotenvx/primitives@0.8.0': {}
 
-  '@drizzle-team/brocli@0.11.0': {}
+  '@drizzle-team/brocli@0.12.0': {}
 
   '@emnapi/core@1.10.0':
     dependencies:
@@ -13680,19 +13682,19 @@ snapshots:
 
   dotenv@17.4.2: {}
 
-  drizzle-dbml-generator@0.10.0(drizzle-orm@1.0.0-rc.3(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3)):
+  drizzle-dbml-generator@0.10.0(drizzle-orm@1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3)):
     dependencies:
-      drizzle-orm: 1.0.0-rc.3(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3)
+      drizzle-orm: 1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3)
 
-  drizzle-kit@1.0.0-rc.3:
+  drizzle-kit@1.0.0-rc.4:
     dependencies:
-      '@drizzle-team/brocli': 0.11.0
+      '@drizzle-team/brocli': 0.12.0
       '@js-temporal/polyfill': 0.5.1
       esbuild: 0.25.12
       get-tsconfig: 4.14.0
       jiti: 2.7.0
 
-  drizzle-orm@1.0.0-rc.3(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3):
+  drizzle-orm@1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3):
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
       '@types/pg': 8.20.0
@@ -13700,9 +13702,9 @@ snapshots:
       valibot: 1.4.1(typescript@6.0.3)
       zod: 4.4.3
 
-  drizzle-seed@1.0.0-rc.3(drizzle-orm@1.0.0-rc.3(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3)):
+  drizzle-seed@1.0.0-rc.4(drizzle-orm@1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3)):
     dependencies:
-      drizzle-orm: 1.0.0-rc.3(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3)
+      drizzle-orm: 1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3)
       pure-rand: 6.1.0
 
   dts-resolver@3.0.0(oxc-resolver@11.21.3):
@@ -13880,7 +13882,7 @@ snapshots:
       - '@eslint/css'
       - typescript
 
-  eslint-plugin-drizzle@1.0.0-rc.3(eslint@9.39.4(jiti@2.7.0)):
+  eslint-plugin-drizzle@1.0.0-rc.4(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       eslint: 9.39.4(jiti@2.7.0)
 
@@ -14306,8 +14308,6 @@ snapshots:
       unicorn-magic: 0.4.0
 
   globjoin@0.1.4: {}
-
-  globrex@0.1.2: {}
 
   gopd@1.2.0: {}
 
@@ -16645,10 +16645,6 @@ snapshots:
 
   ts-dedent@2.3.0: {}
 
-  tsconfck@3.1.6(typescript@6.0.3):
-    optionalDependencies:
-      typescript: 6.0.3
-
   tsconfig-paths-webpack-plugin@4.2.0:
     dependencies:
       chalk: 4.1.2
@@ -16881,16 +16877,6 @@ snapshots:
       d3-shape: 3.2.0
       d3-time: 3.1.0
       d3-timer: 3.0.1
-
-  vite-tsconfig-paths@6.1.1(typescript@6.0.3)(vite@8.1.0(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)):
-    dependencies:
-      debug: 4.4.3
-      globrex: 0.1.2
-      tsconfck: 3.1.6(typescript@6.0.3)
-      vite: 8.1.0(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
 
   vite@8.1.0(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0):
     dependencies:

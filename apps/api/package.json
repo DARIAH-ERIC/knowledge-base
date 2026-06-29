@@ -61,7 +61,6 @@
 		"tsx": "catalog:",
 		"typescript": "catalog:",
 		"uuid": "catalog:",
-		"vite-tsconfig-paths": "catalog:",
 		"vitest": "catalog:"
 	},
 	"engines": {
