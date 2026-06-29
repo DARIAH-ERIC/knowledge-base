@@ -58,7 +58,7 @@ WITH
 					('dariah-coordination-office'),
 					('general-assembly'),
 					('joint-research-committee'),
-					('national-coordinators-committee'),
+					('national-coordinator-committee'),
 					('scientific-advisory-board'),
 					('senior-management-team')
 			) AS "tmp" ("slug"),
@@ -100,7 +100,7 @@ WITH
 					('dariah-coordination-office', 'DARIAH coordination office', 'dco'),
 					('general-assembly', 'General assembly', 'ga'),
 					('joint-research-committee', 'Joint research committee', 'jrc'),
-					('national-coordinators-committee', 'National coordinators committee', 'ncc'),
+					('national-coordinator-committee', 'National coordinator committee', 'ncc'),
 					('scientific-advisory-board', 'Scientific advisory board', 'sab'),
 					('senior-management-team', 'Senior management team', 'smt')
 			) AS "tmp" ("slug", "name", "acronym")

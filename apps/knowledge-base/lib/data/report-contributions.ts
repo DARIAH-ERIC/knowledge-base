@@ -24,7 +24,7 @@ export const manualCompensationRoles = [
 ] as const satisfies ReadonlyArray<CompensationRole>;
 
 const jointResearchCommitteeSlug = "joint-research-committee";
-const nationalCoordinatorsCommitteeSlug = "national-coordinators-committee";
+const nationalCoordinatorCommitteeSlug = "national-coordinator-committee";
 
 /**
  * Map a raw person↔org relation (its role + the org it points at) to the compensation role it
@@ -47,7 +47,7 @@ export function classifyCompensationRole(
 			if (orgSlug === jointResearchCommitteeSlug) {
 				return "is_chair_of_jrc";
 			}
-			if (orgSlug === nationalCoordinatorsCommitteeSlug) {
+			if (orgSlug === nationalCoordinatorCommitteeSlug) {
 				return "is_chair_of_ncc";
 			}
 			if (orgType === "working_group") {
