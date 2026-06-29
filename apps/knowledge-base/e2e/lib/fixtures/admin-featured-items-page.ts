@@ -1,16 +1,16 @@
 import type { Locator, Page } from "@playwright/test";
 
-const BASE_PATH = "/en/dashboard/website/metadata";
+const BASE_PATH = "/en/dashboard/website/featured";
 
 /** Accessible name shared by the featured-items selection list and its options popover. */
 const FEATURED_LABEL = "Featured news items";
 
 /**
- * Page object for the website metadata page, focused on the "Featured News Items" select (an
+ * Page object for the website featured-items page, focused on the "Featured News Items" select (an
  * `AsyncListSelect`): selected items render as full-width, drag-reorderable rows; a popover (opened
  * via "Add news item") provides a searchable, multi-select option list.
  */
-export class AdminSiteMetadataPage {
+export class AdminFeaturedItemsPage {
 	readonly page: Page;
 
 	constructor(page: Page) {
@@ -135,6 +135,6 @@ export class AdminSiteMetadataPage {
 
 	async save(): Promise<void> {
 		await this.page.getByRole("button", { name: "Save", exact: true }).click();
-		await this.page.getByText("Metadata saved.").waitFor({ state: "visible" });
+		await this.page.getByText("Featured items saved.").waitFor({ state: "visible" });
 	}
 }
