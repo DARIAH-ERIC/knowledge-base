@@ -278,6 +278,55 @@ test.describe("projects admin", () => {
 		expect(relations).toMatchObject({ socialMediaIds: [] });
 	});
 
+	test("should remove multiple linked social media without resurrecting removed entries", async ({
+		page,
+		createAdminProjectsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const adminProjectsPage = createAdminProjectsPage(workerIndex);
+		const projectName = `${adminProjectsPage.workerPrefix} Social Multi Remove ${randomUUID()}`;
+		const socialA = `${adminProjectsPage.workerPrefix} Social A ${randomUUID()}`;
+		const socialB = `${adminProjectsPage.workerPrefix} Social B ${randomUUID()}`;
+		const socialC = `${adminProjectsPage.workerPrefix} Social C ${randomUUID()}`;
+
+		await adminProjectsPage.gotoCreate();
+		await adminProjectsPage.fillName(projectName);
+		await adminProjectsPage.fillFunding(100);
+		await adminProjectsPage.selectFirstScope();
+		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
+		await adminProjectsPage.fillSummary("Project for social media multi-removal regression");
+		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await adminProjectsPage.createSocialMediaInForm(socialA, "https://example.com/social-a");
+		await adminProjectsPage.createSocialMediaInForm(socialB, "https://example.com/social-b");
+		await adminProjectsPage.createSocialMediaInForm(socialC, "https://example.com/social-c");
+		await adminProjectsPage.submitForm();
+
+		const created = await db.getProjectRelationsByName(projectName);
+		expect(created?.socialMediaIds).toHaveLength(3);
+		const socialMediaA = await db.getSocialMediaByName(socialA);
+		expect(socialMediaA).not.toBeNull();
+
+		// Re-open the edit form and remove two of the three rows. Regression guard: removing a second
+		// row used to resurrect the first-removed entry because React Aria's GridList served a cached
+		// row whose remove handler had captured a stale selection (see AsyncListSelect's `valueRef`).
+		// Remove C, then B — only A should remain.
+		await adminProjectsPage.searchByName(projectName);
+		const row = adminProjectsPage.projectRowByName(projectName);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		await adminProjectsPage.removeSelectedInControlByName("Social media", socialC);
+		await adminProjectsPage.removeSelectedInControlByName("Social media", socialB);
+		await adminProjectsPage.submitForm();
+
+		const relations = await db.getProjectRelationsByName(projectName);
+		expect(relations?.socialMediaIds).toStrictEqual([socialMediaA!.id]);
+	});
+
 	test("should delete a project", async ({ createAdminProjectsPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const adminProjectsPage = createAdminProjectsPage(workerIndex);
