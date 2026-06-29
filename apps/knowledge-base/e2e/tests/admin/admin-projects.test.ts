@@ -290,13 +290,25 @@ test.describe("projects admin", () => {
 		const socialB = `${adminProjectsPage.workerPrefix} Social B ${randomUUID()}`;
 		const socialC = `${adminProjectsPage.workerPrefix} Social C ${randomUUID()}`;
 
+		// The create action does not persist social media relations (only the update action does), so
+		// link the three entries via the edit form, matching the other relation tests in this file.
 		await adminProjectsPage.gotoCreate();
 		await adminProjectsPage.fillName(projectName);
-		await adminProjectsPage.fillFunding(100);
 		await adminProjectsPage.selectFirstScope();
 		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
 		await adminProjectsPage.fillSummary("Project for social media multi-removal regression");
 		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await adminProjectsPage.submitForm();
+
+		await adminProjectsPage.searchByName(projectName);
+		await adminProjectsPage.projectRowByName(projectName).getByRole("button", {
+			name: "Open actions menu",
+		}).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
 		await adminProjectsPage.createSocialMediaInForm(socialA, "https://example.com/social-a");
 		await adminProjectsPage.createSocialMediaInForm(socialB, "https://example.com/social-b");
 		await adminProjectsPage.createSocialMediaInForm(socialC, "https://example.com/social-c");
@@ -312,8 +324,9 @@ test.describe("projects admin", () => {
 		// row whose remove handler had captured a stale selection (see AsyncListSelect's `valueRef`).
 		// Remove C, then B — only A should remain.
 		await adminProjectsPage.searchByName(projectName);
-		const row = adminProjectsPage.projectRowByName(projectName);
-		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await adminProjectsPage.projectRowByName(projectName).getByRole("button", {
+			name: "Open actions menu",
+		}).click();
 		await Promise.all([
 			page.waitForURL("**/edit"),
 			page.getByRole("menuitem", { name: "Edit" }).click(),
