@@ -301,9 +301,12 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.submitForm();
 
 		await adminProjectsPage.searchByName(projectName);
-		await adminProjectsPage.projectRowByName(projectName).getByRole("button", {
-			name: "Open actions menu",
-		}).click();
+		await adminProjectsPage
+			.projectRowByName(projectName)
+			.getByRole("button", {
+				name: "Open actions menu",
+			})
+			.click();
 		await Promise.all([
 			page.waitForURL("**/edit"),
 			page.getByRole("menuitem", { name: "Edit" }).click(),
@@ -324,9 +327,12 @@ test.describe("projects admin", () => {
 		// row whose remove handler had captured a stale selection (see AsyncListSelect's `valueRef`).
 		// Remove C, then B — only A should remain.
 		await adminProjectsPage.searchByName(projectName);
-		await adminProjectsPage.projectRowByName(projectName).getByRole("button", {
-			name: "Open actions menu",
-		}).click();
+		await adminProjectsPage
+			.projectRowByName(projectName)
+			.getByRole("button", {
+				name: "Open actions menu",
+			})
+			.click();
 		await Promise.all([
 			page.waitForURL("**/edit"),
 			page.getByRole("menuitem", { name: "Edit" }).click(),
