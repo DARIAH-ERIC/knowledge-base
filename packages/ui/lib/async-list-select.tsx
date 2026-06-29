@@ -19,7 +19,6 @@ import {
 	GridListDescription,
 	GridListItem,
 	GridListLabel,
-	GridListSpacer,
 	GridListStart,
 } from "@/lib/grid-list";
 import { ListBox, ListBoxDescription, ListBoxItem, ListBoxLabel } from "@/lib/list-box";
@@ -224,7 +223,6 @@ function AsyncListSelectInner<T extends AsyncOption>(
 								<GridListStart className="min-inline-0 flex-1">
 									<div className="flex min-inline-0 flex-col">{content}</div>
 								</GridListStart>
-								<GridListSpacer />
 								{!isDisabled ? (
 									<AriaButton
 										aria-label={t("Remove")}
