@@ -129,8 +129,8 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 					},
 				},
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
+			orderBy(t, { asc }) {
+				return [asc(t.name), asc(t.id)];
 			},
 			limit,
 			offset,

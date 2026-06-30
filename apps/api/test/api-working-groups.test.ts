@@ -370,6 +370,34 @@ describe("working-groups", () => {
 				expect(data.offset).toBe(offset);
 			});
 		});
+
+		it("should order working groups by name", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const items = createItems(4);
+				const expectedNames = [
+					"Alphabetical working group",
+					"Middle working group",
+					"Zulu working group",
+				];
+
+				items[1]!.organisationalUnit.name = expectedNames[2]!;
+				items[2]!.organisationalUnit.name = expectedNames[0]!;
+				items[3]!.organisationalUnit.name = expectedNames[1]!;
+				await seed(db, items);
+
+				const response = await client["working-groups"].$get({
+					query: { limit: "100" },
+				});
+
+				expect(response.status).toBe(200);
+				const data = await response.json();
+				const seededIds = new Set(items.slice(1).map((item) => item.version.id));
+				const names = data.data.filter((item) => seededIds.has(item.id)).map((item) => item.name);
+
+				expect(names).toEqual(expectedNames);
+			});
+		});
 	});
 
 	it("should return only active working groups when status=active", async () => {
