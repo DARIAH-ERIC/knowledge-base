@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
 import type { DariahProject } from "@/routes/dariah-projects/schemas";
+import { eq } from "@/services/db/sql";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
@@ -285,6 +286,44 @@ describe("dariah-projects", () => {
 				);
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
+			});
+		});
+
+		it("should order projects by end date and then start date descending", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const { dariahItems } = await seed(db, 3);
+				const earlierEnd = new Date("2025-12-31T00:00:00.000Z");
+				const laterEnd = new Date("2026-12-31T00:00:00.000Z");
+				const durations = [
+					{ start: new Date("2022-01-01T00:00:00.000Z"), end: earlierEnd },
+					{ start: new Date("2021-01-01T00:00:00.000Z"), end: laterEnd },
+					{ start: new Date("2023-01-01T00:00:00.000Z"), end: laterEnd },
+				];
+
+				await Promise.all(
+					dariahItems.map((item, index) =>
+						db
+							.update(schema.projects)
+							.set({ duration: durations[index]! })
+							.where(eq(schema.projects.id, item.project.id)),
+					),
+				);
+
+				const response = await client["dariah-projects"].$get({
+					query: { limit: "100" },
+				});
+
+				expect(response.status).toBe(200);
+				const data = await response.json();
+				const seededIds = new Set(dariahItems.map((item) => item.project.id));
+				const ids = data.data.filter((item) => seededIds.has(item.id)).map((item) => item.id);
+
+				expect(ids).toEqual([
+					dariahItems[2]!.project.id,
+					dariahItems[1]!.project.id,
+					dariahItems[0]!.project.id,
+				]);
 			});
 		});
 
