@@ -131,7 +131,7 @@ export async function getDariahProjects(
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
+				return [desc(sql`UPPER(${t.duration})`), desc(sql`LOWER(${t.duration})`), desc(t.id)];
 			},
 			limit,
 			offset,
