@@ -421,8 +421,10 @@ export class DatabaseService {
 	async getWorkingGroupByName(name: string): Promise<{
 		acronym: string | null;
 		documentId: string;
+		email: string | null;
 		id: string;
 		imageId: string | null;
+		mailingList: string | null;
 		name: string;
 		sshocMarketplaceActorId: number | null;
 		summary: string | null;
@@ -431,8 +433,10 @@ export class DatabaseService {
 			.select({
 				acronym: schema.organisationalUnits.acronym,
 				documentId: schema.entityVersions.entityId,
+				email: schema.organisationalUnits.email,
 				id: schema.organisationalUnits.id,
 				imageId: schema.organisationalUnits.imageId,
+				mailingList: schema.organisationalUnits.mailingList,
 				name: schema.organisationalUnits.name,
 				sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
 				summary: schema.organisationalUnits.summary,

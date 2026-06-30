@@ -22,6 +22,8 @@ test.describe("working groups admin", () => {
 		const sshocMarketplaceActorId = 123456;
 		const summary = "E2E test working group summary.";
 		const description = "E2E test working group description.";
+		const email = "wg@e2e.example.org";
+		const mailingList = "https://lists.e2e.example.org/wg";
 		const testAsset = await db.getTestAsset();
 
 		await workingGroupsPage.gotoCreate();
@@ -31,6 +33,8 @@ test.describe("working groups admin", () => {
 		await workingGroupsPage.fillSshocMarketplaceActorId(sshocMarketplaceActorId);
 		await workingGroupsPage.selectTestImage();
 		await workingGroupsPage.fillSummary(summary);
+		await workingGroupsPage.fillEmail(email);
+		await workingGroupsPage.fillMailingList(mailingList);
 		await workingGroupsPage.fillDescription(description);
 
 		await workingGroupsPage.submitForm();
@@ -42,7 +46,9 @@ test.describe("working groups admin", () => {
 		expect(created).not.toBeNull();
 		expect(created).toMatchObject({
 			acronym,
+			email,
 			imageId: testAsset.id,
+			mailingList,
 			name,
 			sshocMarketplaceActorId,
 			summary,
@@ -67,6 +73,8 @@ test.describe("working groups admin", () => {
 		await workingGroupsPage.fillSshocMarketplaceActorId(123457);
 		await workingGroupsPage.selectTestImage();
 		await workingGroupsPage.fillSummary("E2E test working group to be edited.");
+		await workingGroupsPage.fillEmail("old-wg@e2e.example.org");
+		await workingGroupsPage.fillMailingList("old-list@e2e.example.org");
 		await workingGroupsPage.fillDescription("Description for edit test.");
 		await workingGroupsPage.submitForm();
 
@@ -85,12 +93,18 @@ test.describe("working groups admin", () => {
 		const updatedSshocMarketplaceActorId = 123458;
 		const updatedSummary = "Updated E2E test working group summary.";
 		const updatedDescription = "Updated E2E test working group description.";
+		const updatedEmail = "new-wg@e2e.example.org";
+		// Switch the mailing list from an email to a URL to exercise both branches of the
+		// email-or-URL validation.
+		const updatedMailingList = "https://lists.e2e.example.org/new-wg";
 
 		await page.getByLabel("Name", { exact: true }).fill(updatedName);
 		await workingGroupsPage.fillAcronym(updatedAcronym);
 		await workingGroupsPage.fillSshocMarketplaceActorId(updatedSshocMarketplaceActorId);
 		await workingGroupsPage.selectTestImage();
 		await workingGroupsPage.fillSummary(updatedSummary);
+		await workingGroupsPage.fillEmail(updatedEmail);
+		await workingGroupsPage.fillMailingList(updatedMailingList);
 		const descriptionEditor = page.getByRole("textbox", { name: "Description" });
 		await descriptionEditor.click();
 		await page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
@@ -107,7 +121,9 @@ test.describe("working groups admin", () => {
 		expect(updated).not.toBeNull();
 		expect(updated).toMatchObject({
 			acronym: updatedAcronym,
+			email: updatedEmail,
 			imageId: testAsset.id,
+			mailingList: updatedMailingList,
 			name: updatedName,
 			sshocMarketplaceActorId: updatedSshocMarketplaceActorId,
 			summary: updatedSummary,
@@ -132,6 +148,8 @@ test.describe("working groups admin", () => {
 		await workingGroupsPage.fillSshocMarketplaceActorId(123459);
 		await workingGroupsPage.selectTestImage();
 		await workingGroupsPage.fillSummary("Optional working group summary");
+		await workingGroupsPage.fillEmail("optional-wg@e2e.example.org");
+		await workingGroupsPage.fillMailingList("https://lists.e2e.example.org/optional-wg");
 		await workingGroupsPage.fillDescription("Required description for clear test.");
 		await workingGroupsPage.submitForm();
 
@@ -148,16 +166,45 @@ test.describe("working groups admin", () => {
 		await workingGroupsPage.fillAcronym("");
 		await page.locator('input[name="sshocMarketplaceActorId"]').fill("");
 		await workingGroupsPage.fillSummary("");
+		await workingGroupsPage.fillEmail("");
+		await workingGroupsPage.fillMailingList("");
 		await workingGroupsPage.removeImage();
 		await workingGroupsPage.submitForm();
 
 		const updated = await db.getWorkingGroupByName(updatedName);
 		expect(updated).toMatchObject({
 			acronym: null,
+			email: null,
 			imageId: null,
+			mailingList: null,
 			sshocMarketplaceActorId: null,
 			summary: null,
 		});
+	});
+
+	test("should reject a mailing list that is neither an email nor a URL", async ({
+		createAdminWorkingGroupsPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const workingGroupsPage = createAdminWorkingGroupsPage(workerIndex);
+
+		const name = `${workingGroupsPage.workerPrefix} Invalid Mailing List ${randomUUID()}`;
+
+		await workingGroupsPage.gotoCreate();
+		await workingGroupsPage.fillName(name);
+		await workingGroupsPage.fillSummary("Working group with an invalid mailing list.");
+		await workingGroupsPage.fillMailingList("not-an-email-or-url");
+		await workingGroupsPage.fillDescription("Description for validation test.");
+
+		// Mailing list is a plain text field (no client-side type), so the invalid value reaches the
+		// server action, which returns an error state with the inline field message.
+		await workingGroupsPage.page
+			.getByRole("button", { name: /^Save(?! and publish\b).*$/ })
+			.click();
+
+		await expect(
+			workingGroupsPage.page.getByText("Enter a valid email address or URL."),
+		).toBeVisible();
 	});
 
 	test("should manage unit relations", async ({ createAdminWorkingGroupsPage, db }) => {

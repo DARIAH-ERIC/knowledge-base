@@ -14031,6 +14031,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             },
             "type": "array",
           },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "entity": {
             "properties": {
               "slug": {
@@ -14103,6 +14113,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "license",
                 ],
                 "type": "object",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "mailingList": {
+            "anyOf": [
+              {
+                "type": "string",
               },
               {
                 "type": "null",
@@ -14353,6 +14373,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "acronym",
           "name",
           "summary",
+          "email",
+          "mailingList",
           "metadata",
           "sshocMarketplaceActorId",
           "image",
@@ -14367,6 +14389,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "description": "Working group",
         "properties": {
           "acronym": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "email": {
             "anyOf": [
               {
                 "type": "string",
@@ -14448,6 +14480,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "license",
                 ],
                 "type": "object",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "mailingList": {
+            "anyOf": [
+              {
+                "type": "string",
               },
               {
                 "type": "null",
@@ -14596,6 +14638,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "acronym",
           "name",
           "summary",
+          "email",
+          "mailingList",
           "metadata",
           "sshocMarketplaceActorId",
           "image",
