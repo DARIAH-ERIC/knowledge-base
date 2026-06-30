@@ -729,6 +729,34 @@ describe("members-partners", () => {
 				expect(data.offset).toBe(offset);
 			});
 		});
+
+		it("should order members and partners by organisation name", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const items = createItems(4);
+				const expectedNames = [
+					"Alphabetical organisation",
+					"Middle organisation",
+					"Zulu organisation",
+				];
+
+				items[1]!.organisationalUnit.name = expectedNames[2]!;
+				items[2]!.organisationalUnit.name = expectedNames[0]!;
+				items[3]!.organisationalUnit.name = expectedNames[1]!;
+				await seed(db, items);
+
+				const response = await client["members-partners"].$get({
+					query: { limit: "100" },
+				});
+
+				expect(response.status).toBe(200);
+				const data = await response.json();
+				const seededIds = new Set(items.slice(1).map((item) => item.version.id));
+				const names = data.data.filter((item) => seededIds.has(item.id)).map((item) => item.name);
+
+				expect(names).toEqual(expectedNames);
+			});
+		});
 	});
 
 	describe("GET /api/members-partners/:id", () => {
