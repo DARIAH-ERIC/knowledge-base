@@ -11,7 +11,6 @@ import {
 
 export interface WorkingGroupReportSummaryData {
 	numberOfMembers: number | null;
-	mailingList: string | null;
 	chairs: Array<{ id: string; personName: string; roleType: string }>;
 	socialMedia: Array<{
 		id: string;
@@ -99,16 +98,6 @@ export async function WorkingGroupReportSummary(
 					<dl className="grid max-inline-sm grid-cols-[auto_1fr] gap-x-8 gap-y-3 text-sm">
 						<dt className="text-muted-fg">{t("Number of members")}</dt>
 						<dd>{data.numberOfMembers ?? "—"}</dd>
-						<dt className="text-muted-fg">{t("Mailing list")}</dt>
-						<dd>
-							{data.mailingList != null ? (
-								<a className="underline" href={data.mailingList} rel="noreferrer" target="_blank">
-									{data.mailingList}
-								</a>
-							) : (
-								"—"
-							)}
-						</dd>
 					</dl>
 				</ReportSummarySection>
 

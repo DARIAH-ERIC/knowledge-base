@@ -42,7 +42,6 @@ export async function GET(
 				workingGroupAcronym: branding?.acronym ?? null,
 				campaign: report.campaign.year,
 				numberOfMembers: report.summary.numberOfMembers,
-				mailingList: report.summary.mailingList,
 				chairs: report.summary.chairs.map((c) => {
 					return { name: c.personName, role: c.roleType };
 				}),

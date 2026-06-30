@@ -2,9 +2,9 @@ import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { expect, test } from "@/e2e/lib/test";
 
 /**
- * Working-group-report content editing as a chair. Covers the Data tab (members / mailing list save
- * round-trip) and the Questions tab (rich-text answer persisted via the batched upsert action). A
- * question is seeded for the campaign so the questions form renders an answer editor.
+ * Working-group-report content editing as a chair. Covers the Data tab (members save round-trip)
+ * and the Questions tab (rich-text answer persisted via the batched upsert action). A question is
+ * seeded for the campaign so the questions form renders an answer editor.
  */
 test.describe("working group report content (chair)", () => {
 	test.describe.configure({ mode: "default" });
@@ -43,11 +43,10 @@ test.describe("working group report content (chair)", () => {
 		}
 	});
 
-	test("saves members and mailing list", async ({ page }) => {
+	test("saves members", async ({ page }) => {
 		await page.goto(`/en/dashboard/reporting/working-group-reports/${year!}/${slug!}/edit/data`);
 
 		await page.getByLabel("Number of members").fill("15");
-		await page.getByLabel("Mailing list").fill("wg-list@example.org");
 		// Scope to the data form: the screen also renders a comment section with its own "Save". Wait for
 		// the (non-redirecting) save action to finish before reloading, otherwise the reload aborts the
 		// in-flight POST and nothing is persisted.
@@ -66,7 +65,6 @@ test.describe("working group report content (chair)", () => {
 
 		await page.reload();
 		await expect(page.getByLabel("Number of members")).toHaveValue("15");
-		await expect(page.getByLabel("Mailing list")).toHaveValue("wg-list@example.org");
 	});
 
 	test("saves a rich-text answer", async ({ page, db }) => {

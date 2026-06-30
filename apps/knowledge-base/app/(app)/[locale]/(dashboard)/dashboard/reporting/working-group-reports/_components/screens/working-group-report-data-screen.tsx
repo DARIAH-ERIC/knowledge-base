@@ -39,7 +39,6 @@ export async function WorkingGroupReportDataScreen(
 				columns: {
 					id: true,
 					numberOfMembers: true,
-					mailingList: true,
 					workingGroupDocumentId: true,
 					campaignId: true,
 				},

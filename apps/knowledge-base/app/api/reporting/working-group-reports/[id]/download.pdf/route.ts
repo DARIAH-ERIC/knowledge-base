@@ -108,10 +108,7 @@ export async function GET(
 				{ kind: "heading", text: "Working group data" },
 				{
 					kind: "definitionList",
-					rows: [
-						{ label: "Number of members", value: value(summary.numberOfMembers) },
-						{ label: "Mailing list", value: value(summary.mailingList) },
-					],
+					rows: [{ label: "Number of members", value: value(summary.numberOfMembers) }],
 				},
 			];
 

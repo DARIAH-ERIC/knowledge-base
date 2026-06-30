@@ -133,7 +133,6 @@ export const workingGroupReports = p.snakeCase.table(
 			.references(() => entities.id),
 		status: p.text("status", { enum: reportStatusEnum }).notNull().default("draft"),
 		numberOfMembers: p.integer("number_of_members"),
-		mailingList: p.text("mailing_list"),
 		...f.timestamps(),
 	},
 	(t) => [
