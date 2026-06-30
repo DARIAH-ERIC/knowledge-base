@@ -6,6 +6,7 @@
 		"add:package": "turbo generate package",
 		"bootstrap:users:admin": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"seed\" run bootstrap:users:admin",
 		"build": "turbo run build",
+		"data:clean:news-summaries": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"migrate\" run data:clean:news-summaries",
 		"data:ingest:search": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"ingest\" run data:ingest:search",
 		"data:ingest:search:entities": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"ingest\" run data:ingest:search:entities",
 		"data:ingest:search:resources": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"ingest\" run data:ingest:search:resources",

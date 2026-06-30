@@ -5,6 +5,7 @@
 	"type": "module",
 	"sideEffects": false,
 	"scripts": {
+		"data:clean:news-summaries": "tsx ./scripts/clean-news-summaries.ts",
 		"data:migrate:get-unr-schema": "drizzle-kit introspect --config=./config/unr-db.config.ts",
 		"data:migrate:unr": "tsx ./scripts/migrate-unr.ts",
 		"data:migrate:wordpress": "tsx ./scripts/migrate-wordpress.ts",
