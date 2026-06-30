@@ -49,6 +49,14 @@ export class AdminWorkingGroupsPage {
 		await this.page.getByLabel("Summary").fill(text);
 	}
 
+	async fillEmail(email: string): Promise<void> {
+		await this.page.getByLabel("Email").fill(email);
+	}
+
+	async fillMailingList(mailingList: string): Promise<void> {
+		await this.page.getByLabel("Mailing list").fill(mailingList);
+	}
+
 	async selectTestImage(): Promise<void> {
 		await this.page.locator('input[name="imageKey"]').evaluate((input, value) => {
 			(input as HTMLInputElement).value = value;

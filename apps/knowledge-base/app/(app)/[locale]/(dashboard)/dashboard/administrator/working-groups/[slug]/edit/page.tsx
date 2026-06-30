@@ -92,7 +92,9 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 			where: { id: draftVersionId },
 			columns: {
 				acronym: true,
+				email: true,
 				id: true,
+				mailingList: true,
 				name: true,
 				sshocMarketplaceActorId: true,
 				summary: true,

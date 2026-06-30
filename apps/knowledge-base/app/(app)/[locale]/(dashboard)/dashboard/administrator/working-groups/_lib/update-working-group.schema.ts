@@ -8,6 +8,14 @@ export const UpdateWorkingGroupActionInputSchema = v.object({
 	...v.pick(OrganisationalUnitUpdateSchema, ["name", "summary"]).entries,
 	summary: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
+	email: v.nullish(v.pipe(v.string(), v.email()), null),
+	mailingList: v.nullish(
+		v.union(
+			[v.pipe(v.string(), v.email()), v.pipe(v.string(), v.url())],
+			"Enter a valid email address or URL.",
+		),
+		null,
+	),
 	sshocMarketplaceActorId: v.nullish(
 		v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		null,

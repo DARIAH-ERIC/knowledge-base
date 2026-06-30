@@ -50,7 +50,9 @@ export const createWorkingGroupAction = createMutationAction({
 		await tx.insert(schema.organisationalUnits).values({
 			id: versionId,
 			acronym: input.acronym,
+			email: input.email,
 			imageId,
+			mailingList: input.mailingList,
 			name: input.name,
 			sshocMarketplaceActorId: input.sshocMarketplaceActorId,
 			summary: input.summary,

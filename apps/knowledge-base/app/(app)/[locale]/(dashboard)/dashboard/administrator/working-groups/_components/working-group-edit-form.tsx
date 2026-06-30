@@ -31,7 +31,7 @@ interface WorkingGroupEditFormProps {
 	isPublished: boolean;
 	workingGroup: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "email" | "id" | "mailingList" | "name" | "sshocMarketplaceActorId" | "summary"
 	> & {
 		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
