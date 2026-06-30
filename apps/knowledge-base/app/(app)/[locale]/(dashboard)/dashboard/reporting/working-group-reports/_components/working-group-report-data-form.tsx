@@ -15,7 +15,7 @@ import { Fragment, type ReactNode, useActionState } from "react";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface WorkingGroupReportDataFormProps {
-	report: Pick<schema.WorkingGroupReport, "id" | "numberOfMembers" | "mailingList">;
+	report: Pick<schema.WorkingGroupReport, "id" | "numberOfMembers">;
 	formAction: ServerAction;
 }
 
@@ -38,12 +38,6 @@ export function WorkingGroupReportDataForm(
 			>
 				<Label>{t("Number of members")}</Label>
 				<Input min={0} />
-				<FieldError />
-			</TextField>
-
-			<TextField defaultValue={report.mailingList ?? undefined} name="mailingList">
-				<Label>{t("Mailing list")}</Label>
-				<Input />
 				<FieldError />
 			</TextField>
 

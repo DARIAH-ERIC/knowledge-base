@@ -32,7 +32,6 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 			id: true,
 			status: true,
 			numberOfMembers: true,
-			mailingList: true,
 			campaignId: true,
 			workingGroupDocumentId: true,
 		},
@@ -79,7 +78,6 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 		campaign: report.campaign,
 		summary: {
 			numberOfMembers: report.numberOfMembers,
-			mailingList: report.mailingList,
 			chairs: chairs.map((chair) => {
 				return { id: chair.id, personName: chair.personName, roleType: chair.chairRole };
 			}),

@@ -28,7 +28,6 @@ export const updateWorkingGroupReportDataAction = createMutationAction({
 			.update(schema.workingGroupReports)
 			.set({
 				numberOfMembers: input.numberOfMembers ?? null,
-				mailingList: input.mailingList ?? null,
 			})
 			.where(eq(schema.workingGroupReports.id, input.id));
 

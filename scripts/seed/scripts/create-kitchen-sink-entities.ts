@@ -1544,7 +1544,6 @@ async function main() {
 					workingGroupDocumentId: workingGroupEntityId,
 					status: "draft",
 					numberOfMembers: 18,
-					mailingList: "kitchen-sink-working-group@example.org",
 				})
 				.onConflictDoUpdate({
 					target: [
@@ -1554,7 +1553,6 @@ async function main() {
 					set: {
 						status: "draft",
 						numberOfMembers: 18,
-						mailingList: "kitchen-sink-working-group@example.org",
 					},
 				})
 				.returning({ id: schema.workingGroupReports.id });
