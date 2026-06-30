@@ -6,6 +6,8 @@ import { ContentBlockInputSchema } from "@/lib/content-block-input";
 export const CreateWorkingGroupActionInputSchema = v.object({
 	...v.pick(OrganisationalUnitInsertSchema, ["name", "summary"]).entries,
 	acronym: v.optional(v.pipe(v.string(), v.nonEmpty())),
+	email: v.nullish(v.pipe(v.string(), v.email()), null),
+	mailingList: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	sshocMarketplaceActorId: v.nullish(
 		v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		null,

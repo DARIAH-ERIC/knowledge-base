@@ -41,7 +41,9 @@ async function getOrganisationalUnitBySlug(
 					},
 		columns: {
 			acronym: true,
+			email: true,
 			id: true,
+			mailingList: true,
 			name: true,
 			ror: true,
 			sshocMarketplaceActorId: true,

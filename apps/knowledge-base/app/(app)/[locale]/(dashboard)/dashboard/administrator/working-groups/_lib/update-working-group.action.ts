@@ -42,7 +42,9 @@ export const updateWorkingGroupAction = createMutationAction({
 			.update(schema.organisationalUnits)
 			.set({
 				acronym: input.acronym,
+				email: input.email,
 				imageId,
+				mailingList: input.mailingList,
 				name: input.name,
 				sshocMarketplaceActorId: input.sshocMarketplaceActorId,
 				summary: input.summary,

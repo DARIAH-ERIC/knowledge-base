@@ -70,6 +70,8 @@ export const organisationalUnits = p.snakeCase.table("organisational_units", {
 	acronym: p.text("acronym"),
 	ror: p.text("ror"),
 	summary: p.text("summary"),
+	email: p.text("email"),
+	mailingList: p.text("mailing_list"),
 	imageId: p.uuid("image_id").references(() => assets.id),
 	typeId: p
 		.uuid("type_id")
@@ -228,17 +230,17 @@ export const workingGroupUnitType = "working_group";
 export const workingGroups = p.snakeCase
 	.view("working_groups", {
 		id: p.uuid("id").notNull(),
-		/** TODO: Holds activities, disciplines, memberTracking, mailingList, contactEmail. */
+		/** TODO: Holds activities, disciplines, memberTracking. */
 		metadata: p.jsonb("metadata").$type<{
 			activities?: string;
 			disciplines?: string;
 			memberTracking?: string;
-			mailingList?: string;
-			contactEmail?: string;
 		}>(),
 		name: p.text("name").notNull(),
 		acronym: p.text("acronym"),
 		summary: p.text("summary"),
+		email: p.text("email"),
+		mailingList: p.text("mailing_list"),
 		updatedAt: f.timestamp("updated_at").notNull(),
 		imageId: p.uuid("image_id"),
 		sshocMarketplaceActorId: p.integer("sshoc_marketplace_actor_id"),

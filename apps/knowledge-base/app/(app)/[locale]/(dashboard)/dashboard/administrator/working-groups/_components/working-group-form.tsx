@@ -27,7 +27,7 @@ interface WorkingGroupFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	workingGroup?: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "email" | "id" | "mailingList" | "name" | "sshocMarketplaceActorId" | "summary"
 	> & {
 		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
@@ -98,6 +98,25 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 					<TextField defaultValue={workingGroup?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
 						<TextArea rows={5} />
+						<FieldError />
+					</TextField>
+				</FormSection>
+
+				<Separator className="my-6" />
+
+				<FormSection
+					description={t("Enter the working group contact details.")}
+					title={t("Contact")}
+				>
+					<TextField defaultValue={workingGroup?.email ?? undefined} name="email" type="email">
+						<Label>{t("Email")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
+
+					<TextField defaultValue={workingGroup?.mailingList ?? undefined} name="mailingList">
+						<Label>{t("Mailing list")}</Label>
+						<Input />
 						<FieldError />
 					</TextField>
 				</FormSection>
