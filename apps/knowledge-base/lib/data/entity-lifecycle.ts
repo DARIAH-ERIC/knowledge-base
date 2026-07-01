@@ -47,6 +47,23 @@ export interface EntityLifecycleAdapter {
 	wipeSubtype(tx: Transaction, versionId: string): Promise<void>;
 }
 
+/**
+ * Strip the per-version primary key and timestamps from a subtype row, leaving the copyable version
+ * payload. Adapters read the whole source row (`.select()` with no argument, so newly added columns
+ * are carried automatically) and spread this payload onto the target version — guarding against the
+ * bug class where a hardcoded `.select({...})` list silently drops a new column on publish.
+ *
+ * - `id` is the per-version PK and must be re-assigned to the target version by the caller.
+ * - `createdAt`/`updatedAt` come from `f.timestamps()`; version timing lives on `entity_versions`
+ *   (see `setVersionUpdatedAt`), not on the subtype row, so they are never copied across versions.
+ */
+export function subtypePayload<T extends { id: unknown; createdAt: unknown; updatedAt: unknown }>(
+	row: T,
+): Omit<T, "id" | "createdAt" | "updatedAt"> {
+	const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = row;
+	return rest;
+}
+
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------

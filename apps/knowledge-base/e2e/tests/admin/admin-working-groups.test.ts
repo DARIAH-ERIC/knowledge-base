@@ -282,6 +282,7 @@ test.describe("working groups admin", () => {
 	test("version selector shows correct content per version", async ({
 		page,
 		createAdminWorkingGroupsPage,
+		db,
 	}) => {
 		const workerIndex = test.info().workerIndex;
 		const workingGroupsPage = createAdminWorkingGroupsPage(workerIndex);
@@ -289,12 +290,16 @@ test.describe("working groups admin", () => {
 		const name = `${workingGroupsPage.workerPrefix} VersionSelector ${randomUUID()}`;
 		const originalSummary = `${workingGroupsPage.workerPrefix} Original summary ${randomUUID()}`;
 		const updatedSummary = `${workingGroupsPage.workerPrefix} Updated summary ${randomUUID()}`;
+		const email = "versioned-wg@e2e.example.org";
+		const mailingList = "https://lists.e2e.example.org/versioned-wg";
 
 		// Create → Publish. Right after publishing the details page reads as published-only
 		// (the cloned draft row exists but has no changes from the published version).
 		await workingGroupsPage.gotoCreate();
 		await workingGroupsPage.fillName(name);
 		await workingGroupsPage.fillSummary(originalSummary);
+		await workingGroupsPage.fillEmail(email);
+		await workingGroupsPage.fillMailingList(mailingList);
 		await workingGroupsPage.selectTestImage();
 		await workingGroupsPage.fillDescription("Version selector test description.");
 		await workingGroupsPage.submitForm();
@@ -302,6 +307,12 @@ test.describe("working groups admin", () => {
 		await workingGroupsPage.searchByName(name);
 		await workingGroupsPage.gotoDetailsFromList(name);
 		await workingGroupsPage.publishFromDetails();
+
+		// The published row must carry every scalar column forward from the draft — not just the ones an
+		// adapter's copy list happened to include. This reproduces the original symptom where publishing
+		// NULLed `email` / `mailing_list` on the published version while the draft kept them.
+		const published = await db.getPublishedWorkingGroupByName(name);
+		expect(published).toMatchObject({ email, mailingList, summary: originalSummary });
 
 		// Edit the draft's summary so it diverges from the published version.
 		await workingGroupsPage.searchByName(name);
