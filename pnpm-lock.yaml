@@ -129,6 +129,9 @@ catalogs:
     '@tiptap/extension-image':
       specifier: ^3.27.1
       version: 3.27.1
+    '@tiptap/extension-typography':
+      specifier: ^3.27.1
+      version: 3.27.1
     '@tiptap/html':
       specifier: ^3.27.1
       version: 3.27.1
@@ -1778,6 +1781,9 @@ importers:
         specifier: 'catalog:'
         version: 3.27.1(@tiptap/pm@3.27.1)
       '@tiptap/extension-image':
+        specifier: 'catalog:'
+        version: 3.27.1(@tiptap/core@3.27.1(@tiptap/pm@3.27.1))
+      '@tiptap/extension-typography':
         specifier: 'catalog:'
         version: 3.27.1(@tiptap/core@3.27.1(@tiptap/pm@3.27.1))
       '@tiptap/pm':
@@ -5587,6 +5593,11 @@ packages:
 
   '@tiptap/extension-text@3.27.1':
     resolution: {integrity: sha512-6ZwaZwSrDh+KFFv6V1J79oO37yPs7y1bFxvk1/9Ih2rn3Xr5AWz+eMS+n8RpH3djBVVAQpdIAeYQgcn+VCSsTg==}
+    peerDependencies:
+      '@tiptap/core': 3.27.1
+
+  '@tiptap/extension-typography@3.27.1':
+    resolution: {integrity: sha512-hkZyiiv45XQGizdEYxJn86g8yKJxG45kkTztg0m6qjjcdDzjhUAcwVPTZ4ecg3hxwy/XNY7gEBOMGI7iqJl2sw==}
     peerDependencies:
       '@tiptap/core': 3.27.1
 
@@ -12633,6 +12644,10 @@ snapshots:
       '@tiptap/core': 3.27.1(@tiptap/pm@3.27.1)
 
   '@tiptap/extension-text@3.27.1(@tiptap/core@3.27.1(@tiptap/pm@3.27.1))':
+    dependencies:
+      '@tiptap/core': 3.27.1(@tiptap/pm@3.27.1)
+
+  '@tiptap/extension-typography@3.27.1(@tiptap/core@3.27.1(@tiptap/pm@3.27.1))':
     dependencies:
       '@tiptap/core': 3.27.1(@tiptap/pm@3.27.1)
 

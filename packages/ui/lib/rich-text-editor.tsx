@@ -4,6 +4,7 @@
 
 import { type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
+import { Typography } from "@tiptap/extension-typography";
 import {
 	EditorContent,
 	type NodeViewProps,
@@ -688,6 +689,28 @@ export function createRichTextExtensions(
 				openOnClick: false,
 				defaultProtocol: "https",
 			},
+		}),
+		// Normalise typography as authors type. Keep the unambiguous substitutions (smart
+		// quotes/apostrophes, `--` → em dash, `...` → ellipsis) and disable the rest, which corrupt
+		// legitimate technical/academic text — e.g. `(c)` as a list marker → ©, `1/2` → ½, `->` → →,
+		// `!=` → ≠, `<<`/`>>` → «/».
+		Typography.configure({
+			copyright: false,
+			registeredTrademark: false,
+			trademark: false,
+			servicemark: false,
+			oneHalf: false,
+			oneQuarter: false,
+			threeQuarters: false,
+			plusMinus: false,
+			notEqual: false,
+			laquo: false,
+			raquo: false,
+			leftArrow: false,
+			rightArrow: false,
+			multiplication: false,
+			superscriptTwo: false,
+			superscriptThree: false,
 		}),
 		Image,
 		createAssetImageNode(options?.renderImagePicker),
