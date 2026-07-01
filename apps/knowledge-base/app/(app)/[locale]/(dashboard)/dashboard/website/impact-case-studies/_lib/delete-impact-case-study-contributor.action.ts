@@ -27,7 +27,7 @@ export async function deleteImpactCaseStudyContributorAction(
 		);
 
 	after(async () => {
-		await dispatchWebhook({ type: "impact-case-studies" });
+		await dispatchWebhook({ events: ["impact_case_studies"] });
 	});
 
 	await recordAuditEvent(db, {

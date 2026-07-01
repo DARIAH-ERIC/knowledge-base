@@ -9,6 +9,7 @@ import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import { resolveOrganisationalUnitChangeEvents } from "@/lib/webhook/resolve-organisational-unit-change-events";
 
 export async function endContributionAction(id: string, end: Date): Promise<void> {
 	const { user } = await assertAuthenticated();
@@ -42,5 +43,8 @@ export async function endContributionAction(id: string, end: Date): Promise<void
 	});
 
 	revalidatePath("/[locale]/dashboard/administrator", "layout");
-	await dispatchWebhook({ type: "persons" });
+	const unitTypes = await resolveOrganisationalUnitChangeEvents(db, [
+		contribution.organisationalUnitDocumentId,
+	]);
+	await dispatchWebhook({ events: ["persons", ...unitTypes] });
 }

@@ -19,6 +19,6 @@ export const publishImpactCaseStudyAction = createCommandAction({
 
 	async postCommit({ result }) {
 		await syncWebsiteDocumentForEntity(result.subjectId);
-		await dispatchWebhook({ type: "impact-case-studies" });
+		await dispatchWebhook({ events: ["impact_case_studies"] });
 	},
 });

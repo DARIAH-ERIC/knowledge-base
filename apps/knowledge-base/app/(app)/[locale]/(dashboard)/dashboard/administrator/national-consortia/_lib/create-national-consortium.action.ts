@@ -11,7 +11,7 @@ import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-u
 import { filterToPublishedDocumentIds } from "@/lib/data/relations";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
-import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import { dispatchWebhook, organisationalUnitChangeEvent } from "@/lib/webhook/dispatch-webhook";
 
 export const createNationalConsortiumAction = createMutationAction({
 	schema: CreateNationalConsortiumActionInputSchema,
@@ -101,6 +101,6 @@ export const createNationalConsortiumAction = createMutationAction({
 		if (!shouldSaveAndPublish(ctx.formData)) {
 			return;
 		}
-		await dispatchWebhook({ type: "members-partners" });
+		await dispatchWebhook({ events: [organisationalUnitChangeEvent("national_consortium")] });
 	},
 });

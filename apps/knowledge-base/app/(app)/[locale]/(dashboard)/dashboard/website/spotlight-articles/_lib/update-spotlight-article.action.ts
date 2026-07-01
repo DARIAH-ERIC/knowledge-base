@@ -104,6 +104,6 @@ export const updateSpotlightArticleAction = createMutationAction({
 			return;
 		}
 		await syncWebsiteDocumentForEntity(result.subjectId);
-		await dispatchWebhook({ type: "spotlight-articles" });
+		await dispatchWebhook({ events: ["spotlight_articles"] });
 	},
 });

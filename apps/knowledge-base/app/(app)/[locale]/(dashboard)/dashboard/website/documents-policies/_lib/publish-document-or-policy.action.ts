@@ -22,7 +22,7 @@ export async function publishDocumentOrPolicyAction(documentId: string): Promise
 
 	after(async () => {
 		await syncWebsiteDocumentForEntity(documentId);
-		await dispatchWebhook({ type: "documents-policies" });
+		await dispatchWebhook({ events: ["documents_policies"] });
 	});
 
 	await recordAuditEvent(db, {
