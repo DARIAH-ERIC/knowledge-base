@@ -12,6 +12,8 @@ interface ManagedOrganisationalUnitUpdate {
 	documentId: string;
 	name?: string;
 	acronym: string | null;
+	email?: string | null;
+	mailingList?: string | null;
 	summary: string | null;
 	sshocMarketplaceActorId: number | null;
 	ror?: string | null;
@@ -45,7 +47,9 @@ export async function updateManagedOrganisationalUnitDraft(
 		.update(schema.organisationalUnits)
 		.set({
 			acronym: input.acronym,
+			email: input.email,
 			imageId,
+			mailingList: input.mailingList,
 			name: input.name,
 			ror: input.ror,
 			sshocMarketplaceActorId: input.sshocMarketplaceActorId,
