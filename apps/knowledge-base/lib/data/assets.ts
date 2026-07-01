@@ -4,12 +4,11 @@ import { Readable } from "node:stream";
 import type { ReadableStream } from "node:stream/web";
 
 import { isNonEmptyString } from "@acdh-oeaw/lib";
-import { relationsFilterToSQL } from "@dariah-eric/database/relations";
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
 import { unaccentIlike } from "@/lib/db/search";
-import { eq } from "@/lib/db/sql";
+import { and, count, desc, eq, like } from "@/lib/db/sql";
 import { type ImageUrlOptions, images } from "@/lib/images";
 import { type AssetPrefix, assetPrefixes, storage as s3 } from "@/lib/storage";
 
@@ -69,36 +68,30 @@ interface GetMediaLibraryAssetsParams {
 export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams) {
 	const { imageUrlOptions, limit = 20, offset = 0, prefix, q } = params;
 
-	const prefixFilter = prefix != null ? { key: { like: `${prefix}/%` } } : undefined;
+	const prefixFilter = prefix != null ? like(schema.assets.key, `${prefix}/%`) : undefined;
 	const searchFilter = isNonEmptyString(q)
-		? { RAW: unaccentIlike(schema.assets.label, `%${q}%`) }
+		? unaccentIlike(schema.assets.label, `%${q}%`)
 		: undefined;
+	const where = and(prefixFilter, searchFilter);
 
-	const filter =
-		prefixFilter != null || searchFilter != null ? { ...prefixFilter, ...searchFilter } : undefined;
-
-	const sqlFilter = filter != null ? relationsFilterToSQL(schema.assets, filter) : undefined;
-
-	const [assets, total] = await Promise.all([
-		db.query.assets.findMany({
-			columns: {
-				id: true,
-				key: true,
-				label: true,
-				alt: true,
-				caption: true,
-				licenseId: true,
-				mimeType: true,
-				size: true,
-			},
-			limit,
-			offset,
-			orderBy: {
-				updatedAt: "desc",
-			},
-			where: filter,
-		}),
-		db.$count(schema.assets, sqlFilter),
+	const [assets, aggregate] = await Promise.all([
+		db
+			.select({
+				id: schema.assets.id,
+				key: schema.assets.key,
+				label: schema.assets.label,
+				alt: schema.assets.alt,
+				caption: schema.assets.caption,
+				licenseId: schema.assets.licenseId,
+				mimeType: schema.assets.mimeType,
+				size: schema.assets.size,
+			})
+			.from(schema.assets)
+			.where(where)
+			.orderBy(desc(schema.assets.updatedAt))
+			.limit(limit)
+			.offset(offset),
+		db.select({ total: count() }).from(schema.assets).where(where),
 	]);
 
 	const items = assets.map((asset) => {
@@ -120,7 +113,7 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 		};
 	});
 
-	return { items, total };
+	return { items, total: aggregate.at(0)?.total ?? 0 };
 }
 
 interface UploadAssetParams {
@@ -192,36 +185,30 @@ interface GetAssetsForDashboardParams {
 export async function getAssetsForDashboard(params: GetAssetsForDashboardParams) {
 	const { imageUrlOptions, limit = 24, offset = 0, prefix, q } = params;
 
-	const prefixFilter = prefix != null ? { key: { like: `${prefix}/%` } } : undefined;
+	const prefixFilter = prefix != null ? like(schema.assets.key, `${prefix}/%`) : undefined;
 	const searchFilter = isNonEmptyString(q)
-		? { RAW: unaccentIlike(schema.assets.label, `%${q}%`) }
+		? unaccentIlike(schema.assets.label, `%${q}%`)
 		: undefined;
+	const where = and(prefixFilter, searchFilter);
 
-	const filter =
-		prefixFilter != null || searchFilter != null ? { ...prefixFilter, ...searchFilter } : undefined;
-
-	const sqlFilter = filter != null ? relationsFilterToSQL(schema.assets, filter) : undefined;
-
-	const [assets, total] = await Promise.all([
-		db.query.assets.findMany({
-			columns: {
-				id: true,
-				key: true,
-				label: true,
-				alt: true,
-				caption: true,
-				licenseId: true,
-				mimeType: true,
-				size: true,
-			},
-			limit,
-			offset,
-			orderBy: {
-				updatedAt: "desc",
-			},
-			where: filter,
-		}),
-		db.$count(schema.assets, sqlFilter),
+	const [assets, aggregate] = await Promise.all([
+		db
+			.select({
+				id: schema.assets.id,
+				key: schema.assets.key,
+				label: schema.assets.label,
+				alt: schema.assets.alt,
+				caption: schema.assets.caption,
+				licenseId: schema.assets.licenseId,
+				mimeType: schema.assets.mimeType,
+				size: schema.assets.size,
+			})
+			.from(schema.assets)
+			.where(where)
+			.orderBy(desc(schema.assets.updatedAt))
+			.limit(limit)
+			.offset(offset),
+		db.select({ total: count() }).from(schema.assets).where(where),
 	]);
 
 	const items = assets.map((asset) => {
@@ -243,5 +230,5 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 		};
 	});
 
-	return { items, total };
+	return { items, total: aggregate.at(0)?.total ?? 0 };
 }
