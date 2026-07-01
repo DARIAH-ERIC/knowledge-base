@@ -2,13 +2,31 @@
 
 "use client";
 
+import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
+import { isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
 import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
+import type { JSONContent } from "@tiptap/core";
 import { renderToReactElement } from "@tiptap/static-renderer/pm/react";
 import type { ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 
 const richTextExtensions = createRichTextExtensions();
+
+/** Renders a richtext caption inside a `figcaption`, or nothing when the caption is empty. */
+function CaptionFigcaption({
+	caption,
+}: Readonly<{ caption: JSONContent | null | undefined }>): ReactNode {
+	if (isEmptyRichTextDocument(caption)) {
+		return null;
+	}
+
+	return (
+		<figcaption>
+			<InlineRichTextRenderer content={caption!} />
+		</figcaption>
+	);
+}
 
 function getEmbedUrl(url: string): string {
 	const watchMatch = /youtube\.com\/watch\?.*?v=([\w-]+)/.exec(url);
@@ -112,7 +130,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							title={title ?? embedUrl}
 						/>
 					</div>
-					{caption != null ? <figcaption>{caption}</figcaption> : null}
+					<CaptionFigcaption caption={caption} />
 				</figure>
 			);
 		}
@@ -136,11 +154,11 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							return (
 								<figure key={idx} className="inline-[min(20rem,80vw)] shrink-0 snap-start">
 									<img
-										alt={item.caption ?? ""}
+										alt={toPlainText(item.caption)}
 										className="aspect-4/3 inline-full rounded-lg object-cover"
 										src={item.imageUrl}
 									/>
-									{item.caption != null ? <figcaption>{item.caption}</figcaption> : null}
+									<CaptionFigcaption caption={item.caption} />
 								</figure>
 							);
 						})}
@@ -158,11 +176,11 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 						return (
 							<figure key={idx}>
 								<img
-									alt={item.caption ?? ""}
+									alt={toPlainText(item.caption)}
 									className="aspect-4/3 inline-full rounded-lg object-cover"
 									src={item.imageUrl}
 								/>
-								{item.caption != null ? <figcaption>{item.caption}</figcaption> : null}
+								<CaptionFigcaption caption={item.caption} />
 							</figure>
 						);
 					})}
@@ -216,8 +234,8 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 
 			return (
 				<figure>
-					<img alt={caption ?? ""} src={imageUrl} />
-					{caption != null ? <figcaption>{caption}</figcaption> : null}
+					<img alt={toPlainText(caption)} src={imageUrl} />
+					<CaptionFigcaption caption={caption} />
 				</figure>
 			);
 		}

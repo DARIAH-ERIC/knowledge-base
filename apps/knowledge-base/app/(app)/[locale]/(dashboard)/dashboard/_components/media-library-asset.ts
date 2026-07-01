@@ -1,3 +1,5 @@
+import type { JSONContent } from "@tiptap/core";
+
 export interface MediaLibraryAsset {
 	key: string;
 	label: string;
@@ -8,7 +10,7 @@ export interface MediaLibraryAsset {
 	// assignable; the fields are populated at runtime for the media library list view.
 	id?: string;
 	alt?: string | null;
-	caption?: string | null;
+	caption?: JSONContent | null;
 	licenseId?: string | null;
 	size?: number | null;
 }

@@ -121,7 +121,7 @@ interface UploadAssetParams {
 	licenseId?: schema.AssetInput["licenseId"];
 	prefix: AssetPrefix;
 	label?: string;
-	caption?: string;
+	caption?: schema.AssetInput["caption"];
 	alt?: string;
 }
 
@@ -154,7 +154,7 @@ interface UpdateAssetMetadataParams {
 	id: string;
 	label: string;
 	alt?: string | null;
-	caption?: string | null;
+	caption?: schema.AssetInput["caption"];
 	licenseId?: schema.AssetInput["licenseId"] | null;
 }
 

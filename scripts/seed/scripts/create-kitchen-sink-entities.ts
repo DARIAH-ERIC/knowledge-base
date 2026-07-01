@@ -3,7 +3,12 @@ import * as fs from "node:fs/promises";
 import { join } from "node:path";
 
 import { assert, log } from "@acdh-oeaw/lib";
-import { type Database, type Transaction, createDatabaseService } from "@dariah-eric/database";
+import {
+	type Database,
+	type Transaction,
+	createDatabaseService,
+	plainTextToRichText,
+} from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { eq, inArray, sql } from "@dariah-eric/database/sql";
 import { type ResourceDocument, resourceSources, resourceTypes } from "@dariah-eric/search";
@@ -358,7 +363,7 @@ async function main() {
 					label: "Kitchen Sink Featured Image",
 					filename: "featured-image.png",
 					mimeType: "image/png",
-					caption: "Kitchen sink featured image.",
+					caption: plainTextToRichText("Kitchen sink featured image."),
 					alt: "Kitchen sink featured illustration",
 					licenseId,
 				},
@@ -368,7 +373,7 @@ async function main() {
 					label: "Kitchen Sink Hero Image",
 					filename: "hero-image.png",
 					mimeType: "image/png",
-					caption: "Kitchen sink hero image.",
+					caption: plainTextToRichText("Kitchen sink hero image."),
 					alt: "Kitchen sink hero illustration",
 					licenseId,
 				},
@@ -378,7 +383,7 @@ async function main() {
 					label: "Kitchen Sink Avatar",
 					filename: "avatar.png",
 					mimeType: "image/png",
-					caption: "Kitchen sink avatar.",
+					caption: plainTextToRichText("Kitchen sink avatar."),
 					alt: "Kitchen sink avatar portrait",
 					licenseId,
 				},
@@ -388,7 +393,7 @@ async function main() {
 					label: "Kitchen Sink Document",
 					filename: "document.pdf",
 					mimeType: "application/pdf",
-					caption: "Kitchen sink policy PDF.",
+					caption: plainTextToRichText("Kitchen sink policy PDF."),
 					alt: "Kitchen sink policy PDF",
 					licenseId,
 				},
@@ -1818,13 +1823,13 @@ async function main() {
 				await upsertById(tx, schema.imageContentBlocks, {
 					id: imageBlockId,
 					imageId: createId("asset:image"),
-					caption: `Kitchen sink image block for ${field.fieldName}.`,
+					caption: plainTextToRichText(`Kitchen sink image block for ${field.fieldName}.`),
 				});
 				await upsertById(tx, schema.embedContentBlocks, {
 					id: embedBlockId,
 					url: "https://example.org/embeds/kitchen-sink",
 					title: `Kitchen Sink ${field.fieldName} Embed`,
-					caption: `Embedded content for ${field.fieldName}.`,
+					caption: plainTextToRichText(`Embedded content for ${field.fieldName}.`),
 				});
 				await upsertById(tx, schema.dataContentBlocks, {
 					id: dataBlockId,

@@ -30,22 +30,34 @@ import {
 	Trash2Icon,
 } from "lucide-react";
 import { useExtracted } from "next-intl";
-import {
-	type ComponentType,
-	type ReactNode,
-	useCallback,
-	useId,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
-import { Button as ButtonPrimitive } from "react-aria-components";
+import { type ReactNode, useCallback, useId, useMemo, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 import { Button } from "@/lib/button";
+import { InlineRichTextEditor } from "@/lib/inline-rich-text-editor";
+import { InlineRichTextRenderer } from "@/lib/inline-rich-text-renderer";
 import { Input } from "@/lib/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
+import { isEmptyRichTextDocument, toPlainText } from "@/lib/rich-text";
+import { RichTextEditorToolbarButton } from "@/lib/rich-text-toolbar-button";
 import { Tooltip, TooltipContent } from "@/lib/tooltip";
+
+/** Serialize a richtext caption for storage in an HTML `data-caption` attribute (copy/paste). */
+function serializeCaptionAttr(caption: JSONContent | null): string | null {
+	return caption != null ? JSON.stringify(caption) : null;
+}
+
+/** Parse a `data-caption` attribute back into richtext JSON; invalid/empty values become null. */
+function parseCaptionAttr(value: string | null | undefined): JSONContent | null {
+	if (value == null || value === "") {
+		return null;
+	}
+	try {
+		return JSON.parse(value) as JSONContent;
+	} catch {
+		return null;
+	}
+}
 
 type RichTextSize = "sm" | "md" | "lg";
 
@@ -82,38 +94,9 @@ function normalizeInitialContent(content: JSONContent | undefined): JSONContent 
 
 type ImagePickerRenderer = NonNullable<RichTextEditorProps["renderImagePicker"]>;
 
-export interface RichTextEditorToolbarButtonProps {
-	"aria-label": string;
-	icon: ComponentType<{ className?: string }>;
-	isActive?: boolean;
-	onClick: () => void;
-}
-
-export function RichTextEditorToolbarButton({
-	"aria-label": ariaLabel,
-	icon: Icon,
-	isActive,
-	onClick,
-}: Readonly<RichTextEditorToolbarButtonProps>): ReactNode {
-	return (
-		<Tooltip>
-			<ButtonPrimitive
-				aria-label={ariaLabel}
-				className={twMerge(
-					"relative inline-flex block-8 inline-8 items-center justify-center rounded-md transition-colors text-muted-fg hover:text-fg focus:outline-none focus:ring-2 focus:ring-ring",
-					isActive === true && "bg-primary-subtle/50 text-fg",
-				)}
-				onPress={() => {
-					onClick();
-				}}
-				type="button"
-			>
-				<Icon className="block-4 inline-4" />
-			</ButtonPrimitive>
-			<TooltipContent inverse={true}>{ariaLabel}</TooltipContent>
-		</Tooltip>
-	);
-}
+// Re-export so existing consumers can keep importing from `@dariah-eric/ui/rich-text-editor`.
+export { RichTextEditorToolbarButton };
+export type { RichTextEditorToolbarButtonProps } from "@/lib/rich-text-toolbar-button";
 
 // Keep the internal alias for backward-compat within this file.
 const RichTextEditorIconButton = RichTextEditorToolbarButton;
@@ -182,12 +165,12 @@ function EmbedNodeView({
 }: Readonly<NodeViewProps>): ReactNode {
 	const url = node.attrs.url as string | null;
 	const title = node.attrs.title as string | null;
-	const caption = node.attrs.caption as string | null;
+	const caption = node.attrs.caption as JSONContent | null;
 
 	const [isEditing, setIsEditing] = useState(url == null && editor.isEditable);
 	const [urlInput, setUrlInput] = useState(url ?? "");
 	const [titleInput, setTitleInput] = useState(title ?? "");
-	const [captionInput, setCaptionInput] = useState(caption ?? "");
+	const [captionJson, setCaptionJson] = useState<JSONContent | null>(caption);
 
 	function handleApply() {
 		if (!urlInput.trim() || !titleInput.trim()) {
@@ -196,7 +179,7 @@ function EmbedNodeView({
 		updateAttributes({
 			url: urlInput.trim(),
 			title: titleInput.trim(),
-			caption: captionInput.trim() ?? null,
+			caption: isEmptyRichTextDocument(captionJson) ? null : captionJson,
 		});
 		setIsEditing(false);
 	}
@@ -205,12 +188,11 @@ function EmbedNodeView({
 
 	const urlInputId = useId();
 	const titleInputId = useId();
-	const captionInputId = useId();
 
 	function resetInputs() {
 		setUrlInput(url ?? "");
 		setTitleInput(title ?? "");
-		setCaptionInput(caption ?? "");
+		setCaptionJson(caption);
 	}
 
 	function selectNode() {
@@ -264,16 +246,11 @@ function EmbedNodeView({
 							/>
 						</div>
 						<div className="flex flex-col gap-y-1">
-							<label className="text-sm/6 font-medium" htmlFor={captionInputId}>
-								{"Caption"}
-							</label>
-							<Input
-								id={captionInputId}
-								onChange={(e) => {
-									setCaptionInput(e.target.value);
-								}}
-								type="text"
-								value={captionInput}
+							<span className="text-sm/6 font-medium">{"Caption"}</span>
+							<InlineRichTextEditor
+								aria-label="Caption"
+								content={caption ?? undefined}
+								onChange={setCaptionJson}
 							/>
 						</div>
 						<div className="flex items-center gap-x-2">
@@ -330,7 +307,7 @@ function EmbedNodeView({
 											selectNode();
 											setUrlInput(url ?? "");
 											setTitleInput(title ?? "");
-											setCaptionInput(caption ?? "");
+											setCaptionJson(caption);
 											setIsEditing(true);
 										}}
 										type="button"
@@ -352,9 +329,12 @@ function EmbedNodeView({
 								<span className="min-inline-0 truncate text-xs text-muted-fg">{url}</span>
 							</div>
 						)}
-						{caption != null && caption !== "" && (
-							<p className="border-bs border-border px-4 py-2 text-sm text-muted-fg">{caption}</p>
-						)}
+						{!isEmptyRichTextDocument(caption) ? (
+							<InlineRichTextRenderer
+								className="border-bs border-border px-4 py-2 text-muted-fg"
+								content={caption!}
+							/>
+						) : null}
 					</div>
 				)}
 			</div>
@@ -390,7 +370,7 @@ export const EmbedNode = Node.create({
 					return {
 						url: el.dataset.url,
 						title: el.dataset.title,
-						caption: el.dataset.caption,
+						caption: parseCaptionAttr(el.dataset.caption),
 					};
 				},
 			},
@@ -404,7 +384,7 @@ export const EmbedNode = Node.create({
 				"data-embed-block": "",
 				"data-url": node.attrs.url as string | null,
 				"data-title": node.attrs.title as string | null,
-				"data-caption": node.attrs.caption as string | null,
+				"data-caption": serializeCaptionAttr(node.attrs.caption as JSONContent | null),
 			},
 		];
 	},
@@ -429,23 +409,22 @@ function AssetImageNodeView({
 }: Readonly<AssetImageNodeViewProps>): ReactNode {
 	const imageKey = node.attrs.imageKey as string | null;
 	const imageUrl = node.attrs.imageUrl as string | null;
-	const caption = node.attrs.caption as string | null;
+	const caption = node.attrs.caption as JSONContent | null;
 
 	const [isEditing, setIsEditing] = useState(
 		(editor.isEditable && (imageKey == null || imageUrl == null)) || false,
 	);
 	const [imageKeyInput, setImageKeyInput] = useState(imageKey ?? "");
 	const [imageUrlInput, setImageUrlInput] = useState(imageUrl ?? "");
-	const [captionInput, setCaptionInput] = useState(caption ?? "");
+	const [captionJson, setCaptionJson] = useState<JSONContent | null>(caption);
 
 	const imageKeyInputId = useId();
 	const imageUrlInputId = useId();
-	const captionInputId = useId();
 
 	function resetInputs() {
 		setImageKeyInput(imageKey ?? "");
 		setImageUrlInput(imageUrl ?? "");
-		setCaptionInput(caption ?? "");
+		setCaptionJson(caption);
 	}
 
 	function selectNode() {
@@ -465,7 +444,7 @@ function AssetImageNodeView({
 		updateAttributes({
 			imageKey: imageKeyInput.trim() ?? null,
 			imageUrl: nextImageUrl,
-			caption: captionInput.trim() ?? null,
+			caption: isEmptyRichTextDocument(captionJson) ? null : captionJson,
 		});
 		setIsEditing(false);
 	}
@@ -490,7 +469,7 @@ function AssetImageNodeView({
 								updateAttributes({
 									imageKey: nextImageKey,
 									imageUrl: nextImageUrl,
-									caption: captionInput.trim() ?? null,
+									caption: isEmptyRichTextDocument(captionJson) ? null : captionJson,
 								});
 								setImageKeyInput(nextImageKey);
 								setImageUrlInput(nextImageUrl);
@@ -530,16 +509,11 @@ function AssetImageNodeView({
 						</>
 					) : null}
 					<div className="flex flex-col gap-y-1">
-						<label className="text-sm/6 font-medium" htmlFor={captionInputId}>
-							{"Caption"}
-						</label>
-						<Input
-							id={captionInputId}
-							onChange={(e) => {
-								setCaptionInput(e.target.value);
-							}}
-							type="text"
-							value={captionInput}
+						<span className="text-sm/6 font-medium">{"Caption"}</span>
+						<InlineRichTextEditor
+							aria-label="Caption"
+							content={caption ?? undefined}
+							onChange={setCaptionJson}
 						/>
 					</div>
 					<div className="flex items-center gap-x-2">
@@ -576,7 +550,7 @@ function AssetImageNodeView({
 				<div className="group">
 					<div className="relative">
 						<img
-							alt={caption ?? ""}
+							alt={toPlainText(caption)}
 							className="block inline-full max-block-96 object-contain"
 							data-asset-image=""
 							data-image-key={imageKey ?? undefined}
@@ -606,8 +580,11 @@ function AssetImageNodeView({
 							</button>
 						</div>
 					</div>
-					{caption != null && caption !== "" ? (
-						<p className="border-bs border-border px-4 py-2 text-sm text-muted-fg">{caption}</p>
+					{!isEmptyRichTextDocument(caption) ? (
+						<InlineRichTextRenderer
+							className="border-bs border-border px-4 py-2 text-muted-fg"
+							content={caption!}
+						/>
 					) : null}
 				</div>
 			)}
@@ -640,7 +617,7 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 						return {
 							imageKey: el.dataset.imageKey,
 							imageUrl: el.getAttribute("src"),
-							caption: el.dataset.caption,
+							caption: parseCaptionAttr(el.dataset.caption),
 						};
 					},
 				},
@@ -656,7 +633,9 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 						"data-asset-image": "",
 						"data-image-key": node.attrs.imageKey as string | null,
 					},
-					node.attrs.caption != null ? { "data-caption": node.attrs.caption as string } : {},
+					node.attrs.caption != null
+						? { "data-caption": serializeCaptionAttr(node.attrs.caption as JSONContent | null) }
+						: {},
 				),
 			];
 		},

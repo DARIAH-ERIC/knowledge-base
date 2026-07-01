@@ -29,7 +29,8 @@ export const LicenseSchema = v.object({
 export const ImageSchema = v.object({
 	url: v.string(),
 	alt: v.nullable(v.string()),
-	caption: v.nullable(v.string()),
+	/** Richtext caption as Tiptap JSON (bold/italic/link); consumers render it like other richtext. */
+	caption: v.nullable(v.any()),
 	license: v.nullable(LicenseSchema),
 });
 

@@ -18,11 +18,11 @@ import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
-import { TextArea } from "@dariah-eric/ui/textarea";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import { CaptionField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field";
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
 import { imageSizeLimit } from "@/config/assets.config";
 import { formatFileSize } from "@/lib/format-file-size";
@@ -156,11 +156,7 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 							<FieldError />
 						</TextField>
 
-						<TextField aria-label={t("Caption")} name="caption">
-							<Label>{t("Caption")}</Label>
-							<TextArea placeholder={t("Optional caption displayed below the image")} rows={2} />
-							<FieldError />
-						</TextField>
+						<CaptionField name="caption" />
 
 						<Select defaultValue="none" name="licenseId">
 							<Label>{t("License")}</Label>

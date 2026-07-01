@@ -4,7 +4,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 import { assert, isNonEmptyString, log, unreachable } from "@acdh-oeaw/lib";
-import type { Database, Transaction } from "@dariah-eric/database";
+import { type Database, type Transaction, plainTextToRichText } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import type { StorageService } from "@dariah-eric/storage";
 import type { AssetPrefix } from "@dariah-eric/storage/config";
@@ -209,7 +209,7 @@ export function createWordPressContentMigrator(
 				key,
 				label,
 				mimeType: metadata["content-type"],
-				caption: caption === "Read more" ? null : caption,
+				caption: caption === "Read more" ? null : plainTextToRichText(caption),
 				alt,
 			})
 			.returning({ id: schema.assets.id });

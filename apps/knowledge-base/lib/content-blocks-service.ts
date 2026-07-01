@@ -20,7 +20,7 @@ async function getAssetIdByKey(tx: Transaction, key: string): Promise<string | n
 async function createGalleryItems(
 	tx: Transaction,
 	blockId: string,
-	items: Array<{ imageKey?: string; imageUrl?: string; caption?: string }> = [],
+	items: Array<{ imageKey?: string; imageUrl?: string; caption?: JSONContent | null }> = [],
 ): Promise<Array<schema.GalleryContentBlockItemInput>> {
 	const galleryItems = await Promise.all(
 		items.map(async (item, position) => {

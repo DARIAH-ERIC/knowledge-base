@@ -5,7 +5,8 @@
 import type { ContentBlockTypes } from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
-import { Label } from "@dariah-eric/ui/field";
+import { Label, labelStyles } from "@dariah-eric/ui/field";
+import { InlineRichTextEditor } from "@dariah-eric/ui/inline-rich-text-editor";
 import { Input } from "@dariah-eric/ui/input";
 import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
 import {
@@ -18,6 +19,7 @@ import {
 	ModalTitle,
 } from "@dariah-eric/ui/modal";
 import { NumberField, NumberInput } from "@dariah-eric/ui/number-field";
+import { isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
 import { RichTextEditor, RichTextEditorToolbarButton } from "@dariah-eric/ui/rich-text-editor";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
@@ -75,14 +77,14 @@ interface ImageContentBlockItem {
 	id: Key;
 	type: "image";
 	position?: number;
-	content?: { imageKey?: string; imageUrl?: string; caption?: string };
+	content?: { imageKey?: string; imageUrl?: string; caption?: JSONContent | null };
 }
 
 interface EmbedContentBlockItem {
 	id: Key;
 	type: "embed";
 	position?: number;
-	content?: { url?: string; title?: string; caption?: string };
+	content?: { url?: string; title?: string; caption?: JSONContent | null };
 }
 
 interface DataContentBlockItem {
@@ -122,7 +124,7 @@ interface GalleryContentBlockItem {
 	position?: number;
 	content?: {
 		layout?: "carousel" | "grid";
-		items?: Array<{ imageKey?: string; imageUrl?: string; caption?: string }>;
+		items?: Array<{ imageKey?: string; imageUrl?: string; caption?: JSONContent | null }>;
 	};
 }
 
@@ -704,7 +706,11 @@ function GalleryContentBlockPanel({
 						<div className="flex items-start gap-x-4">
 							{galleryItem.imageUrl != null && (
 								<img
-									alt={galleryItem.caption ?? t("Selected image")}
+									alt={
+										galleryItem.caption != null
+											? toPlainText(galleryItem.caption)
+											: t("Selected image")
+									}
 									className="block-24 inline-auto max-inline-full shrink-0 rounded-lg object-cover"
 									src={galleryItem.imageUrl}
 								/>
@@ -725,21 +731,27 @@ function GalleryContentBlockPanel({
 							/>
 						</div>
 
-						<TextField
-							onChange={(value) => {
-								onChange({
-									...item.content,
-									layout,
-									items: items.map((existingItem, itemIndex) =>
-										itemIndex === idx ? { ...existingItem, caption: value } : existingItem,
-									),
-								});
-							}}
-							value={galleryItem.caption ?? ""}
-						>
-							<Label>{t("Caption")}</Label>
-							<Input />
-						</TextField>
+						<div className="flex flex-col gap-y-1">
+							<span className={labelStyles()}>{t("Caption")}</span>
+							<InlineRichTextEditor
+								aria-label={t("Caption")}
+								content={galleryItem.caption ?? undefined}
+								onChange={(value) => {
+									onChange({
+										...item.content,
+										layout,
+										items: items.map((existingItem, itemIndex) =>
+											itemIndex === idx
+												? {
+														...existingItem,
+														caption: isEmptyRichTextDocument(value) ? null : value,
+													}
+												: existingItem,
+										),
+									});
+								}}
+							/>
+						</div>
 					</div>
 				))}
 			</div>
@@ -972,15 +984,16 @@ function EmbedContentBlockPanel({
 				<Label>{t("Title")}</Label>
 				<Input placeholder={t("Descriptive title for screen readers")} />
 			</TextField>
-			<TextField
-				onChange={(value) => {
-					onChange({ ...item.content, caption: value });
-				}}
-				value={caption ?? ""}
-			>
-				<Label>{t("Caption")}</Label>
-				<Input />
-			</TextField>
+			<div className="flex flex-col gap-y-1">
+				<span className={labelStyles()}>{t("Caption")}</span>
+				<InlineRichTextEditor
+					aria-label={t("Caption")}
+					content={caption ?? undefined}
+					onChange={(value) => {
+						onChange({ ...item.content, caption: isEmptyRichTextDocument(value) ? null : value });
+					}}
+				/>
+			</div>
 			{embedUrl != null && (
 				<div className="aspect-video inline-full overflow-hidden rounded-lg border border-border">
 					<iframe
@@ -1019,7 +1032,7 @@ function ImageContentBlockPanel({
 			<div className="flex items-start gap-x-4">
 				{imageUrl != null && (
 					<img
-						alt={caption ?? t("Selected image")}
+						alt={caption != null ? toPlainText(caption) : t("Selected image")}
 						className="block-24 inline-auto max-inline-full rounded-lg object-cover shrink-0"
 						src={imageUrl}
 					/>
@@ -1036,15 +1049,16 @@ function ImageContentBlockPanel({
 					<input name="imageContentBlock.imageKey" type="hidden" value={imageKey} />
 				)}
 			</div>
-			<TextField
-				onChange={(value) => {
-					onChange({ ...item.content, caption: value });
-				}}
-				value={caption ?? ""}
-			>
-				<Label>{t("Caption")}</Label>
-				<Input />
-			</TextField>
+			<div className="flex flex-col gap-y-1">
+				<span className={labelStyles()}>{t("Caption")}</span>
+				<InlineRichTextEditor
+					aria-label={t("Caption")}
+					content={caption ?? undefined}
+					onChange={(value) => {
+						onChange({ ...item.content, caption: isEmptyRichTextDocument(value) ? null : value });
+					}}
+				/>
+			</div>
 		</div>
 	);
 }

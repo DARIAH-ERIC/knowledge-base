@@ -14,6 +14,7 @@ import {
 	ModalHeader,
 } from "@dariah-eric/ui/modal";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import { toPlainText } from "@dariah-eric/ui/rich-text";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
@@ -34,6 +35,7 @@ import {
 import { FileTrigger, type Selection } from "react-aria-components";
 
 import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
+import { CaptionField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
 import { imageMimeTypes, imageSizeLimit, mediaLibraryPageSize } from "@/config/assets.config";
@@ -449,10 +451,10 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 																	<span className="font-medium">{t("Alt text")}:</span> {asset.alt}
 																</span>
 															) : null}
-															{asset.caption != null && asset.caption !== "" ? (
+															{asset.caption != null && toPlainText(asset.caption) !== "" ? (
 																<span className="line-clamp-2 text-xs text-muted-fg">
 																	<span className="font-medium">{t("Caption")}:</span>{" "}
-																	{asset.caption}
+																	{toPlainText(asset.caption)}
 																</span>
 															) : null}
 															<div className="flex flex-row flex-wrap items-center gap-x-1.5 text-xs text-muted-fg">
@@ -540,10 +542,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 										<Input />
 									</TextField>
 
-									<TextField name="caption">
-										<Label>{t("Caption")}</Label>
-										<Input />
-									</TextField>
+									<CaptionField name="caption" />
 
 									<Select defaultValue="none" name="licenseId">
 										<Label>{t("License")}</Label>

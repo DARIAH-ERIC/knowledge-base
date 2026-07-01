@@ -2,9 +2,11 @@
 
 import { assetPrefixes } from "@dariah-eric/storage/config";
 import { buttonStyles } from "@dariah-eric/ui/button-styles";
+import { toPlainText } from "@dariah-eric/ui/rich-text";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
 import { ArrowDownTrayIcon, ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useState } from "react";
 
@@ -26,7 +28,7 @@ interface AssetItem {
 	key: string;
 	label: string;
 	alt: string | null;
-	caption: string | null;
+	caption: JSONContent | null;
 	licenseId: string | null;
 	mimeType: string;
 	size: number | null;
@@ -201,9 +203,10 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 												<span className="font-medium">{t("Alt text")}:</span> {asset.alt}
 											</span>
 										) : null}
-										{asset.caption != null && asset.caption !== "" ? (
+										{asset.caption != null && toPlainText(asset.caption) !== "" ? (
 											<span className="line-clamp-2 text-xs text-muted-fg">
-												<span className="font-medium">{t("Caption")}:</span> {asset.caption}
+												<span className="font-medium">{t("Caption")}:</span>{" "}
+												{toPlainText(asset.caption)}
 											</span>
 										) : null}
 										<div className="flex flex-row flex-wrap items-center gap-x-1.5 text-xs text-muted-fg">
