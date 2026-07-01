@@ -2,7 +2,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import type { PublicRelatedEntityType } from "@/lib/schemas";
 import type { Database, Transaction } from "@/middlewares/db";
-import { alias, and, eq, notInArray, sql } from "@/services/db/sql";
+import { alias, and, asc, eq, notInArray, sql } from "@/services/db/sql";
 import { search } from "@/services/search";
 
 export interface RelatedEntity {
@@ -98,6 +98,10 @@ export async function getRelatedEntities(
 					"internal_pages",
 				]),
 			),
+		)
+		.orderBy(
+			asc(schema.entitiesToEntities.position),
+			asc(schema.entitiesToEntities.relatedEntityId),
 		);
 }
 
@@ -107,7 +111,8 @@ export async function getRelatedResources(db: Database | Transaction, entityId: 
 	const rows = await db
 		.select({ resourceId: schema.entitiesToResources.resourceId })
 		.from(schema.entitiesToResources)
-		.where(eq(schema.entitiesToResources.entityId, documentId));
+		.where(eq(schema.entitiesToResources.entityId, documentId))
+		.orderBy(asc(schema.entitiesToResources.position), asc(schema.entitiesToResources.resourceId));
 
 	if (rows.length === 0) {
 		return [];
@@ -126,13 +131,24 @@ export async function getRelatedResources(db: Database | Transaction, entityId: 
 		throw result.error;
 	}
 
-	return result.value.items.map((hit) => {
-		return {
-			id: hit.document.id,
-			label: hit.document.label,
-			type: hit.document.type,
-			sourceUrl: hit.document.source_url ?? null,
-			links: hit.document.links,
-		};
+	const resourcesById = new Map(
+		result.value.items.map(
+			(hit) =>
+				[
+					hit.document.id,
+					{
+						id: hit.document.id,
+						label: hit.document.label,
+						type: hit.document.type,
+						sourceUrl: hit.document.source_url ?? null,
+						links: hit.document.links,
+					},
+				] as const,
+		),
+	);
+
+	return ids.flatMap((id) => {
+		const resource = resourcesById.get(id);
+		return resource == null ? [] : [resource];
 	});
 }

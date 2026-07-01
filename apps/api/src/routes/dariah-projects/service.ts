@@ -11,6 +11,7 @@ import {
 	getPublishedProjectPartnersByDocuments,
 } from "@/lib/project-partners";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
+import { socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq, not, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -117,6 +118,7 @@ export async function getDariahProjects(
 					},
 				},
 				socialMedia: {
+					...socialMediaByPosition,
 					columns: {
 						id: true,
 						url: true,
@@ -237,6 +239,7 @@ export async function getDariahProjectById(
 					},
 				},
 				socialMedia: {
+					...socialMediaByPosition,
 					columns: {
 						id: true,
 						url: true,
@@ -408,6 +411,7 @@ export async function getDariahProjectBySlug(
 				},
 			},
 			socialMedia: {
+				...socialMediaByPosition,
 				columns: {
 					id: true,
 					url: true,
