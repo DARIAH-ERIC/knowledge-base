@@ -10,6 +10,18 @@ export const E2E_TEST_ASSET_LABEL = "E2E Test Asset";
 
 type Database = InferOk<ReturnType<typeof createDatabaseService>>;
 
+interface WorkingGroupVersionRow {
+	acronym: string | null;
+	documentId: string;
+	email: string | null;
+	id: string;
+	imageId: string | null;
+	mailingList: string | null;
+	name: string;
+	sshocMarketplaceActorId: number | null;
+	summary: string | null;
+}
+
 /**
  * Worker-scoped service that provides DB access and test-data helpers.
  *
@@ -418,17 +430,10 @@ export class DatabaseService {
 		return this.getOrganisationalUnitDescriptionByVersionId(consortium.id);
 	}
 
-	async getWorkingGroupByName(name: string): Promise<{
-		acronym: string | null;
-		documentId: string;
-		email: string | null;
-		id: string;
-		imageId: string | null;
-		mailingList: string | null;
-		name: string;
-		sshocMarketplaceActorId: number | null;
-		summary: string | null;
-	} | null> {
+	private async getWorkingGroupByNameAndStatus(
+		name: string,
+		statusType: "draft" | "published",
+	): Promise<WorkingGroupVersionRow | null> {
 		const [row] = await this.db
 			.select({
 				acronym: schema.organisationalUnits.acronym,
@@ -443,6 +448,7 @@ export class DatabaseService {
 			})
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
@@ -451,11 +457,28 @@ export class DatabaseService {
 				and(
 					eq(schema.organisationalUnits.name, name),
 					eq(schema.organisationalUnitTypes.type, "working_group"),
+					eq(schema.entityStatus.type, statusType),
 				),
 			)
 			.limit(1);
 
 		return row ?? null;
+	}
+
+	/**
+	 * Read the _draft_ working-group version. Save-only (unpublished) admin edits only ever touch the
+	 * draft row, so this is what create/edit/relation assertions should read. Use
+	 * {@link getPublishedWorkingGroupByName} to assert what a public visitor sees after publishing —
+	 * previously this join had no status filter and an unordered `.limit(1)`, so it silently read the
+	 * draft and masked bugs that only corrupt the published row (e.g. dropped-column-on-publish).
+	 */
+	async getWorkingGroupByName(name: string): Promise<WorkingGroupVersionRow | null> {
+		return this.getWorkingGroupByNameAndStatus(name, "draft");
+	}
+
+	/** Read the _published_ working-group version — what a public visitor sees after publishing. */
+	async getPublishedWorkingGroupByName(name: string): Promise<WorkingGroupVersionRow | null> {
+		return this.getWorkingGroupByNameAndStatus(name, "published");
 	}
 
 	async getWorkingGroupDescriptionByName(name: string): Promise<unknown> {
