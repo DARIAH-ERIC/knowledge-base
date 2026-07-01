@@ -81,17 +81,19 @@ export async function upsertTypedContentBlock(
 			}
 
 			const caption = block.content?.caption ?? null;
+			const captionMode = block.content?.captionMode ?? (caption != null ? "override" : "inherit");
 
 			if (isNew) {
 				await tx.insert(schema.imageContentBlocks).values({
 					id: blockId,
 					imageId,
 					caption,
+					captionMode,
 				});
 			} else {
 				await tx
 					.update(schema.imageContentBlocks)
-					.set({ imageId, caption })
+					.set({ imageId, caption, captionMode })
 					.where(eq(schema.imageContentBlocks.id, blockId));
 			}
 			break;
@@ -257,7 +259,10 @@ export async function getEntityContentBlocks(
 				id: schema.imageContentBlocks.id,
 				position: schema.contentBlocks.position,
 				imageKey: schema.assets.key,
+				alt: schema.assets.alt,
+				assetCaption: schema.assets.caption,
 				caption: schema.imageContentBlocks.caption,
+				captionMode: schema.imageContentBlocks.captionMode,
 			})
 			.from(schema.imageContentBlocks)
 			.innerJoin(schema.contentBlocks, eq(schema.imageContentBlocks.id, schema.contentBlocks.id))
@@ -378,7 +383,14 @@ export async function getEntityContentBlocks(
 			id: row.id,
 			position: row.position,
 			type: "image" as const,
-			content: { imageKey: row.imageKey, imageUrl, caption: row.caption ?? undefined },
+			content: {
+				imageKey: row.imageKey,
+				imageUrl,
+				alt: row.alt,
+				assetCaption: row.assetCaption,
+				caption: row.caption,
+				captionMode: row.captionMode,
+			},
 		};
 	});
 

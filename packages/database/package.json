@@ -13,6 +13,7 @@
 		".": "./dist/index.mjs",
 		"./client": "./dist/client.mjs",
 		"./errors": "./dist/errors.mjs",
+		"./image-captions": "./dist/image-captions.mjs",
 		"./relations": "./dist/relations.mjs",
 		"./schema": "./dist/schema.mjs",
 		"./sql": "./dist/sql.mjs"

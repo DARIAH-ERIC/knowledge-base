@@ -38,8 +38,9 @@ import { InlineRichTextEditor } from "@/lib/inline-rich-text-editor";
 import { InlineRichTextRenderer } from "@/lib/inline-rich-text-renderer";
 import { Input } from "@/lib/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
-import { isEmptyRichTextDocument, toPlainText } from "@/lib/rich-text";
+import { isEmptyRichTextDocument } from "@/lib/rich-text";
 import { RichTextEditorToolbarButton } from "@/lib/rich-text-toolbar-button";
+import { ToggleGroup, ToggleGroupItem } from "@/lib/toggle-group";
 import { Tooltip, TooltipContent } from "@/lib/tooltip";
 
 /** Serialize a richtext caption for storage in an HTML `data-caption` attribute (copy/paste). */
@@ -77,7 +78,13 @@ interface RichTextEditorProps {
 	name?: string;
 	onChange?: (content: JSONContent) => void;
 	renderEmbedInsert?: (insertEmbed: () => void) => ReactNode;
-	renderImagePicker?: (insert: (imageKey: string, imageUrl: string) => void) => ReactNode;
+	renderImagePicker?: (
+		insert: (
+			imageKey: string,
+			imageUrl: string,
+			asset?: { alt?: string | null; caption?: JSONContent | null },
+		) => void,
+	) => ReactNode;
 }
 
 function normalizeInitialContent(content: JSONContent | undefined): JSONContent | undefined {
@@ -93,6 +100,18 @@ function normalizeInitialContent(content: JSONContent | undefined): JSONContent 
 }
 
 type ImagePickerRenderer = NonNullable<RichTextEditorProps["renderImagePicker"]>;
+type ImageCaptionMode = "hidden" | "inherit" | "override";
+
+function resolveImageCaption(
+	captionMode: ImageCaptionMode,
+	caption: JSONContent | null,
+	assetCaption: JSONContent | null,
+): JSONContent | null {
+	if (captionMode === "hidden") {
+		return null;
+	}
+	return captionMode === "override" ? caption : assetCaption;
+}
 
 // Re-export so existing consumers can keep importing from `@dariah-eric/ui/rich-text-editor`.
 export { RichTextEditorToolbarButton };
@@ -409,7 +428,11 @@ function AssetImageNodeView({
 }: Readonly<AssetImageNodeViewProps>): ReactNode {
 	const imageKey = node.attrs.imageKey as string | null;
 	const imageUrl = node.attrs.imageUrl as string | null;
+	const alt = node.attrs.alt as string | null;
+	const assetCaption = node.attrs.assetCaption as JSONContent | null;
 	const caption = node.attrs.caption as JSONContent | null;
+	const captionMode = node.attrs.captionMode as ImageCaptionMode;
+	const resolvedCaption = resolveImageCaption(captionMode, caption, assetCaption);
 
 	const [isEditing, setIsEditing] = useState(
 		(editor.isEditable && (imageKey == null || imageUrl == null)) || false,
@@ -417,6 +440,7 @@ function AssetImageNodeView({
 	const [imageKeyInput, setImageKeyInput] = useState(imageKey ?? "");
 	const [imageUrlInput, setImageUrlInput] = useState(imageUrl ?? "");
 	const [captionJson, setCaptionJson] = useState<JSONContent | null>(caption);
+	const [captionModeInput, setCaptionModeInput] = useState<ImageCaptionMode>(captionMode);
 
 	const imageKeyInputId = useId();
 	const imageUrlInputId = useId();
@@ -425,6 +449,7 @@ function AssetImageNodeView({
 		setImageKeyInput(imageKey ?? "");
 		setImageUrlInput(imageUrl ?? "");
 		setCaptionJson(caption);
+		setCaptionModeInput(captionMode);
 	}
 
 	function selectNode() {
@@ -442,9 +467,10 @@ function AssetImageNodeView({
 		}
 
 		updateAttributes({
-			imageKey: imageKeyInput.trim() ?? null,
+			imageKey: imageKeyInput.trim() || null,
 			imageUrl: nextImageUrl,
 			caption: isEmptyRichTextDocument(captionJson) ? null : captionJson,
+			captionMode: captionModeInput,
 		});
 		setIsEditing(false);
 	}
@@ -465,11 +491,14 @@ function AssetImageNodeView({
 					{renderImagePicker != null ? (
 						<div className="flex flex-col gap-y-2">
 							<div className="text-sm/6 font-medium">{"Pick image"}</div>
-							{renderImagePicker((nextImageKey, nextImageUrl) => {
+							{renderImagePicker((nextImageKey, nextImageUrl, asset) => {
 								updateAttributes({
 									imageKey: nextImageKey,
 									imageUrl: nextImageUrl,
+									alt: asset?.alt ?? null,
+									assetCaption: asset?.caption ?? null,
 									caption: isEmptyRichTextDocument(captionJson) ? null : captionJson,
+									captionMode: captionModeInput,
 								});
 								setImageKeyInput(nextImageKey);
 								setImageUrlInput(nextImageUrl);
@@ -509,12 +538,36 @@ function AssetImageNodeView({
 						</>
 					) : null}
 					<div className="flex flex-col gap-y-1">
-						<span className="text-sm/6 font-medium">{"Caption"}</span>
-						<InlineRichTextEditor
-							aria-label="Caption"
-							content={caption ?? undefined}
-							onChange={setCaptionJson}
-						/>
+						<span className="text-sm/6 font-medium">{"Caption behavior"}</span>
+						<ToggleGroup
+							aria-label="Caption behavior"
+							disallowEmptySelection={true}
+							onSelectionChange={(keys) => {
+								const mode = [...keys][0] as ImageCaptionMode | undefined;
+								if (mode != null) {
+									setCaptionModeInput(mode);
+								}
+							}}
+							selectedKeys={[captionModeInput]}
+							size="sm"
+						>
+							<ToggleGroupItem id="inherit">{"Use asset caption"}</ToggleGroupItem>
+							<ToggleGroupItem id="override">{"Custom caption"}</ToggleGroupItem>
+							<ToggleGroupItem id="hidden">{"No caption"}</ToggleGroupItem>
+						</ToggleGroup>
+						{captionModeInput === "override" ? (
+							<InlineRichTextEditor
+								aria-label="Custom caption"
+								content={captionJson ?? undefined}
+								onChange={setCaptionJson}
+							/>
+						) : null}
+						{captionModeInput === "inherit" && !isEmptyRichTextDocument(assetCaption) ? (
+							<InlineRichTextRenderer
+								className="rounded-lg border border-border px-3 py-2 text-muted-fg"
+								content={assetCaption!}
+							/>
+						) : null}
 					</div>
 					<div className="flex items-center gap-x-2">
 						<Button
@@ -550,7 +603,7 @@ function AssetImageNodeView({
 				<div className="group">
 					<div className="relative">
 						<img
-							alt={toPlainText(caption)}
+							alt={alt ?? ""}
 							className="block inline-full max-block-96 object-contain"
 							data-asset-image=""
 							data-image-key={imageKey ?? undefined}
@@ -580,10 +633,10 @@ function AssetImageNodeView({
 							</button>
 						</div>
 					</div>
-					{!isEmptyRichTextDocument(caption) ? (
+					{!isEmptyRichTextDocument(resolvedCaption) ? (
 						<InlineRichTextRenderer
 							className="border-bs border-border px-4 py-2 text-muted-fg"
-							content={caption!}
+							content={resolvedCaption!}
 						/>
 					) : null}
 				</div>
@@ -604,7 +657,10 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 			return {
 				imageKey: { default: null },
 				imageUrl: { default: null },
+				alt: { default: null },
+				assetCaption: { default: null },
 				caption: { default: null },
+				captionMode: { default: "inherit" },
 			};
 		},
 
@@ -617,7 +673,10 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 						return {
 							imageKey: el.dataset.imageKey,
 							imageUrl: el.getAttribute("src"),
+							alt: el.getAttribute("alt"),
+							assetCaption: parseCaptionAttr(el.dataset.assetCaption),
 							caption: parseCaptionAttr(el.dataset.caption),
+							captionMode: el.dataset.captionMode ?? "inherit",
 						};
 					},
 				},
@@ -630,9 +689,18 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 				mergeAttributes(
 					{
 						src: node.attrs.imageUrl as string | null,
+						alt: node.attrs.alt as string | null,
 						"data-asset-image": "",
 						"data-image-key": node.attrs.imageKey as string | null,
+						"data-caption-mode": node.attrs.captionMode as ImageCaptionMode,
 					},
+					node.attrs.assetCaption != null
+						? {
+								"data-asset-caption": serializeCaptionAttr(
+									node.attrs.assetCaption as JSONContent | null,
+								),
+							}
+						: {},
 					node.attrs.caption != null
 						? { "data-caption": serializeCaptionAttr(node.attrs.caption as JSONContent | null) }
 						: {},
@@ -841,7 +909,11 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 	}, [editor]);
 
 	const insertImage = useCallback(
-		(imageKey: string, imageUrl: string) => {
+		(
+			imageKey: string,
+			imageUrl: string,
+			asset?: { alt?: string | null; caption?: JSONContent | null },
+		) => {
 			if (!editor) {
 				return;
 			}
@@ -849,7 +921,16 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				editor
 					.chain()
 					.focus()
-					.insertContent({ type: "assetImage", attrs: { imageKey, imageUrl } })
+					.insertContent({
+						type: "assetImage",
+						attrs: {
+							imageKey,
+							imageUrl,
+							alt: asset?.alt ?? null,
+							assetCaption: asset?.caption ?? null,
+							captionMode: "inherit",
+						},
+					})
 					.run();
 			} else {
 				editor.chain().focus().setImage({ src: imageUrl }).run();

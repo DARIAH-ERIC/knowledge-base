@@ -126,6 +126,7 @@ async function cloneTypedContentBlock(
 				.select({
 					imageId: schema.imageContentBlocks.imageId,
 					caption: schema.imageContentBlocks.caption,
+					captionMode: schema.imageContentBlocks.captionMode,
 				})
 				.from(schema.imageContentBlocks)
 				.where(eq(schema.imageContentBlocks.id, sourceBlockId))

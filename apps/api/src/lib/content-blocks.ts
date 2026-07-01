@@ -1,9 +1,10 @@
+import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 import * as v from "valibot";
 
 import { generateImageUrl, toImageAsset } from "@/lib/images";
-import { ImageSchema } from "@/lib/schemas";
+import { ImageSchema, LicenseSchema } from "@/lib/schemas";
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, eq } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -21,8 +22,13 @@ export const EmbedContentBlockSchema = v.object({
 
 export const ImageContentBlockSchema = v.object({
 	type: v.literal("image"),
-	image: ImageSchema,
+	image: v.object({
+		url: v.string(),
+		alt: v.nullable(v.string()),
+		license: v.nullable(LicenseSchema),
+	}),
 	caption: v.nullable(v.any()),
+	captionSource: v.nullable(v.picklist(["asset", "block"])),
 });
 
 export const DataContentBlockSchema = v.object({
@@ -70,6 +76,7 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			embedUrl: schema.embedContentBlocks.url,
 			embedCaption: schema.embedContentBlocks.caption,
 			imageCaption: schema.imageContentBlocks.caption,
+			imageCaptionMode: schema.imageContentBlocks.captionMode,
 			imageKey: schema.assets.key,
 			imageAlt: schema.assets.alt,
 			imageAssetCaption: schema.assets.caption,
@@ -140,6 +147,7 @@ function normalizeRow(row: {
 	embedUrl: string | null;
 	embedCaption: JSONContent | null;
 	imageCaption: JSONContent | null;
+	imageCaptionMode: ImageCaptionMode | null;
 	imageKey: string | null;
 	imageAlt: string | null;
 	imageAssetCaption: JSONContent | null;
@@ -165,19 +173,30 @@ function normalizeRow(row: {
 			return { type: "embed", url: row.embedUrl!, caption: row.embedCaption };
 		}
 		case "image": {
+			const assetImage = generateImageUrl(
+				toImageAsset({
+					key: row.imageKey!,
+					alt: row.imageAlt,
+					caption: row.imageAssetCaption,
+					licenseName: row.imageLicenseName,
+					licenseUrl: row.imageLicenseUrl,
+				}),
+				imageWidth.featured,
+			);
+			const { caption: _assetCaption, ...image } = assetImage;
+			const captionMode =
+				row.imageCaptionMode ?? (row.imageCaption != null ? "override" : "inherit");
+			const { caption, source: captionSource } = resolveImageCaption({
+				assetCaption: row.imageAssetCaption,
+				blockCaption: row.imageCaption,
+				captionMode,
+			});
+
 			return {
 				type: "image",
-				image: generateImageUrl(
-					toImageAsset({
-						key: row.imageKey!,
-						alt: row.imageAlt,
-						caption: row.imageAssetCaption,
-						licenseName: row.imageLicenseName,
-						licenseUrl: row.imageLicenseUrl,
-					}),
-					imageWidth.featured,
-				),
-				caption: row.imageCaption,
+				image,
+				caption,
+				captionSource,
 			};
 		}
 		case "data": {

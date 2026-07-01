@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/u
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -42,7 +43,15 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 	const [fileError, setFileError] = useState<string | null>(null);
 
 	const [state, formAction, isPending] = useActionState(
-		async (prevState: ActionState<{ key: string; url: string }>, formData: FormData) => {
+		async (
+			prevState: ActionState<{
+				key: string;
+				url: string;
+				alt: string | null;
+				caption: JSONContent | null;
+			}>,
+			formData: FormData,
+		) => {
 			const result = await uploadImageAction(prevState, formData);
 			if (result.status === "success") {
 				setIsOpen(false);

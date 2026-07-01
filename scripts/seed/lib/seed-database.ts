@@ -424,12 +424,14 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 
 		const imageContentBlocks: Array<schema.ImageContentBlockInput> =
 			contentBlockIdsByType.image.map(({ id }) => {
+				const caption = plainTextToRichText(
+					f.helpers.maybe(() => f.lorem.sentence(), { probability: 0.5 }),
+				);
 				return {
 					id,
 					imageId: f.helpers.arrayElement(imageIds).id,
-					caption: plainTextToRichText(
-						f.helpers.maybe(() => f.lorem.sentence(), { probability: 0.5 }),
-					),
+					caption,
+					captionMode: caption != null ? "override" : "inherit",
 				};
 			});
 

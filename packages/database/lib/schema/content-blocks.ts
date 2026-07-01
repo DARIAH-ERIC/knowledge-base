@@ -168,18 +168,33 @@ export const GalleryContentBlockItemSelectSchema = createSelectSchema(galleryCon
 export const GalleryContentBlockItemInsertSchema = createInsertSchema(galleryContentBlockItems);
 export const GalleryContentBlockItemUpdateSchema = createUpdateSchema(galleryContentBlockItems);
 
-export const imageContentBlocks = p.snakeCase.table("content_blocks_type_image", {
-	id: p
-		.uuid("id")
-		.primaryKey()
-		.references(() => contentBlocks.id, { onDelete: "cascade" }),
-	imageId: p
-		.uuid("image_id")
-		.notNull()
-		.references(() => assets.id),
-	caption: p.jsonb("caption").$type<JSONContent>(),
-	...f.timestamps(),
-});
+export const imageCaptionModesEnum = ["hidden", "inherit", "override"] as const;
+
+export const imageContentBlocks = p.snakeCase.table(
+	"content_blocks_type_image",
+	{
+		id: p
+			.uuid("id")
+			.primaryKey()
+			.references(() => contentBlocks.id, { onDelete: "cascade" }),
+		imageId: p
+			.uuid("image_id")
+			.notNull()
+			.references(() => assets.id),
+		caption: p.jsonb("caption").$type<JSONContent>(),
+		captionMode: p
+			.text("caption_mode", { enum: imageCaptionModesEnum })
+			.notNull()
+			.default("inherit"),
+		...f.timestamps(),
+	},
+	(t) => [
+		p.check(
+			"content_blocks_type_image_caption_mode_enum_check",
+			inArray(t.captionMode, imageCaptionModesEnum),
+		),
+	],
+);
 
 export type ImageContentBlock = typeof imageContentBlocks.$inferSelect;
 export type ImageContentBlockInput = typeof imageContentBlocks.$inferInsert;

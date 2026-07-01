@@ -7,6 +7,7 @@ export default defineConfig({
 		"./lib/index.ts",
 		"./lib/client.ts",
 		"./lib/errors.ts",
+		"./lib/image-captions.ts",
 		"./lib/relations.ts",
 		"./lib/schema.ts",
 		"./lib/sql.ts",
