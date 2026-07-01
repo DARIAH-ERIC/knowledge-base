@@ -156,11 +156,13 @@ export class DatabaseService {
 			this.db
 				.select({ relatedEntityId: schema.entitiesToEntities.relatedEntityId })
 				.from(schema.entitiesToEntities)
-				.where(eq(schema.entitiesToEntities.entityId, entityId)),
+				.where(eq(schema.entitiesToEntities.entityId, entityId))
+				.orderBy(schema.entitiesToEntities.position),
 			this.db
 				.select({ resourceId: schema.entitiesToResources.resourceId })
 				.from(schema.entitiesToResources)
-				.where(eq(schema.entitiesToResources.entityId, entityId)),
+				.where(eq(schema.entitiesToResources.entityId, entityId))
+				.orderBy(schema.entitiesToResources.position),
 		]);
 
 		return {
@@ -892,7 +894,8 @@ export class DatabaseService {
 		const socialMedia = await this.db
 			.select({ socialMediaId: schema.projectsToSocialMedia.socialMediaId })
 			.from(schema.projectsToSocialMedia)
-			.where(eq(schema.projectsToSocialMedia.projectId, project.id));
+			.where(eq(schema.projectsToSocialMedia.projectId, project.id))
+			.orderBy(schema.projectsToSocialMedia.position);
 
 		return {
 			partners,

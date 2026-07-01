@@ -3,6 +3,7 @@ import { type Locator, type Page, expect } from "@playwright/test";
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
+import { dragGridRowDownByName } from "@/e2e/lib/fixtures/reorder";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/administrator/projects";
@@ -146,22 +147,40 @@ export class AdminProjectsPage {
 	}
 
 	async removeAllSelectedInControl(label: string): Promise<void> {
-		// Selected items render as rows in a grid list (aria-label === the control label); each row has
-		// a single Remove button (its aria-label extracts as "ui" in the e2e build, so target by row).
+		// Selected items render as rows in an orderable grid list (aria-label === the control label);
+		// each row has a drag handle (slot="drag") plus a Remove button whose aria-label extracts as
+		// "ui" in the e2e build, so target the non-drag button.
 		const list = this.page.getByRole("grid", { name: label });
-		const removeButtons = list.getByRole("row").getByRole("button");
+		const removeButtons = list.getByRole("row").locator('button:not([slot="drag"])');
 		while ((await removeButtons.count()) > 0) {
 			await removeButtons.first().click();
 		}
 	}
 
 	async removeSelectedInControlByName(label: string, name: string): Promise<void> {
-		// Remove a single selected row identified by its visible name. Each row has one Remove button
-		// (its aria-label extracts as "ui" in the e2e build, so target the row's only button).
+		// Remove a single selected row identified by its visible name. Each row has a drag handle
+		// (slot="drag") plus a Remove button (its aria-label extracts as "ui" in the e2e build), so
+		// target the row's non-drag button.
 		const list = this.page.getByRole("grid", { name: label });
 		const row = list.getByRole("row").filter({ hasText: name });
-		await row.getByRole("button").click();
+		await row.locator('button:not([slot="drag"])').click();
 		await expect(row).toBeHidden();
+	}
+
+	/** Names of the currently-selected rows in an orderable control, in display order. */
+	async getSelectedNamesInControl(label: string): Promise<Array<string>> {
+		const rows = this.page.getByRole("grid", { name: label }).getByRole("row");
+		const texts = await rows.allInnerTexts();
+		return texts.map((text) => text.trim()).filter((text) => text !== "");
+	}
+
+	/** Drag a selected row one position down past the row below it, within the given control. */
+	async moveSelectedInControlDown(label: string, name: string): Promise<void> {
+		await dragGridRowDownByName(
+			this.page,
+			this.page.getByRole("grid", { name: label }).getByRole("row"),
+			name,
+		);
 	}
 
 	async createSocialMediaInForm(name: string, url: string): Promise<void> {

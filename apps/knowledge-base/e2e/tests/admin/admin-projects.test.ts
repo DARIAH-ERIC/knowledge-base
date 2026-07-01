@@ -372,4 +372,81 @@ test.describe("projects admin", () => {
 		// The project row should no longer be visible.
 		await expect(adminProjectsPage.projectRowByName(projectName)).toBeHidden();
 	});
+
+	test("should persist a reordered social media selection", async ({
+		page,
+		createAdminProjectsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const adminProjectsPage = createAdminProjectsPage(workerIndex);
+		const projectName = `${adminProjectsPage.workerPrefix} Social Reorder ${randomUUID()}`;
+		const socialA = `${adminProjectsPage.workerPrefix} Social Reorder A ${randomUUID()}`;
+		const socialB = `${adminProjectsPage.workerPrefix} Social Reorder B ${randomUUID()}`;
+		const socialC = `${adminProjectsPage.workerPrefix} Social Reorder C ${randomUUID()}`;
+
+		await adminProjectsPage.gotoCreate();
+		await adminProjectsPage.fillName(projectName);
+		await adminProjectsPage.selectFirstScope();
+		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
+		await adminProjectsPage.fillSummary("Project for social media reorder");
+		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await adminProjectsPage.submitForm();
+
+		// Social media relations are only persisted by the update action, so link them via the edit
+		// form (matching the other social media tests in this file).
+		await adminProjectsPage.searchByName(projectName);
+		await adminProjectsPage
+			.projectRowByName(projectName)
+			.getByRole("button", { name: "Open actions menu" })
+			.click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		await adminProjectsPage.createSocialMediaInForm(
+			socialA,
+			"https://example.com/social-reorder-a",
+		);
+		await adminProjectsPage.createSocialMediaInForm(
+			socialB,
+			"https://example.com/social-reorder-b",
+		);
+		await adminProjectsPage.createSocialMediaInForm(
+			socialC,
+			"https://example.com/social-reorder-c",
+		);
+		await adminProjectsPage.submitForm();
+
+		const [mediaA, mediaB, mediaC] = await Promise.all([
+			db.getSocialMediaByName(socialA),
+			db.getSocialMediaByName(socialB),
+			db.getSocialMediaByName(socialC),
+		]);
+
+		// Persisted in creation (selection) order.
+		const created = await db.getProjectRelationsByName(projectName);
+		expect(created?.socialMediaIds).toStrictEqual([mediaA!.id, mediaB!.id, mediaC!.id]);
+
+		// Re-open the edit form and drag the first entry down one: [A, B, C] -> [B, A, C].
+		await adminProjectsPage.searchByName(projectName);
+		await adminProjectsPage
+			.projectRowByName(projectName)
+			.getByRole("button", { name: "Open actions menu" })
+			.click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		await adminProjectsPage.moveSelectedInControlDown("Social media", socialA);
+		const orderedNames = await adminProjectsPage.getSelectedNamesInControl("Social media");
+		expect(orderedNames[0]).toContain(socialB);
+
+		await adminProjectsPage.submitForm();
+
+		const reordered = await db.getProjectRelationsByName(projectName);
+		expect(reordered?.socialMediaIds).toStrictEqual([mediaB!.id, mediaA!.id, mediaC!.id]);
+	});
 });
