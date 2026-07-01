@@ -599,6 +599,33 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.entities.id,
 				optional: true,
 			}),
+			totpCredentials: r.many.userTotpCredentials({
+				from: r.users.id,
+				to: r.userTotpCredentials.userId,
+			}),
+		},
+		userTotpCredentials: {
+			user: r.one.users({
+				from: r.userTotpCredentials.userId,
+				to: r.users.id,
+				optional: false,
+			}),
+			sessions: r.many.sessions({
+				from: r.userTotpCredentials.id,
+				to: r.sessions.twoFactorCredentialId,
+			}),
+		},
+		sessions: {
+			user: r.one.users({
+				from: r.sessions.userId,
+				to: r.users.id,
+				optional: false,
+			}),
+			twoFactorCredential: r.one.userTotpCredentials({
+				from: r.sessions.twoFactorCredentialId,
+				to: r.userTotpCredentials.id,
+				optional: true,
+			}),
 		},
 		reportingCampaigns: {
 			countryReports: r.many.countryReports({
