@@ -19,6 +19,7 @@ import fromHtml from "rehype-parse";
 import { unified } from "unified";
 
 import { assetsCacheFilePath, assetsCacheFolderPath } from "../../config/data-migration.config";
+import { cleanTiptapDoc } from "./clean-tiptap-content";
 import type { WordPressData } from "./get-wordpress-data";
 
 const processor = unified().use(fromHtml);
@@ -326,14 +327,14 @@ export function createWordPressContentMigrator(
 					items: segment.items.map(({ title, bodyHtml }) => {
 						return {
 							title,
-							content: generateJSON(bodyHtml, [StarterKit, Image]),
+							content: cleanTiptapDoc(generateJSON(bodyHtml, [StarterKit, Image])),
 						};
 					}),
 				});
 				continue;
 			}
 
-			const doc = generateJSON(segment.content, [StarterKit, Image]);
+			const doc = cleanTiptapDoc(generateJSON(segment.content, [StarterKit, Image]));
 			let richTextRun: Array<JSONContent> = [];
 
 			for (const node of doc.content ?? []) {
