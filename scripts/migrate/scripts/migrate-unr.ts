@@ -14,6 +14,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 
 import { placeholderImageUrl } from "../config/data-migration.config";
 import { env } from "../config/env.config";
+import { cleanTiptapDoc } from "../src/lib/clean-tiptap-content";
 import {
 	countryToInstitution,
 	roles,
@@ -370,7 +371,7 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(workingGroup.description, [StarterKit]);
+			const content = cleanTiptapDoc(generateJSON(workingGroup.description, [StarterKit]));
 
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
@@ -545,7 +546,7 @@ async function main() {
 				}
 
 				if (country.description != null) {
-					const content = generateJSON(country.description, [StarterKit]);
+					const content = cleanTiptapDoc(generateJSON(country.description, [StarterKit]));
 
 					const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 						where: {
@@ -1222,7 +1223,7 @@ async function main() {
 				.returning({ id: schema.persons.id });
 
 			if (person.description != null) {
-				const content = generateJSON(person.description, [StarterKit]);
+				const content = cleanTiptapDoc(generateJSON(person.description, [StarterKit]));
 
 				const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 					where: {
@@ -1401,7 +1402,7 @@ async function main() {
 			assert(unrBody);
 
 			if (unrBody.description != null) {
-				const content = generateJSON(unrBody.description, [StarterKit]);
+				const content = cleanTiptapDoc(generateJSON(unrBody.description, [StarterKit]));
 
 				const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 					where: {
