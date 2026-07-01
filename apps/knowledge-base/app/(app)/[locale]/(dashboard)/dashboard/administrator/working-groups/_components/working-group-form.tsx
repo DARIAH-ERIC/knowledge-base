@@ -104,25 +104,6 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 
 				<Separator className="my-6" />
 
-				<FormSection
-					description={t("Enter the working group contact details.")}
-					title={t("Contact")}
-				>
-					<TextField defaultValue={workingGroup?.email ?? undefined} name="email" type="email">
-						<Label>{t("Email")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-
-					<TextField defaultValue={workingGroup?.mailingList ?? undefined} name="mailingList">
-						<Label>{t("Mailing list")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-				</FormSection>
-
-				<Separator className="my-6" />
-
 				<FormSection description={t("Select or upload an image.")} title={t("Image")}>
 					{selectedImage != null && (
 						<img
@@ -173,6 +154,25 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 						initialAssets={initialAssets}
 						name="description"
 					/>
+				</FormSection>
+
+				<Separator className="my-6" />
+
+				<FormSection
+					description={t("Enter the working group contact details.")}
+					title={t("Contact")}
+				>
+					<TextField defaultValue={workingGroup?.email ?? undefined} name="email" type="email">
+						<Label>{t("Email")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
+
+					<TextField defaultValue={workingGroup?.mailingList ?? undefined} name="mailingList">
+						<Label>{t("Mailing list")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
 				</FormSection>
 
 				<Separator className="my-6" />

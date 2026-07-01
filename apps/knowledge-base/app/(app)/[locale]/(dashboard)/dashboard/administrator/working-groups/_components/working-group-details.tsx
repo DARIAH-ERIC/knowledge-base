@@ -114,18 +114,6 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{workingGroup.summary}</DescriptionDetails>
 
-				<DescriptionTerm>{t("Email")}</DescriptionTerm>
-				<DescriptionDetails>
-					{workingGroup.email != null ? (
-						<a className="underline" href={`mailto:${workingGroup.email}`}>
-							{workingGroup.email}
-						</a>
-					) : null}
-				</DescriptionDetails>
-
-				<DescriptionTerm>{t("Mailing list")}</DescriptionTerm>
-				<DescriptionDetails>{workingGroup.mailingList}</DescriptionDetails>
-
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
 					{workingGroup.image != null ? (
@@ -146,6 +134,18 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 						/>
 					) : null}
 				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Email")}</DescriptionTerm>
+				<DescriptionDetails>
+					{workingGroup.email != null ? (
+						<a className="underline" href={`mailto:${workingGroup.email}`}>
+							{workingGroup.email}
+						</a>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Mailing list")}</DescriptionTerm>
+				<DescriptionDetails>{workingGroup.mailingList}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Social Media")}</DescriptionTerm>
 				<DescriptionDetails>
