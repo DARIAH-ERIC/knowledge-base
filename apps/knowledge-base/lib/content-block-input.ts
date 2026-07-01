@@ -16,7 +16,7 @@ export const ContentBlockInputSchema = v.union([
 			v.object({
 				imageKey: v.optional(v.string()),
 				imageUrl: v.optional(v.string()),
-				caption: v.optional(v.string()),
+				caption: v.optional(v.nullable(v.custom<JSONContent>(() => true))),
 			}),
 		),
 	}),
@@ -28,7 +28,7 @@ export const ContentBlockInputSchema = v.union([
 			v.object({
 				url: v.optional(v.string()),
 				title: v.optional(v.string()),
-				caption: v.optional(v.string()),
+				caption: v.optional(v.nullable(v.custom<JSONContent>(() => true))),
 			}),
 		),
 	}),
@@ -66,7 +66,7 @@ export const ContentBlockInputSchema = v.union([
 						v.object({
 							imageKey: v.optional(v.string()),
 							imageUrl: v.optional(v.string()),
-							caption: v.optional(v.string()),
+							caption: v.optional(v.nullable(v.custom<JSONContent>(() => true))),
 						}),
 					),
 				),

@@ -16,12 +16,13 @@ import {
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
-import { TextArea } from "@dariah-eric/ui/textarea";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
+import { CaptionField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field";
 import { updateAssetMetadataAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/update-asset-metadata.action";
 
 interface AssetMetadataItem {
@@ -29,7 +30,7 @@ interface AssetMetadataItem {
 	key: string;
 	label: string;
 	alt: string | null;
-	caption: string | null;
+	caption: JSONContent | null;
 	licenseId: string | null;
 	mimeType: string;
 	url: string;
@@ -117,11 +118,7 @@ export function EditAssetMetadataDialog(props: Readonly<EditAssetMetadataDialogP
 							<FieldError />
 						</TextField>
 
-						<TextField defaultValue={asset.caption ?? ""} name="caption">
-							<Label>{t("Caption")}</Label>
-							<TextArea placeholder={t("Optional caption displayed below the image")} rows={3} />
-							<FieldError />
-						</TextField>
+						<CaptionField defaultValue={asset.caption} name="caption" />
 
 						<Select defaultValue={asset.licenseId ?? "none"} name="licenseId">
 							<Label>{t("License")}</Label>

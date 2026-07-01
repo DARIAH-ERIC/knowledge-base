@@ -3,6 +3,7 @@ import * as v from "valibot";
 import { imageMimeTypes, imageSizeLimit } from "@/config/assets.config";
 import { assetPrefixes } from "@/lib/data/assets";
 import { formatFileSize } from "@/lib/format-file-size";
+import { RichTextCaptionFormSchema } from "@/lib/rich-text-caption";
 
 const OptionalLicenseSchema = v.pipe(
 	v.optional(v.string()),
@@ -23,6 +24,6 @@ export const UploadImageInputSchema = v.object({
 	licenseId: OptionalLicenseSchema,
 	prefix: v.picklist(assetPrefixes),
 	label: v.optional(v.pipe(v.string(), v.nonEmpty())),
-	caption: v.optional(v.pipe(v.string(), v.nonEmpty())),
+	caption: RichTextCaptionFormSchema,
 	alt: v.optional(v.pipe(v.string(), v.nonEmpty())),
 });

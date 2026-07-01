@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import * as schema from "@dariah-eric/database/schema";
+import type { JSONContent } from "@tiptap/core";
 
 import { type ContentBlock, getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
@@ -129,7 +130,7 @@ function mapPersonContributors(
 		slug: string;
 		imageKey: string | null;
 		imageAlt: string | null;
-		imageCaption: string | null;
+		imageCaption: JSONContent | null;
 		licenseName: string | null;
 		licenseUrl: string | null;
 		role: string;

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import * as schema from "@dariah-eric/database/schema";
+import type { JSONContent } from "@tiptap/core";
 
 import { generateImageUrl, toImageAsset } from "@/lib/images";
 import type { Database, Transaction } from "@/middlewares/db";
@@ -219,7 +220,7 @@ interface InstitutionRow {
 	slug: string;
 	logoKey: string | null;
 	logoAlt: string | null;
-	logoCaption: string | null;
+	logoCaption: JSONContent | null;
 	licenseName: string | null;
 	licenseUrl: string | null;
 	status: (typeof schema.organisationalUnitStatusEnum)[number] | null;

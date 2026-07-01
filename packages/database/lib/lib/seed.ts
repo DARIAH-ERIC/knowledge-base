@@ -5,6 +5,7 @@ import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
 import { eq } from "drizzle-orm";
 
+import { plainTextToRichText } from "../rich-text";
 import * as schema from "../schema";
 import type { Client } from "./admin-client";
 
@@ -431,7 +432,9 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 				return {
 					id,
 					imageId: f.helpers.arrayElement(imageIds).id,
-					caption: f.helpers.maybe(() => f.lorem.sentence(), { probability: 0.5 }),
+					caption: plainTextToRichText(
+						f.helpers.maybe(() => f.lorem.sentence(), { probability: 0.5 }),
+					),
 				};
 			});
 
@@ -454,7 +457,9 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 						galleryContentBlockId,
 						imageId,
 						position,
-						caption: f.helpers.maybe(() => f.lorem.sentence(), { probability: 0.5 }),
+						caption: plainTextToRichText(
+							f.helpers.maybe(() => f.lorem.sentence(), { probability: 0.5 }),
+						),
 					};
 				}),
 			);

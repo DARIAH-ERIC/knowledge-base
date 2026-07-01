@@ -1,4 +1,5 @@
 import * as schema from "@dariah-eric/database/schema";
+import type { JSONContent } from "@tiptap/core";
 import * as v from "valibot";
 
 import { generateImageUrl, toImageAsset } from "@/lib/images";
@@ -15,13 +16,13 @@ export const RichTextContentBlockSchema = v.object({
 export const EmbedContentBlockSchema = v.object({
 	type: v.literal("embed"),
 	url: v.string(),
-	caption: v.nullable(v.string()),
+	caption: v.nullable(v.any()),
 });
 
 export const ImageContentBlockSchema = v.object({
 	type: v.literal("image"),
 	image: ImageSchema,
-	caption: v.nullable(v.string()),
+	caption: v.nullable(v.any()),
 });
 
 export const DataContentBlockSchema = v.object({
@@ -137,11 +138,11 @@ function normalizeRow(row: {
 	blockType: string;
 	richTextContent: unknown;
 	embedUrl: string | null;
-	embedCaption: string | null;
-	imageCaption: string | null;
+	embedCaption: JSONContent | null;
+	imageCaption: JSONContent | null;
 	imageKey: string | null;
 	imageAlt: string | null;
-	imageAssetCaption: string | null;
+	imageAssetCaption: JSONContent | null;
 	imageLicenseName: string | null;
 	imageLicenseUrl: string | null;
 	dataLimit: number | null;
@@ -150,7 +151,7 @@ function normalizeRow(row: {
 	heroEyebrow: string | null;
 	heroImageKey: string | null;
 	heroImageAlt: string | null;
-	heroImageCaption: string | null;
+	heroImageCaption: JSONContent | null;
 	heroLicenseName: string | null;
 	heroLicenseUrl: string | null;
 	heroCtas: unknown;

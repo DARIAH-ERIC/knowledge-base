@@ -9,12 +9,12 @@ interface RichTextBlock {
 
 interface ImageBlock {
 	type: "image";
-	content?: { imageKey?: string; imageUrl?: string; caption?: string };
+	content?: { imageKey?: string; imageUrl?: string; caption?: JSONContent | null };
 }
 
 interface EmbedBlock {
 	type: "embed";
-	content?: { url?: string; title?: string; caption?: string };
+	content?: { url?: string; title?: string; caption?: JSONContent | null };
 }
 
 export type MergeableBlock = RichTextBlock | ImageBlock | EmbedBlock;
@@ -91,7 +91,7 @@ export function splitDocumentToBlocks(doc: JSONContent): Array<ContentBlockInput
 				content: {
 					imageKey: (node.attrs?.imageKey as string | null | undefined) ?? undefined,
 					imageUrl: (node.attrs?.imageUrl as string | null | undefined) ?? undefined,
-					caption: (node.attrs?.caption as string | null | undefined) ?? undefined,
+					caption: (node.attrs?.caption as JSONContent | null | undefined) ?? undefined,
 				},
 			});
 		} else if (node.type === "embedBlock") {
@@ -102,7 +102,7 @@ export function splitDocumentToBlocks(doc: JSONContent): Array<ContentBlockInput
 				content: {
 					url: (node.attrs?.url as string | null | undefined) ?? undefined,
 					title: (node.attrs?.title as string | null | undefined) ?? undefined,
-					caption: (node.attrs?.caption as string | null | undefined) ?? undefined,
+					caption: (node.attrs?.caption as JSONContent | null | undefined) ?? undefined,
 				},
 			});
 		} else {

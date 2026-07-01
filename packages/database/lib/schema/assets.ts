@@ -1,3 +1,4 @@
+import type { JSONContent } from "@tiptap/core";
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
@@ -13,7 +14,7 @@ export const assets = p.snakeCase.table("assets", {
 	mimeType: p.text("mime_type").notNull(),
 	/** File size in bytes. Nullable for assets uploaded before size tracking was added. */
 	size: p.bigint("size", { mode: "number" }),
-	caption: p.text("caption"),
+	caption: p.jsonb("caption").$type<JSONContent>(),
 	alt: p.text("alt"),
 	licenseId: p.uuid("license_id").references(() => licenses.id),
 	...f.timestamps(),

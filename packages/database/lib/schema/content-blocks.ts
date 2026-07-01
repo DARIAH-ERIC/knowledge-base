@@ -116,7 +116,7 @@ export const embedContentBlocks = p.snakeCase.table("content_blocks_type_embed",
 		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	url: p.text("url").notNull(),
 	title: p.text("title").notNull(),
-	caption: p.text("caption"),
+	caption: p.jsonb("caption").$type<JSONContent>(),
 	...f.timestamps(),
 });
 
@@ -157,7 +157,7 @@ export const galleryContentBlockItems = p.snakeCase.table("content_blocks_type_g
 		.notNull()
 		.references(() => assets.id),
 	position: p.integer("position").notNull(),
-	caption: p.text("caption"),
+	caption: p.jsonb("caption").$type<JSONContent>(),
 	...f.timestamps(),
 });
 
@@ -177,7 +177,7 @@ export const imageContentBlocks = p.snakeCase.table("content_blocks_type_image",
 		.uuid("image_id")
 		.notNull()
 		.references(() => assets.id),
-	caption: p.text("caption"),
+	caption: p.jsonb("caption").$type<JSONContent>(),
 	...f.timestamps(),
 });
 

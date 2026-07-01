@@ -63,3 +63,4 @@ export type DatabaseService = ReturnType<typeof createDatabaseService>;
 
 export { alias } from "drizzle-orm/pg-core";
 export * from "drizzle-orm/sql";
+export { plainTextToRichText } from "./rich-text";

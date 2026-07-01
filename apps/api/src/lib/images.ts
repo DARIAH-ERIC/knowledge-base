@@ -1,16 +1,18 @@
+import type { JSONContent } from "@tiptap/core";
+
 import { images } from "@/services/images";
 
 export interface ImageAsset {
 	key: string;
 	alt: string | null;
-	caption: string | null;
+	caption: JSONContent | null;
 	license: { name: string | null; url: string | null } | null;
 }
 
 export interface Image {
 	url: string;
 	alt: string | null;
-	caption: string | null;
+	caption: JSONContent | null;
 	license: { name: string; url: string } | null;
 }
 
@@ -22,7 +24,7 @@ export interface Image {
 interface FlatImageAsset {
 	key: string;
 	alt: string | null;
-	caption: string | null;
+	caption: JSONContent | null;
 	licenseName: string | null;
 	licenseUrl: string | null;
 }
