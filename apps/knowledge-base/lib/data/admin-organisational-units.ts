@@ -112,6 +112,7 @@ export async function getOrganisationalUnitEditData(params: {
 		getUnitRelations(documentId),
 		db.query.organisationalUnitsToSocialMedia.findMany({
 			where: { organisationalUnitId: unit.id },
+			orderBy: { position: "asc" },
 			columns: { socialMediaId: true },
 		}),
 		getUnitRelationStatusOptions(unitType),

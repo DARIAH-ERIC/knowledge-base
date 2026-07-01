@@ -115,6 +115,7 @@ export default async function DashboardAdministratorGovernanceBodyDetailsPage(
 		getUnitRelations(documentId),
 		db.query.organisationalUnitsToSocialMedia.findMany({
 			where: { organisationalUnitId: governanceBody.id },
+			orderBy: { position: "asc" },
 			columns: { socialMediaId: true },
 		}),
 		getEntityContentBlocks(versionId, "description"),

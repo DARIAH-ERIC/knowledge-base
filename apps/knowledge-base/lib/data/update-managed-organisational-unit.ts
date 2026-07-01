@@ -5,8 +5,9 @@ import type { ContentBlockInput } from "@/lib/content-block-input";
 import { ensureDraftVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
+import { syncOrganisationalUnitSocialMedia } from "@/lib/data/social-media-relations";
 import type { Transaction } from "@/lib/db";
-import { eq, inArray } from "@/lib/db/sql";
+import { eq } from "@/lib/db/sql";
 
 interface ManagedOrganisationalUnitUpdate {
 	documentId: string;
@@ -64,32 +65,7 @@ export async function updateManagedOrganisationalUnitDraft(
 		input.descriptionContentBlocks,
 	);
 
-	const existingSocialMedia = await tx.query.organisationalUnitsToSocialMedia.findMany({
-		where: { organisationalUnitId: draftVersionId },
-		columns: { id: true, socialMediaId: true },
-	});
-	const existingIds = new Set(existingSocialMedia.map((row) => row.socialMediaId));
-	const submittedIds = new Set(input.socialMediaIds);
-	const idsToDelete = existingSocialMedia
-		.filter((row) => !submittedIds.has(row.socialMediaId))
-		.map((row) => row.id);
-	if (idsToDelete.length > 0) {
-		await tx
-			.delete(schema.organisationalUnitsToSocialMedia)
-			.where(inArray(schema.organisationalUnitsToSocialMedia.id, idsToDelete));
-	}
-
-	const idsToInsert = input.socialMediaIds.filter((id) => !existingIds.has(id));
-	if (idsToInsert.length > 0) {
-		await tx.insert(schema.organisationalUnitsToSocialMedia).values(
-			idsToInsert.map((socialMediaId) => {
-				return {
-					organisationalUnitId: draftVersionId,
-					socialMediaId,
-				};
-			}),
-		);
-	}
+	await syncOrganisationalUnitSocialMedia(tx, draftVersionId, input.socialMediaIds);
 
 	await touchVersion(tx, draftVersionId);
 }

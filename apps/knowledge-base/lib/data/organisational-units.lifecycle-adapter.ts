@@ -21,7 +21,10 @@ export const organisationalUnitsLifecycleAdapter: EntityLifecycleAdapter = {
 		// (keyed by entities.id) and are not cloned per version — see the schema.
 
 		const socialMedia = await tx
-			.select({ socialMediaId: schema.organisationalUnitsToSocialMedia.socialMediaId })
+			.select({
+				position: schema.organisationalUnitsToSocialMedia.position,
+				socialMediaId: schema.organisationalUnitsToSocialMedia.socialMediaId,
+			})
 			.from(schema.organisationalUnitsToSocialMedia)
 			.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, sourceVersionId));
 
@@ -54,7 +57,10 @@ export const organisationalUnitsLifecycleAdapter: EntityLifecycleAdapter = {
 			.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, targetVersionId));
 
 		const socialMedia = await tx
-			.select({ socialMediaId: schema.organisationalUnitsToSocialMedia.socialMediaId })
+			.select({
+				position: schema.organisationalUnitsToSocialMedia.position,
+				socialMediaId: schema.organisationalUnitsToSocialMedia.socialMediaId,
+			})
 			.from(schema.organisationalUnitsToSocialMedia)
 			.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, sourceVersionId));
 

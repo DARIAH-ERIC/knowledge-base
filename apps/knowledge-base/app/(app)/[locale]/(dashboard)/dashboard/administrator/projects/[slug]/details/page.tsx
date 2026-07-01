@@ -152,6 +152,7 @@ export default async function DashboardAdministratorProjectDetailsPage(
 		})(),
 		db.query.projectsToSocialMedia.findMany({
 			where: { projectId: project.id },
+			orderBy: { position: "asc" },
 			columns: {},
 			with: {
 				socialMedia: {

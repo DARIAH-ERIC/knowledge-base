@@ -317,6 +317,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						fetchPage={fetchSocialMediaOptionsPage}
 						initialItems={initialSocialMediaItems}
 						initialTotal={initialSocialMediaTotal}
+						isOrderable={true}
 						onChange={setSelectedSocialMediaIds}
 						selectedItems={localSocialMediaItems}
 						value={selectedSocialMediaIds}

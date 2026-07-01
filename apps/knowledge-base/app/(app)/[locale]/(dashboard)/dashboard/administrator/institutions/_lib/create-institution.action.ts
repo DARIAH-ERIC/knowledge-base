@@ -64,16 +64,16 @@ export const createInstitutionAction = createMutationAction({
 		);
 		if (publishedRelatedEntityIds.length > 0) {
 			await tx.insert(schema.entitiesToEntities).values(
-				publishedRelatedEntityIds.map((relatedEntityId) => {
-					return { entityId: documentId, relatedEntityId };
+				publishedRelatedEntityIds.map((relatedEntityId, position) => {
+					return { entityId: documentId, position, relatedEntityId };
 				}),
 			);
 		}
 
 		if (input.relatedResourceIds.length > 0) {
 			await tx.insert(schema.entitiesToResources).values(
-				input.relatedResourceIds.map((resourceId) => {
-					return { entityId: documentId, resourceId };
+				input.relatedResourceIds.map((resourceId, position) => {
+					return { entityId: documentId, position, resourceId };
 				}),
 			);
 		}

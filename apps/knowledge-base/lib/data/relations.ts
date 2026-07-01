@@ -261,7 +261,7 @@ export async function getAvailableResources() {
  * Filter the given document ids down to those that have at least one published version. Used as a
  * server-side backstop before persisting any document-level relation — the picker already restricts
  * choices to published entities, but stale or tampered submissions are silently dropped rather than
- * written through.
+ * written through. The result preserves the input order so callers can derive a stable `position`.
  */
 export async function filterToPublishedDocumentIds(
 	tx: Transaction,
@@ -278,9 +278,18 @@ export async function filterToPublishedDocumentIds(
 		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 		.where(and(publishedEntityVersionWhere(), inArray(schema.entities.id, [...documentIds])));
 
-	return rows.map((row) => row.id);
+	const publishedIds = new Set(rows.map((row) => row.id));
+
+	return documentIds.filter((id) => publishedIds.has(id));
 }
 
+/**
+ * Reconcile a document's entity/resource relations. The submitted id arrays are already in display
+ * order, so each row's `position` is its index in that order — enabling user-defined sort order to
+ * round-trip through {@link getEntityRelations}. Existing rows are diffed (rather than deleted and
+ * reinserted) to preserve `created_at`; surviving rows whose index changed get a `position`
+ * update.
+ */
 export async function syncEntityRelations(
 	tx: Transaction,
 	documentId: string,
@@ -289,30 +298,72 @@ export async function syncEntityRelations(
 ) {
 	const [existingEntityRows, existingResourceRows] = await Promise.all([
 		tx
-			.select({ relatedEntityId: schema.entitiesToEntities.relatedEntityId })
+			.select({
+				position: schema.entitiesToEntities.position,
+				relatedEntityId: schema.entitiesToEntities.relatedEntityId,
+			})
 			.from(schema.entitiesToEntities)
 			.where(eq(schema.entitiesToEntities.entityId, documentId)),
 		tx
-			.select({ resourceId: schema.entitiesToResources.resourceId })
+			.select({
+				position: schema.entitiesToResources.position,
+				resourceId: schema.entitiesToResources.resourceId,
+			})
 			.from(schema.entitiesToResources)
 			.where(eq(schema.entitiesToResources.entityId, documentId)),
 	]);
 
-	const existingDocumentIds = new Set(existingEntityRows.map((r) => r.relatedEntityId));
-	const existingResourceIds = new Set(existingResourceRows.map((r) => r.resourceId));
+	const existingDocumentPositions = new Map(
+		existingEntityRows.map((r) => [r.relatedEntityId, r.position] as const),
+	);
+	const existingResourcePositions = new Map(
+		existingResourceRows.map((r) => [r.resourceId, r.position] as const),
+	);
 
-	const documentIdsToDelete = [...existingDocumentIds].filter(
+	const documentIdsToDelete = [...existingDocumentPositions.keys()].filter(
 		(x) => !relatedDocumentIds.includes(x),
 	);
-	const documentIdsToAdd = await filterToPublishedDocumentIds(
-		tx,
-		relatedDocumentIds.filter((x) => !existingDocumentIds.has(x)),
+	const newlyPublishedDocumentIds = new Set(
+		await filterToPublishedDocumentIds(
+			tx,
+			relatedDocumentIds.filter((x) => !existingDocumentPositions.has(x)),
+		),
 	);
 
-	const resourceIdsToDelete = [...existingResourceIds].filter(
+	// Final ordered lists: submitted order, dropping additions that failed the published-only
+	// backstop. `position` is the index in this compacted list.
+	const orderedDocumentIds = relatedDocumentIds.filter(
+		(x) => existingDocumentPositions.has(x) || newlyPublishedDocumentIds.has(x),
+	);
+	const orderedResourceIds = relatedResourceIds;
+
+	const resourceIdsToDelete = [...existingResourcePositions.keys()].filter(
 		(x) => !relatedResourceIds.includes(x),
 	);
-	const resourceIdsToAdd = relatedResourceIds.filter((x) => !existingResourceIds.has(x));
+
+	const documentRowsToInsert = orderedDocumentIds.flatMap((relatedEntityId, position) =>
+		existingDocumentPositions.has(relatedEntityId)
+			? []
+			: [{ entityId: documentId, position, relatedEntityId }],
+	);
+	const resourceRowsToInsert = orderedResourceIds.flatMap((resourceId, position) =>
+		existingResourcePositions.has(resourceId)
+			? []
+			: [{ entityId: documentId, position, resourceId }],
+	);
+
+	const documentPositionUpdates = orderedDocumentIds.flatMap((relatedEntityId, position) =>
+		existingDocumentPositions.has(relatedEntityId) &&
+		existingDocumentPositions.get(relatedEntityId) !== position
+			? [{ position, relatedEntityId }]
+			: [],
+	);
+	const resourcePositionUpdates = orderedResourceIds.flatMap((resourceId, position) =>
+		existingResourcePositions.has(resourceId) &&
+		existingResourcePositions.get(resourceId) !== position
+			? [{ position, resourceId }]
+			: [],
+	);
 
 	await Promise.all([
 		documentIdsToDelete.length > 0
@@ -325,12 +376,8 @@ export async function syncEntityRelations(
 						),
 					)
 			: Promise.resolve(),
-		documentIdsToAdd.length > 0
-			? tx.insert(schema.entitiesToEntities).values(
-					documentIdsToAdd.map((relatedEntityId) => {
-						return { entityId: documentId, relatedEntityId };
-					}),
-				)
+		documentRowsToInsert.length > 0
+			? tx.insert(schema.entitiesToEntities).values(documentRowsToInsert)
 			: Promise.resolve(),
 		resourceIdsToDelete.length > 0
 			? tx
@@ -342,13 +389,31 @@ export async function syncEntityRelations(
 						),
 					)
 			: Promise.resolve(),
-		resourceIdsToAdd.length > 0
-			? tx.insert(schema.entitiesToResources).values(
-					resourceIdsToAdd.map((resourceId) => {
-						return { entityId: documentId, resourceId };
-					}),
-				)
+		resourceRowsToInsert.length > 0
+			? tx.insert(schema.entitiesToResources).values(resourceRowsToInsert)
 			: Promise.resolve(),
+		...documentPositionUpdates.map((update) =>
+			tx
+				.update(schema.entitiesToEntities)
+				.set({ position: update.position })
+				.where(
+					and(
+						eq(schema.entitiesToEntities.entityId, documentId),
+						eq(schema.entitiesToEntities.relatedEntityId, update.relatedEntityId),
+					),
+				),
+		),
+		...resourcePositionUpdates.map((update) =>
+			tx
+				.update(schema.entitiesToResources)
+				.set({ position: update.position })
+				.where(
+					and(
+						eq(schema.entitiesToResources.entityId, documentId),
+						eq(schema.entitiesToResources.resourceId, update.resourceId),
+					),
+				),
+		),
 	]);
 }
 
@@ -357,11 +422,13 @@ export async function getEntityRelations(documentId: string) {
 		db
 			.select({ relatedEntityId: schema.entitiesToEntities.relatedEntityId })
 			.from(schema.entitiesToEntities)
-			.where(eq(schema.entitiesToEntities.entityId, documentId)),
+			.where(eq(schema.entitiesToEntities.entityId, documentId))
+			.orderBy(schema.entitiesToEntities.position, schema.entitiesToEntities.createdAt),
 		db
 			.select({ resourceId: schema.entitiesToResources.resourceId })
 			.from(schema.entitiesToResources)
-			.where(eq(schema.entitiesToResources.entityId, documentId)),
+			.where(eq(schema.entitiesToResources.entityId, documentId))
+			.orderBy(schema.entitiesToResources.position, schema.entitiesToResources.createdAt),
 	]);
 
 	return {

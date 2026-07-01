@@ -77,6 +77,7 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 					fetchPage={(params) => fetchRelationOptionsPage("entities", params)}
 					initialItems={initialRelatedEntityItems}
 					initialTotal={initialRelatedEntityTotal}
+					isOrderable={true}
 					onChange={(ids) => {
 						setSelectedEntityIds(ids);
 					}}
@@ -105,6 +106,7 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 					fetchPage={(params) => fetchRelationOptionsPage("resources", params)}
 					initialItems={initialRelatedResourceItems}
 					initialTotal={initialRelatedResourceTotal}
+					isOrderable={true}
 					onChange={(ids) => {
 						setSelectedResourceIds(ids);
 					}}
