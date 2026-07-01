@@ -125,6 +125,7 @@ export async function getCountrySocialMedia(
 
 	const rows = await queryDb.query.organisationalUnitsToSocialMedia.findMany({
 		where: { organisationalUnitId },
+		orderBy: { position: "asc" },
 		columns: { socialMediaId: true },
 	});
 

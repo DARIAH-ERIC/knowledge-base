@@ -205,6 +205,7 @@ export const entitiesToEntities = p.snakeCase.table(
 			.uuid("related_entity_id")
 			.notNull()
 			.references(() => entities.id),
+		position: p.integer("position").notNull().default(0),
 		...f.timestamps(),
 	},
 	(t) => [
@@ -224,6 +225,7 @@ export const entitiesToResources = p.snakeCase.table(
 			.notNull()
 			.references(() => entities.id),
 		resourceId: p.text("resource_id").notNull(),
+		position: p.integer("position").notNull().default(0),
 		...f.timestamps(),
 	},
 	(t) => [

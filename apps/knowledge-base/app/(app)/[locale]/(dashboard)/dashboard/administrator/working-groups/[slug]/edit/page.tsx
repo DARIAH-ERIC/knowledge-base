@@ -140,6 +140,7 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 		getEntityContentBlocks(workingGroup.id, "description"),
 		db.query.organisationalUnitsToSocialMedia.findMany({
 			where: { organisationalUnitId: workingGroup.id },
+			orderBy: { position: "asc" },
 			columns: { socialMediaId: true },
 		}),
 	]);

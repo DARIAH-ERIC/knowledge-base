@@ -7,7 +7,7 @@ import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl, toImageAsset } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
-import { mapSocialMedia } from "@/lib/social-media";
+import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { type SQLWrapper, alias, and, count, eq, exists, not, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -116,6 +116,7 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 					},
 				},
 				socialMedia: {
+					...socialMediaByPosition,
 					columns: {
 						id: true,
 						name: true,
@@ -285,6 +286,7 @@ export async function getWorkingGroupById(
 					},
 				},
 				socialMedia: {
+					...socialMediaByPosition,
 					columns: {
 						id: true,
 						name: true,
@@ -463,6 +465,7 @@ export async function getWorkingGroupBySlug(
 				},
 			},
 			socialMedia: {
+				...socialMediaByPosition,
 				columns: {
 					id: true,
 					name: true,

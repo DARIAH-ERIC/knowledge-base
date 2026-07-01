@@ -7,6 +7,7 @@ import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl } from "@/lib/images";
 import { getPublishedProjectPartners } from "@/lib/project-partners";
+import { socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq, not, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -78,6 +79,7 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 					},
 				},
 				socialMedia: {
+					...socialMediaByPosition,
 					columns: {
 						id: true,
 						url: true,
@@ -198,6 +200,7 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 					},
 				},
 				socialMedia: {
+					...socialMediaByPosition,
 					columns: {
 						id: true,
 						url: true,
@@ -374,6 +377,7 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 				},
 			},
 			socialMedia: {
+				...socialMediaByPosition,
 				columns: {
 					id: true,
 					url: true,

@@ -138,6 +138,7 @@ export const projectsToSocialMedia = p.snakeCase.table("projects_to_social_media
 		.uuid("social_media_id")
 		.notNull()
 		.references(() => socialMedia.id),
+	position: p.integer("position").notNull().default(0),
 	...f.timestamps(),
 });
 

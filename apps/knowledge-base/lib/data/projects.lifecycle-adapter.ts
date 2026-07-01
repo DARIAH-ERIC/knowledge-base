@@ -19,7 +19,10 @@ export const projectsLifecycleAdapter: EntityLifecycleAdapter = {
 		// cloned per version — see projects.ts schema.
 
 		const socialMedia = await tx
-			.select({ socialMediaId: schema.projectsToSocialMedia.socialMediaId })
+			.select({
+				position: schema.projectsToSocialMedia.position,
+				socialMediaId: schema.projectsToSocialMedia.socialMediaId,
+			})
 			.from(schema.projectsToSocialMedia)
 			.where(eq(schema.projectsToSocialMedia.projectId, sourceVersionId));
 
@@ -59,7 +62,10 @@ export const projectsLifecycleAdapter: EntityLifecycleAdapter = {
 			.where(eq(schema.projects.id, targetVersionId));
 
 		const socialMedia = await tx
-			.select({ socialMediaId: schema.projectsToSocialMedia.socialMediaId })
+			.select({
+				position: schema.projectsToSocialMedia.position,
+				socialMediaId: schema.projectsToSocialMedia.socialMediaId,
+			})
 			.from(schema.projectsToSocialMedia)
 			.where(eq(schema.projectsToSocialMedia.projectId, sourceVersionId));
 

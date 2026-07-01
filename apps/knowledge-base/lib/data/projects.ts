@@ -286,6 +286,7 @@ export async function getProjectDetailsForAdmin(currentUser: Pick<User, "role">,
 		getProjectPartnerRowsForAdmin(project.entityVersion.entity.id),
 		db.query.projectsToSocialMedia.findMany({
 			where: { projectId: project.id },
+			orderBy: { position: "asc" },
 			columns: {},
 			with: {
 				socialMedia: {
@@ -356,6 +357,7 @@ export async function getProjectEditDataForAdmin(currentUser: Pick<User, "role">
 		getProjectPartnerRowsForAdmin(project.entityVersion.entity.id),
 		db.query.projectsToSocialMedia.findMany({
 			where: { projectId: project.id },
+			orderBy: { position: "asc" },
 			columns: { socialMediaId: true },
 		}),
 	]);

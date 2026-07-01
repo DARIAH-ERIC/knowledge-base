@@ -2,6 +2,7 @@ import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
+import { dragGridRowDownByName } from "@/e2e/lib/fixtures/reorder";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/website/news";
@@ -120,12 +121,29 @@ export class WebsiteNewsPage {
 	}
 
 	async removeRelatedEntity(entityName: string): Promise<void> {
-		// Selected items now render as rows in a grid list; each row has a single Remove button (the
-		// button aria-labels are not locator-friendly in the e2e build, so target the row by name).
+		// Selected items render as rows in an orderable grid list; each row has a drag handle
+		// (slot="drag") plus a Remove button. The button aria-labels are not locator-friendly in the
+		// e2e build, so target the row by name and the non-drag button.
 		const row = this.relatedEntitiesSection().getByRole("row", { name: entityName });
 		await row.waitFor({ state: "visible" });
-		await row.getByRole("button").click();
+		await row.locator('button:not([slot="drag"])').click();
 		await row.waitFor({ state: "hidden" });
+	}
+
+	/** Names of the currently-selected related entities, in display order. */
+	async getRelatedEntityNames(): Promise<Array<string>> {
+		const rows = this.relatedEntitiesSection().getByRole("row");
+		const texts = await rows.allInnerTexts();
+		return texts.map((text) => text.trim()).filter((text) => text !== "");
+	}
+
+	/** Drag a related-entity row one position down past the row below it. */
+	async moveRelatedEntityDown(entityName: string): Promise<void> {
+		await dragGridRowDownByName(
+			this.page,
+			this.relatedEntitiesSection().getByRole("row"),
+			entityName,
+		);
 	}
 
 	private contentBlockEditor(): Locator {

@@ -7,7 +7,7 @@ import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl, toImageAsset } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
-import { mapSocialMedia } from "@/lib/social-media";
+import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { hardcodedWorkingGroups } from "@/routes/governance-bodies/hardcoded-working-groups";
 import { alias, and, count, eq, inArray, sql } from "@/services/db/sql";
@@ -389,6 +389,7 @@ export async function getGovernanceBodies(
 					},
 				},
 				socialMedia: {
+					...socialMediaByPosition,
 					columns: {
 						id: true,
 						name: true,
@@ -509,6 +510,7 @@ export async function getGovernanceBodyById(
 						},
 					},
 					socialMedia: {
+						...socialMediaByPosition,
 						columns: {
 							id: true,
 							name: true,
@@ -683,6 +685,7 @@ export async function getGovernanceBodyBySlug(
 				},
 			},
 			socialMedia: {
+				...socialMediaByPosition,
 				columns: {
 					id: true,
 					name: true,

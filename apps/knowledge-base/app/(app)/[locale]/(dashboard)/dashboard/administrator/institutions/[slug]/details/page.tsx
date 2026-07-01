@@ -120,6 +120,7 @@ export default async function DashboardAdministratorInstitutionDetailsPage(
 		getUnitProjectPartnerships(documentId),
 		db.query.organisationalUnitsToSocialMedia.findMany({
 			where: { organisationalUnitId: institution.id },
+			orderBy: { position: "asc" },
 			columns: { socialMediaId: true },
 		}),
 		getEntityContentBlocks(versionId, "description"),

@@ -139,6 +139,7 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 		getEntityContentBlocks(governanceBody.id, "description"),
 		db.query.organisationalUnitsToSocialMedia.findMany({
 			where: { organisationalUnitId: governanceBody.id },
+			orderBy: { position: "asc" },
 			columns: { socialMediaId: true },
 		}),
 	]);

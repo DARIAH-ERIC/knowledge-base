@@ -7,7 +7,7 @@ import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl, toImageAsset } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
-import { mapSocialMedia } from "@/lib/social-media";
+import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { type SQLWrapper, alias, and, count, eq, exists, inArray, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -68,6 +68,7 @@ export async function getMembersAndPartners(
 					},
 				},
 				socialMedia: {
+					...socialMediaByPosition,
 					columns: {
 						id: true,
 						name: true,
@@ -360,6 +361,7 @@ async function getInstitutionsByRelation(
 				},
 			},
 			socialMedia: {
+				...socialMediaByPosition,
 				columns: {
 					url: true,
 				},
@@ -500,6 +502,7 @@ async function getNationalConsortium(
 				},
 			},
 			socialMedia: {
+				...socialMediaByPosition,
 				columns: {
 					id: true,
 					name: true,
@@ -679,6 +682,7 @@ export async function getMemberOrPartnerById(
 					},
 				},
 				socialMedia: {
+					...socialMediaByPosition,
 					columns: {
 						id: true,
 						name: true,
@@ -904,6 +908,7 @@ export async function getMemberOrPartnerBySlug(
 				},
 			},
 			socialMedia: {
+				...socialMediaByPosition,
 				columns: {
 					id: true,
 					name: true,

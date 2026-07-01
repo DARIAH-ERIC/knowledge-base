@@ -184,6 +184,7 @@ export const organisationalUnitsToSocialMedia = p.snakeCase.table(
 			.uuid("social_media_id")
 			.notNull()
 			.references(() => socialMedia.id),
+		position: p.integer("position").notNull().default(0),
 		...f.timestamps(),
 	},
 );
