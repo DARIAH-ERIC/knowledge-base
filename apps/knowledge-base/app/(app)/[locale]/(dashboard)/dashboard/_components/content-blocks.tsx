@@ -2,11 +2,13 @@
 
 "use client";
 
+import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 import type { ContentBlockTypes } from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { Label, labelStyles } from "@dariah-eric/ui/field";
 import { InlineRichTextEditor } from "@dariah-eric/ui/inline-rich-text-editor";
+import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
 import { Input } from "@dariah-eric/ui/input";
 import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
 import {
@@ -77,7 +79,14 @@ interface ImageContentBlockItem {
 	id: Key;
 	type: "image";
 	position?: number;
-	content?: { imageKey?: string; imageUrl?: string; caption?: JSONContent | null };
+	content?: {
+		imageKey?: string;
+		imageUrl?: string;
+		alt?: string | null;
+		assetCaption?: JSONContent | null;
+		caption?: JSONContent | null;
+		captionMode?: ImageCaptionMode;
+	};
 }
 
 interface EmbedContentBlockItem {
@@ -582,8 +591,8 @@ function ContentBlockPanel({
 									<MediaLibraryDialog
 										defaultPrefix="images"
 										initialAssets={initialAssets}
-										onSelect={(key, url) => {
-											insert(key, url);
+										onSelect={(key, url, asset) => {
+											insert(key, url, asset);
 										}}
 										prefixes={["avatars", "images", "logos"]}
 										trigger={({ open }) => (
@@ -1026,13 +1035,20 @@ function ImageContentBlockPanel({
 	const imageKey = item.content?.imageKey;
 	const imageUrl = item.content?.imageUrl;
 	const caption = item.content?.caption;
+	const captionMode =
+		item.content?.captionMode ?? (item.content?.caption != null ? "override" : "inherit");
+	const { caption: resolvedCaption } = resolveImageCaption({
+		assetCaption: item.content?.assetCaption,
+		blockCaption: caption,
+		captionMode,
+	});
 
 	return (
 		<div className="flex flex-col gap-y-4">
 			<div className="flex items-start gap-x-4">
 				{imageUrl != null && (
 					<img
-						alt={caption != null ? toPlainText(caption) : t("Selected image")}
+						alt={item.content?.alt ?? ""}
 						className="block-24 inline-auto max-inline-full rounded-lg object-cover shrink-0"
 						src={imageUrl}
 					/>
@@ -1040,8 +1056,15 @@ function ImageContentBlockPanel({
 				<MediaLibraryDialog
 					defaultPrefix="images"
 					initialAssets={initialAssets ?? []}
-					onSelect={(key, url) => {
-						onChange({ ...item.content, imageKey: key, imageUrl: url });
+					onSelect={(key, url, asset) => {
+						onChange({
+							...item.content,
+							imageKey: key,
+							imageUrl: url,
+							alt: asset?.alt ?? null,
+							assetCaption: asset?.caption ?? null,
+							captionMode,
+						});
 					}}
 					prefixes={["avatars", "images", "logos"]}
 				/>
@@ -1050,14 +1073,39 @@ function ImageContentBlockPanel({
 				)}
 			</div>
 			<div className="flex flex-col gap-y-1">
-				<span className={labelStyles()}>{t("Caption")}</span>
-				<InlineRichTextEditor
-					aria-label={t("Caption")}
-					content={caption ?? undefined}
-					onChange={(value) => {
-						onChange({ ...item.content, caption: isEmptyRichTextDocument(value) ? null : value });
+				<span className={labelStyles()}>{t("Caption behavior")}</span>
+				<ToggleGroup
+					aria-label={t("Caption behavior")}
+					disallowEmptySelection={true}
+					onSelectionChange={(keys) => {
+						const mode = [...keys][0] as ImageCaptionMode | undefined;
+						if (mode != null) {
+							onChange({ ...item.content, captionMode: mode });
+						}
 					}}
-				/>
+					selectedKeys={[captionMode]}
+					size="sm"
+				>
+					<ToggleGroupItem id="inherit">{t("Use asset caption")}</ToggleGroupItem>
+					<ToggleGroupItem id="override">{t("Custom caption")}</ToggleGroupItem>
+					<ToggleGroupItem id="hidden">{t("No caption")}</ToggleGroupItem>
+				</ToggleGroup>
+				{captionMode === "override" ? (
+					<InlineRichTextEditor
+						aria-label={t("Custom caption")}
+						content={caption ?? undefined}
+						onChange={(value) => {
+							onChange({
+								...item.content,
+								caption: isEmptyRichTextDocument(value) ? null : value,
+								captionMode: "override",
+							});
+						}}
+					/>
+				) : null}
+				{captionMode === "inherit" && !isEmptyRichTextDocument(resolvedCaption) ? (
+					<InlineRichTextRenderer content={resolvedCaption!} />
+				) : null}
 			</div>
 		</div>
 	);

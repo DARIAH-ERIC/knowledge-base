@@ -1,6 +1,8 @@
 import type { JSONContent } from "@tiptap/core";
 import * as v from "valibot";
 
+const ImageCaptionModeSchema = v.picklist(["hidden", "inherit", "override"] as const);
+
 export const ContentBlockInputSchema = v.union([
 	v.object({
 		id: v.string(),
@@ -16,7 +18,10 @@ export const ContentBlockInputSchema = v.union([
 			v.object({
 				imageKey: v.optional(v.string()),
 				imageUrl: v.optional(v.string()),
+				alt: v.optional(v.nullable(v.string())),
+				assetCaption: v.optional(v.nullable(v.custom<JSONContent>(() => true))),
 				caption: v.optional(v.nullable(v.custom<JSONContent>(() => true))),
+				captionMode: v.optional(ImageCaptionModeSchema),
 			}),
 		),
 	}),

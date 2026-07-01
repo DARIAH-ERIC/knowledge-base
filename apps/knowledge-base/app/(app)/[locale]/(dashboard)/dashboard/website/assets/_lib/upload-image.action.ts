@@ -6,6 +6,7 @@ import {
 	createActionStateError,
 	createActionStateSuccess,
 } from "@dariah-eric/next-lib/actions";
+import type { JSONContent } from "@tiptap/core";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
@@ -21,7 +22,7 @@ import { createServerAction } from "@/lib/server/create-server-action";
 
 /** Uses createServerAction because the success response carries typed data. */
 export const uploadImageAction = createServerAction<
-	{ key: string; url: string },
+	{ key: string; url: string; alt: string | null; caption: JSONContent | null },
 	GetValidationErrors<typeof UploadImageInputSchema>
 >(
 	// FIXME: should use a coarser-grained "can upload assets" capability instead of requireAdmin
@@ -61,7 +62,7 @@ export const uploadImageAction = createServerAction<
 
 		return createActionStateSuccess({
 			message: t("Successfully uploaded image."),
-			data: { key, url },
+			data: { key, url, alt: alt ?? null, caption: caption ?? null },
 		});
 	},
 );

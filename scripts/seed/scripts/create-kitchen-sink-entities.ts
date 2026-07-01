@@ -1824,6 +1824,7 @@ async function main() {
 					id: imageBlockId,
 					imageId: createId("asset:image"),
 					caption: plainTextToRichText(`Kitchen sink image block for ${field.fieldName}.`),
+					captionMode: "override",
 				});
 				await upsertById(tx, schema.embedContentBlocks, {
 					id: embedBlockId,

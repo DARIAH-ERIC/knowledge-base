@@ -1,3 +1,4 @@
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import type { JSONContent } from "@tiptap/core";
 
 import type { ContentBlockInput } from "@/lib/content-block-input";
@@ -9,7 +10,14 @@ interface RichTextBlock {
 
 interface ImageBlock {
 	type: "image";
-	content?: { imageKey?: string; imageUrl?: string; caption?: JSONContent | null };
+	content?: {
+		imageKey?: string;
+		imageUrl?: string;
+		alt?: string | null;
+		assetCaption?: JSONContent | null;
+		caption?: JSONContent | null;
+		captionMode?: ImageCaptionMode;
+	};
 }
 
 interface EmbedBlock {
@@ -32,12 +40,17 @@ export function mergeBlocksToDocument(blocks: Array<MergeableBlock>): JSONConten
 			const children = block.content?.content ?? [];
 			nodes.push(...children);
 		} else if (block.type === "image") {
+			const captionMode =
+				block.content?.captionMode ?? (block.content?.caption != null ? "override" : "inherit");
 			nodes.push({
 				type: "assetImage",
 				attrs: {
 					imageKey: block.content?.imageKey ?? null,
 					imageUrl: block.content?.imageUrl ?? null,
+					alt: block.content?.alt ?? null,
+					assetCaption: block.content?.assetCaption ?? null,
 					caption: block.content?.caption ?? null,
+					captionMode,
 				},
 			});
 		} else {
@@ -91,7 +104,11 @@ export function splitDocumentToBlocks(doc: JSONContent): Array<ContentBlockInput
 				content: {
 					imageKey: (node.attrs?.imageKey as string | null | undefined) ?? undefined,
 					imageUrl: (node.attrs?.imageUrl as string | null | undefined) ?? undefined,
+					alt: (node.attrs?.alt as string | null | undefined) ?? undefined,
+					assetCaption: (node.attrs?.assetCaption as JSONContent | null | undefined) ?? undefined,
 					caption: (node.attrs?.caption as JSONContent | null | undefined) ?? undefined,
+					captionMode:
+						(node.attrs?.captionMode as ImageCaptionMode | null | undefined) ?? "inherit",
 				},
 			});
 		} else if (node.type === "embedBlock") {

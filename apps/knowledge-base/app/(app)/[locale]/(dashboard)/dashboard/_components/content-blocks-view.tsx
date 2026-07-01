@@ -2,6 +2,7 @@
 
 "use client";
 
+import { resolveImageCaption } from "@dariah-eric/database/image-captions";
 import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
 import { isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
 import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
@@ -226,7 +227,14 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 
 		case "image": {
 			const imageUrl = contentBlock.content?.imageUrl;
-			const caption = contentBlock.content?.caption;
+			const captionMode =
+				contentBlock.content?.captionMode ??
+				(contentBlock.content?.caption != null ? "override" : "inherit");
+			const { caption } = resolveImageCaption({
+				assetCaption: contentBlock.content?.assetCaption,
+				blockCaption: contentBlock.content?.caption,
+				captionMode,
+			});
 
 			if (imageUrl == null || !imageUrl) {
 				return null;
@@ -234,7 +242,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 
 			return (
 				<figure>
-					<img alt={toPlainText(caption)} src={imageUrl} />
+					<img alt={contentBlock.content?.alt ?? ""} src={imageUrl} />
 					<CaptionFigcaption caption={caption} />
 				</figure>
 			);
