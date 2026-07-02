@@ -6649,7 +6649,37 @@ msgstr "Error 401"
 msgid "N1Yb+F"
 msgstr "You need to sign in to access this page. If you already have an account, please sign in below."
 
-#: lib/server/create-command-action.ts:135
+#: lib/server/create-command-action.ts:136
+#: lib/server/create-server-action.ts:111
+msgid "Ni9MxS"
+msgstr "An entity with this slug already exists."
+
+#: lib/server/create-command-action.ts:137
 #: lib/server/create-server-action.ts:112
+msgid "WtzfWm"
+msgstr "A record with these values already exists."
+
+#: lib/server/create-command-action.ts:138
+#: lib/server/create-server-action.ts:113
+msgid "7XzbEI"
+msgstr "A related record no longer exists. Refresh the page and try again."
+
+#: lib/server/create-command-action.ts:141
+#: lib/server/create-server-action.ts:116
+msgid "FhIASk"
+msgstr "This record conflicts with an existing record."
+
+#: lib/server/create-command-action.ts:142
+#: lib/server/create-server-action.ts:117
+msgid "qDy0wr"
+msgstr "The submitted data violates a data rule."
+
+#: lib/server/create-command-action.ts:143
+#: lib/server/create-server-action.ts:118
+msgid "Bosjdo"
+msgstr "The submitted data is incomplete."
+
+#: lib/server/create-command-action.ts:146
+#: lib/server/create-server-action.ts:123
 msgid "lkI8/e"
 msgstr "Internal server error."
