@@ -65,6 +65,30 @@ export function createStorageService(params: CreateStorageServiceParams) {
 			});
 		},
 
+		/** Overwrites the object at an existing `key`, unlike `upload` which generates a new key. */
+		// oxlint-disable-next-line typescript/explicit-module-boundary-types
+		replace({
+			input,
+			key,
+			metadata,
+			size,
+		}: {
+			input: Readable | Buffer;
+			key: string;
+			metadata: AssetMetadata;
+			size?: number;
+		}) {
+			return Result.tryPromise({
+				async try() {
+					await client.putObject(bucketName, key, input, size, metadata);
+					return { key };
+				},
+				catch(cause) {
+					return new StorageUploadError({ cause });
+				},
+			});
+		},
+
 		// oxlint-disable-next-line typescript/explicit-module-boundary-types
 		stat(key: string) {
 			return Result.tryPromise({
