@@ -102,14 +102,12 @@ export const EventsQuerySchema = v.object({
 		v.description(
 			"Return only events whose duration overlaps with or extends beyond this date (YYYY-MM-DD). Combined with `until`, defines a window: events starting before `until` and ending after `from`. Pass today's date to retrieve the first page of upcoming and ongoing events. Results are sorted ascending (soonest first) when this parameter is set.",
 		),
-		v.metadata({ ref: "EventFromParam" }),
 	),
 	until: v.pipe(
 		v.optional(v.pipe(v.string(), v.isoDate())),
 		v.description(
 			"Return only events whose duration overlaps with or starts before this date (YYYY-MM-DD). Combined with `from`, defines a window: events starting before `until` and ending after `from`. When used without `from`, results are sorted descending (most recently started first).",
 		),
-		v.metadata({ ref: "EventUntilParam" }),
 	),
 });
 

@@ -60,13 +60,9 @@ export const NavigationMenuListSchema = v.pipe(
 export type NavigationMenuList = v.InferOutput<typeof NavigationMenuListSchema>;
 
 export const GetNavigation = {
-	QuerySchema: v.pipe(
-		v.object({
-			menu: v.optional(v.string()),
-		}),
-		v.description("Get navigation query params"),
-		v.metadata({ ref: "GetNavigationQuery" }),
-	),
+	QuerySchema: v.object({
+		menu: v.pipe(v.optional(v.string()), v.description("Filter navigation menus by name")),
+	}),
 	ResponseSchema: v.pipe(
 		NavigationMenuListSchema,
 		v.description("List of navigation menus with items"),

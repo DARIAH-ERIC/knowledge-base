@@ -134,7 +134,6 @@ export const WorkingGroupQuerySchema = v.object({
 		v.description(
 			"Filter by active (membership duration contains current time) or inactive (membership duration has ended)",
 		),
-		v.metadata({ ref: "WorkingGroupStatusParam" }),
 	),
 });
 
