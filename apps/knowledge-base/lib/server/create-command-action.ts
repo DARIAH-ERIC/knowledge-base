@@ -19,6 +19,7 @@ import { type Transaction, db } from "@/lib/db";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import type { MutationResult } from "@/lib/server/create-mutation-action";
+import { getUserFacingErrorMessage } from "@/lib/server/get-user-facing-error-message";
 
 export interface CommandContext {
 	user: User | null;
@@ -131,8 +132,18 @@ export function createCommandAction<
 		} catch (error) {
 			rethrow(error);
 			log.error(error);
+			const message = getUserFacingErrorMessage(error, {
+				entitySlugConflict: t("An entity with this slug already exists."),
+				uniqueConflict: t("A record with these values already exists."),
+				missingRelatedRecord: t(
+					"A related record no longer exists. Refresh the page and try again.",
+				),
+				recordConflict: t("This record conflicts with an existing record."),
+				invalidData: t("The submitted data violates a data rule."),
+				missingData: t("The submitted data is incomplete."),
+			});
 			return createActionStateError<TValidationErrors>({
-				message: t("Internal server error."),
+				message: message ?? t("Internal server error."),
 			});
 		}
 	};

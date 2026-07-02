@@ -11,6 +11,7 @@ import { headers } from "next/headers";
 import { unstable_rethrow as rethrow } from "next/navigation";
 
 import { assertAdmin, assertAuthenticated } from "@/lib/auth/session";
+import { getUserFacingErrorMessage } from "@/lib/server/get-user-facing-error-message";
 
 export interface ServerActionContext {
 	/**
@@ -106,10 +107,20 @@ export function createServerAction<
 			rethrow(error);
 
 			log.error(error);
+			const message = getUserFacingErrorMessage(error, {
+				entitySlugConflict: t("An entity with this slug already exists."),
+				uniqueConflict: t("A record with these values already exists."),
+				missingRelatedRecord: t(
+					"A related record no longer exists. Refresh the page and try again.",
+				),
+				recordConflict: t("This record conflicts with an existing record."),
+				invalidData: t("The submitted data violates a data rule."),
+				missingData: t("The submitted data is incomplete."),
+			});
 
 			return createActionStateError<TValidationErrors>({
 				formData,
-				message: t("Internal server error."),
+				message: message ?? t("Internal server error."),
 			});
 		}
 	};
