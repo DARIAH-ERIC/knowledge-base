@@ -157,13 +157,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "type": "string",
         },
       },
-      "GetNavigationQuery": {
-        "in": "query",
-        "name": "menu",
-        "schema": {
-          "type": "string",
-        },
-      },
       "GetNewsItemByIdParams": {
         "in": "path",
         "name": "id",
@@ -2082,14 +2075,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
         "type": "object",
       },
-      "DariahProjectStatusParam": {
-        "description": "Filter by active (project duration contains current time) or inactive (project duration has ended)",
-        "enum": [
-          "active",
-          "inactive",
-        ],
-        "type": "string",
-      },
       "DocumentOrPolicy": {
         "description": "Document or policy",
         "properties": {
@@ -3484,11 +3469,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
         "type": "object",
       },
-      "EventFromParam": {
-        "description": "Return only events whose duration overlaps with or extends beyond this date (YYYY-MM-DD). Combined with \`until\`, defines a window: events starting before \`until\` and ending after \`from\`. Pass today's date to retrieve the first page of upcoming and ongoing events. Results are sorted ascending (soonest first) when this parameter is set.",
-        "format": "date",
-        "type": "string",
-      },
       "EventLink": {
         "description": "Link to adjacent event",
         "properties": {
@@ -3583,11 +3563,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "$ref": "#/components/schemas/EventSlug",
         },
         "type": "array",
-      },
-      "EventUntilParam": {
-        "description": "Return only events whose duration overlaps with or starts before this date (YYYY-MM-DD). Combined with \`from\`, defines a window: events starting before \`until\` and ending after \`from\`. When used without \`from\`, results are sorted descending (most recently started first).",
-        "format": "date",
-        "type": "string",
       },
       "FeaturedEntities": {
         "description": "Featured entities grouped by type",
@@ -4168,18 +4143,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "description": "List of funding call slugs",
         "items": {
           "$ref": "#/components/schemas/FundingCallSlug",
-        },
-        "type": "array",
-      },
-      "FundingCallStatusParam": {
-        "description": "Filter by funding call status relative to the current time. Can be provided multiple times, e.g. \`?status=upcoming&status=open\`.",
-        "items": {
-          "enum": [
-            "upcoming",
-            "open",
-            "closed",
-          ],
-          "type": "string",
         },
         "type": "array",
       },
@@ -7337,30 +7300,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         },
         "type": "array",
       },
-      "InstitutionStatusParam": {
-        "anyOf": [
-          {
-            "items": {
-              "enum": [
-                "partner_institution",
-                "cooperating_partner",
-                "none",
-              ],
-              "type": "string",
-            },
-            "type": "array",
-          },
-          {
-            "enum": [
-              "partner_institution",
-              "cooperating_partner",
-              "none",
-            ],
-            "type": "string",
-          },
-        ],
-        "description": "Filter institutions by their relation to the DARIAH-EU ERIC (repeatable)",
-      },
       "InternalServerErrorResponse": {
         "description": "Internal server error response",
         "properties": {
@@ -7375,13 +7314,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "message",
         ],
         "type": "object",
-      },
-      "LimitParam": {
-        "default": "10",
-        "description": "Maximum number of items in paginated list",
-        "maximum": 100,
-        "minimum": 1,
-        "type": "integer",
       },
       "MemberOrObserver": {
         "description": "Member or observer country",
@@ -9410,12 +9342,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
         "type": "object",
       },
-      "OffsetParam": {
-        "default": "0",
-        "description": "Offset in paginated list",
-        "minimum": 0,
-        "type": "integer",
-      },
       "Opportunity": {
         "description": "Opportunity",
         "properties": {
@@ -10044,29 +9970,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "description": "List of opportunity slugs",
         "items": {
           "$ref": "#/components/schemas/OpportunitySlug",
-        },
-        "type": "array",
-      },
-      "OpportunitySourceParam": {
-        "description": "Filter by opportunity source. Can be provided multiple times, e.g. \`?source=dariah&source=external\`.",
-        "items": {
-          "enum": [
-            "dariah",
-            "external",
-          ],
-          "type": "string",
-        },
-        "type": "array",
-      },
-      "OpportunityStatusParam": {
-        "description": "Filter by opportunity status relative to the current time. Can be provided multiple times, e.g. \`?status=upcoming&status=open\`.",
-        "items": {
-          "enum": [
-            "upcoming",
-            "open",
-            "closed",
-          ],
-          "type": "string",
         },
         "type": "array",
       },
@@ -12303,14 +12206,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "type",
         ],
         "type": "object",
-      },
-      "ProjectStatusParam": {
-        "description": "Filter by active (project duration contains current time) or inactive (project duration has ended)",
-        "enum": [
-          "active",
-          "inactive",
-        ],
-        "type": "string",
       },
       "RelatedNationalConsortium": {
         "description": "National consortium",
@@ -14592,14 +14487,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         },
         "type": "array",
       },
-      "WorkingGroupStatusParam": {
-        "description": "Filter by active (membership duration contains current time) or inactive (membership duration has ended)",
-        "enum": [
-          "active",
-          "inactive",
-        ],
-        "type": "string",
-      },
     },
     "securitySchemes": {
       "apiAccessToken": {
@@ -14623,24 +14510,36 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getDariahProjects",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
           {
+            "description": "Filter by active (project duration contains current time) or inactive (project duration has ended)",
             "in": "query",
             "name": "status",
             "schema": {
-              "$ref": "#/components/schemas/DariahProjectStatusParam",
+              "enum": [
+                "active",
+                "inactive",
+              ],
+              "type": "string",
             },
           },
         ],
@@ -14678,17 +14577,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getDariahProjectSlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -14820,17 +14726,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getDocumentsPolicies",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -14868,17 +14781,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getDocumentOrPolicySlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -15066,31 +14986,42 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getEvents",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
           {
+            "description": "Return only events whose duration overlaps with or extends beyond this date (YYYY-MM-DD). Combined with \`until\`, defines a window: events starting before \`until\` and ending after \`from\`. Pass today's date to retrieve the first page of upcoming and ongoing events. Results are sorted ascending (soonest first) when this parameter is set.",
             "in": "query",
             "name": "from",
             "schema": {
-              "$ref": "#/components/schemas/EventFromParam",
+              "format": "date",
+              "type": "string",
             },
           },
           {
+            "description": "Return only events whose duration overlaps with or starts before this date (YYYY-MM-DD). Combined with \`from\`, defines a window: events starting before \`until\` and ending after \`from\`. When used without \`from\`, results are sorted descending (most recently started first).",
             "in": "query",
             "name": "until",
             "schema": {
-              "$ref": "#/components/schemas/EventUntilParam",
+              "format": "date",
+              "type": "string",
             },
           },
         ],
@@ -15128,17 +15059,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getEventSlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -15302,24 +15240,40 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getFundingCalls",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
           {
+            "description": "Filter by funding call status relative to the current time. Can be provided multiple times, e.g. \`?status=upcoming&status=open\`.",
             "in": "query",
             "name": "status",
             "schema": {
-              "$ref": "#/components/schemas/FundingCallStatusParam",
+              "items": {
+                "enum": [
+                  "upcoming",
+                  "open",
+                  "closed",
+                ],
+                "type": "string",
+              },
+              "type": "array",
             },
           },
         ],
@@ -15357,17 +15311,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getFundingCallSlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -15499,17 +15460,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getGovernanceBodies",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -15547,17 +15515,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getGovernanceBodySlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -15689,17 +15664,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getImpactCaseStudies",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -15737,17 +15719,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getImpactCaseStudySlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -15879,24 +15868,52 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getInstitutions",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
           {
+            "description": "Filter institutions by their relation to the DARIAH-EU ERIC (repeatable)",
             "in": "query",
             "name": "status",
             "schema": {
-              "$ref": "#/components/schemas/InstitutionStatusParam",
+              "anyOf": [
+                {
+                  "items": {
+                    "enum": [
+                      "partner_institution",
+                      "cooperating_partner",
+                      "none",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                {
+                  "enum": [
+                    "partner_institution",
+                    "cooperating_partner",
+                    "none",
+                  ],
+                  "type": "string",
+                },
+              ],
             },
           },
         ],
@@ -15934,17 +15951,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getInstitutionSlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -16076,17 +16100,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getMembersAndPartners",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -16124,17 +16155,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getMemberOrPartnerSlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -16266,17 +16304,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getNationalConsortia",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -16314,17 +16359,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getNationalConsortiumSlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -16456,7 +16508,12 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getNavigation",
         "parameters": [
           {
-            "$ref": "#/components/parameters/GetNavigationQuery",
+            "description": "Filter navigation menus by name",
+            "in": "query",
+            "name": "menu",
+            "schema": {
+              "type": "string",
+            },
           },
         ],
         "responses": {
@@ -16493,17 +16550,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getNews",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -16541,17 +16605,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getNewsItemSlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -16683,17 +16754,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getNewsletters",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -16798,31 +16876,55 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getOpportunities",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
           {
+            "description": "Filter by opportunity status relative to the current time. Can be provided multiple times, e.g. \`?status=upcoming&status=open\`.",
             "in": "query",
             "name": "status",
             "schema": {
-              "$ref": "#/components/schemas/OpportunityStatusParam",
+              "items": {
+                "enum": [
+                  "upcoming",
+                  "open",
+                  "closed",
+                ],
+                "type": "string",
+              },
+              "type": "array",
             },
           },
           {
+            "description": "Filter by opportunity source. Can be provided multiple times, e.g. \`?source=dariah&source=external\`.",
             "in": "query",
             "name": "source",
             "schema": {
-              "$ref": "#/components/schemas/OpportunitySourceParam",
+              "items": {
+                "enum": [
+                  "dariah",
+                  "external",
+                ],
+                "type": "string",
+              },
+              "type": "array",
             },
           },
         ],
@@ -16860,17 +16962,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getOpportunitySlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -17002,17 +17111,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getPages",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -17050,17 +17166,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getPageSlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -17192,17 +17315,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getPersons",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -17240,17 +17370,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getPersonSlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -17382,24 +17519,36 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getProjects",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
           {
+            "description": "Filter by active (project duration contains current time) or inactive (project duration has ended)",
             "in": "query",
             "name": "status",
             "schema": {
-              "$ref": "#/components/schemas/ProjectStatusParam",
+              "enum": [
+                "active",
+                "inactive",
+              ],
+              "type": "string",
             },
           },
         ],
@@ -17437,17 +17586,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getProjectSlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -17621,17 +17777,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getSocialMediaList",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -17716,17 +17879,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getSpotlightArticles",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -17764,17 +17934,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getSpotlightArticleSlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],
@@ -17938,24 +18115,36 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getWorkingGroups",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
           {
+            "description": "Filter by active (membership duration contains current time) or inactive (membership duration has ended)",
             "in": "query",
             "name": "status",
             "schema": {
-              "$ref": "#/components/schemas/WorkingGroupStatusParam",
+              "enum": [
+                "active",
+                "inactive",
+              ],
+              "type": "string",
             },
           },
         ],
@@ -17993,17 +18182,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "operationId": "getWorkingGroupSlugs",
         "parameters": [
           {
+            "description": "Maximum number of items in paginated list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "$ref": "#/components/schemas/LimitParam",
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
             },
           },
           {
+            "description": "Offset in paginated list",
             "in": "query",
             "name": "offset",
             "schema": {
-              "$ref": "#/components/schemas/OffsetParam",
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
             },
           },
         ],

@@ -97,14 +97,12 @@ export const OpportunitiesQuerySchema = v.object({
 		v.description(
 			"Filter by opportunity status relative to the current time. Can be provided multiple times, e.g. `?status=upcoming&status=open`.",
 		),
-		v.metadata({ ref: "OpportunityStatusParam" }),
 	),
 	source: v.pipe(
 		v.optional(OpportunitySourceQuerySchema),
 		v.description(
 			"Filter by opportunity source. Can be provided multiple times, e.g. `?source=dariah&source=external`.",
 		),
-		v.metadata({ ref: "OpportunitySourceParam" }),
 	),
 });
 
