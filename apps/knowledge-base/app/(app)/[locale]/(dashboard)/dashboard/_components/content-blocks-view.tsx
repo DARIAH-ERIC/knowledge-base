@@ -11,6 +11,7 @@ import { renderToReactElement } from "@tiptap/static-renderer/pm/react";
 import type { ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { getEmbedUrl } from "@/lib/embed-url";
 
 const richTextExtensions = createRichTextExtensions();
 
@@ -27,20 +28,6 @@ function CaptionFigcaption({
 			<InlineRichTextRenderer content={caption!} />
 		</figcaption>
 	);
-}
-
-function getEmbedUrl(url: string): string {
-	const watchMatch = /youtube\.com\/watch\?.*?v=([\w-]+)/.exec(url);
-	if (watchMatch != null) {
-		return `https://www.youtube-nocookie.com/embed/${watchMatch[1]!}`;
-	}
-
-	const shortMatch = /youtu\.be\/([\w-]+)/.exec(url);
-	if (shortMatch != null) {
-		return `https://www.youtube-nocookie.com/embed/${shortMatch[1]!}`;
-	}
-
-	return url;
 }
 
 interface ContentBlocksViewProps {

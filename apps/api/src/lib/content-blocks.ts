@@ -3,6 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 import * as v from "valibot";
 
+import { getEmbedUrl } from "@/lib/embed-url";
 import { generateImageUrl, toImageAsset } from "@/lib/images";
 import { ImageSchema, LicenseSchema } from "@/lib/schemas";
 import type { Database, Transaction } from "@/middlewares/db";
@@ -16,7 +17,10 @@ export const RichTextContentBlockSchema = v.object({
 
 export const EmbedContentBlockSchema = v.object({
 	type: v.literal("embed"),
+	/** The URL as entered by the editor. */
 	url: v.string(),
+	/** `url` normalised to a `youtube-nocookie.com` embed URL, ready for an `<iframe src>`. */
+	embedUrl: v.string(),
 	caption: v.nullable(v.any()),
 });
 
@@ -170,7 +174,12 @@ function normalizeRow(row: {
 			return { type: "rich_text", content: row.richTextContent };
 		}
 		case "embed": {
-			return { type: "embed", url: row.embedUrl!, caption: row.embedCaption };
+			return {
+				type: "embed",
+				url: row.embedUrl!,
+				embedUrl: getEmbedUrl(row.embedUrl!),
+				caption: row.embedCaption,
+			};
 		}
 		case "image": {
 			const assetImage = generateImageUrl(

@@ -507,6 +507,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -517,6 +520,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -1185,6 +1189,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -1195,6 +1202,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -2120,6 +2128,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -2130,6 +2141,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -2831,6 +2843,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -2841,6 +2856,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -3634,6 +3650,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -3644,6 +3663,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -5087,6 +5107,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -5097,6 +5120,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -6408,6 +6432,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -6418,6 +6445,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -7419,6 +7447,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -7429,6 +7460,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -8754,6 +8786,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -8764,6 +8799,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -9446,6 +9482,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -9456,6 +9495,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -10100,6 +10140,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -10110,6 +10153,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -10781,6 +10825,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -10791,6 +10838,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -11510,6 +11558,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -11520,6 +11571,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -12653,6 +12705,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -12663,6 +12718,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
@@ -13664,6 +13720,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "embedUrl": {
+                      "type": "string",
+                    },
                     "type": {
                       "const": "embed",
                     },
@@ -13674,6 +13733,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "url",
+                    "embedUrl",
                     "caption",
                   ],
                   "type": "object",
