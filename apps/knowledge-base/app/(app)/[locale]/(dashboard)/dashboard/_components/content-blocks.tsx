@@ -67,6 +67,7 @@ import {
 	mergeBlocksToDocument,
 	splitDocumentToBlocks,
 } from "@/lib/content-blocks-document";
+import { getEmbedUrl } from "@/lib/embed-url";
 
 interface RichTextContentBlockItem {
 	id: Key;
@@ -937,21 +938,6 @@ function DataContentBlockPanel({
 			)}
 		</div>
 	);
-}
-
-// Normalises watch/share URLs to embed format and uses youtube-nocookie for privacy.
-function getEmbedUrl(url: string): string {
-	const watchMatch = /youtube\.com\/watch\?.*?v=([\w-]+)/.exec(url);
-	if (watchMatch != null) {
-		return `https://www.youtube-nocookie.com/embed/${watchMatch[1]!}`;
-	}
-
-	const shortMatch = /youtu\.be\/([\w-]+)/.exec(url);
-	if (shortMatch != null) {
-		return `https://www.youtube-nocookie.com/embed/${shortMatch[1]!}`;
-	}
-
-	return url;
 }
 
 interface EmbedContentBlockPanelProps {
