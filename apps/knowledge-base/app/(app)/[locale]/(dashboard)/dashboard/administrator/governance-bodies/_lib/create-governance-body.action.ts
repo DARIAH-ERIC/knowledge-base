@@ -18,7 +18,8 @@ export const createGovernanceBodyAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "governance_bodies" },
 	revalidate: "/[locale]/dashboard/administrator/governance-bodies",
-	redirect: "/dashboard/administrator/governance-bodies",
+	redirect: ({ input }) =>
+		`/dashboard/administrator/governance-bodies/${slugify(input.name)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const slug = slugify(input.name);

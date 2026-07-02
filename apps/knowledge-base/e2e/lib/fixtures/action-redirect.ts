@@ -2,8 +2,12 @@ import type { Page } from "@playwright/test";
 
 interface WaitForActionRedirectOptions {
 	page: Page;
-	redirectPathname: string;
+	redirectPathname: string | RegExp;
 	trigger: () => Promise<unknown>;
+}
+
+function matchesPathname(pathname: string, expected: string | RegExp): boolean {
+	return typeof expected === "string" ? pathname === expected : expected.test(pathname);
 }
 
 export async function waitForActionRedirect(
@@ -27,14 +31,14 @@ export async function waitForActionRedirect(
 				response.request().method() === "POST" &&
 				url.pathname === currentPathname &&
 				response.status() === 303 &&
-				redirectUrl.pathname === redirectPathname
+				matchesPathname(redirectUrl.pathname, redirectPathname)
 			);
 		}),
 		trigger(),
 	]);
 
 	await page
-		.waitForURL((url) => url.pathname === redirectPathname, { timeout: 10_000 })
+		.waitForURL((url) => matchesPathname(url.pathname, redirectPathname), { timeout: 10_000 })
 		.catch(async () => {
 			const redirectTarget = response.headers()["x-action-redirect"]?.split(";")[0];
 
@@ -43,6 +47,6 @@ export async function waitForActionRedirect(
 			}
 
 			await page.goto(redirectTarget);
-			await page.waitForURL((url) => url.pathname === redirectPathname);
+			await page.waitForURL((url) => matchesPathname(url.pathname, redirectPathname));
 		});
 }

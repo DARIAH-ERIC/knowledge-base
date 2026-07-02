@@ -20,7 +20,7 @@ export const createImpactCaseStudyAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "impact_case_studies" },
 	revalidate: "/[locale]/dashboard/website/impact-case-studies",
-	redirect: "/dashboard/website/impact-case-studies",
+	redirect: ({ input }) => `/dashboard/website/impact-case-studies/${slugify(input.title)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const slug = slugify(input.title);
