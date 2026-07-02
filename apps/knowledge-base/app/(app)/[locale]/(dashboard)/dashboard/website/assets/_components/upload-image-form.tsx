@@ -8,7 +8,7 @@ import { useExtracted } from "next-intl";
 import { type ReactNode, useActionState, useState } from "react";
 
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
-import { imageSizeLimit } from "@/config/assets.config";
+import { imageMimeTypes, imageSizeLimit } from "@/config/assets.config";
 import { formatFileSize } from "@/lib/format-file-size";
 
 export function UploadImageForm(): ReactNode {
@@ -24,7 +24,7 @@ export function UploadImageForm(): ReactNode {
 			<label>
 				<div>{t("Select an image to upload")}</div>
 				<input
-					accept="image/png, image/jpeg"
+					accept={imageMimeTypes.join(",")}
 					name="file"
 					onChange={(event) => {
 						const file = event.target.files?.[0];

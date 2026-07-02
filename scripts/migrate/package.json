@@ -6,6 +6,7 @@
 	"sideEffects": false,
 	"scripts": {
 		"data:clean:wordpress": "tsx ./scripts/clean-wordpress-content.ts",
+		"data:migrate:clamp-image-resolution": "tsx ./scripts/clamp-image-resolution.ts",
 		"data:migrate:get-unr-schema": "drizzle-kit introspect --config=./config/unr-db.config.ts",
 		"data:migrate:unr": "tsx ./scripts/migrate-unr.ts",
 		"data:migrate:wordpress": "tsx ./scripts/migrate-wordpress.ts",
@@ -30,6 +31,7 @@
 		"drizzle-orm": "catalog:",
 		"hast-util-to-text": "catalog:",
 		"rehype-parse": "catalog:",
+		"sharp": "catalog:",
 		"unified": "catalog:",
 		"valibot": "catalog:"
 	},

@@ -5,7 +5,9 @@ import type { ReadableStream } from "node:stream/web";
 
 import { isNonEmptyString } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
+import sharp from "sharp";
 
+import { imageMaxResolution } from "@/config/assets.config";
 import { db } from "@/lib/db";
 import { unaccentIlike } from "@/lib/db/search";
 import { and, count, desc, eq, like } from "@/lib/db/sql";
@@ -116,6 +118,44 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 	return { items, total: aggregate.at(0)?.total ?? 0 };
 }
 
+/** Vector images have no raster resolution, so imgproxy's source-resolution limit does not apply. */
+const vectorMimeType = "image/svg+xml";
+
+/**
+ * Ensures the uploaded image stays within imgproxy's source-resolution limit (see
+ * {@link imageMaxResolution}). Images above the limit are downscaled with sharp — imgproxy only ever
+ * serves much smaller derived variants, so the extra pixels carry no deliverable value and would
+ * only break rendering. Images within the limit keep their original bytes untouched.
+ */
+async function prepareImageForUpload(
+	file: File,
+): Promise<{ input: Readable | Buffer; size: number }> {
+	if (file.type === vectorMimeType) {
+		return { input: Readable.fromWeb(file.stream() as ReadableStream), size: file.size };
+	}
+
+	const buffer = Buffer.from(await file.arrayBuffer());
+	const { height, width } = await sharp(buffer).metadata();
+	const resolution = width * height;
+
+	/**
+	 * `Number.isFinite` guards against images sharp cannot measure (guarding against `NaN`
+	 * dimensions).
+	 */
+	if (!Number.isFinite(resolution) || resolution <= imageMaxResolution) {
+		return { input: buffer, size: buffer.byteLength };
+	}
+
+	const scale = Math.sqrt(imageMaxResolution / resolution);
+	const resized = await sharp(buffer)
+		/** Bake EXIF orientation into the pixels before we strip metadata during re-encoding. */
+		.rotate()
+		.resize({ fit: "inside", height: Math.floor(height * scale), width: Math.floor(width * scale) })
+		.toBuffer();
+
+	return { input: resized, size: resized.byteLength };
+}
+
 interface UploadAssetParams {
 	file: File;
 	licenseId?: schema.AssetInput["licenseId"];
@@ -128,8 +168,7 @@ interface UploadAssetParams {
 export async function uploadAsset(params: UploadAssetParams) {
 	const { file, licenseId, prefix, label, alt, caption } = params;
 
-	const input = Readable.fromWeb(file.stream() as ReadableStream);
-	const size = file.size;
+	const { input, size } = await prepareImageForUpload(file);
 	const metadata = { "content-type": file.type, name: file.name };
 
 	const { key } = (await s3.upload({ input, prefix, metadata, size })).unwrap();
