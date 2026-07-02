@@ -3,14 +3,71 @@ import type { JSONContent } from "@tiptap/core";
 /**
  * WordPress-originated TipTap documents inherit a number of authoring oddities from the old CMS:
  * headings that were really bolded paragraphs, `<br>` used for layout, `&nbsp;` sprinkled as
- * spacing, and empty spacer paragraphs. This module normalises those into clean, semantic TipTap
- * JSON.
+ * spacing, empty spacer paragraphs, and HTML attributes copied from WordPress or pasted markup.
+ * This module normalises those into clean, semantic TipTap JSON.
  *
  * The transform is pure and idempotent: running it twice yields the same document, and a document
  * with no oddities is returned structurally unchanged (so callers can diff to skip no-op writes).
  */
 
 const NON_BREAKING_SPACE = /\u00A0/g;
+
+function stripImportedHtmlAttributes(attrs: JSONContent["attrs"]): JSONContent["attrs"] {
+	if (
+		attrs == null ||
+		(!Object.hasOwn(attrs, "class") &&
+			!Object.hasOwn(attrs, "rel") &&
+			!Object.hasOwn(attrs, "target"))
+	) {
+		return attrs;
+	}
+
+	const { class: _class, rel: _rel, target: _target, ...rest } = attrs;
+	return Object.keys(rest).length > 0 ? rest : undefined;
+}
+
+/** Removes presentational and browser-behaviour attributes imported from source HTML. */
+function stripImportedHtmlAttributesFromNode(node: JSONContent): JSONContent {
+	const attrs = stripImportedHtmlAttributes(node.attrs);
+	let marks = node.marks;
+
+	if (marks != null) {
+		const cleanedMarks = marks.map((mark) => {
+			const markAttrs = stripImportedHtmlAttributes(mark.attrs);
+			if (markAttrs === mark.attrs) {
+				return mark;
+			}
+
+			const cleanedMark = { ...mark };
+			if (markAttrs == null) {
+				delete cleanedMark.attrs;
+			} else {
+				cleanedMark.attrs = markAttrs;
+			}
+			return cleanedMark;
+		});
+		if (cleanedMarks.some((mark, index) => mark !== marks?.[index])) {
+			marks = cleanedMarks;
+		}
+	}
+
+	if (attrs === node.attrs && marks === node.marks) {
+		return node;
+	}
+
+	const cleanedNode = { ...node };
+	if (attrs == null) {
+		delete cleanedNode.attrs;
+	} else {
+		cleanedNode.attrs = attrs;
+	}
+	if (marks == null) {
+		delete cleanedNode.marks;
+	} else {
+		cleanedNode.marks = marks;
+	}
+	return cleanedNode;
+}
 
 function marksKey(node: JSONContent): string {
 	return JSON.stringify(node.marks ?? []);
@@ -108,39 +165,41 @@ const DROP_WHEN_EMPTY = new Set(["listItem", "bulletList", "orderedList", "block
  * or heading, or a list/list-item/blockquote that cleaning has left with no content.
  */
 function cleanNode(node: JSONContent): JSONContent | null {
-	if (node.type === "text") {
-		return { ...node, text: (node.text ?? "").replace(NON_BREAKING_SPACE, " ") };
+	const cleanedNode = stripImportedHtmlAttributesFromNode(node);
+
+	if (cleanedNode.type === "text") {
+		return { ...cleanedNode, text: (cleanedNode.text ?? "").replace(NON_BREAKING_SPACE, " ") };
 	}
 
 	// Paragraphs and headings are handled here even without a `content` key, so that WordPress's empty
 	// spacer paragraphs (`{ "type": "paragraph" }`) are dropped rather than passed through.
-	if (node.type === "heading" || node.type === "paragraph") {
-		const children = (node.content ?? [])
+	if (cleanedNode.type === "heading" || cleanedNode.type === "paragraph") {
+		const children = (cleanedNode.content ?? [])
 			.map((child) => cleanNode(child))
 			.filter((child): child is JSONContent => child != null);
-		const normalized = normalizeInlineChildren(children, node.type);
+		const normalized = normalizeInlineChildren(children, cleanedNode.type);
 		if (normalized.length === 0) {
 			return null;
 		}
-		return { ...node, content: normalized };
+		return { ...cleanedNode, content: normalized };
 	}
 
-	if (node.content == null) {
+	if (cleanedNode.content == null) {
 		// Atoms and leaf nodes (image, horizontalRule, hardBreak) pass through untouched.
-		return node;
+		return cleanedNode;
 	}
 
-	const children = node.content
+	const children = cleanedNode.content
 		.map((child) => cleanNode(child))
 		.filter((child): child is JSONContent => child != null);
 
 	// Drop containers that cleaning has left empty — an empty bullet, list, or quote is WordPress
 	// noise. `doc` is never dropped; it stays as an empty document for the caller to handle.
-	if (children.length === 0 && node.type != null && DROP_WHEN_EMPTY.has(node.type)) {
+	if (children.length === 0 && cleanedNode.type != null && DROP_WHEN_EMPTY.has(cleanedNode.type)) {
 		return null;
 	}
 
-	return { ...node, content: children };
+	return { ...cleanedNode, content: children };
 }
 
 /**
