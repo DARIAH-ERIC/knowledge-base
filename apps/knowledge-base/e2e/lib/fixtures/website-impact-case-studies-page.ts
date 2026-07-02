@@ -92,13 +92,17 @@ export class WebsiteImpactCaseStudiesPage {
 	}
 
 	async submitForm(): Promise<void> {
+		const isCreate = new URL(this.page.url()).pathname === `${BASE_PATH}/create`;
 		await waitForActionRedirect({
 			page: this.page,
-			redirectPathname: BASE_PATH,
+			redirectPathname: isCreate ? new RegExp(`^${BASE_PATH}/[^/]+/details$`) : BASE_PATH,
 			trigger: async () => {
 				await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
 			},
 		});
+		if (isCreate) {
+			await this.goto();
+		}
 	}
 
 	// ---------------------------------------------------------------------------

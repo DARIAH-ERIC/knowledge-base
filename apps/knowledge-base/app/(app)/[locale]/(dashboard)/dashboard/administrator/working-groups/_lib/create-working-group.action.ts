@@ -18,7 +18,7 @@ export const createWorkingGroupAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "working_groups" },
 	revalidate: "/[locale]/dashboard/administrator/working-groups",
-	redirect: "/dashboard/administrator/working-groups",
+	redirect: ({ input }) => `/dashboard/administrator/working-groups/${slugify(input.name)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const slug = slugify(input.name);
