@@ -59,6 +59,12 @@ function changed(before: JSONContent, after: JSONContent): boolean {
 	return stableStringify(before) !== stableStringify(after);
 }
 
+function printDryRunChange(source: string, before: JSONContent, after: JSONContent): void {
+	log.info(
+		`[dry run] ${source}\nbefore:\n${JSON.stringify(before, null, 2)}\nafter:\n${JSON.stringify(after, null, 2)}`,
+	);
+}
+
 interface AccordionItem {
 	title: string;
 	content: JSONContent;
@@ -107,7 +113,9 @@ async function main() {
 		}
 
 		richTextChanged += 1;
-		if (!isDryRun) {
+		if (isDryRun) {
+			printDryRunChange(`rich_text:${block.id}`, block.content, cleaned);
+		} else {
 			await db
 				.update(schema.richTextContentBlocks)
 				.set({ content: cleaned })
@@ -122,13 +130,16 @@ async function main() {
 	for (const block of accordionBlocks) {
 		const items = block.items as Array<AccordionItem>;
 
-		const cleanedItems = items.map((item) => {
+		const cleanedItems = items.map((item, index) => {
 			const cleaned = cleanTiptapDoc(item.content);
 			for (const issue of findOverExtendedLinks(cleaned)) {
 				linkIssues.push({ source: `accordion:${block.id}`, text: linkLine(issue) });
 			}
 			for (const hardBreak of findMidTextHardBreaks(cleaned)) {
 				hardBreaks.push({ source: `accordion:${block.id}`, text: hardBreak.text });
+			}
+			if (isDryRun && changed(item.content, cleaned)) {
+				printDryRunChange(`accordion:${block.id}:item:${String(index)}`, item.content, cleaned);
 			}
 			return { ...item, content: cleaned };
 		});
@@ -154,7 +165,7 @@ async function main() {
 	await writeReport(hardBreakReportFilePath, hardBreaks);
 
 	log.success(
-		`${isDryRun ? "[dry run] " : ""}Cleaned ${String(richTextChanged)} rich_text block(s) and ${String(
+		`${isDryRun ? "[dry run] Would clean" : "Cleaned"} ${String(richTextChanged)} rich_text block(s) and ${String(
 			accordionChanged,
 		)} accordion block(s).`,
 	);

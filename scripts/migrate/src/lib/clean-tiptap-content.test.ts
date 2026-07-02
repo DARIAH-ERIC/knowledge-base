@@ -73,6 +73,60 @@ describe("cleanTiptapDoc", () => {
 		);
 	});
 
+	it("removes imported HTML presentation and browser attributes from link marks", () => {
+		const input = doc({
+			type: "paragraph",
+			content: [
+				{
+					type: "text",
+					marks: [
+						{
+							type: "link",
+							attrs: {
+								href: "https://shewrote.rich.ru.nl/",
+								target: "_blank",
+								rel: "noopener noreferrer nofollow",
+								class: "cursor-pointer OWAAutoLink elementToProof",
+							},
+						},
+					],
+					text: "SHEWROTE",
+				},
+			],
+		});
+
+		expect(cleanTiptapDoc(input)).toStrictEqual(
+			doc({
+				type: "paragraph",
+				content: [
+					{
+						type: "text",
+						marks: [
+							{
+								type: "link",
+								attrs: {
+									href: "https://shewrote.rich.ru.nl/",
+								},
+							},
+						],
+						text: "SHEWROTE",
+					},
+				],
+			}),
+		);
+	});
+
+	it("removes imported CSS classes from nodes while preserving other attributes", () => {
+		const input = doc({
+			type: "image",
+			attrs: { src: "https://x/image.png", alt: "Example", class: "aligncenter wp-image-12" },
+		});
+
+		expect(cleanTiptapDoc(input)).toStrictEqual(
+			doc({ type: "image", attrs: { src: "https://x/image.png", alt: "Example" } }),
+		);
+	});
+
 	it("removes empty spacer paragraphs (with and without a content key)", () => {
 		const input = doc(
 			{ type: "paragraph" },
