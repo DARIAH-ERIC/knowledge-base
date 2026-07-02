@@ -143,6 +143,8 @@ FROM
 			('institution', 'country', 'is_located_in'),
 			('institution', 'regional_hub', 'is_member_of'),
 			('institution', 'national_consortium', 'is_member_of'),
+			('institution', 'national_consortium', 'is_observer_of'),
+			('institution', 'institution', 'is_part_of'),
 			('institution', 'eric', 'is_partner_institution_of'),
 			('institution', 'eric', 'is_cooperating_partner_of'),
 			('institution', 'eric', 'is_national_coordinating_institution_in'),
@@ -205,6 +207,7 @@ FROM
 		VALUES
 			('is_affiliated_with', 'institution'),
 			('is_chair_of', 'governance_body'),
+			('is_chair_of', 'national_consortium'),
 			('is_chair_of', 'working_group'),
 			('is_vice_chair_of', 'governance_body'),
 			('is_member_of', 'governance_body'),
