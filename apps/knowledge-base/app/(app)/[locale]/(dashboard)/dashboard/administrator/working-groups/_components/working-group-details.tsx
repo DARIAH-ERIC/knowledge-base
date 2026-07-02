@@ -78,6 +78,8 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 	} = props;
 
 	const t = useExtracted();
+	const mailingListIsUrl =
+		workingGroup.mailingList != null && URL.canParse(workingGroup.mailingList);
 
 	return (
 		<Fragment>
@@ -145,7 +147,20 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Mailing list")}</DescriptionTerm>
-				<DescriptionDetails>{workingGroup.mailingList}</DescriptionDetails>
+				<DescriptionDetails>
+					{workingGroup.mailingList != null ? (
+						<a
+							className="underline"
+							href={
+								mailingListIsUrl ? workingGroup.mailingList : `mailto:${workingGroup.mailingList}`
+							}
+							rel={mailingListIsUrl ? "noreferrer" : undefined}
+							target={mailingListIsUrl ? "_blank" : undefined}
+						>
+							{workingGroup.mailingList}
+						</a>
+					) : null}
+				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Social Media")}</DescriptionTerm>
 				<DescriptionDetails>
