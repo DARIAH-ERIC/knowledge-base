@@ -79,14 +79,13 @@ test.describe("working groups admin", () => {
 		await workingGroupsPage.submitForm();
 
 		await workingGroupsPage.searchByName(originalName);
-		const row = workingGroupsPage.rowByName(originalName);
-		await expect(row).toBeVisible();
-
-		await row.getByRole("button", { name: "Open actions menu" }).click();
-		await Promise.all([
-			page.waitForURL("**/edit"),
-			page.getByRole("menuitem", { name: "Edit" }).click(),
-		]);
+		await expect(workingGroupsPage.rowByName(originalName)).toBeVisible();
+		await workingGroupsPage.gotoDetailsFromList(originalName);
+		await expect(page.getByRole("link", { name: "old-list@e2e.example.org" })).toHaveAttribute(
+			"href",
+			"mailto:old-list@e2e.example.org",
+		);
+		await workingGroupsPage.gotoEditFromDetails();
 
 		const updatedName = `${workingGroupsPage.workerPrefix} Updated ${randomUUID()}`;
 		const updatedAcronym = "E2ENEW";
@@ -114,6 +113,12 @@ test.describe("working groups admin", () => {
 
 		await workingGroupsPage.searchByName(updatedName);
 		await expect(workingGroupsPage.rowByName(updatedName)).toBeVisible();
+		await workingGroupsPage.gotoDetailsFromList(updatedName);
+		await expect(page.getByRole("link", { name: updatedMailingList })).toHaveAttribute(
+			"href",
+			updatedMailingList,
+		);
+		await workingGroupsPage.goto();
 		await workingGroupsPage.searchByName(originalName);
 		await expect(workingGroupsPage.rowByName(originalName)).toBeHidden();
 

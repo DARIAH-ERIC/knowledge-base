@@ -24,7 +24,7 @@ export const createDocumentOrPolicyAction = createMutationAction<
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "documents_policies" },
 	revalidate: "/[locale]/dashboard/website/documents-policies",
-	redirect: "/dashboard/website/documents-policies",
+	redirect: ({ input }) => `/dashboard/website/documents-policies/${slugify(input.title)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const slug = slugify(input.title);

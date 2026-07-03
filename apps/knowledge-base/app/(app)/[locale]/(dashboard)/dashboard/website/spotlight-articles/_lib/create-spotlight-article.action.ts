@@ -20,7 +20,7 @@ export const createSpotlightArticleAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "spotlight_articles" },
 	revalidate: "/[locale]/dashboard/website/spotlight-articles",
-	redirect: "/dashboard/website/spotlight-articles",
+	redirect: ({ input }) => `/dashboard/website/spotlight-articles/${slugify(input.title)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const slug = slugify(input.title);

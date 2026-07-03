@@ -19,7 +19,7 @@ export const createOpportunityAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "opportunities" },
 	revalidate: "/[locale]/dashboard/website/opportunities",
-	redirect: "/dashboard/website/opportunities",
+	redirect: ({ input }) => `/dashboard/website/opportunities/${slugify(input.title)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const slug = slugify(input.title);

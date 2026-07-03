@@ -58,6 +58,11 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		contentBlocks: {
+			calloutContentBlock: r.one.calloutContentBlocks({
+				from: r.contentBlocks.id,
+				to: r.calloutContentBlocks.id,
+				optional: true,
+			}),
 			field: r.one.fields({
 				from: r.contentBlocks.fieldId,
 				to: r.fields.id,
@@ -102,6 +107,13 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.contentBlocks.id,
 				to: r.accordionContentBlocks.id,
 				optional: true,
+			}),
+		},
+		calloutContentBlocks: {
+			contentBlock: r.one.contentBlocks({
+				from: r.calloutContentBlocks.id,
+				to: r.contentBlocks.id,
+				optional: false,
 			}),
 		},
 		dataContentBlocks: {

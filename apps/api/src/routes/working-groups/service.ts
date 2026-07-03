@@ -168,6 +168,51 @@ interface GetWorkingGroupByIdParams {
 }
 
 async function getChairs(db: Database | Transaction, workingGroupId: string) {
+	const workingGroupRelation = alias(
+		schema.organisationalUnitsRelations,
+		"chair_working_group_relation",
+	);
+	const workingGroupRelationStatus = alias(
+		schema.organisationalUnitStatus,
+		"chair_working_group_relation_status",
+	);
+	const chairMatchesWorkingGroupLifecycle = exists(
+		db
+			.select({ one: sql<number>`1` })
+			.from(workingGroupRelation)
+			.innerJoin(
+				workingGroupRelationStatus,
+				eq(workingGroupRelation.status, workingGroupRelationStatus.id),
+			)
+			.where(
+				and(
+					eq(
+						workingGroupRelation.unitDocumentId,
+						schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+					),
+					eq(workingGroupRelationStatus.status, "is_part_of"),
+					// Timestamp ranges are upper-exclusive. Compare their bounds explicitly for ended
+					// groups so a chair relation ending at the same instant as the group is included.
+					sql`
+						(
+							(
+								${workingGroupRelation.duration} @> NOW()::TIMESTAMPTZ
+								AND ${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ
+							)
+							OR (
+								UPPER(${workingGroupRelation.duration}) <= NOW()::TIMESTAMPTZ
+								AND LOWER(${schema.personsToOrganisationalUnits.duration}) < UPPER(${workingGroupRelation.duration})
+								AND (
+									UPPER(${schema.personsToOrganisationalUnits.duration}) IS NULL
+									OR UPPER(${schema.personsToOrganisationalUnits.duration}) >= UPPER(${workingGroupRelation.duration})
+								)
+							)
+						)
+					`,
+				),
+			),
+	);
+
 	const rows = await db
 		.select({
 			id: schema.persons.id,
@@ -203,7 +248,7 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 			and(
 				sql`${schema.personsToOrganisationalUnits.organisationalUnitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${workingGroupId})`,
 				eq(schema.personRoleTypes.type, "is_chair_of"),
-				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
+				chairMatchesWorkingGroupLifecycle,
 			),
 		);
 

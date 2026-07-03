@@ -4,6 +4,7 @@
 
 import { resolveImageCaption } from "@dariah-eric/database/image-captions";
 import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
+import { Note } from "@dariah-eric/ui/note";
 import { isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
 import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
@@ -11,6 +12,7 @@ import { renderToReactElement } from "@tiptap/static-renderer/pm/react";
 import type { ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { getEmbedUrl } from "@/lib/embed-url";
 
 const richTextExtensions = createRichTextExtensions();
 
@@ -27,20 +29,6 @@ function CaptionFigcaption({
 			<InlineRichTextRenderer content={caption!} />
 		</figcaption>
 	);
-}
-
-function getEmbedUrl(url: string): string {
-	const watchMatch = /youtube\.com\/watch\?.*?v=([\w-]+)/.exec(url);
-	if (watchMatch != null) {
-		return `https://www.youtube-nocookie.com/embed/${watchMatch[1]!}`;
-	}
-
-	const shortMatch = /youtu\.be\/([\w-]+)/.exec(url);
-	if (shortMatch != null) {
-		return `https://www.youtube-nocookie.com/embed/${shortMatch[1]!}`;
-	}
-
-	return url;
 }
 
 interface ContentBlocksViewProps {
@@ -63,6 +51,24 @@ interface ContentBlockViewProps {
 
 function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): ReactNode {
 	switch (contentBlock.type) {
+		case "callout": {
+			const content = contentBlock.content?.content;
+			const intent = contentBlock.content?.intent ?? "info";
+			const title = contentBlock.content?.title;
+			if (content == null) {
+				return null;
+			}
+
+			return (
+				<aside aria-label={title ?? `${intent} callout`}>
+					<Note intent={intent === "neutral" ? "default" : intent}>
+						{title != null ? <strong className="mbe-1 block">{title}</strong> : null}
+						<InlineRichTextRenderer content={content} />
+					</Note>
+				</aside>
+			);
+		}
+
 		case "accordion": {
 			const items = contentBlock.content?.items;
 

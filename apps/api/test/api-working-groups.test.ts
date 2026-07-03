@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
 import type { WorkingGroup } from "@/routes/working-groups/schemas";
-import { inArray } from "@/services/db/sql";
+import { eq, inArray } from "@/services/db/sql";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
@@ -338,6 +338,24 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 	);
 }
 
+async function endWorkingGroupAndChair(
+	db: Database,
+	item: ReturnType<typeof createItems>[number],
+	end: Date,
+) {
+	const start = f.date.past({ years: 5, refDate: end });
+
+	await db
+		.update(schema.organisationalUnitsRelations)
+		.set({ duration: { start, end } })
+		.where(eq(schema.organisationalUnitsRelations.unitDocumentId, item.entity.id));
+
+	await db
+		.update(schema.personsToOrganisationalUnits)
+		.set({ duration: { start, end } })
+		.where(eq(schema.personsToOrganisationalUnits.organisationalUnitDocumentId, item.entity.id));
+}
+
 describe("working-groups", () => {
 	describe("GET /api/working-groups", () => {
 		it("should return paginated list of working groups", async () => {
@@ -571,6 +589,36 @@ describe("working-groups", () => {
 
 				expect(response.status).toBe(404);
 			});
+		});
+	});
+
+	it("should return chairs whose relation ended with an inactive working group", async () => {
+		await withTransaction(async (db) => {
+			const client = createTestClient(db);
+			const items = createItems(2);
+			const item = items[1]!;
+			const chair = createChair();
+			await seed(db, items, chair);
+			await endWorkingGroupAndChair(db, item, f.date.past());
+
+			const byIdResponse = await client["working-groups"][":id"].$get({
+				param: { id: item.organisationalUnit.id },
+			});
+			const bySlugResponse = await client["working-groups"].slugs[":slug"].$get({
+				param: { slug: item.entity.slug },
+			});
+
+			expect(byIdResponse.status).toBe(200);
+			expect(bySlugResponse.status).toBe(200);
+			const byId = (await byIdResponse.json()) as WorkingGroup;
+			const bySlug = (await bySlugResponse.json()) as WorkingGroup;
+
+			expect(byId.chairs).toEqual([
+				expect.objectContaining({ name: chair.person.name, role: "is_chair_of" }),
+			]);
+			expect(bySlug.chairs).toEqual([
+				expect.objectContaining({ name: chair.person.name, role: "is_chair_of" }),
+			]);
 		});
 	});
 

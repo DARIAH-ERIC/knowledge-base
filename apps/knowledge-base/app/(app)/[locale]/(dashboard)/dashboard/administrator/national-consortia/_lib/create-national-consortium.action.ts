@@ -18,7 +18,8 @@ export const createNationalConsortiumAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "national_consortia" },
 	revalidate: "/[locale]/dashboard/administrator/national-consortia",
-	redirect: "/dashboard/administrator/national-consortia",
+	redirect: ({ input }) =>
+		`/dashboard/administrator/national-consortia/${slugify(input.name)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const slug = slugify(input.name);

@@ -39,6 +39,20 @@ export const ContentBlockInputSchema = v.union([
 	}),
 	v.object({
 		id: v.string(),
+		type: v.literal("callout"),
+		position: v.optional(v.number()),
+		content: v.optional(
+			v.object({
+				intent: v.optional(
+					v.picklist(["neutral", "info", "warning", "danger", "success"] as const),
+				),
+				title: v.optional(v.string()),
+				content: v.optional(v.custom<JSONContent>(() => true)),
+			}),
+		),
+	}),
+	v.object({
+		id: v.string(),
 		type: v.literal("data"),
 		position: v.optional(v.number()),
 		content: v.optional(

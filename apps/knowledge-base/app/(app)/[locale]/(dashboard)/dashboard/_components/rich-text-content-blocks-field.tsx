@@ -2,7 +2,7 @@
 
 import { RichTextEditor, RichTextEditorToolbarButton } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, InfoIcon } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
@@ -10,7 +10,10 @@ import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboa
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
 import { mergeBlocksToDocument, splitDocumentToBlocks } from "@/lib/content-blocks-document";
 
-type MergeableContentBlock = Extract<ContentBlock, { type: "rich_text" | "image" | "embed" }>;
+type MergeableContentBlock = Extract<
+	ContentBlock,
+	{ type: "rich_text" | "image" | "embed" | "callout" }
+>;
 
 interface RichTextContentBlocksFieldProps {
 	"aria-label": string;
@@ -28,7 +31,10 @@ export function RichTextContentBlocksField({
 	const mergeableBlocks =
 		initialBlocks?.filter(
 			(block): block is MergeableContentBlock =>
-				block.type === "rich_text" || block.type === "image" || block.type === "embed",
+				block.type === "rich_text" ||
+				block.type === "image" ||
+				block.type === "embed" ||
+				block.type === "callout",
 		) ?? [];
 	const initialContent = mergeBlocksToDocument(mergeableBlocks);
 	const [editorContent, setEditorContent] = useState<JSONContent>(
@@ -56,6 +62,13 @@ export function RichTextContentBlocksField({
 				aria-label={ariaLabel}
 				content={initialContent}
 				onChange={setEditorContent}
+				renderCalloutInsert={(insertCallout) => (
+					<RichTextEditorToolbarButton
+						aria-label="Insert callout"
+						icon={InfoIcon}
+						onClick={insertCallout}
+					/>
+				)}
 				renderImagePicker={renderImagePicker}
 			/>
 			{blocks.map((block, idx) => (

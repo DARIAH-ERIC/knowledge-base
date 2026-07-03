@@ -25,12 +25,21 @@ interface EmbedBlock {
 	content?: { url?: string; title?: string; caption?: JSONContent | null };
 }
 
-export type MergeableBlock = RichTextBlock | ImageBlock | EmbedBlock;
+interface CalloutBlock {
+	type: "callout";
+	content?: {
+		intent?: "neutral" | "info" | "warning" | "danger" | "success";
+		title?: string;
+		content?: JSONContent;
+	};
+}
+
+export type MergeableBlock = RichTextBlock | ImageBlock | EmbedBlock | CalloutBlock;
 
 /**
- * Merges an ordered sequence of rich_text and image blocks into a single Tiptap document. Image
- * blocks become `assetImage` nodes; rich_text blocks contribute their child nodes directly. The
- * result is used as the initial content of the unified editor.
+ * Merges an ordered sequence of inline content blocks into a single Tiptap document. Typed blocks
+ * become custom top-level nodes; rich_text blocks contribute their child nodes directly. The result
+ * is used as the initial content of the unified editor.
  */
 export function mergeBlocksToDocument(blocks: Array<MergeableBlock>): JSONContent {
 	const nodes: Array<JSONContent> = [];
@@ -53,13 +62,22 @@ export function mergeBlocksToDocument(blocks: Array<MergeableBlock>): JSONConten
 					captionMode,
 				},
 			});
-		} else {
+		} else if (block.type === "embed") {
 			nodes.push({
 				type: "embedBlock",
 				attrs: {
 					url: block.content?.url ?? null,
 					title: block.content?.title ?? null,
 					caption: block.content?.caption ?? null,
+				},
+			});
+		} else {
+			nodes.push({
+				type: "calloutBlock",
+				attrs: {
+					intent: block.content?.intent ?? "info",
+					title: block.content?.title ?? null,
+					content: block.content?.content ?? null,
 				},
 			});
 		}
@@ -73,8 +91,8 @@ export function mergeBlocksToDocument(blocks: Array<MergeableBlock>): JSONConten
 }
 
 /**
- * Splits a unified Tiptap document back into an ordered array of rich_text and image
- * ContentBlockInputs. `assetImage` nodes become image blocks; runs of other nodes become rich_text
+ * Splits a unified Tiptap document back into an ordered array of ContentBlockInputs. Custom
+ * top-level nodes become their corresponding typed blocks; runs of other nodes become rich_text
  * blocks. All produced blocks are treated as new (no `id` / `position`) so the server will delete
  * the old blocks and re-insert.
  */
@@ -120,6 +138,26 @@ export function splitDocumentToBlocks(doc: JSONContent): Array<ContentBlockInput
 					url: (node.attrs?.url as string | null | undefined) ?? undefined,
 					title: (node.attrs?.title as string | null | undefined) ?? undefined,
 					caption: (node.attrs?.caption as JSONContent | null | undefined) ?? undefined,
+				},
+			});
+		} else if (node.type === "calloutBlock") {
+			flushRichText();
+			blocks.push({
+				id: crypto.randomUUID(),
+				type: "callout",
+				content: {
+					intent:
+						node.attrs?.intent === "default"
+							? "neutral"
+							: ((node.attrs?.intent as
+									| "neutral"
+									| "info"
+									| "warning"
+									| "danger"
+									| "success"
+									| undefined) ?? "info"),
+					title: (node.attrs?.title as string | null | undefined) ?? undefined,
+					content: (node.attrs?.content as JSONContent | null | undefined) ?? undefined,
 				},
 			});
 		} else {
