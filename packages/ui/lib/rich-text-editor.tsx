@@ -537,7 +537,7 @@ function CalloutNodeView({
 					</div>
 				</div>
 			) : (
-				<div className="group relative">
+				<aside aria-label={title ?? `${intent} callout`} className="group relative">
 					<Note intent={intent}>
 						{title != null ? <strong className="mbe-1 block">{title}</strong> : null}
 						{content != null ? <InlineRichTextRenderer content={content} /> : null}
@@ -566,7 +566,7 @@ function CalloutNodeView({
 							</button>
 						</div>
 					) : null}
-				</div>
+				</aside>
 			)}
 		</BlockNodeSurface>
 	);
@@ -584,6 +584,16 @@ export const CalloutNode = Node.create({
 	parseHTML() {
 		return [
 			{
+				tag: "aside[data-callout-block]",
+				getAttrs(dom) {
+					return {
+						intent: dom.dataset.intent ?? "info",
+						title: dom.dataset.title ?? null,
+						content: parseCaptionAttr(dom.dataset.content),
+					};
+				},
+			},
+			{
 				tag: "div[data-callout-block]",
 				getAttrs(dom) {
 					return {
@@ -597,8 +607,10 @@ export const CalloutNode = Node.create({
 	},
 	renderHTML({ node }) {
 		return [
-			"div",
+			"aside",
 			{
+				"aria-label":
+					(node.attrs.title as string | null) ?? `${node.attrs.intent as string} callout`,
 				"data-callout-block": "",
 				"data-intent": node.attrs.intent as string,
 				"data-title": node.attrs.title as string | null,

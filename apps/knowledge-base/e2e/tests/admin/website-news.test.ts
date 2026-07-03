@@ -276,6 +276,7 @@ test.describe("website news admin", () => {
 
 		await newsPage.searchByTitle(title);
 		await newsPage.gotoDetailsFromList(title);
+		await expect(page.getByRole("complementary", { name: calloutTitle })).toBeVisible();
 		await expect(page.getByText(above)).toBeVisible();
 		await expect(page.getByText(calloutTitle)).toBeVisible();
 		await expect(page.getByText(calloutBody)).toBeVisible();
