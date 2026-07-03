@@ -182,6 +182,52 @@ export class WebsiteNewsPage {
 		await callout.getByRole("button", { name: "Apply" }).click();
 	}
 
+	async dragCalloutBeforeText(text: string): Promise<void> {
+		const editor = this.contentBlockEditor();
+		const callout = this.page.getByLabel("Callout block");
+		const dragHandle = callout.locator("xpath=..");
+		const targetParagraph = editor.locator("p").filter({ hasText: text });
+
+		await dragHandle.scrollIntoViewIfNeeded();
+		const sourceBox = await dragHandle.boundingBox();
+		const targetBox = await targetParagraph.boundingBox();
+		if (sourceBox == null || targetBox == null) {
+			throw new Error("Could not resolve inline content-block drag coordinates.");
+		}
+
+		const startX = sourceBox.x + sourceBox.width / 2;
+		const startY = sourceBox.y + sourceBox.height / 2;
+		const dropX = targetBox.x + Math.min(24, targetBox.width / 2);
+		const dropY = targetBox.y + 2;
+		const { mouse } = this.page;
+		// Native ProseMirror drag-and-drop needs paced pointer moves to establish a drag selection.
+		// oxlint-disable-next-line playwright/no-wait-for-timeout
+		const pause = (): Promise<void> => this.page.waitForTimeout(120);
+
+		await mouse.move(startX, startY);
+		await mouse.down();
+		await pause();
+		await mouse.move(startX, startY - 8);
+		await pause();
+		await mouse.move((startX + dropX) / 2, (startY + dropY) / 2);
+		await pause();
+		await mouse.move(dropX, dropY);
+		await pause();
+		await mouse.up();
+
+		await expect
+			.poll(async () => {
+				const [nextCalloutBox, nextTargetBox] = await Promise.all([
+					callout.boundingBox(),
+					targetParagraph.boundingBox(),
+				]);
+				return (
+					nextCalloutBox != null && nextTargetBox != null && nextCalloutBox.y < nextTargetBox.y
+				);
+			})
+			.toBe(true);
+	}
+
 	async updateContentBlockText(text: string): Promise<void> {
 		const editor = this.contentBlockEditor();
 		await editor.clear();
