@@ -15,6 +15,13 @@ export const RichTextContentBlockSchema = v.object({
 	content: v.any(),
 });
 
+export const CalloutContentBlockSchema = v.object({
+	type: v.literal("callout"),
+	intent: v.picklist(schema.calloutIntentsEnum),
+	title: v.nullable(v.string()),
+	content: v.any(),
+});
+
 export const EmbedContentBlockSchema = v.object({
 	type: v.literal("embed"),
 	/** The URL as entered by the editor. */
@@ -56,6 +63,7 @@ export const AccordionContentBlockSchema = v.object({
 
 export const ContentBlockSchema = v.union([
 	RichTextContentBlockSchema,
+	CalloutContentBlockSchema,
 	EmbedContentBlockSchema,
 	ImageContentBlockSchema,
 	DataContentBlockSchema,
@@ -76,6 +84,9 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			fieldName: schema.entityTypesFieldsNames.fieldName,
 			blockId: schema.contentBlocks.id,
 			blockType: schema.contentBlockTypes.type,
+			calloutIntent: schema.calloutContentBlocks.intent,
+			calloutTitle: schema.calloutContentBlocks.title,
+			calloutContent: schema.calloutContentBlocks.content,
 			richTextContent: schema.richTextContentBlocks.content,
 			embedUrl: schema.embedContentBlocks.url,
 			embedCaption: schema.embedContentBlocks.caption,
@@ -112,6 +123,10 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			schema.richTextContentBlocks,
 			eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
 		)
+		.leftJoin(
+			schema.calloutContentBlocks,
+			eq(schema.calloutContentBlocks.id, schema.contentBlocks.id),
+		)
 		.leftJoin(schema.embedContentBlocks, eq(schema.embedContentBlocks.id, schema.contentBlocks.id))
 		.leftJoin(schema.imageContentBlocks, eq(schema.imageContentBlocks.id, schema.contentBlocks.id))
 		.leftJoin(schema.assets, eq(schema.assets.id, schema.imageContentBlocks.imageId))
@@ -147,6 +162,9 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 
 function normalizeRow(row: {
 	blockType: string;
+	calloutIntent: (typeof schema.calloutIntentsEnum)[number] | null;
+	calloutTitle: string | null;
+	calloutContent: JSONContent | null;
 	richTextContent: unknown;
 	embedUrl: string | null;
 	embedCaption: JSONContent | null;
@@ -170,6 +188,14 @@ function normalizeRow(row: {
 	accordionItems: unknown;
 }): ContentBlock {
 	switch (row.blockType) {
+		case "callout": {
+			return {
+				type: "callout",
+				intent: row.calloutIntent!,
+				title: row.calloutTitle,
+				content: row.calloutContent,
+			};
+		}
 		case "rich_text": {
 			return { type: "rich_text", content: row.richTextContent };
 		}

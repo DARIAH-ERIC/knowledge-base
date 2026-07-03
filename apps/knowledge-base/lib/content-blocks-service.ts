@@ -55,6 +55,23 @@ export async function upsertTypedContentBlock(
 	isNew: boolean,
 ): Promise<void> {
 	switch (block.type) {
+		case "callout": {
+			const intent = block.content?.intent ?? "info";
+			const title = block.content?.title?.trim() ?? null;
+			const content = block.content?.content ?? { type: "doc", content: [{ type: "paragraph" }] };
+			if (isNew) {
+				await tx
+					.insert(schema.calloutContentBlocks)
+					.values({ id: blockId, intent, title, content });
+			} else {
+				await tx
+					.update(schema.calloutContentBlocks)
+					.set({ intent, title, content })
+					.where(eq(schema.calloutContentBlocks.id, blockId));
+			}
+			break;
+		}
+
 		case "rich_text": {
 			if (isNew) {
 				await tx
@@ -231,6 +248,7 @@ export async function getEntityContentBlocks(
 			: eq(schema.fields.entityVersionId, entityVersionId);
 
 	const [
+		calloutContentBlockRows,
 		richTextContentBlocks,
 		imageContentBlockRows,
 		embedContentBlockRows,
@@ -239,6 +257,23 @@ export async function getEntityContentBlocks(
 		heroContentBlockRows,
 		accordionContentBlockRows,
 	] = await Promise.all([
+		db
+			.select({
+				id: schema.calloutContentBlocks.id,
+				position: schema.contentBlocks.position,
+				intent: schema.calloutContentBlocks.intent,
+				title: schema.calloutContentBlocks.title,
+				content: schema.calloutContentBlocks.content,
+			})
+			.from(schema.calloutContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.calloutContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(contentBlocksWhere)
+			.orderBy(schema.contentBlocks.position),
 		db
 			.select({
 				id: schema.richTextContentBlocks.id,
@@ -394,6 +429,19 @@ export async function getEntityContentBlocks(
 		};
 	});
 
+	const calloutContentBlocks = calloutContentBlockRows.map((row) => {
+		return {
+			id: row.id,
+			position: row.position,
+			type: "callout" as const,
+			content: {
+				intent: row.intent,
+				title: row.title ?? undefined,
+				content: row.content,
+			},
+		};
+	});
+
 	const embedContentBlocks = embedContentBlockRows.map((row) => {
 		return {
 			id: row.id,
@@ -483,6 +531,7 @@ export async function getEntityContentBlocks(
 	});
 
 	return [
+		...calloutContentBlocks,
 		...richTextContentBlocks.map((row) => {
 			return { ...row, type: "rich_text" as const };
 		}),

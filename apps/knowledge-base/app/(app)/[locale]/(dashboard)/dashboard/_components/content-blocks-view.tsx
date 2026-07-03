@@ -4,6 +4,7 @@
 
 import { resolveImageCaption } from "@dariah-eric/database/image-captions";
 import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
+import { Note } from "@dariah-eric/ui/note";
 import { isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
 import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
@@ -50,6 +51,22 @@ interface ContentBlockViewProps {
 
 function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): ReactNode {
 	switch (contentBlock.type) {
+		case "callout": {
+			const content = contentBlock.content?.content;
+			if (content == null) {
+				return null;
+			}
+
+			return (
+				<Note intent={contentBlock.content?.intent ?? "info"}>
+					{contentBlock.content?.title != null ? (
+						<strong className="mbe-1 block">{contentBlock.content.title}</strong>
+					) : null}
+					<InlineRichTextRenderer content={content} />
+				</Note>
+			);
+		}
+
 		case "accordion": {
 			const items = contentBlock.content?.items;
 

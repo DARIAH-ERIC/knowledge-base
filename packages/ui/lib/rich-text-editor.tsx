@@ -37,6 +37,7 @@ import { Button } from "@/lib/button";
 import { InlineRichTextEditor } from "@/lib/inline-rich-text-editor";
 import { InlineRichTextRenderer } from "@/lib/inline-rich-text-renderer";
 import { Input } from "@/lib/input";
+import { Note, type NoteProps } from "@/lib/note";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
 import { isEmptyRichTextDocument } from "@/lib/rich-text";
 import { RichTextEditorToolbarButton } from "@/lib/rich-text-toolbar-button";
@@ -78,6 +79,7 @@ interface RichTextEditorProps {
 	name?: string;
 	onChange?: (content: JSONContent) => void;
 	renderEmbedInsert?: (insertEmbed: () => void) => ReactNode;
+	renderCalloutInsert?: (insertCallout: () => void) => ReactNode;
 	renderImagePicker?: (
 		insert: (
 			imageKey: string,
@@ -410,6 +412,202 @@ export const EmbedNode = Node.create({
 
 	addNodeView() {
 		return ReactNodeViewRenderer(EmbedNodeView);
+	},
+});
+
+type CalloutIntent = NonNullable<NoteProps["intent"]>;
+
+function CalloutNodeView({
+	editor,
+	getPos,
+	node,
+	selected,
+	updateAttributes,
+	deleteNode,
+}: Readonly<NodeViewProps>): ReactNode {
+	const intent = node.attrs.intent as CalloutIntent;
+	const title = node.attrs.title as string | null;
+	const content = node.attrs.content as JSONContent | null;
+	const [isEditing, setIsEditing] = useState(content == null && editor.isEditable);
+	const [intentInput, setIntentInput] = useState<CalloutIntent>(intent);
+	const [titleInput, setTitleInput] = useState(title ?? "");
+	const [contentInput, setContentInput] = useState<JSONContent | null>(content);
+	const titleInputId = useId();
+
+	function selectNode() {
+		const pos = getPos();
+		if (typeof pos === "number") {
+			editor.commands.setNodeSelection(pos);
+		}
+	}
+
+	function resetInputs() {
+		setIntentInput(intent);
+		setTitleInput(title ?? "");
+		setContentInput(content);
+	}
+
+	return (
+		<BlockNodeSurface
+			className="border-transparent"
+			isEditable={editor.isEditable}
+			isSelected={selected}
+			label="Callout block"
+			onDoubleClick={() => {
+				selectNode();
+				resetInputs();
+				setIsEditing(true);
+			}}
+		>
+			{isEditing ? (
+				<div className="flex flex-col gap-y-3 border border-input bg-bg p-4">
+					<div className="flex flex-col gap-y-1">
+						<span className="text-sm/6 font-medium">{"Style"}</span>
+						<ToggleGroup
+							aria-label="Callout style"
+							disallowEmptySelection={true}
+							onSelectionChange={(keys) => {
+								const nextIntent = [...keys][0] as CalloutIntent | undefined;
+								if (nextIntent != null) {
+									setIntentInput(nextIntent);
+								}
+							}}
+							selectedKeys={[intentInput]}
+							size="sm"
+						>
+							<ToggleGroupItem id="default">{"Default"}</ToggleGroupItem>
+							<ToggleGroupItem id="info">{"Info"}</ToggleGroupItem>
+							<ToggleGroupItem id="warning">{"Warning"}</ToggleGroupItem>
+							<ToggleGroupItem id="danger">{"Danger"}</ToggleGroupItem>
+							<ToggleGroupItem id="success">{"Success"}</ToggleGroupItem>
+						</ToggleGroup>
+					</div>
+					<div className="flex flex-col gap-y-1">
+						<label className="text-sm/6 font-medium" htmlFor={titleInputId}>
+							{"Title (optional)"}
+						</label>
+						<Input
+							id={titleInputId}
+							onChange={(event) => {
+								setTitleInput(event.target.value);
+							}}
+							value={titleInput}
+						/>
+					</div>
+					<div className="flex flex-col gap-y-1">
+						<span className="text-sm/6 font-medium">{"Content"}</span>
+						<InlineRichTextEditor
+							aria-label="Callout content"
+							content={contentInput ?? undefined}
+							onChange={setContentInput}
+						/>
+					</div>
+					<div className="flex items-center gap-x-2">
+						<Button
+							intent="primary"
+							onPress={() => {
+								updateAttributes({
+									intent: intentInput,
+									title: titleInput.trim() || null,
+									content: contentInput ?? { type: "doc", content: [{ type: "paragraph" }] },
+								});
+								setIsEditing(false);
+							}}
+							size="sm"
+							type="button"
+						>
+							{"Apply"}
+						</Button>
+						{content != null ? (
+							<Button
+								intent="outline"
+								onPress={() => {
+									setIsEditing(false);
+								}}
+								size="sm"
+								type="button"
+							>
+								{"Cancel"}
+							</Button>
+						) : (
+							<Button intent="outline" onPress={deleteNode} size="sm" type="button">
+								{"Remove"}
+							</Button>
+						)}
+					</div>
+				</div>
+			) : (
+				<div className="group relative">
+					<Note intent={intent}>
+						{title != null ? <strong className="mbe-1 block">{title}</strong> : null}
+						{content != null ? <InlineRichTextRenderer content={content} /> : null}
+					</Note>
+					{editor.isEditable ? (
+						<div className="absolute inset-e-2 inset-bs-2 flex gap-x-1 opacity-0 transition-opacity group-hover:opacity-100">
+							<button
+								aria-label="Edit callout"
+								className="rounded-sm bg-bg/90 p-1 text-muted-fg shadow-sm hover:text-fg"
+								onClick={() => {
+									selectNode();
+									resetInputs();
+									setIsEditing(true);
+								}}
+								type="button"
+							>
+								<PencilIcon className="block-3.5 inline-3.5" />
+							</button>
+							<button
+								aria-label="Remove callout"
+								className="rounded-sm bg-bg/90 p-1 text-muted-fg shadow-sm hover:text-danger"
+								onClick={deleteNode}
+								type="button"
+							>
+								<Trash2Icon className="block-3.5 inline-3.5" />
+							</button>
+						</div>
+					) : null}
+				</div>
+			)}
+		</BlockNodeSurface>
+	);
+}
+
+export const CalloutNode = Node.create({
+	name: "calloutBlock",
+	group: "block",
+	atom: true,
+	draggable: true,
+	selectable: true,
+	addAttributes() {
+		return { intent: { default: "info" }, title: { default: null }, content: { default: null } };
+	},
+	parseHTML() {
+		return [
+			{
+				tag: "div[data-callout-block]",
+				getAttrs(dom) {
+					return {
+						intent: dom.dataset.intent ?? "info",
+						title: dom.dataset.title ?? null,
+						content: parseCaptionAttr(dom.dataset.content),
+					};
+				},
+			},
+		];
+	},
+	renderHTML({ node }) {
+		return [
+			"div",
+			{
+				"data-callout-block": "",
+				"data-intent": node.attrs.intent as string,
+				"data-title": node.attrs.title as string | null,
+				"data-content": serializeCaptionAttr(node.attrs.content as JSONContent | null),
+			},
+		];
+	},
+	addNodeView() {
+		return ReactNodeViewRenderer(CalloutNodeView);
 	},
 });
 
@@ -762,6 +960,7 @@ export function createRichTextExtensions(
 		Image,
 		createAssetImageNode(options?.renderImagePicker),
 		EmbedNode,
+		CalloutNode,
 	];
 }
 
@@ -775,6 +974,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		className,
 		size,
 		renderEmbedInsert,
+		renderCalloutInsert,
 		renderImagePicker,
 	} = props;
 
@@ -905,6 +1105,20 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			.chain()
 			.focus()
 			.insertContent({ type: "embedBlock", attrs: { url: null, title: null, caption: null } })
+			.run();
+	}, [editor]);
+
+	const insertCallout = useCallback(() => {
+		if (!editor) {
+			return;
+		}
+		editor
+			.chain()
+			.focus()
+			.insertContent({
+				type: "calloutBlock",
+				attrs: { intent: "info", title: null, content: null },
+			})
 			.run();
 	}, [editor]);
 
@@ -1082,6 +1296,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							{renderEmbedInsert(insertEmbed)}
 						</>
 					) : null}
+					{renderCalloutInsert != null ? renderCalloutInsert(insertCallout) : null}
 				</div>
 			) : null}
 			{name != null && (

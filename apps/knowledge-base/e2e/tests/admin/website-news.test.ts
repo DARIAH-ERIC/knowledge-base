@@ -240,6 +240,48 @@ test.describe("website news admin", () => {
 		expect(contentBlocks).toHaveLength(0);
 	});
 
+	test("should save an inline callout between two rich-text blocks", async ({
+		page,
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Inline Callout ${randomUUID()}`;
+		const above = `Rich text above ${randomUUID()}`;
+		const calloutTitle = `Important ${randomUUID()}`;
+		const calloutBody = `Callout body ${randomUUID()}`;
+		const below = `Rich text below ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item with an inline callout");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await newsPage.addContentWithCallout({ above, below, body: calloutBody, title: calloutTitle });
+		await newsPage.submitForm();
+
+		const contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual([
+			"rich_text",
+			"callout",
+			"rich_text",
+		]);
+		expect(contentBlocks.map(({ position }) => position)).toStrictEqual([0, 1, 2]);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(above);
+		expect(contentBlocks[1]).toMatchObject({
+			calloutIntent: "warning",
+			calloutTitle,
+		});
+		expect(JSON.stringify(contentBlocks[1]!.content)).toContain(calloutBody);
+		expect(JSON.stringify(contentBlocks[2]!.content)).toContain(below);
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoDetailsFromList(title);
+		await expect(page.getByText(above)).toBeVisible();
+		await expect(page.getByText(calloutTitle)).toBeVisible();
+		await expect(page.getByText(calloutBody)).toBeVisible();
+		await expect(page.getByText(below)).toBeVisible();
+	});
+
 	test("should delete a news item", async ({ createWebsiteNewsPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const newsPage = createWebsiteNewsPage(workerIndex);

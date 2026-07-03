@@ -26,6 +26,7 @@ async function main() {
 			dataContentBlocks: schema.dataContentBlocks,
 			documentationPages: schema.documentationPages,
 			embedContentBlocks: schema.embedContentBlocks,
+			calloutContentBlocks: schema.calloutContentBlocks,
 			entities: schema.entities,
 			entitiesToEntities: schema.entitiesToEntities,
 			entitiesToResources: schema.entitiesToResources,

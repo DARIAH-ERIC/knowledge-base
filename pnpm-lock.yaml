@@ -591,6 +591,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.2
+      is-in-ci:
+        specifier: 'catalog:'
+        version: 2.0.0
       openapi-types:
         specifier: 'catalog:'
         version: 12.1.3

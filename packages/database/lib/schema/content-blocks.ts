@@ -10,6 +10,7 @@ import { fields } from "./entities";
 
 export const contentBlockTypesEnum = [
 	"accordion",
+	"callout",
 	"data",
 	"embed",
 	"gallery",
@@ -55,6 +56,32 @@ export type ContentBlockInput = typeof contentBlocks.$inferInsert;
 export const ContentBlockSelectSchema = createSelectSchema(contentBlocks);
 export const ContentBlockInsertSchema = createInsertSchema(contentBlocks);
 export const ContentBlockUpdateSchema = createUpdateSchema(contentBlocks);
+
+export const calloutIntentsEnum = ["default", "info", "warning", "danger", "success"] as const;
+
+export const calloutContentBlocks = p.snakeCase.table(
+	"content_blocks_type_callout",
+	{
+		id: p
+			.uuid("id")
+			.primaryKey()
+			.references(() => contentBlocks.id, { onDelete: "cascade" }),
+		intent: p.text("intent", { enum: calloutIntentsEnum }).notNull().default("info"),
+		title: p.text("title"),
+		content: p.jsonb("content").$type<JSONContent>().notNull(),
+		...f.timestamps(),
+	},
+	(t) => [
+		p.check("content_blocks_type_callout_intent_enum_check", inArray(t.intent, calloutIntentsEnum)),
+	],
+);
+
+export type CalloutContentBlock = typeof calloutContentBlocks.$inferSelect;
+export type CalloutContentBlockInput = typeof calloutContentBlocks.$inferInsert;
+
+export const CalloutContentBlockSelectSchema = createSelectSchema(calloutContentBlocks);
+export const CalloutContentBlockInsertSchema = createInsertSchema(calloutContentBlocks);
+export const CalloutContentBlockUpdateSchema = createUpdateSchema(calloutContentBlocks);
 
 export const dataContentBlockTypesEnum = [
 	"events",

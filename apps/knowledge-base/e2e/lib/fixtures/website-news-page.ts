@@ -156,6 +156,32 @@ export class WebsiteNewsPage {
 		await this.contentBlockEditor().fill(text);
 	}
 
+	async addContentWithCallout(options: {
+		above: string;
+		below: string;
+		body: string;
+		title: string;
+	}): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+
+		const editor = this.contentBlockEditor();
+		await editor.fill(options.above);
+		await editor.press("Enter");
+		await editor.pressSequentially(options.below);
+
+		/** Insert at the end of the first paragraph, between the two rich-text runs. */
+		await editor.press("Control+Home");
+		await editor.press("End");
+		await this.page.getByRole("button", { name: "Insert callout" }).click();
+
+		const callout = this.page.getByLabel("Callout block");
+		await callout.getByText("Warning", { exact: true }).click();
+		await callout.getByRole("textbox", { name: "Title (optional)" }).fill(options.title);
+		await callout.getByRole("textbox", { name: "Callout content" }).fill(options.body);
+		await callout.getByRole("button", { name: "Apply" }).click();
+	}
+
 	async updateContentBlockText(text: string): Promise<void> {
 		const editor = this.contentBlockEditor();
 		await editor.clear();
