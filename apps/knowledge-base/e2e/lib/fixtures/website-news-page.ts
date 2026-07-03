@@ -186,8 +186,11 @@ export class WebsiteNewsPage {
 		const editor = this.contentBlockEditor();
 		const callout = this.page.getByLabel("Callout block", { exact: true });
 		const dragHandle = callout.locator("xpath=..");
+		const nodeView = dragHandle.locator("xpath=..");
 		const targetParagraph = editor.locator("p").filter({ hasText: text });
 
+		await expect(dragHandle).toHaveAttribute("data-drag-handle", "");
+		await expect(nodeView).toHaveAttribute("draggable", "true");
 		await dragHandle.scrollIntoViewIfNeeded();
 		const sourceBox = await dragHandle.boundingBox();
 		const targetBox = await targetParagraph.boundingBox();
@@ -195,8 +198,9 @@ export class WebsiteNewsPage {
 			throw new Error("Could not resolve inline content-block drag coordinates.");
 		}
 
+		/** Start in the empty top padding so Chromium does not initiate a text-selection drag. */
 		const startX = sourceBox.x + sourceBox.width / 2;
-		const startY = sourceBox.y + sourceBox.height / 2;
+		const startY = sourceBox.y + 6;
 		const dropX = targetBox.x + Math.min(24, targetBox.width / 2);
 		const dropY = targetBox.y + 2;
 		const { mouse } = this.page;
@@ -207,11 +211,11 @@ export class WebsiteNewsPage {
 		await mouse.move(startX, startY);
 		await mouse.down();
 		await pause();
-		await mouse.move(startX, startY - 8);
+		await mouse.move(startX, startY + 12, { steps: 5 });
 		await pause();
-		await mouse.move((startX + dropX) / 2, (startY + dropY) / 2);
+		await mouse.move((startX + dropX) / 2, (startY + dropY) / 2, { steps: 10 });
 		await pause();
-		await mouse.move(dropX, dropY);
+		await mouse.move(dropX, dropY, { steps: 10 });
 		await pause();
 		await mouse.up();
 
@@ -234,10 +238,12 @@ export class WebsiteNewsPage {
 
 		const titleInput = callout.getByRole("textbox", { name: "Title (optional)" });
 		await titleInput.click({ position: { x: 8, y: 12 } });
-		const titleSelection = await titleInput.evaluate((element: HTMLInputElement) => {return {
-			end: element.selectionEnd,
-			start: element.selectionStart,
-		}});
+		const titleSelection = await titleInput.evaluate((element: HTMLInputElement) => {
+			return {
+				end: element.selectionEnd,
+				start: element.selectionStart,
+			};
+		});
 		expect(titleSelection.start).toBe(titleSelection.end);
 		expect(titleSelection.start).not.toBeNull();
 		expect(titleSelection.start!).toBeLessThan(title.length);
@@ -248,9 +254,7 @@ export class WebsiteNewsPage {
 			.first()
 			.dblclick({ position: { x: 28, y: 10 } });
 		await expect
-			.poll(async () => 
-				contentEditor.evaluate(() => window.getSelection()?.toString() ?? "")
-			)
+			.poll(async () => contentEditor.evaluate(() => window.getSelection()?.toString() ?? ""))
 			.toBe(selectedWord);
 
 		await callout.getByRole("button", { name: "Cancel" }).click();

@@ -30,7 +30,15 @@ import {
 	Trash2Icon,
 } from "lucide-react";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+	type ReactNode,
+	useCallback,
+	useId,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { twMerge } from "tailwind-merge";
 
 import { Button } from "@/lib/button";
@@ -143,7 +151,7 @@ function BlockNodeSurface({
 }: Readonly<BlockNodeSurfaceProps>): ReactNode {
 	const wrapperRef = useRef<HTMLDivElement>(null);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		/** ProseMirror puts `draggable` on the node-view container outside `NodeViewWrapper`. */
 		const nodeViewContainer = wrapperRef.current?.parentElement;
 		if (nodeViewContainer == null) {
