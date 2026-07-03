@@ -164,6 +164,9 @@ function mapPersonContributors(
 
 function hasContent(block: ContentBlock): boolean {
 	switch (block.type) {
+		case "callout": {
+			return (block.title?.trim().length ?? 0) > 0 || hasRichTextContent(block.content);
+		}
 		case "rich_text": {
 			return hasRichTextContent(block.content);
 		}

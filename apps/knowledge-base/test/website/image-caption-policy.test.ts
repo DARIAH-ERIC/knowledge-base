@@ -78,3 +78,33 @@ describe("image content-block document conversion", () => {
 		expect(document.content?.[0]?.attrs?.captionMode).toBe("override");
 	});
 });
+
+describe("callout content-block document conversion", () => {
+	it("keeps callouts inline while round-tripping them as separate blocks", () => {
+		const content: JSONContent = {
+			type: "doc",
+			content: [{ type: "paragraph", content: [{ type: "text", text: "Take care" }] }],
+		};
+		const document = mergeBlocksToDocument([
+			{ type: "rich_text", content: blockCaption },
+			{ type: "callout", content: { intent: "warning", title: "Important", content } },
+			{ type: "rich_text", content: assetCaption },
+		]);
+
+		expect(document.content?.map((node) => node.type)).toStrictEqual([
+			"paragraph",
+			"calloutBlock",
+			"paragraph",
+		]);
+		expect(splitDocumentToBlocks(document).map((block) => block.type)).toStrictEqual([
+			"rich_text",
+			"callout",
+			"rich_text",
+		]);
+		expect(splitDocumentToBlocks(document)[1]?.content).toStrictEqual({
+			intent: "warning",
+			title: "Important",
+			content,
+		});
+	});
+});

@@ -106,6 +106,23 @@ async function cloneTypedContentBlock(
 	typeName: schema.ContentBlockTypes["type"],
 ): Promise<void> {
 	switch (typeName) {
+		case "callout": {
+			const [source] = await tx
+				.select({
+					intent: schema.calloutContentBlocks.intent,
+					title: schema.calloutContentBlocks.title,
+					content: schema.calloutContentBlocks.content,
+				})
+				.from(schema.calloutContentBlocks)
+				.where(eq(schema.calloutContentBlocks.id, sourceBlockId))
+				.limit(1);
+			if (source == null) {
+				return;
+			}
+			await tx.insert(schema.calloutContentBlocks).values({ id: targetBlockId, ...source });
+			break;
+		}
+
 		case "rich_text": {
 			const [source] = await tx
 				.select({ content: schema.richTextContentBlocks.content })

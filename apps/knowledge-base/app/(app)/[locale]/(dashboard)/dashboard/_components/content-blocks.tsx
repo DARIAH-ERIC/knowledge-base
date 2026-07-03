@@ -36,6 +36,7 @@ import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
 import {
 	ChevronDownIcon,
 	CodeBracketSquareIcon,
+	InformationCircleIcon,
 	ListBulletIcon,
 	PencilSquareIcon,
 	PhotoIcon,
@@ -115,6 +116,17 @@ interface DataContentBlockItem {
 	};
 }
 
+interface CalloutContentBlockItem {
+	id: Key;
+	type: "callout";
+	position?: number;
+	content?: {
+		intent?: "default" | "info" | "warning" | "danger" | "success";
+		title?: string;
+		content?: JSONContent;
+	};
+}
+
 interface HeroContentBlockItem {
 	id: Key;
 	type: "hero";
@@ -151,6 +163,7 @@ export type ContentBlock =
 	| RichTextContentBlockItem
 	| ImageContentBlockItem
 	| EmbedContentBlockItem
+	| CalloutContentBlockItem
 	| DataContentBlockItem
 	| GalleryContentBlockItem
 	| HeroContentBlockItem
@@ -164,7 +177,12 @@ interface UnifiedContentBlockItem {
 
 type ContentBlockListItem = ContentBlock | UnifiedContentBlockItem;
 
-const UNIFIED_BLOCK_TYPES = new Set<ContentBlock["type"]>(["rich_text", "image", "embed"]);
+const UNIFIED_BLOCK_TYPES = new Set<ContentBlock["type"]>([
+	"rich_text",
+	"image",
+	"embed",
+	"callout",
+]);
 const DATA_CONTENT_BLOCK_TYPES = [
 	"events",
 	"news",
@@ -395,6 +413,7 @@ function ContentBlockItem({
 
 	const contentBlockTypeNames: Record<ContentBlockTypes["type"] | "unified_content", string> = {
 		accordion: t("Accordion"),
+		callout: t("Callout"),
 		data: t("Data"),
 		embed: t("Embed"),
 		gallery: t("Gallery"),
@@ -406,6 +425,7 @@ function ContentBlockItem({
 
 	const contentBlockTypeIcons: Record<ContentBlockTypes["type"] | "unified_content", ReactNode> = {
 		accordion: <ListBulletIcon className="block-4 inline-4 shrink-0" />,
+		callout: <InformationCircleIcon className="block-4 inline-4 shrink-0" />,
 		data: <Square3Stack3DIcon className="block-4 inline-4 shrink-0" />,
 		embed: <CodeBracketSquareIcon className="block-4 inline-4 shrink-0" />,
 		gallery: <Squares2X2Icon className="block-4 inline-4 shrink-0" />,
@@ -543,6 +563,10 @@ function ContentBlockPanel({
 			);
 		}
 
+		case "callout": {
+			return null;
+		}
+
 		case "data": {
 			return <DataContentBlockPanel item={item} onChange={onChange} />;
 		}
@@ -584,6 +608,13 @@ function ContentBlockPanel({
 							aria-label="Insert embed"
 							icon={CodeBracketSquareIcon}
 							onClick={insertEmbed}
+						/>
+					)}
+					renderCalloutInsert={(insertCallout) => (
+						<RichTextEditorToolbarButton
+							aria-label="Insert callout"
+							icon={InformationCircleIcon}
+							onClick={insertCallout}
 						/>
 					)}
 					renderImagePicker={
@@ -1331,6 +1362,7 @@ export function ContentBlockMenu({ onAdd }: Readonly<ContentBlockMenuProps>): Re
 
 	const contentBlockTypeNames: Record<ContentBlockListItem["type"], string> = {
 		accordion: t("Accordion"),
+		callout: t("Callout"),
 		data: t("Data"),
 		embed: t("Embed"),
 		gallery: t("Gallery"),

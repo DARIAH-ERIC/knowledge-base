@@ -157,7 +157,10 @@ async function getPlainTextFieldContentByEntityId(
 	const rows = await db
 		.select({
 			entityId: schema.fields.entityVersionId,
-			content: schema.richTextContentBlocks.content,
+			blockType: schema.contentBlockTypes.type,
+			richTextContent: schema.richTextContentBlocks.content,
+			calloutTitle: schema.calloutContentBlocks.title,
+			calloutContent: schema.calloutContentBlocks.content,
 		})
 		.from(schema.fields)
 		.innerJoin(
@@ -169,15 +172,19 @@ async function getPlainTextFieldContentByEntityId(
 			schema.contentBlockTypes,
 			eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
 		)
-		.innerJoin(
+		.leftJoin(
 			schema.richTextContentBlocks,
 			eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
+		)
+		.leftJoin(
+			schema.calloutContentBlocks,
+			eq(schema.calloutContentBlocks.id, schema.contentBlocks.id),
 		)
 		.where(
 			and(
 				inArray(schema.fields.entityVersionId, entityIds),
 				eq(schema.entityTypesFieldsNames.fieldName, fieldName),
-				eq(schema.contentBlockTypes.type, "rich_text"),
+				inArray(schema.contentBlockTypes.type, ["rich_text", "callout"]),
 			),
 		)
 		.orderBy(schema.fields.entityVersionId, schema.contentBlocks.position);
@@ -185,7 +192,12 @@ async function getPlainTextFieldContentByEntityId(
 	const contentByEntityId = new Map<string, Array<string>>();
 
 	for (const row of rows) {
-		const content = toPlainText(row.content);
+		const content =
+			row.blockType === "callout"
+				? [row.calloutTitle, toPlainText(row.calloutContent)]
+						.filter((part): part is string => part != null && part.length > 0)
+						.join(" ")
+				: toPlainText(row.richTextContent);
 
 		if (content.length === 0) {
 			continue;

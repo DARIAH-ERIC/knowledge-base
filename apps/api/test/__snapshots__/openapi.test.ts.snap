@@ -492,6 +492,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
                     "caption": {
                       "anyOf": [
                         {},
@@ -1168,6 +1203,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "required": [
                     "type",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
                     "content",
                   ],
                   "type": "object",
@@ -2105,6 +2175,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
                     "caption": {
                       "anyOf": [
                         {},
@@ -2814,6 +2919,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "required": [
                     "type",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
                     "content",
                   ],
                   "type": "object",
@@ -3611,6 +3751,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "required": [
                     "type",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
                     "content",
                   ],
                   "type": "object",
@@ -5062,6 +5237,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
                     "caption": {
                       "anyOf": [
                         {},
@@ -6387,6 +6597,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
                     "caption": {
                       "anyOf": [
                         {},
@@ -7365,6 +7610,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "required": [
                     "type",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
                     "content",
                   ],
                   "type": "object",
@@ -8710,6 +8990,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
                     "caption": {
                       "anyOf": [
                         {},
@@ -9400,6 +9715,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
                     "caption": {
                       "anyOf": [
                         {},
@@ -10029,6 +10379,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "required": [
                     "type",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
                     "content",
                   ],
                   "type": "object",
@@ -10714,6 +11099,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "required": [
                     "type",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
                     "content",
                   ],
                   "type": "object",
@@ -11447,6 +11867,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "required": [
                     "type",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
                     "content",
                   ],
                   "type": "object",
@@ -12592,6 +13047,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
                     "caption": {
                       "anyOf": [
                         {},
@@ -13601,6 +14091,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                   "required": [
                     "type",
+                    "content",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "intent": {
+                      "enum": [
+                        "default",
+                        "info",
+                        "warning",
+                        "danger",
+                        "success",
+                      ],
+                      "type": "string",
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "type": {
+                      "const": "callout",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "intent",
+                    "title",
                     "content",
                   ],
                   "type": "object",
