@@ -488,7 +488,9 @@ function CalloutNodeView({
 						</label>
 						<Input
 							id={titleInputId}
-							onChange={(event) => setTitleInput(event.target.value)}
+							onChange={(event) => {
+								setTitleInput(event.target.value);
+							}}
 							value={titleInput}
 						/>
 					</div>
@@ -517,7 +519,14 @@ function CalloutNodeView({
 							{"Apply"}
 						</Button>
 						{content != null ? (
-							<Button intent="outline" onPress={() => setIsEditing(false)} size="sm" type="button">
+							<Button
+								intent="outline"
+								onPress={() => {
+									setIsEditing(false);
+								}}
+								size="sm"
+								type="button"
+							>
 								{"Cancel"}
 							</Button>
 						) : (
@@ -530,7 +539,7 @@ function CalloutNodeView({
 			) : (
 				<div className="group relative">
 					<Note intent={intent}>
-						{title != null ? <strong className="mb-1 block">{title}</strong> : null}
+						{title != null ? <strong className="mbe-1 block">{title}</strong> : null}
 						{content != null ? <InlineRichTextRenderer content={content} /> : null}
 					</Note>
 					{editor.isEditable ? (
