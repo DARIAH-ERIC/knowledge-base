@@ -22,7 +22,7 @@ ingress:
   className: "nginx-proxy-protocol"
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+    nginx.ingress.kubernetes.io/proxy-body-size: "24m"
     nginx.ingress.kubernetes.io/proxy-buffering: "off"
 livenessProbe:
   path: /health

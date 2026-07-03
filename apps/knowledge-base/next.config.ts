@@ -22,7 +22,7 @@ const config: Config = {
 			 * Must be larger than `imageSizeLimit` in `config/assets.config.ts` to allow multipart
 			 * form-data overhead.
 			 */
-			bodySizeLimit: "8mb",
+			bodySizeLimit: "24mb",
 		},
 		turbopackFileSystemCacheForDev: true,
 		viewTransition: true,

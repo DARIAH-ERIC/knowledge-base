@@ -84,6 +84,10 @@ function createMockStorage(content = "test file content"): StorageService {
 			return Result.ok({ key: "" });
 		},
 		// eslint-disable-next-line @typescript-eslint/require-await
+		async replace() {
+			return Result.ok({ key: "" });
+		},
+		// eslint-disable-next-line @typescript-eslint/require-await
 		async stat() {
 			return Result.ok({ size: Buffer.from(content).byteLength });
 		},
