@@ -221,9 +221,15 @@ export class DatabaseService {
 		return asset ?? null;
 	}
 
-	async getNewsContentBlocksByTitle(
-		title: string,
-	): Promise<Array<{ type: string; position: number; content: unknown }>> {
+	async getNewsContentBlocksByTitle(title: string): Promise<
+		Array<{
+			calloutIntent: string | null;
+			calloutTitle: string | null;
+			content: unknown;
+			position: number;
+			type: string;
+		}>
+	> {
 		const [newsItem] = await this.db
 			.select({ versionId: schema.news.id })
 			.from(schema.news)
@@ -236,7 +242,9 @@ export class DatabaseService {
 
 		const rows = await this.db
 			.select({
-				content: sql<unknown>`${schema.richTextContentBlocks.content}`,
+				calloutIntent: schema.calloutContentBlocks.intent,
+				calloutTitle: schema.calloutContentBlocks.title,
+				content: sql<unknown>`coalesce(${schema.richTextContentBlocks.content}, ${schema.calloutContentBlocks.content})`,
 				position: schema.contentBlocks.position,
 				type: schema.contentBlockTypes.type,
 			})
@@ -249,6 +257,10 @@ export class DatabaseService {
 			.leftJoin(
 				schema.richTextContentBlocks,
 				eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(
+				schema.calloutContentBlocks,
+				eq(schema.calloutContentBlocks.id, schema.contentBlocks.id),
 			)
 			.where(eq(schema.fields.entityVersionId, newsItem.versionId))
 			.orderBy(schema.contentBlocks.position);
