@@ -57,7 +57,7 @@ export const ContentBlockSelectSchema = createSelectSchema(contentBlocks);
 export const ContentBlockInsertSchema = createInsertSchema(contentBlocks);
 export const ContentBlockUpdateSchema = createUpdateSchema(contentBlocks);
 
-export const calloutIntentsEnum = ["default", "info", "warning", "danger", "success"] as const;
+export const calloutIntentsEnum = ["neutral", "info", "warning", "danger", "success"] as const;
 
 export const calloutContentBlocks = p.snakeCase.table(
 	"content_blocks_type_callout",

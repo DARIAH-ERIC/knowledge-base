@@ -495,7 +495,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -1212,7 +1212,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -2178,7 +2178,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -2928,7 +2928,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -3760,7 +3760,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -5240,7 +5240,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -6600,7 +6600,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -7619,7 +7619,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -8993,7 +8993,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -9718,7 +9718,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -10388,7 +10388,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -11108,7 +11108,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -11876,7 +11876,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -13050,7 +13050,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",
@@ -14100,7 +14100,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "content": {},
                     "intent": {
                       "enum": [
-                        "default",
+                        "neutral",
                         "info",
                         "warning",
                         "danger",

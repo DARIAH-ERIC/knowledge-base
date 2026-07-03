@@ -175,11 +175,89 @@ export class WebsiteNewsPage {
 		await editor.press("End");
 		await this.page.getByRole("button", { name: "Insert callout" }).click();
 
-		const callout = this.page.getByLabel("Callout block");
+		const callout = this.page.getByLabel("Callout block", { exact: true });
 		await callout.getByText("Warning", { exact: true }).click();
 		await callout.getByRole("textbox", { name: "Title (optional)" }).fill(options.title);
 		await callout.getByRole("textbox", { name: "Callout content" }).fill(options.body);
 		await callout.getByRole("button", { name: "Apply" }).click();
+	}
+
+	async dragCalloutBeforeText(text: string): Promise<void> {
+		const editor = this.contentBlockEditor();
+		const callout = this.page.getByLabel("Callout block", { exact: true });
+		const dragHandle = callout.locator("xpath=..");
+		const nodeView = dragHandle.locator("xpath=..");
+		const targetParagraph = editor.locator("p").filter({ hasText: text });
+
+		await expect(dragHandle).toHaveAttribute("data-drag-handle", "");
+		await expect(nodeView).toHaveAttribute("draggable", "true");
+		await dragHandle.scrollIntoViewIfNeeded();
+		const sourceBox = await dragHandle.boundingBox();
+		const targetBox = await targetParagraph.boundingBox();
+		if (sourceBox == null || targetBox == null) {
+			throw new Error("Could not resolve inline content-block drag coordinates.");
+		}
+
+		/** Start in the empty top padding so Chromium does not initiate a text-selection drag. */
+		const startX = sourceBox.x + sourceBox.width / 2;
+		const startY = sourceBox.y + 6;
+		const dropX = targetBox.x + Math.min(24, targetBox.width / 2);
+		const dropY = targetBox.y + 2;
+		const { mouse } = this.page;
+		// Native ProseMirror drag-and-drop needs paced pointer moves to establish a drag selection.
+		// oxlint-disable-next-line playwright/no-wait-for-timeout
+		const pause = (): Promise<void> => this.page.waitForTimeout(120);
+
+		await mouse.move(startX, startY);
+		await mouse.down();
+		await pause();
+		await mouse.move(startX, startY + 12, { steps: 5 });
+		await pause();
+		await mouse.move((startX + dropX) / 2, (startY + dropY) / 2, { steps: 10 });
+		await pause();
+		await mouse.move(dropX, dropY, { steps: 10 });
+		await pause();
+		await mouse.up();
+
+		await expect
+			.poll(async () => {
+				const [nextCalloutBox, nextTargetBox] = await Promise.all([
+					callout.boundingBox(),
+					targetParagraph.boundingBox(),
+				]);
+				return (
+					nextCalloutBox != null && nextTargetBox != null && nextCalloutBox.y < nextTargetBox.y
+				);
+			})
+			.toBe(true);
+	}
+
+	async expectCalloutPointerEditing(title: string, selectedWord: string): Promise<void> {
+		const callout = this.page.getByLabel("Callout block", { exact: true });
+		await callout.dblclick();
+
+		const titleInput = callout.getByRole("textbox", { name: "Title (optional)" });
+		await titleInput.click({ position: { x: 8, y: 12 } });
+		const titleSelection = await titleInput.evaluate((element: HTMLInputElement) => {
+			return {
+				end: element.selectionEnd,
+				start: element.selectionStart,
+			};
+		});
+		expect(titleSelection.start).toBe(titleSelection.end);
+		expect(titleSelection.start).not.toBeNull();
+		expect(titleSelection.start!).toBeLessThan(title.length);
+
+		const contentEditor = callout.getByRole("textbox", { name: "Callout content" });
+		await contentEditor
+			.locator("p")
+			.first()
+			.dblclick({ position: { x: 28, y: 10 } });
+		await expect
+			.poll(async () => contentEditor.evaluate(() => window.getSelection()?.toString() ?? ""))
+			.toBe(selectedWord);
+
+		await callout.getByRole("button", { name: "Cancel" }).click();
 	}
 
 	async updateContentBlockText(text: string): Promise<void> {

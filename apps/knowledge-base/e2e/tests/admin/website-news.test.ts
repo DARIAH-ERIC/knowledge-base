@@ -249,7 +249,8 @@ test.describe("website news admin", () => {
 		const title = `${newsPage.workerPrefix} Inline Callout ${randomUUID()}`;
 		const above = `Rich text above ${randomUUID()}`;
 		const calloutTitle = `Important ${randomUUID()}`;
-		const calloutBody = `Callout body ${randomUUID()}`;
+		const selectedCalloutWord = "Selectable";
+		const calloutBody = `${selectedCalloutWord} callout body ${randomUUID()}`;
 		const below = `Rich text below ${randomUUID()}`;
 
 		await newsPage.gotoCreate();
@@ -259,7 +260,7 @@ test.describe("website news admin", () => {
 		await newsPage.addContentWithCallout({ above, below, body: calloutBody, title: calloutTitle });
 		await newsPage.submitForm();
 
-		const contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		let contentBlocks = await db.getNewsContentBlocksByTitle(title);
 		expect(contentBlocks.map(({ type }) => type)).toStrictEqual([
 			"rich_text",
 			"callout",
@@ -276,10 +277,38 @@ test.describe("website news admin", () => {
 
 		await newsPage.searchByTitle(title);
 		await newsPage.gotoDetailsFromList(title);
+		await expect(page.getByRole("complementary", { name: calloutTitle })).toBeVisible();
 		await expect(page.getByText(above)).toBeVisible();
 		await expect(page.getByText(calloutTitle)).toBeVisible();
 		await expect(page.getByText(calloutBody)).toBeVisible();
 		await expect(page.getByText(below)).toBeVisible();
+
+		await newsPage.gotoEditFromDetails();
+		await newsPage.expectCalloutPointerEditing(calloutTitle, selectedCalloutWord);
+		await newsPage.dragCalloutBeforeText(above);
+		await newsPage.submitForm();
+
+		contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["callout", "rich_text"]);
+		expect(contentBlocks.map(({ position }) => position)).toStrictEqual([0, 1]);
+		expect(contentBlocks[0]).toMatchObject({
+			calloutIntent: "warning",
+			calloutTitle,
+		});
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(calloutBody);
+		expect(JSON.stringify(contentBlocks[1]!.content)).toContain(above);
+		expect(JSON.stringify(contentBlocks[1]!.content)).toContain(below);
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoDetailsFromList(title);
+		const calloutBox = await page.getByText(calloutTitle).boundingBox();
+		const aboveBox = await page.getByText(above).boundingBox();
+		const belowBox = await page.getByText(below).boundingBox();
+		expect(calloutBox).not.toBeNull();
+		expect(aboveBox).not.toBeNull();
+		expect(belowBox).not.toBeNull();
+		expect(calloutBox!.y).toBeLessThan(aboveBox!.y);
+		expect(aboveBox!.y).toBeLessThan(belowBox!.y);
 	});
 
 	test("should delete a news item", async ({ createWebsiteNewsPage }) => {

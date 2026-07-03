@@ -53,17 +53,19 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 	switch (contentBlock.type) {
 		case "callout": {
 			const content = contentBlock.content?.content;
+			const intent = contentBlock.content?.intent ?? "info";
+			const title = contentBlock.content?.title;
 			if (content == null) {
 				return null;
 			}
 
 			return (
-				<Note intent={contentBlock.content?.intent ?? "info"}>
-					{contentBlock.content?.title != null ? (
-						<strong className="mbe-1 block">{contentBlock.content.title}</strong>
-					) : null}
-					<InlineRichTextRenderer content={content} />
-				</Note>
+				<aside aria-label={title ?? `${intent} callout`}>
+					<Note intent={intent === "neutral" ? "default" : intent}>
+						{title != null ? <strong className="mbe-1 block">{title}</strong> : null}
+						<InlineRichTextRenderer content={content} />
+					</Note>
+				</aside>
 			);
 		}
 
