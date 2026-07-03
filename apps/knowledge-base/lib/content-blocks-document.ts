@@ -28,7 +28,7 @@ interface EmbedBlock {
 interface CalloutBlock {
 	type: "callout";
 	content?: {
-		intent?: "default" | "info" | "warning" | "danger" | "success";
+		intent?: "neutral" | "info" | "warning" | "danger" | "success";
 		title?: string;
 		content?: JSONContent;
 	};
@@ -147,13 +147,15 @@ export function splitDocumentToBlocks(doc: JSONContent): Array<ContentBlockInput
 				type: "callout",
 				content: {
 					intent:
-						(node.attrs?.intent as
-							| "default"
-							| "info"
-							| "warning"
-							| "danger"
-							| "success"
-							| undefined) ?? "info",
+						node.attrs?.intent === "default"
+							? "neutral"
+							: ((node.attrs?.intent as
+									| "neutral"
+									| "info"
+									| "warning"
+									| "danger"
+									| "success"
+									| undefined) ?? "info"),
 					title: (node.attrs?.title as string | null | undefined) ?? undefined,
 					content: (node.attrs?.content as JSONContent | null | undefined) ?? undefined,
 				},

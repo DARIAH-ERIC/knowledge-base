@@ -44,7 +44,7 @@ export const ContentBlockInputSchema = v.union([
 		content: v.optional(
 			v.object({
 				intent: v.optional(
-					v.picklist(["default", "info", "warning", "danger", "success"] as const),
+					v.picklist(["neutral", "info", "warning", "danger", "success"] as const),
 				),
 				title: v.optional(v.string()),
 				content: v.optional(v.custom<JSONContent>(() => true)),

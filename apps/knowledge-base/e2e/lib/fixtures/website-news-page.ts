@@ -175,7 +175,7 @@ export class WebsiteNewsPage {
 		await editor.press("End");
 		await this.page.getByRole("button", { name: "Insert callout" }).click();
 
-		const callout = this.page.getByLabel("Callout block");
+		const callout = this.page.getByLabel("Callout block", { exact: true });
 		await callout.getByText("Warning", { exact: true }).click();
 		await callout.getByRole("textbox", { name: "Title (optional)" }).fill(options.title);
 		await callout.getByRole("textbox", { name: "Callout content" }).fill(options.body);
@@ -184,7 +184,7 @@ export class WebsiteNewsPage {
 
 	async dragCalloutBeforeText(text: string): Promise<void> {
 		const editor = this.contentBlockEditor();
-		const callout = this.page.getByLabel("Callout block");
+		const callout = this.page.getByLabel("Callout block", { exact: true });
 		const dragHandle = callout.locator("xpath=..");
 		const targetParagraph = editor.locator("p").filter({ hasText: text });
 
@@ -226,6 +226,34 @@ export class WebsiteNewsPage {
 				);
 			})
 			.toBe(true);
+	}
+
+	async expectCalloutPointerEditing(title: string, selectedWord: string): Promise<void> {
+		const callout = this.page.getByLabel("Callout block", { exact: true });
+		await callout.dblclick();
+
+		const titleInput = callout.getByRole("textbox", { name: "Title (optional)" });
+		await titleInput.click({ position: { x: 8, y: 12 } });
+		const titleSelection = await titleInput.evaluate((element: HTMLInputElement) => {return {
+			end: element.selectionEnd,
+			start: element.selectionStart,
+		}});
+		expect(titleSelection.start).toBe(titleSelection.end);
+		expect(titleSelection.start).not.toBeNull();
+		expect(titleSelection.start!).toBeLessThan(title.length);
+
+		const contentEditor = callout.getByRole("textbox", { name: "Callout content" });
+		await contentEditor
+			.locator("p")
+			.first()
+			.dblclick({ position: { x: 28, y: 10 } });
+		await expect
+			.poll(async () => 
+				contentEditor.evaluate(() => window.getSelection()?.toString() ?? "")
+			)
+			.toBe(selectedWord);
+
+		await callout.getByRole("button", { name: "Cancel" }).click();
 	}
 
 	async updateContentBlockText(text: string): Promise<void> {

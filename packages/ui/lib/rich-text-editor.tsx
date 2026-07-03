@@ -30,14 +30,14 @@ import {
 	Trash2Icon,
 } from "lucide-react";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useCallback, useId, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 import { Button } from "@/lib/button";
 import { InlineRichTextEditor } from "@/lib/inline-rich-text-editor";
 import { InlineRichTextRenderer } from "@/lib/inline-rich-text-renderer";
 import { Input } from "@/lib/input";
-import { Note, type NoteProps } from "@/lib/note";
+import { Note } from "@/lib/note";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
 import { isEmptyRichTextDocument } from "@/lib/rich-text";
 import { RichTextEditorToolbarButton } from "@/lib/rich-text-toolbar-button";
@@ -126,6 +126,7 @@ interface BlockNodeSurfaceProps {
 	children: ReactNode;
 	className?: string;
 	isEditable: boolean;
+	isEditing: boolean;
 	isSelected?: boolean;
 	label: string;
 	onDoubleClick?: () => void;
@@ -135,12 +136,28 @@ function BlockNodeSurface({
 	children,
 	className,
 	isEditable,
+	isEditing,
 	isSelected = false,
 	label,
 	onDoubleClick,
 }: Readonly<BlockNodeSurfaceProps>): ReactNode {
+	const wrapperRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		/** ProseMirror puts `draggable` on the node-view container outside `NodeViewWrapper`. */
+		const nodeViewContainer = wrapperRef.current?.parentElement;
+		if (nodeViewContainer == null) {
+			return;
+		}
+		if (isEditing || !isEditable) {
+			nodeViewContainer.removeAttribute("draggable");
+		} else {
+			nodeViewContainer.setAttribute("draggable", "true");
+		}
+	}, [isEditable, isEditing]);
+
 	return (
-		<NodeViewWrapper data-drag-handle="">
+		<NodeViewWrapper ref={wrapperRef} data-drag-handle={isEditing || !isEditable ? undefined : ""}>
 			<div
 				aria-label={label}
 				className={twMerge(
@@ -151,7 +168,7 @@ function BlockNodeSurface({
 				)}
 				contentEditable={false}
 				onDoubleClick={(e) => {
-					if (!isEditable || onDoubleClick == null) {
+					if (isEditing || !isEditable || onDoubleClick == null) {
 						return;
 					}
 					e.preventDefault();
@@ -227,6 +244,7 @@ function EmbedNodeView({
 	return (
 		<BlockNodeSurface
 			isEditable={editor.isEditable}
+			isEditing={isEditing}
 			isSelected={selected}
 			label="Embed block"
 			onDoubleClick={() => {
@@ -415,7 +433,23 @@ export const EmbedNode = Node.create({
 	},
 });
 
-type CalloutIntent = NonNullable<NoteProps["intent"]>;
+type CalloutIntent = "neutral" | "info" | "warning" | "danger" | "success";
+
+function normalizeCalloutIntent(intent: unknown): CalloutIntent {
+	if (intent === "default") {
+		return "neutral";
+	}
+	if (
+		intent === "neutral" ||
+		intent === "info" ||
+		intent === "warning" ||
+		intent === "danger" ||
+		intent === "success"
+	) {
+		return intent;
+	}
+	return "info";
+}
 
 function CalloutNodeView({
 	editor,
@@ -425,7 +459,7 @@ function CalloutNodeView({
 	updateAttributes,
 	deleteNode,
 }: Readonly<NodeViewProps>): ReactNode {
-	const intent = node.attrs.intent as CalloutIntent;
+	const intent = normalizeCalloutIntent(node.attrs.intent);
 	const title = node.attrs.title as string | null;
 	const content = node.attrs.content as JSONContent | null;
 	const [isEditing, setIsEditing] = useState(content == null && editor.isEditable);
@@ -451,6 +485,7 @@ function CalloutNodeView({
 		<BlockNodeSurface
 			className="border-transparent"
 			isEditable={editor.isEditable}
+			isEditing={isEditing}
 			isSelected={selected}
 			label="Callout block"
 			onDoubleClick={() => {
@@ -475,7 +510,7 @@ function CalloutNodeView({
 							selectedKeys={[intentInput]}
 							size="sm"
 						>
-							<ToggleGroupItem id="default">{"Default"}</ToggleGroupItem>
+							<ToggleGroupItem id="neutral">{"Neutral"}</ToggleGroupItem>
 							<ToggleGroupItem id="info">{"Info"}</ToggleGroupItem>
 							<ToggleGroupItem id="warning">{"Warning"}</ToggleGroupItem>
 							<ToggleGroupItem id="danger">{"Danger"}</ToggleGroupItem>
@@ -538,7 +573,7 @@ function CalloutNodeView({
 				</div>
 			) : (
 				<aside aria-label={title ?? `${intent} callout`} className="group relative">
-					<Note intent={intent}>
+					<Note intent={intent === "neutral" ? "default" : intent}>
 						{title != null ? <strong className="mbe-1 block">{title}</strong> : null}
 						{content != null ? <InlineRichTextRenderer content={content} /> : null}
 					</Note>
@@ -587,7 +622,7 @@ export const CalloutNode = Node.create({
 				tag: "aside[data-callout-block]",
 				getAttrs(dom) {
 					return {
-						intent: dom.dataset.intent ?? "info",
+						intent: normalizeCalloutIntent(dom.dataset.intent),
 						title: dom.dataset.title ?? null,
 						content: parseCaptionAttr(dom.dataset.content),
 					};
@@ -597,7 +632,7 @@ export const CalloutNode = Node.create({
 				tag: "div[data-callout-block]",
 				getAttrs(dom) {
 					return {
-						intent: dom.dataset.intent ?? "info",
+						intent: normalizeCalloutIntent(dom.dataset.intent),
 						title: dom.dataset.title ?? null,
 						content: parseCaptionAttr(dom.dataset.content),
 					};
@@ -688,6 +723,7 @@ function AssetImageNodeView({
 	return (
 		<BlockNodeSurface
 			isEditable={editor.isEditable}
+			isEditing={isEditing}
 			isSelected={selected}
 			label="Image block"
 			onDoubleClick={() => {

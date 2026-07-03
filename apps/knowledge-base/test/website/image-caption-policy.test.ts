@@ -107,4 +107,18 @@ describe("callout content-block document conversion", () => {
 			content,
 		});
 	});
+
+	it("normalizes the legacy default intent to neutral", () => {
+		const blocks = splitDocumentToBlocks({
+			type: "doc",
+			content: [
+				{
+					type: "calloutBlock",
+					attrs: { intent: "default", title: null, content: blockCaption },
+				},
+			],
+		});
+
+		expect(blocks[0]?.content).toMatchObject({ intent: "neutral" });
+	});
 });

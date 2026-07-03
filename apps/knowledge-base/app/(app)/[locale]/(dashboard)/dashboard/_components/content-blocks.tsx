@@ -121,7 +121,7 @@ interface CalloutContentBlockItem {
 	type: "callout";
 	position?: number;
 	content?: {
-		intent?: "default" | "info" | "warning" | "danger" | "success";
+		intent?: "neutral" | "info" | "warning" | "danger" | "success";
 		title?: string;
 		content?: JSONContent;
 	};

@@ -249,7 +249,8 @@ test.describe("website news admin", () => {
 		const title = `${newsPage.workerPrefix} Inline Callout ${randomUUID()}`;
 		const above = `Rich text above ${randomUUID()}`;
 		const calloutTitle = `Important ${randomUUID()}`;
-		const calloutBody = `Callout body ${randomUUID()}`;
+		const selectedCalloutWord = "Selectable";
+		const calloutBody = `${selectedCalloutWord} callout body ${randomUUID()}`;
 		const below = `Rich text below ${randomUUID()}`;
 
 		await newsPage.gotoCreate();
@@ -283,6 +284,7 @@ test.describe("website news admin", () => {
 		await expect(page.getByText(below)).toBeVisible();
 
 		await newsPage.gotoEditFromDetails();
+		await newsPage.expectCalloutPointerEditing(calloutTitle, selectedCalloutWord);
 		await newsPage.dragCalloutBeforeText(above);
 		await newsPage.submitForm();
 

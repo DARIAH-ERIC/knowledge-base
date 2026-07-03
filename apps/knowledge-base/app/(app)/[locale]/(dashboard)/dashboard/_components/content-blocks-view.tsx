@@ -61,7 +61,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 
 			return (
 				<aside aria-label={title ?? `${intent} callout`}>
-					<Note intent={intent}>
+					<Note intent={intent === "neutral" ? "default" : intent}>
 						{title != null ? <strong className="mbe-1 block">{title}</strong> : null}
 						<InlineRichTextRenderer content={content} />
 					</Note>
