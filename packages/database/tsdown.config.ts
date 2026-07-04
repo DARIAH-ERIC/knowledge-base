@@ -9,6 +9,7 @@ export default defineConfig({
 		"./lib/errors.ts",
 		"./lib/image-captions.ts",
 		"./lib/relations.ts",
+		"./lib/rich-text.ts",
 		"./lib/schema.ts",
 		"./lib/sql.ts",
 	],

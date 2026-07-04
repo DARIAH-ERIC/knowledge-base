@@ -15,6 +15,7 @@
 		"./errors": "./dist/errors.mjs",
 		"./image-captions": "./dist/image-captions.mjs",
 		"./relations": "./dist/relations.mjs",
+		"./rich-text": "./dist/rich-text.mjs",
 		"./schema": "./dist/schema.mjs",
 		"./sql": "./dist/sql.mjs"
 	},

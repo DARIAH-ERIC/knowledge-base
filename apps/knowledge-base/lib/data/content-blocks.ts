@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
+import { isEmptyRichTextDocument } from "@dariah-eric/database/rich-text";
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
@@ -50,6 +51,9 @@ interface CreateRichTextContentBlockParams {
 
 export async function createRichTextContentBlock(params: CreateRichTextContentBlockParams) {
 	const { fieldId, typeId, content, position = 0 } = params;
+	if (isEmptyRichTextDocument(content)) {
+		return undefined;
+	}
 
 	const [contentBlock] = await db
 		.insert(schema.contentBlocks)
@@ -92,6 +96,10 @@ interface UpdateRichTextContentBlockParams {
 
 export async function updateRichTextContentBlock(params: UpdateRichTextContentBlockParams) {
 	const { id, content } = params;
+	if (isEmptyRichTextDocument(content)) {
+		await db.delete(schema.contentBlocks).where(eq(schema.contentBlocks.id, id));
+		return undefined;
+	}
 
 	const [updated] = await db
 		.update(schema.richTextContentBlocks)

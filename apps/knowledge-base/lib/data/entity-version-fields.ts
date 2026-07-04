@@ -1,4 +1,5 @@
 import { assert } from "@acdh-oeaw/lib";
+import { isEmptyRichTextDocument } from "@dariah-eric/database/rich-text";
 import * as schema from "@dariah-eric/database/schema";
 
 import type { ContentBlockInput } from "@/lib/content-block-input";
@@ -71,6 +72,15 @@ export async function upsertRichTextEntityVersionField(
 		},
 		columns: { id: true },
 	});
+
+	if (isEmptyRichTextDocument(content)) {
+		if (existingContentBlock != null) {
+			await tx
+				.delete(schema.contentBlocks)
+				.where(eq(schema.contentBlocks.id, existingContentBlock.id));
+		}
+		return;
+	}
 
 	if (existingContentBlock == null) {
 		const [newContentBlock] = await tx

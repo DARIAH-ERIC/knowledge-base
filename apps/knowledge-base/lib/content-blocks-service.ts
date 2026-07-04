@@ -1,3 +1,4 @@
+import { isEmptyRichTextDocument } from "@dariah-eric/database/rich-text";
 import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
@@ -73,6 +74,10 @@ export async function upsertTypedContentBlock(
 		}
 
 		case "rich_text": {
+			if (isEmptyRichTextDocument(block.content)) {
+				await tx.delete(schema.contentBlocks).where(eq(schema.contentBlocks.id, blockId));
+				break;
+			}
 			if (isNew) {
 				await tx
 					.insert(schema.richTextContentBlocks)
