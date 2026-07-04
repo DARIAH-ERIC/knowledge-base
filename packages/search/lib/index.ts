@@ -36,6 +36,7 @@ export type {
 	ResourceFacetField,
 	ResourceFilterField,
 	ResourceItem,
+	PublicationResourceDocument,
 	ResourceSearchField,
 	ResourceSearchResult,
 	ResourceSortField,

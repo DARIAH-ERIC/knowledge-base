@@ -1,5 +1,18 @@
 # dariah knowledge base data migration
 
+## Zotero publications
+
+Import a Zotero JSON export into the canonical publications table with an explicit collection map:
+
+```sh
+pnpm data:migrate:zotero-publications ./zotero.json ./collection-map.json
+pnpm data:migrate:zotero-publications ./zotero.json ./collection-map.json --write
+```
+
+The first command is a dry run. The mapping file maps Zotero collection keys (or names, depending
+on the export) to published national-consortium or working-group document UUIDs. Imported records
+remain drafts for review. Re-running the write import updates by Zotero key or normalized DOI.
+
 ## bodies
 
 | unr         | kb                                    | comment                                          |

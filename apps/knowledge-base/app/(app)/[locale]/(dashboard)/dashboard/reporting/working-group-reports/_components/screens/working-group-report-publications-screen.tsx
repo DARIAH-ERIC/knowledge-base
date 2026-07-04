@@ -37,7 +37,7 @@ export async function WorkingGroupReportPublicationsScreen(
 	const report = result.data;
 	const snapshot = await getWorkingGroupExternalResourceSnapshot(
 		report.id,
-		"working_group_zotero_publications",
+		"working_group_publications",
 	);
 	const t = await getExtracted();
 	const canRefresh = await isReportEditable(user, {
@@ -51,19 +51,19 @@ export async function WorkingGroupReportPublicationsScreen(
 			capturedAt={snapshot?.capturedAt.toISOString() ?? null}
 			capturedByUserName={snapshot?.capturedByUserName ?? null}
 			description={t(
-				"Stored Zotero publications for this report. Refresh to capture the current search-index results.",
+				"Stored publications for this report. Refresh to capture the current bibliography records.",
 			)}
 			emptyMessage={
 				snapshot == null
-					? t("No Zotero publications snapshot has been captured yet.")
-					: t("No Zotero publications recorded for this snapshot.")
+					? t("No publications snapshot has been captured yet.")
+					: t("No publications recorded for this snapshot.")
 			}
 			items={snapshot?.items ?? []}
 			refreshAction={refreshWorkingGroupReportExternalResourceSnapshotAction}
 			reportId={report.id}
 			reportIdFieldName="workingGroupReportId"
-			section="working_group_zotero_publications"
-			title={t("Zotero publications")}
+			section="working_group_publications"
+			title={t("Publications")}
 		/>
 	);
 }

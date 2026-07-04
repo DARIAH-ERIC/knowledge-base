@@ -11,6 +11,7 @@
 		"data:migrate:unr": "tsx ./scripts/migrate-unr.ts",
 		"data:migrate:wordpress": "tsx ./scripts/migrate-wordpress.ts",
 		"data:migrate:wordpress-news-item": "tsx ./scripts/migrate-wordpress-news-item.ts",
+		"data:migrate:zotero-publications": "tsx ./scripts/import-zotero-publications.ts",
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",
 		"lint:check": "oxlint --report-unused-disable-directives --type-aware --type-check",

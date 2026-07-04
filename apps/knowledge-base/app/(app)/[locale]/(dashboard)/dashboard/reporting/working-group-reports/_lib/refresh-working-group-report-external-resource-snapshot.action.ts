@@ -19,11 +19,11 @@ function getSuccessMessage(
 		case "working_group_sshoc_resources": {
 			return t("SSHOC resources snapshot refreshed.");
 		}
-		case "working_group_zotero_publications": {
-			return t("Zotero publications snapshot refreshed.");
+		case "working_group_publications": {
+			return t("Publications snapshot refreshed.");
 		}
 		case "country_sshoc_resources":
-		case "country_zotero_publications": {
+		case "country_publications": {
 			return t("External resources snapshot refreshed.");
 		}
 	}

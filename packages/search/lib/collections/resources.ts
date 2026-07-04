@@ -33,6 +33,7 @@ export const resourcesCollection = defineCollection({
 });
 
 export const resourceSources = [
+	"knowledge-base",
 	"dariah-campus",
 	"episciences",
 	"hal",
@@ -65,7 +66,7 @@ interface ResourceDocumentBase extends CollectionDocument<typeof resourcesCollec
 export interface PublicationResourceDocument extends ResourceDocumentBase {
 	type: "publication";
 	kind: string | null;
-	source: "episciences" | "hal" | "open-aire" | "zenodo" | "zotero";
+	source: "knowledge-base" | "episciences" | "hal" | "open-aire" | "zenodo" | "zotero";
 	national_consortia: Array<string>;
 	working_groups: Array<string>;
 	institutions: Array<string>;

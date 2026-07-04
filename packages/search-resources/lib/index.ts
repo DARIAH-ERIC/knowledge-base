@@ -18,6 +18,7 @@ export {
 	type SyncSearchResourcesResult,
 } from "./service";
 export { loadOrgUnitLookups } from "./org-units";
+export { loadKnowledgeBasePublicationDocuments } from "./publications";
 export { createSshocItem, type SshocOrgUnitLookups } from "./sshoc";
 export { createZenodoRecord } from "./zenodo";
 export {

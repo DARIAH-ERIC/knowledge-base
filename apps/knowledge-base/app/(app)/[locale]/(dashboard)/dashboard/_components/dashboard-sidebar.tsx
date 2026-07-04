@@ -146,6 +146,12 @@ export function useSidebarMenu(
 				icon: <ListBulletIcon />,
 			},
 			{
+				href: "/dashboard/administrator/publications",
+				tooltip: t("Publications"),
+				label: t("Publications"),
+				icon: <ListBulletIcon />,
+			},
+			{
 				href: "/dashboard/administrator/project-partners",
 				tooltip: t("Project partners"),
 				label: t("Project partners"),

@@ -962,6 +962,24 @@ export const relations = defineRelations(schema, (r) => {
 				optional: true,
 			}),
 		},
+		publications: {
+			attributions: r.many.publicationsToOrganisationalUnits({
+				from: r.publications.id,
+				to: r.publicationsToOrganisationalUnits.publicationId,
+			}),
+		},
+		publicationsToOrganisationalUnits: {
+			publication: r.one.publications({
+				from: r.publicationsToOrganisationalUnits.publicationId,
+				to: r.publications.id,
+				optional: false,
+			}),
+			organisationalUnitEntity: r.one.entities({
+				from: r.publicationsToOrganisationalUnits.organisationalUnitDocumentId,
+				to: r.entities.id,
+				optional: false,
+			}),
+		},
 		spotlightArticles: {
 			contributors: r.many.persons({
 				from: r.spotlightArticles.id.through(

@@ -152,9 +152,9 @@ export const WorkingGroupReportUpdateSchema = createUpdateSchema(workingGroupRep
 
 export const reportExternalResourceSnapshotSectionEnum = [
 	"country_sshoc_resources",
-	"country_zotero_publications",
+	"country_publications",
 	"working_group_sshoc_resources",
-	"working_group_zotero_publications",
+	"working_group_publications",
 ] as const;
 
 /**

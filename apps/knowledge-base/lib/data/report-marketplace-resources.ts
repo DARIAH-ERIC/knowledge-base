@@ -1,6 +1,7 @@
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import type { ResourceDocument, ResourceItem, SearchResourcesParams } from "@dariah-eric/search";
+import { loadKnowledgeBasePublicationDocuments } from "@dariah-eric/search-resources";
 
 import { type Transaction, db } from "@/lib/db";
 import { and, eq, sql } from "@/lib/db/sql";
@@ -8,12 +9,12 @@ import { search } from "@/lib/search";
 
 export const countryExternalResourceSnapshotSections = [
 	"country_sshoc_resources",
-	"country_zotero_publications",
+	"country_publications",
 ] as const satisfies ReadonlyArray<ReportExternalResourceSnapshotSection>;
 
 export const workingGroupExternalResourceSnapshotSections = [
 	"working_group_sshoc_resources",
-	"working_group_zotero_publications",
+	"working_group_publications",
 ] as const satisfies ReadonlyArray<ReportExternalResourceSnapshotSection>;
 
 export type ReportExternalResourceSnapshotSection =
@@ -325,12 +326,21 @@ async function getCountryExternalResourceSnapshotCapture(
 			return { actorSlugs: consortiumSlugs, filterBy, items };
 		}
 
-		case "country_zotero_publications": {
-			const filterBy = `type:=publication && source:=zotero && year:=${year} && ${nationalConsortiaFilter(consortiumSlugs)}`;
+		case "country_publications": {
+			const filterBy = `database:publication_year=${String(year)};national_consortia=${consortiumSlugs.join(",")}`;
+			const consortiumSlugSet = new Set(consortiumSlugs);
 			const items =
 				consortiumSlugs.length === 0
 					? []
-					: await searchAllResourcePagesStrict({ ...getSearchBaseParams(), filterBy });
+					: (await loadKnowledgeBasePublicationDocuments(db))
+							.filter(
+								(document) =>
+									document.year === year &&
+									document.national_consortia.some((slug) => consortiumSlugSet.has(slug)),
+							)
+							.map((document) => {
+								return { document, highlight: {} };
+							});
 
 			return { actorSlugs: consortiumSlugs, filterBy, items };
 		}
@@ -357,12 +367,18 @@ async function getWorkingGroupExternalResourceSnapshotCapture(
 			return { actorSlugs: workingGroupSlugs, filterBy, items };
 		}
 
-		case "working_group_zotero_publications": {
-			const filterBy = `type:=publication && source:=zotero && year:=${year} && working_groups:=${workingGroupFilter}`;
+		case "working_group_publications": {
+			const filterBy = `database:publication_year=${String(year)};working_groups=${workingGroupSlugs.join(",")}`;
 			const items =
 				slug == null
 					? []
-					: await searchAllResourcePagesStrict({ ...getSearchBaseParams(), filterBy });
+					: (await loadKnowledgeBasePublicationDocuments(db))
+							.filter(
+								(document) => document.year === year && document.working_groups.includes(slug),
+							)
+							.map((document) => {
+								return { document, highlight: {} };
+							});
 
 			return { actorSlugs: workingGroupSlugs, filterBy, items };
 		}

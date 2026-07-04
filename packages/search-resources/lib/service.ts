@@ -3,7 +3,7 @@ import type { DariahCampusClient } from "@dariah-eric/client-campus";
 import type { EpisciencesClient, EpisciencesSearchDocument } from "@dariah-eric/client-episciences";
 import type { SshocClient } from "@dariah-eric/client-sshoc";
 import type { ZenodoClient } from "@dariah-eric/client-zenodo";
-import type { ZoteroClient } from "@dariah-eric/client-zotero";
+import type { Database } from "@dariah-eric/database";
 import {
 	type ResourceDocument,
 	type SearchService,
@@ -13,6 +13,7 @@ import {
 import type { SearchAdminService } from "@dariah-eric/search/admin";
 import { Result } from "better-result";
 
+import { loadKnowledgeBasePublicationDocuments } from "./publications";
 import {
 	type EpisciencesPaperEntry,
 	type OrgUnitResourceLookups,
@@ -29,6 +30,7 @@ export interface SearchResourcesCache<CacheError = unknown> {
 }
 
 export interface CreateSearchResourcesServiceParams {
+	db: Database;
 	campus: DariahCampusClient;
 	episciences: EpisciencesClient;
 	search: SearchAdminService;
@@ -36,8 +38,6 @@ export interface CreateSearchResourcesServiceParams {
 	sshoc: SshocClient;
 	sshocMarketplaceBaseUrl: string;
 	zenodo: ZenodoClient;
-	zotero: ZoteroClient;
-	zoteroGroupId: string;
 	/**
 	 * Lookups used to resolve sshoc actor ids and zotero collection names to the slugs of national
 	 * consortia and working groups that own a resource.
@@ -100,6 +100,7 @@ async function fetchEpisciencesPapers(
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createSearchResourcesService(params: CreateSearchResourcesServiceParams) {
 	const {
+		db,
 		campus,
 		episciences,
 		search,
@@ -107,10 +108,6 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		sshoc,
 		sshocMarketplaceBaseUrl,
 		zenodo,
-		// NOTE: zotero source temporarily disabled (see note in `resources.ts`). To re-enable, restore
-		// these and the zotero fetch in `fetchSearchIndexResourceSourceData` below.
-		// zotero,
-		// zoteroGroupId,
 		orgUnits,
 	} = params;
 
@@ -123,6 +120,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 
 		const result = await Result.gen(async function* () {
 			const [
+				knowledgeBasePublications,
 				sshocItemsResult,
 				campusResourcesResult,
 				campusCurriculaResult,
@@ -133,6 +131,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				// zoteroItemsResult,
 				// zoteroCollectionsResult,
 			] = await Promise.all([
+				loadKnowledgeBasePublicationDocuments(db),
 				getOrFetch(cache, "sshoc/items", () =>
 					sshoc.items.searchAll({
 						"f.keyword": ["DARIAH Resource"],
@@ -168,8 +167,8 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 			const episciencesPapers = yield* await getOrFetch(cache, "episciences/papers", () =>
 				fetchEpisciencesPapers(episciences, episciencesDocuments),
 			);
-
 			return Result.ok({
+				knowledgeBasePublications,
 				campusCurricula,
 				campusResources,
 				episciencesDocuments,

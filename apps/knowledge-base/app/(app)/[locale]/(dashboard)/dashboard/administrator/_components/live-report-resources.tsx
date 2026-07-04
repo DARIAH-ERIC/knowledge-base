@@ -50,12 +50,12 @@ async function getLiveSectionDescriptors(
 			},
 			{
 				description: t(
-					"Stored Zotero publications for this report. Refresh to capture the current search-index results.",
+					"Stored publications for this report. Refresh to capture the current bibliography records.",
 				),
-				emptyMessage: t("No Zotero publications snapshot has been captured yet."),
+				emptyMessage: t("No publications snapshot has been captured yet."),
 				id: liveReportPublicationsSectionId,
-				section: "country_zotero_publications",
-				title: t("Zotero publications"),
+				section: "country_publications",
+				title: t("Publications"),
 			},
 		];
 	}
@@ -72,12 +72,12 @@ async function getLiveSectionDescriptors(
 		},
 		{
 			description: t(
-				"Stored Zotero publications for this report. Refresh to capture the current search-index results.",
+				"Stored publications for this report. Refresh to capture the current bibliography records.",
 			),
-			emptyMessage: t("No Zotero publications snapshot has been captured yet."),
+			emptyMessage: t("No publications snapshot has been captured yet."),
 			id: liveReportPublicationsSectionId,
-			section: "working_group_zotero_publications",
-			title: t("Zotero publications"),
+			section: "working_group_publications",
+			title: t("Publications"),
 		},
 	];
 }
@@ -98,11 +98,11 @@ async function getSnapshot(
 ): Promise<ReportExternalResourceSnapshot | null> {
 	switch (descriptor.section) {
 		case "country_sshoc_resources":
-		case "country_zotero_publications": {
+		case "country_publications": {
 			return getCountryExternalResourceSnapshot(reportId, descriptor.section);
 		}
 		case "working_group_sshoc_resources":
-		case "working_group_zotero_publications": {
+		case "working_group_publications": {
 			return getWorkingGroupExternalResourceSnapshot(reportId, descriptor.section);
 		}
 	}

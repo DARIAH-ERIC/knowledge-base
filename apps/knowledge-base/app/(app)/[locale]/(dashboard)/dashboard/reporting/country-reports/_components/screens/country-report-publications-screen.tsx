@@ -43,10 +43,7 @@ export async function CountryReportPublicationsScreen(
 
 	const t = await getExtracted();
 	const canRefresh = await isReportEditable(user, { type: "country_report", id: report.id });
-	const snapshot = await getCountryExternalResourceSnapshot(
-		report.id,
-		"country_zotero_publications",
-	);
+	const snapshot = await getCountryExternalResourceSnapshot(report.id, "country_publications");
 
 	return (
 		<div className="flex flex-col gap-y-12">
@@ -55,19 +52,19 @@ export async function CountryReportPublicationsScreen(
 				capturedAt={snapshot?.capturedAt.toISOString() ?? null}
 				capturedByUserName={snapshot?.capturedByUserName ?? null}
 				description={t(
-					"Stored Zotero publications for this report. Refresh to capture the current search-index results.",
+					"Stored publications for this report. Refresh to capture the current bibliography records.",
 				)}
 				emptyMessage={
 					snapshot == null
-						? t("No Zotero publications snapshot has been captured yet.")
-						: t("No Zotero publications recorded for this snapshot.")
+						? t("No publications snapshot has been captured yet.")
+						: t("No publications recorded for this snapshot.")
 				}
 				items={snapshot?.items ?? []}
 				refreshAction={refreshCountryReportExternalResourceSnapshotAction}
 				reportId={report.id}
 				reportIdFieldName="countryReportId"
-				section="country_zotero_publications"
-				title={t("Zotero publications")}
+				section="country_publications"
+				title={t("Publications")}
 			/>
 
 			<ReportScreenCommentSection

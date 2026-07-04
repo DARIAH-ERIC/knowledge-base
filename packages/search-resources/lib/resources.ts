@@ -32,6 +32,7 @@ export interface EpisciencesPaperEntry {
 }
 
 export interface SearchIndexResourceSourceData {
+	knowledgeBasePublications: Array<ResourceDocument>;
 	campusCurricula: Array<DariahCampusCurriculum>;
 	campusResources: Array<DariahCampusResource>;
 	episciencesDocuments: Array<EpisciencesSearchDocument>;
@@ -74,6 +75,7 @@ export function createSearchIndexResourceDocuments(
 ): Array<ResourceDocument> {
 	const { sourceData, sshocMarketplaceBaseUrl, orgUnits } = params;
 	const {
+		knowledgeBasePublications,
 		campusCurricula,
 		campusResources,
 		episciencesDocuments,
@@ -91,6 +93,7 @@ export function createSearchIndexResourceDocuments(
 	);
 
 	return [
+		...knowledgeBasePublications,
 		...sshocItems.map((item) => createSshocItem(item, sshocMarketplaceBaseUrl, orgUnits)),
 		...campusResources.map((item) => createCampusResource(item)),
 		...campusCurricula.map((item) => createCampusCurriculum(item)),
