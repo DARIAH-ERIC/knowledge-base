@@ -8,6 +8,8 @@ import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import { resolveOrganisationalUnitChangeEvents } from "@/lib/webhook/resolve-organisational-unit-change-events";
 
 /** Delegated counterpart of `deleteUnitRelationAction` for country partner-institution relations. */
 export async function deleteDelegatedUnitRelationAction(id: string): Promise<void> {
@@ -40,4 +42,10 @@ export async function deleteDelegatedUnitRelationAction(id: string): Promise<voi
 	});
 
 	revalidatePath("/[locale]/dashboard/countries", "layout");
+	await dispatchWebhook({
+		events: await resolveOrganisationalUnitChangeEvents(db, [
+			relation.unitDocumentId,
+			relation.relatedUnitDocumentId,
+		]),
+	});
 }

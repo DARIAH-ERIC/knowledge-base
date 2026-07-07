@@ -16,7 +16,7 @@ export async function deleteNavigationItemAction(id: string): Promise<void> {
 	await db.delete(schema.navigationItems).where(eq(schema.navigationItems.id, id));
 
 	after(async () => {
-		await dispatchWebhook({ type: "navigation" });
+		await dispatchWebhook({ events: ["navigation"] });
 	});
 
 	await recordAuditEvent(db, {

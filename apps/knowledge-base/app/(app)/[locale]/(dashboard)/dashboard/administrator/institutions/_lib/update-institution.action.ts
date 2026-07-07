@@ -13,7 +13,7 @@ import { eq } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
-import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import { dispatchWebhook, organisationalUnitChangeEvent } from "@/lib/webhook/dispatch-webhook";
 
 export const updateInstitutionAction = createMutationAction({
 	schema: UpdateInstitutionActionInputSchema,
@@ -85,6 +85,6 @@ export const updateInstitutionAction = createMutationAction({
 			return;
 		}
 		await syncWebsiteDocumentForEntity(result.subjectId);
-		await dispatchWebhook({ type: "members-partners" });
+		await dispatchWebhook({ events: [organisationalUnitChangeEvent("institution")] });
 	},
 });

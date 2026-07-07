@@ -14,6 +14,8 @@ import { db } from "@/lib/db";
 import { isExclusionViolation } from "@/lib/db/errors";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import { resolveOrganisationalUnitChangeEvents } from "@/lib/webhook/resolve-organisational-unit-change-events";
 
 /**
  * Delegated counterpart of `createUnitRelationAction`, scoped to the partner-institution relations
@@ -76,6 +78,12 @@ export const createDelegatedUnitRelationAction = createServerAction(
 			});
 
 			revalidatePath("/[locale]/dashboard/countries", "layout");
+			await dispatchWebhook({
+				events: await resolveOrganisationalUnitChangeEvents(db, [
+					unitDocumentId,
+					relatedUnitDocumentId,
+				]),
+			});
 
 			return createActionStateSuccess({
 				data: {

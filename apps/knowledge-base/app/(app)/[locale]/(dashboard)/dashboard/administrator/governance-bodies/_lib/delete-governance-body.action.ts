@@ -11,7 +11,7 @@ import {
 	getWebsiteDocumentDescriptorByEntityId,
 } from "@/lib/search/website-index";
 import { createCommandAction } from "@/lib/server/create-command-action";
-import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import { dispatchWebhook, organisationalUnitChangeEvent } from "@/lib/webhook/dispatch-webhook";
 
 export const deleteGovernanceBodyAction = createCommandAction({
 	requireAdmin: true,
@@ -81,6 +81,6 @@ export const deleteGovernanceBodyAction = createCommandAction({
 		if (result.descriptor != null) {
 			await deleteWebsiteDocument(result.descriptor);
 		}
-		await dispatchWebhook({ type: "governance-bodies" });
+		await dispatchWebhook({ events: [organisationalUnitChangeEvent("governance_body")] });
 	},
 });

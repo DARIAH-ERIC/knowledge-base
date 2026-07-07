@@ -4,7 +4,7 @@ import { publishVersion } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createCommandAction } from "@/lib/server/create-command-action";
-import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import { dispatchWebhook, organisationalUnitChangeEvent } from "@/lib/webhook/dispatch-webhook";
 
 export const publishWorkingGroupAction = createCommandAction({
 	requireAdmin: true,
@@ -19,6 +19,6 @@ export const publishWorkingGroupAction = createCommandAction({
 
 	async postCommit({ result }) {
 		await syncWebsiteDocumentForEntity(result.subjectId);
-		await dispatchWebhook({ type: "working-groups" });
+		await dispatchWebhook({ events: [organisationalUnitChangeEvent("working_group")] });
 	},
 });

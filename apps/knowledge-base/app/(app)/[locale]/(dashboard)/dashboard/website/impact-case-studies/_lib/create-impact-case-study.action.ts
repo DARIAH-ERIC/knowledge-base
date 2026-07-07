@@ -114,6 +114,6 @@ export const createImpactCaseStudyAction = createMutationAction({
 			return;
 		}
 		await syncWebsiteDocumentForEntity(result.subjectId);
-		await dispatchWebhook({ type: "impact-case-studies" });
+		await dispatchWebhook({ events: ["impact_case_studies"] });
 	},
 });

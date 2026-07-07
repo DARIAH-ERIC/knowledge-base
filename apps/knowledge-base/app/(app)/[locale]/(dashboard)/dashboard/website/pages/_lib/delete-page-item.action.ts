@@ -78,6 +78,6 @@ export const deletePageItemAction = createCommandAction({
 		if (result.descriptor != null) {
 			await deleteWebsiteDocument(result.descriptor);
 		}
-		await dispatchWebhook({ type: "pages" });
+		await dispatchWebhook({ events: ["pages"] });
 	},
 });

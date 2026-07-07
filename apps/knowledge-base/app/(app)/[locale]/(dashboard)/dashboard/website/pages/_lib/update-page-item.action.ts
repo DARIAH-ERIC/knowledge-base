@@ -104,6 +104,6 @@ export const updatePageItemAction = createMutationAction({
 			return;
 		}
 		await syncWebsiteDocumentForEntity(result.subjectId);
-		await dispatchWebhook({ type: "pages" });
+		await dispatchWebhook({ events: ["pages"] });
 	},
 });

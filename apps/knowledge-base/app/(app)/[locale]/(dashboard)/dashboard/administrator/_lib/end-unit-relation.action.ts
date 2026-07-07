@@ -7,13 +7,15 @@ import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import { resolveOrganisationalUnitChangeEvents } from "@/lib/webhook/resolve-organisational-unit-change-events";
 
 export async function endUnitRelationAction(id: string, end: Date): Promise<void> {
 	const auditSession = await assertAdmin();
 
 	const relation = await db.query.organisationalUnitsRelations.findFirst({
 		where: { id },
-		columns: { duration: true },
+		columns: { duration: true, unitDocumentId: true, relatedUnitDocumentId: true },
 	});
 
 	if (relation == null) {
@@ -34,4 +36,10 @@ export async function endUnitRelationAction(id: string, end: Date): Promise<void
 	});
 
 	revalidatePath("/[locale]/dashboard/administrator", "layout");
+	await dispatchWebhook({
+		events: await resolveOrganisationalUnitChangeEvents(db, [
+			relation.unitDocumentId,
+			relation.relatedUnitDocumentId,
+		]),
+	});
 }
