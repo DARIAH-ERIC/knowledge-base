@@ -633,6 +633,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						},
 					},
 					columns: {
+						duration: true,
 						summary: true,
 						title: true,
 						updatedAt: true,
@@ -659,7 +660,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					importedAt,
 					type: "event",
 					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
+					sourceUpdatedAt: item.duration.start,
 					label: item.title,
 					description: item.summary ?? "",
 					link: `/events/${item.entityVersion.entity.slug}`,
