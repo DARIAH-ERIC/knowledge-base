@@ -16,7 +16,6 @@ const config: Config = {
 	experimental: {
 		authInterrupts: true,
 		globalNotFound: true,
-		rootParams: true,
 		serverActions: {
 			/**
 			 * Must be larger than `imageSizeLimit` in `config/assets.config.ts` to allow multipart
@@ -25,6 +24,7 @@ const config: Config = {
 			bodySizeLimit: "24mb",
 		},
 		turbopackFileSystemCacheForDev: true,
+		turbopackRustReactCompiler: true,
 		viewTransition: true,
 	},
 	headers() {

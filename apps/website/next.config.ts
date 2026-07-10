@@ -14,10 +14,9 @@ const config: Config = {
 	/** Compression should be handled by the reverse proxy. */
 	compress: false,
 	experimental: {
-		authInterrupts: true,
 		globalNotFound: true,
-		rootParams: true,
 		turbopackFileSystemCacheForDev: true,
+		turbopackRustReactCompiler: true,
 		viewTransition: true,
 	},
 	headers() {

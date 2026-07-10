@@ -1,5 +1,6 @@
 {
 	"$schema": "./node_modules/turbo/schema.json",
+	"cacheMaxAge": "7d",
 	"globalDependencies": [".env.keys"],
 	"globalEnv": [
 		"API_ACCESS_TOKEN",
