@@ -29,6 +29,11 @@ function visit(node: unknown, parts: Array<string>) {
 		return;
 	}
 
+	if (node.type === "buttonLink" && isRecord(node.attrs) && typeof node.attrs.label === "string") {
+		parts.push(node.attrs.label);
+		return;
+	}
+
 	if (typeof node.text === "string") {
 		parts.push(node.text);
 	}

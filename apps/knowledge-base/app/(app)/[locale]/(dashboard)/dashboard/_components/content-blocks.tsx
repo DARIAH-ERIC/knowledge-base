@@ -36,6 +36,7 @@ import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
 import {
 	ChevronDownIcon,
 	CodeBracketSquareIcon,
+	CursorArrowRaysIcon,
 	InformationCircleIcon,
 	ListBulletIcon,
 	PencilSquareIcon,
@@ -615,6 +616,13 @@ function ContentBlockPanel({
 							aria-label="Insert callout"
 							icon={InformationCircleIcon}
 							onClick={insertCallout}
+						/>
+					)}
+					renderButtonLinkInsert={(insertButtonLink) => (
+						<RichTextEditorToolbarButton
+							aria-label="Insert button link"
+							icon={CursorArrowRaysIcon}
+							onClick={insertButtonLink}
 						/>
 					)}
 					renderImagePicker={
