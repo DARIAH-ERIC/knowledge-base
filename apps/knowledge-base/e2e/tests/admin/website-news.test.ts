@@ -311,6 +311,98 @@ test.describe("website news admin", () => {
 		expect(aboveBox!.y).toBeLessThan(belowBox!.y);
 	});
 
+	test("should save standalone and inline button links in a content block", async ({
+		page,
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Button Links ${randomUUID()}`;
+		const intro = `Rich text intro ${randomUUID()}`;
+		const primary = { label: `Apply now ${randomUUID()}`, url: "https://example.com/apply" };
+		const secondary = { label: `Learn more ${randomUUID()}`, url: "https://example.com/learn" };
+		const inline = {
+			before: "Read the ",
+			label: `guide ${randomUUID()}`,
+			url: "https://example.com/guide",
+			after: " carefully.",
+		};
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item with button links");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await newsPage.addContentWithButtonLinks({ intro, primary, secondary, inline });
+		await newsPage.submitForm();
+
+		/** The buttons are inline nodes, so everything stays in a single rich_text block. */
+		const contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text"]);
+
+		interface DocNode {
+			type?: string;
+			content?: Array<DocNode>;
+			attrs?: { href?: string; label?: string; variant?: string };
+		}
+		const paragraphs = (contentBlocks[0]!.content as DocNode).content ?? [];
+		const buttonLinks = paragraphs.flatMap((paragraph) =>
+			(paragraph.content ?? []).filter((child) => child.type === "buttonLink"),
+		);
+		expect(buttonLinks).toHaveLength(3);
+		expect(buttonLinks.map((node) => node.attrs?.href)).toStrictEqual(
+			expect.arrayContaining([primary.url, secondary.url, inline.url]),
+		);
+		expect(buttonLinks.map((node) => node.attrs?.label)).toStrictEqual(
+			expect.arrayContaining([primary.label, secondary.label, inline.label]),
+		);
+		expect(buttonLinks.map((node) => node.attrs?.variant)).toStrictEqual(
+			expect.arrayContaining(["primary", "outline", "secondary"]),
+		);
+
+		/** Two buttons each sit alone in a paragraph (block-level CTAs); one is inline with text. */
+		const standaloneParagraphs = paragraphs.filter(
+			(paragraph) =>
+				paragraph.type === "paragraph" &&
+				paragraph.content?.length === 1 &&
+				paragraph.content[0]?.type === "buttonLink",
+		);
+		expect(standaloneParagraphs).toHaveLength(2);
+		// oxlint-disable-next-line typescript/strict-boolean-expressions
+		const inlineParagraph = paragraphs.find(
+			(paragraph) =>
+				paragraph.type === "paragraph" &&
+				(paragraph.content?.length ?? 0) > 1 &&
+				paragraph.content?.some((child) => child.type === "buttonLink"),
+		);
+		expect(inlineParagraph).toBeDefined();
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoDetailsFromList(title);
+
+		/** Button links render as anchors on the published page. */
+		const primaryLink = page.getByRole("link", { name: primary.label });
+		await expect(primaryLink).toBeVisible();
+		await expect(primaryLink).toHaveAttribute("href", primary.url);
+		const secondaryLink = page.getByRole("link", { name: secondary.label });
+		await expect(secondaryLink).toBeVisible();
+		await expect(secondaryLink).toHaveAttribute("href", secondary.url);
+		await expect(page.getByRole("link", { name: inline.label })).toHaveAttribute(
+			"href",
+			inline.url,
+		);
+		await expect(page.getByText(intro)).toBeVisible();
+
+		/** The standalone CTA is the only content of its paragraph; the inline one shares text. */
+		const primaryParagraphText = await primaryLink.locator("xpath=ancestor::p[1]").innerText();
+		expect(primaryParagraphText.trim()).toBe(primary.label);
+		const inlineParagraphText = await page
+			.getByRole("link", { name: inline.label })
+			.locator("xpath=ancestor::p[1]")
+			.innerText();
+		expect(inlineParagraphText).toContain(inline.before.trim());
+		expect(inlineParagraphText).toContain(inline.after.trim());
+	});
+
 	test("should delete a news item", async ({ createWebsiteNewsPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const newsPage = createWebsiteNewsPage(workerIndex);

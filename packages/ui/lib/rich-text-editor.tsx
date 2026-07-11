@@ -42,6 +42,8 @@ import {
 import { twMerge } from "tailwind-merge";
 
 import { Button } from "@/lib/button";
+import { ButtonLink } from "@/lib/button-link";
+import { buttonStyles } from "@/lib/button-styles";
 import { InlineRichTextEditor } from "@/lib/inline-rich-text-editor";
 import { InlineRichTextRenderer } from "@/lib/inline-rich-text-renderer";
 import { Input } from "@/lib/input";
@@ -88,6 +90,7 @@ interface RichTextEditorProps {
 	onChange?: (content: JSONContent) => void;
 	renderEmbedInsert?: (insertEmbed: () => void) => ReactNode;
 	renderCalloutInsert?: (insertCallout: () => void) => ReactNode;
+	renderButtonLinkInsert?: (insertButtonLink: () => void) => ReactNode;
 	renderImagePicker?: (
 		insert: (
 			imageKey: string,
@@ -666,6 +669,228 @@ export const CalloutNode = Node.create({
 	},
 });
 
+type ButtonLinkVariant = "primary" | "secondary" | "outline";
+
+function normalizeButtonLinkVariant(value: unknown): ButtonLinkVariant {
+	if (value === "primary" || value === "secondary" || value === "outline") {
+		return value;
+	}
+	return "primary";
+}
+
+/**
+ * Inline call-to-action node: a link rendered to look like a button. Stored as structured
+ * `href`/`label`/`variant` attributes (not styled text) and edited through a popover anchored to
+ * the button itself, mirroring the `EmbedNode`/`CalloutNode` pattern but at the inline level.
+ */
+function ButtonLinkNodeView({
+	editor,
+	getPos,
+	node,
+	selected,
+	updateAttributes,
+	deleteNode,
+}: Readonly<NodeViewProps>): ReactNode {
+	const href = node.attrs.href as string | null;
+	const label = node.attrs.label as string | null;
+	const variant = normalizeButtonLinkVariant(node.attrs.variant);
+
+	const [isOpen, setIsOpen] = useState(href == null && editor.isEditable);
+	const [hrefInput, setHrefInput] = useState(href ?? "");
+	const [labelInput, setLabelInput] = useState(label ?? "");
+	const [variantInput, setVariantInput] = useState<ButtonLinkVariant>(variant);
+
+	const hrefInputId = useId();
+	const labelInputId = useId();
+
+	const displayLabel = label ?? "Button";
+
+	if (!editor.isEditable) {
+		return (
+			<NodeViewWrapper as="span" className="inline-block align-baseline">
+				<ButtonLink href={href ?? "#"} intent={variant} size="sm">
+					{displayLabel}
+				</ButtonLink>
+			</NodeViewWrapper>
+		);
+	}
+
+	function selectNode() {
+		const pos = getPos();
+		if (typeof pos === "number") {
+			editor.commands.setNodeSelection(pos);
+		}
+	}
+
+	function resetInputs() {
+		setHrefInput(href ?? "");
+		setLabelInput(label ?? "");
+		setVariantInput(variant);
+	}
+
+	function handleApply() {
+		const nextHref = hrefInput.trim();
+		const nextLabel = labelInput.trim();
+		if (!nextHref || !nextLabel) {
+			return;
+		}
+		updateAttributes({ href: nextHref, label: nextLabel, variant: variantInput });
+		setIsOpen(false);
+	}
+
+	function handleOpenChange(open: boolean) {
+		if (open) {
+			selectNode();
+			resetInputs();
+			setIsOpen(true);
+			return;
+		}
+		// Dismissing a button that was never configured removes the placeholder node.
+		if (href == null) {
+			deleteNode();
+			return;
+		}
+		setIsOpen(false);
+	}
+
+	return (
+		<NodeViewWrapper as="span" className="inline-block align-baseline" contentEditable={false}>
+			<Popover isOpen={isOpen} onOpenChange={handleOpenChange}>
+				<PopoverTrigger
+					aria-label="Edit button link"
+					className={twMerge(
+						buttonStyles({ intent: variant, size: "sm" }),
+						"cursor-pointer",
+						selected && "ring-2 ring-primary/40",
+					)}
+				>
+					{displayLabel}
+				</PopoverTrigger>
+				<PopoverContent className="p-3">
+					<form
+						className="flex inline-64 flex-col gap-2"
+						onSubmit={(e) => {
+							e.preventDefault();
+							handleApply();
+						}}
+					>
+						<div className="flex flex-col gap-y-1">
+							<label className="text-sm/6 font-medium" htmlFor={labelInputId}>
+								{"Label"}
+							</label>
+							<Input
+								autoFocus={true}
+								id={labelInputId}
+								onChange={(e) => {
+									setLabelInput(e.target.value);
+								}}
+								placeholder="Learn more"
+								type="text"
+								value={labelInput}
+							/>
+						</div>
+						<div className="flex flex-col gap-y-1">
+							<label className="text-sm/6 font-medium" htmlFor={hrefInputId}>
+								{"URL"}
+							</label>
+							<Input
+								id={hrefInputId}
+								onChange={(e) => {
+									setHrefInput(e.target.value);
+								}}
+								placeholder="https://example.com"
+								type="text"
+								value={hrefInput}
+							/>
+						</div>
+						<div className="flex flex-col gap-y-1">
+							<span className="text-sm/6 font-medium">{"Style"}</span>
+							<ToggleGroup
+								aria-label="Button style"
+								disallowEmptySelection={true}
+								onSelectionChange={(keys) => {
+									const nextVariant = [...keys][0] as ButtonLinkVariant | undefined;
+									if (nextVariant != null) {
+										setVariantInput(nextVariant);
+									}
+								}}
+								selectedKeys={[variantInput]}
+								size="sm"
+							>
+								<ToggleGroupItem id="primary">{"Primary"}</ToggleGroupItem>
+								<ToggleGroupItem id="secondary">{"Secondary"}</ToggleGroupItem>
+								<ToggleGroupItem id="outline">{"Outline"}</ToggleGroupItem>
+							</ToggleGroup>
+						</div>
+						<div className="flex gap-2">
+							<Button
+								className="flex-1"
+								intent="primary"
+								isDisabled={!hrefInput.trim() || !labelInput.trim()}
+								size="sm"
+								type="submit"
+							>
+								{"Apply"}
+							</Button>
+							<Button intent="outline" onPress={deleteNode} size="sm" type="button">
+								{"Remove"}
+							</Button>
+						</div>
+					</form>
+				</PopoverContent>
+			</Popover>
+		</NodeViewWrapper>
+	);
+}
+
+export const ButtonLinkNode = Node.create({
+	name: "buttonLink",
+	group: "inline",
+	inline: true,
+	atom: true,
+	selectable: true,
+	draggable: false,
+
+	addAttributes() {
+		return {
+			href: { default: null },
+			label: { default: null },
+			variant: { default: "primary" },
+		};
+	},
+
+	parseHTML() {
+		return [
+			{
+				tag: "a[data-button-link]",
+				getAttrs(dom) {
+					return {
+						href: dom.getAttribute("href"),
+						label: dom.textContent,
+						variant: normalizeButtonLinkVariant(dom.dataset.variant),
+					};
+				},
+			},
+		];
+	},
+
+	renderHTML({ node }) {
+		return [
+			"a",
+			mergeAttributes({
+				"data-button-link": "",
+				href: node.attrs.href as string | null,
+				"data-variant": node.attrs.variant as string,
+			}),
+			(node.attrs.label as string | null) ?? "",
+		];
+	},
+
+	addNodeView() {
+		return ReactNodeViewRenderer(ButtonLinkNodeView);
+	},
+});
+
 interface AssetImageNodeViewProps extends NodeViewProps {
 	renderImagePicker?: ImagePickerRenderer;
 }
@@ -1017,6 +1242,7 @@ export function createRichTextExtensions(
 		createAssetImageNode(options?.renderImagePicker),
 		EmbedNode,
 		CalloutNode,
+		ButtonLinkNode,
 	];
 }
 
@@ -1031,6 +1257,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		size,
 		renderEmbedInsert,
 		renderCalloutInsert,
+		renderButtonLinkInsert,
 		renderImagePicker,
 	} = props;
 
@@ -1174,6 +1401,20 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			.insertContent({
 				type: "calloutBlock",
 				attrs: { intent: "info", title: null, content: null },
+			})
+			.run();
+	}, [editor]);
+
+	const insertButtonLink = useCallback(() => {
+		if (!editor) {
+			return;
+		}
+		editor
+			.chain()
+			.focus()
+			.insertContent({
+				type: "buttonLink",
+				attrs: { href: null, label: null, variant: "primary" },
 			})
 			.run();
 	}, [editor]);
@@ -1353,6 +1594,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						</>
 					) : null}
 					{renderCalloutInsert != null ? renderCalloutInsert(insertCallout) : null}
+					{renderButtonLinkInsert != null ? renderButtonLinkInsert(insertButtonLink) : null}
 				</div>
 			) : null}
 			{name != null && (

@@ -2,7 +2,7 @@
 
 import { RichTextEditor, RichTextEditorToolbarButton } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
-import { ImageIcon, InfoIcon } from "lucide-react";
+import { ImageIcon, InfoIcon, MousePointerClickIcon } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
@@ -62,6 +62,13 @@ export function RichTextContentBlocksField({
 				aria-label={ariaLabel}
 				content={initialContent}
 				onChange={setEditorContent}
+				renderButtonLinkInsert={(insertButtonLink) => (
+					<RichTextEditorToolbarButton
+						aria-label="Insert button link"
+						icon={MousePointerClickIcon}
+						onClick={insertButtonLink}
+					/>
+				)}
 				renderCalloutInsert={(insertCallout) => (
 					<RichTextEditorToolbarButton
 						aria-label="Insert callout"

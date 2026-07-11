@@ -182,6 +182,65 @@ export class WebsiteNewsPage {
 		await callout.getByRole("button", { name: "Apply" }).click();
 	}
 
+	/** Insert a button-link inline node at the current cursor via the toolbar + popover form. */
+	private async insertButtonLink(options: {
+		label: string;
+		url: string;
+		variant?: "Primary" | "Secondary" | "Outline";
+	}): Promise<void> {
+		await this.page.getByRole("button", { name: "Insert button link" }).click();
+
+		/** Scope to the popover's form; the main editor textbox is named "Content", not "Label". */
+		const form = this.page
+			.locator("form")
+			.filter({ has: this.page.getByRole("textbox", { name: "Label" }) });
+		await form.getByRole("textbox", { name: "Label" }).fill(options.label);
+		await form.getByRole("textbox", { name: "URL" }).fill(options.url);
+		if (options.variant != null) {
+			await form.getByText(options.variant, { exact: true }).click();
+		}
+		await form.getByRole("button", { name: "Apply" }).click();
+	}
+
+	/**
+	 * Build a content block with two standalone button links — each alone in its own paragraph, so it
+	 * reads as a block-level CTA — plus one button link inline within a run of text. `Control+End`
+	 * moves the caret to the document end between insertions so we never click onto an existing
+	 * button node (which would re-open its popover).
+	 */
+	async addContentWithButtonLinks(options: {
+		intro: string;
+		primary: { label: string; url: string };
+		secondary: { label: string; url: string };
+		inline: { before: string; label: string; url: string; after: string };
+	}): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+
+		const editor = this.contentBlockEditor();
+		await editor.click();
+		await editor.pressSequentially(options.intro);
+
+		await editor.press("Control+End");
+		await editor.press("Enter");
+		await this.insertButtonLink({ ...options.primary, variant: "Primary" });
+
+		await editor.press("Control+End");
+		await editor.press("Enter");
+		await this.insertButtonLink({ ...options.secondary, variant: "Outline" });
+
+		await editor.press("Control+End");
+		await editor.press("Enter");
+		await editor.pressSequentially(options.inline.before);
+		await this.insertButtonLink({
+			label: options.inline.label,
+			url: options.inline.url,
+			variant: "Secondary",
+		});
+		await editor.press("Control+End");
+		await editor.pressSequentially(options.inline.after);
+	}
+
 	async dragCalloutBeforeText(text: string): Promise<void> {
 		const editor = this.contentBlockEditor();
 		const callout = this.page.getByLabel("Callout block", { exact: true });
