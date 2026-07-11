@@ -11,6 +11,13 @@ import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
+import {
+	getEntityRelationOptions,
+	getEntityRelationOptionsByIds,
+	getEntityRelations,
+	getResourceRelationOptions,
+	getResourceRelationOptionsByIds,
+} from "@/lib/data/relations";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
 import { alias, eq } from "@/lib/db/sql";
@@ -123,6 +130,9 @@ export default async function DashboardAdministratorEditProjectPage(
 		initialSocialMedia,
 		existingPartners,
 		existingSocialMedia,
+		initialRelatedEntities,
+		initialRelatedResources,
+		relations,
 	] = await Promise.all([
 		getEntityContentBlocks(project.id, "description"),
 		db.query.projectScopes.findMany({
@@ -165,6 +175,14 @@ export default async function DashboardAdministratorEditProjectPage(
 			orderBy: { position: "asc" },
 			columns: { socialMediaId: true },
 		}),
+		getEntityRelationOptions(),
+		getResourceRelationOptions(),
+		getEntityRelations(documentId),
+	]);
+
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relations.relatedEntityIds),
+		getResourceRelationOptionsByIds(relations.relatedResourceIds),
 	]);
 
 	const initialPartners = existingPartners.map((partner) => {
@@ -200,6 +218,12 @@ export default async function DashboardAdministratorEditProjectPage(
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			initialPartners={initialPartners}
+			initialRelatedEntityIds={relations.relatedEntityIds}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
+			initialRelatedResourceIds={relations.relatedResourceIds}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
 			initialSocialMediaIds={initialSocialMediaIds}
 			initialSocialMediaItems={initialSocialMedia.items}
 			initialSocialMediaTotal={initialSocialMedia.total}
@@ -207,6 +231,8 @@ export default async function DashboardAdministratorEditProjectPage(
 			project={{ ...project, descriptionContentBlocks, image }}
 			roles={roles}
 			scopes={scopes}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 			selectedSocialMediaItems={selectedSocialMediaItems}
 		/>
 	);

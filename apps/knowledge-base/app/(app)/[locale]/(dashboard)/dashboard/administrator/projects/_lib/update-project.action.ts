@@ -7,6 +7,7 @@ import { UpdateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
+import { syncEntityRelations } from "@/lib/data/relations";
 import { syncProjectSocialMedia } from "@/lib/data/social-media-relations";
 import { eq } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
@@ -57,6 +58,13 @@ export const updateProjectAction = createMutationAction({
 		);
 
 		await syncProjectSocialMedia(tx, draftVersionId, input.socialMediaIds);
+
+		await syncEntityRelations(
+			tx,
+			input.documentId,
+			input.relatedEntityIds,
+			input.relatedResourceIds,
+		);
 
 		await touchVersion(tx, draftVersionId);
 

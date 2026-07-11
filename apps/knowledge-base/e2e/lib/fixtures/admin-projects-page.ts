@@ -183,6 +183,73 @@ export class AdminProjectsPage {
 		);
 	}
 
+	// ---------------------------------------------------------------------------
+	// Related entities / resources
+	// ---------------------------------------------------------------------------
+
+	private relatedEntitiesSection(): Locator {
+		return this.page
+			.locator("section")
+			.filter({ has: this.page.getByRole("heading", { name: "Related entities", level: 2 }) });
+	}
+
+	private relatedEntitiesDialog(): Locator {
+		return this.page
+			.getByRole("dialog")
+			.filter({ has: this.page.getByRole("listbox", { name: "Related entities" }) });
+	}
+
+	private relatedEntitiesControl(): Locator {
+		return this.relatedEntitiesSection().getByRole("button", { name: "Add related entity" });
+	}
+
+	private async closeRelatedEntitiesDialog(dialog: Locator): Promise<void> {
+		await this.page.mouse.click(1, 1);
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	async selectRelatedEntity(entityName: string): Promise<void> {
+		const trigger = this.relatedEntitiesControl();
+		const dialog = this.relatedEntitiesDialog();
+
+		await trigger.click();
+		await dialog.waitFor({ state: "visible" });
+
+		const searchbox = dialog.getByRole("searchbox");
+		await searchbox.fill(entityName);
+
+		const option = dialog.getByRole("option", { name: entityName, exact: true });
+		await option.waitFor({ state: "visible" });
+		await option.click();
+		await this.closeRelatedEntitiesDialog(dialog);
+	}
+
+	async removeRelatedEntity(entityName: string): Promise<void> {
+		// Selected items render as rows in an orderable grid list; each row has a drag handle
+		// (slot="drag") plus a Remove button whose aria-label is not locator-friendly in the e2e
+		// build, so target the row by name and the non-drag button.
+		const row = this.relatedEntitiesSection().getByRole("row", { name: entityName });
+		await row.waitFor({ state: "visible" });
+		await row.locator('button:not([slot="drag"])').click();
+		await row.waitFor({ state: "hidden" });
+	}
+
+	/** Names of the currently-selected related entities, in display order. */
+	async getRelatedEntityNames(): Promise<Array<string>> {
+		const rows = this.relatedEntitiesSection().getByRole("row");
+		const texts = await rows.allInnerTexts();
+		return texts.map((text) => text.trim()).filter((text) => text !== "");
+	}
+
+	/** Drag a related-entity row one position down past the row below it. */
+	async moveRelatedEntityDown(entityName: string): Promise<void> {
+		await dragGridRowDownByName(
+			this.page,
+			this.relatedEntitiesSection().getByRole("row"),
+			entityName,
+		);
+	}
+
 	async createSocialMediaInForm(name: string, url: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Create social media" }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Create social media" });
@@ -343,6 +410,15 @@ export class AdminProjectsPage {
 		await row.getByRole("button", { name: "Open actions menu" }).click();
 		await this.page.getByRole("menuitem", { name: "View" }).click();
 		await this.page.waitForURL(`**${BASE_PATH}/**/details`);
+	}
+
+	async gotoEditFromList(name: string): Promise<void> {
+		const row = this.projectRowByName(name);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			this.page.waitForURL(`**${BASE_PATH}/**/edit`),
+			this.page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
 	}
 
 	async gotoEditFromDetails(): Promise<void> {

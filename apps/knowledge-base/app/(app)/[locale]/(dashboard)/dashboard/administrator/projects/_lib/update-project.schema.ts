@@ -20,4 +20,6 @@ export const UpdateProjectActionInputSchema = v.object({
 		[],
 	),
 	socialMediaIds: v.optional(v.array(v.pipe(v.string(), v.uuid())), []),
+	relatedEntityIds: v.optional(v.array(v.pipe(v.string(), v.uuid())), []),
+	relatedResourceIds: v.optional(v.array(v.pipe(v.string(), v.nonEmpty())), []),
 });

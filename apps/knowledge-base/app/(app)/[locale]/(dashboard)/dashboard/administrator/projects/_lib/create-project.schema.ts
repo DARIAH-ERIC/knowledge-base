@@ -16,4 +16,6 @@ export const CreateProjectActionInputSchema = v.object({
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
 		[],
 	),
+	relatedEntityIds: v.optional(v.array(v.pipe(v.string(), v.uuid())), []),
+	relatedResourceIds: v.optional(v.array(v.pipe(v.string(), v.nonEmpty())), []),
 });

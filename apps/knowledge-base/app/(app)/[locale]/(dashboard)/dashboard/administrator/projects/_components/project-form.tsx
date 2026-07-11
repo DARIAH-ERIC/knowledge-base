@@ -31,6 +31,7 @@ import { Fragment, type ReactNode, useActionState, useState, useTransition } fro
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
+import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import {
 	FormLayout,
 	FormSection,
@@ -85,6 +86,14 @@ interface ProjectFormProps {
 	initialSocialMediaTotal: number;
 	selectedSocialMediaItems?: Array<AsyncOption>;
 	initialSocialMediaIds?: Array<string>;
+	initialRelatedEntityIds?: Array<string>;
+	initialRelatedEntityItems: Array<AsyncOption>;
+	initialRelatedEntityTotal: number;
+	initialRelatedResourceIds?: Array<string>;
+	initialRelatedResourceItems: Array<AsyncOption>;
+	initialRelatedResourceTotal: number;
+	selectedRelatedEntities?: Array<AsyncOption>;
+	selectedRelatedResources?: Array<AsyncOption>;
 }
 
 export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
@@ -97,6 +106,14 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 		initialSocialMediaTotal,
 		selectedSocialMediaItems,
 		initialSocialMediaIds,
+		initialRelatedEntityIds,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
+		initialRelatedResourceIds,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 	} = props;
 
 	const t = useExtracted();
@@ -336,6 +353,19 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						<input key={id} name={`socialMediaIds.${String(index)}`} type="hidden" value={id} />
 					))}
 				</FormSection>
+
+				<Separator className="my-6" />
+
+				<EntityRelationsFields
+					initialRelatedEntityIds={initialRelatedEntityIds}
+					initialRelatedEntityItems={initialRelatedEntityItems}
+					initialRelatedEntityTotal={initialRelatedEntityTotal}
+					initialRelatedResourceIds={initialRelatedResourceIds}
+					initialRelatedResourceItems={initialRelatedResourceItems}
+					initialRelatedResourceTotal={initialRelatedResourceTotal}
+					selectedRelatedEntities={selectedRelatedEntities}
+					selectedRelatedResources={selectedRelatedResources}
+				/>
 
 				<ModalContent
 					isOpen={isCreateSocialMediaOpen}
