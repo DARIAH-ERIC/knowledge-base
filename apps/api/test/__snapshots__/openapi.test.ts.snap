@@ -3723,6 +3723,12 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       "FeaturedEntities": {
         "description": "Featured entities grouped by type",
         "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/EventBase",
+            },
+            "type": "array",
+          },
           "news": {
             "items": {
               "$ref": "#/components/schemas/NewsItemBase",
@@ -3732,6 +3738,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         },
         "required": [
           "news",
+          "events",
         ],
         "type": "object",
       },
