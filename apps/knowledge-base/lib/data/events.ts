@@ -168,7 +168,7 @@ export async function getEventOptions(
 			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where)
-			.orderBy(schema.events.title)
+			.orderBy(desc(sql<Date>`lower(${schema.events.duration})`), schema.events.id)
 			.limit(limit)
 			.offset(offset),
 		db
