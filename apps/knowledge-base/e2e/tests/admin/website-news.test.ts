@@ -349,13 +349,13 @@ test.describe("website news admin", () => {
 			(paragraph.content ?? []).filter((child) => child.type === "buttonLink"),
 		);
 		expect(buttonLinks).toHaveLength(3);
-		expect(buttonLinks.map((node) => node.attrs?.href)).toEqual(
+		expect(buttonLinks.map((node) => node.attrs?.href)).toStrictEqual(
 			expect.arrayContaining([primary.url, secondary.url, inline.url]),
 		);
-		expect(buttonLinks.map((node) => node.attrs?.label)).toEqual(
+		expect(buttonLinks.map((node) => node.attrs?.label)).toStrictEqual(
 			expect.arrayContaining([primary.label, secondary.label, inline.label]),
 		);
-		expect(buttonLinks.map((node) => node.attrs?.variant)).toEqual(
+		expect(buttonLinks.map((node) => node.attrs?.variant)).toStrictEqual(
 			expect.arrayContaining(["primary", "outline", "secondary"]),
 		);
 
@@ -367,6 +367,7 @@ test.describe("website news admin", () => {
 				paragraph.content[0]?.type === "buttonLink",
 		);
 		expect(standaloneParagraphs).toHaveLength(2);
+		// oxlint-disable-next-line typescript/strict-boolean-expressions
 		const inlineParagraph = paragraphs.find(
 			(paragraph) =>
 				paragraph.type === "paragraph" &&
@@ -385,13 +386,14 @@ test.describe("website news admin", () => {
 		const secondaryLink = page.getByRole("link", { name: secondary.label });
 		await expect(secondaryLink).toBeVisible();
 		await expect(secondaryLink).toHaveAttribute("href", secondary.url);
-		await expect(page.getByRole("link", { name: inline.label })).toHaveAttribute("href", inline.url);
+		await expect(page.getByRole("link", { name: inline.label })).toHaveAttribute(
+			"href",
+			inline.url,
+		);
 		await expect(page.getByText(intro)).toBeVisible();
 
 		/** The standalone CTA is the only content of its paragraph; the inline one shares text. */
-		const primaryParagraphText = await primaryLink
-			.locator("xpath=ancestor::p[1]")
-			.innerText();
+		const primaryParagraphText = await primaryLink.locator("xpath=ancestor::p[1]").innerText();
 		expect(primaryParagraphText.trim()).toBe(primary.label);
 		const inlineParagraphText = await page
 			.getByRole("link", { name: inline.label })
