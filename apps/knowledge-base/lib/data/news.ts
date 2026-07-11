@@ -170,7 +170,7 @@ export async function getNewsItemOptions(
 			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where)
-			.orderBy(schema.news.title)
+			.orderBy(desc(schema.news.publicationDate), schema.news.id)
 			.limit(limit)
 			.offset(offset),
 		db
