@@ -66,13 +66,13 @@ export interface AsyncListSelectProps<T extends AsyncOption> {
 
 function renderDefaultOption(item: AsyncOption): ReactNode {
 	if (item.description == null || item.description === "") {
-		return <ListBoxLabel>{item.name}</ListBoxLabel>;
+		return <ListBoxLabel className="truncate">{item.name}</ListBoxLabel>;
 	}
 
 	return (
 		<>
-			<ListBoxLabel>{item.name}</ListBoxLabel>
-			<ListBoxDescription>{item.description}</ListBoxDescription>
+			<ListBoxLabel className="truncate">{item.name}</ListBoxLabel>
+			<ListBoxDescription className="truncate">{item.description}</ListBoxDescription>
 		</>
 	);
 }
@@ -257,7 +257,7 @@ function AsyncListSelectInner<T extends AsyncOption>(
 
 				<AriaPopover
 					className={cx(
-						"group/popover flex min-inline-72 origin-(--trigger-anchor-point) flex-col overflow-hidden rounded-xl border border-fg/10 bg-overlay text-overlay-fg shadow-xs outline-hidden",
+						"group/popover flex min-inline-72 max-inline-120 origin-(--trigger-anchor-point) flex-col overflow-hidden rounded-xl border border-fg/10 bg-overlay text-overlay-fg shadow-xs outline-hidden",
 						"entering:fade-in entering:animate-in",
 						"exiting:fade-out exiting:animate-out",
 					)}
