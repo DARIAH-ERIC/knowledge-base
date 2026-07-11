@@ -32,7 +32,7 @@ const db = createDatabaseService({
 }).unwrap();
 
 function toTsvCell(value: Date | string): string {
-	return (value instanceof Date ? value.toISOString() : value)
+	return (typeof value === "string" ? value : value.toISOString())
 		.replaceAll("\t", " ")
 		.replaceAll(/\r?\n/g, " ");
 }
