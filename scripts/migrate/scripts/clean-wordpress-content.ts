@@ -22,7 +22,7 @@ import {
  * report of over-extended links that need manual fixing.
  *
  * Idempotent: only rows whose content actually changes are updated. Pass `--dry-run` to report what
- * would change without writing.
+ * would change without writing and create a log of the affected entities.
  */
 
 const isDryRun = process.argv.includes("--dry-run");
@@ -70,6 +70,15 @@ interface AccordionItem {
 	content: JSONContent;
 }
 
+interface ContentBlockOwner {
+	entityId: string;
+	entityLabel: string | null;
+	entitySlug: string;
+	entityType: string;
+	fieldName: string;
+	status: string;
+}
+
 function linkLine(issue: OverExtendedLink): string {
 	return `${issue.href ?? "(no href)"}\t${issue.text}`;
 }
@@ -83,16 +92,80 @@ async function writeReport(filePath: string, rows: Array<{ source: string; text:
 	await fs.writeFile(filePath, `${report}\n`, { encoding: "utf-8" });
 }
 
+async function writeChangedEntitiesReport(filePath: string, entities: Array<string>) {
+	await fs.mkdir(cacheFolderPath, { recursive: true });
+	const header =
+		"entity_type\tentity_id\ttitle\tfield\tstatus\tcontent_block_type\tcontent_block_id";
+	await fs.writeFile(
+		filePath,
+		`${header}\n${entities.join("\n")}${entities.length > 0 ? "\n" : ""}`,
+		{
+			encoding: "utf-8",
+		},
+	);
+}
+
+function formatChangedEntity(
+	owner: ContentBlockOwner | undefined,
+	contentBlockType: "accordion" | "rich_text",
+	contentBlockId: string,
+): string {
+	if (owner == null) {
+		return `unknown\tunknown\tunknown\tunknown\tunknown\t${contentBlockType}\t${contentBlockId}`;
+	}
+
+	const title = (owner.entityLabel ?? owner.entitySlug).replaceAll(/\s+/g, " ").trim();
+	return [
+		owner.entityType,
+		owner.entityId,
+		title,
+		owner.fieldName,
+		owner.status,
+		contentBlockType,
+		contentBlockId,
+	].join("\t");
+}
+
 const linkReportFilePath = path.join(cacheFolderPath, "wordpress-link-issues.log");
 const hardBreakReportFilePath = path.join(cacheFolderPath, "wordpress-hardbreak-review.log");
+const changedEntitiesReportFilePath = path.join(cacheFolderPath, "wordpress-content-dry-run.log");
 
 async function main() {
 	log.info(isDryRun ? "Cleaning WordPress content (dry run)..." : "Cleaning WordPress content...");
 
 	const linkIssues: Array<{ source: string; text: string }> = [];
 	const hardBreaks: Array<{ source: string; text: string }> = [];
+	const changedEntities: Array<string> = [];
 	let richTextChanged = 0;
 	let accordionChanged = 0;
+	const contentBlockOwners = new Map<string, ContentBlockOwner>();
+
+	if (isDryRun) {
+		const owners = await db
+			.select({
+				contentBlockId: schema.contentBlocks.id,
+				entityId: schema.entities.id,
+				entityLabel: schema.entities.label,
+				entitySlug: schema.entities.slug,
+				entityType: schema.entityTypes.type,
+				fieldName: schema.entityTypesFieldsNames.fieldName,
+				status: schema.entityStatus.type,
+			})
+			.from(schema.contentBlocks)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.innerJoin(schema.entityVersions, eq(schema.fields.entityVersionId, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id));
+
+		for (const { contentBlockId, ...owner } of owners) {
+			contentBlockOwners.set(contentBlockId, owner);
+		}
+	}
 
 	const richTextBlocks = await db.query.richTextContentBlocks.findMany({
 		columns: { id: true, content: true },
@@ -114,6 +187,9 @@ async function main() {
 
 		richTextChanged += 1;
 		if (isDryRun) {
+			changedEntities.push(
+				formatChangedEntity(contentBlockOwners.get(block.id), "rich_text", block.id),
+			);
 			printDryRunChange(`rich_text:${block.id}`, block.content, cleaned);
 		} else {
 			await db
@@ -153,7 +229,11 @@ async function main() {
 		}
 
 		accordionChanged += 1;
-		if (!isDryRun) {
+		if (isDryRun) {
+			changedEntities.push(
+				formatChangedEntity(contentBlockOwners.get(block.id), "accordion", block.id),
+			);
+		} else {
 			await db
 				.update(schema.accordionContentBlocks)
 				.set({ items: cleanedItems })
@@ -163,6 +243,9 @@ async function main() {
 
 	await writeReport(linkReportFilePath, linkIssues);
 	await writeReport(hardBreakReportFilePath, hardBreaks);
+	if (isDryRun) {
+		await writeChangedEntitiesReport(changedEntitiesReportFilePath, changedEntities);
+	}
 
 	log.success(
 		`${isDryRun ? "[dry run] Would clean" : "Cleaned"} ${String(richTextChanged)} rich_text block(s) and ${String(
@@ -179,6 +262,9 @@ async function main() {
 			hardBreaks.length > 0 ? ` (report: ${hardBreakReportFilePath})` : ""
 		}.`,
 	);
+	if (isDryRun) {
+		log.info(`Changed entities report: ${changedEntitiesReportFilePath}.`);
+	}
 }
 
 main()
