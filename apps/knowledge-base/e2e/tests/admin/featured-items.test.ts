@@ -2,7 +2,10 @@ import type { AdminFeaturedItemsPage } from "@/e2e/lib/fixtures/admin-featured-i
 import type { DatabaseService } from "@/e2e/lib/fixtures/database-service";
 import { expect, test } from "@/e2e/lib/test";
 
-type FeaturedIds = { news: Array<string>; events: Array<string> };
+interface FeaturedIds {
+	news: Array<string>;
+	events: Array<string>;
+}
 
 /**
  * Drives one featured section (news or events). Both are `AsyncListSelect`s (isOrderable,
@@ -25,14 +28,18 @@ const SECTION_CONFIGS: Array<SectionConfig> = [
 		getItems: (db) => db.getPublishedNewsItems(4),
 		section: (page) => page.news,
 		reset: (db, ids) => db.resetSiteMetadataFeaturedItems({ news: ids }),
-		expected: (ids) => ({ news: ids, events: [] }),
+		expected: (ids) => {
+			return { news: ids, events: [] };
+		},
 	},
 	{
 		label: "events",
 		getItems: (db) => db.getPublishedEvents(4),
 		section: (page) => page.events,
 		reset: (db, ids) => db.resetSiteMetadataFeaturedItems({ events: ids }),
-		expected: (ids) => ({ news: [], events: ids }),
+		expected: (ids) => {
+			return { news: [], events: ids };
+		},
 	},
 ];
 
