@@ -119,13 +119,43 @@ export class DatabaseService {
 		return rows;
 	}
 
-	/** Reads the singleton site_metadata row's `featuredItemIds` (empty array when unset). */
-	async getSiteMetadataFeaturedItemIds(): Promise<Array<string>> {
+	/**
+	 * Returns published events (id = published version id, matching what the featured-items picker
+	 * uses) ordered by title, the same order as the picker's first page.
+	 */
+	async getPublishedEvents(count: number): Promise<Array<{ id: string; name: string }>> {
+		const rows = await this.db
+			.select({ id: schema.events.id, name: schema.events.title })
+			.from(schema.events)
+			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(eq(schema.entityStatus.type, "published"))
+			.orderBy(schema.events.title)
+			.limit(count);
+
+		if (rows.length < count) {
+			throw new Error(`Expected at least ${String(count)} published events for featured tests.`);
+		}
+
+		return rows;
+	}
+
+	/**
+	 * Reads the singleton site_metadata row's `featuredItemIds`, grouped by entity type (empty lists
+	 * when unset).
+	 */
+	async getSiteMetadataFeaturedItemIds(): Promise<{
+		news: Array<string>;
+		events: Array<string>;
+	}> {
 		const row = await this.db.query.siteMetadata.findFirst({
 			columns: { featuredItemIds: true },
 		});
 
-		return (row?.featuredItemIds as Array<string> | null) ?? [];
+		return {
+			news: row?.featuredItemIds?.news ?? [],
+			events: row?.featuredItemIds?.events ?? [],
+		};
 	}
 
 	/**
@@ -133,18 +163,22 @@ export class DatabaseService {
 	 * description exist so the form can be saved without filling them). Used to put the page into a
 	 * known state before/after the featured-items tests.
 	 */
-	async resetSiteMetadataFeaturedItems(featuredItemIds: Array<string> = []): Promise<void> {
+	async resetSiteMetadataFeaturedItems(
+		featuredItemIds: { news?: Array<string>; events?: Array<string> } = {},
+	): Promise<void> {
+		const value = { news: featuredItemIds.news ?? [], events: featuredItemIds.events ?? [] };
+
 		await this.db
 			.insert(schema.siteMetadata)
 			.values({
 				id: 1,
 				title: "E2E Site Title",
 				description: "E2E Site Description",
-				featuredItemIds,
+				featuredItemIds: value,
 			})
 			.onConflictDoUpdate({
 				target: schema.siteMetadata.id,
-				set: { featuredItemIds, updatedAt: sql`NOW()` },
+				set: { featuredItemIds: value, updatedAt: sql`NOW()` },
 			});
 	}
 

@@ -2,29 +2,37 @@ import type { Locator, Page } from "@playwright/test";
 
 const BASE_PATH = "/en/dashboard/website/featured";
 
-/** Accessible name shared by the featured-items selection list and its options popover. */
-const FEATURED_LABEL = "Featured news items";
+/** Accessible names for one featured section's selection list and its "add" popover trigger. */
+interface FeaturedSectionConfig {
+	/** Shared by the selection list (a GridList → role "grid") and its options popover. */
+	gridLabel: string;
+	/** The button that opens the searchable options popover. */
+	addLabel: string;
+}
+
+const SECTIONS = {
+	news: { gridLabel: "Featured news items", addLabel: "Add news item" },
+	events: { gridLabel: "Featured events", addLabel: "Add event" },
+} satisfies Record<string, FeaturedSectionConfig>;
 
 /**
- * Page object for the website featured-items page, focused on the "Featured News Items" select (an
- * `AsyncListSelect`): selected items render as full-width, drag-reorderable rows; a popover (opened
- * via "Add news item") provides a searchable, multi-select option list.
+ * One featured section (news or events) on the website featured-items page. Each is an
+ * `AsyncListSelect` (isOrderable, maxItems=3): selected items render as full-width,
+ * drag-reorderable rows; a popover (opened via its "add" button) provides a searchable,
+ * multi-select option list.
  */
-export class AdminFeaturedItemsPage {
-	readonly page: Page;
+class FeaturedSection {
+	private readonly page: Page;
+	private readonly config: FeaturedSectionConfig;
 
-	constructor(page: Page) {
+	constructor(page: Page, config: FeaturedSectionConfig) {
 		this.page = page;
-	}
-
-	async goto(): Promise<void> {
-		await this.page.goto(BASE_PATH);
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		this.config = config;
 	}
 
 	/** The selection list (a GridList → role "grid"); distinct from the popover listbox. */
 	private featuredList(): Locator {
-		return this.page.getByRole("grid", { name: FEATURED_LABEL });
+		return this.page.getByRole("grid", { name: this.config.gridLabel });
 	}
 
 	featuredRow(name: string): Locator {
@@ -39,7 +47,7 @@ export class AdminFeaturedItemsPage {
 	}
 
 	private async openOptions(): Promise<Locator> {
-		await this.page.getByRole("button", { name: "Add news item" }).click();
+		await this.page.getByRole("button", { name: this.config.addLabel }).click();
 		const searchbox = this.page.getByRole("searchbox");
 		await searchbox.waitFor({ state: "visible" });
 		return searchbox;
@@ -131,6 +139,28 @@ export class AdminFeaturedItemsPage {
 		await mouse.up();
 		// Wait for the drop to complete so the reordered list has rendered.
 		await dragging.waitFor({ state: "hidden" });
+	}
+}
+
+/**
+ * Page object for the website featured-items page. The page hosts two independent featured sections
+ * — news and events — each exposed via {@link news} / {@link events}; `goto` and `save` act on the
+ * shared page and form.
+ */
+export class AdminFeaturedItemsPage {
+	readonly page: Page;
+	readonly news: FeaturedSection;
+	readonly events: FeaturedSection;
+
+	constructor(page: Page) {
+		this.page = page;
+		this.news = new FeaturedSection(page, SECTIONS.news);
+		this.events = new FeaturedSection(page, SECTIONS.events);
+	}
+
+	async goto(): Promise<void> {
+		await this.page.goto(BASE_PATH);
+		await this.page.waitForURL(`**${BASE_PATH}`);
 	}
 
 	async save(): Promise<void> {

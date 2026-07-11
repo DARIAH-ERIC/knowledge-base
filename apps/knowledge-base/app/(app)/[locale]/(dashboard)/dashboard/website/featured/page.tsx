@@ -9,6 +9,7 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { FeaturedItemsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/featured/_components/featured-items-form";
+import { getEventOptions, getEventOptionsByIds } from "@/lib/data/events";
 import { getNewsItemOptions, getNewsItemOptionsByIds } from "@/lib/data/news";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -39,11 +40,19 @@ export default async function DashboardWebsiteFeaturedPage(
 		},
 	});
 
-	const featuredItemIds = (siteMetadataRow?.featuredItemIds as Array<string> | null) ?? [];
+	const featuredNewsIds = siteMetadataRow?.featuredItemIds?.news ?? [];
+	const featuredEventIds = siteMetadataRow?.featuredItemIds?.events ?? [];
 
-	const [initialFeaturedItemsOptions, selectedFeaturedItems] = await Promise.all([
+	const [
+		initialFeaturedNewsOptions,
+		selectedFeaturedNews,
+		initialFeaturedEventOptions,
+		selectedFeaturedEvents,
+	] = await Promise.all([
 		getNewsItemOptions(),
-		getNewsItemOptionsByIds(featuredItemIds),
+		getNewsItemOptionsByIds(featuredNewsIds),
+		getEventOptions(),
+		getEventOptionsByIds(featuredEventIds),
 	]);
 
 	return (
@@ -59,9 +68,12 @@ export default async function DashboardWebsiteFeaturedPage(
 
 			<div className="p-(--layout-padding)">
 				<FeaturedItemsForm
-					featuredItemIds={featuredItemIds}
-					initialFeaturedItemsOptions={initialFeaturedItemsOptions}
-					selectedFeaturedItems={selectedFeaturedItems}
+					featuredEventIds={featuredEventIds}
+					featuredNewsIds={featuredNewsIds}
+					initialFeaturedEventOptions={initialFeaturedEventOptions}
+					initialFeaturedNewsOptions={initialFeaturedNewsOptions}
+					selectedFeaturedEvents={selectedFeaturedEvents}
+					selectedFeaturedNews={selectedFeaturedNews}
 				/>
 			</div>
 		</div>

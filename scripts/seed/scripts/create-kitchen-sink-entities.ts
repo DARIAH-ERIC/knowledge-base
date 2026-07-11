@@ -492,6 +492,24 @@ async function main() {
 					versionId: createId(`version:news:${entry.slug}`),
 				};
 			});
+			/**
+			 * Extra published events so the featured-events e2e test has enough options. Same naming
+			 * discipline as `featuredNewsDocuments` (distinct, non-prefixing titles that sort before the
+			 * "Kitchen Sink" events) so the picker's first page and Playwright's role locators stay
+			 * unambiguous.
+			 */
+			const featuredEventDocuments = [
+				{ slug: "featured-test-event-alpha", title: "Featured Test Event Alpha" },
+				{ slug: "featured-test-event-bravo", title: "Featured Test Event Bravo" },
+				{ slug: "featured-test-event-charlie", title: "Featured Test Event Charlie" },
+				{ slug: "featured-test-event-delta", title: "Featured Test Event Delta" },
+			].map((entry) => {
+				return {
+					...entry,
+					id: createId(`entity:event:${entry.slug}`),
+					versionId: createId(`version:event:${entry.slug}`),
+				};
+			});
 			const fundingCallDocument = {
 				id: createId("entity:funding-call"),
 				versionId: createId("version:funding-call"),
@@ -729,6 +747,15 @@ async function main() {
 						slug: doc.slug,
 					};
 				}),
+				...featuredEventDocuments.map((doc) => {
+					return {
+						id: doc.id,
+						versionId: doc.versionId,
+						typeId: assertLookupId(entityTypeIds.get("events"), 'Missing entity type "events".'),
+						statusId: publishedStatusId,
+						slug: doc.slug,
+					};
+				}),
 			];
 
 			const entityIdsBySeedId = new Map<string, { documentId: string; versionId: string }>();
@@ -868,6 +895,18 @@ async function main() {
 					summary: "A published news item seeded for the featured-items e2e tests.",
 					publicationDate: new Date("2024-01-15T00:00:00.000Z"),
 					imageId: createId("asset:image"),
+				});
+			}
+			for (const doc of featuredEventDocuments) {
+				await upsertById(tx, schema.events, {
+					id: entityIdsBySeedId.get(doc.id)!.versionId,
+					title: doc.title,
+					summary: "A published event seeded for the featured-items e2e tests.",
+					imageId: createId("asset:image"),
+					location: "Vienna",
+					duration: createTimestampRange("2026-04-15T09:00:00.000Z", "2026-04-17T17:00:00.000Z"),
+					isFullDay: false,
+					website: `https://example.org/events/${doc.slug}`,
 				});
 			}
 			await upsertById(tx, schema.fundingCalls, {
