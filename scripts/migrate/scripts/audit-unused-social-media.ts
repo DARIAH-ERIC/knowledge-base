@@ -10,8 +10,8 @@ import { cacheFolderPath } from "../config/data-migration.config";
 import { env } from "../config/env.config";
 
 /**
- * Lists social-media rows that are not referenced by any database foreign key. Runs as a dry run
- * by default; pass `--apply` to delete them.
+ * Lists social-media rows that are not referenced by any database foreign key. Runs as a dry run by
+ * default; pass `--apply` to delete them.
  *
  * @example
  * 	pnpm run data:audit:unused-social-media
@@ -57,7 +57,10 @@ async function main(): Promise<void> {
 				updatedAt: schema.socialMedia.updatedAt,
 			})
 			.from(schema.socialMedia)
-			.innerJoin(schema.socialMediaTypes, eq(schema.socialMediaTypes.id, schema.socialMedia.typeId)),
+			.innerJoin(
+				schema.socialMediaTypes,
+				eq(schema.socialMediaTypes.id, schema.socialMedia.typeId),
+			),
 		db
 			.select({ id: schema.projectsToSocialMedia.socialMediaId })
 			.from(schema.projectsToSocialMedia),
@@ -119,7 +122,9 @@ async function main(): Promise<void> {
 			deleted++;
 		} catch (error) {
 			failed++;
-			log.error(`Failed to remove social-media entry "${item.name}" (${item.id}): ${String(error)}`);
+			log.error(
+				`Failed to remove social-media entry "${item.name}" (${item.id}): ${String(error)}`,
+			);
 		}
 	}
 
