@@ -11,6 +11,11 @@ import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
+import {
+	getEntityRelationOptionsByIds,
+	getEntityRelations,
+	getResourceRelationOptionsByIds,
+} from "@/lib/data/relations";
 import { db } from "@/lib/db";
 import { alias, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
@@ -163,6 +168,13 @@ export default async function DashboardAdministratorProjectDetailsPage(
 		}),
 	]);
 
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(documentId);
+
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
+
 	const image =
 		project.image != null
 			? {
@@ -197,6 +209,8 @@ export default async function DashboardAdministratorProjectDetailsPage(
 				socialMedia: socialMediaLinks.map((link) => link.socialMedia),
 			}}
 			publishAction={publishProjectAction}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 			selectedVersion={selectedVersion}
 		/>
 	);

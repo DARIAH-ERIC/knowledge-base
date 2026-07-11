@@ -13,10 +13,23 @@ interface ProjectCreateFormProps {
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
 	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
 	initialSocialMediaTotal: number;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
 }
 
 export function ProjectCreateForm(props: Readonly<ProjectCreateFormProps>): ReactNode {
-	const { initialAssets, scopes, initialSocialMediaItems, initialSocialMediaTotal } = props;
+	const {
+		initialAssets,
+		scopes,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+	} = props;
 
 	const t = useExtracted();
 
@@ -27,6 +40,10 @@ export function ProjectCreateForm(props: Readonly<ProjectCreateFormProps>): Reac
 			<ProjectForm
 				formAction={createProjectAction}
 				initialAssets={initialAssets}
+				initialRelatedEntityItems={initialRelatedEntityItems}
+				initialRelatedEntityTotal={initialRelatedEntityTotal}
+				initialRelatedResourceItems={initialRelatedResourceItems}
+				initialRelatedResourceTotal={initialRelatedResourceTotal}
 				initialSocialMediaItems={initialSocialMediaItems}
 				initialSocialMediaTotal={initialSocialMediaTotal}
 				scopes={scopes}

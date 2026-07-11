@@ -39,6 +39,14 @@ interface ProjectEditFormProps {
 	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
 	initialSocialMediaTotal: number;
 	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityIds: Array<string>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
+	initialRelatedResourceIds: Array<string>;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
+	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	initialPartners: Array<{
 		id: string;
 		unitDocumentId: string;
@@ -63,6 +71,14 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 		initialSocialMediaItems,
 		initialSocialMediaTotal,
 		selectedSocialMediaItems,
+		initialRelatedEntityIds,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
+		initialRelatedResourceIds,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 		roles,
 		initialPartners,
 	} = props;
@@ -97,11 +113,19 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 					<ProjectForm
 						formAction={updateProjectAction}
 						initialAssets={initialAssets}
+						initialRelatedEntityIds={initialRelatedEntityIds}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceIds={initialRelatedResourceIds}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
 						initialSocialMediaIds={initialSocialMediaIds}
 						initialSocialMediaItems={initialSocialMediaItems}
 						initialSocialMediaTotal={initialSocialMediaTotal}
 						project={project}
 						scopes={scopes}
+						selectedRelatedEntities={selectedRelatedEntities}
+						selectedRelatedResources={selectedRelatedResources}
 						selectedSocialMediaItems={selectedSocialMediaItems}
 					/>
 				</TabPanel>

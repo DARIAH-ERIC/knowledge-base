@@ -8,6 +8,7 @@ import { CreateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
+import { filterToPublishedDocumentIds } from "@/lib/data/relations";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
@@ -60,6 +61,26 @@ export const createProjectAction = createMutationAction({
 			"description",
 			input.descriptionContentBlocks,
 		);
+
+		const publishedRelatedEntityIds = await filterToPublishedDocumentIds(
+			tx,
+			input.relatedEntityIds,
+		);
+		if (publishedRelatedEntityIds.length > 0) {
+			await tx.insert(schema.entitiesToEntities).values(
+				publishedRelatedEntityIds.map((relatedEntityId, position) => {
+					return { entityId: documentId, position, relatedEntityId };
+				}),
+			);
+		}
+
+		if (input.relatedResourceIds.length > 0) {
+			await tx.insert(schema.entitiesToResources).values(
+				input.relatedResourceIds.map((resourceId, position) => {
+					return { entityId: documentId, position, resourceId };
+				}),
+			);
+		}
 
 		if (shouldSaveAndPublish(formData)) {
 			await publishVersion(tx, documentId, projectsLifecycleAdapter);
