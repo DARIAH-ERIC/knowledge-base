@@ -3,9 +3,11 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
+import { relationOptionsPageSize } from "@/lib/constants/relations";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { unaccentIlike } from "@/lib/db/search";
-import { and, count, desc, eq, sql } from "@/lib/db/sql";
+import { and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
 export type EventsSort = "duration" | "title";
@@ -137,6 +139,68 @@ export async function getEventById(params: GetEventByIdParams) {
 	const data = { ...rest, entity: entityVersion.entity, image };
 
 	return data;
+}
+
+export interface EventOption {
+	id: string;
+	name: string;
+}
+
+interface GetEventOptionsParams {
+	limit?: number;
+	offset?: number;
+	q?: string;
+}
+
+export async function getEventOptions(
+	params: GetEventOptionsParams = {},
+): Promise<{ items: Array<EventOption>; total: number }> {
+	const { limit = relationOptionsPageSize, offset = 0, q } = params;
+	const query = q?.trim();
+	const searchWhere =
+		query != null && query !== "" ? unaccentIlike(schema.events.title, `%${query}%`) : undefined;
+	const where = and(publishedEntityVersionWhere(), searchWhere);
+
+	const [items, aggregate] = await Promise.all([
+		db
+			.select({ id: schema.events.id, name: schema.events.title })
+			.from(schema.events)
+			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(where)
+			.orderBy(schema.events.title)
+			.limit(limit)
+			.offset(offset),
+		db
+			.select({ total: count() })
+			.from(schema.events)
+			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(where),
+	]);
+
+	return { items, total: aggregate.at(0)?.total ?? 0 };
+}
+
+export async function getEventOptionsByIds(ids: ReadonlyArray<string>) {
+	if (ids.length === 0) {
+		return [];
+	}
+
+	const rows = await db
+		.select({ id: schema.events.id, name: schema.events.title })
+		.from(schema.events)
+		.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.where(and(publishedEntityVersionWhere(), inArray(schema.events.id, [...ids])))
+		.orderBy(schema.events.title);
+
+	const itemById = new Map(rows.map((row) => [row.id, row] as const));
+
+	return ids.flatMap((id) => {
+		const item = itemById.get(id);
+		return item != null ? [item] : [];
+	});
 }
 
 export type EventsWithEntities = Awaited<ReturnType<typeof getEvents>>;

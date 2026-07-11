@@ -21,7 +21,9 @@ export const updateFeaturedItemsAction = createMutationAction({
 	async preCheck({ input }) {
 		const t = await getExtracted();
 
-		if (!(await isPublishedEntityVersions(db, input.featuredItemIds))) {
+		if (
+			!(await isPublishedEntityVersions(db, [...input.featuredNewsIds, ...input.featuredEventIds]))
+		) {
 			return createActionStateError({
 				message: t("Featured items must be published."),
 			});
@@ -39,7 +41,10 @@ export const updateFeaturedItemsAction = createMutationAction({
 		 */
 		await tx
 			.update(schema.siteMetadata)
-			.set({ featuredItemIds: input.featuredItemIds, updatedAt: sql`NOW()` })
+			.set({
+				featuredItemIds: { news: input.featuredNewsIds, events: input.featuredEventIds },
+				updatedAt: sql`NOW()`,
+			})
 			.where(eq(schema.siteMetadata.id, 1));
 
 		return { subjectId: "site", successMessage: t("Featured items saved.") };
