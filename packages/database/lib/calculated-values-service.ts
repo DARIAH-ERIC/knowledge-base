@@ -85,7 +85,9 @@ async function getCountryValues(
 	);
 
 	function toItems(items: Array<{ name: string; slug: string }>): Array<CalculatedValueListItem> {
-		return items.map((item) => {return { name: item.name, slug: item.slug }});
+		return items.map((item) => {
+			return { name: item.name, slug: item.slug };
+		});
 	}
 
 	return {
