@@ -271,17 +271,17 @@ export async function checkDerivedRelations(
 		try {
 			findings.push(...(await checkRule(db, rule)));
 		} catch (error) {
+			// oxlint-disable-next-line unicorn/no-instanceof-builtins
 			errors.push(error instanceof Error ? error.message : String(error));
 		}
 	}
 
-	findings.sort((a, b) => {
-		return (
+	findings.sort(
+		(a, b) =>
 			a.rule.localeCompare(b.rule) ||
 			a.kind.localeCompare(b.kind) ||
-			a.personLabel.localeCompare(b.personLabel)
-		);
-	});
+			a.personLabel.localeCompare(b.personLabel),
+	);
 
 	return { findings, errors };
 }
