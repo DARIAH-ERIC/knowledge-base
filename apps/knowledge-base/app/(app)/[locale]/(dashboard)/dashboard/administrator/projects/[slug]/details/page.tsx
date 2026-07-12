@@ -9,7 +9,7 @@ import { discardProjectDraftAction } from "@/app/(app)/[locale]/(dashboard)/dash
 import { publishProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/publish-project.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import {
 	getEntityRelationOptionsByIds,
@@ -120,7 +120,7 @@ export default async function DashboardAdministratorProjectDetailsPage(
 	}
 
 	const [descriptionContentBlocks, partners, socialMediaLinks] = await Promise.all([
-		getEntityContentBlocks(versionId, "description"),
+		getResolvedEntityContentBlocks(versionId, "description"),
 		(() => {
 			const unitDocumentLifecycle = alias(schema.documentLifecycle, "unit_document_lifecycle");
 			return db

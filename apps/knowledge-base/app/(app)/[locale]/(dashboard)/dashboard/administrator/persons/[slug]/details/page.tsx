@@ -8,7 +8,7 @@ import { discardPersonDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { publishPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/publish-person.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getPersonContributions } from "@/lib/data/contributions";
 import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { db } from "@/lib/db";
@@ -106,7 +106,7 @@ export default async function DashboardAdministratorPersonDetailsPage(
 
 	const [contributions, biographyContentBlocks] = await Promise.all([
 		getPersonContributions(documentId),
-		getEntityContentBlocks(versionId, "biography"),
+		getResolvedEntityContentBlocks(versionId, "biography"),
 	]);
 
 	const image =

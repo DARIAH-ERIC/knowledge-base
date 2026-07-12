@@ -7,7 +7,7 @@ import { SpotlightArticleDetails } from "@/app/(app)/[locale]/(dashboard)/dashbo
 import { discardSpotlightArticleDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/discard-spotlight-article-draft.action";
 import { publishSpotlightArticleAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/publish-spotlight-article.action";
 import { imageGridOptions } from "@/config/assets.config";
-import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import {
 	getEntityRelationOptionsByIds,
@@ -125,7 +125,7 @@ export default async function DashboardWebsiteSpotlightArticleDetailsPage(
 		options: imageGridOptions,
 	});
 
-	const contentBlocks = await getEntityContentBlocks(spotlightArticle.id, "content");
+	const contentBlocks = await getResolvedEntityContentBlocks(spotlightArticle.id, "content");
 
 	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(doc.id);
 

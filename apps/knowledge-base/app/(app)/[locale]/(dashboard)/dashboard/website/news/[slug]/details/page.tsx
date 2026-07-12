@@ -7,7 +7,7 @@ import { NewsItemDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/webs
 import { discardNewsItemDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/discard-news-item-draft.action";
 import { publishNewsItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/publish-news-item.action";
 import { imageGridOptions } from "@/config/assets.config";
-import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import {
 	getEntityRelationOptionsByIds,
@@ -131,7 +131,7 @@ export default async function DashboardWebsiteNewsItemDetailsPage(
 		options: imageGridOptions,
 	});
 
-	const contentBlocks = await getEntityContentBlocks(newsItem.id, "content");
+	const contentBlocks = await getResolvedEntityContentBlocks(newsItem.id, "content");
 
 	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(doc.id);
 

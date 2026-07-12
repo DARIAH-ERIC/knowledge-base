@@ -1,5 +1,10 @@
 import { log } from "@acdh-oeaw/lib";
 import type { Database } from "@dariah-eric/database";
+import {
+	annotateCalculatedValues,
+	collectCalculatedValueKinds,
+} from "@dariah-eric/database/calculated-values";
+import { getCalculatedValues } from "@dariah-eric/database/calculated-values-service";
 import * as schema from "@dariah-eric/database/schema";
 import { alias, and, eq, inArray, sql } from "@dariah-eric/database/sql";
 import type { SearchService, WebsiteDocument } from "@dariah-eric/search";
@@ -189,9 +194,17 @@ async function getPlainTextFieldContentByEntityId(
 		)
 		.orderBy(schema.fields.entityVersionId, schema.contentBlocks.position);
 
+	// Attach current calculated-value data before flattening so the indexed text contains the
+	// actual values (stale until the entity's next sync, like every other indexed field).
+	const calculatedValueKinds = collectCalculatedValueKinds(rows);
+	const annotatedRows =
+		calculatedValueKinds.size > 0
+			? annotateCalculatedValues(rows, await getCalculatedValues(db, calculatedValueKinds))
+			: rows;
+
 	const contentByEntityId = new Map<string, Array<string>>();
 
-	for (const row of rows) {
+	for (const row of annotatedRows) {
 		const content =
 			row.blockType === "callout"
 				? [row.calloutTitle, toPlainText(row.calloutContent)]

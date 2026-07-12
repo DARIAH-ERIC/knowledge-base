@@ -105,6 +105,7 @@
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/style-variants": "catalog:",
+		"@dariah-eric/database": "workspace:^",
 		"@heroicons/react": "catalog:",
 		"@internationalized/date": "catalog:",
 		"@react-aria/utils": "catalog:",

@@ -5149,6 +5149,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "memberCountries": {
             "type": "number",
           },
+          "observerCountries": {
+            "type": "number",
+          },
           "partnerInstitutions": {
             "type": "number",
           },
@@ -5158,6 +5161,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         },
         "required": [
           "memberCountries",
+          "observerCountries",
           "partnerInstitutions",
           "cooperatingPartners",
           "workingGroups",

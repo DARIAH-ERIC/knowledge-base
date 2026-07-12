@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { OpportunityDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details";
 import { discardOpportunityDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/discard-opportunity-draft.action";
 import { publishOpportunityAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/publish-opportunity.action";
-import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -120,7 +120,7 @@ export default async function DashboardWebsiteOpportunitiesDetailsPage(
 		notFound();
 	}
 
-	const contentBlocks = await getEntityContentBlocks(opportunity.id, "content");
+	const contentBlocks = await getResolvedEntityContentBlocks(opportunity.id, "content");
 
 	return (
 		<OpportunityDetails

@@ -1,3 +1,8 @@
+import {
+	annotateCalculatedValues,
+	collectCalculatedValueKinds,
+} from "@dariah-eric/database/calculated-values";
+import { getCalculatedValues } from "@dariah-eric/database/calculated-values-service";
 import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
@@ -157,7 +162,20 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 		fieldMap.get(row.fieldId)!.blocks.push(normalizeRow(row));
 	}
 
-	return Object.fromEntries([...fieldMap.values()].map(({ name, blocks }) => [name, blocks]));
+	const fields = Object.fromEntries(
+		[...fieldMap.values()].map(({ name, blocks }) => [name, blocks]),
+	);
+
+	// Calculated-value nodes are stored as references; attach the current data here (a `value`
+	// attribute: number for counts, name array for lists) so consumers render it themselves.
+	const calculatedValueKinds = collectCalculatedValueKinds(fields);
+	if (calculatedValueKinds.size === 0) {
+		return fields;
+	}
+
+	const calculatedValues = await getCalculatedValues(db, calculatedValueKinds);
+
+	return annotateCalculatedValues(fields, calculatedValues);
 }
 
 function normalizeRow(row: {

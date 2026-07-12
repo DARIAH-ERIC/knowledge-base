@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -56,7 +56,7 @@ export default async function DocumentationPage(
 	const { slug } = await props.params;
 
 	const page = await getDocumentationPage(slug);
-	const contentBlocks = await getEntityContentBlocks(page.id, "content");
+	const contentBlocks = await getResolvedEntityContentBlocks(page.id, "content");
 
 	return (
 		<Main className="container flex-1 px-8 py-12 xs:px-16">

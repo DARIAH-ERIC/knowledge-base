@@ -7,6 +7,7 @@ import { EricDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/administ
 import { publishEricAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_lib/publish-eric.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { resolveCalculatedValuesInContentBlocks } from "@/lib/content-blocks-service";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
 import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { getEricReverseRelationGroups } from "@/lib/data/eric";
@@ -83,6 +84,10 @@ export default async function DashboardAdministratorEricDetailsPage(
 		unit: eric,
 	} = ericData;
 
+	const descriptionContentBlocks = await resolveCalculatedValuesInContentBlocks(
+		eric.descriptionContentBlocks,
+	);
+
 	const image =
 		eric.image != null
 			? {
@@ -97,7 +102,7 @@ export default async function DashboardAdministratorEricDetailsPage(
 	return (
 		<EricDetails
 			documentId={documentId}
-			eric={{ ...eric, image }}
+			eric={{ ...eric, descriptionContentBlocks, image }}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
 			publishAction={publishEricAction}

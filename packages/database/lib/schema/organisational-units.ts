@@ -254,6 +254,7 @@ export const statistics = p.snakeCase
 		partnerInstitutions: p.integer("partner_institutions"),
 		cooperatingPartners: p.integer("cooperating_partners"),
 		workingGroups: p.integer("working_groups"),
+		observerCountries: p.integer("observer_countries"),
 	})
 	.existing();
 
