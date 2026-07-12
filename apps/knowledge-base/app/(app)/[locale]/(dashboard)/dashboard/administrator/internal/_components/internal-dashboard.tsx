@@ -1,6 +1,8 @@
 "use client";
 
 import { auditLogActionEnum } from "@dariah-eric/database/schema";
+import { Badge } from "@dariah-eric/ui/badge";
+import { Link } from "@dariah-eric/ui/link";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import {
 	Table,
@@ -22,11 +24,18 @@ import {
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { dashboardPageSize } from "@/config/pagination.config";
 import type { AuditLogAction, AuditLogResult } from "@/lib/data/audit-log";
+import type {
+	DerivedRelationCheckResult,
+	DerivedRelationFindingKind,
+	DerivedRelationInterval,
+} from "@/lib/data/data-integrity";
 import type { ExpensiveStatementsResult } from "@/lib/data/pg-stat-statements";
+import { getEntityDetailHref } from "@/lib/entity-detail-href";
 
 interface InternalDashboardProps {
 	action: AuditLogAction | undefined;
 	auditLog: AuditLogResult;
+	integrity: DerivedRelationCheckResult;
 	page: number;
 	statements: ExpensiveStatementsResult;
 }
@@ -37,8 +46,14 @@ function humanizeAction(action: string): string {
 	return action.replaceAll("_", " ");
 }
 
+const findingKindBadgeIntents: Record<DerivedRelationFindingKind, "amber" | "rose"> = {
+	missing_derived: "amber",
+	missing_source: "amber",
+	duration_mismatch: "rose",
+};
+
 export function InternalDashboard(props: Readonly<InternalDashboardProps>): ReactNode {
-	const { action, auditLog, page, statements } = props;
+	const { action, auditLog, integrity, page, statements } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -52,6 +67,26 @@ export function InternalDashboard(props: Readonly<InternalDashboardProps>): Reac
 
 	const selectedAction = search.filters.action !== "" ? search.filters.action : "all";
 
+	function formatIntervals(intervals: Array<DerivedRelationInterval>): ReactNode {
+		if (intervals.length === 0) {
+			return "—";
+		}
+
+		return intervals.map((interval) => {
+			const start = format.dateTime(new Date(interval.start), { dateStyle: "medium" });
+			const end =
+				interval.end != null
+					? format.dateTime(new Date(interval.end), { dateStyle: "medium" })
+					: t("ongoing");
+
+			return (
+				<span className="block whitespace-nowrap" key={`${interval.start}:${interval.end ?? ""}`}>
+					{start} – {end}
+				</span>
+			);
+		});
+	}
+
 	return (
 		<Fragment>
 			<EntityListHeader
@@ -63,6 +98,7 @@ export function InternalDashboard(props: Readonly<InternalDashboardProps>): Reac
 				<TabList aria-label={t("Internal diagnostics")}>
 					<Tab id="audit">{t("Audit log")}</Tab>
 					<Tab id="statements">{t("Expensive queries")}</Tab>
+					<Tab id="integrity">{t("Data integrity")}</Tab>
 				</TabList>
 
 				<TabPanel id="audit" className="flex flex-col gap-y-(--layout-padding)">
@@ -173,6 +209,79 @@ export function InternalDashboard(props: Readonly<InternalDashboardProps>): Reac
 							)}
 						</div>
 					)}
+				</TabPanel>
+
+				<TabPanel id="integrity" className="flex flex-col gap-y-(--layout-padding)">
+					<div className="text-balance text-muted-fg text-sm">
+						{t(
+							"Relations which must be entered twice, e.g. a national coordinator must also be a member of the General Assembly for the same period. Same checks as the data:audit:derived-relations script.",
+						)}
+					</div>
+
+					{integrity.errors.length > 0 ? (
+						<div className="flex flex-col gap-y-1 text-danger-subtle-fg text-sm">
+							{integrity.errors.map((error) => (
+								<p key={error}>{error}</p>
+							))}
+						</div>
+					) : null}
+
+					<Table
+						aria-label={t("Data integrity")}
+						className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+					>
+						<TableHeader>
+							<TableColumn id="person" isRowHeader={true}>
+								{t("Person")}
+							</TableColumn>
+							<TableColumn id="kind">{t("Issue")}</TableColumn>
+							<TableColumn id="detail">{t("Detail")}</TableColumn>
+							<TableColumn id="source">{t("Source periods")}</TableColumn>
+							<TableColumn id="derived">{t("Derived periods")}</TableColumn>
+						</TableHeader>
+						<TableBody
+							items={integrity.findings.map((finding) => {
+								return {
+									...finding,
+									id: `${finding.rule}:${finding.kind}:${finding.personDocumentId}`,
+								};
+							})}
+							renderEmptyState={() => t("No data-integrity issues found.")}
+						>
+							{(finding) => {
+								const href = getEntityDetailHref({
+									entityType: "persons",
+									slug: finding.personSlug,
+								});
+
+								return (
+									<TableRow id={finding.id}>
+										<TableCell>
+											{href != null ? (
+												<Link className="underline" href={href}>
+													{finding.personLabel}
+												</Link>
+											) : (
+												finding.personLabel
+											)}
+										</TableCell>
+										<TableCell>
+											<Badge intent={findingKindBadgeIntents[finding.kind]}>
+												{humanizeAction(finding.kind)}
+											</Badge>
+										</TableCell>
+										<TableCell>
+											<span className="block max-inline-96 whitespace-normal">
+												{finding.detail}
+											</span>
+										</TableCell>
+										<TableCell>{formatIntervals(finding.sourceIntervals)}</TableCell>
+										<TableCell>{formatIntervals(finding.derivedIntervals)}</TableCell>
+									</TableRow>
+								);
+							}}
+						</TableBody>
+					</Table>
 				</TabPanel>
 			</Tabs>
 		</Fragment>

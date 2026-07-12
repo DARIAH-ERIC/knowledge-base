@@ -1,0 +1,29 @@
+{
+	"name": "@dariah-eric/audit",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"sideEffects": false,
+	"scripts": {
+		"data:audit:derived-relations": "tsx ./scripts/audit-derived-relations.ts",
+		"format:check": "oxfmt --check",
+		"format:fix": "oxfmt --write",
+		"lint:check": "oxlint --report-unused-disable-directives --type-aware --type-check",
+		"lint:fix": "oxlint --fix --report-unused-disable-directives --type-aware --type-check",
+		"types:check": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@dariah-eric/configs": "workspace:^",
+		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/env": "workspace:^",
+		"@types/node": "catalog:",
+		"drizzle-orm": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:",
+		"valibot": "catalog:"
+	},
+	"engines": {
+		"node": "24.x"
+	}
+}
