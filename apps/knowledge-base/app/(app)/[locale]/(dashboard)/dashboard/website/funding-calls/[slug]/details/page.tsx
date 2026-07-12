@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { FundingCallDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details";
 import { discardFundingCallDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/discard-funding-call-draft.action";
 import { publishFundingCallAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/publish-funding-call.action";
-import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -113,7 +113,7 @@ export default async function DashboardWebsiteFundingCallsDetailsPage(
 		notFound();
 	}
 
-	const contentBlocks = await getEntityContentBlocks(fundingCall.id, "content");
+	const contentBlocks = await getResolvedEntityContentBlocks(fundingCall.id, "content");
 
 	return (
 		<FundingCallDetails

@@ -7,7 +7,7 @@ import { DocumentOrPolicyDetails } from "@/app/(app)/[locale]/(dashboard)/dashbo
 import { discardDocumentOrPolicyDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/discard-document-or-policy-draft.action";
 import { publishDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/publish-document-or-policy.action";
 import { imageGridOptions } from "@/config/assets.config";
-import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
@@ -114,7 +114,7 @@ export default async function DashboardWebsiteDocumentOrPolicyDetailsPage(
 
 	const downloadUrl = `/api/assets/download?key=${encodeURIComponent(documentOrPolicy.document.key)}`;
 
-	const contentBlocks = await getEntityContentBlocks(documentOrPolicy.id, "description");
+	const contentBlocks = await getResolvedEntityContentBlocks(documentOrPolicy.id, "description");
 	const hasPublishableDraft = draftId != null && (publishedId == null || hasDraftChanges);
 
 	return (

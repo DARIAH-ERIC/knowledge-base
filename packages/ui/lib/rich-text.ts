@@ -1,4 +1,7 @@
+import { formatCalculatedValue } from "@dariah-eric/database/calculated-values";
 import type { JSONContent } from "@tiptap/core";
+
+export { formatCalculatedValue };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === "object";
@@ -33,6 +36,18 @@ function visit(node: unknown, parts: Array<string>) {
 
 	if (node.type === "buttonLink" && isRecord(node.attrs) && typeof node.attrs.label === "string") {
 		parts.push(node.attrs.label);
+		return;
+	}
+
+	if (node.type === "calculatedValue" && isRecord(node.attrs)) {
+		// Annotated nodes flatten to their resolved value; raw references fall back to the display
+		// label so search/alt text stays meaningful.
+		const resolved = formatCalculatedValue(node.attrs);
+		const label = node.attrs.label ?? node.attrs.kind;
+		const text = resolved ?? (typeof label === "string" ? label : null);
+		if (text != null) {
+			parts.push(text);
+		}
 		return;
 	}
 

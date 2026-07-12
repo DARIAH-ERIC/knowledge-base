@@ -5,6 +5,8 @@ export default defineConfig({
 	dts: true,
 	entry: [
 		"./lib/index.ts",
+		"./lib/calculated-values.ts",
+		"./lib/calculated-values-service.ts",
 		"./lib/client.ts",
 		"./lib/errors.ts",
 		"./lib/image-captions.ts",

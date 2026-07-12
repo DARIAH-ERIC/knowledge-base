@@ -62,6 +62,7 @@ import {
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
+import { CalculatedValueInsertMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/calculated-value-insert-menu";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
 import {
@@ -624,6 +625,9 @@ function ContentBlockPanel({
 							icon={CursorArrowRaysIcon}
 							onClick={insertButtonLink}
 						/>
+					)}
+					renderCalculatedValueInsert={(insertCalculatedValue) => (
+						<CalculatedValueInsertMenu onInsert={insertCalculatedValue} />
 					)}
 					renderImagePicker={
 						initialAssets != null

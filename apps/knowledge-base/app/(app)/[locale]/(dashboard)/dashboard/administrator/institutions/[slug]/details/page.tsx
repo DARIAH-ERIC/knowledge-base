@@ -7,7 +7,7 @@ import { InstitutionDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/a
 import { publishInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/publish-institution.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { getPersonRelations } from "@/lib/data/person-relations";
 import { getUnitProjectPartnerships } from "@/lib/data/project-partners";
@@ -123,7 +123,7 @@ export default async function DashboardAdministratorInstitutionDetailsPage(
 			orderBy: { position: "asc" },
 			columns: { socialMediaId: true },
 		}),
-		getEntityContentBlocks(versionId, "description"),
+		getResolvedEntityContentBlocks(versionId, "description"),
 	]);
 
 	const socialMediaIds = socialMediaRows.map((row) => row.socialMediaId);

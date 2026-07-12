@@ -7,7 +7,7 @@ import { PageItemDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/webs
 import { discardPageItemDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/discard-page-item-draft.action";
 import { publishPageItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/publish-page-item.action";
 import { imageGridOptions } from "@/config/assets.config";
-import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import {
 	getEntityRelationOptionsByIds,
@@ -127,7 +127,7 @@ export default async function DashboardWebsitePageItemDetailsPage(
 			})
 		: null;
 
-	const contentBlocks = await getEntityContentBlocks(pageItem.id, "content");
+	const contentBlocks = await getResolvedEntityContentBlocks(pageItem.id, "content");
 
 	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(doc.id);
 

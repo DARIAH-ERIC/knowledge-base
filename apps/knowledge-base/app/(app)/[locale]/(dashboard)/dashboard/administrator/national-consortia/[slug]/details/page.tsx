@@ -7,6 +7,7 @@ import { NationalConsortiumDetails } from "@/app/(app)/[locale]/(dashboard)/dash
 import { publishNationalConsortiumAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/publish-national-consortium.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { resolveCalculatedValuesInContentBlocks } from "@/lib/content-blocks-service";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
 import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { db } from "@/lib/db";
@@ -80,6 +81,10 @@ export default async function DashboardAdministratorNationalConsortiumDetailsPag
 		unit: nationalConsortium,
 	} = nationalConsortiumData;
 
+	const descriptionContentBlocks = await resolveCalculatedValuesInContentBlocks(
+		nationalConsortium.descriptionContentBlocks,
+	);
+
 	const image =
 		nationalConsortium.image != null
 			? {
@@ -96,7 +101,7 @@ export default async function DashboardAdministratorNationalConsortiumDetailsPag
 			documentId={documentId}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
-			nationalConsortium={{ ...nationalConsortium, image }}
+			nationalConsortium={{ ...nationalConsortium, descriptionContentBlocks, image }}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}

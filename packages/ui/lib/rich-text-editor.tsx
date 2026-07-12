@@ -28,6 +28,7 @@ import {
 	PencilIcon,
 	QuoteIcon,
 	Trash2Icon,
+	VariableIcon,
 } from "lucide-react";
 import { useExtracted } from "next-intl";
 import {
@@ -49,7 +50,7 @@ import { InlineRichTextRenderer } from "@/lib/inline-rich-text-renderer";
 import { Input } from "@/lib/input";
 import { Note } from "@/lib/note";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
-import { isEmptyRichTextDocument } from "@/lib/rich-text";
+import { formatCalculatedValue, isEmptyRichTextDocument } from "@/lib/rich-text";
 import { RichTextEditorToolbarButton } from "@/lib/rich-text-toolbar-button";
 import { ToggleGroup, ToggleGroupItem } from "@/lib/toggle-group";
 import { Tooltip, TooltipContent } from "@/lib/tooltip";
@@ -91,6 +92,9 @@ interface RichTextEditorProps {
 	renderEmbedInsert?: (insertEmbed: () => void) => ReactNode;
 	renderCalloutInsert?: (insertCallout: () => void) => ReactNode;
 	renderButtonLinkInsert?: (insertButtonLink: () => void) => ReactNode;
+	renderCalculatedValueInsert?: (
+		insertCalculatedValue: (value: { kind: string; label: string }) => void,
+	) => ReactNode;
 	renderImagePicker?: (
 		insert: (
 			imageKey: string,
@@ -891,6 +895,132 @@ export const ButtonLinkNode = Node.create({
 	},
 });
 
+/**
+ * Inline reference to a calculated value (e.g. the current number of member countries). The
+ * document stores only a `kind` reference plus a display `label`; read paths substitute the current
+ * value server-side, so the editor renders a placeholder chip instead of text.
+ */
+function CalculatedValueNodeView({
+	editor,
+	getPos,
+	node,
+	selected,
+	deleteNode,
+}: Readonly<NodeViewProps>): ReactNode {
+	const kind = node.attrs.kind as string | null;
+	const label = (node.attrs.label as string | null) ?? kind ?? "Calculated value";
+
+	const chipClassName = twMerge(
+		"inline-flex items-center gap-x-1 rounded-full border border-border bg-muted px-2 py-0.5 text-sm text-muted-fg",
+		selected && "ring-2 ring-ring",
+	);
+
+	if (!editor.isEditable) {
+		// Read views receive annotated nodes (a resolved `value` attribute) and render the plain
+		// value; nodes without one (unknown kind) degrade to the labelled chip.
+		const resolved = formatCalculatedValue(node.attrs);
+		if (resolved != null) {
+			return (
+				<NodeViewWrapper as="span" className="inline align-baseline">
+					{resolved}
+				</NodeViewWrapper>
+			);
+		}
+
+		return (
+			<NodeViewWrapper as="span" className="inline-block align-baseline">
+				<span className={chipClassName}>
+					<VariableIcon aria-hidden={true} className="block-3.5 inline-3.5" />
+					{label}
+				</span>
+			</NodeViewWrapper>
+		);
+	}
+
+	function selectNode() {
+		const pos = getPos();
+		if (typeof pos === "number") {
+			editor.commands.setNodeSelection(pos);
+		}
+	}
+
+	return (
+		<NodeViewWrapper as="span" className="inline-block align-baseline" contentEditable={false}>
+			<Popover
+				onOpenChange={(open) => {
+					if (open) {
+						selectNode();
+					}
+				}}
+			>
+				<PopoverTrigger aria-label={label} className={chipClassName}>
+					<VariableIcon aria-hidden={true} className="block-3.5 inline-3.5" />
+					{label}
+				</PopoverTrigger>
+				<PopoverContent className="p-3">
+					<div className="flex inline-64 flex-col gap-2">
+						<span className="text-sm font-medium">{label}</span>
+						<p className="text-xs text-muted-fg">
+							{"Replaced with the current value whenever the content is displayed."}
+						</p>
+						<Button intent="outline" onPress={deleteNode} size="sm" type="button">
+							{"Remove"}
+						</Button>
+					</div>
+				</PopoverContent>
+			</Popover>
+		</NodeViewWrapper>
+	);
+}
+
+export const CalculatedValueNode = Node.create({
+	name: "calculatedValue",
+	group: "inline",
+	inline: true,
+	atom: true,
+	selectable: true,
+	draggable: false,
+
+	addAttributes() {
+		return {
+			kind: { default: null },
+			label: { default: null },
+			/** Resolved data attached by the server on read paths; never present in editor content. */
+			value: { default: null },
+		};
+	},
+
+	parseHTML() {
+		return [
+			{
+				tag: "span[data-calculated-value]",
+				getAttrs(dom) {
+					return {
+						kind: dom.dataset.calculatedValue ?? null,
+						label: dom.textContent,
+					};
+				},
+			},
+		];
+	},
+
+	renderHTML({ node }) {
+		const resolved = formatCalculatedValue(node.attrs as Record<string, unknown>);
+
+		return [
+			"span",
+			mergeAttributes({
+				"data-calculated-value": node.attrs.kind as string | null,
+			}),
+			resolved ?? (node.attrs.label as string | null) ?? (node.attrs.kind as string | null) ?? "",
+		];
+	},
+
+	addNodeView() {
+		return ReactNodeViewRenderer(CalculatedValueNodeView);
+	},
+});
+
 interface AssetImageNodeViewProps extends NodeViewProps {
 	renderImagePicker?: ImagePickerRenderer;
 }
@@ -1243,6 +1373,7 @@ export function createRichTextExtensions(
 		EmbedNode,
 		CalloutNode,
 		ButtonLinkNode,
+		CalculatedValueNode,
 	];
 }
 
@@ -1258,6 +1389,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		renderEmbedInsert,
 		renderCalloutInsert,
 		renderButtonLinkInsert,
+		renderCalculatedValueInsert,
 		renderImagePicker,
 	} = props;
 
@@ -1418,6 +1550,23 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			})
 			.run();
 	}, [editor]);
+
+	const insertCalculatedValue = useCallback(
+		(value: { kind: string; label: string }) => {
+			if (!editor) {
+				return;
+			}
+			editor
+				.chain()
+				.focus()
+				.insertContent({
+					type: "calculatedValue",
+					attrs: { kind: value.kind, label: value.label },
+				})
+				.run();
+		},
+		[editor],
+	);
 
 	const insertImage = useCallback(
 		(
@@ -1595,6 +1744,9 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					) : null}
 					{renderCalloutInsert != null ? renderCalloutInsert(insertCallout) : null}
 					{renderButtonLinkInsert != null ? renderButtonLinkInsert(insertButtonLink) : null}
+					{renderCalculatedValueInsert != null
+						? renderCalculatedValueInsert(insertCalculatedValue)
+						: null}
 				</div>
 			) : null}
 			{name != null && (

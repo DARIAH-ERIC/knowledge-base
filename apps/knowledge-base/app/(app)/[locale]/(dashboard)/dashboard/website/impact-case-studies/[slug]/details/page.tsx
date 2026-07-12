@@ -7,7 +7,7 @@ import { ImpactCaseStudyDetails } from "@/app/(app)/[locale]/(dashboard)/dashboa
 import { discardImpactCaseStudyDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/discard-impact-case-study-draft.action";
 import { publishImpactCaseStudyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/publish-impact-case-study.action";
 import { imageGridOptions } from "@/config/assets.config";
-import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getImpactCaseStudyContributors } from "@/lib/data/article-contributors";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import {
@@ -126,7 +126,7 @@ export default async function DashboardWebsiteImpactCaseStudyDetailsPage(
 		options: imageGridOptions,
 	});
 
-	const contentBlocks = await getEntityContentBlocks(impactCaseStudy.id, "content");
+	const contentBlocks = await getResolvedEntityContentBlocks(impactCaseStudy.id, "content");
 
 	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(doc.id);
 

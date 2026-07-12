@@ -5,6 +5,7 @@ import type { JSONContent } from "@tiptap/core";
 import { ImageIcon, InfoIcon, MousePointerClickIcon } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 
+import { CalculatedValueInsertMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/calculated-value-insert-menu";
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
@@ -75,6 +76,9 @@ export function RichTextContentBlocksField({
 						icon={InfoIcon}
 						onClick={insertCallout}
 					/>
+				)}
+				renderCalculatedValueInsert={(insertCalculatedValue) => (
+					<CalculatedValueInsertMenu onInsert={insertCalculatedValue} />
 				)}
 				renderImagePicker={renderImagePicker}
 			/>

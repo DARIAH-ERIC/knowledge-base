@@ -11,6 +11,8 @@
 	"sideEffects": false,
 	"exports": {
 		".": "./dist/index.mjs",
+		"./calculated-values": "./dist/calculated-values.mjs",
+		"./calculated-values-service": "./dist/calculated-values-service.mjs",
 		"./client": "./dist/client.mjs",
 		"./errors": "./dist/errors.mjs",
 		"./image-captions": "./dist/image-captions.mjs",
