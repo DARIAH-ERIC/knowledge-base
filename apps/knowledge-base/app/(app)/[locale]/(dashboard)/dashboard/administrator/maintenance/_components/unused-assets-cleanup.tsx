@@ -2,11 +2,15 @@
 
 import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
+import { GridList, GridListItem } from "@dariah-eric/ui/grid-list";
 import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
+import cn from "clsx/lite";
 import { AlertTriangleIcon, DownloadIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState, useTransition } from "react";
+import type { Selection } from "react-aria-components";
 
+import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { deleteUnusedAssetsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/delete-unused-assets.action";
 import { useClientPagination } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/use-client-pagination";
@@ -25,39 +29,31 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 	const t = useExtracted();
 	const router = useRouter();
 
-	const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+	const [selected, setSelected] = useState<Selection>(() => new Set());
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 	const [isPending, startTransition] = useTransition();
 	const [result, setResult] = useState<DeleteUnusedAssetsResult | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
+	// Selection persists across pages, so normalise to an explicit set of ids we can measure and
+	// delete. The `"all"` sentinel only arises from a keyboard select-all over the current page.
+	const selectedIds = selected === "all" ? new Set(assets.map((asset) => asset.id)) : selected;
+
 	const selectedSize = assets.reduce(
-		(sum, asset) => (selected.has(asset.id) ? sum + (asset.size ?? 0) : sum),
+		(sum, asset) => (selectedIds.has(asset.id) ? sum + (asset.size ?? 0) : sum),
 		0,
 	);
 
-	const allSelected = assets.length > 0 && selected.size === assets.length;
+	const allSelected = assets.length > 0 && selectedIds.size === assets.length;
 
 	const { page, pageItems, perPage, setPage, totalItems, totalPages } = useClientPagination(assets);
-
-	function toggle(id: string, isSelected: boolean) {
-		setSelected((current) => {
-			const next = new Set(current);
-			if (isSelected) {
-				next.add(id);
-			} else {
-				next.delete(id);
-			}
-			return next;
-		});
-	}
 
 	function toggleAll(isSelected: boolean) {
 		setSelected(isSelected ? new Set(assets.map((asset) => asset.id)) : new Set());
 	}
 
 	function confirmDelete() {
-		const ids = Array.from(selected);
+		const ids = Array.from(selectedIds, String);
 		setError(null);
 
 		startTransition(async () => {
@@ -98,14 +94,14 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 
 				<Button
 					intent="danger"
-					isDisabled={selected.size === 0 || isPending}
+					isDisabled={selectedIds.size === 0 || isPending}
 					onPress={() => {
 						setIsConfirmOpen(true);
 					}}
 				>
-					{selected.size > 0
+					{selectedIds.size > 0
 						? t("Delete selected ({count}) · {size}", {
-								count: String(selected.size),
+								count: String(selectedIds.size),
 								size: formatFileSize(selectedSize),
 							})
 						: t("Delete selected")}
@@ -128,57 +124,58 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 				</p>
 			) : null}
 
-			<ul className="grid grid-cols-4 gap-(--layout-padding) sm:grid-cols-6 lg:grid-cols-8">
-				{pageItems.map((asset) => {
-					const isSelected = selected.has(asset.id);
-
-					return (
-						<li
-							className="flex flex-col gap-y-2 rounded-md border border-border p-2 selected:border-danger selected:bg-danger/5"
-							data-selected={isSelected || undefined}
-							key={asset.id}
-						>
-							<button
-								aria-label={t("Select {label}", { label: asset.label })}
-								className="block overflow-hidden rounded-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
-								onClick={() => {
-									toggle(asset.id, !isSelected);
-								}}
-								type="button"
-							>
-								{/* eslint-disable-next-line @next/next/no-img-element */}
-								<img
-									alt={asset.label}
-									className="aspect-square inline-full bg-muted object-contain"
-									src={asset.url}
-								/>
-							</button>
-							<Checkbox
-								className="items-start"
-								isSelected={isSelected}
-								onChange={(value) => {
-									toggle(asset.id, value);
-								}}
-							>
-								<span className="flex flex-col" data-slot="label">
-									<span className="line-clamp-2 wrap-break-word text-sm">{asset.label}</span>
-									<span className="text-muted-fg text-xs">
-										{asset.size != null ? formatFileSize(asset.size) : t("unknown size")}
-									</span>
+			<GridList
+				aria-label={t("Unused assets")}
+				className="grid grid-cols-[repeat(auto-fill,minmax(min(18rem,100%),1fr))] gap-(--layout-padding)"
+				items={pageItems}
+				layout="grid"
+				onSelectionChange={setSelected}
+				selectedKeys={selected}
+				selectionBehavior="toggle"
+				selectionMode="multiple"
+			>
+				{(asset) => (
+					<GridListItem
+						className={(values) =>
+							cn(
+								"items-stretch gap-3 p-2.5 [--grid-list-item-text-active:var(--color-fg)]",
+								values.isSelected && "inset-ring-danger/60 bg-danger/8",
+							)
+						}
+						id={asset.id}
+						textValue={asset.label}
+					>
+						<AssetPreview
+							alt={asset.label}
+							className="block-20 inline-20 shrink-0 self-start overflow-hidden rounded-sm bg-muted"
+							imageClassName="object-contain"
+							kindLabelClassName="bg-bg/90"
+							mimeType={asset.mimeType}
+							src={asset.url}
+							storageKey={asset.key}
+						/>
+						<div className="flex min-inline-0 flex-1 flex-col gap-y-1">
+							<span className="line-clamp-2 wrap-break-word font-medium text-sm/tight">
+								{asset.label}
+							</span>
+							<div className="mbs-auto flex flex-col gap-y-0.5 pbs-1 text-muted-fg text-xs">
+								<span>{asset.size != null ? formatFileSize(asset.size) : t("unknown size")}</span>
+								<span className="truncate" title={asset.mimeType}>
+									{asset.mimeType}
 								</span>
-							</Checkbox>
-							<a
-								className="inline-flex items-center gap-x-1 text-muted-fg text-xs underline hover:text-fg"
-								download={true}
-								href={`/api/assets/${asset.id}/download`}
-							>
-								<DownloadIcon aria-hidden={true} className="block-3.5 inline-3.5" />
-								{t("Download")}
-							</a>
-						</li>
-					);
-				})}
-			</ul>
+								<a
+									className="mbs-0.5 inline-flex inline-fit items-center gap-x-1 underline hover:text-fg"
+									download={true}
+									href={`/api/assets/${asset.id}/download`}
+								>
+									<DownloadIcon aria-hidden={true} className="block-3.5 inline-3.5" />
+									{t("Download")}
+								</a>
+							</div>
+						</div>
+					</GridListItem>
+				)}
+			</GridList>
 
 			{totalItems > perPage ? (
 				<Paginate
@@ -199,10 +196,10 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 				}}
 			>
 				<ModalHeader
-					title={t("Delete {count} unused assets", { count: String(selected.size) })}
+					title={t("Delete {count} unused assets", { count: String(selectedIds.size) })}
 					description={t(
 						"This permanently removes {count} assets ({size}) from storage and the database. This action cannot be undone.",
-						{ count: String(selected.size), size: formatFileSize(selectedSize) },
+						{ count: String(selectedIds.size), size: formatFileSize(selectedSize) },
 					)}
 				/>
 				{error != null ? (
