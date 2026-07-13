@@ -136,7 +136,9 @@ export function EmptyContentBlocksCleanup(
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
 			>
 				<TableHeader>
-					<TableColumn id="select">{t("Select")}</TableColumn>
+					<TableColumn className="inline-px" id="select">
+						{t("Select")}
+					</TableColumn>
 					<TableColumn id="entity" isRowHeader={true}>
 						{t("Entity")}
 					</TableColumn>

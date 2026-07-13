@@ -133,8 +133,10 @@ export function UnusedSocialMediaCleanup(
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
 			>
 				<TableHeader>
-					<TableColumn id="select">{t("Select")}</TableColumn>
-					<TableColumn id="name" isRowHeader={true}>
+					<TableColumn className="inline-px" id="select">
+						{t("Select")}
+					</TableColumn>
+					<TableColumn className="max-inline-80" id="name" isRowHeader={true}>
 						{t("Name")}
 					</TableColumn>
 					<TableColumn id="type">{t("Type")}</TableColumn>
@@ -152,7 +154,11 @@ export function UnusedSocialMediaCleanup(
 									}}
 								/>
 							</TableCell>
-							<TableCell>{item.name}</TableCell>
+							<TableCell>
+								<div className="max-inline-80 truncate" title={item.name}>
+									{item.name}
+								</div>
+							</TableCell>
 							<TableCell>{humanizeType(item.type)}</TableCell>
 							<TableCell>
 								<Link className="underline" href={item.url} target="_blank">
