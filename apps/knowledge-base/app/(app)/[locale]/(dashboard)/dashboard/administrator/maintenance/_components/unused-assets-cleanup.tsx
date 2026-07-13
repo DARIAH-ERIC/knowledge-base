@@ -147,7 +147,7 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 					>
 						<AssetPreview
 							alt={asset.label}
-							className="block-20 inline-20 shrink-0 self-start overflow-hidden rounded-sm bg-muted"
+							className="block-32 inline-32 shrink-0 self-start overflow-hidden rounded-sm bg-muted"
 							imageClassName="object-contain"
 							kindLabelClassName="bg-bg/90"
 							mimeType={asset.mimeType}

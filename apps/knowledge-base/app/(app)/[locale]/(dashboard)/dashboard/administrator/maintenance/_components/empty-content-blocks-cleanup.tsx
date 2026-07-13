@@ -146,7 +146,7 @@ export function EmptyContentBlocksCleanup(
 					<TableColumn id="field">{t("Field")}</TableColumn>
 					<TableColumn id="status">{t("Status")}</TableColumn>
 				</TableHeader>
-				<TableBody items={pageItems}>
+				<TableBody dependencies={[selected]} items={pageItems}>
 					{(block) => {
 						const href = getEntityDetailHref({
 							entityType: block.entityType,

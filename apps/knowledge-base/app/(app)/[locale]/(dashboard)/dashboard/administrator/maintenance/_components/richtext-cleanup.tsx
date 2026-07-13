@@ -142,7 +142,7 @@ export function RichTextCleanup(props: Readonly<RichTextCleanupProps>): ReactNod
 					<TableColumn id="block">{t("Block")}</TableColumn>
 					<TableColumn id="status">{t("Status")}</TableColumn>
 				</TableHeader>
-				<TableBody items={pageItems}>
+				<TableBody dependencies={[selected]} items={pageItems}>
 					{(block) => {
 						const href = getEntityDetailHref({
 							entityType: block.entityType,
