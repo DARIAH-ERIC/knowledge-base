@@ -7,7 +7,7 @@ import { EricDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/administ
 import { publishEricAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_lib/publish-eric.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { resolveCalculatedValuesInContentBlocks } from "@/lib/content-blocks-service";
+import { resolvePlaceholderValuesInContentBlocks } from "@/lib/content-blocks-service";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
 import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { getEricReverseRelationGroups } from "@/lib/data/eric";
@@ -84,7 +84,7 @@ export default async function DashboardAdministratorEricDetailsPage(
 		unit: eric,
 	} = ericData;
 
-	const descriptionContentBlocks = await resolveCalculatedValuesInContentBlocks(
+	const descriptionContentBlocks = await resolvePlaceholderValuesInContentBlocks(
 		eric.descriptionContentBlocks,
 	);
 

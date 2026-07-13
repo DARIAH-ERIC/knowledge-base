@@ -7,7 +7,7 @@ import { CountryDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/admin
 import { publishCountryAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/publish-country.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { resolveCalculatedValuesInContentBlocks } from "@/lib/content-blocks-service";
+import { resolvePlaceholderValuesInContentBlocks } from "@/lib/content-blocks-service";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
 import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { getPersonRelations } from "@/lib/data/person-relations";
@@ -89,7 +89,7 @@ export default async function DashboardAdministratorCountryDetailsPage(
 		unit: country,
 	} = countryData;
 
-	const descriptionContentBlocks = await resolveCalculatedValuesInContentBlocks(
+	const descriptionContentBlocks = await resolvePlaceholderValuesInContentBlocks(
 		country.descriptionContentBlocks,
 	);
 

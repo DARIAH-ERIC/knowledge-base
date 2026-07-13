@@ -1,4 +1,4 @@
-import { formatCalculatedValue } from "@dariah-eric/database/calculated-values";
+import { formatPlaceholderValue } from "@dariah-eric/database/placeholder-values";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === "object";
@@ -36,10 +36,10 @@ function visit(node: unknown, parts: Array<string>) {
 		return;
 	}
 
-	if (node.type === "calculatedValue" && isRecord(node.attrs)) {
+	if (node.type === "placeholderValue" && isRecord(node.attrs)) {
 		// Annotated nodes flatten to their resolved value so it is searchable; raw references fall
 		// back to the display label.
-		const resolved = formatCalculatedValue(node.attrs);
+		const resolved = formatPlaceholderValue(node.attrs);
 		const label = node.attrs.label ?? node.attrs.kind;
 		const text = resolved ?? (typeof label === "string" ? label : null);
 		if (text != null) {

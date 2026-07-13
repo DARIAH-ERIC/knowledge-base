@@ -25,11 +25,11 @@ export type WebhookEntityType =
 	| "working-groups";
 
 /**
- * Mutations dispatching these types change membership/working-group data, which calculated-value
+ * Mutations dispatching these types change membership/working-group data, which placeholder-value
  * nodes embedded in other pages' richtext render. Those pages must be revalidated too, even though
  * their own content did not change.
  */
-const calculatedValueAffectingTypes = new Set<WebhookEntityType>([
+const placeholderValueAffectingTypes = new Set<WebhookEntityType>([
 	"members-partners",
 	"working-groups",
 ]);
@@ -51,9 +51,9 @@ const webhookTypesByEntityType: Partial<
 	organisational_units: ["members-partners", "working-groups"],
 };
 
-/** Website route groups whose published content embeds calculated-value nodes. */
-async function getCalculatedValueEmbeddingWebhookTypes(): Promise<Set<WebhookEntityType>> {
-	const marker = '%"calculatedValue"%';
+/** Website route groups whose published content embeds placeholder-value nodes. */
+async function getPlaceholderValueEmbeddingWebhookTypes(): Promise<Set<WebhookEntityType>> {
+	const marker = '%"placeholderValue"%';
 
 	const rows = await db
 		.selectDistinct({ type: schema.entityTypes.type })
@@ -126,17 +126,17 @@ export async function dispatchWebhook(payload: { type: WebhookEntityType }): Pro
 
 	await send(payload.type);
 
-	if (!calculatedValueAffectingTypes.has(payload.type)) {
+	if (!placeholderValueAffectingTypes.has(payload.type)) {
 		return;
 	}
 
 	try {
-		const embeddingTypes = await getCalculatedValueEmbeddingWebhookTypes();
+		const embeddingTypes = await getPlaceholderValueEmbeddingWebhookTypes();
 		embeddingTypes.delete(payload.type);
 		for (const type of embeddingTypes) {
 			await send(type);
 		}
 	} catch (error) {
-		log.error("[revalidation webhook] calculated-value scan failed", error);
+		log.error("[revalidation webhook] placeholder-value scan failed", error);
 	}
 }

@@ -1,8 +1,8 @@
 import {
-	annotateCalculatedValues,
-	collectCalculatedValueKinds,
-} from "@dariah-eric/database/calculated-values";
-import { getCalculatedValues } from "@dariah-eric/database/calculated-values-service";
+	annotatePlaceholderValues,
+	collectPlaceholderValueKinds,
+} from "@dariah-eric/database/placeholder-values";
+import { getPlaceholderValues } from "@dariah-eric/database/placeholder-values-service";
 import { isEmptyRichTextDocument } from "@dariah-eric/database/rich-text";
 import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
@@ -555,29 +555,29 @@ export async function getEntityContentBlocks(
 }
 
 /**
- * Annotates calculated-value nodes in already-loaded content blocks with their current data (a
+ * Annotates placeholder-value nodes in already-loaded content blocks with their current data (a
  * `value` attribute the renderers format). Use on read-only views (details pages); edit screens
  * must keep the raw nodes so editors see and can remove the reference chips.
  */
-export async function resolveCalculatedValuesInContentBlocks(
+export async function resolvePlaceholderValuesInContentBlocks(
 	blocks: Array<ContentBlock>,
 ): Promise<Array<ContentBlock>> {
-	const kinds = collectCalculatedValueKinds(blocks);
+	const kinds = collectPlaceholderValueKinds(blocks);
 	if (kinds.size === 0) {
 		return blocks;
 	}
 
-	const values = await getCalculatedValues(db, kinds);
+	const values = await getPlaceholderValues(db, kinds);
 
-	return annotateCalculatedValues(blocks, values);
+	return annotatePlaceholderValues(blocks, values);
 }
 
-/** `getEntityContentBlocks` with calculated-value nodes substituted by their current values. */
+/** `getEntityContentBlocks` with placeholder-value nodes substituted by their current values. */
 export async function getResolvedEntityContentBlocks(
 	entityVersionId: string,
 	fieldName?: string,
 ): Promise<Array<ContentBlock>> {
 	const blocks = await getEntityContentBlocks(entityVersionId, fieldName);
 
-	return resolveCalculatedValuesInContentBlocks(blocks);
+	return resolvePlaceholderValuesInContentBlocks(blocks);
 }
