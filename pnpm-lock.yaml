@@ -1415,6 +1415,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@24.13.2)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(happy-dom@20.9.0)(vite@8.1.0(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))
 
   packages/email:
     devDependencies:
@@ -2039,6 +2042,39 @@ importers:
       unified:
         specifier: 'catalog:'
         version: 11.0.5
+      valibot:
+        specifier: 'catalog:'
+        version: 1.4.1(typescript@6.0.3)
+
+  scripts/maintenance:
+    devDependencies:
+      '@acdh-oeaw/lib':
+        specifier: 'catalog:'
+        version: 1.0.7
+      '@dariah-eric/configs':
+        specifier: workspace:^
+        version: link:../../packages/configs
+      '@dariah-eric/database':
+        specifier: workspace:^
+        version: link:../../packages/database
+      '@dariah-eric/env':
+        specifier: workspace:^
+        version: link:../../packages/env
+      '@dariah-eric/storage':
+        specifier: workspace:^
+        version: link:../../packages/storage
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.13.2
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.22.0)(valibot@1.4.1(typescript@6.0.3))(zod@4.4.3)
+      tsx:
+        specifier: 'catalog:'
+        version: 4.22.4
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
       valibot:
         specifier: 'catalog:'
         version: 1.4.1(typescript@6.0.3)

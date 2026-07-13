@@ -5,9 +5,6 @@
 	"type": "module",
 	"sideEffects": false,
 	"scripts": {
-		"data:audit:unused-assets": "tsx ./scripts/audit-unused-assets.ts",
-		"data:audit:unused-social-media": "tsx ./scripts/audit-unused-social-media.ts",
-		"data:clean:empty-content-blocks": "tsx ./scripts/clean-empty-content-blocks.ts",
 		"data:clean:wordpress": "tsx ./scripts/clean-wordpress-content.ts",
 		"data:migrate:clamp-image-resolution": "tsx ./scripts/clamp-image-resolution.ts",
 		"data:migrate:get-unr-schema": "drizzle-kit introspect --config=./config/unr-db.config.ts",

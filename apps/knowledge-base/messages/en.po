@@ -682,6 +682,7 @@ msgstr "Forgot password?"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:59
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:99
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx:108
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:134
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-details.tsx:101
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:97
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:73
@@ -839,7 +840,7 @@ msgid "sq1btl"
 msgstr "Caption"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/command-palette.tsx:120
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:454
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:460
 msgid "1QGkRH"
 msgstr "Quick search..."
 
@@ -992,6 +993,10 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx:619
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:533
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:503
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:207
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:204
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:197
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:190
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx:456
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:425
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:391
@@ -1061,8 +1066,8 @@ msgid "X6ruKu"
 msgstr "Data type"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:879
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:222
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:223
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:228
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:229
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav.tsx:24
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx:231
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx:360
@@ -1078,15 +1083,15 @@ msgid "ZvKSfJ"
 msgstr "Events"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:880
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:258
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:259
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:264
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:265
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:74
 msgid "NZyhSX"
 msgstr "News"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:881
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:264
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:265
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:270
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:271
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:81
 msgid "zB5VYc"
 msgstr "Opportunities"
@@ -1096,22 +1101,22 @@ msgid "5+5Dw/"
 msgstr "Funding calls"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:883
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:270
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:271
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:276
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:277
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:74
 msgid "CxfKLC"
 msgstr "Pages"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:884
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:276
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:277
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:282
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:283
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:81
 msgid "FZzBJD"
 msgstr "Spotlight articles"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:885
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:240
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:241
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:246
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:247
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:81
 msgid "99bd1b"
 msgstr "Impact case studies"
@@ -1153,6 +1158,7 @@ msgstr "selected"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1012
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1231
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx:170
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:137
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:55
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:396
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:59
@@ -1297,6 +1303,9 @@ msgstr "Role"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:300
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx:111
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:135
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:130
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:136
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx:276
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:402
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:71
@@ -1619,6 +1628,9 @@ msgstr "This will permanently delete this contribution."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:362
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:141
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx:153
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:209
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:199
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:192
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:142
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:135
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx:344
@@ -1645,8 +1657,8 @@ msgstr "Delete"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-breadcrumbs.tsx:56
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:101
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:470
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:473
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:476
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:479
 msgid "hzSNj4"
 msgstr "Dashboard"
 
@@ -1685,15 +1697,15 @@ msgstr "Administration"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:54
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:55
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:90
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:91
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:204
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:205
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:289
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:290
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:321
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:322
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:466
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:96
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:97
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:210
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:211
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:295
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:296
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:327
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:328
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:472
 msgid "9uOFF3"
 msgstr "Overview"
 
@@ -1721,21 +1733,28 @@ msgstr "Newsletters"
 msgid "YDMrKK"
 msgstr "Users"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:86
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:84
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:85
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:81
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:86
+msgid "dudqv/"
+msgstr "Maintenance"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/(index)/page.tsx:23
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/(index)/page.tsx:36
 msgid "jRwo0w"
 msgstr "Organisation & governance"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:96
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:97
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:102
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:103
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-form.tsx:211
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-page.tsx:37
 msgid "2U1Oi0"
 msgstr "DARIAH ERIC"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:102
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:103
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:108
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:109
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:83
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx:80
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-edit-form.tsx:82
@@ -1744,8 +1763,8 @@ msgstr "DARIAH ERIC"
 msgid "aMwxYb"
 msgstr "Countries"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:108
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:109
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:114
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:115
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx:83
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-edit-form.tsx:85
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-edit-form.tsx:176
@@ -1753,8 +1772,8 @@ msgstr "Countries"
 msgid "0P1TrU"
 msgstr "Governance bodies"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:114
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:115
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:120
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:121
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-edit-form.tsx:108
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-edit-form.tsx:164
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx:81
@@ -1771,32 +1790,32 @@ msgstr "Governance bodies"
 msgid "/XO6LE"
 msgstr "Institutions"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:120
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:121
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:127
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:264
 msgid "iMuuQx"
 msgstr "Institution relations"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:126
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:127
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:132
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:133
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:79
 msgid "TLU3vQ"
 msgstr "National consortia"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:132
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:133
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:138
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:139
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:72
 msgid "JZnNTW"
 msgstr "Persons"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:138
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:139
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:144
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:145
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:283
 msgid "4osOBY"
 msgstr "Person relations"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:144
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:145
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:150
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:151
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-projects-section.tsx:200
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-details.tsx:253
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-edit-form.tsx:105
@@ -1806,27 +1825,27 @@ msgstr "Person relations"
 msgid "UxTJRa"
 msgstr "Projects"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:150
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:151
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:156
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:157
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx:240
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-edit-form.tsx:95
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:207
 msgid "j4CVWS"
 msgstr "Project partners"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:156
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:157
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:162
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:163
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx:90
 msgid "Vbf9fF"
 msgstr "Internal Services"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:162
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:163
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:168
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:169
 msgid "47oxNf"
 msgstr "SSHOC Services"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:168
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:169
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:174
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:175
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx:118
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx:121
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:151
@@ -1844,8 +1863,8 @@ msgstr "SSHOC Services"
 msgid "ZEEVQX"
 msgstr "Social media"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:174
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:175
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:180
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:181
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx:82
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-edit-form.tsx:84
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-edit-form.tsx:160
@@ -1853,23 +1872,23 @@ msgstr "Social media"
 msgid "S+6JuP"
 msgstr "Working groups"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:182
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:188
 msgid "tLYOnZ"
 msgstr "Knowledge base"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:186
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:187
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:192
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:193
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-pages-page.tsx:65
 msgid "HI4eh/"
 msgstr "Internal pages"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:192
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:193
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:198
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:199
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:78
 msgid "Nz7d4t"
 msgstr "Documentation pages"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:200
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:206
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-social-media-amounts-form.tsx:44
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:91
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:135
@@ -1878,64 +1897,64 @@ msgstr "Documentation pages"
 msgid "JkLHGw"
 msgstr "Website"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:210
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:211
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:216
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:217
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:77
 msgid "d1uESJ"
 msgstr "Assets"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:216
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:217
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:222
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:223
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:307
 msgid "aswkXQ"
 msgstr "Documents and policies"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:228
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:229
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:234
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:235
 #: app/(app)/[locale]/(dashboard)/dashboard/website/featured/page.tsx:62
 msgid "sRmJJM"
 msgstr "Featured items"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:234
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:235
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:240
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:241
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:79
 msgid "5F/Zdm"
 msgstr "Funding Calls"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:246
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:247
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:252
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:253
 msgid "8Q504V"
 msgstr "Metadata"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:252
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:253
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:258
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:259
 msgid "fBg+7V"
 msgstr "Navigation"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:284
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:290
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/reporting-overview-page.tsx:72
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx:64
 msgid "reFEEC"
 msgstr "Reporting"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:295
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:296
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:301
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:302
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx:40
 msgid "pYj07u"
 msgstr "Reporting campaigns"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:301
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:302
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:307
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:308
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx:133
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx:45
 msgid "H3eDAS"
 msgstr "Statistics"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:307
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:308
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:327
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:328
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:313
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:314
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:333
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:334
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:91
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx:217
@@ -1947,10 +1966,10 @@ msgstr "Statistics"
 msgid "yOdVub"
 msgstr "Country reports"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:313
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:314
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:333
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:334
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:319
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:320
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:339
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:340
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx:279
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:70
@@ -1961,16 +1980,16 @@ msgstr "Country reports"
 msgid "2k5El8"
 msgstr "Working group reports"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:351
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:352
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:357
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:358
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-details.tsx:252
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:195
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/(index)/page.tsx:23
 msgid "cVwexr"
 msgstr "National consortium"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:366
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:367
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:372
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:373
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-edit-form.tsx:161
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form.tsx:84
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-edit-form.tsx:56
@@ -1980,7 +1999,7 @@ msgstr "National consortium"
 msgid "OFTO7O"
 msgstr "Working group"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:439
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:445
 msgid "ShOrju"
 msgstr "Open quick search"
 
@@ -2204,6 +2223,9 @@ msgstr "Media library"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:316
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:570
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:131
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:132
 msgid "kQAf2d"
 msgstr "Select"
 
@@ -2310,7 +2332,7 @@ msgstr "People"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:313
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:423
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:429
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:235
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:112
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:172
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:179
@@ -2516,7 +2538,7 @@ msgstr "ROR"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-details.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:119
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:137
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:101
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-details.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:138
@@ -2679,6 +2701,8 @@ msgstr "Relations"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:62
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx:114
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:137
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:133
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:103
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:56
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:98
@@ -3805,121 +3829,338 @@ msgstr "Administrator dashboard - New internal service"
 msgid "mfP4EN"
 msgstr "Administrator dashboard - Internal Services"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:80
-msgid "2wsjxR"
-msgstr "ongoing"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:93
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:58
 msgid "2KtWqT"
 msgstr "Internal"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:94
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:59
 msgid "5g+82s"
 msgstr "Internal diagnostics for administrators."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:98
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:63
 msgid "hIVSGF"
 msgstr "Internal diagnostics"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:99
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:127
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:64
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:91
 msgid "ED9RG5"
 msgstr "Audit log"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:100
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:168
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:65
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:132
 msgid "0klKKn"
 msgstr "Expensive queries"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:101
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:230
-msgid "NLbnpZ"
-msgstr "Data integrity"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:107
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:71
 msgid "QinKCt"
 msgstr "Filter by action"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:116
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:80
 msgid "jK9a9x"
 msgstr "All actions"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:132
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:96
 msgid "ug01Mk"
 msgstr "Time"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:134
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:98
 msgid "CHXoWz"
 msgstr "Actor"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:135
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:99
 msgid "QlsDcr"
 msgstr "Action"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:136
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:100
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:50
 msgid "LLtKhp"
 msgstr "Subject"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:139
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:103
 msgid "Je3HwC"
 msgstr "No audit log entries."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:173
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:137
 msgid "qj71j1"
 msgstr "Query"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:175
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:139
 msgid "fQFNOL"
 msgstr "Calls"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:176
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:140
 msgid "QsSili"
 msgstr "Total time (ms)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:177
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:141
 msgid "uG15p0"
 msgstr "Mean time (ms)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:178
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:142
 msgid "4lbK5K"
 msgstr "Rows"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:184
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:148
 msgid "8XPIPe"
 msgstr "No statements recorded yet."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:207
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:171
 msgid "5L04Xa"
 msgstr "The pg_stat_statements extension is not enabled on this database. Enable it via shared_preload_libraries in the Postgres configuration to see query statistics."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:216
-msgid "YlkJms"
-msgstr "Relations which must be entered twice, e.g. a national coordinator must also be a member of the General Assembly for the same period. Same checks as the data:audit:derived-relations script."
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/page.tsx:42
+msgid "Oo2iPN"
+msgstr "Administrator dashboard - Internal"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:237
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:79
+msgid "mt0whq"
+msgstr "Could not delete the selected content blocks. Please try again."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:88
+msgid "UGpGaL"
+msgstr "Deleted {count} empty content blocks."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:89
+msgid "9t2r4W"
+msgstr "No empty content blocks found."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:98
+msgid "aGsOhv"
+msgstr "{count} empty content blocks"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:109
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:110
+msgid "AXmzdg"
+msgstr "Delete selected ({count})"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:110
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:107
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:111
+msgid "ELsv+o"
+msgstr "Delete selected"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:120
+msgid "Q78rFv"
+msgstr "{skipped} blocks were skipped (no longer empty)."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:127
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:187
+msgid "F0fEMW"
+msgstr "Empty content blocks"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:133
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:128
+msgid "UfO190"
+msgstr "Entity"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:136
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:131
+msgid "AbvQFb"
+msgstr "Field"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:155
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:151
+msgid "UsIAum"
+msgstr "Select this block"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:189
+msgid "S0dOZ4"
+msgstr "Delete {count} empty content blocks"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:190
+msgid "RQZLUJ"
+msgstr "This permanently removes {count} empty rich-text blocks from their entities. This action cannot be undone."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:68
+msgid "2wsjxR"
+msgstr "ongoing"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:82
+msgid "6EvqZu"
+msgstr "Data-integrity checks and cleanup actions for administrators."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:87
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:107
+msgid "NLbnpZ"
+msgstr "Data integrity"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:88
+msgid "XslFtA"
+msgstr "Cleanup"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:93
+msgid "cK2jEA"
+msgstr "Pairs of relations which must always be recorded together, e.g. a national representative must also be a member of the General Assembly for the same period."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:114
 msgid "ryAzxy"
 msgstr "Issue"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:238
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:115
 msgid "4aal2m"
 msgstr "Detail"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:239
-msgid "JgfmLJ"
-msgstr "Source periods"
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:116
+msgid "6XETNf"
+msgstr "Periods"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:240
-msgid "2SwFh6"
-msgstr "Derived periods"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:249
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:125
 msgid "19AjgC"
 msgstr "No data-integrity issues found."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/page.tsx:43
-msgid "Oo2iPN"
-msgstr "Administrator dashboard - Internal"
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:174
+msgid "eUKwKz"
+msgstr "Unused assets"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:176
+msgid "ZzEr58"
+msgstr "Assets (images) which are not referenced by any record or embedded in any rich-text field. Review and select the ones to permanently remove from storage and the database."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:189
+msgid "6qo9NM"
+msgstr "Rich-text content blocks with no meaningful content (empty paragraphs, stray line breaks). Review and select the ones to remove from their entities."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:200
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:128
+msgid "83nm5m"
+msgstr "Unused social media"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:202
+msgid "QbAq9u"
+msgstr "Social-media entries not linked to any project, organisational unit, service, or report. Review and select the ones to permanently remove from the database."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:213
+msgid "JEU8B5"
+msgstr "Rich-text normalisation"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:215
+msgid "p1NYmD"
+msgstr "Content blocks whose rich text can be tidied: empty paragraphs, stray line breaks, non-breaking spaces, imported HTML attributes, and bold headings. Review and select the ones to rewrite."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:74
+msgid "XW27V3"
+msgstr "Could not normalise the selected content blocks. Please try again."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:83
+msgid "tfbWba"
+msgstr "Normalised {count} content blocks."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:84
+msgid "DJ6qDO"
+msgstr "No rich-text content needs normalising."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:93
+msgid "OIt6A/"
+msgstr "{count} content blocks to normalise"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:104
+msgid "sodunc"
+msgstr "Normalise selected ({count})"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:105
+msgid "1Xnlv0"
+msgstr "Normalise selected"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:115
+msgid "V4L0tb"
+msgstr "{skipped} blocks were skipped (no longer changed)."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:122
+msgid "IZNXIG"
+msgstr "Rich-text to normalise"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:132
+msgid "Up5U7K"
+msgstr "Block"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:186
+msgid "jQt8+7"
+msgstr "Normalise {count} content blocks"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:187
+msgid "UZ9vgC"
+msgstr "This rewrites the rich text of {count} content blocks to remove empty paragraphs, stray line breaks, non-breaking spaces, imported HTML attributes, and bold headings. This action cannot be undone."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:206
+msgid "yN9OFd"
+msgstr "Normalise"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:67
+msgid "oCzyFL"
+msgstr "Could not delete the selected assets. Please try again."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:76
+msgid "EM6orA"
+msgstr "Deleted {count} unused assets, reclaiming {size}."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:80
+msgid "xmzkws"
+msgstr "No unused assets found."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:89
+msgid "7vxT7w"
+msgstr "{count} unused assets · {size} reclaimable"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:103
+msgid "P66Q2h"
+msgstr "Delete selected ({count}) · {size}"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:117
+msgid "NQePyT"
+msgstr "{skipped} assets were skipped (no longer unused) and {failed} could not be removed from storage."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:153
+msgid "FRVN+N"
+msgstr "unknown size"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:163
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:230
+msgid "5q3qC0"
+msgstr "Download"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:179
+msgid "YBqMhH"
+msgstr "Delete {count} unused assets"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:180
+msgid "qZQETl"
+msgstr "This permanently removes {count} assets ({size}) from storage and the database. This action cannot be undone."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:78
+msgid "Bb2tkT"
+msgstr "Could not delete the selected social-media entries. Please try again."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:87
+msgid "fwqSig"
+msgstr "Deleted {count} unused social-media entries."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:90
+msgid "tiiLB4"
+msgstr "No unused social-media entries found."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:99
+msgid "r2s5Pg"
+msgstr "{count} unused social-media entries"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:121
+msgid "dwXvCF"
+msgstr "{skipped} entries were skipped (no longer unused)."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:144
+msgid "B3wlOH"
+msgstr "Select this entry"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:172
+msgid "chZ5Al"
+msgstr "Delete {count} unused social-media entries"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:173
+msgid "E3PgoW"
+msgstr "This permanently removes {count} social-media entries from the database. This action cannot be undone."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/page.tsx:24
+msgid "bXXV4t"
+msgstr "Administrator dashboard - Maintenance"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:80
 msgid "wod28x"
@@ -5806,10 +6047,6 @@ msgstr "No images match your filters."
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:137
 msgid "vC8XBw"
 msgstr "No images found. Upload one to get started."
-
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:230
-msgid "5q3qC0"
-msgstr "Download"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:74
 msgid "4GyDYS"

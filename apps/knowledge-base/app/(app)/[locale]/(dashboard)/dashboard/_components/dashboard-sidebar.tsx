@@ -79,6 +79,12 @@ export function useSidebarMenu(
 				label: t("Users"),
 				icon: <ListBulletIcon />,
 			},
+			{
+				href: "/dashboard/administrator/maintenance",
+				tooltip: t("Maintenance"),
+				label: t("Maintenance"),
+				icon: <ListBulletIcon />,
+			},
 		],
 	};
 
