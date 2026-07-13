@@ -42,3 +42,17 @@ pnpm --filter @dariah-eric/maintenance run data:clean:empty-content-blocks -- --
 
 The empty set is recomputed at deletion time, so a block edited to have content since the report is
 protected. Only the database is touched (needs the `DATABASE_*` env vars).
+
+### `data:clean:unused-social-media`
+
+Finds social-media entries not referenced by any project, organisational unit, service, or report
+(referencing columns discovered from the Postgres catalog). Social-media rows are only ever linked by
+id, so a foreign-key check is exhaustive. Writes a TSV report to `.cache/unused-social-media.tsv`.
+
+```bash
+pnpm --filter @dariah-eric/maintenance run data:clean:unused-social-media            # dry run
+pnpm --filter @dariah-eric/maintenance run data:clean:unused-social-media -- --apply # delete
+```
+
+The unused set is recomputed at deletion time. Only the database is touched (needs the `DATABASE_*`
+env vars).

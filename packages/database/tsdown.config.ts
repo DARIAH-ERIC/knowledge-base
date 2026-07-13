@@ -10,6 +10,7 @@ export default defineConfig({
 		"./lib/placeholder-values-service.ts",
 		"./lib/client.ts",
 		"./lib/content-block-cleanup-service.ts",
+		"./lib/social-media-cleanup-service.ts",
 		"./lib/errors.ts",
 		"./lib/image-captions.ts",
 		"./lib/integrity-service.ts",

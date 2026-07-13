@@ -18,6 +18,7 @@ import type { Key } from "react-aria-components";
 import { EntityListHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { EmptyContentBlocksCleanup } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup";
 import { UnusedAssetsCleanup } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup";
+import { UnusedSocialMediaCleanup } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup";
 import type { UnusedAssetsPreviewResult } from "@/lib/data/asset-cleanup";
 import type { EmptyContentBlocksResult } from "@/lib/data/content-block-cleanup";
 import type {
@@ -25,12 +26,14 @@ import type {
 	PairedRelationFindingKind,
 	RelationInterval,
 } from "@/lib/data/data-integrity";
+import type { UnusedSocialMediaResult } from "@/lib/data/social-media-cleanup";
 import { getEntityDetailHref } from "@/lib/entity-detail-href";
 
 interface MaintenanceDashboardProps {
 	emptyContentBlocks: EmptyContentBlocksResult;
 	integrity: PairedRelationCheckResult;
 	unusedAssets: UnusedAssetsPreviewResult;
+	unusedSocialMedia: UnusedSocialMediaResult;
 }
 
 function humanizeKind(kind: string): string {
@@ -43,7 +46,7 @@ const findingKindBadgeIntents: Record<PairedRelationFindingKind, "amber" | "rose
 };
 
 export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>): ReactNode {
-	const { emptyContentBlocks, integrity, unusedAssets } = props;
+	const { emptyContentBlocks, integrity, unusedAssets, unusedSocialMedia } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -187,6 +190,19 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</div>
 
 						<EmptyContentBlocksCleanup blocks={emptyContentBlocks.blocks} />
+					</section>
+
+					<section className="flex flex-col gap-y-(--layout-padding)">
+						<div className="flex flex-col gap-y-1">
+							<h3 className="font-medium text-sm">{t("Unused social media")}</h3>
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Social-media entries not linked to any project, organisational unit, service, or report. Review and select the ones to permanently remove from the database.",
+								)}
+							</p>
+						</div>
+
+						<UnusedSocialMediaCleanup items={unusedSocialMedia.items} />
 					</section>
 				</TabPanel>
 			</Tabs>

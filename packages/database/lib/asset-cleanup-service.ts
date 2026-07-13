@@ -1,5 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 
+import { type CatalogColumn, getReferencedIds, qualifiedTable } from "./cleanup-references";
 import type { Database, Transaction } from "./index";
 import * as schema from "./schema";
 
@@ -38,37 +39,6 @@ export interface UnusedAssetsResult {
 	totalSize: number;
 }
 
-interface CatalogColumn {
-	schema: string;
-	table: string;
-	column: string;
-}
-
-/** Columns holding a foreign key that references `assets.id`. */
-async function getAssetForeignKeyColumns(
-	db: Database | Transaction,
-): Promise<Array<CatalogColumn>> {
-	const result = await db.execute<{
-		schema_name: string;
-		table_name: string;
-		column_name: string;
-	}>(sql`
-		select
-			n.nspname as schema_name,
-			cl.relname as table_name,
-			a.attname as column_name
-		from pg_constraint c
-		join pg_class cl on cl.oid = c.conrelid
-		join pg_namespace n on n.oid = cl.relnamespace
-		join pg_attribute a on a.attrelid = c.conrelid and a.attnum = any(c.conkey)
-		where c.confrelid = 'assets'::regclass and c.contype = 'f'
-	`);
-
-	return result.rows.map((row) => {
-		return { schema: row.schema_name, table: row.table_name, column: row.column_name };
-	});
-}
-
 /**
  * All `jsonb` columns in user schemas, which is where rich-text (and thus embedded asset keys)
  * live.
@@ -88,32 +58,6 @@ async function getJsonbColumns(db: Database | Transaction): Promise<Array<Catalo
 	return result.rows.map((row) => {
 		return { schema: row.table_schema, table: row.table_name, column: row.column_name };
 	});
-}
-
-function qualifiedColumn(column: CatalogColumn) {
-	return sql`${sql.identifier(column.schema)}.${sql.identifier(column.table)}.${sql.identifier(column.column)}`;
-}
-
-function qualifiedTable(column: CatalogColumn) {
-	return sql`${sql.identifier(column.schema)}.${sql.identifier(column.table)}`;
-}
-
-/** Set of `assets.id` values referenced by any foreign key. */
-async function getReferencedAssetIds(db: Database | Transaction): Promise<Set<string>> {
-	const columns = await getAssetForeignKeyColumns(db);
-
-	if (columns.length === 0) {
-		return new Set();
-	}
-
-	const selects = columns.map(
-		(column) =>
-			sql`select ${qualifiedColumn(column)}::text as id from ${qualifiedTable(column)} where ${qualifiedColumn(column)} is not null`,
-	);
-
-	const result = await db.execute<{ id: string }>(sql.join(selects, sql` union `));
-
-	return new Set(result.rows.map((row) => row.id));
 }
 
 /**
@@ -164,7 +108,7 @@ async function getKeysEmbeddedInRichText(
 }
 
 export async function findUnusedAssets(db: Database | Transaction): Promise<UnusedAssetsResult> {
-	const referencedIds = await getReferencedAssetIds(db);
+	const referencedIds = await getReferencedIds(db, "assets");
 
 	const allAssets = await db.execute<{
 		id: string;

@@ -8,6 +8,7 @@ import { assertAdminPageAccess } from "@/lib/auth/session";
 import { getUnusedAssets } from "@/lib/data/asset-cleanup";
 import { getEmptyContentBlocks } from "@/lib/data/content-block-cleanup";
 import { getDataIntegrityFindings } from "@/lib/data/data-integrity";
+import { getUnusedSocialMedia } from "@/lib/data/social-media-cleanup";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorMaintenancePageProps extends PageProps<"/[locale]/dashboard/administrator/maintenance"> {}
@@ -30,10 +31,11 @@ export default async function DashboardAdministratorMaintenancePage(
 ): Promise<ReactNode> {
 	await assertAdminPageAccess();
 
-	const [integrity, unusedAssets, emptyContentBlocks] = await Promise.all([
+	const [integrity, unusedAssets, emptyContentBlocks, unusedSocialMedia] = await Promise.all([
 		getDataIntegrityFindings(),
 		getUnusedAssets({ imageUrlOptions: imageGridOptions }),
 		getEmptyContentBlocks(),
+		getUnusedSocialMedia(),
 	]);
 
 	return (
@@ -41,6 +43,7 @@ export default async function DashboardAdministratorMaintenancePage(
 			emptyContentBlocks={emptyContentBlocks}
 			integrity={integrity}
 			unusedAssets={unusedAssets}
+			unusedSocialMedia={unusedSocialMedia}
 		/>
 	);
 }

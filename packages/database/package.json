@@ -16,6 +16,7 @@
 		"./placeholder-values-service": "./dist/placeholder-values-service.mjs",
 		"./client": "./dist/client.mjs",
 		"./content-block-cleanup-service": "./dist/content-block-cleanup-service.mjs",
+		"./social-media-cleanup-service": "./dist/social-media-cleanup-service.mjs",
 		"./errors": "./dist/errors.mjs",
 		"./image-captions": "./dist/image-captions.mjs",
 		"./integrity-service": "./dist/integrity-service.mjs",
