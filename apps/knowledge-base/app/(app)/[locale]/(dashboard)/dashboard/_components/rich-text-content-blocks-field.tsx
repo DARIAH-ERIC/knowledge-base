@@ -5,10 +5,10 @@ import type { JSONContent } from "@tiptap/core";
 import { ImageIcon, InfoIcon, MousePointerClickIcon } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 
-import { CalculatedValueInsertMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/calculated-value-insert-menu";
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import { PlaceholderValueInsertMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/placeholder-value-insert-menu";
 import { mergeBlocksToDocument, splitDocumentToBlocks } from "@/lib/content-blocks-document";
 
 type MergeableContentBlock = Extract<
@@ -77,8 +77,8 @@ export function RichTextContentBlocksField({
 						onClick={insertCallout}
 					/>
 				)}
-				renderCalculatedValueInsert={(insertCalculatedValue) => (
-					<CalculatedValueInsertMenu onInsert={insertCalculatedValue} />
+				renderPlaceholderValueInsert={(insertPlaceholderValue) => (
+					<PlaceholderValueInsertMenu onInsert={insertPlaceholderValue} />
 				)}
 				renderImagePicker={renderImagePicker}
 			/>

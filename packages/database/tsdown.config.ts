@@ -6,8 +6,8 @@ export default defineConfig({
 	entry: [
 		"./lib/index.ts",
 		"./lib/asset-cleanup-service.ts",
-		"./lib/calculated-values.ts",
-		"./lib/calculated-values-service.ts",
+		"./lib/placeholder-values.ts",
+		"./lib/placeholder-values-service.ts",
 		"./lib/client.ts",
 		"./lib/content-block-cleanup-service.ts",
 		"./lib/errors.ts",

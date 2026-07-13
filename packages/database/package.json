@@ -12,8 +12,8 @@
 	"exports": {
 		".": "./dist/index.mjs",
 		"./asset-cleanup-service": "./dist/asset-cleanup-service.mjs",
-		"./calculated-values": "./dist/calculated-values.mjs",
-		"./calculated-values-service": "./dist/calculated-values-service.mjs",
+		"./placeholder-values": "./dist/placeholder-values.mjs",
+		"./placeholder-values-service": "./dist/placeholder-values-service.mjs",
 		"./client": "./dist/client.mjs",
 		"./content-block-cleanup-service": "./dist/content-block-cleanup-service.mjs",
 		"./errors": "./dist/errors.mjs",
