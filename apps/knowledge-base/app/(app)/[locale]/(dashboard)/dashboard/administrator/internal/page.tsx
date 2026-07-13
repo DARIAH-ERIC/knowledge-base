@@ -6,6 +6,7 @@ import { InternalDashboard } from "@/app/(app)/[locale]/(dashboard)/dashboard/ad
 import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { type AuditLogAction, auditLogActions, getAuditLogEntries } from "@/lib/data/audit-log";
+import { getDataIntegrityFindings } from "@/lib/data/data-integrity";
 import { getExpensiveStatements } from "@/lib/data/pg-stat-statements";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -59,9 +60,10 @@ export default async function DashboardAdministratorInternalPage(
 	const rawAction = getSearchParam(rawSearchParams, "action");
 	const action = auditLogActions.find((value) => value === rawAction);
 
-	const [auditLog, statements] = await Promise.all([
+	const [auditLog, statements, integrity] = await Promise.all([
 		getAuditLogEntries({ limit: pageSize, offset: (page - 1) * pageSize, action }),
 		getExpensiveStatements(),
+		getDataIntegrityFindings(),
 	]);
 
 	const totalPages = Math.max(Math.ceil(auditLog.total / pageSize), 1);
@@ -71,6 +73,12 @@ export default async function DashboardAdministratorInternalPage(
 	}
 
 	return (
-		<InternalDashboard action={action} auditLog={auditLog} page={page} statements={statements} />
+		<InternalDashboard
+			action={action}
+			auditLog={auditLog}
+			integrity={integrity}
+			page={page}
+			statements={statements}
+		/>
 	);
 }

@@ -16,6 +16,7 @@
 		"./client": "./dist/client.mjs",
 		"./errors": "./dist/errors.mjs",
 		"./image-captions": "./dist/image-captions.mjs",
+		"./integrity-service": "./dist/integrity-service.mjs",
 		"./relations": "./dist/relations.mjs",
 		"./rich-text": "./dist/rich-text.mjs",
 		"./schema": "./dist/schema.mjs",

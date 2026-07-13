@@ -10,6 +10,7 @@ export default defineConfig({
 		"./lib/client.ts",
 		"./lib/errors.ts",
 		"./lib/image-captions.ts",
+		"./lib/integrity-service.ts",
 		"./lib/relations.ts",
 		"./lib/rich-text.ts",
 		"./lib/schema.ts",

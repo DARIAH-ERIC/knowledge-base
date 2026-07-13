@@ -2310,6 +2310,7 @@ msgstr "People"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:313
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:423
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:429
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:235
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:172
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:179
@@ -2515,7 +2516,7 @@ msgstr "ROR"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-details.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:119
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:101
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:137
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-details.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:138
@@ -3804,86 +3805,119 @@ msgstr "Administrator dashboard - New internal service"
 msgid "mfP4EN"
 msgstr "Administrator dashboard - Internal Services"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:58
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:80
+msgid "2wsjxR"
+msgstr "ongoing"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:93
 msgid "2KtWqT"
 msgstr "Internal"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:59
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:94
 msgid "5g+82s"
 msgstr "Internal diagnostics for administrators."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:63
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:98
 msgid "hIVSGF"
 msgstr "Internal diagnostics"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:64
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:91
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:127
 msgid "ED9RG5"
 msgstr "Audit log"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:65
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:132
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:100
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:168
 msgid "0klKKn"
 msgstr "Expensive queries"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:71
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:101
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:230
+msgid "NLbnpZ"
+msgstr "Data integrity"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:107
 msgid "QinKCt"
 msgstr "Filter by action"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:116
 msgid "jK9a9x"
 msgstr "All actions"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:96
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:132
 msgid "ug01Mk"
 msgstr "Time"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:98
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:134
 msgid "CHXoWz"
 msgstr "Actor"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:135
 msgid "QlsDcr"
 msgstr "Action"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:100
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:136
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:50
 msgid "LLtKhp"
 msgstr "Subject"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:103
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:139
 msgid "Je3HwC"
 msgstr "No audit log entries."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:137
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:173
 msgid "qj71j1"
 msgstr "Query"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:139
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:175
 msgid "fQFNOL"
 msgstr "Calls"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:140
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:176
 msgid "QsSili"
 msgstr "Total time (ms)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:177
 msgid "uG15p0"
 msgstr "Mean time (ms)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:142
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:178
 msgid "4lbK5K"
 msgstr "Rows"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:148
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:184
 msgid "8XPIPe"
 msgstr "No statements recorded yet."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:171
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:207
 msgid "5L04Xa"
 msgstr "The pg_stat_statements extension is not enabled on this database. Enable it via shared_preload_libraries in the Postgres configuration to see query statistics."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/page.tsx:42
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:216
+msgid "YlkJms"
+msgstr "Relations which must be entered twice, e.g. a national coordinator must also be a member of the General Assembly for the same period. Same checks as the data:audit:derived-relations script."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:237
+msgid "ryAzxy"
+msgstr "Issue"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:238
+msgid "4aal2m"
+msgstr "Detail"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:239
+msgid "JgfmLJ"
+msgstr "Source periods"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:240
+msgid "2SwFh6"
+msgstr "Derived periods"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:249
+msgid "19AjgC"
+msgstr "No data-integrity issues found."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/page.tsx:43
 msgid "Oo2iPN"
 msgstr "Administrator dashboard - Internal"
 
