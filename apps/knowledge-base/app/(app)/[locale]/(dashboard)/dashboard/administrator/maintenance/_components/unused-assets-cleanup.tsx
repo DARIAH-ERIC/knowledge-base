@@ -3,9 +3,9 @@
 import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { GridList, GridListItem } from "@dariah-eric/ui/grid-list";
-import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
+import { Modal, ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
 import cn from "clsx/lite";
-import { AlertTriangleIcon, DownloadIcon } from "lucide-react";
+import { AlertTriangleIcon, DownloadIcon, ExpandIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState, useTransition } from "react";
 import type { Selection } from "react-aria-components";
@@ -145,15 +145,38 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 						id={asset.id}
 						textValue={asset.label}
 					>
-						<AssetPreview
-							alt={asset.label}
-							className="block-32 inline-32 shrink-0 self-start overflow-hidden rounded-sm bg-muted"
-							imageClassName="object-contain"
-							kindLabelClassName="bg-bg/90"
-							mimeType={asset.mimeType}
-							src={asset.url}
-							storageKey={asset.key}
-						/>
+						<div className="relative block-32 inline-32 shrink-0 self-start">
+							<AssetPreview
+								alt={asset.label}
+								className="block-32 inline-32 overflow-hidden rounded-sm bg-muted"
+								imageClassName="object-contain"
+								kindLabelClassName="bg-bg/90"
+								mimeType={asset.mimeType}
+								src={asset.url}
+								storageKey={asset.key}
+							/>
+							{asset.mimeType?.startsWith("image/") ? (
+								<Modal>
+									<Button
+										aria-label={t("View full-size image")}
+										className="absolute inset-e-1 inset-bs-1 bg-bg/80 backdrop-blur-sm"
+										intent="outline"
+										size="sq-xs"
+									>
+										<ExpandIcon aria-hidden={true} className="block-3.5 inline-3.5" />
+									</Button>
+									<ModalContent aria-label={asset.label} size="5xl">
+										<div className="flex items-center justify-center p-4">
+											<img
+												alt={asset.label}
+												className="max-block-[80vh] max-inline-full object-contain"
+												src={`/api/assets/${asset.id}/download`}
+											/>
+										</div>
+									</ModalContent>
+								</Modal>
+							) : null}
+						</div>
 						<div className="flex min-inline-0 flex-1 flex-col gap-y-1">
 							<span className="line-clamp-2 wrap-break-word font-medium text-sm/tight">
 								{asset.label}
