@@ -22,6 +22,8 @@
 		"./integrity-service": "./dist/integrity-service.mjs",
 		"./relations": "./dist/relations.mjs",
 		"./rich-text": "./dist/rich-text.mjs",
+		"./rich-text-normalize": "./dist/rich-text-normalize.mjs",
+		"./richtext-cleanup-service": "./dist/richtext-cleanup-service.mjs",
 		"./schema": "./dist/schema.mjs",
 		"./sql": "./dist/sql.mjs"
 	},

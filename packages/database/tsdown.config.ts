@@ -16,6 +16,8 @@ export default defineConfig({
 		"./lib/integrity-service.ts",
 		"./lib/relations.ts",
 		"./lib/rich-text.ts",
+		"./lib/rich-text-normalize.ts",
+		"./lib/richtext-cleanup-service.ts",
 		"./lib/schema.ts",
 		"./lib/sql.ts",
 	],

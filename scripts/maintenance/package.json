@@ -6,6 +6,7 @@
 	"sideEffects": false,
 	"scripts": {
 		"data:clean:empty-content-blocks": "tsx ./scripts/clean-empty-content-blocks.ts",
+		"data:clean:richtext": "tsx ./scripts/clean-richtext.ts",
 		"data:clean:unused-assets": "tsx ./scripts/clean-unused-assets.ts",
 		"data:clean:unused-social-media": "tsx ./scripts/clean-unused-social-media.ts",
 		"format:check": "oxfmt --check",

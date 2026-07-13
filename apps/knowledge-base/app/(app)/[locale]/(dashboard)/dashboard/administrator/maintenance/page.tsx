@@ -8,6 +8,7 @@ import { assertAdminPageAccess } from "@/lib/auth/session";
 import { getUnusedAssets } from "@/lib/data/asset-cleanup";
 import { getEmptyContentBlocks } from "@/lib/data/content-block-cleanup";
 import { getDataIntegrityFindings } from "@/lib/data/data-integrity";
+import { getRichTextNeedingCleanup } from "@/lib/data/richtext-cleanup";
 import { getUnusedSocialMedia } from "@/lib/data/social-media-cleanup";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -31,17 +32,20 @@ export default async function DashboardAdministratorMaintenancePage(
 ): Promise<ReactNode> {
 	await assertAdminPageAccess();
 
-	const [integrity, unusedAssets, emptyContentBlocks, unusedSocialMedia] = await Promise.all([
-		getDataIntegrityFindings(),
-		getUnusedAssets({ imageUrlOptions: imageGridOptions }),
-		getEmptyContentBlocks(),
-		getUnusedSocialMedia(),
-	]);
+	const [integrity, unusedAssets, emptyContentBlocks, unusedSocialMedia, richTextCleanup] =
+		await Promise.all([
+			getDataIntegrityFindings(),
+			getUnusedAssets({ imageUrlOptions: imageGridOptions }),
+			getEmptyContentBlocks(),
+			getUnusedSocialMedia(),
+			getRichTextNeedingCleanup(),
+		]);
 
 	return (
 		<MaintenanceDashboard
 			emptyContentBlocks={emptyContentBlocks}
 			integrity={integrity}
+			richTextCleanup={richTextCleanup}
 			unusedAssets={unusedAssets}
 			unusedSocialMedia={unusedSocialMedia}
 		/>

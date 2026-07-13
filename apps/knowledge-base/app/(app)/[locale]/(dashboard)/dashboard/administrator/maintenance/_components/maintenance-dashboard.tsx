@@ -17,6 +17,7 @@ import type { Key } from "react-aria-components";
 
 import { EntityListHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { EmptyContentBlocksCleanup } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup";
+import { RichTextCleanup } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup";
 import { UnusedAssetsCleanup } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup";
 import { UnusedSocialMediaCleanup } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup";
 import type { UnusedAssetsPreviewResult } from "@/lib/data/asset-cleanup";
@@ -26,12 +27,14 @@ import type {
 	PairedRelationFindingKind,
 	RelationInterval,
 } from "@/lib/data/data-integrity";
+import type { RichTextCleanupResult } from "@/lib/data/richtext-cleanup";
 import type { UnusedSocialMediaResult } from "@/lib/data/social-media-cleanup";
 import { getEntityDetailHref } from "@/lib/entity-detail-href";
 
 interface MaintenanceDashboardProps {
 	emptyContentBlocks: EmptyContentBlocksResult;
 	integrity: PairedRelationCheckResult;
+	richTextCleanup: RichTextCleanupResult;
 	unusedAssets: UnusedAssetsPreviewResult;
 	unusedSocialMedia: UnusedSocialMediaResult;
 }
@@ -46,7 +49,7 @@ const findingKindBadgeIntents: Record<PairedRelationFindingKind, "amber" | "rose
 };
 
 export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>): ReactNode {
-	const { emptyContentBlocks, integrity, unusedAssets, unusedSocialMedia } = props;
+	const { emptyContentBlocks, integrity, richTextCleanup, unusedAssets, unusedSocialMedia } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -203,6 +206,19 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</div>
 
 						<UnusedSocialMediaCleanup items={unusedSocialMedia.items} />
+					</section>
+
+					<section className="flex flex-col gap-y-(--layout-padding)">
+						<div className="flex flex-col gap-y-1">
+							<h3 className="font-medium text-sm">{t("Rich-text normalisation")}</h3>
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Content blocks whose rich text can be tidied: empty paragraphs, stray line breaks, non-breaking spaces, imported HTML attributes, and bold headings. Review and select the ones to rewrite.",
+								)}
+							</p>
+						</div>
+
+						<RichTextCleanup blocks={richTextCleanup.blocks} />
 					</section>
 				</TabPanel>
 			</Tabs>
