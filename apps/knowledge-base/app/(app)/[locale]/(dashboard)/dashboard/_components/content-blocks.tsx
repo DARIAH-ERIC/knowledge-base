@@ -1318,8 +1318,8 @@ function AccordionContentBlockPanel({
 											<MediaLibraryDialog
 												defaultPrefix="images"
 												initialAssets={initialAssets}
-												onSelect={(_key, url) => {
-													insert("", url);
+												onSelect={(key, url, asset) => {
+													insert(key, url, asset);
 												}}
 												prefixes={["avatars", "images", "logos"]}
 												trigger={({ open }) => (
