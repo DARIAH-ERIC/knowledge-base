@@ -1,41 +1,61 @@
 import { and, eq, inArray } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
 
 import type { Database, Transaction } from "./index";
 import * as schema from "./schema";
 
 /**
- * Data-integrity checks for person-to-organisational-unit relations which must be entered twice
- * because one is derivable from the other, e.g. a person who is national coordinator (or deputy)
- * for a country must also be a member of the General Assembly governance body for the same period.
+ * Data-integrity checks for pairs of person-to-organisational-unit relations which must always be
+ * entered together because they record the same fact from two angles — e.g. a person who is a
+ * country's national representative (or deputy) must also be a member of the General Assembly
+ * governance body for the same period.
+ *
+ * Neither relation is derived from the other: a user may enter either one first and forget its
+ * counterpart, so every rule is checked **in both directions**. A finding is raised when one side
+ * exists without the other, or when both exist but their durations do not line up.
+ *
  * Shared by the `@dariah-eric/audit` cli scripts and the admin dashboard.
  */
 
-export interface DerivedRelationRule {
-	name: string;
+/** One side of a paired-relation rule: a person-to-organisational-unit relation of a given shape. */
+export interface RelationEndpoint {
+	/** A relation with any of these role types satisfies this side. */
+	roleTypes: ReadonlyArray<(typeof schema.personRoleTypesEnum)[number]>;
 	/**
-	 * Role types which imply the derived relation. The allowed-relations table restricts these to the
-	 * expected unit type (e.g. country), so the rule does not re-check the unit type.
+	 * Slug of the organisational-unit document the relation must point to. Omit to match a relation
+	 * to any unit — the allowed-relations table already restricts the role types to the expected unit
+	 * type (e.g. national representative → country), so the rule need not re-check it.
 	 */
-	sourceRoleTypes: Array<(typeof schema.personRoleTypesEnum)[number]>;
-	derivedRoleType: (typeof schema.personRoleTypesEnum)[number];
-	/** Slug of the organisational-unit document the derived relation must point to. */
-	derivedUnitSlug: string;
+	unitSlug?: string;
+	/** Human-readable name for this side, used in findings and the dashboard. */
+	label: string;
 }
 
-export const derivedRelationRules: Array<DerivedRelationRule> = [
+export interface PairedRelationRule {
+	name: string;
+	/** The two relations which must co-exist. Order is irrelevant; both directions are checked. */
+	a: RelationEndpoint;
+	b: RelationEndpoint;
+}
+
+export const pairedRelationRules: Array<PairedRelationRule> = [
 	{
-		name: "general-assembly-membership",
-		sourceRoleTypes: ["national_coordinator", "national_coordinator_deputy"],
-		derivedRoleType: "is_member_of",
-		derivedUnitSlug: "general-assembly",
+		name: "national-representative-general-assembly",
+		a: {
+			roleTypes: ["national_representative", "national_representative_deputy"],
+			label: "National representative (or deputy) of a country",
+		},
+		b: {
+			roleTypes: ["is_member_of"],
+			unitSlug: "general-assembly",
+			label: "Member of the General Assembly",
+		},
 	},
 ];
 
 /**
- * Consecutive terms are often entered as separate rows on one side (e.g. coordinator then deputy)
- * but as a single continuous membership on the other, so intervals separated by at most this gap
- * are merged before comparison.
+ * Consecutive terms are often entered as separate rows on one side (e.g. representative then
+ * deputy) but as a single continuous membership on the other, so intervals separated by at most
+ * this gap are merged before comparison.
  */
 const mergeGapMs = 24 * 60 * 60 * 1000;
 
@@ -77,12 +97,12 @@ function areIntervalSetsEqual(a: Array<Interval>, b: Array<Interval>): boolean {
 }
 
 /** JSON-serializable so findings can cross a server/client boundary. `end: null` means ongoing. */
-export interface DerivedRelationInterval {
+export interface RelationInterval {
 	start: string;
 	end: string | null;
 }
 
-function toSerializableIntervals(intervals: Array<Interval>): Array<DerivedRelationInterval> {
+function toSerializableIntervals(intervals: Array<Interval>): Array<RelationInterval> {
 	return intervals.map((interval) => {
 		return {
 			start: new Date(interval.start).toISOString(),
@@ -91,169 +111,231 @@ function toSerializableIntervals(intervals: Array<Interval>): Array<DerivedRelat
 	});
 }
 
-export type DerivedRelationFindingKind = "missing_derived" | "missing_source" | "duration_mismatch";
+export type PairedRelationFindingKind = "missing_counterpart" | "duration_mismatch";
 
-export interface DerivedRelationFinding {
+/** A duration on one side of a rule; an absent `end` means the relation is still ongoing. */
+export interface RelationDuration {
+	start: Date;
+	end?: Date;
+}
+
+/**
+ * Merges a side's durations into a normalised, display-ready set of intervals (see
+ * {@link mergeGapMs}).
+ */
+export function mergeAdjacentDurations(
+	durations: Array<RelationDuration>,
+): Array<RelationInterval> {
+	return toSerializableIntervals(toIntervals(durations));
+}
+
+/**
+ * The outcome of comparing the two sides of a rule for one person; `null` means they are
+ * consistent.
+ */
+export type PairClassification =
+	| { kind: "missing_counterpart"; missingSide: "a" | "b" }
+	| { kind: "duration_mismatch" }
+	| null;
+
+/**
+ * Classifies the two sides of a paired-relation rule for a single person. Neither side is primary:
+ * if either side has relations while the other has none, the missing side is reported — so the
+ * check runs in both directions. If both sides exist but their merged intervals differ, it is a
+ * duration mismatch. Both absent (or both present and equal) is consistent (`null`).
+ */
+export function classifyRelationPair(
+	aDurations: Array<RelationDuration>,
+	bDurations: Array<RelationDuration>,
+): PairClassification {
+	if (aDurations.length === 0 && bDurations.length === 0) {
+		return null;
+	}
+	if (aDurations.length === 0) {
+		return { kind: "missing_counterpart", missingSide: "a" };
+	}
+	if (bDurations.length === 0) {
+		return { kind: "missing_counterpart", missingSide: "b" };
+	}
+	if (!areIntervalSetsEqual(toIntervals(aDurations), toIntervals(bDurations))) {
+		return { kind: "duration_mismatch" };
+	}
+	return null;
+}
+
+/** The periods recorded for one side of a rule, labelled for display. */
+export interface RelationSide {
+	label: string;
+	intervals: Array<RelationInterval>;
+}
+
+export interface PairedRelationFinding {
 	rule: string;
-	kind: DerivedRelationFindingKind;
+	kind: PairedRelationFindingKind;
 	personDocumentId: string;
 	personSlug: string;
 	personLabel: string;
 	detail: string;
-	sourceIntervals: Array<DerivedRelationInterval>;
-	derivedIntervals: Array<DerivedRelationInterval>;
+	/** Both sides of the rule, always in `[a, b]` order, so the dashboard can show them side by side. */
+	sides: [RelationSide, RelationSide];
 }
 
-export interface DerivedRelationCheckResult {
-	findings: Array<DerivedRelationFinding>;
-	/** Rules which could not run, e.g. because the derived unit document is missing. */
+export interface PairedRelationCheckResult {
+	findings: Array<PairedRelationFinding>;
+	/** Rules which could not run, e.g. because an endpoint's unit document is missing. */
 	errors: Array<string>;
 }
 
-async function checkRule(
+async function resolveEndpointUnitId(
 	db: Database | Transaction,
-	rule: DerivedRelationRule,
-): Promise<Array<DerivedRelationFinding>> {
-	const unitEntities = alias(schema.entities, "unit_entities");
-	const personEntities = alias(schema.entities, "person_entities");
+	ruleName: string,
+	endpoint: RelationEndpoint,
+): Promise<string | undefined> {
+	if (endpoint.unitSlug == null) {
+		return undefined;
+	}
 
-	const [derivedUnit] = await db
-		.select({ id: schema.entities.id, label: schema.entities.label })
+	const [unit] = await db
+		.select({ id: schema.entities.id })
 		.from(schema.entities)
 		.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
 		.where(
 			and(
 				eq(schema.entityTypes.type, "organisational_units"),
-				eq(schema.entities.slug, rule.derivedUnitSlug),
+				eq(schema.entities.slug, endpoint.unitSlug),
 			),
 		);
 
-	if (derivedUnit == null) {
+	if (unit == null) {
 		throw new Error(
-			`Rule "${rule.name}": no organisational-unit document with slug "${rule.derivedUnitSlug}".`,
+			`Rule "${ruleName}": no organisational-unit document with slug "${endpoint.unitSlug}".`,
 		);
 	}
 
-	const derivedUnitLabel = derivedUnit.label ?? rule.derivedUnitSlug;
+	return unit.id;
+}
 
-	const [sourceRows, derivedRows] = await Promise.all([
-		db
-			.select({
-				personDocumentId: schema.personsToOrganisationalUnits.personDocumentId,
-				personSlug: personEntities.slug,
-				personLabel: personEntities.label,
-				unitLabel: unitEntities.label,
-				roleType: schema.personRoleTypes.type,
-				duration: schema.personsToOrganisationalUnits.duration,
-			})
-			.from(schema.personsToOrganisationalUnits)
-			.innerJoin(
-				schema.personRoleTypes,
-				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
-			)
-			.innerJoin(
-				personEntities,
-				eq(personEntities.id, schema.personsToOrganisationalUnits.personDocumentId),
-			)
-			.innerJoin(
-				unitEntities,
-				eq(unitEntities.id, schema.personsToOrganisationalUnits.organisationalUnitDocumentId),
-			)
-			.where(inArray(schema.personRoleTypes.type, rule.sourceRoleTypes)),
-		db
-			.select({
-				personDocumentId: schema.personsToOrganisationalUnits.personDocumentId,
-				personSlug: personEntities.slug,
-				personLabel: personEntities.label,
-				duration: schema.personsToOrganisationalUnits.duration,
-			})
-			.from(schema.personsToOrganisationalUnits)
-			.innerJoin(
-				schema.personRoleTypes,
-				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
-			)
-			.innerJoin(
-				personEntities,
-				eq(personEntities.id, schema.personsToOrganisationalUnits.personDocumentId),
-			)
-			.where(
-				and(
-					eq(schema.personRoleTypes.type, rule.derivedRoleType),
-					eq(schema.personsToOrganisationalUnits.organisationalUnitDocumentId, derivedUnit.id),
-				),
+interface EndpointRelation {
+	personDocumentId: string;
+	personSlug: string;
+	personLabel: string | null;
+	duration: { start: Date; end?: Date };
+}
+
+async function getEndpointRelations(
+	db: Database | Transaction,
+	endpoint: RelationEndpoint,
+	unitId: string | undefined,
+): Promise<Array<EndpointRelation>> {
+	const personEntities = schema.entities;
+
+	return db
+		.select({
+			personDocumentId: schema.personsToOrganisationalUnits.personDocumentId,
+			personSlug: personEntities.slug,
+			personLabel: personEntities.label,
+			duration: schema.personsToOrganisationalUnits.duration,
+		})
+		.from(schema.personsToOrganisationalUnits)
+		.innerJoin(
+			schema.personRoleTypes,
+			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+		)
+		.innerJoin(
+			personEntities,
+			eq(personEntities.id, schema.personsToOrganisationalUnits.personDocumentId),
+		)
+		.where(
+			and(
+				inArray(schema.personRoleTypes.type, [...endpoint.roleTypes]),
+				unitId != null
+					? eq(schema.personsToOrganisationalUnits.organisationalUnitDocumentId, unitId)
+					: undefined,
 			),
+		);
+}
+
+async function checkRule(
+	db: Database | Transaction,
+	rule: PairedRelationRule,
+): Promise<Array<PairedRelationFinding>> {
+	const [aUnitId, bUnitId] = await Promise.all([
+		resolveEndpointUnitId(db, rule.name, rule.a),
+		resolveEndpointUnitId(db, rule.name, rule.b),
+	]);
+
+	const [aRows, bRows] = await Promise.all([
+		getEndpointRelations(db, rule.a, aUnitId),
+		getEndpointRelations(db, rule.b, bUnitId),
 	]);
 
 	interface PersonRelations {
 		personSlug: string;
 		personLabel: string;
-		source: typeof sourceRows;
-		derived: typeof derivedRows;
+		a: Array<EndpointRelation>;
+		b: Array<EndpointRelation>;
 	}
 
 	const byPerson = new Map<string, PersonRelations>();
 
-	function getPerson(
-		personDocumentId: string,
-		personSlug: string,
-		personLabel: string | null,
-	): PersonRelations {
-		let person = byPerson.get(personDocumentId);
+	function getPerson(row: EndpointRelation): PersonRelations {
+		let person = byPerson.get(row.personDocumentId);
 		if (person == null) {
 			person = {
-				personSlug,
-				personLabel: personLabel ?? personDocumentId,
-				source: [],
-				derived: [],
+				personSlug: row.personSlug,
+				personLabel: row.personLabel ?? row.personDocumentId,
+				a: [],
+				b: [],
 			};
-			byPerson.set(personDocumentId, person);
+			byPerson.set(row.personDocumentId, person);
 		}
 		return person;
 	}
 
-	for (const row of sourceRows) {
-		getPerson(row.personDocumentId, row.personSlug, row.personLabel).source.push(row);
+	for (const row of aRows) {
+		getPerson(row).a.push(row);
 	}
-	for (const row of derivedRows) {
-		getPerson(row.personDocumentId, row.personSlug, row.personLabel).derived.push(row);
+	for (const row of bRows) {
+		getPerson(row).b.push(row);
 	}
 
-	const findings: Array<DerivedRelationFinding> = [];
+	const findings: Array<PairedRelationFinding> = [];
 
 	for (const [personDocumentId, person] of byPerson) {
-		const sourceIntervals = toIntervals(person.source.map((row) => row.duration));
-		const derivedIntervals = toIntervals(person.derived.map((row) => row.duration));
+		const aDurations = person.a.map((row) => row.duration);
+		const bDurations = person.b.map((row) => row.duration);
 
-		const sourceRoles = [
-			...new Set(person.source.map((row) => `${row.roleType} (${row.unitLabel ?? "?"})`)),
-		].join(", ");
+		const classification = classifyRelationPair(aDurations, bDurations);
+		if (classification == null) {
+			continue;
+		}
+
+		const sides: [RelationSide, RelationSide] = [
+			{ label: rule.a.label, intervals: mergeAdjacentDurations(aDurations) },
+			{ label: rule.b.label, intervals: mergeAdjacentDurations(bDurations) },
+		];
 
 		const base = {
 			rule: rule.name,
 			personDocumentId,
 			personSlug: person.personSlug,
 			personLabel: person.personLabel,
-			sourceIntervals: toSerializableIntervals(sourceIntervals),
-			derivedIntervals: toSerializableIntervals(derivedIntervals),
+			sides,
 		};
 
-		if (person.derived.length === 0) {
+		if (classification.kind === "missing_counterpart") {
+			const present = classification.missingSide === "a" ? rule.b : rule.a;
+			const missing = classification.missingSide === "a" ? rule.a : rule.b;
 			findings.push({
 				...base,
-				kind: "missing_derived",
-				detail: `Has ${sourceRoles} but no "${rule.derivedRoleType}" relation to "${derivedUnitLabel}".`,
+				kind: "missing_counterpart",
+				detail: `Is "${present.label}" but is missing the matching "${missing.label}".`,
 			});
-		} else if (person.source.length === 0) {
-			findings.push({
-				...base,
-				kind: "missing_source",
-				detail: `Is "${rule.derivedRoleType}" of "${derivedUnitLabel}" but has none of the roles which imply it (${rule.sourceRoleTypes.join(", ")}).`,
-			});
-		} else if (!areIntervalSetsEqual(sourceIntervals, derivedIntervals)) {
+		} else {
 			findings.push({
 				...base,
 				kind: "duration_mismatch",
-				detail: `Durations of ${sourceRoles} do not match the "${rule.derivedRoleType}" relation to "${derivedUnitLabel}".`,
+				detail: `Is both "${rule.a.label}" and "${rule.b.label}", but the periods do not match.`,
 			});
 		}
 	}
@@ -261,13 +343,13 @@ async function checkRule(
 	return findings;
 }
 
-export async function checkDerivedRelations(
+export async function checkPairedRelations(
 	db: Database | Transaction,
-): Promise<DerivedRelationCheckResult> {
-	const findings: Array<DerivedRelationFinding> = [];
+): Promise<PairedRelationCheckResult> {
+	const findings: Array<PairedRelationFinding> = [];
 	const errors: Array<string> = [];
 
-	for (const rule of derivedRelationRules) {
+	for (const rule of pairedRelationRules) {
 		try {
 			findings.push(...(await checkRule(db, rule)));
 		} catch (error) {

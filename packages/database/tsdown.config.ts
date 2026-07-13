@@ -5,9 +5,11 @@ export default defineConfig({
 	dts: true,
 	entry: [
 		"./lib/index.ts",
+		"./lib/asset-cleanup-service.ts",
 		"./lib/calculated-values.ts",
 		"./lib/calculated-values-service.ts",
 		"./lib/client.ts",
+		"./lib/content-block-cleanup-service.ts",
 		"./lib/errors.ts",
 		"./lib/image-captions.ts",
 		"./lib/integrity-service.ts",

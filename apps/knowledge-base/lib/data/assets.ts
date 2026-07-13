@@ -57,6 +57,22 @@ export async function getAssets(params: GetAssetsParams) {
 	};
 }
 
+/** Looks up the storage key and download metadata for a single asset, or `null` if it is gone. */
+export async function getAssetForDownload(
+	id: string,
+): Promise<{ key: string; filename: string | null; mimeType: string } | null> {
+	const [asset] = await db
+		.select({
+			key: schema.assets.key,
+			filename: schema.assets.filename,
+			mimeType: schema.assets.mimeType,
+		})
+		.from(schema.assets)
+		.where(eq(schema.assets.id, id));
+
+	return asset ?? null;
+}
+
 interface GetMediaLibraryAssetsParams {
 	imageUrlOptions: ImageUrlOptions;
 	/** @default 20 */

@@ -1,25 +1,27 @@
 import {
-	type DerivedRelationCheckResult,
-	type DerivedRelationFinding,
-	type DerivedRelationFindingKind,
-	type DerivedRelationInterval,
-	checkDerivedRelations,
+	type PairedRelationCheckResult,
+	type PairedRelationFinding,
+	type PairedRelationFindingKind,
+	type RelationInterval,
+	type RelationSide,
+	checkPairedRelations,
 } from "@dariah-eric/database/integrity-service";
 
 import { db } from "@/lib/db";
 
 export type {
-	DerivedRelationCheckResult,
-	DerivedRelationFinding,
-	DerivedRelationFindingKind,
-	DerivedRelationInterval,
+	PairedRelationCheckResult,
+	PairedRelationFinding,
+	PairedRelationFindingKind,
+	RelationInterval,
+	RelationSide,
 };
 
 /**
- * Runs the derived-relation data-integrity checks (e.g. national coordinator roles must be mirrored
- * by a General Assembly membership with matching duration). Same checks as the `@dariah-eric/audit`
- * cli scripts.
+ * Runs the paired-relation data-integrity checks (e.g. a national representative role and the
+ * matching General Assembly membership must both exist with the same duration). Checked in both
+ * directions. Same checks as the `@dariah-eric/audit` cli scripts.
  */
-export async function getDataIntegrityFindings(): Promise<DerivedRelationCheckResult> {
-	return checkDerivedRelations(db);
+export async function getDataIntegrityFindings(): Promise<PairedRelationCheckResult> {
+	return checkPairedRelations(db);
 }
