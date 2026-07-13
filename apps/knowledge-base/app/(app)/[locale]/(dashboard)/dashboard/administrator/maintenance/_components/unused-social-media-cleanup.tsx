@@ -16,7 +16,9 @@ import { AlertTriangleIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState, useTransition } from "react";
 
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { deleteUnusedSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/delete-unused-social-media.action";
+import { useClientPagination } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/use-client-pagination";
 import type {
 	DeleteUnusedSocialMediaResult,
 	UnusedSocialMedia,
@@ -46,6 +48,8 @@ export function UnusedSocialMediaCleanup(
 	const [error, setError] = useState<string | null>(null);
 
 	const allSelected = items.length > 0 && selected.size === items.length;
+
+	const { page, pageItems, perPage, setPage, totalItems, totalPages } = useClientPagination(items);
 
 	function toggle(id: string, isSelected: boolean) {
 		setSelected((current) => {
@@ -136,7 +140,7 @@ export function UnusedSocialMediaCleanup(
 					<TableColumn id="type">{t("Type")}</TableColumn>
 					<TableColumn id="url">{t("URL")}</TableColumn>
 				</TableHeader>
-				<TableBody items={items}>
+				<TableBody items={pageItems}>
 					{(item) => (
 						<TableRow id={item.id}>
 							<TableCell>
@@ -159,6 +163,16 @@ export function UnusedSocialMediaCleanup(
 					)}
 				</TableBody>
 			</Table>
+
+			{totalItems > perPage ? (
+				<Paginate
+					page={page}
+					perPage={perPage}
+					setPage={setPage}
+					total={totalPages}
+					totalItems={totalItems}
+				/>
+			) : null}
 
 			<ModalContent
 				isOpen={isConfirmOpen}
