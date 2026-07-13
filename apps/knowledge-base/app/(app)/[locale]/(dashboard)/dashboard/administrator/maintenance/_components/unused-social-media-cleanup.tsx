@@ -142,7 +142,7 @@ export function UnusedSocialMediaCleanup(
 					<TableColumn id="type">{t("Type")}</TableColumn>
 					<TableColumn id="url">{t("URL")}</TableColumn>
 				</TableHeader>
-				<TableBody items={pageItems}>
+				<TableBody dependencies={[selected]} items={pageItems}>
 					{(item) => (
 						<TableRow id={item.id}>
 							<TableCell>

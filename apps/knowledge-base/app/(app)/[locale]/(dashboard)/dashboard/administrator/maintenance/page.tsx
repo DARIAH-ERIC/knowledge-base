@@ -1,15 +1,15 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
+import { EmptyContentBlocksSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-section";
 import { MaintenanceDashboard } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard";
-import { imageGridOptions } from "@/config/assets.config";
+import { MaintenanceSectionFallback } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-section-fallback";
+import { PairedRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-section";
+import { RichTextSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-section";
+import { UnusedAssetsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-section";
+import { UnusedSocialMediaSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-section";
 import { assertAdminPageAccess } from "@/lib/auth/session";
-import { getUnusedAssets } from "@/lib/data/asset-cleanup";
-import { getEmptyContentBlocks } from "@/lib/data/content-block-cleanup";
-import { getDataIntegrityFindings } from "@/lib/data/data-integrity";
-import { getRichTextNeedingCleanup } from "@/lib/data/richtext-cleanup";
-import { getUnusedSocialMedia } from "@/lib/data/social-media-cleanup";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorMaintenancePageProps extends PageProps<"/[locale]/dashboard/administrator/maintenance"> {}
@@ -32,22 +32,33 @@ export default async function DashboardAdministratorMaintenancePage(
 ): Promise<ReactNode> {
 	await assertAdminPageAccess();
 
-	const [integrity, unusedAssets, emptyContentBlocks, unusedSocialMedia, richTextCleanup] =
-		await Promise.all([
-			getDataIntegrityFindings(),
-			getUnusedAssets({ imageUrlOptions: imageGridOptions }),
-			getEmptyContentBlocks(),
-			getUnusedSocialMedia(),
-			getRichTextNeedingCleanup(),
-		]);
-
 	return (
 		<MaintenanceDashboard
-			emptyContentBlocks={emptyContentBlocks}
-			integrity={integrity}
-			richTextCleanup={richTextCleanup}
-			unusedAssets={unusedAssets}
-			unusedSocialMedia={unusedSocialMedia}
+			emptyContentBlocks={
+				<Suspense fallback={<MaintenanceSectionFallback />}>
+					<EmptyContentBlocksSection />
+				</Suspense>
+			}
+			pairedRelations={
+				<Suspense fallback={<MaintenanceSectionFallback />}>
+					<PairedRelationsSection />
+				</Suspense>
+			}
+			richText={
+				<Suspense fallback={<MaintenanceSectionFallback />}>
+					<RichTextSection />
+				</Suspense>
+			}
+			unusedAssets={
+				<Suspense fallback={<MaintenanceSectionFallback />}>
+					<UnusedAssetsSection />
+				</Suspense>
+			}
+			unusedSocialMedia={
+				<Suspense fallback={<MaintenanceSectionFallback />}>
+					<UnusedSocialMediaSection />
+				</Suspense>
+			}
 		/>
 	);
 }

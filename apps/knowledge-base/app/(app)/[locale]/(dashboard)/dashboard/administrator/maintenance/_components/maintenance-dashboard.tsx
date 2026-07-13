@@ -6,27 +6,17 @@ import { Fragment, type ReactNode, useState } from "react";
 import type { Key } from "react-aria-components";
 
 import { EntityListHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
-import { EmptyContentBlocksCleanup } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup";
-import { PairedRelationsCheck } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check";
-import { RichTextCleanup } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup";
-import { UnusedAssetsCleanup } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup";
-import { UnusedSocialMediaCleanup } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup";
-import type { UnusedAssetsPreviewResult } from "@/lib/data/asset-cleanup";
-import type { EmptyContentBlocksResult } from "@/lib/data/content-block-cleanup";
-import type { PairedRelationCheckResult } from "@/lib/data/data-integrity";
-import type { RichTextCleanupResult } from "@/lib/data/richtext-cleanup";
-import type { UnusedSocialMediaResult } from "@/lib/data/social-media-cleanup";
 
 interface MaintenanceDashboardProps {
-	emptyContentBlocks: EmptyContentBlocksResult;
-	integrity: PairedRelationCheckResult;
-	richTextCleanup: RichTextCleanupResult;
-	unusedAssets: UnusedAssetsPreviewResult;
-	unusedSocialMedia: UnusedSocialMediaResult;
+	emptyContentBlocks: ReactNode;
+	pairedRelations: ReactNode;
+	richText: ReactNode;
+	unusedAssets: ReactNode;
+	unusedSocialMedia: ReactNode;
 }
 
 export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>): ReactNode {
-	const { emptyContentBlocks, integrity, richTextCleanup, unusedAssets, unusedSocialMedia } = props;
+	const { emptyContentBlocks, pairedRelations, richText, unusedAssets, unusedSocialMedia } = props;
 
 	const t = useExtracted();
 	const [selectedTab, setSelectedTab] = useState<Key>("integrity");
@@ -57,7 +47,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 								)}
 							</p>
 
-							<PairedRelationsCheck result={integrity} />
+							{pairedRelations}
 						</TabPanel>
 					</Tabs>
 				</TabPanel>
@@ -78,10 +68,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 								)}
 							</p>
 
-							<UnusedAssetsCleanup
-								assets={unusedAssets.assets}
-								totalSize={unusedAssets.totalSize}
-							/>
+							{unusedAssets}
 						</TabPanel>
 
 						<TabPanel id="empty-content-blocks" className="flex flex-col gap-y-(--layout-padding)">
@@ -91,7 +78,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 								)}
 							</p>
 
-							<EmptyContentBlocksCleanup blocks={emptyContentBlocks.blocks} />
+							{emptyContentBlocks}
 						</TabPanel>
 
 						<TabPanel id="unused-social-media" className="flex flex-col gap-y-(--layout-padding)">
@@ -101,7 +88,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 								)}
 							</p>
 
-							<UnusedSocialMediaCleanup items={unusedSocialMedia.items} />
+							{unusedSocialMedia}
 						</TabPanel>
 
 						<TabPanel id="richtext" className="flex flex-col gap-y-(--layout-padding)">
@@ -111,7 +98,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 								)}
 							</p>
 
-							<RichTextCleanup blocks={richTextCleanup.blocks} />
+							{richText}
 						</TabPanel>
 					</Tabs>
 				</TabPanel>
