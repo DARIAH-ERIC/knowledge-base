@@ -3,6 +3,8 @@ import {
 	type ResolvedPlaceholderValues,
 	annotatePlaceholderValues,
 	collectPlaceholderValueKinds,
+	getPlaceholderValueVariants,
+	normalizePlaceholderValueVariant,
 	placeholderValueKindLabels,
 } from "@dariah-eric/database/placeholder-values";
 import { formatPlaceholderValue, toPlainText } from "@dariah-eric/ui/rich-text";
@@ -102,6 +104,27 @@ describe("formatPlaceholderValue", () => {
 	it("returns null for unresolved nodes", () => {
 		expect(formatPlaceholderValue({ kind: "member_countries_count", value: null })).toBeNull();
 		expect(formatPlaceholderValue(null)).toBeNull();
+	});
+});
+
+describe("placeholder value variants", () => {
+	it("offers a linked variant only for list kinds", () => {
+		expect(getPlaceholderValueVariants("member_countries_list")).toStrictEqual(["plain", "linked"]);
+		expect(getPlaceholderValueVariants("member_countries_count")).toStrictEqual(["plain"]);
+		expect(getPlaceholderValueVariants("working_groups_count")).toStrictEqual(["plain"]);
+	});
+
+	it("normalizes unknown or missing variants to plain", () => {
+		expect(normalizePlaceholderValueVariant("linked")).toBe("linked");
+		expect(normalizePlaceholderValueVariant("bogus")).toBe("plain");
+		expect(normalizePlaceholderValueVariant(undefined)).toBe("plain");
+	});
+
+	it("is advisory: plain-text rendering ignores the variant", () => {
+		// A `linked` list still flattens to conjunction-joined names for search/alt text.
+		expect(formatPlaceholderValue({ value: memberCountries, variant: "linked" })).toBe(
+			"Austria, Belgium, and Croatia",
+		);
 	});
 });
 

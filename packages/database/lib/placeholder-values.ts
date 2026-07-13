@@ -43,6 +43,49 @@ export function isPlaceholderValueKind(value: unknown): value is PlaceholderValu
 	return (placeholderValueKindsEnum as ReadonlyArray<unknown>).includes(value);
 }
 
+/**
+ * Presentation variants an author can request for a placeholder value. Advisory only: consumers
+ * honor them where they can and fall back to `plain` where they can't (e.g. the search index and
+ * `alt`-text flattening always render plain text regardless of the requested variant).
+ *
+ * - `plain` — render as text (counts as digits, lists joined via `Intl.ListFormat`).
+ * - `linked` — for `*_list` kinds, wrap each item in a link to its detail page (built from the item's
+ *   `slug`). Meaningless for count kinds, which only ever render `plain`.
+ *
+ * The resolved `value` attached on read paths is identical regardless of variant; the variant only
+ * rides along as a hint the renderer switches on.
+ */
+export const placeholderValueVariantsEnum = ["plain", "linked"] as const;
+
+export type PlaceholderValueVariant = (typeof placeholderValueVariantsEnum)[number];
+
+export const defaultPlaceholderValueVariant: PlaceholderValueVariant = "plain";
+
+/** Human-readable labels, shown for the variant toggle in the editor. */
+export const placeholderValueVariantLabels: Record<PlaceholderValueVariant, string> = {
+	plain: "Plain text",
+	linked: "Linked",
+};
+
+export function isPlaceholderValueVariant(value: unknown): value is PlaceholderValueVariant {
+	return (placeholderValueVariantsEnum as ReadonlyArray<unknown>).includes(value);
+}
+
+/** Coerces an arbitrary stored/parsed attribute to a known variant, defaulting to `plain`. */
+export function normalizePlaceholderValueVariant(value: unknown): PlaceholderValueVariant {
+	return isPlaceholderValueVariant(value) ? value : defaultPlaceholderValueVariant;
+}
+
+/**
+ * Variants offered for a kind in the editor. Count kinds render as a single number, so they only
+ * support `plain`; `*_list` kinds can additionally be rendered as `linked`.
+ */
+export function getPlaceholderValueVariants(
+	kind: PlaceholderValueKind,
+): ReadonlyArray<PlaceholderValueVariant> {
+	return kind.endsWith("_list") ? placeholderValueVariantsEnum : ["plain"];
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === "object" && !Array.isArray(value);
 }
