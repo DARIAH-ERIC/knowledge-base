@@ -50,7 +50,7 @@ import { InlineRichTextRenderer } from "@/lib/inline-rich-text-renderer";
 import { Input } from "@/lib/input";
 import { Note } from "@/lib/note";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
-import { formatCalculatedValue, isEmptyRichTextDocument } from "@/lib/rich-text";
+import { formatPlaceholderValue, isEmptyRichTextDocument } from "@/lib/rich-text";
 import { RichTextEditorToolbarButton } from "@/lib/rich-text-toolbar-button";
 import { ToggleGroup, ToggleGroupItem } from "@/lib/toggle-group";
 import { Tooltip, TooltipContent } from "@/lib/tooltip";
@@ -92,8 +92,8 @@ interface RichTextEditorProps {
 	renderEmbedInsert?: (insertEmbed: () => void) => ReactNode;
 	renderCalloutInsert?: (insertCallout: () => void) => ReactNode;
 	renderButtonLinkInsert?: (insertButtonLink: () => void) => ReactNode;
-	renderCalculatedValueInsert?: (
-		insertCalculatedValue: (value: { kind: string; label: string }) => void,
+	renderPlaceholderValueInsert?: (
+		insertPlaceholderValue: (value: { kind: string; label: string }) => void,
 	) => ReactNode;
 	renderImagePicker?: (
 		insert: (
@@ -896,11 +896,11 @@ export const ButtonLinkNode = Node.create({
 });
 
 /**
- * Inline reference to a calculated value (e.g. the current number of member countries). The
+ * Inline reference to a placeholder value (e.g. the current number of member countries). The
  * document stores only a `kind` reference plus a display `label`; read paths substitute the current
  * value server-side, so the editor renders a placeholder chip instead of text.
  */
-function CalculatedValueNodeView({
+function PlaceholderValueNodeView({
 	editor,
 	getPos,
 	node,
@@ -908,7 +908,7 @@ function CalculatedValueNodeView({
 	deleteNode,
 }: Readonly<NodeViewProps>): ReactNode {
 	const kind = node.attrs.kind as string | null;
-	const label = (node.attrs.label as string | null) ?? kind ?? "Calculated value";
+	const label = (node.attrs.label as string | null) ?? kind ?? "Placeholder value";
 
 	const chipClassName = twMerge(
 		"inline-flex items-center gap-x-1 rounded-full border border-border bg-muted px-2 py-0.5 text-sm text-muted-fg",
@@ -918,7 +918,7 @@ function CalculatedValueNodeView({
 	if (!editor.isEditable) {
 		// Read views receive annotated nodes (a resolved `value` attribute) and render the plain
 		// value; nodes without one (unknown kind) degrade to the labelled chip.
-		const resolved = formatCalculatedValue(node.attrs);
+		const resolved = formatPlaceholderValue(node.attrs);
 		if (resolved != null) {
 			return (
 				<NodeViewWrapper as="span" className="inline align-baseline">
@@ -973,8 +973,8 @@ function CalculatedValueNodeView({
 	);
 }
 
-export const CalculatedValueNode = Node.create({
-	name: "calculatedValue",
+export const PlaceholderValueNode = Node.create({
+	name: "placeholderValue",
 	group: "inline",
 	inline: true,
 	atom: true,
@@ -993,10 +993,10 @@ export const CalculatedValueNode = Node.create({
 	parseHTML() {
 		return [
 			{
-				tag: "span[data-calculated-value]",
+				tag: "span[data-placeholder-value]",
 				getAttrs(dom) {
 					return {
-						kind: dom.dataset.calculatedValue ?? null,
+						kind: dom.dataset.placeholderValue ?? null,
 						label: dom.textContent,
 					};
 				},
@@ -1005,19 +1005,19 @@ export const CalculatedValueNode = Node.create({
 	},
 
 	renderHTML({ node }) {
-		const resolved = formatCalculatedValue(node.attrs as Record<string, unknown>);
+		const resolved = formatPlaceholderValue(node.attrs as Record<string, unknown>);
 
 		return [
 			"span",
 			mergeAttributes({
-				"data-calculated-value": node.attrs.kind as string | null,
+				"data-placeholder-value": node.attrs.kind as string | null,
 			}),
 			resolved ?? (node.attrs.label as string | null) ?? (node.attrs.kind as string | null) ?? "",
 		];
 	},
 
 	addNodeView() {
-		return ReactNodeViewRenderer(CalculatedValueNodeView);
+		return ReactNodeViewRenderer(PlaceholderValueNodeView);
 	},
 });
 
@@ -1373,7 +1373,7 @@ export function createRichTextExtensions(
 		EmbedNode,
 		CalloutNode,
 		ButtonLinkNode,
-		CalculatedValueNode,
+		PlaceholderValueNode,
 	];
 }
 
@@ -1389,7 +1389,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		renderEmbedInsert,
 		renderCalloutInsert,
 		renderButtonLinkInsert,
-		renderCalculatedValueInsert,
+		renderPlaceholderValueInsert,
 		renderImagePicker,
 	} = props;
 
@@ -1551,7 +1551,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			.run();
 	}, [editor]);
 
-	const insertCalculatedValue = useCallback(
+	const insertPlaceholderValue = useCallback(
 		(value: { kind: string; label: string }) => {
 			if (!editor) {
 				return;
@@ -1560,7 +1560,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				.chain()
 				.focus()
 				.insertContent({
-					type: "calculatedValue",
+					type: "placeholderValue",
 					attrs: { kind: value.kind, label: value.label },
 				})
 				.run();
@@ -1744,8 +1744,8 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					) : null}
 					{renderCalloutInsert != null ? renderCalloutInsert(insertCallout) : null}
 					{renderButtonLinkInsert != null ? renderButtonLinkInsert(insertButtonLink) : null}
-					{renderCalculatedValueInsert != null
-						? renderCalculatedValueInsert(insertCalculatedValue)
+					{renderPlaceholderValueInsert != null
+						? renderPlaceholderValueInsert(insertPlaceholderValue)
 						: null}
 				</div>
 			) : null}

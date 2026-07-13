@@ -62,9 +62,9 @@ import {
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
-import { CalculatedValueInsertMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/calculated-value-insert-menu";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import { PlaceholderValueInsertMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/placeholder-value-insert-menu";
 import {
 	type MergeableBlock,
 	mergeBlocksToDocument,
@@ -626,8 +626,8 @@ function ContentBlockPanel({
 							onClick={insertButtonLink}
 						/>
 					)}
-					renderCalculatedValueInsert={(insertCalculatedValue) => (
-						<CalculatedValueInsertMenu onInsert={insertCalculatedValue} />
+					renderPlaceholderValueInsert={(insertPlaceholderValue) => (
+						<PlaceholderValueInsertMenu onInsert={insertPlaceholderValue} />
 					)}
 					renderImagePicker={
 						initialAssets != null

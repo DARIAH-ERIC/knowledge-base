@@ -7,7 +7,7 @@ import { WorkingGroupDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 import { publishWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/publish-working-group.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { resolveCalculatedValuesInContentBlocks } from "@/lib/content-blocks-service";
+import { resolvePlaceholderValuesInContentBlocks } from "@/lib/content-blocks-service";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
 import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { getPersonRelations } from "@/lib/data/person-relations";
@@ -85,7 +85,7 @@ export default async function DashboardAdministratorWorkingGroupDetailsPage(
 		unit: workingGroup,
 	} = workingGroupData;
 
-	const descriptionContentBlocks = await resolveCalculatedValuesInContentBlocks(
+	const descriptionContentBlocks = await resolvePlaceholderValuesInContentBlocks(
 		workingGroup.descriptionContentBlocks,
 	);
 
