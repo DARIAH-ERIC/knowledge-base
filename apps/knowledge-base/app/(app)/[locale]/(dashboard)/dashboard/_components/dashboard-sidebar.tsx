@@ -56,15 +56,15 @@ export function useSidebarMenu(
 				icon: <ListBulletIcon />,
 			},
 			{
-				href: "/dashboard/administrator/tasks",
-				tooltip: t("Tasks"),
-				label: t("Tasks"),
-				icon: <ListBulletIcon />,
-			},
-			{
 				href: "/dashboard/administrator/drafts",
 				tooltip: t("Drafts"),
 				label: t("Drafts"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/maintenance",
+				tooltip: t("Maintenance"),
+				label: t("Maintenance"),
 				icon: <ListBulletIcon />,
 			},
 			{
@@ -74,15 +74,15 @@ export function useSidebarMenu(
 				icon: <ListBulletIcon />,
 			},
 			{
-				href: "/dashboard/administrator/users",
-				tooltip: t("Users"),
-				label: t("Users"),
+				href: "/dashboard/administrator/tasks",
+				tooltip: t("Tasks"),
+				label: t("Tasks"),
 				icon: <ListBulletIcon />,
 			},
 			{
-				href: "/dashboard/administrator/maintenance",
-				tooltip: t("Maintenance"),
-				label: t("Maintenance"),
+				href: "/dashboard/administrator/users",
+				tooltip: t("Users"),
+				label: t("Users"),
 				icon: <ListBulletIcon />,
 			},
 		],

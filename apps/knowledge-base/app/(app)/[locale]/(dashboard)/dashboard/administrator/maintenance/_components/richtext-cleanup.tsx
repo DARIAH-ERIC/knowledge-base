@@ -16,7 +16,9 @@ import { AlertTriangleIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState, useTransition } from "react";
 
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { cleanRichTextAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/clean-richtext.action";
+import { useClientPagination } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/use-client-pagination";
 import type { CleanRichTextResult, RichTextCleanupBlock } from "@/lib/data/richtext-cleanup";
 import { getEntityDetailHref } from "@/lib/entity-detail-href";
 import { useRouter } from "@/lib/navigation/navigation";
@@ -42,6 +44,12 @@ export function RichTextCleanup(props: Readonly<RichTextCleanupProps>): ReactNod
 	const [error, setError] = useState<string | null>(null);
 
 	const allSelected = blocks.length > 0 && selected.size === blocks.length;
+
+	const rows = blocks.map((block) => {
+		return { ...block, id: block.contentBlockId };
+	});
+
+	const { page, pageItems, perPage, setPage, totalItems, totalPages } = useClientPagination(rows);
 
 	function toggle(id: string, isSelected: boolean) {
 		setSelected((current) => {
@@ -132,11 +140,7 @@ export function RichTextCleanup(props: Readonly<RichTextCleanupProps>): ReactNod
 					<TableColumn id="block">{t("Block")}</TableColumn>
 					<TableColumn id="status">{t("Status")}</TableColumn>
 				</TableHeader>
-				<TableBody
-					items={blocks.map((block) => {
-						return { ...block, id: block.contentBlockId };
-					})}
-				>
+				<TableBody items={pageItems}>
 					{(block) => {
 						const href = getEntityDetailHref({
 							entityType: block.entityType,
@@ -173,6 +177,16 @@ export function RichTextCleanup(props: Readonly<RichTextCleanupProps>): ReactNod
 					}}
 				</TableBody>
 			</Table>
+
+			{totalItems > perPage ? (
+				<Paginate
+					page={page}
+					perPage={perPage}
+					setPage={setPage}
+					total={totalPages}
+					totalItems={totalItems}
+				/>
+			) : null}
 
 			<ModalContent
 				isOpen={isConfirmOpen}

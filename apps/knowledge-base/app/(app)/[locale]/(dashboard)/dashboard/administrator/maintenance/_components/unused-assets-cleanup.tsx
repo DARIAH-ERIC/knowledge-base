@@ -7,7 +7,9 @@ import { AlertTriangleIcon, DownloadIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState, useTransition } from "react";
 
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { deleteUnusedAssetsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/delete-unused-assets.action";
+import { useClientPagination } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/use-client-pagination";
 import type { DeleteUnusedAssetsResult, UnusedAssetPreview } from "@/lib/data/asset-cleanup";
 import { formatFileSize } from "@/lib/format-file-size";
 import { useRouter } from "@/lib/navigation/navigation";
@@ -35,6 +37,8 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 	);
 
 	const allSelected = assets.length > 0 && selected.size === assets.length;
+
+	const { page, pageItems, perPage, setPage, totalItems, totalPages } = useClientPagination(assets);
 
 	function toggle(id: string, isSelected: boolean) {
 		setSelected((current) => {
@@ -124,8 +128,8 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 				</p>
 			) : null}
 
-			<ul className="grid grid-cols-2 gap-(--layout-padding) sm:grid-cols-3 lg:grid-cols-4">
-				{assets.map((asset) => {
+			<ul className="grid grid-cols-4 gap-(--layout-padding) sm:grid-cols-6 lg:grid-cols-8">
+				{pageItems.map((asset) => {
 					const isSelected = selected.has(asset.id);
 
 					return (
@@ -134,12 +138,21 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 							data-selected={isSelected || undefined}
 							key={asset.id}
 						>
-							{/* eslint-disable-next-line @next/next/no-img-element */}
-							<img
-								alt={asset.label}
-								className="aspect-square inline-full rounded-sm bg-muted object-contain"
-								src={asset.url}
-							/>
+							<button
+								aria-label={t("Select {label}", { label: asset.label })}
+								className="block overflow-hidden rounded-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+								onClick={() => {
+									toggle(asset.id, !isSelected);
+								}}
+								type="button"
+							>
+								{/* eslint-disable-next-line @next/next/no-img-element */}
+								<img
+									alt={asset.label}
+									className="aspect-square inline-full bg-muted object-contain"
+									src={asset.url}
+								/>
+							</button>
 							<Checkbox
 								className="items-start"
 								isSelected={isSelected}
@@ -147,7 +160,7 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 									toggle(asset.id, value);
 								}}
 							>
-								<span className="flex flex-col">
+								<span className="flex flex-col" data-slot="label">
 									<span className="line-clamp-2 wrap-break-word text-sm">{asset.label}</span>
 									<span className="text-muted-fg text-xs">
 										{asset.size != null ? formatFileSize(asset.size) : t("unknown size")}
@@ -166,6 +179,16 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 					);
 				})}
 			</ul>
+
+			{totalItems > perPage ? (
+				<Paginate
+					page={page}
+					perPage={perPage}
+					setPage={setPage}
+					total={totalPages}
+					totalItems={totalItems}
+				/>
+			) : null}
 
 			<ModalContent
 				isOpen={isConfirmOpen}

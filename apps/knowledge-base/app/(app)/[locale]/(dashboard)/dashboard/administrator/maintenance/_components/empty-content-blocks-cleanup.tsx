@@ -16,7 +16,9 @@ import { AlertTriangleIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState, useTransition } from "react";
 
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { deleteEmptyContentBlocksAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/delete-empty-content-blocks.action";
+import { useClientPagination } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/use-client-pagination";
 import type {
 	DeleteEmptyContentBlocksResult,
 	EmptyContentBlock,
@@ -47,6 +49,12 @@ export function EmptyContentBlocksCleanup(
 	const [error, setError] = useState<string | null>(null);
 
 	const allSelected = blocks.length > 0 && selected.size === blocks.length;
+
+	const rows = blocks.map((block) => {
+		return { ...block, id: block.contentBlockId };
+	});
+
+	const { page, pageItems, perPage, setPage, totalItems, totalPages } = useClientPagination(rows);
 
 	function toggle(id: string, isSelected: boolean) {
 		setSelected((current) => {
@@ -136,11 +144,7 @@ export function EmptyContentBlocksCleanup(
 					<TableColumn id="field">{t("Field")}</TableColumn>
 					<TableColumn id="status">{t("Status")}</TableColumn>
 				</TableHeader>
-				<TableBody
-					items={blocks.map((block) => {
-						return { ...block, id: block.contentBlockId };
-					})}
-				>
+				<TableBody items={pageItems}>
 					{(block) => {
 						const href = getEntityDetailHref({
 							entityType: block.entityType,
@@ -176,6 +180,16 @@ export function EmptyContentBlocksCleanup(
 					}}
 				</TableBody>
 			</Table>
+
+			{totalItems > perPage ? (
+				<Paginate
+					page={page}
+					perPage={perPage}
+					setPage={setPage}
+					total={totalPages}
+					totalItems={totalItems}
+				/>
+			) : null}
 
 			<ModalContent
 				isOpen={isConfirmOpen}
