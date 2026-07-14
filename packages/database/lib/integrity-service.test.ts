@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { classifyRelationPair, mergeAdjacentDurations } from "./integrity-service";
+import { classifyRelationPair, isUnitInactive, mergeAdjacentDurations } from "./integrity-service";
 
 const d = (value: string): Date => new Date(value);
 
@@ -107,5 +107,39 @@ describe("classifyRelationPair", () => {
 		];
 		const continuous = [{ start: d("2024-01-01T00:00:00Z"), end: d("2024-12-31T00:00:00Z") }];
 		expect(classifyRelationPair(gapped, continuous)).toEqual({ kind: "duration_mismatch" });
+	});
+});
+
+describe("isUnitInactive", () => {
+	it("is not inactive when there are no trigger relations", () => {
+		expect(isUnitInactive([])).toBe(false);
+	});
+
+	it("is inactive when its only trigger relation has ended", () => {
+		expect(
+			isUnitInactive([{ start: d("2020-01-01T00:00:00Z"), end: d("2024-01-01T00:00:00Z") }]),
+		).toBe(true);
+	});
+
+	it("is not inactive when a trigger relation is still ongoing", () => {
+		expect(isUnitInactive([{ start: d("2020-01-01T00:00:00Z") }])).toBe(false);
+	});
+
+	it("is not inactive when any of several trigger relations is still ongoing", () => {
+		expect(
+			isUnitInactive([
+				{ start: d("2018-01-01T00:00:00Z"), end: d("2020-01-01T00:00:00Z") },
+				{ start: d("2020-01-01T00:00:00Z") },
+			]),
+		).toBe(false);
+	});
+
+	it("is inactive when every trigger relation has ended", () => {
+		expect(
+			isUnitInactive([
+				{ start: d("2016-01-01T00:00:00Z"), end: d("2018-01-01T00:00:00Z") },
+				{ start: d("2018-01-01T00:00:00Z"), end: d("2020-01-01T00:00:00Z") },
+			]),
+		).toBe(true);
 	});
 });

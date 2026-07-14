@@ -56,7 +56,14 @@ export function UnitRelationRequirementsCheck(
 					<TableColumn id="has">{t("Has")}</TableColumn>
 					<TableColumn id="missing">{t("Missing")}</TableColumn>
 				</TableHeader>
-				<TableBody items={pageItems} renderEmptyState={() => t("No data-integrity issues found.")}>
+				<TableBody
+					items={pageItems}
+					renderEmptyState={() => (
+						<p className="p-(--gutter) text-muted-fg text-sm">
+							{t("No data-integrity issues found.")}
+						</p>
+					)}
+				>
 					{(finding) => {
 						const href = getEntityDetailHref({
 							entityType: "organisational_units",

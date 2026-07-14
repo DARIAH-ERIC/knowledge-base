@@ -5,6 +5,7 @@
 	"type": "module",
 	"sideEffects": false,
 	"scripts": {
+		"data:audit:inactive-unit-relations": "tsx ./scripts/audit-inactive-unit-relations.ts",
 		"data:audit:paired-relations": "tsx ./scripts/audit-paired-relations.ts",
 		"data:audit:relation-vocabulary": "tsx ./scripts/audit-relation-vocabulary.ts",
 		"data:audit:unit-relation-requirements": "tsx ./scripts/audit-unit-relation-requirements.ts",
