@@ -47,8 +47,8 @@ export async function getUnitRelationRequirementFindings(): Promise<UnitRelation
 
 /**
  * Runs the inactive-unit-relation checks (e.g. a working group whose `is_part_of` relation to an
- * ERIC has ended must not still have open chair/vice-chair/member/contact relations). Same checks as
- * the `@dariah-eric/audit` cli scripts.
+ * ERIC has ended must not still have open chair/vice-chair/member/contact relations). Same checks
+ * as the `@dariah-eric/audit` cli scripts.
  */
 export async function getInactiveUnitRelationFindings(): Promise<InactiveUnitRelationCheckResult> {
 	return checkInactiveUnitRelations(db);
