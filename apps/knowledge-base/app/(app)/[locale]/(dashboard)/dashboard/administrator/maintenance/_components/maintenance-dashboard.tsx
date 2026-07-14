@@ -9,6 +9,7 @@ import { EntityListHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_co
 
 interface MaintenanceDashboardProps {
 	emptyContentBlocks: ReactNode;
+	inactiveUnitRelations: ReactNode;
 	pairedRelations: ReactNode;
 	richText: ReactNode;
 	unitRelationRequirements: ReactNode;
@@ -19,6 +20,7 @@ interface MaintenanceDashboardProps {
 export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>): ReactNode {
 	const {
 		emptyContentBlocks,
+		inactiveUnitRelations,
 		pairedRelations,
 		richText,
 		unitRelationRequirements,
@@ -47,6 +49,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						<TabList aria-label={t("Data-integrity checks")}>
 							<Tab id="paired-relations">{t("Paired relations")}</Tab>
 							<Tab id="unit-relation-requirements">{t("Required relations")}</Tab>
+							<Tab id="inactive-unit-relations">{t("Inactive units")}</Tab>
 						</TabList>
 
 						<TabPanel id="paired-relations" className="flex flex-col gap-y-(--layout-padding)">
@@ -70,6 +73,19 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							</p>
 
 							{unitRelationRequirements}
+						</TabPanel>
+
+						<TabPanel
+							id="inactive-unit-relations"
+							className="flex flex-col gap-y-(--layout-padding)"
+						>
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Organisational units that are no longer active but still have open person relations, e.g. a working group whose membership in an ERIC has ended, or a country that is no longer a member, but whose chair, member, coordinator, representative, or contact relations have no end date.",
+								)}
+							</p>
+
+							{inactiveUnitRelations}
 						</TabPanel>
 					</Tabs>
 				</TabPanel>

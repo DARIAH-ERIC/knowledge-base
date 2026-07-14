@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
 
 import { EmptyContentBlocksSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-section";
+import { InactiveUnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-section";
 import { MaintenanceDashboard } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard";
 import { MaintenanceSectionFallback } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-section-fallback";
 import { PairedRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-section";
@@ -38,6 +39,11 @@ export default async function DashboardAdministratorMaintenancePage(
 			emptyContentBlocks={
 				<Suspense fallback={<MaintenanceSectionFallback />}>
 					<EmptyContentBlocksSection />
+				</Suspense>
+			}
+			inactiveUnitRelations={
+				<Suspense fallback={<MaintenanceSectionFallback />}>
+					<InactiveUnitRelationsSection />
 				</Suspense>
 			}
 			pairedRelations={

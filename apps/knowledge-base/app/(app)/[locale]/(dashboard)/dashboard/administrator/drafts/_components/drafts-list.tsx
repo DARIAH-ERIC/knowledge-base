@@ -86,7 +86,7 @@ export function DraftsList(props: Readonly<DraftsListProps>): ReactNode {
 				/>
 			) : (
 				<Fragment>
-					<div className="flex justify-end">
+					<div className="flex justify-end mt-(--layout-padding)">
 						<Select
 							aria-label={t("Filter by type")}
 							onChange={(key) => {
