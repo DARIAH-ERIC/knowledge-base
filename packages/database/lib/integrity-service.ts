@@ -50,6 +50,18 @@ export const pairedRelationRules: Array<PairedRelationRule> = [
 			label: "Member of the General Assembly",
 		},
 	},
+	{
+		name: "national-coordinator-ncc",
+		a: {
+			roleTypes: ["national_coordinator", "national_coordinator_deputy"],
+			label: "National coordinator (or deputy) of a country",
+		},
+		b: {
+			roleTypes: ["is_member_of"],
+			unitSlug: "national-coordinator-committee",
+			label: "Member of the National Coordinator Committee",
+		},
+	},
 ];
 
 /**
