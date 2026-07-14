@@ -37,6 +37,67 @@ function humanizeAction(action: string): string {
 	return action.replaceAll("_", " ");
 }
 
+function humanizeSummaryKey(key: string): string {
+	const words = key.replaceAll("_", " ");
+	return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+function formatSummaryValue(value: unknown): string {
+	if (Array.isArray(value)) {
+		return value.map((entry) => String(entry)).join(", ");
+	}
+	if (typeof value === "boolean") {
+		return value ? "yes" : "no";
+	}
+	if (value != null && typeof value === "object") {
+		return JSON.stringify(value);
+	}
+	return String(value);
+}
+
+/**
+ * Renders an audit summary as short human-readable text. `lifecycle` becomes a leading phrase; any
+ * other keys an action explicitly recorded show as "Key: value". Returns "" when there is nothing
+ * worth showing, so the cell can render a muted dash instead of `{}`.
+ */
+function formatAuditSummary(summary: Record<string, unknown>): string {
+	const parts: Array<string> = [];
+
+	if (summary.lifecycle === "published") {
+		parts.push("Published");
+	} else if (summary.lifecycle === "draft") {
+		parts.push("Saved as draft");
+	}
+
+	for (const [key, value] of Object.entries(summary)) {
+		if (key === "lifecycle") {
+			continue;
+		}
+		// Legacy rows recorded every submitted field name here — deliberately noise, so drop it.
+		if (key === "fields") {
+			continue;
+		}
+		// `save-and-publish` is exactly what `lifecycle: published` already conveys.
+		if (key === "intent" && value === "save-and-publish") {
+			continue;
+		}
+		if (value == null || value === "" || (Array.isArray(value) && value.length === 0)) {
+			continue;
+		}
+		parts.push(`${humanizeSummaryKey(key)}: ${formatSummaryValue(value)}`);
+	}
+
+	return parts.join(" · ");
+}
+
+function AuditSummary({ summary }: Readonly<{ summary: Record<string, unknown> }>): ReactNode {
+	const text = formatAuditSummary(summary);
+	if (text === "") {
+		return <span className="text-muted-fg">—</span>;
+	}
+	return <span className="text-sm">{text}</span>;
+}
+
 export function InternalDashboard(props: Readonly<InternalDashboardProps>): ReactNode {
 	const { action, auditLog, page, statements } = props;
 
@@ -116,7 +177,7 @@ export function InternalDashboard(props: Readonly<InternalDashboardProps>): Reac
 										<span className="block text-muted-fg text-xs">{item.subjectType}</span>
 									</TableCell>
 									<TableCell>
-										<code className="text-xs">{JSON.stringify(item.summary)}</code>
+										<AuditSummary summary={item.summary} />
 									</TableCell>
 								</TableRow>
 							)}

@@ -1,8 +1,11 @@
 import { unique } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
-import { db } from "@/lib/db";
+import { type Database, type Transaction, db } from "@/lib/db";
 import { alias, count, desc, eq, inArray, sql } from "@/lib/db/sql";
+
+/** A db handle usable for reads — the global pool, or an open transaction (for write-time reads). */
+type AuditLogClient = Database | Transaction;
 
 export type AuditLogAction = (typeof schema.auditLogActionEnum)[number];
 
@@ -43,6 +46,7 @@ export interface AuditLogResult {
  * `null` and are handled by the other resolvers / fallback.
  */
 async function resolveEntityDocumentTitles(
+	client: AuditLogClient,
 	documentIds: Array<string>,
 ): Promise<Map<string, string>> {
 	if (documentIds.length === 0) {
@@ -51,7 +55,7 @@ async function resolveEntityDocumentTitles(
 
 	const versionId = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 
-	const rows = await db
+	const rows = await client
 		.select({
 			documentId: schema.documentLifecycle.documentId,
 			label: sql<
@@ -81,6 +85,18 @@ async function resolveEntityDocumentTitles(
 		}
 	}
 	return labels;
+}
+
+/**
+ * Resolves a single entity document id to its current version's title/name. Pass the active
+ * transaction and call this _before_ the entity is deleted; the result is meant to be stored as the
+ * audit row's `subjectLabel` (see {@link resolveAuditSubjectLabel}).
+ */
+export async function resolveEntityDocumentLabel(
+	client: AuditLogClient,
+	documentId: string,
+): Promise<string | null> {
+	return (await resolveEntityDocumentTitles(client, [documentId])).get(documentId) ?? null;
 }
 
 /** Resolves country/working-group report ids to "<org unit name> <campaign year>". */
@@ -268,6 +284,148 @@ function humanizeSubjectType(subjectType: string): string {
 	return subjectType.replaceAll("_", " ");
 }
 
+/** Resolves a `services.id` / `social_media.id` (etc.) to its `name`. */
+async function resolveNamedRecordLabel(
+	table: typeof schema.services | typeof schema.socialMedia,
+	id: string,
+): Promise<string | null> {
+	const [row] = await db.select({ name: table.name }).from(table).where(eq(table.id, id)).limit(1);
+	return row?.name ?? null;
+}
+
+/** Resolves a navigation id, trying menu-item labels first, then top-level menu names. */
+async function resolveNavigationLabel(id: string): Promise<string | null> {
+	const [item] = await db
+		.select({ label: schema.navigationItems.label })
+		.from(schema.navigationItems)
+		.where(eq(schema.navigationItems.id, id))
+		.limit(1);
+	if (item?.label != null) {
+		return item.label;
+	}
+
+	const [menu] = await db
+		.select({ name: schema.navigationMenus.name })
+		.from(schema.navigationMenus)
+		.where(eq(schema.navigationMenus.id, id))
+		.limit(1);
+	return menu?.name ?? null;
+}
+
+/** Resolves a `projects_to_organisational_units.id` to "<project> — <organisation>". */
+async function resolveProjectPartnerLabel(id: string): Promise<string | null> {
+	const projectLifecycle = alias(schema.documentLifecycle, "project_partner_project_lifecycle");
+	const unitLifecycle = alias(schema.documentLifecycle, "project_partner_unit_lifecycle");
+	const projectVersionId = sql`COALESCE(${projectLifecycle.draftId}, ${projectLifecycle.publishedId})`;
+	const unitVersionId = sql`COALESCE(${unitLifecycle.draftId}, ${unitLifecycle.publishedId})`;
+
+	const [row] = await db
+		.select({ projectName: schema.projects.name, unitName: schema.organisationalUnits.name })
+		.from(schema.projectsToOrganisationalUnits)
+		.leftJoin(
+			projectLifecycle,
+			eq(projectLifecycle.documentId, schema.projectsToOrganisationalUnits.projectDocumentId),
+		)
+		.leftJoin(schema.projects, eq(schema.projects.id, projectVersionId))
+		.leftJoin(
+			unitLifecycle,
+			eq(unitLifecycle.documentId, schema.projectsToOrganisationalUnits.unitDocumentId),
+		)
+		.leftJoin(schema.organisationalUnits, eq(schema.organisationalUnits.id, unitVersionId))
+		.where(eq(schema.projectsToOrganisationalUnits.id, id))
+		.limit(1);
+
+	if (row == null) {
+		return null;
+	}
+	const project = row.projectName ?? "Unknown project";
+	const unit = row.unitName ?? "unknown organisation";
+	return `${project} — ${unit}`;
+}
+
+/**
+ * Subject types whose id is an `entities.id` document id (resolved via the current version).
+ * Includes the organisational-unit subtypes (`countries`, `institutions`, ...) — they all resolve
+ * through `organisational_units.name` regardless of the discriminator carried in the subject type.
+ */
+const entityDocumentSubjectTypes = new Set([
+	"news",
+	"events",
+	"pages",
+	"opportunities",
+	"funding_calls",
+	"impact_case_studies",
+	"spotlight_articles",
+	"documents_policies",
+	"documentation_pages",
+	"internal_pages",
+	"persons",
+	"projects",
+	"organisational_units",
+	"countries",
+	"institutions",
+	"national_consortia",
+	"working_groups",
+	"governance_bodies",
+]);
+
+/**
+ * Resolves a single subject to its human-readable label, dispatching on `subjectType`. Call this at
+ * write time — before the subject row is deleted — and pass the result as `recordAuditEvent`'s
+ * `subjectLabel`, so the audit log keeps a readable label even though the subject no longer
+ * exists.
+ *
+ * Returns `null` when the subject can't be resolved (unknown type, non-uuid id, or a subtype id
+ * that doesn't map cleanly, e.g. a document-policy _group_ under the `documents_policies` type);
+ * callers that know a better label for those cases should pass it explicitly instead.
+ */
+export async function resolveAuditSubjectLabel(
+	subjectType: string,
+	subjectId: string,
+): Promise<string | null> {
+	if (!isUuid(subjectId)) {
+		return null;
+	}
+
+	if (entityDocumentSubjectTypes.has(subjectType)) {
+		return resolveEntityDocumentLabel(db, subjectId);
+	}
+
+	switch (subjectType) {
+		case "country_reports":
+		case "working_group_reports": {
+			return (await resolveReportLabels([subjectId])).get(subjectId) ?? null;
+		}
+		case "reporting_campaigns": {
+			return (await resolveCampaignLabels([subjectId])).get(subjectId) ?? null;
+		}
+		case "contributions": {
+			return (await resolveContributionLabels([subjectId])).get(subjectId) ?? null;
+		}
+		case "unit_relations": {
+			return (await resolveUnitRelationLabels([subjectId])).get(subjectId) ?? null;
+		}
+		case "users": {
+			return (await resolveActorLabels([subjectId])).get(subjectId) ?? null;
+		}
+		case "project_partners": {
+			return resolveProjectPartnerLabel(subjectId);
+		}
+		case "social_media": {
+			return resolveNamedRecordLabel(schema.socialMedia, subjectId);
+		}
+		case "internal_services": {
+			return resolveNamedRecordLabel(schema.services, subjectId);
+		}
+		case "navigation": {
+			return resolveNavigationLabel(subjectId);
+		}
+		default: {
+			return null;
+		}
+	}
+}
+
 export async function getAuditLogEntries(
 	params: Readonly<GetAuditLogEntriesParams>,
 ): Promise<AuditLogResult> {
@@ -282,6 +440,7 @@ export async function getAuditLogEntries(
 				action: schema.auditLogs.action,
 				subjectType: schema.auditLogs.subjectType,
 				subjectId: schema.auditLogs.subjectId,
+				subjectLabel: schema.auditLogs.subjectLabel,
 				summary: schema.auditLogs.summary,
 				createdAt: schema.auditLogs.createdAt,
 				actorUserId: schema.auditLogs.actorUserId,
@@ -316,7 +475,7 @@ export async function getAuditLogEntries(
 		unitRelationLabels,
 		actorLabels,
 	] = await Promise.all([
-		resolveEntityDocumentTitles(uuidSubjectIds),
+		resolveEntityDocumentTitles(db, uuidSubjectIds),
 		resolveReportLabels(uuidSubjectIds),
 		resolveCampaignLabels(uuidSubjectIds),
 		resolveContributionLabels(uuidSubjectIds),
@@ -325,7 +484,11 @@ export async function getAuditLogEntries(
 	]);
 
 	const data: Array<AuditLogEntry> = items.map((item) => {
+		// A label snapshotted at write time (see `resolveAuditSubjectLabel`) wins: it's the only source
+		// that survives the subject being deleted. Otherwise resolve live from the current version so
+		// renames stay reflected, and fall back to `<type> #<id>` when nothing resolves.
 		const subjectLabel =
+			item.subjectLabel ??
 			entityTitles.get(item.subjectId) ??
 			reportLabels.get(item.subjectId) ??
 			campaignLabels.get(item.subjectId) ??

@@ -28,6 +28,13 @@ export const auditLogs = p.snakeCase.table(
 		action: p.text("action", { enum: auditLogActionEnum }).notNull(),
 		subjectType: p.text("subject_type").notNull(),
 		subjectId: p.text("subject_id").notNull(),
+		/**
+		 * Snapshot of the subject's human-readable label at the time the event was recorded. Populated
+		 * for events whose subject won't be resolvable at read time — notably deletes, where the live
+		 * row is gone. Null for events whose label is resolved live from the current version (so
+		 * renames stay reflected). See `resolveAuditSubjectLabel`.
+		 */
+		subjectLabel: p.text("subject_label"),
 		summary: p.jsonb("summary").notNull().default({}),
 		createdAt: f.timestamp("created_at").notNull().defaultNow(),
 	},

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { assertCanManageCountryInstitutionRelation } from "@/app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/authorize-country-institution-relation";
 import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 
@@ -27,6 +28,9 @@ export async function deleteDelegatedUnitRelationAction(id: string): Promise<voi
 		relatedUnitDocumentId: relation.relatedUnitDocumentId,
 	});
 
+	// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
+	const subjectLabel = await resolveAuditSubjectLabel("unit_relations", id);
+
 	await db
 		.delete(schema.organisationalUnitsRelations)
 		.where(eq(schema.organisationalUnitsRelations.id, id));
@@ -36,6 +40,7 @@ export async function deleteDelegatedUnitRelationAction(id: string): Promise<voi
 		action: "delete",
 		subjectType: "unit_relations",
 		subjectId: id,
+		subjectLabel,
 		summary: {},
 	});
 

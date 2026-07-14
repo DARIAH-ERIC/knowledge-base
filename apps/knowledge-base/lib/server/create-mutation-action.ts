@@ -28,6 +28,13 @@ import { type ServerAction, createServerAction } from "@/lib/server/create-serve
  */
 export interface MutationResult<TSuccessData = unknown> {
 	subjectId: string;
+	/**
+	 * Snapshot of the subject's label for the audit row. Set this when the subject won't be
+	 * resolvable at read time — above all for deletes, where `mutate` must resolve the label (e.g.
+	 * via `resolveAuditSubjectLabel`) _before_ removing the row. Omit it for create/update so the log
+	 * resolves the label live from the current version.
+	 */
+	subjectLabel?: string | null;
 	auditSummary?: Record<string, unknown>;
 	successMessage?: string;
 	successData?: TSuccessData;
@@ -174,6 +181,7 @@ export function createMutationAction<TSchema extends v.GenericSchema, TSuccessDa
 					action: opts.audit.action,
 					subjectType: opts.audit.subjectType,
 					subjectId: mutationResult.subjectId,
+					subjectLabel: mutationResult.subjectLabel,
 					summary: {
 						...getAuditSummaryFromFormData(formData),
 						...mutationResult.auditSummary,
