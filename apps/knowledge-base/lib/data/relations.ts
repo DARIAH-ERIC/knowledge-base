@@ -20,6 +20,12 @@ export interface RelationOptionItem {
 	name: string;
 	/** Human-readable type label (e.g. "Event", "Working group"). */
 	description?: string;
+	/** Raw entity-type token — used by the merge tool to enforce same-type selection. */
+	entityType?: string;
+	/** Raw organisational-unit-type token (only set for organisational units). */
+	unitType?: string | null;
+	/** The entity's current slug — used by the maintenance slug editor to prefill the field. */
+	slug?: string;
 }
 
 interface GetRelationOptionsParams {
@@ -108,6 +114,9 @@ export async function getEntityRelationOptions(
 				id: row.id,
 				name: row.label ?? row.slug,
 				description: getEntityTypeLabel({ entityType: row.entityType, unitType: row.unitType }),
+				entityType: row.entityType,
+				unitType: row.unitType,
+				slug: row.slug,
 			};
 		}),
 		total: aggregate.at(0)?.total ?? 0,

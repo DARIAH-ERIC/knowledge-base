@@ -140,3 +140,16 @@ export async function dispatchWebhook(payload: { type: WebhookEntityType }): Pro
 		log.error("[revalidation webhook] placeholder-value scan failed", error);
 	}
 }
+
+/**
+ * Dispatch the revalidation webhook(s) for a raw entity-type token. A single entity type can
+ * surface on the website under several route groups (e.g. an organisational unit is both
+ * members-partners and working-groups), so this fans out to each mapped {@link WebhookEntityType}.
+ */
+export async function dispatchWebhookForEntityType(
+	entityType: (typeof schema.entityTypesEnum)[number],
+): Promise<void> {
+	for (const type of webhookTypesByEntityType[entityType] ?? []) {
+		await dispatchWebhook({ type });
+	}
+}

@@ -1957,6 +1957,36 @@ export class DatabaseService {
 		});
 	}
 
+	/** Insert a document-level entity→entity relation (used to seed the maintenance merge tool). */
+	async addEntityToEntityRelation(entityId: string, relatedEntityId: string): Promise<void> {
+		await this.db
+			.insert(schema.entitiesToEntities)
+			.values({ entityId, relatedEntityId, position: 0 })
+			.onConflictDoNothing();
+	}
+
+	/** Read the current slug of an entity document (used by the maintenance slug editor test). */
+	async getEntitySlugByDocumentId(documentId: string): Promise<string | null> {
+		const [row] = await this.db
+			.select({ slug: schema.entities.slug })
+			.from(schema.entities)
+			.where(eq(schema.entities.id, documentId))
+			.limit(1);
+
+		return row?.slug ?? null;
+	}
+
+	/** Whether an entity document still exists (a merged-away source should not). */
+	async entityDocumentExists(documentId: string): Promise<boolean> {
+		const [row] = await this.db
+			.select({ id: schema.entities.id })
+			.from(schema.entities)
+			.where(eq(schema.entities.id, documentId))
+			.limit(1);
+
+		return row != null;
+	}
+
 	async getFundingCallByTitle(title: string): Promise<{
 		duration: { start: Date; end?: Date };
 		id: string;
