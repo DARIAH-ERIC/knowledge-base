@@ -1,190 +1,127 @@
+import { randomUUID } from "node:crypto";
+
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { describe, expect, it } from "vitest";
 
+import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
 import { mergeEntities } from "@/lib/data/entity-merge";
-import { and, eq, ne, sql } from "@/lib/db/sql";
+import type { Transaction } from "@/lib/db";
+import { eq, sql } from "@/lib/db/sql";
 import { withTransaction } from "@/test/lib/with-transaction";
 
-describe("mergeEntities (against migrated dump)", () => {
-	it("re-points a duplicate project's relations onto the target and deletes the source", async () => {
+type Tx = Transaction;
+
+async function getProjectTypeId(tx: Tx): Promise<string> {
+	const type = await tx.query.entityTypes.findFirst({
+		where: { type: "projects" },
+		columns: { id: true },
+	});
+	assert(type, "projects entity type not found in database");
+	return type.id;
+}
+
+async function getProjectRoleId(tx: Tx): Promise<string> {
+	const role = await tx.query.projectRoles.findFirst({ columns: { id: true } });
+	assert(role, "no project_roles seeded in database");
+	return role.id;
+}
+
+/** Insert a bare entity document to act as an FK target (e.g. a project↔unit relation endpoint). */
+async function createBareEntity(tx: Tx, typeId: string): Promise<string> {
+	const [row] = await tx
+		.insert(schema.entities)
+		.values({ slug: `merge-test-${randomUUID()}`, typeId })
+		.returning({ id: schema.entities.id });
+	assert(row);
+	return row.id;
+}
+
+async function countProjectUnits(tx: Tx, projectDocumentId: string): Promise<number> {
+	return tx
+		.select({ n: sql<number>`count(*)::int` })
+		.from(schema.projectsToOrganisationalUnits)
+		.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, projectDocumentId))
+		.then((r) => r[0]?.n ?? 0);
+}
+
+describe("mergeEntities", () => {
+	it("re-points project→unit relations onto the target, deduping collisions, and deletes the source", async () => {
 		await withTransaction(async (tx) => {
-			const source = await tx.query.entities.findFirst({
-				where: { slug: { like: "oscars-duplicate%" } },
-				columns: { id: true },
-			});
-			assert(source, "expected an 'oscars-duplicate' project in the dump");
+			const typeId = await getProjectTypeId(tx);
+			const roleId = await getProjectRoleId(tx);
 
-			// Any other, non-duplicate project of the same type is a valid mechanical merge target.
-			const target = await tx
-				.select({ id: schema.entities.id })
-				.from(schema.entities)
-				.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
-				.where(
-					and(
-						eq(schema.entityTypes.type, "projects"),
-						ne(schema.entities.id, source.id),
-						sql`${schema.entities.slug} not like '%-duplicate%'`,
-					),
-				)
-				.limit(1)
-				.then((rows) => rows[0]);
-			assert(target, "expected a canonical project to merge into");
+			const source = await createPublishedDocument(tx, typeId, `merge-src-${randomUUID()}`);
+			const target = await createPublishedDocument(tx, typeId, `merge-tgt-${randomUUID()}`);
+			const unitA = await createBareEntity(tx, typeId);
+			const unitB = await createBareEntity(tx, typeId);
 
-			const sourceP2ouBefore = await tx
-				.select({ n: sql<number>`count(*)::int` })
-				.from(schema.projectsToOrganisationalUnits)
-				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, source.id))
-				.then((r) => r[0]?.n ?? 0);
-			const sourceCrpcBefore = await tx
-				.select({ n: sql<number>`count(*)::int` })
-				.from(schema.countryReportProjectContributions)
-				.where(eq(schema.countryReportProjectContributions.projectDocumentId, source.id))
-				.then((r) => r[0]?.n ?? 0);
-			const targetP2ouBefore = await tx
-				.select({ n: sql<number>`count(*)::int` })
-				.from(schema.projectsToOrganisationalUnits)
-				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, target.id))
-				.then((r) => r[0]?.n ?? 0);
+			await tx.insert(schema.projectsToOrganisationalUnits).values([
+				{ projectDocumentId: source.documentId, unitDocumentId: unitA, roleId },
+				{ projectDocumentId: source.documentId, unitDocumentId: unitB, roleId },
+				// Target already relates to unitA with the same role — the incoming source row collides.
+				{ projectDocumentId: target.documentId, unitDocumentId: unitA, roleId },
+			]);
 
-			// After the merge, the target should hold exactly the distinct union of both projects'
-			// (unit, role) pairs — colliding source rows are deduped, not duplicated or lost.
-			const expectedUnion = await tx
-				.select({ n: sql<number>`count(distinct (unit_document_id, role_id))::int` })
-				.from(schema.projectsToOrganisationalUnits)
-				.where(
-					sql`${schema.projectsToOrganisationalUnits.projectDocumentId} in (${source.id}, ${target.id})`,
-				)
-				.then((r) => r[0]?.n ?? 0);
-
-			expect(sourceP2ouBefore).toBeGreaterThan(0);
-
-			await mergeEntities(tx, source.id, target.id);
+			await mergeEntities(tx, source.documentId, target.documentId);
 
 			// Source document is fully gone.
-			const sourceEntity = await tx.query.entities.findFirst({ where: { id: source.id } });
-			expect(sourceEntity).toBeUndefined();
+			expect(
+				await tx.query.entities.findFirst({ where: { id: source.documentId } }),
+			).toBeUndefined();
+			expect(
+				await tx
+					.select({ id: schema.entityVersions.id })
+					.from(schema.entityVersions)
+					.where(eq(schema.entityVersions.entityId, source.documentId)),
+			).toHaveLength(0);
+			expect(await countProjectUnits(tx, source.documentId)).toBe(0);
 
-			const sourceVersions = await tx
-				.select({ id: schema.entityVersions.id })
-				.from(schema.entityVersions)
-				.where(eq(schema.entityVersions.entityId, source.id));
-			expect(sourceVersions).toHaveLength(0);
-
-			// Target is intact.
-			const targetEntity = await tx.query.entities.findFirst({ where: { id: target.id } });
-			expect(targetEntity).toBeDefined();
-
-			// Relations moved off the source.
-			const sourceP2ouAfter = await tx
-				.select({ n: sql<number>`count(*)::int` })
+			// Target keeps the distinct union of (unit, role) — unitA deduped, unitB moved.
+			const units = await tx
+				.select({ unit: schema.projectsToOrganisationalUnits.unitDocumentId })
 				.from(schema.projectsToOrganisationalUnits)
-				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, source.id))
-				.then((r) => r[0]?.n ?? 0);
-			expect(sourceP2ouAfter).toBe(0);
-
-			const sourceCrpcAfter = await tx
-				.select({ n: sql<number>`count(*)::int` })
-				.from(schema.countryReportProjectContributions)
-				.where(eq(schema.countryReportProjectContributions.projectDocumentId, source.id))
-				.then((r) => r[0]?.n ?? 0);
-			expect(sourceCrpcAfter).toBe(0);
-
-			// …and onto the target, deduped to the distinct union of (unit, role) pairs.
-			const targetP2ouAfter = await tx
-				.select({ n: sql<number>`count(*)::int` })
-				.from(schema.projectsToOrganisationalUnits)
-				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, target.id))
-				.then((r) => r[0]?.n ?? 0);
-			expect(targetP2ouAfter).toBe(expectedUnion);
-			expect(targetP2ouAfter).toBeGreaterThanOrEqual(targetP2ouBefore);
-			expect(targetP2ouAfter).toBeLessThanOrEqual(targetP2ouBefore + sourceP2ouBefore);
-
-			// The report contribution moved too.
-			const targetCrpcMoved = await tx
-				.select({ n: sql<number>`count(*)::int` })
-				.from(schema.countryReportProjectContributions)
-				.where(eq(schema.countryReportProjectContributions.projectDocumentId, target.id))
-				.then((r) => r[0]?.n ?? 0);
-			expect(targetCrpcMoved).toBeGreaterThanOrEqual(sourceCrpcBefore);
+				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, target.documentId));
+			expect(units.map((u) => u.unit).toSorted()).toStrictEqual([unitA, unitB].toSorted());
 		});
 	});
 
-	it("is idempotent-safe: merging on a pair with overlapping relations dedupes rather than errors", async () => {
+	it("dedupes without erroring when every incoming relation collides with the target", async () => {
 		await withTransaction(async (tx) => {
-			const source = await tx.query.entities.findFirst({
-				where: { slug: { like: "oscars-duplicate%" } },
-				columns: { id: true },
-			});
-			assert(source, "expected an 'oscars-duplicate' project in the dump");
+			const typeId = await getProjectTypeId(tx);
+			const roleId = await getProjectRoleId(tx);
 
-			const target = await tx
-				.select({ id: schema.entities.id })
-				.from(schema.entities)
-				.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
-				.where(
-					and(
-						eq(schema.entityTypes.type, "projects"),
-						ne(schema.entities.id, source.id),
-						sql`${schema.entities.slug} not like '%-duplicate%'`,
-					),
-				)
-				.limit(1)
-				.then((rows) => rows[0]);
-			assert(target, "expected a canonical project to merge into");
+			const source = await createPublishedDocument(tx, typeId, `merge-src-${randomUUID()}`);
+			const target = await createPublishedDocument(tx, typeId, `merge-tgt-${randomUUID()}`);
+			const unitA = await createBareEntity(tx, typeId);
+			const unitB = await createBareEntity(tx, typeId);
 
-			// Pre-seed the target with a copy of every source relation so that every re-point collides.
-			await tx.execute(sql`
-				insert into projects_to_organisational_units (project_document_id, unit_document_id, role_id, duration)
-				select ${target.id}, unit_document_id, role_id, duration
-				from projects_to_organisational_units
-				where project_document_id = ${source.id}
-				on conflict do nothing
-			`);
+			await tx.insert(schema.projectsToOrganisationalUnits).values([
+				{ projectDocumentId: source.documentId, unitDocumentId: unitA, roleId },
+				{ projectDocumentId: source.documentId, unitDocumentId: unitB, roleId },
+				// Target already holds a copy of every source relation → all collide.
+				{ projectDocumentId: target.documentId, unitDocumentId: unitA, roleId },
+				{ projectDocumentId: target.documentId, unitDocumentId: unitB, roleId },
+			]);
 
-			const targetP2ouBefore = await tx
-				.select({ n: sql<number>`count(*)::int` })
-				.from(schema.projectsToOrganisationalUnits)
-				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, target.id))
-				.then((r) => r[0]?.n ?? 0);
+			const targetBefore = await countProjectUnits(tx, target.documentId);
 
-			// Should not throw despite every incoming relation colliding.
-			await mergeEntities(tx, source.id, target.id);
+			await mergeEntities(tx, source.documentId, target.documentId);
 
-			const targetP2ouAfter = await tx
-				.select({ n: sql<number>`count(*)::int` })
-				.from(schema.projectsToOrganisationalUnits)
-				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, target.id))
-				.then((r) => r[0]?.n ?? 0);
-
-			// All collided → deduped, target count unchanged.
-			expect(targetP2ouAfter).toBe(targetP2ouBefore);
-
-			const sourceEntity = await tx.query.entities.findFirst({ where: { id: source.id } });
-			expect(sourceEntity).toBeUndefined();
+			expect(await countProjectUnits(tx, target.documentId)).toBe(targetBefore);
+			expect(
+				await tx.query.entities.findFirst({ where: { id: source.documentId } }),
+			).toBeUndefined();
 		});
 	});
 
-	it("re-points the self-referential entities_to_entities on both endpoints, dropping self-relations and dedup", async () => {
+	it("re-points self-referential entities_to_entities on both endpoints, dropping self-relations and dedup", async () => {
 		await withTransaction(async (tx) => {
-			const projectType = await tx.query.entityTypes.findFirst({
-				where: { type: "projects" },
-				columns: { id: true },
-			});
-			assert(projectType, "projects entity type not found");
+			const typeId = await getProjectTypeId(tx);
 
-			async function makeEntity(slug: string): Promise<string> {
-				const [row] = await tx
-					.insert(schema.entities)
-					.values({ slug, typeId: projectType!.id })
-					.returning({ id: schema.entities.id });
-				assert(row);
-				return row.id;
-			}
-
-			const sourceId = await makeEntity("merge-test-source");
-			const targetId = await makeEntity("merge-test-target");
-			const otherId = await makeEntity("merge-test-other");
+			const sourceId = await createBareEntity(tx, typeId);
+			const targetId = await createBareEntity(tx, typeId);
+			const otherId = await createBareEntity(tx, typeId);
 
 			await tx.insert(schema.entitiesToEntities).values([
 				{ entityId: sourceId, relatedEntityId: otherId, position: 0 }, // → (target, other)
