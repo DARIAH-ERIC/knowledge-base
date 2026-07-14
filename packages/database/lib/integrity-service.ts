@@ -198,6 +198,27 @@ export interface PairedRelationCheckResult {
 	errors: Array<string>;
 }
 
+/** Resolves an organisational-unit document id from its slug, throwing if no such document exists. */
+async function resolveUnitIdBySlug(
+	db: Database | Transaction,
+	ruleName: string,
+	slug: string,
+): Promise<string> {
+	const [unit] = await db
+		.select({ id: schema.entities.id })
+		.from(schema.entities)
+		.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
+		.where(
+			and(eq(schema.entityTypes.type, "organisational_units"), eq(schema.entities.slug, slug)),
+		);
+
+	if (unit == null) {
+		throw new Error(`Rule "${ruleName}": no organisational-unit document with slug "${slug}".`);
+	}
+
+	return unit.id;
+}
+
 async function resolveEndpointUnitId(
 	db: Database | Transaction,
 	ruleName: string,
@@ -207,24 +228,7 @@ async function resolveEndpointUnitId(
 		return undefined;
 	}
 
-	const [unit] = await db
-		.select({ id: schema.entities.id })
-		.from(schema.entities)
-		.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
-		.where(
-			and(
-				eq(schema.entityTypes.type, "organisational_units"),
-				eq(schema.entities.slug, endpoint.unitSlug),
-			),
-		);
-
-	if (unit == null) {
-		throw new Error(
-			`Rule "${ruleName}": no organisational-unit document with slug "${endpoint.unitSlug}".`,
-		);
-	}
-
-	return unit.id;
+	return resolveUnitIdBySlug(db, ruleName, endpoint.unitSlug);
 }
 
 interface EndpointRelation {
@@ -376,6 +380,217 @@ export async function checkPairedRelations(
 			a.kind.localeCompare(b.kind) ||
 			a.personLabel.localeCompare(b.personLabel),
 	);
+
+	return { findings, errors };
+}
+
+/**
+ * Data-integrity checks for organisational-unit relations where the presence of one relation on a
+ * unit requires another relation on the **same** unit — e.g. every institution that is a partner
+ * institution or cooperating partner of DARIAH-EU must also record which country it is located in.
+ *
+ * Unlike the paired-relation checks above, these are one-directional (a prerequisite, not a mirror
+ * that must be entered from both sides) and compare presence only, not durations. A finding is
+ * raised for each unit that has the trigger relation but not the required one.
+ *
+ * Shared by the `@dariah-eric/audit` cli scripts and the admin dashboard.
+ */
+
+/** A set of unit-to-unit relation statuses, optionally pinned to a specific related-unit document. */
+export interface UnitRelationRequirementRule {
+	name: string;
+	/**
+	 * The trigger: a unit which has any relation with one of these statuses to `relatedUnitSlug` must
+	 * also satisfy `required`.
+	 */
+	trigger: {
+		statuses: ReadonlyArray<(typeof schema.organisationalUnitStatusEnum)[number]>;
+		/**
+		 * Slug of the related-unit document the trigger relation must point to (e.g. the DARIAH-EU
+		 * eric).
+		 */
+		relatedUnitSlug: string;
+		/**
+		 * Restrict the check to trigger units of this subtype. Needed because the same relation status
+		 * may exist on units the requirement cannot apply to — e.g. a _country_ can also be a partner
+		 * of DARIAH-EU, but only _institutions_ are ever `is_located_in` a country, so a country would
+		 * otherwise be flagged as a false positive.
+		 */
+		unitType?: (typeof schema.organisationalUnitTypesEnum)[number];
+		/** Human-readable name for the trigger, used in findings and the dashboard. */
+		label: string;
+	};
+	/**
+	 * The relation the same unit must also have. The type of the related unit need not be re-checked
+	 * here — the allowed-relations table already restricts these statuses to the expected unit type
+	 * (e.g. `is_located_in` only ever points institution → country).
+	 */
+	required: {
+		statuses: ReadonlyArray<(typeof schema.organisationalUnitStatusEnum)[number]>;
+		/** Human-readable name for the required relation, used in findings and the dashboard. */
+		label: string;
+	};
+}
+
+export const unitRelationRequirementRules: Array<UnitRelationRequirementRule> = [
+	{
+		name: "dariah-partner-located-in-country",
+		trigger: {
+			statuses: ["is_partner_institution_of", "is_cooperating_partner_of"],
+			relatedUnitSlug: "dariah-eu",
+			unitType: "institution",
+			label: "Partner institution or cooperating partner of DARIAH-EU",
+		},
+		required: {
+			statuses: ["is_located_in"],
+			label: "Located in a country",
+		},
+	},
+];
+
+export interface UnitRelationRequirementFinding {
+	rule: string;
+	unitDocumentId: string;
+	unitSlug: string;
+	unitLabel: string;
+	/** Organisational-unit subtype (e.g. `institution`), used to build the dashboard detail link. */
+	unitType: string;
+	/** Label of the trigger relation the unit has. */
+	triggerLabel: string;
+	/** Label of the relation the unit is missing. */
+	requiredLabel: string;
+	detail: string;
+}
+
+export interface UnitRelationRequirementCheckResult {
+	findings: Array<UnitRelationRequirementFinding>;
+	/** Rules which could not run, e.g. because the trigger's related-unit document is missing. */
+	errors: Array<string>;
+}
+
+/**
+ * Document ids of every unit with any relation of one of `statuses` (optionally to
+ * `relatedUnitId`).
+ */
+async function getUnitDocumentIdsWithStatus(
+	db: Database | Transaction,
+	statuses: ReadonlyArray<(typeof schema.organisationalUnitStatusEnum)[number]>,
+	relatedUnitId?: string,
+): Promise<Set<string>> {
+	const rows = await db
+		.select({ unitDocumentId: schema.organisationalUnitsRelations.unitDocumentId })
+		.from(schema.organisationalUnitsRelations)
+		.innerJoin(
+			schema.organisationalUnitStatus,
+			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+		)
+		.where(
+			and(
+				inArray(schema.organisationalUnitStatus.status, [...statuses]),
+				relatedUnitId != null
+					? eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, relatedUnitId)
+					: undefined,
+			),
+		);
+
+	return new Set(rows.map((row) => row.unitDocumentId));
+}
+
+interface UnitDetail {
+	slug: string;
+	label: string | null;
+	type: string;
+}
+
+/** Resolves display fields (slug, label, subtype) for a set of unit document ids. */
+async function getUnitDetails(
+	db: Database | Transaction,
+	unitDocumentIds: Array<string>,
+): Promise<Map<string, UnitDetail>> {
+	if (unitDocumentIds.length === 0) {
+		return new Map();
+	}
+
+	// A unit document's slug, label and subtype are constant across its draft/published versions, so
+	// selectDistinct collapses the one-row-per-version fan-out from the entity-versions join.
+	const rows = await db
+		.selectDistinct({
+			unitDocumentId: schema.entities.id,
+			slug: schema.entities.slug,
+			label: schema.entities.label,
+			type: schema.organisationalUnitTypes.type,
+		})
+		.from(schema.entities)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.entityId, schema.entities.id))
+		.innerJoin(
+			schema.organisationalUnits,
+			eq(schema.organisationalUnits.id, schema.entityVersions.id),
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.where(inArray(schema.entities.id, unitDocumentIds));
+
+	return new Map(
+		rows.map((row) => [row.unitDocumentId, { slug: row.slug, label: row.label, type: row.type }]),
+	);
+}
+
+async function checkUnitRelationRequirementRule(
+	db: Database | Transaction,
+	rule: UnitRelationRequirementRule,
+): Promise<Array<UnitRelationRequirementFinding>> {
+	const relatedUnitId = await resolveUnitIdBySlug(db, rule.name, rule.trigger.relatedUnitSlug);
+
+	const [triggerUnitIds, requiredUnitIds] = await Promise.all([
+		getUnitDocumentIdsWithStatus(db, rule.trigger.statuses, relatedUnitId),
+		getUnitDocumentIdsWithStatus(db, rule.required.statuses),
+	]);
+
+	const missingUnitIds = [...triggerUnitIds].filter((id) => !requiredUnitIds.has(id));
+	const details = await getUnitDetails(db, missingUnitIds);
+
+	return missingUnitIds.flatMap((unitDocumentId) => {
+		const detail = details.get(unitDocumentId);
+
+		// Drop trigger units of the wrong subtype (see `trigger.unitType`), and any unit whose subtype
+		// could not be resolved when the rule is type-restricted.
+		if (rule.trigger.unitType != null && detail?.type !== rule.trigger.unitType) {
+			return [];
+		}
+
+		return [
+			{
+				rule: rule.name,
+				unitDocumentId,
+				unitSlug: detail?.slug ?? unitDocumentId,
+				unitLabel: detail?.label ?? unitDocumentId,
+				unitType: detail?.type ?? "institution",
+				triggerLabel: rule.trigger.label,
+				requiredLabel: rule.required.label,
+				detail: `Is "${rule.trigger.label}" but is missing the required "${rule.required.label}".`,
+			},
+		];
+	});
+}
+
+export async function checkUnitRelationRequirements(
+	db: Database | Transaction,
+): Promise<UnitRelationRequirementCheckResult> {
+	const findings: Array<UnitRelationRequirementFinding> = [];
+	const errors: Array<string> = [];
+
+	for (const rule of unitRelationRequirementRules) {
+		try {
+			findings.push(...(await checkUnitRelationRequirementRule(db, rule)));
+		} catch (error) {
+			// oxlint-disable-next-line unicorn/no-instanceof-builtins
+			errors.push(error instanceof Error ? error.message : String(error));
+		}
+	}
+
+	findings.sort((a, b) => a.rule.localeCompare(b.rule) || a.unitLabel.localeCompare(b.unitLabel));
 
 	return { findings, errors };
 }
