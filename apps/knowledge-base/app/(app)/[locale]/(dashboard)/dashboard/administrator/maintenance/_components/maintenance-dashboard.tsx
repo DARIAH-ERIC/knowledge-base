@@ -43,7 +43,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						<TabPanel id="paired-relations" className="flex flex-col gap-y-(--layout-padding)">
 							<p className="text-balance text-muted-fg text-sm">
 								{t(
-									"Pairs of relations which must always be recorded together, e.g. a national representative must also be a member of the General Assembly for the same period.",
+									"Pairs of relations which must always be recorded together, e.g. a national representative must also be a member of the General Assembly, and a national coordinator must also be a member of the National Coordinator Committee, for the same period.",
 								)}
 							</p>
 
