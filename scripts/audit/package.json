@@ -6,6 +6,7 @@
 	"sideEffects": false,
 	"scripts": {
 		"data:audit:paired-relations": "tsx ./scripts/audit-paired-relations.ts",
+		"data:audit:unit-relation-requirements": "tsx ./scripts/audit-unit-relation-requirements.ts",
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",
 		"lint:check": "oxlint --report-unused-disable-directives --type-aware --type-check",

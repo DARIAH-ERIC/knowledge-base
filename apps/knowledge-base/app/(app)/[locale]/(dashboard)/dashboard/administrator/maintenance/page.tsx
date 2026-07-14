@@ -7,6 +7,7 @@ import { MaintenanceDashboard } from "@/app/(app)/[locale]/(dashboard)/dashboard
 import { MaintenanceSectionFallback } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-section-fallback";
 import { PairedRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-section";
 import { RichTextSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-section";
+import { UnitRelationRequirementsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unit-relation-requirements-section";
 import { UnusedAssetsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-section";
 import { UnusedSocialMediaSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-section";
 import { assertAdminPageAccess } from "@/lib/auth/session";
@@ -47,6 +48,11 @@ export default async function DashboardAdministratorMaintenancePage(
 			richText={
 				<Suspense fallback={<MaintenanceSectionFallback />}>
 					<RichTextSection />
+				</Suspense>
+			}
+			unitRelationRequirements={
+				<Suspense fallback={<MaintenanceSectionFallback />}>
+					<UnitRelationRequirementsSection />
 				</Suspense>
 			}
 			unusedAssets={

@@ -11,12 +11,20 @@ interface MaintenanceDashboardProps {
 	emptyContentBlocks: ReactNode;
 	pairedRelations: ReactNode;
 	richText: ReactNode;
+	unitRelationRequirements: ReactNode;
 	unusedAssets: ReactNode;
 	unusedSocialMedia: ReactNode;
 }
 
 export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>): ReactNode {
-	const { emptyContentBlocks, pairedRelations, richText, unusedAssets, unusedSocialMedia } = props;
+	const {
+		emptyContentBlocks,
+		pairedRelations,
+		richText,
+		unitRelationRequirements,
+		unusedAssets,
+		unusedSocialMedia,
+	} = props;
 
 	const t = useExtracted();
 	const [selectedTab, setSelectedTab] = useState<Key>("integrity");
@@ -38,6 +46,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 					<Tabs>
 						<TabList aria-label={t("Data-integrity checks")}>
 							<Tab id="paired-relations">{t("Paired relations")}</Tab>
+							<Tab id="unit-relation-requirements">{t("Required relations")}</Tab>
 						</TabList>
 
 						<TabPanel id="paired-relations" className="flex flex-col gap-y-(--layout-padding)">
@@ -48,6 +57,19 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							</p>
 
 							{pairedRelations}
+						</TabPanel>
+
+						<TabPanel
+							id="unit-relation-requirements"
+							className="flex flex-col gap-y-(--layout-padding)"
+						>
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Organisational units whose relations imply another that is missing, e.g. every institution that is a partner institution or cooperating partner of DARIAH-EU must also record which country it is located in.",
+								)}
+							</p>
+
+							{unitRelationRequirements}
 						</TabPanel>
 					</Tabs>
 				</TabPanel>
