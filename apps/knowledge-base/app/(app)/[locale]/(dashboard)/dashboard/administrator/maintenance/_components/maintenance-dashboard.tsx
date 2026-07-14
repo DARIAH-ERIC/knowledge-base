@@ -6,6 +6,8 @@ import { Fragment, type ReactNode, useState } from "react";
 import type { Key } from "react-aria-components";
 
 import { EntityListHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
+import { MergeEntities } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities";
+import { SlugEditor } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor";
 
 interface MaintenanceDashboardProps {
 	emptyContentBlocks: ReactNode;
@@ -40,6 +42,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 				<TabList aria-label={t("Maintenance")}>
 					<Tab id="integrity">{t("Data integrity")}</Tab>
 					<Tab id="cleanup">{t("Cleanup")}</Tab>
+					<Tab id="merge">{t("Merge & rename")}</Tab>
 				</TabList>
 
 				<TabPanel id="integrity">
@@ -121,6 +124,35 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							</p>
 
 							{richText}
+						</TabPanel>
+					</Tabs>
+				</TabPanel>
+
+				<TabPanel id="merge">
+					<Tabs>
+						<TabList aria-label={t("Merge & rename")}>
+							<Tab id="merge-entities">{t("Merge duplicates")}</Tab>
+							<Tab id="edit-slug">{t("Edit slug")}</Tab>
+						</TabList>
+
+						<TabPanel id="merge-entities" className="flex flex-col gap-y-(--layout-padding)">
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Merge a duplicate entity into a canonical one: all relations are re-pointed onto the target and the source is permanently deleted. Both entities must be the same type.",
+								)}
+							</p>
+
+							<MergeEntities />
+						</TabPanel>
+
+						<TabPanel id="edit-slug" className="flex flex-col gap-y-(--layout-padding)">
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Change an entity's slug. This is an administrator-only maintenance action — slugs are normally managed by the system and form part of the public URL.",
+								)}
+							</p>
+
+							<SlugEditor />
 						</TabPanel>
 					</Tabs>
 				</TabPanel>
