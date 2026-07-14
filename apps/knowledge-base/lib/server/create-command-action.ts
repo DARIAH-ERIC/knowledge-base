@@ -103,6 +103,7 @@ export function createCommandAction<
 					action: opts.audit.action,
 					subjectType: opts.audit.subjectType,
 					subjectId: r.subjectId,
+					subjectLabel: r.subjectLabel,
 					summary: r.auditSummary ?? {},
 				});
 				return r;

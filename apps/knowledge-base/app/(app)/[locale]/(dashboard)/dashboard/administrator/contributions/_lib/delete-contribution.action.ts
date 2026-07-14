@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
@@ -28,6 +29,9 @@ export async function deleteContributionAction(id: string): Promise<void> {
 		id: contribution.organisationalUnitDocumentId,
 	});
 
+	// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
+	const subjectLabel = await resolveAuditSubjectLabel("contributions", id);
+
 	await db.transaction(async (tx) => {
 		await tx
 			.delete(schema.countryReportContributions)
@@ -43,6 +47,7 @@ export async function deleteContributionAction(id: string): Promise<void> {
 		action: "delete",
 		subjectType: "contributions",
 		subjectId: id,
+		subjectLabel,
 		summary: {},
 	});
 
