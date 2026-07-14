@@ -435,8 +435,9 @@ async function main() {
 	 * - Creates a relation between the national consortium organisational unit and the country
 	 *   organisitational unit of type: is_consortium_of
 	 * - Creates a relation between the country organisational unit and the umbrella unit of type
-	 *   is_member_of or is_cooperating_partner_of Checks if number of organisational units of type
-	 *   country in kb matches number of countries in unr
+	 *   is_member_of for member countries (cooperating partnerships are recorded at the institution
+	 *   level instead — see the institution migration). Checks if number of organisational units of
+	 *   type country in kb matches number of countries in unr
 	 */
 
 	log.info("Migrating countries...");
@@ -625,17 +626,12 @@ async function main() {
 				});
 			}
 
-			if (country.type === "cooperating_partnership") {
-				await tx.insert(schema.organisationalUnitsRelations).values({
-					unitDocumentId: await documentIdOf(tx, countryOrgUnit.id),
-					relatedUnitDocumentId: await documentIdOf(tx, umbrellaUnit.id),
-					duration: {
-						start: country.startDate ?? new Date(Date.UTC(1900, 0, 1)),
-						end: country.endDate ?? undefined,
-					},
-					status: organisationalUnitStatusByType.is_cooperating_partner_of.id,
-				});
-			}
+			// A cooperating partnership is NOT recorded as a `country -> eric` relation: the data model
+			// only allows `is_cooperating_partner_of` on `institution -> eric` (see the allowed-relations
+			// vocabulary), and the `members_and_partners` view derives cooperating-partner countries from
+			// their institutions (`institution is_cooperating_partner_of eric` + `is_located_in country`),
+			// which the institution migration below already creates. Writing it here too produced invalid,
+			// redundant rows for 8 countries — see `data:audit:relation-vocabulary`.
 		});
 	}
 
