@@ -3,7 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { alias, and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 
 export type CountryMemberObserverStatus = "is_member_of" | "is_observer_of" | null;
@@ -76,7 +76,7 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 		query != null && query !== ""
 			? and(
 					eq(schema.organisationalUnitTypes.type, countryType),
-					unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
+					matchesAllTerms(query, schema.organisationalUnits.name),
 				)
 			: eq(schema.organisationalUnitTypes.type, countryType);
 	const nameOrderBy =

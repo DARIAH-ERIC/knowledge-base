@@ -1,4 +1,4 @@
-import { type SQL, type SQLWrapper, sql } from "@/lib/db/sql";
+import { type SQL, type SQLWrapper, and, or, sql } from "@/lib/db/sql";
 
 export function unaccentIlike(value: SQLWrapper, pattern: string): SQL<boolean> {
 	return sql`unaccent(${value}) ILIKE unaccent(${pattern})`;
@@ -35,8 +35,30 @@ export function normalizedIncludes(value: SQLWrapper, term: string): SQL<boolean
 export function normalizeSearchTerms(query: string): Array<string> {
 	return query
 		.normalize("NFKD")
-		.replace(/\p{Diacritic}/gu, "")
+		.replaceAll(/\p{Diacritic}/gu, "")
 		.toLowerCase()
 		.split(/[^\p{L}\p{N}]+/u)
 		.filter((term) => term !== "");
+}
+
+/**
+ * Build a tokenized, punctuation-insensitive `WHERE` predicate: split {@link query} into terms and
+ * require every term to match at least one of the given {@link columns} (AND across terms, OR across
+ * columns). Matching is via {@link normalizedIncludes}, so separators and "&"/"and" differences
+ * between the query and the stored value don't matter, and term order is irrelevant.
+ *
+ * Returns `undefined` when the query is empty (or all punctuation), so callers can drop it straight
+ * into an `and(...)` where an absent search means "no filter".
+ */
+export function matchesAllTerms(
+	query: string | null | undefined,
+	...columns: [SQLWrapper, ...Array<SQLWrapper>]
+): SQL | undefined {
+	const terms = query != null ? normalizeSearchTerms(query) : [];
+	if (terms.length === 0) {
+		return undefined;
+	}
+	return and(
+		...terms.map((term) => or(...columns.map((column) => normalizedIncludes(column, term)))),
+	);
 }

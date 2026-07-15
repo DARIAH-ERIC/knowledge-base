@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, eq, inArray, sql } from "@/lib/db/sql";
 
 export interface PersonOption {
@@ -24,8 +24,7 @@ export async function getPersonOptions(
 ): Promise<{ items: Array<PersonOption>; total: number }> {
 	const { limit = relationOptionsPageSize, offset = 0, q } = params;
 	const query = q?.trim();
-	const searchWhere =
-		query != null && query !== "" ? unaccentIlike(schema.persons.name, `%${query}%`) : undefined;
+	const searchWhere = matchesAllTerms(query, schema.persons.name);
 	const where = and(publishedEntityVersionWhere(), searchWhere);
 
 	const [items, aggregate] = await Promise.all([

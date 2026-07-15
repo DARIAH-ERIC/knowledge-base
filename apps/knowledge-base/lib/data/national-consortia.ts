@@ -3,7 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { alias, and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 
 export type NationalConsortiaSort = "name" | "country";
@@ -261,7 +261,7 @@ export async function getNationalConsortia(
 			.where(
 				and(
 					eq(schema.organisationalUnitTypes.type, consortiumType),
-					unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
+					matchesAllTerms(query, schema.organisationalUnits.name),
 				),
 			),
 		db
@@ -297,7 +297,7 @@ export async function getNationalConsortia(
 						schema.organisationalUnitTypes.type,
 						"country" as typeof schema.organisationalUnitTypes.$inferSelect.type,
 					),
-					unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
+					matchesAllTerms(query, schema.organisationalUnits.name),
 				),
 			),
 	]);

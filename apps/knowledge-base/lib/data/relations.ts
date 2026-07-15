@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { type Database, type Transaction, db } from "@/lib/db";
-import { normalizeSearchTerms, normalizedIncludes } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { and, eq, inArray, or, sql } from "@/lib/db/sql";
 import {
 	getEntityTypeLabel,
@@ -46,24 +46,17 @@ export async function getEntityRelationOptions(
 	// not just the raw stored token.
 	const { entityTypes: matchedEntityTypes, unitTypes: matchedUnitTypes } =
 		getEntityTypeTokensMatchingLabel(query ?? "");
-	// Split the query into normalized terms and require every term to match the slug or label (AND
-	// across terms). Normalization treats punctuation (commas, hyphens, slashes) and "&"/"and" as
+	// Require every query term to match the slug or label (AND across terms, OR across the two
+	// columns). Normalization treats punctuation (commas, hyphens, slashes) and "&"/"and" as
 	// interchangeable on both sides, so "clarin eric" finds the "clarin-eric" slug, "Culture,
 	// Innovation" matches a stored "Culture Innovation", and "R and D" matches "R&D". Term order is
 	// irrelevant. The type-label match keeps using the whole query, so a multi-word type like
 	// "working group" still resolves.
-	const terms = query != null ? normalizeSearchTerms(query) : [];
-	const allTermsMatchSlugOrLabel =
-		terms.length > 0
-			? and(
-					...terms.map((term) =>
-						or(
-							normalizedIncludes(schema.entities.slug, term),
-							normalizedIncludes(schema.entities.label, term),
-						),
-					),
-				)
-			: undefined;
+	const allTermsMatchSlugOrLabel = matchesAllTerms(
+		query,
+		schema.entities.slug,
+		schema.entities.label,
+	);
 	const matchesType = or(
 		matchedEntityTypes.length > 0
 			? inArray(

@@ -5,8 +5,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
-import { count, desc, eq, inArray, or } from "@/lib/db/sql";
+import { matchesAllTerms } from "@/lib/db/search";
+import { count, desc, eq, inArray } from "@/lib/db/sql";
 import { getSocialMediaTypeLabel } from "@/lib/social-media-type-label";
 
 export interface SocialMediaOption {
@@ -55,13 +55,7 @@ export async function getSocialMedia(
 ): Promise<SocialMediaResult> {
 	const { limit, offset, q, sort = "name", dir = "asc" } = params;
 	const query = q?.trim();
-	const where =
-		query != null && query !== ""
-			? or(
-					unaccentIlike(schema.socialMedia.name, `%${query}%`),
-					unaccentIlike(schema.socialMedia.url, `%${query}%`),
-				)
-			: undefined;
+	const where = matchesAllTerms(query, schema.socialMedia.name, schema.socialMedia.url);
 	const orderBy =
 		sort === "type"
 			? dir === "asc"
@@ -127,13 +121,7 @@ export async function getSocialMediaOptions(
 ): Promise<{ items: Array<SocialMediaOption>; total: number }> {
 	const { limit = 20, offset = 0, q } = params;
 	const query = q?.trim();
-	const where =
-		query != null && query !== ""
-			? or(
-					unaccentIlike(schema.socialMedia.name, `%${query}%`),
-					unaccentIlike(schema.socialMedia.url, `%${query}%`),
-				)
-			: undefined;
+	const where = matchesAllTerms(query, schema.socialMedia.name, schema.socialMedia.url);
 
 	const [rows, aggregate] = await Promise.all([
 		db

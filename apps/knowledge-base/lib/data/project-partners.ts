@@ -3,8 +3,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
-import { alias, count, desc, eq, or, sql } from "@/lib/db/sql";
+import { matchesAllTerms } from "@/lib/db/search";
+import { alias, count, desc, eq, sql } from "@/lib/db/sql";
 
 export type ProjectPartnersSort =
 	| "projectName"
@@ -59,16 +59,14 @@ export async function getProjectPartners(
 	const projectPickedVersion = sql`COALESCE(${projectDocumentLifecycle.draftId}, ${projectDocumentLifecycle.publishedId})`;
 	const unitPickedVersion = sql`COALESCE(${unitDocumentLifecycle.draftId}, ${unitDocumentLifecycle.publishedId})`;
 	const query = q?.trim();
-	const searchWhere =
-		query != null && query !== ""
-			? or(
-					unaccentIlike(schema.projects.name, `%${query}%`),
-					unaccentIlike(schema.projects.acronym, `%${query}%`),
-					unaccentIlike(schema.projectRoles.role, `%${query}%`),
-					unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
-					unaccentIlike(schema.organisationalUnitTypes.type, `%${query}%`),
-				)
-			: undefined;
+	const searchWhere = matchesAllTerms(
+		query,
+		schema.projects.name,
+		schema.projects.acronym,
+		schema.projectRoles.role,
+		schema.organisationalUnits.name,
+		schema.organisationalUnitTypes.type,
+	);
 	const where = searchWhere;
 	const orderBy =
 		sort === "roleType"
@@ -206,13 +204,7 @@ export async function getProjectOptions(params: Readonly<GetProjectOptionsParams
 }> {
 	const { limit = 20, offset = 0, q } = params;
 	const query = q?.trim();
-	const where =
-		query != null && query !== ""
-			? or(
-					unaccentIlike(schema.projects.name, `%${query}%`),
-					unaccentIlike(schema.projects.acronym, `%${query}%`),
-				)
-			: undefined;
+	const where = matchesAllTerms(query, schema.projects.name, schema.projects.acronym);
 	const projectEntities = alias(schema.entities, "project_option_entities");
 	const projectDocumentLifecycle = alias(
 		schema.documentLifecycle,

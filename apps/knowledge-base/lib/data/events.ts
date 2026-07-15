@@ -6,7 +6,7 @@ import { imageAssetWidth } from "@/config/assets.config";
 import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
@@ -25,8 +25,7 @@ interface GetEventsParams {
 export async function getEvents(params: GetEventsParams) {
 	const { limit = 10, offset = 0, q, sort = "duration", dir = "desc" } = params;
 	const query = q?.trim();
-	const where =
-		query != null && query !== "" ? unaccentIlike(schema.events.title, `%${query}%`) : undefined;
+	const where = matchesAllTerms(query, schema.events.title);
 	const orderBy =
 		sort === "title"
 			? dir === "asc"
@@ -157,8 +156,7 @@ export async function getEventOptions(
 ): Promise<{ items: Array<EventOption>; total: number }> {
 	const { limit = relationOptionsPageSize, offset = 0, q } = params;
 	const query = q?.trim();
-	const searchWhere =
-		query != null && query !== "" ? unaccentIlike(schema.events.title, `%${query}%`) : undefined;
+	const searchWhere = matchesAllTerms(query, schema.events.title);
 	const where = and(publishedEntityVersionWhere(), searchWhere);
 
 	const [items, aggregate] = await Promise.all([

@@ -3,13 +3,12 @@
 import { Readable } from "node:stream";
 import type { ReadableStream } from "node:stream/web";
 
-import { isNonEmptyString } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import sharp from "sharp";
 
 import { imageMaxResolution } from "@/config/assets.config";
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, desc, eq, like } from "@/lib/db/sql";
 import { type ImageUrlOptions, images } from "@/lib/images";
 import { type AssetPrefix, assetPrefixes, storage as s3 } from "@/lib/storage";
@@ -87,9 +86,7 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 	const { imageUrlOptions, limit = 20, offset = 0, prefix, q } = params;
 
 	const prefixFilter = prefix != null ? like(schema.assets.key, `${prefix}/%`) : undefined;
-	const searchFilter = isNonEmptyString(q)
-		? unaccentIlike(schema.assets.label, `%${q}%`)
-		: undefined;
+	const searchFilter = matchesAllTerms(q, schema.assets.label);
 	const where = and(prefixFilter, searchFilter);
 
 	const [assets, aggregate] = await Promise.all([
@@ -241,9 +238,7 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 	const { imageUrlOptions, limit = 24, offset = 0, prefix, q } = params;
 
 	const prefixFilter = prefix != null ? like(schema.assets.key, `${prefix}/%`) : undefined;
-	const searchFilter = isNonEmptyString(q)
-		? unaccentIlike(schema.assets.label, `%${q}%`)
-		: undefined;
+	const searchFilter = matchesAllTerms(q, schema.assets.label);
 	const where = and(prefixFilter, searchFilter);
 
 	const [assets, aggregate] = await Promise.all([

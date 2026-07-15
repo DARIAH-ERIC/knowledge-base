@@ -9,7 +9,7 @@ import {
 	getOrganisationalUnitOptionsByDocumentIds,
 } from "@/lib/data/organisational-units";
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 import {
 	toOrganisationalUnitDocumentOption,
@@ -55,7 +55,7 @@ export async function getServices(params: Readonly<GetServicesParams>): Promise<
 	const serviceTypes: Array<ServiceTypes> =
 		type === "internal" ? InternalServiceTypes : SSHOCServiceTypes;
 	const where = and(
-		query != null && query !== "" ? unaccentIlike(schema.services.name, `%${query}%`) : undefined,
+		matchesAllTerms(query, schema.services.name),
 		inArray(schema.serviceTypes.type, serviceTypes),
 	);
 	const orderBy =
