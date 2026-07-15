@@ -21,6 +21,7 @@ interface GetCountriesParams {
 export interface CountriesResult {
 	data: Array<
 		Pick<schema.OrganisationalUnit, "id" | "name"> & {
+			documentId: string;
 			memberObserverFrom: Date | null;
 			memberObserverStatus: CountryMemberObserverStatus;
 			memberObserverUntil: Date | null;
@@ -87,6 +88,9 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 
 	const baseItemsQuery = db
 		.select({
+			// `id` is the picked *version* id (organisational_units is keyed by entity_versions.id); the
+			// document id is what mutations operate on.
+			documentId: schema.entities.id,
 			id: schema.organisationalUnits.id,
 			name: schema.organisationalUnits.name,
 			slug: schema.entities.slug,
@@ -195,6 +199,7 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 		const relation = relationByCountryId.get(item.id);
 
 		return {
+			documentId: item.documentId,
 			entity: { slug: item.slug },
 			id: item.id,
 			memberObserverFrom: relation?.from ?? null,

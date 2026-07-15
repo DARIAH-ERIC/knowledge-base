@@ -35,6 +35,7 @@ interface InstitutionsPageProps {
 				schema.OrganisationalUnit,
 				"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId"
 			> & {
+				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
 				hasDraft: boolean;
 				isPublished: boolean;
@@ -64,7 +65,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 	const [items, optimisticallyRemoveItem] = useOptimistic(institutions.data, (state, id: string) =>
 		state.filter((item) => item.id !== id),
 	);
-	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
@@ -135,7 +136,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 										danger={true}
 										icon={<TrashIcon className="me-2 block-4 inline-4" />}
 										onAction={() => {
-											setItemToDelete({ id: item.id });
+											setItemToDelete({ id: item.id, documentId: item.documentId });
 										}}
 									>
 										{t("Delete")}
@@ -163,13 +164,13 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 						return;
 					}
 
-					const id = itemToDelete.id;
+					const { id, documentId } = itemToDelete;
 					setDeleteError(null);
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
 						try {
-							const state = await deleteInstitutionAction(id);
+							const state = await deleteInstitutionAction(documentId);
 							if (isActionStateError(state)) {
 								const message = Array.isArray(state.message) ? state.message[0] : state.message;
 								setDeleteError(message ?? t("Could not delete institution. Please try again."));

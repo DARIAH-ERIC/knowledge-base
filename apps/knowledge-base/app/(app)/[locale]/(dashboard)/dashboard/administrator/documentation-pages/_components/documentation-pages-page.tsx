@@ -33,6 +33,7 @@ interface DocumentationPagesPageProps {
 	documentationPages: {
 		data: Array<
 			Pick<schema.DocumentationPage, "id" | "title"> & {
+				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
 				hasDraft: boolean;
 				isPublished: boolean;
@@ -62,7 +63,7 @@ export function DocumentationPagesPage(props: Readonly<DocumentationPagesPagePro
 		documentationPages.data,
 		(state, id: string) => state.filter((item) => item.id !== id),
 	);
-	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
@@ -131,7 +132,7 @@ export function DocumentationPagesPage(props: Readonly<DocumentationPagesPagePro
 										danger={true}
 										icon={<TrashIcon className="me-2 block-4 inline-4" />}
 										onAction={() => {
-											setItemToDelete({ id: item.id });
+											setItemToDelete({ id: item.id, documentId: item.documentId });
 										}}
 									>
 										{t("Delete")}
@@ -159,13 +160,13 @@ export function DocumentationPagesPage(props: Readonly<DocumentationPagesPagePro
 						return;
 					}
 
-					const id = itemToDelete.id;
+					const { id, documentId } = itemToDelete;
 					setDeleteError(null);
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
 						try {
-							const state = await deleteDocumentationPageAction(id);
+							const state = await deleteDocumentationPageAction(documentId);
 							if (isActionStateError(state)) {
 								const message = Array.isArray(state.message) ? state.message[0] : state.message;
 								setDeleteError(

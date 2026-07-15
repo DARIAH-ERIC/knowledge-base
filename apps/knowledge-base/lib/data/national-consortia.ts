@@ -20,6 +20,7 @@ export interface NationalConsortiaResult {
 	data: Array<
 		Pick<schema.OrganisationalUnit, "id" | "name" | "sshocMarketplaceActorId"> & {
 			countryName: string | null;
+			documentId: string;
 			entity: Pick<schema.Entity, "slug">;
 			hasDraft: boolean;
 			isPublished: boolean;
@@ -135,6 +136,9 @@ const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema
 const versionPick = sql`${schema.entityVersions.id} = ${pickedVersion}`;
 
 const itemSelect = {
+	// `id` is the picked *version* id (organisational_units is keyed by entity_versions.id); the
+	// document id is what mutations operate on.
+	documentId: schema.entities.id,
 	id: schema.organisationalUnits.id,
 	name: schema.organisationalUnits.name,
 	sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
@@ -198,6 +202,7 @@ export async function getNationalConsortia(
 				data: items.map((item) => {
 					return {
 						countryName: countryNames.get(item.id) ?? null,
+						documentId: item.documentId,
 						entity: { slug: item.slug },
 						hasDraft: item.hasDraft,
 						isPublished: item.isPublished,
@@ -217,6 +222,7 @@ export async function getNationalConsortia(
 			.map((item) => {
 				return {
 					countryName: countryNames.get(item.id) ?? null,
+					documentId: item.documentId,
 					entity: { slug: item.slug },
 					hasDraft: item.hasDraft,
 					isPublished: item.isPublished,
@@ -334,6 +340,7 @@ export async function getNationalConsortia(
 			data: pagedItems.map((item) => {
 				return {
 					countryName: countryNames.get(item.id) ?? null,
+					documentId: item.documentId,
 					entity: { slug: item.slug },
 					hasDraft: item.hasDraft,
 					isPublished: item.isPublished,
@@ -353,6 +360,7 @@ export async function getNationalConsortia(
 		.map((item) => {
 			return {
 				countryName: countryNames.get(item.id) ?? null,
+				documentId: item.documentId,
 				entity: { slug: item.slug },
 				hasDraft: item.hasDraft,
 				isPublished: item.isPublished,

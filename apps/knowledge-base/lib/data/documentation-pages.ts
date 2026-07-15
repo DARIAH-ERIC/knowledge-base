@@ -37,6 +37,9 @@ export async function getDocumentationPages(params: GetDocumentationPagesParams)
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({
+				// `id` is the picked *version* id (documentation_pages is keyed by entity_versions.id);
+				// the document id is what mutations operate on.
+				documentId: schema.entities.id,
 				id: schema.documentationPages.id,
 				slug: schema.entities.slug,
 				hasDraft: schema.documentLifecycle.hasDraftChanges,
@@ -69,6 +72,7 @@ export async function getDocumentationPages(params: GetDocumentationPagesParams)
 	return {
 		data: items.map((item) => {
 			return {
+				documentId: item.documentId,
 				id: item.id,
 				entity: { slug: item.slug },
 				hasDraft: item.hasDraft,
