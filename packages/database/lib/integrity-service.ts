@@ -4,6 +4,32 @@ import type { Database, Transaction } from "./index";
 import * as schema from "./schema";
 
 /**
+ * Vocabulary shared by several of the rule sets below.
+ *
+ * An institution's relation to DARIAH-EU is recorded with one of four `institution -> eric`
+ * statuses. The three below are degrees of full partnership; `is_cooperating_partner_of` is the
+ * separate, lesser status which excludes them (see {@link mutuallyExclusiveUnitRelationRules}) and
+ * which, unlike them, belongs to an institution in a _non_-member country (see
+ * {@link countryMembershipRules}).
+ */
+const dariahPartnerInstitutionStatuses = [
+	"is_partner_institution_of",
+	"is_national_coordinating_institution_in",
+	"is_national_representative_institution_in",
+] as const satisfies ReadonlyArray<(typeof schema.organisationalUnitStatusEnum)[number]>;
+
+const dariahPartnerInstitutionLabel =
+	"Partner institution, national coordinating institution, or national representative institution of DARIAH-EU";
+
+/** The `country -> eric` statuses which make a country part of DARIAH-EU. */
+const dariahCountryMembershipStatuses = [
+	"is_member_of",
+	"is_observer_of",
+] as const satisfies ReadonlyArray<(typeof schema.organisationalUnitStatusEnum)[number]>;
+
+const dariahCountryMembershipLabel = "Member or observer of DARIAH-EU";
+
+/**
  * Data-integrity checks for pairs of person-to-organisational-unit relations which must always be
  * entered together because they record the same fact from two angles — e.g. a person who is a
  * country's national representative (or deputy) must also be a member of the General Assembly
@@ -98,13 +124,64 @@ function mergeIntervals(intervals: Array<Interval>, gapMs: number): Array<Interv
 	return merged;
 }
 
+/** Timestamps for a set of durations exactly as recorded, i.e. without merging near-adjacent ones. */
+function toRawIntervals(durations: Array<{ start: Date; end?: Date }>): Array<Interval> {
+	return durations.map((duration) => {
+		return { start: duration.start.getTime(), end: duration.end?.getTime() ?? Infinity };
+	});
+}
+
 function toIntervals(durations: Array<{ start: Date; end?: Date }>): Array<Interval> {
-	return mergeIntervals(
-		durations.map((duration) => {
-			return { start: duration.start.getTime(), end: duration.end?.getTime() ?? Infinity };
-		}),
-		mergeGapMs,
-	);
+	return mergeIntervals(toRawIntervals(durations), mergeGapMs);
+}
+
+/**
+ * The periods covered by both sets, merged. Intervals which merely touch at an endpoint do not
+ * intersect: the result is a non-empty span, never a single instant.
+ */
+function intersectIntervals(a: Array<Interval>, b: Array<Interval>): Array<Interval> {
+	const intersections: Array<Interval> = [];
+
+	for (const x of a) {
+		for (const y of b) {
+			const start = Math.max(x.start, y.start);
+			const end = Math.min(x.end, y.end);
+
+			if (start < end) {
+				intersections.push({ start, end });
+			}
+		}
+	}
+
+	return mergeIntervals(intersections, 0);
+}
+
+/** The parts of `a` which no interval in `b` covers, merged; empty when `b` covers all of `a`. */
+function subtractIntervals(a: Array<Interval>, b: Array<Interval>): Array<Interval> {
+	let remaining = mergeIntervals(a, 0);
+
+	for (const cut of mergeIntervals(b, 0)) {
+		const next: Array<Interval> = [];
+
+		for (const interval of remaining) {
+			// Disjoint (or merely touching): `cut` removes nothing from this interval.
+			if (cut.end <= interval.start || cut.start >= interval.end) {
+				next.push(interval);
+				continue;
+			}
+
+			if (interval.start < cut.start) {
+				next.push({ start: interval.start, end: cut.start });
+			}
+			if (cut.end < interval.end) {
+				next.push({ start: cut.end, end: interval.end });
+			}
+		}
+
+		remaining = next;
+	}
+
+	return remaining;
 }
 
 function areIntervalSetsEqual(a: Array<Interval>, b: Array<Interval>): boolean {
@@ -445,10 +522,13 @@ export const unitRelationRequirementRules: Array<UnitRelationRequirementRule> = 
 	{
 		name: "dariah-partner-located-in-country",
 		trigger: {
-			statuses: ["is_partner_institution_of", "is_cooperating_partner_of"],
+			// Every way an institution can relate to DARIAH-EU requires knowing its country — the
+			// coordinating/representative statuses because they represent that country, the partner and
+			// cooperating ones because {@link countryMembershipRules} constrains which country it may be.
+			statuses: [...dariahPartnerInstitutionStatuses, "is_cooperating_partner_of"],
 			relatedUnitSlug: "dariah-eu",
 			unitType: "institution",
-			label: "Partner institution or cooperating partner of DARIAH-EU",
+			label: `${dariahPartnerInstitutionLabel}, or cooperating partner of DARIAH-EU`,
 		},
 		required: {
 			statuses: ["is_located_in"],
@@ -477,17 +557,33 @@ export interface UnitRelationRequirementCheckResult {
 	errors: Array<string>;
 }
 
+/** One unit-to-unit relation: which unit, which related unit, and for how long. */
+export interface UnitRelationRow {
+	unitDocumentId: string;
+	relatedUnitDocumentId: string;
+	duration: RelationDuration;
+}
+
 /**
- * Document ids of every unit with any relation of one of `statuses` (optionally to
- * `relatedUnitId`).
+ * Every unit-to-unit relation with one of `statuses`, optionally narrowed to those pointing to
+ * `relatedUnitId` and/or held by one of `unitDocumentIds`.
  */
-async function getUnitDocumentIdsWithStatus(
+async function getUnitRelations(
 	db: Database | Transaction,
 	statuses: ReadonlyArray<(typeof schema.organisationalUnitStatusEnum)[number]>,
 	relatedUnitId?: string,
-): Promise<Set<string>> {
-	const rows = await db
-		.select({ unitDocumentId: schema.organisationalUnitsRelations.unitDocumentId })
+	unitDocumentIds?: Array<string>,
+): Promise<Array<UnitRelationRow>> {
+	if (unitDocumentIds?.length === 0) {
+		return [];
+	}
+
+	return db
+		.select({
+			unitDocumentId: schema.organisationalUnitsRelations.unitDocumentId,
+			relatedUnitDocumentId: schema.organisationalUnitsRelations.relatedUnitDocumentId,
+			duration: schema.organisationalUnitsRelations.duration,
+		})
 		.from(schema.organisationalUnitsRelations)
 		.innerJoin(
 			schema.organisationalUnitStatus,
@@ -499,8 +595,23 @@ async function getUnitDocumentIdsWithStatus(
 				relatedUnitId != null
 					? eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, relatedUnitId)
 					: undefined,
+				unitDocumentIds != null
+					? inArray(schema.organisationalUnitsRelations.unitDocumentId, unitDocumentIds)
+					: undefined,
 			),
 		);
+}
+
+/**
+ * Document ids of every unit with any relation of one of `statuses` (optionally to
+ * `relatedUnitId`).
+ */
+async function getUnitDocumentIdsWithStatus(
+	db: Database | Transaction,
+	statuses: ReadonlyArray<(typeof schema.organisationalUnitStatusEnum)[number]>,
+	relatedUnitId?: string,
+): Promise<Set<string>> {
+	const rows = await getUnitRelations(db, statuses, relatedUnitId);
 
 	return new Set(rows.map((row) => row.unitDocumentId));
 }
@@ -756,24 +867,7 @@ async function getUnitDurationsByStatus(
 	statuses: ReadonlyArray<(typeof schema.organisationalUnitStatusEnum)[number]>,
 	relatedUnitId?: string,
 ): Promise<Map<string, Array<RelationDuration>>> {
-	const rows = await db
-		.select({
-			unitDocumentId: schema.organisationalUnitsRelations.unitDocumentId,
-			duration: schema.organisationalUnitsRelations.duration,
-		})
-		.from(schema.organisationalUnitsRelations)
-		.innerJoin(
-			schema.organisationalUnitStatus,
-			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
-		)
-		.where(
-			and(
-				inArray(schema.organisationalUnitStatus.status, [...statuses]),
-				relatedUnitId != null
-					? eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, relatedUnitId)
-					: undefined,
-			),
-		);
+	const rows = await getUnitRelations(db, statuses, relatedUnitId);
 
 	const byUnit = new Map<string, Array<RelationDuration>>();
 	for (const row of rows) {
@@ -945,17 +1039,21 @@ export async function checkInactiveUnitRelations(
 
 /**
  * Data-integrity checks for pairs of unit-to-unit relations which must never be recorded on the
- * same unit for the same period, because one already implies the other — e.g. a national
- * coordinating institution is by definition a partner institution, so recording both is redundant:
- * the partner status is inferred from the coordinating relation instead, and only the latter is
- * entered.
+ * same unit for the same period. A rule's `kind` says why, and therefore how to fix it:
+ *
+ * - `redundant` — `a` already implies `b`, so `b` carries no information of its own and should be
+ *   removed: a national coordinating institution is by definition a partner institution, so the
+ *   partner status is inferred from the coordinating relation rather than entered alongside it.
+ * - `contradictory` — `a` and `b` are competing statuses which cannot both hold: an institution is
+ *   either a cooperating partner of DARIAH-EU or a full partner/coordinating/representative
+ *   institution, never both. Neither side is authoritative, so a human decides which one is wrong.
  *
  * Unlike the required-relation checks, these compare durations rather than mere presence, because
  * both relations may legitimately co-exist in the database over _separate_ periods — an institution
  * that was a partner institution until 2015 and became a national coordinating institution in 2020
- * is correct history, not a data error. Only where the two periods actually overlap is the
- * redundant relation reported. Two periods that merely touch at an endpoint (one ends exactly when
- * the other begins — a clean handover) are not an overlap.
+ * is correct history, not a data error. Only where the two periods actually overlap is a finding
+ * raised. Two periods that merely touch at an endpoint (one ends exactly when the other begins — a
+ * clean handover) are not an overlap.
  *
  * Shared by the `@dariah-eric/audit` cli scripts and the admin dashboard.
  */
@@ -966,13 +1064,15 @@ export interface ExclusiveRelationEndpoint {
 	statuses: ReadonlyArray<(typeof schema.organisationalUnitStatusEnum)[number]>;
 	/**
 	 * Slug of the related-unit document the relation must point to (e.g. the DARIAH-EU eric). Omit to
-	 * match a relation to any related unit — e.g. a national coordinating institution is tied to
-	 * whichever country it coordinates, so the related unit must not be pinned.
+	 * match a relation to any related unit.
 	 */
 	relatedUnitSlug?: string;
 	/** Human-readable name for this side, used in findings and the dashboard. */
 	label: string;
 }
+
+/** Why two relations must not overlap, which decides how a finding is worded and resolved. */
+export type MutuallyExclusiveFindingKind = "redundant" | "contradictory";
 
 export interface MutuallyExclusiveUnitRelationRule {
 	name: string;
@@ -981,39 +1081,60 @@ export interface MutuallyExclusiveUnitRelationRule {
 	 * the rule cannot apply to (see `UnitRelationRequirementRule["trigger"]["unitType"]`).
 	 */
 	unitType?: (typeof schema.organisationalUnitTypesEnum)[number];
-	/** The relation which is inferable from `impliedBy`, and so must not be entered alongside it. */
-	redundant: ExclusiveRelationEndpoint;
-	/** The authoritative relation which already implies `redundant`. */
-	impliedBy: ExclusiveRelationEndpoint;
+	kind: MutuallyExclusiveFindingKind;
+	/** For `redundant` rules, the authoritative relation which implies `b`. */
+	a: ExclusiveRelationEndpoint;
+	/** For `redundant` rules, the inferable relation to remove. */
+	b: ExclusiveRelationEndpoint;
 }
 
 export const mutuallyExclusiveUnitRelationRules: Array<MutuallyExclusiveUnitRelationRule> = [
 	{
 		name: "partner-institution-implied-by-national-coordinating-institution",
 		unitType: "institution",
-		redundant: {
+		kind: "redundant",
+		a: {
+			// Both statuses are institution -> eric relations, so this side is pinned to the same eric as
+			// `b`: coordinating *another* eric would not imply being a partner of DARIAH-EU.
+			statuses: ["is_national_coordinating_institution_in"],
+			relatedUnitSlug: "dariah-eu",
+			label: "National coordinating institution in DARIAH-EU",
+		},
+		b: {
 			statuses: ["is_partner_institution_of"],
 			relatedUnitSlug: "dariah-eu",
 			label: "Partner institution of DARIAH-EU",
 		},
-		impliedBy: {
-			statuses: ["is_national_coordinating_institution_in"],
-			label: "National coordinating institution in a country",
+	},
+	{
+		name: "cooperating-partner-excludes-partner-institution",
+		unitType: "institution",
+		kind: "contradictory",
+		a: {
+			statuses: ["is_cooperating_partner_of"],
+			relatedUnitSlug: "dariah-eu",
+			label: "Cooperating partner of DARIAH-EU",
+		},
+		b: {
+			statuses: dariahPartnerInstitutionStatuses,
+			relatedUnitSlug: "dariah-eu",
+			label: dariahPartnerInstitutionLabel,
 		},
 	},
 ];
 
 export interface MutuallyExclusiveUnitRelationFinding {
 	rule: string;
+	kind: MutuallyExclusiveFindingKind;
 	unitDocumentId: string;
 	unitSlug: string;
 	unitLabel: string;
 	/** Organisational-unit subtype (e.g. `institution`), used to build the dashboard detail link. */
 	unitType: string;
-	/** Label of the redundant relation, i.e. the one to remove. */
-	redundantLabel: string;
-	/** Label of the relation which already implies the redundant one. */
-	impliedByLabel: string;
+	/** Label of the rule's `a` side; for `redundant` rules, the authoritative relation. */
+	aLabel: string;
+	/** Label of the rule's `b` side; for `redundant` rules, the relation to remove. */
+	bLabel: string;
 	/** The periods during which both relations are recorded, i.e. what must be resolved. */
 	overlaps: Array<RelationInterval>;
 	detail: string;
@@ -1039,25 +1160,22 @@ export function findOverlappingPeriods(
 	a: Array<RelationDuration>,
 	b: Array<RelationDuration>,
 ): Array<RelationInterval> {
-	const toRaw = (durations: Array<RelationDuration>): Array<Interval> =>
-		durations.map((duration) => {
-			return { start: duration.start.getTime(), end: duration.end?.getTime() ?? Infinity };
-		});
+	return toSerializableIntervals(intersectIntervals(toRawIntervals(a), toRawIntervals(b)));
+}
 
-	const overlaps: Array<Interval> = [];
-
-	for (const x of toRaw(a)) {
-		for (const y of toRaw(b)) {
-			const start = Math.max(x.start, y.start);
-			const end = Math.min(x.end, y.end);
-
-			if (start < end) {
-				overlaps.push({ start, end });
-			}
+/**
+ * Explains an overlap, and what to do about it, according to the rule's
+ * {@link MutuallyExclusiveFindingKind}.
+ */
+function describeMutualExclusion(rule: MutuallyExclusiveUnitRelationRule): string {
+	switch (rule.kind) {
+		case "redundant": {
+			return `Is "${rule.a.label}", which already implies "${rule.b.label}", but both relations are recorded for the same period. Remove the redundant "${rule.b.label}" relation.`;
+		}
+		case "contradictory": {
+			return `Is recorded as both "${rule.a.label}" and "${rule.b.label}" for the same period, but these statuses are mutually exclusive. Remove whichever one is incorrect.`;
 		}
 	}
-
-	return toSerializableIntervals(mergeIntervals(overlaps, 0));
 }
 
 /**
@@ -1066,15 +1184,15 @@ export function findOverlappingPeriods(
  */
 export function buildMutuallyExclusiveUnitRelationFindings(
 	rule: MutuallyExclusiveUnitRelationRule,
-	redundantByUnit: Map<string, Array<RelationDuration>>,
-	impliedByByUnit: Map<string, Array<RelationDuration>>,
+	aByUnit: Map<string, Array<RelationDuration>>,
+	bByUnit: Map<string, Array<RelationDuration>>,
 	details: Map<string, UnitDetail>,
 ): Array<MutuallyExclusiveUnitRelationFinding> {
 	const findings: Array<MutuallyExclusiveUnitRelationFinding> = [];
 
-	for (const [unitDocumentId, redundantDurations] of redundantByUnit) {
-		const impliedByDurations = impliedByByUnit.get(unitDocumentId);
-		if (impliedByDurations == null) {
+	for (const [unitDocumentId, aDurations] of aByUnit) {
+		const bDurations = bByUnit.get(unitDocumentId);
+		if (bDurations == null) {
 			continue;
 		}
 
@@ -1086,21 +1204,22 @@ export function buildMutuallyExclusiveUnitRelationFindings(
 			continue;
 		}
 
-		const overlaps = findOverlappingPeriods(redundantDurations, impliedByDurations);
+		const overlaps = findOverlappingPeriods(aDurations, bDurations);
 		if (overlaps.length === 0) {
 			continue;
 		}
 
 		findings.push({
 			rule: rule.name,
+			kind: rule.kind,
 			unitDocumentId,
 			unitSlug: detail?.slug ?? unitDocumentId,
 			unitLabel: detail?.label ?? unitDocumentId,
 			unitType: detail?.type ?? rule.unitType ?? "institution",
-			redundantLabel: rule.redundant.label,
-			impliedByLabel: rule.impliedBy.label,
+			aLabel: rule.a.label,
+			bLabel: rule.b.label,
 			overlaps,
-			detail: `Is "${rule.impliedBy.label}", which already implies "${rule.redundant.label}", but both relations are recorded for the same period. Remove the redundant "${rule.redundant.label}" relation.`,
+			detail: describeMutualExclusion(rule),
 		});
 	}
 
@@ -1111,28 +1230,23 @@ async function checkMutuallyExclusiveUnitRelationRule(
 	db: Database | Transaction,
 	rule: MutuallyExclusiveUnitRelationRule,
 ): Promise<Array<MutuallyExclusiveUnitRelationFinding>> {
-	const [redundantRelatedUnitId, impliedByRelatedUnitId] = await Promise.all([
-		resolveOptionalUnitIdBySlug(db, rule.name, rule.redundant.relatedUnitSlug),
-		resolveOptionalUnitIdBySlug(db, rule.name, rule.impliedBy.relatedUnitSlug),
+	const [aRelatedUnitId, bRelatedUnitId] = await Promise.all([
+		resolveOptionalUnitIdBySlug(db, rule.name, rule.a.relatedUnitSlug),
+		resolveOptionalUnitIdBySlug(db, rule.name, rule.b.relatedUnitSlug),
 	]);
 
-	const [redundantByUnit, impliedByByUnit] = await Promise.all([
-		getUnitDurationsByStatus(db, rule.redundant.statuses, redundantRelatedUnitId),
-		getUnitDurationsByStatus(db, rule.impliedBy.statuses, impliedByRelatedUnitId),
+	const [aByUnit, bByUnit] = await Promise.all([
+		getUnitDurationsByStatus(db, rule.a.statuses, aRelatedUnitId),
+		getUnitDurationsByStatus(db, rule.b.statuses, bRelatedUnitId),
 	]);
 
 	// Only units carrying both sides can overlap, so details are fetched for those alone.
-	const candidateUnitIds = [...redundantByUnit.keys()].filter((unitDocumentId) =>
-		impliedByByUnit.has(unitDocumentId),
+	const candidateUnitIds = [...aByUnit.keys()].filter((unitDocumentId) =>
+		bByUnit.has(unitDocumentId),
 	);
 	const details = await getUnitDetails(db, candidateUnitIds);
 
-	return buildMutuallyExclusiveUnitRelationFindings(
-		rule,
-		redundantByUnit,
-		impliedByByUnit,
-		details,
-	);
+	return buildMutuallyExclusiveUnitRelationFindings(rule, aByUnit, bByUnit, details);
 }
 
 export async function checkMutuallyExclusiveUnitRelations(
@@ -1151,6 +1265,272 @@ export async function checkMutuallyExclusiveUnitRelations(
 	}
 
 	findings.sort((a, b) => a.rule.localeCompare(b.rule) || a.unitLabel.localeCompare(b.unitLabel));
+
+	return { findings, errors };
+}
+
+/**
+ * Data-integrity checks which follow a relation _chain_: how an institution relates to DARIAH-EU
+ * constrains which country it may be located in.
+ *
+ * A full partner institution — including the national coordinating and representative institutions
+ * — represents a country that is itself part of DARIAH-EU, so that country must be a member or
+ * observer for as long as the institution holds the status. A cooperating partner is the mirror
+ * image: it is how DARIAH-EU records an institution in a country which is _not_ a member or
+ * observer, so there an overlapping membership is the error.
+ *
+ * The chain is `institution -(trigger)-> DARIAH-EU`, `institution -(is_located_in)-> country`,
+ * `country -(is_member_of | is_observer_of)-> DARIAH-EU`. Institutions with no `is_located_in`
+ * relation at all are skipped: {@link unitRelationRequirementRules} already reports those, and
+ * flagging the same missing relation twice would only add noise.
+ *
+ * Periods are compared rather than mere presence. The country's status is judged only for the
+ * period the institution _both_ holds the trigger relation and sits in that country, so an
+ * institution that has moved between countries, or a country that joined or left DARIAH-EU, is
+ * assessed against the relation that was actually in force at the time.
+ *
+ * Shared by the `@dariah-eric/audit` cli scripts and the admin dashboard.
+ */
+
+/** Whether the trigger relation demands the country's status, or rules it out. */
+export type CountryMembershipRequirement = "required" | "forbidden";
+
+export interface CountryMembershipRule {
+	name: string;
+	/** The institution's relation to the eric which brings the rule into force. */
+	trigger: {
+		statuses: ReadonlyArray<(typeof schema.organisationalUnitStatusEnum)[number]>;
+		/** Slug of the eric the trigger relation must point to. */
+		relatedUnitSlug: string;
+		/**
+		 * Restrict the check to units of this subtype, so a unit of another type carrying the same
+		 * status is not judged by a rule that cannot apply to it.
+		 */
+		unitType: (typeof schema.organisationalUnitTypesEnum)[number];
+		/** Human-readable name for the trigger, used in findings and the dashboard. */
+		label: string;
+	};
+	/** The country's relation to the eric which the trigger either requires or forbids. */
+	country: {
+		statuses: ReadonlyArray<(typeof schema.organisationalUnitStatusEnum)[number]>;
+		/** Slug of the eric the country's relation must point to. */
+		relatedUnitSlug: string;
+		requirement: CountryMembershipRequirement;
+		/** Human-readable name for the country's relation, used in findings and the dashboard. */
+		label: string;
+	};
+}
+
+export const countryMembershipRules: Array<CountryMembershipRule> = [
+	{
+		name: "dariah-partner-institution-in-member-country",
+		trigger: {
+			statuses: dariahPartnerInstitutionStatuses,
+			relatedUnitSlug: "dariah-eu",
+			unitType: "institution",
+			label: dariahPartnerInstitutionLabel,
+		},
+		country: {
+			statuses: dariahCountryMembershipStatuses,
+			relatedUnitSlug: "dariah-eu",
+			requirement: "required",
+			label: dariahCountryMembershipLabel,
+		},
+	},
+	{
+		name: "dariah-cooperating-partner-in-non-member-country",
+		trigger: {
+			statuses: ["is_cooperating_partner_of"],
+			relatedUnitSlug: "dariah-eu",
+			unitType: "institution",
+			label: "Cooperating partner of DARIAH-EU",
+		},
+		country: {
+			statuses: dariahCountryMembershipStatuses,
+			relatedUnitSlug: "dariah-eu",
+			requirement: "forbidden",
+			label: dariahCountryMembershipLabel,
+		},
+	},
+];
+
+/**
+ * `country_status_missing`: the country lacked the required status for part of the period.
+ * `country_status_present`: the country held a status the institution's own status excludes.
+ */
+export type CountryMembershipFindingKind = "country_status_missing" | "country_status_present";
+
+export interface CountryMembershipFinding {
+	rule: string;
+	kind: CountryMembershipFindingKind;
+	unitDocumentId: string;
+	unitSlug: string;
+	unitLabel: string;
+	/** Organisational-unit subtype (e.g. `institution`), used to build the dashboard detail link. */
+	unitType: string;
+	countryDocumentId: string;
+	countrySlug: string;
+	countryLabel: string;
+	/** Label of the institution's relation to the eric. */
+	triggerLabel: string;
+	/** Label of the country's relation to the eric. */
+	countryRelationLabel: string;
+	/** The periods which violate the rule: uncovered when `required`, overlapping when `forbidden`. */
+	periods: Array<RelationInterval>;
+	detail: string;
+}
+
+export interface CountryMembershipCheckResult {
+	findings: Array<CountryMembershipFinding>;
+	/** Rules which could not run, e.g. because the eric document is missing. */
+	errors: Array<string>;
+}
+
+/** Where an institution is located, and for how long. */
+export interface UnitLocation {
+	countryDocumentId: string;
+	duration: RelationDuration;
+}
+
+/**
+ * Assembles a rule's findings from already-fetched data — pure, so the core logic is unit-testable
+ * without a database.
+ */
+export function buildCountryMembershipFindings(
+	rule: CountryMembershipRule,
+	triggerByUnit: Map<string, Array<RelationDuration>>,
+	locationsByUnit: Map<string, Array<UnitLocation>>,
+	countryStatusByCountry: Map<string, Array<RelationDuration>>,
+	details: Map<string, UnitDetail>,
+): Array<CountryMembershipFinding> {
+	const findings: Array<CountryMembershipFinding> = [];
+
+	for (const [unitDocumentId, triggerDurations] of triggerByUnit) {
+		const unitDetail = details.get(unitDocumentId);
+
+		// Drop units of the wrong subtype, and any whose subtype could not be resolved.
+		if (unitDetail?.type !== rule.trigger.unitType) {
+			continue;
+		}
+
+		const locations = locationsByUnit.get(unitDocumentId);
+
+		// An institution with no country at all is `unitRelationRequirementRules`' finding to report.
+		if (locations == null) {
+			continue;
+		}
+
+		const triggerIntervals = toRawIntervals(triggerDurations);
+
+		for (const location of locations) {
+			// The institution only holds the status *and* sits in this country while both relations run,
+			// so that intersection is the only period the country's status is judged on.
+			const applicable = intersectIntervals(triggerIntervals, toRawIntervals([location.duration]));
+			if (applicable.length === 0) {
+				continue;
+			}
+
+			const countryStatus = toRawIntervals(
+				countryStatusByCountry.get(location.countryDocumentId) ?? [],
+			);
+
+			const periods =
+				rule.country.requirement === "required"
+					? subtractIntervals(applicable, countryStatus)
+					: intersectIntervals(applicable, countryStatus);
+
+			if (periods.length === 0) {
+				continue;
+			}
+
+			const countryDetail = details.get(location.countryDocumentId);
+			const countryLabel = countryDetail?.label ?? location.countryDocumentId;
+
+			findings.push({
+				rule: rule.name,
+				kind:
+					rule.country.requirement === "required"
+						? "country_status_missing"
+						: "country_status_present",
+				unitDocumentId,
+				unitSlug: unitDetail.slug,
+				unitLabel: unitDetail.label ?? unitDocumentId,
+				unitType: unitDetail.type,
+				countryDocumentId: location.countryDocumentId,
+				countrySlug: countryDetail?.slug ?? location.countryDocumentId,
+				countryLabel,
+				triggerLabel: rule.trigger.label,
+				countryRelationLabel: rule.country.label,
+				periods: toSerializableIntervals(periods),
+				detail:
+					rule.country.requirement === "required"
+						? `Is "${rule.trigger.label}" while located in "${countryLabel}", but "${countryLabel}" is not "${rule.country.label}" for that entire period.`
+						: `Is "${rule.trigger.label}" while located in "${countryLabel}", but "${countryLabel}" is "${rule.country.label}" during that period, which this status excludes.`,
+			});
+		}
+	}
+
+	return findings;
+}
+
+async function checkCountryMembershipRule(
+	db: Database | Transaction,
+	rule: CountryMembershipRule,
+): Promise<Array<CountryMembershipFinding>> {
+	const [triggerEricId, countryEricId] = await Promise.all([
+		resolveUnitIdBySlug(db, rule.name, rule.trigger.relatedUnitSlug),
+		resolveUnitIdBySlug(db, rule.name, rule.country.relatedUnitSlug),
+	]);
+
+	const triggerByUnit = await getUnitDurationsByStatus(db, rule.trigger.statuses, triggerEricId);
+	const unitDocumentIds = [...triggerByUnit.keys()];
+
+	const [locationRows, countryStatusByCountry] = await Promise.all([
+		getUnitRelations(db, ["is_located_in"], undefined, unitDocumentIds),
+		getUnitDurationsByStatus(db, rule.country.statuses, countryEricId),
+	]);
+
+	const locationsByUnit = new Map<string, Array<UnitLocation>>();
+	for (const row of locationRows) {
+		const locations = locationsByUnit.get(row.unitDocumentId) ?? [];
+		locations.push({ countryDocumentId: row.relatedUnitDocumentId, duration: row.duration });
+		locationsByUnit.set(row.unitDocumentId, locations);
+	}
+
+	const details = await getUnitDetails(db, [
+		...new Set([...unitDocumentIds, ...locationRows.map((row) => row.relatedUnitDocumentId)]),
+	]);
+
+	return buildCountryMembershipFindings(
+		rule,
+		triggerByUnit,
+		locationsByUnit,
+		countryStatusByCountry,
+		details,
+	);
+}
+
+export async function checkCountryMembership(
+	db: Database | Transaction,
+): Promise<CountryMembershipCheckResult> {
+	const findings: Array<CountryMembershipFinding> = [];
+	const errors: Array<string> = [];
+
+	for (const rule of countryMembershipRules) {
+		try {
+			findings.push(...(await checkCountryMembershipRule(db, rule)));
+		} catch (error) {
+			// oxlint-disable-next-line unicorn/no-instanceof-builtins
+			errors.push(error instanceof Error ? error.message : String(error));
+		}
+	}
+
+	findings.sort(
+		(a, b) =>
+			a.rule.localeCompare(b.rule) ||
+			a.unitLabel.localeCompare(b.unitLabel) ||
+			a.countryLabel.localeCompare(b.countryLabel),
+	);
 
 	return { findings, errors };
 }

@@ -1,6 +1,10 @@
 import {
+	type CountryMembershipCheckResult,
+	type CountryMembershipFinding,
+	type CountryMembershipFindingKind,
 	type InactiveUnitRelationCheckResult,
 	type InactiveUnitRelationFinding,
+	type MutuallyExclusiveFindingKind,
 	type MutuallyExclusiveUnitRelationCheckResult,
 	type MutuallyExclusiveUnitRelationFinding,
 	type PairedRelationCheckResult,
@@ -10,6 +14,7 @@ import {
 	type RelationSide,
 	type UnitRelationRequirementCheckResult,
 	type UnitRelationRequirementFinding,
+	checkCountryMembership,
 	checkInactiveUnitRelations,
 	checkMutuallyExclusiveUnitRelations,
 	checkPairedRelations,
@@ -19,8 +24,12 @@ import {
 import { db } from "@/lib/db";
 
 export type {
+	CountryMembershipCheckResult,
+	CountryMembershipFinding,
+	CountryMembershipFindingKind,
 	InactiveUnitRelationCheckResult,
 	InactiveUnitRelationFinding,
+	MutuallyExclusiveFindingKind,
 	MutuallyExclusiveUnitRelationCheckResult,
 	MutuallyExclusiveUnitRelationFinding,
 	PairedRelationCheckResult,
@@ -66,4 +75,13 @@ export async function getInactiveUnitRelationFindings(): Promise<InactiveUnitRel
  */
 export async function getMutuallyExclusiveUnitRelationFindings(): Promise<MutuallyExclusiveUnitRelationCheckResult> {
 	return checkMutuallyExclusiveUnitRelations(db);
+}
+
+/**
+ * Runs the country-membership checks (e.g. a partner institution must be located in a country which
+ * is a member or observer of DARIAH-EU for that period, while a cooperating partner must be located
+ * in one which is not). Same checks as the `@dariah-eric/audit` cli scripts.
+ */
+export async function getCountryMembershipFindings(): Promise<CountryMembershipCheckResult> {
+	return checkCountryMembership(db);
 }

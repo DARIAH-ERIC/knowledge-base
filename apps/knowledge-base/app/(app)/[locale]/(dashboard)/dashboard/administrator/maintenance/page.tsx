@@ -2,6 +2,7 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
 
+import { CountryMembershipSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/country-membership-section";
 import { EmptyContentBlocksSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-section";
 import { InactiveUnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-section";
 import { MaintenanceDashboard } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard";
@@ -37,6 +38,11 @@ export default async function DashboardAdministratorMaintenancePage(
 
 	return (
 		<MaintenanceDashboard
+			countryMembership={
+				<Suspense fallback={<MaintenanceSectionFallback />}>
+					<CountryMembershipSection />
+				</Suspense>
+			}
 			emptyContentBlocks={
 				<Suspense fallback={<MaintenanceSectionFallback />}>
 					<EmptyContentBlocksSection />

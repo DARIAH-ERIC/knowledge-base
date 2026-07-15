@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	type CountryMembershipRule,
 	type InactiveUnitRelationRule,
 	type MutuallyExclusiveUnitRelationRule,
 	type PersonRelationToUnit,
 	type RelationDuration,
 	type UnitDetail,
+	type UnitLocation,
+	buildCountryMembershipFindings,
 	buildInactiveUnitRelationFindings,
 	buildMutuallyExclusiveUnitRelationFindings,
 	classifyRelationPair,
+	countryMembershipRules,
 	findOverlappingPeriods,
 	isRelationInconsistentWithInactiveUnit,
 	isUnitInactive,
@@ -497,29 +501,49 @@ describe("mutuallyExclusiveUnitRelationRules", () => {
 			(rule) => rule.name === "partner-institution-implied-by-national-coordinating-institution",
 		);
 
-		// The partner relation is the redundant side: it is the one to remove.
-		expect(rule?.redundant.statuses).toEqual(["is_partner_institution_of"]);
-		expect(rule?.impliedBy.statuses).toEqual(["is_national_coordinating_institution_in"]);
-		// A coordinating institution is tied to whichever country it coordinates, so the related unit
-		// must not be pinned on that side.
-		expect(rule?.impliedBy.relatedUnitSlug).toBeUndefined();
-		expect(rule?.redundant.relatedUnitSlug).toBe("dariah-eu");
+		// The coordinating relation is authoritative; the partner relation is the one to remove.
+		expect(rule?.kind).toBe("redundant");
+		expect(rule?.a.statuses).toEqual(["is_national_coordinating_institution_in"]);
+		expect(rule?.b.statuses).toEqual(["is_partner_institution_of"]);
+		// Both statuses are institution -> eric relations, so both sides must be pinned to the same
+		// eric: coordinating another eric would not imply being a partner of DARIAH-EU.
+		expect(rule?.a.relatedUnitSlug).toBe("dariah-eu");
+		expect(rule?.b.relatedUnitSlug).toBe("dariah-eu");
+		expect(rule?.unitType).toBe("institution");
+	});
+
+	it("treats a cooperating partner as contradicting, not implying, the full partner statuses", () => {
+		const rule = mutuallyExclusiveUnitRelationRules.find(
+			(rule) => rule.name === "cooperating-partner-excludes-partner-institution",
+		);
+
+		// Neither side is authoritative here, so a human decides which one is wrong.
+		expect(rule?.kind).toBe("contradictory");
+		expect(rule?.a.statuses).toEqual(["is_cooperating_partner_of"]);
+		expect(rule?.b.statuses).toEqual([
+			"is_partner_institution_of",
+			"is_national_coordinating_institution_in",
+			"is_national_representative_institution_in",
+		]);
 		expect(rule?.unitType).toBe("institution");
 	});
 });
 
 describe("buildMutuallyExclusiveUnitRelationFindings", () => {
+	// `a` is the coordinating relation (authoritative), `b` the partner relation (to remove).
 	const rule: MutuallyExclusiveUnitRelationRule = {
 		name: "partner-institution-implied-by-national-coordinating-institution",
 		unitType: "institution",
-		redundant: {
+		kind: "redundant",
+		a: {
+			statuses: ["is_national_coordinating_institution_in"],
+			relatedUnitSlug: "dariah-eu",
+			label: "National coordinating institution in DARIAH-EU",
+		},
+		b: {
 			statuses: ["is_partner_institution_of"],
 			relatedUnitSlug: "dariah-eu",
 			label: "Partner institution of DARIAH-EU",
-		},
-		impliedBy: {
-			statuses: ["is_national_coordinating_institution_in"],
-			label: "National coordinating institution in a country",
 		},
 	};
 
@@ -528,53 +552,85 @@ describe("buildMutuallyExclusiveUnitRelationFindings", () => {
 	]);
 
 	const build = (
-		redundant: Array<RelationDuration>,
-		impliedBy: Array<RelationDuration>,
+		coordinating: Array<RelationDuration>,
+		partner: Array<RelationDuration>,
 		unitDetails: Map<string, UnitDetail> = details,
 	) =>
 		buildMutuallyExclusiveUnitRelationFindings(
 			rule,
-			new Map([["i-1", redundant]]),
-			new Map([["i-1", impliedBy]]),
+			new Map([["i-1", coordinating]]),
+			new Map([["i-1", partner]]),
 			unitDetails,
 		);
 
 	it("flags an institution recorded as both for overlapping periods", () => {
 		const findings = build(
-			[{ start: d("2010-01-01T00:00:00Z") }],
 			[{ start: d("2020-01-01T00:00:00Z") }],
+			[{ start: d("2010-01-01T00:00:00Z") }],
 		);
 
 		expect(findings).toHaveLength(1);
 		expect(findings[0]).toMatchObject({
 			rule: "partner-institution-implied-by-national-coordinating-institution",
+			kind: "redundant",
 			unitDocumentId: "i-1",
 			unitSlug: "institution-1",
 			unitLabel: "Institution 1",
 			unitType: "institution",
-			redundantLabel: "Partner institution of DARIAH-EU",
-			impliedByLabel: "National coordinating institution in a country",
+			aLabel: "National coordinating institution in DARIAH-EU",
+			bLabel: "Partner institution of DARIAH-EU",
 			overlaps: [{ start: "2020-01-01T00:00:00.000Z", end: null }],
 			detail:
-				'Is "National coordinating institution in a country", which already implies "Partner institution of DARIAH-EU", but both relations are recorded for the same period. Remove the redundant "Partner institution of DARIAH-EU" relation.',
+				'Is "National coordinating institution in DARIAH-EU", which already implies "Partner institution of DARIAH-EU", but both relations are recorded for the same period. Remove the redundant "Partner institution of DARIAH-EU" relation.',
+		});
+	});
+
+	it("words a contradictory rule as a conflict to resolve rather than a redundancy to remove", () => {
+		const findings = buildMutuallyExclusiveUnitRelationFindings(
+			{
+				name: "cooperating-partner-excludes-partner-institution",
+				unitType: "institution",
+				kind: "contradictory",
+				a: {
+					statuses: ["is_cooperating_partner_of"],
+					relatedUnitSlug: "dariah-eu",
+					label: "Cooperating partner of DARIAH-EU",
+				},
+				b: {
+					statuses: ["is_partner_institution_of"],
+					relatedUnitSlug: "dariah-eu",
+					label: "Partner institution of DARIAH-EU",
+				},
+			},
+			new Map([["i-1", [{ start: d("2020-01-01T00:00:00Z") }]]]),
+			new Map([["i-1", [{ start: d("2010-01-01T00:00:00Z") }]]]),
+			details,
+		);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]).toMatchObject({
+			kind: "contradictory",
+			overlaps: [{ start: "2020-01-01T00:00:00.000Z", end: null }],
+			detail:
+				'Is recorded as both "Cooperating partner of DARIAH-EU" and "Partner institution of DARIAH-EU" for the same period, but these statuses are mutually exclusive. Remove whichever one is incorrect.',
 		});
 	});
 
 	it("does not flag an institution whose partner period ended before it became coordinating", () => {
 		const findings = build(
-			[{ start: d("2010-01-01T00:00:00Z"), end: d("2015-01-01T00:00:00Z") }],
 			[{ start: d("2020-01-01T00:00:00Z") }],
+			[{ start: d("2010-01-01T00:00:00Z"), end: d("2015-01-01T00:00:00Z") }],
 		);
 
 		expect(findings).toEqual([]);
 	});
 
 	it("does not flag an institution which only has the coordinating relation", () => {
-		expect(build([], [{ start: d("2020-01-01T00:00:00Z") }])).toEqual([]);
+		expect(build([{ start: d("2020-01-01T00:00:00Z") }], [])).toEqual([]);
 	});
 
 	it("does not flag an institution which only has the partner relation", () => {
-		expect(build([{ start: d("2020-01-01T00:00:00Z") }], [])).toEqual([]);
+		expect(build([], [{ start: d("2020-01-01T00:00:00Z") }])).toEqual([]);
 	});
 
 	it("ignores a unit whose relations exist but which is not of the rule's subtype", () => {
@@ -617,7 +673,7 @@ describe("buildMutuallyExclusiveUnitRelationFindings", () => {
 						{ start: d("2020-01-01T00:00:00Z"), end: d("2022-01-01T00:00:00Z") },
 					],
 				],
-				// No overlap: partner until 2015, coordinating from 2020.
+				// No overlap: coordinating until 2015, partner only from 2020.
 				["i-2", [{ start: d("2020-01-01T00:00:00Z") }]],
 			]),
 			new Map<string, UnitDetail>([
@@ -633,6 +689,293 @@ describe("buildMutuallyExclusiveUnitRelationFindings", () => {
 				{ start: "2012-01-01T00:00:00.000Z", end: "2014-01-01T00:00:00.000Z" },
 				{ start: "2020-01-01T00:00:00.000Z", end: "2022-01-01T00:00:00.000Z" },
 			],
+		});
+	});
+});
+
+describe("countryMembershipRules", () => {
+	it("requires a member/observer country for the full partner statuses", () => {
+		const rule = countryMembershipRules.find(
+			(rule) => rule.name === "dariah-partner-institution-in-member-country",
+		);
+
+		expect(rule?.country.requirement).toBe("required");
+		expect(rule?.trigger.statuses).toEqual([
+			"is_partner_institution_of",
+			"is_national_coordinating_institution_in",
+			"is_national_representative_institution_in",
+		]);
+		expect(rule?.country.statuses).toEqual(["is_member_of", "is_observer_of"]);
+		expect(rule?.trigger.unitType).toBe("institution");
+	});
+
+	it("forbids a member/observer country for cooperating partners — the mirror image", () => {
+		const rule = countryMembershipRules.find(
+			(rule) => rule.name === "dariah-cooperating-partner-in-non-member-country",
+		);
+
+		expect(rule?.country.requirement).toBe("forbidden");
+		expect(rule?.trigger.statuses).toEqual(["is_cooperating_partner_of"]);
+		expect(rule?.country.statuses).toEqual(["is_member_of", "is_observer_of"]);
+	});
+});
+
+describe("buildCountryMembershipFindings", () => {
+	const requiredRule: CountryMembershipRule = {
+		name: "dariah-partner-institution-in-member-country",
+		trigger: {
+			statuses: ["is_partner_institution_of"],
+			relatedUnitSlug: "dariah-eu",
+			unitType: "institution",
+			label: "Partner institution of DARIAH-EU",
+		},
+		country: {
+			statuses: ["is_member_of", "is_observer_of"],
+			relatedUnitSlug: "dariah-eu",
+			requirement: "required",
+			label: "Member or observer of DARIAH-EU",
+		},
+	};
+
+	const forbiddenRule: CountryMembershipRule = {
+		...requiredRule,
+		name: "dariah-cooperating-partner-in-non-member-country",
+		trigger: { ...requiredRule.trigger, label: "Cooperating partner of DARIAH-EU" },
+		country: { ...requiredRule.country, requirement: "forbidden" },
+	};
+
+	const details = new Map<string, UnitDetail>([
+		["i-1", { slug: "institution-1", label: "Institution 1", type: "institution" }],
+		["c-1", { slug: "country-1", label: "Country 1", type: "country" }],
+	]);
+
+	const ongoingIn = (countryDocumentId: string, start: string): Array<UnitLocation> => [
+		{ countryDocumentId, duration: { start: d(start) } },
+	];
+
+	const build = (
+		rule: CountryMembershipRule,
+		trigger: Array<RelationDuration>,
+		locations: Array<UnitLocation>,
+		countryStatus: Array<RelationDuration>,
+		unitDetails: Map<string, UnitDetail> = details,
+	) =>
+		buildCountryMembershipFindings(
+			rule,
+			new Map([["i-1", trigger]]),
+			new Map([["i-1", locations]]),
+			new Map([["c-1", countryStatus]]),
+			unitDetails,
+		);
+
+	it("does not flag a partner institution in a country that is a member throughout", () => {
+		expect(
+			build(
+				requiredRule,
+				[{ start: d("2020-01-01T00:00:00Z") }],
+				ongoingIn("c-1", "2020-01-01T00:00:00Z"),
+				[{ start: d("2018-01-01T00:00:00Z") }],
+			),
+		).toEqual([]);
+	});
+
+	it("flags the period after the country stopped being a member", () => {
+		// The user's case: institution is a partner from 2020 onwards, but the country's membership
+		// ended in 2021, so 2021 onwards is uncovered.
+		const findings = build(
+			requiredRule,
+			[{ start: d("2020-01-01T00:00:00Z") }],
+			ongoingIn("c-1", "2020-01-01T00:00:00Z"),
+			[{ start: d("2018-01-01T00:00:00Z"), end: d("2021-01-01T00:00:00Z") }],
+		);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]).toMatchObject({
+			rule: "dariah-partner-institution-in-member-country",
+			kind: "country_status_missing",
+			unitDocumentId: "i-1",
+			unitSlug: "institution-1",
+			countryDocumentId: "c-1",
+			countrySlug: "country-1",
+			countryLabel: "Country 1",
+			periods: [{ start: "2021-01-01T00:00:00.000Z", end: null }],
+			detail:
+				'Is "Partner institution of DARIAH-EU" while located in "Country 1", but "Country 1" is not "Member or observer of DARIAH-EU" for that entire period.',
+		});
+	});
+
+	it("flags the period before the country became a member", () => {
+		const findings = build(
+			requiredRule,
+			[{ start: d("2015-01-01T00:00:00Z"), end: d("2025-01-01T00:00:00Z") }],
+			[{ countryDocumentId: "c-1", duration: { start: d("2015-01-01T00:00:00Z") } }],
+			[{ start: d("2020-01-01T00:00:00Z") }],
+		);
+
+		expect(findings[0]?.periods).toEqual([
+			{ start: "2015-01-01T00:00:00.000Z", end: "2020-01-01T00:00:00.000Z" },
+		]);
+	});
+
+	it("flags the whole period when the country has no member or observer relation at all", () => {
+		const findings = build(
+			requiredRule,
+			[{ start: d("2020-01-01T00:00:00Z"), end: d("2024-01-01T00:00:00Z") }],
+			ongoingIn("c-1", "2020-01-01T00:00:00Z"),
+			[],
+		);
+
+		expect(findings[0]?.periods).toEqual([
+			{ start: "2020-01-01T00:00:00.000Z", end: "2024-01-01T00:00:00.000Z" },
+		]);
+	});
+
+	it("judges the country only for the period the institution was actually located there", () => {
+		// The institution left the country in 2022; the country's membership lapsing in 2023 is then
+		// none of this institution's business.
+		expect(
+			build(
+				requiredRule,
+				[{ start: d("2020-01-01T00:00:00Z") }],
+				[
+					{
+						countryDocumentId: "c-1",
+						duration: { start: d("2020-01-01T00:00:00Z"), end: d("2022-01-01T00:00:00Z") },
+					},
+				],
+				[{ start: d("2018-01-01T00:00:00Z"), end: d("2023-01-01T00:00:00Z") }],
+			),
+		).toEqual([]);
+	});
+
+	it("ignores a country the institution was located in outside its partner period", () => {
+		expect(
+			build(
+				requiredRule,
+				[{ start: d("2020-01-01T00:00:00Z") }],
+				[
+					{
+						countryDocumentId: "c-1",
+						duration: { start: d("2010-01-01T00:00:00Z"), end: d("2015-01-01T00:00:00Z") },
+					},
+				],
+				[],
+			),
+		).toEqual([]);
+	});
+
+	it("skips an institution with no country, leaving that to the required-relations check", () => {
+		const findings = buildCountryMembershipFindings(
+			requiredRule,
+			new Map([["i-1", [{ start: d("2020-01-01T00:00:00Z") }]]]),
+			new Map(),
+			new Map(),
+			details,
+		);
+
+		expect(findings).toEqual([]);
+	});
+
+	it("ignores a unit which is not of the trigger's subtype", () => {
+		const countryDetails = new Map<string, UnitDetail>([
+			["i-1", { slug: "country-x", label: "Country X", type: "country" }],
+			["c-1", { slug: "country-1", label: "Country 1", type: "country" }],
+		]);
+
+		expect(
+			build(
+				requiredRule,
+				[{ start: d("2020-01-01T00:00:00Z") }],
+				ongoingIn("c-1", "2020-01-01T00:00:00Z"),
+				[],
+				countryDetails,
+			),
+		).toEqual([]);
+	});
+
+	it("does not flag a cooperating partner in a country that is not a member", () => {
+		expect(
+			build(
+				forbiddenRule,
+				[{ start: d("2020-01-01T00:00:00Z") }],
+				ongoingIn("c-1", "2020-01-01T00:00:00Z"),
+				[],
+			),
+		).toEqual([]);
+	});
+
+	it("flags a cooperating partner in a country that is a member — the inverse rule", () => {
+		const findings = build(
+			forbiddenRule,
+			[{ start: d("2020-01-01T00:00:00Z") }],
+			ongoingIn("c-1", "2020-01-01T00:00:00Z"),
+			[{ start: d("2018-01-01T00:00:00Z") }],
+		);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]).toMatchObject({
+			rule: "dariah-cooperating-partner-in-non-member-country",
+			kind: "country_status_present",
+			periods: [{ start: "2020-01-01T00:00:00.000Z", end: null }],
+			detail:
+				'Is "Cooperating partner of DARIAH-EU" while located in "Country 1", but "Country 1" is "Member or observer of DARIAH-EU" during that period, which this status excludes.',
+		});
+	});
+
+	it("flags only the overlapping stretch when the country joined part-way through", () => {
+		const findings = build(
+			forbiddenRule,
+			[{ start: d("2015-01-01T00:00:00Z"), end: d("2025-01-01T00:00:00Z") }],
+			[{ countryDocumentId: "c-1", duration: { start: d("2015-01-01T00:00:00Z") } }],
+			[{ start: d("2020-01-01T00:00:00Z") }],
+		);
+
+		expect(findings[0]?.periods).toEqual([
+			{ start: "2020-01-01T00:00:00.000Z", end: "2025-01-01T00:00:00.000Z" },
+		]);
+	});
+
+	it("does not flag a cooperating partner whose period merely touches the country's membership", () => {
+		// Membership begins exactly when the cooperating-partner relation ends: a clean handover.
+		expect(
+			build(
+				forbiddenRule,
+				[{ start: d("2015-01-01T00:00:00Z"), end: d("2020-01-01T00:00:00Z") }],
+				[{ countryDocumentId: "c-1", duration: { start: d("2015-01-01T00:00:00Z") } }],
+				[{ start: d("2020-01-01T00:00:00Z") }],
+			),
+		).toEqual([]);
+	});
+
+	it("reports each country separately for an institution that has moved", () => {
+		const findings = buildCountryMembershipFindings(
+			requiredRule,
+			new Map([["i-1", [{ start: d("2010-01-01T00:00:00Z") }]]]),
+			new Map([
+				[
+					"i-1",
+					[
+						{
+							countryDocumentId: "c-1",
+							duration: { start: d("2010-01-01T00:00:00Z"), end: d("2015-01-01T00:00:00Z") },
+						},
+						{ countryDocumentId: "c-2", duration: { start: d("2015-01-01T00:00:00Z") } },
+					],
+				],
+			]),
+			// c-1 was never a member; c-2 is one throughout.
+			new Map([["c-2", [{ start: d("2000-01-01T00:00:00Z") }]]]),
+			new Map<string, UnitDetail>([
+				["i-1", { slug: "institution-1", label: "Institution 1", type: "institution" }],
+				["c-1", { slug: "country-1", label: "Country 1", type: "country" }],
+				["c-2", { slug: "country-2", label: "Country 2", type: "country" }],
+			]),
+		);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]).toMatchObject({
+			countryDocumentId: "c-1",
+			periods: [{ start: "2010-01-01T00:00:00.000Z", end: "2015-01-01T00:00:00.000Z" }],
 		});
 	});
 });
