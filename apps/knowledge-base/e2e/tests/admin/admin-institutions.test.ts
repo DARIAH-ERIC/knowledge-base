@@ -167,7 +167,7 @@ test.describe("institutions admin", () => {
 		});
 	});
 
-	test("should delete an institution", async ({ createAdminInstitutionsPage }) => {
+	test("should delete an institution", async ({ createAdminInstitutionsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const institutionsPage = createAdminInstitutionsPage(workerIndex);
 
@@ -176,6 +176,9 @@ test.describe("institutions admin", () => {
 		await institutionsPage.fillName(name);
 		await institutionsPage.fillDescription("Description for delete test.");
 		await institutionsPage.submitForm();
+
+		const created = await db.getInstitutionByName(name);
+		expect(created).not.toBeNull();
 
 		await institutionsPage.searchByName(name);
 		await expect(institutionsPage.rowByName(name)).toBeVisible();
@@ -189,9 +192,9 @@ test.describe("institutions admin", () => {
 		await expect(deleteDialog).toBeHidden();
 		await expect(institutionsPage.rowByName(name)).toBeHidden();
 
-		// Re-query the list so the assertion sees server state rather than the optimistic one.
-		await institutionsPage.searchByName(name);
-		await expect(institutionsPage.rowByName(name)).toBeHidden();
+		// Source of truth: the entity document and its subtype rows are really gone.
+		expect(await db.entityDocumentExists(created!.documentId)).toBe(false);
+		expect(await db.getInstitutionByName(name)).toBeNull();
 	});
 
 	test("version selector shows correct content per version", async ({

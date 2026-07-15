@@ -170,7 +170,7 @@ test.describe("national consortia admin", () => {
 		});
 	});
 
-	test("should delete a national consortium", async ({ createAdminNationalConsortiaPage }) => {
+	test("should delete a national consortium", async ({ createAdminNationalConsortiaPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const nationalConsortiaPage = createAdminNationalConsortiaPage(workerIndex);
 
@@ -179,6 +179,9 @@ test.describe("national consortia admin", () => {
 		await nationalConsortiaPage.fillName(name);
 		await nationalConsortiaPage.fillDescription("Description for delete test.");
 		await nationalConsortiaPage.submitForm();
+
+		const created = await db.getNationalConsortiumByName(name);
+		expect(created).not.toBeNull();
 
 		await nationalConsortiaPage.searchByName(name);
 		await expect(nationalConsortiaPage.rowByName(name)).toBeVisible();
@@ -192,9 +195,9 @@ test.describe("national consortia admin", () => {
 		await expect(deleteDialog).toBeHidden();
 		await expect(nationalConsortiaPage.rowByName(name)).toBeHidden();
 
-		// Re-query the list so the assertion sees server state rather than the optimistic one.
-		await nationalConsortiaPage.searchByName(name);
-		await expect(nationalConsortiaPage.rowByName(name)).toBeHidden();
+		// Source of truth: the entity document and its subtype rows are really gone.
+		expect(await db.entityDocumentExists(created!.documentId)).toBe(false);
+		expect(await db.getNationalConsortiumByName(name)).toBeNull();
 	});
 
 	test("version selector shows correct content per version", async ({
