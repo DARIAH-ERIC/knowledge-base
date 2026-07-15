@@ -5,7 +5,14 @@ import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Button } from "@dariah-eric/ui/button";
 import { Label } from "@dariah-eric/ui/field";
 import { Input } from "@dariah-eric/ui/input";
-import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
+import { ListBoxDescription, ListBoxLabel } from "@dariah-eric/ui/list-box";
+import {
+	ModalBody,
+	ModalClose,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+} from "@dariah-eric/ui/modal";
 import { Note } from "@dariah-eric/ui/note";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
@@ -31,6 +38,22 @@ function EntitySummary(props: Readonly<{ item: EntityOption }>): ReactNode {
 			) : null}
 			{item.slug != null ? <span className="text-muted-fg"> · {item.slug}</span> : null}
 		</span>
+	);
+}
+
+/**
+ * Dropdown option that surfaces the slug: two entities can share a label (e.g. two "Cyprus
+ * University of Technology" institutions), so the slug is what tells them apart while picking.
+ */
+function renderEntityOption(item: EntityOption): ReactNode {
+	const meta = [item.description, item.slug].filter((value) => value != null && value !== "");
+	return (
+		<div className="flex flex-col">
+			<ListBoxLabel className="truncate">{item.name}</ListBoxLabel>
+			{meta.length > 0 ? (
+				<ListBoxDescription className="break-all">{meta.join(" · ")}</ListBoxDescription>
+			) : null}
+		</div>
 	);
 }
 
@@ -84,37 +107,49 @@ export function MergeEntities(): ReactNode {
 
 	return (
 		<div className="flex max-inline-xl flex-col gap-y-4">
-			<AsyncSelect<EntityOption>
-				aria-label={t("Duplicate (source)")}
-				fetchPage={fetchEntityOptionsPage}
-				initialItems={[]}
-				initialTotal={0}
-				label={t("Duplicate to remove (source)")}
-				loadOnMount={true}
-				onSelect={(item) => {
-					setSource(item);
-					setError(null);
-					setSuccess(null);
-				}}
-				placeholder={t("Search for the duplicate entity…")}
-				selectedItem={source}
-			/>
+			<div className="flex flex-col gap-y-1">
+				<AsyncSelect<EntityOption>
+					aria-label={t("Duplicate (source)")}
+					fetchPage={fetchEntityOptionsPage}
+					initialItems={[]}
+					initialTotal={0}
+					label={t("Duplicate to remove (source)")}
+					loadOnMount={true}
+					onSelect={(item) => {
+						setSource(item);
+						setError(null);
+						setSuccess(null);
+					}}
+					placeholder={t("Search for the duplicate entity…")}
+					renderItem={renderEntityOption}
+					selectedItem={source}
+				/>
+				{source?.slug != null ? (
+					<p className="break-all text-muted-fg text-xs">{source.slug}</p>
+				) : null}
+			</div>
 
-			<AsyncSelect<EntityOption>
-				aria-label={t("Canonical (target)")}
-				fetchPage={fetchEntityOptionsPage}
-				initialItems={[]}
-				initialTotal={0}
-				label={t("Canonical entity to keep (target)")}
-				loadOnMount={true}
-				onSelect={(item) => {
-					setTarget(item);
-					setError(null);
-					setSuccess(null);
-				}}
-				placeholder={t("Search for the canonical entity…")}
-				selectedItem={target}
-			/>
+			<div className="flex flex-col gap-y-1">
+				<AsyncSelect<EntityOption>
+					aria-label={t("Canonical (target)")}
+					fetchPage={fetchEntityOptionsPage}
+					initialItems={[]}
+					initialTotal={0}
+					label={t("Canonical entity to keep (target)")}
+					loadOnMount={true}
+					onSelect={(item) => {
+						setTarget(item);
+						setError(null);
+						setSuccess(null);
+					}}
+					placeholder={t("Search for the canonical entity…")}
+					renderItem={renderEntityOption}
+					selectedItem={target}
+				/>
+				{target?.slug != null ? (
+					<p className="break-all text-muted-fg text-xs">{target.slug}</p>
+				) : null}
+			</div>
 
 			<Note intent="warning">
 				{t(
@@ -173,7 +208,7 @@ export function MergeEntities(): ReactNode {
 					)}
 				/>
 
-				<div className="flex flex-col gap-y-3 px-6 text-sm">
+				<ModalBody className="flex flex-col gap-y-3 text-sm">
 					{source != null ? (
 						<div>
 							<div className="text-muted-fg text-xs uppercase">{t("Delete (source)")}</div>
@@ -197,7 +232,7 @@ export function MergeEntities(): ReactNode {
 							{error}
 						</Note>
 					) : null}
-				</div>
+				</ModalBody>
 
 				<ModalFooter>
 					<ModalClose isDisabled={isPending}>{t("Cancel")}</ModalClose>

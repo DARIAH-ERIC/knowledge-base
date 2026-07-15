@@ -57,9 +57,11 @@ export const pairedRelationRules: Array<PairedRelationRule> = [
 			label: "National coordinator (or deputy) of a country",
 		},
 		b: {
-			roleTypes: ["is_member_of"],
+			// Chairing or vice-chairing the committee is a role on it, so those count as being on the
+			// committee alongside plain membership.
+			roleTypes: ["is_member_of", "is_chair_of", "is_vice_chair_of"],
 			unitSlug: "national-coordinator-committee",
-			label: "Member of the National Coordinator Committee",
+			label: "Member, chair, or vice-chair of the National Coordinator Committee",
 		},
 	},
 ];
@@ -496,7 +498,7 @@ async function getUnitDocumentIdsWithStatus(
 	return new Set(rows.map((row) => row.unitDocumentId));
 }
 
-interface UnitDetail {
+export interface UnitDetail {
 	slug: string;
 	label: string | null;
 	type: string;
@@ -596,14 +598,15 @@ export async function checkUnitRelationRequirements(
 }
 
 /**
- * Data-integrity checks for organisational units that are no longer active but still have open
- * person relations — e.g. a working group whose `is_part_of` relation to an ERIC has ended, yet
- * whose chair/vice-chair/member/contact relations are still recorded as ongoing (no end date).
+ * Data-integrity checks for organisational units that are no longer active but still have person
+ * relations extending past that point — e.g. a working group whose `is_part_of` relation to an ERIC
+ * has ended, yet whose chair/vice-chair/member/contact relations are still recorded as ongoing or
+ * carry an end date later than the working group's.
  *
  * A unit is considered inactive when it has at least one relation of the configured trigger status
  * and _none_ of those relations is still ongoing (all have an end date). For every such unit, each
- * open (end-less) person relation of the configured role types is reported so its end date can be
- * filled in.
+ * person relation of the configured role types that is still ongoing, or that ends after the unit's
+ * inactivity date, is reported so its end date can be corrected.
  *
  * Shared by the `@dariah-eric/audit` cli scripts and the admin dashboard.
  */
@@ -680,8 +683,10 @@ export interface InactiveUnitRelationFinding {
 	personLabel: string;
 	/** The person's role in the unit (e.g. `is_chair_of`). */
 	roleType: string;
-	/** ISO start date of the still-open person relation. */
+	/** ISO start date of the flagged person relation. */
 	personRelationStart: string;
+	/** ISO end date of the person relation, or `null` when it is still ongoing. */
+	personRelationEnd: string | null;
 	detail: string;
 }
 
@@ -710,6 +715,18 @@ function humanizeUnitType(unitType: string): string {
  */
 export function isUnitInactive(durations: Array<RelationDuration>): boolean {
 	return durations.length > 0 && durations.every((duration) => duration.end != null);
+}
+
+/**
+ * A person relation to an inactive unit is inconsistent when it outlives the unit: it is still
+ * ongoing (`relationEnd` is `null`), or its end date is later than the unit's inactivity date. A
+ * relation that closes on or before `unitEnd` is consistent and not flagged.
+ */
+export function isRelationInconsistentWithInactiveUnit(
+	relationEnd: Date | null,
+	unitEnd: Date,
+): boolean {
+	return relationEnd == null || relationEnd.getTime() > unitEnd.getTime();
 }
 
 /** The latest end date among a set of durations, or `null` if all are ongoing. */
@@ -749,7 +766,7 @@ async function getUnitDurationsByStatus(
 	return byUnit;
 }
 
-interface PersonRelationToUnit {
+export interface PersonRelationToUnit {
 	unitDocumentId: string;
 	personDocumentId: string;
 	personSlug: string;
@@ -794,37 +811,56 @@ async function getPersonRelationsToUnits(
 		);
 }
 
-async function checkInactiveUnitRelationRule(
-	db: Database | Transaction,
+/** Ids of the units of the rule's subtype that are inactive (see {@link isUnitInactive}). */
+function inactiveUnitIdsForRule(
 	rule: InactiveUnitRelationRule,
-): Promise<Array<InactiveUnitRelationFinding>> {
-	const durationsByUnit = await getUnitDurationsByStatus(db, rule.inactiveWhen.statuses);
-	const details = await getUnitDetails(db, [...durationsByUnit.keys()]);
-
-	// Keep only inactive units of the configured subtype.
-	const inactiveUnitIds = [...durationsByUnit.keys()].filter(
+	durationsByUnit: Map<string, Array<RelationDuration>>,
+	details: Map<string, UnitDetail>,
+): Array<string> {
+	return [...durationsByUnit.keys()].filter(
 		(unitDocumentId) =>
 			details.get(unitDocumentId)?.type === rule.inactiveWhen.unitType &&
 			isUnitInactive(durationsByUnit.get(unitDocumentId)!),
 	);
+}
 
-	const personRelations = await getPersonRelationsToUnits(
-		db,
-		rule.personRelations.roleTypes,
-		inactiveUnitIds,
-	);
+/**
+ * Assembles a rule's findings from already-fetched data — pure, so the core logic is unit-testable
+ * without a database. For every inactive unit of the rule's subtype, each person relation of the
+ * rule's role types that outlives the unit (see {@link isRelationInconsistentWithInactiveUnit}) is
+ * reported. Person relations pointing to units that are not inactive are ignored.
+ */
+export function buildInactiveUnitRelationFindings(
+	rule: InactiveUnitRelationRule,
+	durationsByUnit: Map<string, Array<RelationDuration>>,
+	details: Map<string, UnitDetail>,
+	personRelations: Array<PersonRelationToUnit>,
+): Array<InactiveUnitRelationFinding> {
+	const inactiveUnitIds = new Set(inactiveUnitIdsForRule(rule, durationsByUnit, details));
 
 	const findings: Array<InactiveUnitRelationFinding> = [];
 
 	for (const relation of personRelations) {
-		// Already-closed relations are fine; only still-open ones need an end date.
-		if (relation.duration.end != null) {
+		if (!inactiveUnitIds.has(relation.unitDocumentId)) {
 			continue;
 		}
 
 		const detail = details.get(relation.unitDocumentId);
 		// `latestEnd` is non-null: an inactive unit has at least one ended trigger relation.
 		const unitEnd = latestEnd(durationsByUnit.get(relation.unitDocumentId)!)!;
+		const relationEnd = relation.duration.end ?? null;
+
+		if (!isRelationInconsistentWithInactiveUnit(relationEnd, unitEnd)) {
+			continue;
+		}
+
+		const roleLabel = humanizeRoleType(relation.roleType);
+		const unitTypeLabel = humanizeUnitType(detail?.type ?? rule.inactiveWhen.unitType);
+		const unitLabel = detail?.label ?? relation.unitDocumentId;
+		const detailMessage =
+			relationEnd == null
+				? `Is still an active "${roleLabel}", but the ${unitTypeLabel} "${unitLabel}" is no longer active.`
+				: `Remains a "${roleLabel}" until ${relationEnd.toISOString().slice(0, 10)}, after the ${unitTypeLabel} "${unitLabel}" became inactive on ${unitEnd.toISOString().slice(0, 10)}.`;
 
 		findings.push({
 			rule: rule.name,
@@ -838,11 +874,30 @@ async function checkInactiveUnitRelationRule(
 			personLabel: relation.personLabel ?? relation.personDocumentId,
 			roleType: relation.roleType,
 			personRelationStart: relation.duration.start.toISOString(),
-			detail: `Is still an active "${humanizeRoleType(relation.roleType)}", but the ${humanizeUnitType(detail?.type ?? rule.inactiveWhen.unitType)} "${detail?.label ?? relation.unitDocumentId}" is no longer active.`,
+			personRelationEnd: relationEnd == null ? null : relationEnd.toISOString(),
+			detail: detailMessage,
 		});
 	}
 
 	return findings;
+}
+
+async function checkInactiveUnitRelationRule(
+	db: Database | Transaction,
+	rule: InactiveUnitRelationRule,
+): Promise<Array<InactiveUnitRelationFinding>> {
+	const durationsByUnit = await getUnitDurationsByStatus(db, rule.inactiveWhen.statuses);
+	const details = await getUnitDetails(db, [...durationsByUnit.keys()]);
+
+	const inactiveUnitIds = inactiveUnitIdsForRule(rule, durationsByUnit, details);
+
+	const personRelations = await getPersonRelationsToUnits(
+		db,
+		rule.personRelations.roleTypes,
+		inactiveUnitIds,
+	);
+
+	return buildInactiveUnitRelationFindings(rule, durationsByUnit, details, personRelations);
 }
 
 export async function checkInactiveUnitRelations(

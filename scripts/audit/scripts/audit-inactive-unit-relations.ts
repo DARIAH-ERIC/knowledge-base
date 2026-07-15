@@ -55,6 +55,7 @@ async function writeReport(findings: Array<InactiveUnitRelationFinding>): Promis
 		"person_label",
 		"role_type",
 		"person_relation_start",
+		"person_relation_end",
 		"detail",
 	] as const;
 	const rows = findings.map((finding) =>
@@ -70,6 +71,7 @@ async function writeReport(findings: Array<InactiveUnitRelationFinding>): Promis
 			finding.personLabel,
 			finding.roleType,
 			finding.personRelationStart,
+			finding.personRelationEnd ?? "",
 			finding.detail,
 		]
 			.map((value) => toTsvCell(value))
