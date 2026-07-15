@@ -40,7 +40,7 @@ export function InactiveUnitRelationsCheck(
 	const findings = result.findings.map((finding) => {
 		return {
 			...finding,
-			id: `${finding.rule}:${finding.unitDocumentId}:${finding.personDocumentId}:${finding.roleType}:${finding.personRelationStart}`,
+			id: `${finding.rule}:${finding.unitDocumentId}:${finding.personDocumentId}:${finding.roleType}:${finding.personRelationStart}:${finding.personRelationEnd ?? "ongoing"}`,
 		};
 	});
 
@@ -119,7 +119,12 @@ export function InactiveUnitRelationsCheck(
 												{format.dateTime(new Date(finding.personRelationStart), {
 													dateStyle: "medium",
 												})}{" "}
-												– {t("ongoing")}
+												–{" "}
+												{finding.personRelationEnd == null
+													? t("ongoing")
+													: format.dateTime(new Date(finding.personRelationEnd), {
+															dateStyle: "medium",
+														})}
 											</span>
 										</div>
 										<div className="flex flex-col">

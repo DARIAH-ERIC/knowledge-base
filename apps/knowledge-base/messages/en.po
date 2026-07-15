@@ -385,7 +385,7 @@ msgstr "Too many requests."
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/update-delegated-unit-relation.action.ts:39
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action.ts:42
 #: app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action.ts:36
-#: lib/server/create-mutation-action.ts:155
+#: lib/server/create-mutation-action.ts:162
 msgid "z9RwCc"
 msgstr "Invalid or missing fields."
 
@@ -994,7 +994,7 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:533
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:503
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:223
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:203
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:209
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:220
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:240
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:210
@@ -1283,6 +1283,7 @@ msgstr "Contributions"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-projects-section.tsx:341
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:316
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:452
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-check.tsx:69
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx:273
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx:413
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:219
@@ -1719,8 +1720,8 @@ msgstr "Drafts"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:66
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:67
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:37
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:42
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:39
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:44
 msgid "dudqv/"
 msgstr "Maintenance"
 
@@ -2333,6 +2334,7 @@ msgstr "People"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:313
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:423
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:429
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-check.tsx:68
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:90
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:172
@@ -2539,7 +2541,7 @@ msgstr "ROR"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-details.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:119
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:101
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:162
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-details.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:138
@@ -3586,6 +3588,7 @@ msgid "eBy/Lk"
 msgstr "Review and manage dated institution-to-organisation relations."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:297
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-check.tsx:117
 msgid "tkgImg"
 msgstr "Relation"
 
@@ -3830,82 +3833,82 @@ msgstr "Administrator dashboard - New internal service"
 msgid "mfP4EN"
 msgstr "Administrator dashboard - Internal Services"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:58
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:119
 msgid "2KtWqT"
 msgstr "Internal"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:59
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:120
 msgid "5g+82s"
 msgstr "Internal diagnostics for administrators."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:63
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:124
 msgid "hIVSGF"
 msgstr "Internal diagnostics"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:64
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:91
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:125
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:152
 msgid "ED9RG5"
 msgstr "Audit log"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:65
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:132
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:193
 msgid "0klKKn"
 msgstr "Expensive queries"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:71
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:132
 msgid "QinKCt"
 msgstr "Filter by action"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:141
 msgid "jK9a9x"
 msgstr "All actions"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:96
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:157
 msgid "ug01Mk"
 msgstr "Time"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:98
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:159
 msgid "CHXoWz"
 msgstr "Actor"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:160
 msgid "QlsDcr"
 msgstr "Action"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:100
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:161
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:50
 msgid "LLtKhp"
 msgstr "Subject"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:103
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:164
 msgid "Je3HwC"
 msgstr "No audit log entries."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:137
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:198
 msgid "qj71j1"
 msgstr "Query"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:139
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:200
 msgid "fQFNOL"
 msgstr "Calls"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:140
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:201
 msgid "QsSili"
 msgstr "Total time (ms)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:202
 msgid "uG15p0"
 msgstr "Mean time (ms)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:142
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:203
 msgid "4lbK5K"
 msgstr "Rows"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:148
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:209
 msgid "8XPIPe"
 msgstr "No statements recorded yet."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:171
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:232
 msgid "5L04Xa"
 msgstr "The pg_stat_statements extension is not enabled on this database. Enable it via shared_preload_libraries in the Postgres configuration to see query statistics."
 
@@ -3945,7 +3948,7 @@ msgid "Q78rFv"
 msgstr "{skipped} blocks were skipped (no longer empty)."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:135
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:84
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:100
 msgid "F0fEMW"
 msgstr "Empty content blocks"
 
@@ -3974,167 +3977,197 @@ msgstr "Delete {count} empty content blocks"
 msgid "RQZLUJ"
 msgstr "This permanently removes {count} empty rich-text blocks from their entities. This action cannot be undone."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:38
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-check.tsx:61
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:55
+msgid "bUbgzY"
+msgstr "Inactive units"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-check.tsx:66
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unit-relation-requirements-check.tsx:54
+msgid "bw3BLv"
+msgstr "Organisational unit"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-check.tsx:70
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:94
+msgid "6XETNf"
+msgstr "Periods"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-check.tsx:76
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:100
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unit-relation-requirements-check.tsx:63
+msgid "19AjgC"
+msgstr "No data-integrity issues found."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-check.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:64
+msgid "2wsjxR"
+msgstr "ongoing"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-check.tsx:131
+msgid "6xofYo"
+msgstr "Unit inactive since"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:40
 msgid "6EvqZu"
 msgstr "Data-integrity checks and cleanup actions for administrators."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:43
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:45
 msgid "NLbnpZ"
 msgstr "Data integrity"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:44
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:46
 msgid "XslFtA"
 msgstr "Cleanup"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:45
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:133
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:47
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:149
 msgid "/GCEL8"
 msgstr "Merge & rename"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:50
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:52
 msgid "Q0xJn+"
 msgstr "Data-integrity checks"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:51
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:53
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:85
 msgid "vaRmzi"
 msgstr "Paired relations"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:52
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:54
 msgid "TUyqK9"
 msgstr "Required relations"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:57
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:60
 msgid "5UqO6/"
 msgstr "Pairs of relations which must always be recorded together, e.g. a national representative must also be a member of the General Assembly, and a national coordinator must also be a member of the National Coordinator Committee, for the same period."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:70
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:73
 msgid "klpL3K"
 msgstr "Organisational units whose relations imply another that is missing, e.g. every institution that is a partner institution or cooperating partner of DARIAH-EU must also record which country it is located in."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:82
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:86
+msgid "8r+eF2"
+msgstr "Organisational units that are no longer active but still have open person relations, e.g. a working group whose membership in an ERIC has ended, or a country that is no longer a member, but whose chair, member, coordinator, representative, or contact relations have no end date."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:98
 msgid "6boAFD"
 msgstr "Cleanup tasks"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:83
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:99
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:128
 msgid "eUKwKz"
 msgstr "Unused assets"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:85
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:101
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:132
 msgid "83nm5m"
 msgstr "Unused social media"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:86
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:102
 msgid "JEU8B5"
 msgstr "Rich-text normalisation"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:91
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:107
 msgid "ZzEr58"
 msgstr "Assets (images) which are not referenced by any record or embedded in any rich-text field. Review and select the ones to permanently remove from storage and the database."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:101
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:117
 msgid "6qo9NM"
 msgstr "Rich-text content blocks with no meaningful content (empty paragraphs, stray line breaks). Review and select the ones to remove from their entities."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:111
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:127
 msgid "QbAq9u"
 msgstr "Social-media entries not linked to any project, organisational unit, service, or report. Review and select the ones to permanently remove from the database."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:121
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:137
 msgid "p1NYmD"
 msgstr "Content blocks whose rich text can be tidied: empty paragraphs, stray line breaks, non-breaking spaces, imported HTML attributes, and bold headings. Review and select the ones to rewrite."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:134
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:150
 msgid "nX7ywS"
 msgstr "Merge duplicates"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:135
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:151
 msgid "IurB2k"
 msgstr "Edit slug"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:140
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:156
 msgid "zrqb0O"
 msgstr "Merge a duplicate entity into a canonical one: all relations are re-pointed onto the target and the source is permanently deleted. Both entities must be the same type."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:150
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:166
 msgid "pvT7BA"
 msgstr "Change an entity's slug. This is an administrator-only maintenance action — slugs are normally managed by the system and form part of the public URL."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:70
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:76
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:86
 msgid "EKv8mE"
 msgstr "Could not merge the entities. Please try again."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:74
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:80
 msgid "n9/uYl"
 msgstr "Merged “{source}” into “{target}”."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:88
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:94
 msgid "PN+Gke"
 msgstr "Duplicate (source)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:92
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:98
 msgid "YKmWzY"
 msgstr "Duplicate to remove (source)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:105
 msgid "QX/0hY"
 msgstr "Search for the duplicate entity…"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:104
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:110
 msgid "/GZGmr"
 msgstr "Canonical (target)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:108
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:114
 msgid "ZAK83h"
 msgstr "Canonical entity to keep (target)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:115
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:121
 msgid "AR4/KL"
 msgstr "Search for the canonical entity…"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:120
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:126
 msgid "Etmgfs"
 msgstr "Merging re-points every relation from the source onto the target, then permanently deletes the source entity (its versions, content, and fields are discarded — only relations are moved). Top-level fields are not merged. This cannot be undone."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:132
 msgid "9trV11"
 msgstr "Source and target must be different entities."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:131
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:137
 msgid "tYw0ae"
 msgstr "Source and target must be the same type. Pick two entities of the same type."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:157
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:170
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:163
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:176
 msgid "D/H/yK"
 msgstr "Merge entities"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:171
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:177
 msgid "ktAbCI"
 msgstr "Confirm the source and target below. The source will be permanently deleted."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:179
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:185
 msgid "ASNj0w"
 msgstr "Delete (source)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:185
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:191
 msgid "fiPdcc"
 msgstr "Keep (target)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:191
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:197
 msgid "YMfbo/"
 msgstr "Type {word} to confirm"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:210
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:216
 msgid "VOjHxG"
 msgstr "Merge and delete source"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:64
-msgid "2wsjxR"
-msgstr "ongoing"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:92
 msgid "ryAzxy"
@@ -4143,15 +4176,6 @@ msgstr "Issue"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:93
 msgid "4aal2m"
 msgstr "Detail"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:94
-msgid "6XETNf"
-msgstr "Periods"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:96
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unit-relation-requirements-check.tsx:59
-msgid "19AjgC"
-msgstr "No data-integrity issues found."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:82
 msgid "XW27V3"
@@ -4233,10 +4257,6 @@ msgstr "Update slug"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unit-relation-requirements-check.tsx:49
 msgid "WmR5+O"
 msgstr "Unit relation requirements"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unit-relation-requirements-check.tsx:54
-msgid "bw3BLv"
-msgstr "Organisational unit"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unit-relation-requirements-check.tsx:56
 msgid "+AUUJ5"
@@ -4323,7 +4343,7 @@ msgstr "Delete {count} unused social-media entries"
 msgid "E3PgoW"
 msgstr "This permanently removes {count} social-media entries from the database. This action cannot be undone."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/page.tsx:25
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/page.tsx:26
 msgid "bXXV4t"
 msgstr "Administrator dashboard - Maintenance"
 
@@ -7125,37 +7145,37 @@ msgstr "Error 401"
 msgid "N1Yb+F"
 msgstr "You need to sign in to access this page. If you already have an account, please sign in below."
 
-#: lib/server/create-command-action.ts:136
+#: lib/server/create-command-action.ts:137
 #: lib/server/create-server-action.ts:111
 msgid "Ni9MxS"
 msgstr "An entity with this slug already exists."
 
-#: lib/server/create-command-action.ts:137
+#: lib/server/create-command-action.ts:138
 #: lib/server/create-server-action.ts:112
 msgid "WtzfWm"
 msgstr "A record with these values already exists."
 
-#: lib/server/create-command-action.ts:138
+#: lib/server/create-command-action.ts:139
 #: lib/server/create-server-action.ts:113
 msgid "7XzbEI"
 msgstr "A related record no longer exists. Refresh the page and try again."
 
-#: lib/server/create-command-action.ts:141
+#: lib/server/create-command-action.ts:142
 #: lib/server/create-server-action.ts:116
 msgid "FhIASk"
 msgstr "This record conflicts with an existing record."
 
-#: lib/server/create-command-action.ts:142
+#: lib/server/create-command-action.ts:143
 #: lib/server/create-server-action.ts:117
 msgid "qDy0wr"
 msgstr "The submitted data violates a data rule."
 
-#: lib/server/create-command-action.ts:143
+#: lib/server/create-command-action.ts:144
 #: lib/server/create-server-action.ts:118
 msgid "Bosjdo"
 msgstr "The submitted data is incomplete."
 
-#: lib/server/create-command-action.ts:146
+#: lib/server/create-command-action.ts:147
 #: lib/server/create-server-action.ts:123
 msgid "lkI8/e"
 msgstr "Internal server error."
