@@ -263,7 +263,7 @@ test.describe("working groups admin", () => {
 		expect(updatedRelations[0]!.duration.end).toBeDefined();
 	});
 
-	test("should delete a working group", async ({ createAdminWorkingGroupsPage }) => {
+	test("should delete a working group", async ({ createAdminWorkingGroupsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const workingGroupsPage = createAdminWorkingGroupsPage(workerIndex);
 
@@ -274,6 +274,9 @@ test.describe("working groups admin", () => {
 		await workingGroupsPage.fillDescription("Description for delete test.");
 		await workingGroupsPage.submitForm();
 
+		const created = await db.getWorkingGroupByName(name);
+		expect(created).not.toBeNull();
+
 		await workingGroupsPage.searchByName(name);
 		await expect(workingGroupsPage.rowByName(name)).toBeVisible();
 
@@ -281,7 +284,14 @@ test.describe("working groups admin", () => {
 		await expect(deleteDialog).toBeVisible();
 		await workingGroupsPage.confirmDelete(deleteDialog);
 
+		// The dialog only closes once the server action succeeded; the row alone would also disappear
+		// on the optimistic update, so it is not on its own evidence the delete went through.
+		await expect(deleteDialog).toBeHidden();
 		await expect(workingGroupsPage.rowByName(name)).toBeHidden();
+
+		// Source of truth: the entity document and its subtype rows are really gone.
+		expect(await db.entityDocumentExists(created!.documentId)).toBe(false);
+		expect(await db.getWorkingGroupByName(name)).toBeNull();
 	});
 
 	test("version selector shows correct content per version", async ({

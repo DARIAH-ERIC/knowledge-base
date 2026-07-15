@@ -346,7 +346,7 @@ test.describe("projects admin", () => {
 		expect(relations?.socialMediaIds).toStrictEqual([socialMediaA!.id]);
 	});
 
-	test("should delete a project", async ({ createAdminProjectsPage }) => {
+	test("should delete a project", async ({ createAdminProjectsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const adminProjectsPage = createAdminProjectsPage(workerIndex);
 
@@ -361,6 +361,9 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.fillDescription("Description for delete test.");
 		await adminProjectsPage.submitForm();
 
+		const created = await db.getProjectByName(projectName);
+		expect(created).not.toBeNull();
+
 		await adminProjectsPage.searchByName(projectName);
 		await expect(adminProjectsPage.projectRowByName(projectName)).toBeVisible();
 
@@ -369,8 +372,14 @@ test.describe("projects admin", () => {
 		await expect(deleteDialog).toBeVisible();
 		await adminProjectsPage.confirmDelete(deleteDialog);
 
-		// The project row should no longer be visible.
+		// The dialog only closes once the server action succeeded; the row alone would also disappear
+		// on the optimistic update, so it is not on its own evidence the delete went through.
+		await expect(deleteDialog).toBeHidden();
 		await expect(adminProjectsPage.projectRowByName(projectName)).toBeHidden();
+
+		// Source of truth: the entity document and its subtype rows are really gone.
+		expect(await db.entityDocumentExists(created!.documentId)).toBe(false);
+		expect(await db.getProjectByName(projectName)).toBeNull();
 	});
 
 	test("should persist a reordered social media selection", async ({

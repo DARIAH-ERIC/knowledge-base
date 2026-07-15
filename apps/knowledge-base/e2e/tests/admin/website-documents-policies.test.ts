@@ -178,7 +178,7 @@ test.describe("website documents-policies admin", () => {
 		expect(updated).toMatchObject({ summary: null, url: null });
 	});
 
-	test("should delete a document or policy", async ({ createWebsiteDocumentsPoliciesPage }) => {
+	test("should delete a document or policy", async ({ createWebsiteDocumentsPoliciesPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const docPoliciesPage = createWebsiteDocumentsPoliciesPage(workerIndex);
 
@@ -192,10 +192,17 @@ test.describe("website documents-policies admin", () => {
 		await docPoliciesPage.searchByTitle(title);
 		await expect(docPoliciesPage.rowByTitle(title)).toBeVisible();
 
+		const created = await db.getDocumentOrPolicyByTitle(title);
+		expect(created).not.toBeNull();
+
 		const deleteDialog = await docPoliciesPage.openDeleteDialog(title);
 		await expect(deleteDialog).toBeVisible();
 		await docPoliciesPage.confirmDelete(deleteDialog);
 
 		await expect(docPoliciesPage.rowByTitle(title)).toBeHidden();
+
+		// Source of truth: the entity document and its subtype rows are really gone.
+		expect(await db.entityDocumentExists(created!.documentId)).toBe(false);
+		expect(await db.getDocumentOrPolicyByTitle(title)).toBeNull();
 	});
 });

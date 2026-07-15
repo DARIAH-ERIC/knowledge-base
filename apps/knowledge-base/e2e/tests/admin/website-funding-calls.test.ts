@@ -111,7 +111,7 @@ test.describe("website funding calls admin", () => {
 		expect(await db.getFundingCallContentBlocksByTitle(title)).toHaveLength(0);
 	});
 
-	test("should delete a funding call", async ({ createWebsiteFundingCallsPage }) => {
+	test("should delete a funding call", async ({ createWebsiteFundingCallsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const fundingCallsPage = createWebsiteFundingCallsPage(workerIndex);
 
@@ -125,10 +125,20 @@ test.describe("website funding calls admin", () => {
 		await fundingCallsPage.searchByTitle(title);
 		await expect(fundingCallsPage.rowByTitle(title)).toBeVisible();
 
+		const created = await db.getFundingCallByTitle(title);
+		expect(created).not.toBeNull();
+
 		const deleteDialog = await fundingCallsPage.openDeleteDialog(title);
 		await expect(deleteDialog).toBeVisible();
 		await fundingCallsPage.confirmDelete(deleteDialog);
 
+		// The dialog only closes once the server action succeeded; the row alone would also disappear
+		// on the optimistic update, so it is not on its own evidence the delete went through.
+		await expect(deleteDialog).toBeHidden();
 		await expect(fundingCallsPage.rowByTitle(title)).toBeHidden();
+
+		// Source of truth: the entity document and its subtype rows are really gone.
+		expect(await db.entityDocumentExists(created!.documentId)).toBe(false);
+		expect(await db.getFundingCallByTitle(title)).toBeNull();
 	});
 });
