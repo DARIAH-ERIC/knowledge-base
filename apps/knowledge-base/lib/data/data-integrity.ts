@@ -1,6 +1,12 @@
 import {
+	type CountryMembershipCheckResult,
+	type CountryMembershipFinding,
+	type CountryMembershipFindingKind,
 	type InactiveUnitRelationCheckResult,
 	type InactiveUnitRelationFinding,
+	type MutuallyExclusiveFindingKind,
+	type MutuallyExclusiveUnitRelationCheckResult,
+	type MutuallyExclusiveUnitRelationFinding,
 	type PairedRelationCheckResult,
 	type PairedRelationFinding,
 	type PairedRelationFindingKind,
@@ -8,7 +14,9 @@ import {
 	type RelationSide,
 	type UnitRelationRequirementCheckResult,
 	type UnitRelationRequirementFinding,
+	checkCountryMembership,
 	checkInactiveUnitRelations,
+	checkMutuallyExclusiveUnitRelations,
 	checkPairedRelations,
 	checkUnitRelationRequirements,
 } from "@dariah-eric/database/integrity-service";
@@ -16,8 +24,14 @@ import {
 import { db } from "@/lib/db";
 
 export type {
+	CountryMembershipCheckResult,
+	CountryMembershipFinding,
+	CountryMembershipFindingKind,
 	InactiveUnitRelationCheckResult,
 	InactiveUnitRelationFinding,
+	MutuallyExclusiveFindingKind,
+	MutuallyExclusiveUnitRelationCheckResult,
+	MutuallyExclusiveUnitRelationFinding,
 	PairedRelationCheckResult,
 	PairedRelationFinding,
 	PairedRelationFindingKind,
@@ -52,4 +66,22 @@ export async function getUnitRelationRequirementFindings(): Promise<UnitRelation
  */
 export async function getInactiveUnitRelationFindings(): Promise<InactiveUnitRelationCheckResult> {
 	return checkInactiveUnitRelations(db);
+}
+
+/**
+ * Runs the mutually-exclusive-unit-relation checks (e.g. a national coordinating institution is by
+ * definition a partner institution, so both relations must not be recorded for the same period).
+ * Same checks as the `@dariah-eric/audit` cli scripts.
+ */
+export async function getMutuallyExclusiveUnitRelationFindings(): Promise<MutuallyExclusiveUnitRelationCheckResult> {
+	return checkMutuallyExclusiveUnitRelations(db);
+}
+
+/**
+ * Runs the country-membership checks (e.g. a partner institution must be located in a country which
+ * is a member or observer of DARIAH-EU for that period, while a cooperating partner must be located
+ * in one which is not). Same checks as the `@dariah-eric/audit` cli scripts.
+ */
+export async function getCountryMembershipFindings(): Promise<CountryMembershipCheckResult> {
+	return checkCountryMembership(db);
 }

@@ -10,8 +10,10 @@ import { MergeEntities } from "@/app/(app)/[locale]/(dashboard)/dashboard/admini
 import { SlugEditor } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor";
 
 interface MaintenanceDashboardProps {
+	countryMembership: ReactNode;
 	emptyContentBlocks: ReactNode;
 	inactiveUnitRelations: ReactNode;
+	mutuallyExclusiveRelations: ReactNode;
 	pairedRelations: ReactNode;
 	richText: ReactNode;
 	unitRelationRequirements: ReactNode;
@@ -21,8 +23,10 @@ interface MaintenanceDashboardProps {
 
 export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>): ReactNode {
 	const {
+		countryMembership,
 		emptyContentBlocks,
 		inactiveUnitRelations,
+		mutuallyExclusiveRelations,
 		pairedRelations,
 		richText,
 		unitRelationRequirements,
@@ -52,6 +56,8 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						<TabList aria-label={t("Data-integrity checks")}>
 							<Tab id="paired-relations">{t("Paired relations")}</Tab>
 							<Tab id="unit-relation-requirements">{t("Required relations")}</Tab>
+							<Tab id="mutually-exclusive-relations">{t("Conflicting relations")}</Tab>
+							<Tab id="country-membership">{t("Country membership")}</Tab>
 							<Tab id="inactive-unit-relations">{t("Inactive units")}</Tab>
 						</TabList>
 
@@ -76,6 +82,29 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							</p>
 
 							{unitRelationRequirements}
+						</TabPanel>
+
+						<TabPanel
+							id="mutually-exclusive-relations"
+							className="flex flex-col gap-y-(--layout-padding)"
+						>
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Institutions whose relations to DARIAH-EU cannot both hold at once. A national coordinating institution is by definition a partner institution, so the partner relation is redundant and should be removed; a cooperating partner, by contrast, contradicts the full partner statuses, so one of the two is simply wrong. Flagged only where the periods overlap — an institution that held one status before the other is valid history.",
+								)}
+							</p>
+
+							{mutuallyExclusiveRelations}
+						</TabPanel>
+
+						<TabPanel id="country-membership" className="flex flex-col gap-y-(--layout-padding)">
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Institutions whose status with DARIAH-EU does not match the country they are located in. A partner, national coordinating, or national representative institution must sit in a country that is a member or observer of DARIAH-EU for the whole period it holds that status; a cooperating partner must sit in one that is neither.",
+								)}
+							</p>
+
+							{countryMembership}
 						</TabPanel>
 
 						<TabPanel

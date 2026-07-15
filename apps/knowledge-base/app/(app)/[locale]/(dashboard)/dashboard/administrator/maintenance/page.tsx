@@ -2,10 +2,12 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
 
+import { CountryMembershipSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/country-membership-section";
 import { EmptyContentBlocksSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-section";
 import { InactiveUnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-section";
 import { MaintenanceDashboard } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard";
 import { MaintenanceSectionFallback } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-section-fallback";
+import { MutuallyExclusiveRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/mutually-exclusive-relations-section";
 import { PairedRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-section";
 import { RichTextSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-section";
 import { UnitRelationRequirementsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unit-relation-requirements-section";
@@ -36,6 +38,11 @@ export default async function DashboardAdministratorMaintenancePage(
 
 	return (
 		<MaintenanceDashboard
+			countryMembership={
+				<Suspense fallback={<MaintenanceSectionFallback />}>
+					<CountryMembershipSection />
+				</Suspense>
+			}
 			emptyContentBlocks={
 				<Suspense fallback={<MaintenanceSectionFallback />}>
 					<EmptyContentBlocksSection />
@@ -44,6 +51,11 @@ export default async function DashboardAdministratorMaintenancePage(
 			inactiveUnitRelations={
 				<Suspense fallback={<MaintenanceSectionFallback />}>
 					<InactiveUnitRelationsSection />
+				</Suspense>
+			}
+			mutuallyExclusiveRelations={
+				<Suspense fallback={<MaintenanceSectionFallback />}>
+					<MutuallyExclusiveRelationsSection />
 				</Suspense>
 			}
 			pairedRelations={
