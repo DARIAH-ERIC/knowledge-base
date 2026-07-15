@@ -21,11 +21,11 @@ export type EntityType = schema.EntityType["type"];
  * Central registry mapping each entity-type token to its lifecycle adapter. Every versioned entity
  * type has exactly one adapter that owns its subtype table; the generic lifecycle helpers in
  * `entity-lifecycle.ts` take an adapter argument, but callers that only know the type token at
- * runtime (e.g. the maintenance merge tool, which operates over an arbitrary picked entity) resolve
- * it here.
+ * runtime (e.g. the maintenance merge and duplicate tools, which operate over an arbitrary picked
+ * entity) resolve it here.
  *
  * `external_links` is the one entity type without a subtype/adapter, so it is intentionally absent
- * and is not mergeable.
+ * and can be neither merged nor duplicated.
  */
 const lifecycleAdapters = {
 	documentation_pages: documentationPagesLifecycleAdapter,
@@ -43,18 +43,18 @@ const lifecycleAdapters = {
 	spotlight_articles: spotlightArticlesLifecycleAdapter,
 } satisfies Partial<Record<EntityType, EntityLifecycleAdapter>>;
 
-/** Entity types that can participate in a merge (i.e. have a lifecycle adapter). */
-export type MergeableEntityType = keyof typeof lifecycleAdapters;
+/** Entity types with a lifecycle adapter — the types merge and duplicate can operate on. */
+export type AdaptedEntityType = keyof typeof lifecycleAdapters;
 
-export const mergeableEntityTypes = new Set(
-	Object.keys(lifecycleAdapters) as Array<MergeableEntityType>,
+export const adaptedEntityTypes = new Set(
+	Object.keys(lifecycleAdapters) as Array<AdaptedEntityType>,
 );
 
-export function isMergeableEntityType(type: string): type is MergeableEntityType {
+export function hasLifecycleAdapter(type: string): type is AdaptedEntityType {
 	return Object.hasOwn(lifecycleAdapters, type);
 }
 
-/** Resolve the lifecycle adapter for a mergeable entity type. */
-export function getLifecycleAdapter(type: MergeableEntityType): EntityLifecycleAdapter {
+/** Resolve the lifecycle adapter for an entity type that has one. */
+export function getLifecycleAdapter(type: AdaptedEntityType): EntityLifecycleAdapter {
 	return lifecycleAdapters[type];
 }

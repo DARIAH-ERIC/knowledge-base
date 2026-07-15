@@ -1973,6 +1973,63 @@ export class DatabaseService {
 		});
 	}
 
+	/**
+	 * A never-published news document (draft version only). Its `entities.label` stays null, so it is
+	 * invisible to the relation-options pickers — used to prove the maintenance slug editor resolves
+	 * drafts through its own options endpoint.
+	 */
+	async createDraftNewsDocument(params: {
+		slug: string;
+		title: string;
+		imageId: string;
+	}): Promise<{ documentId: string; versionId: string }> {
+		const { slug, title, imageId } = params;
+
+		return this.db.transaction(async (tx) => {
+			const type = await tx.query.entityTypes.findFirst({
+				where: { type: "news" },
+				columns: { id: true },
+			});
+			if (type == null) {
+				throw new Error('Entity type "news" not found.');
+			}
+
+			const status = await tx.query.entityStatus.findFirst({
+				where: { type: "draft" },
+				columns: { id: true },
+			});
+			if (status == null) {
+				throw new Error('Entity status "draft" not found.');
+			}
+
+			const [document] = await tx
+				.insert(schema.entities)
+				.values({ slug, typeId: type.id })
+				.returning({ id: schema.entities.id });
+			if (document == null) {
+				throw new Error("Failed to insert draft entity document.");
+			}
+
+			const [version] = await tx
+				.insert(schema.entityVersions)
+				.values({ entityId: document.id, statusId: status.id })
+				.returning({ id: schema.entityVersions.id });
+			if (version == null) {
+				throw new Error("Failed to insert draft entity version.");
+			}
+
+			await tx.insert(schema.news).values({
+				id: version.id,
+				title,
+				summary: "Draft-only news item",
+				publicationDate: new Date("2024-01-15T00:00:00.000Z"),
+				imageId,
+			});
+
+			return { documentId: document.id, versionId: version.id };
+		});
+	}
+
 	/** Insert a document-level entity→entity relation (used to seed the maintenance merge tool). */
 	async addEntityToEntityRelation(entityId: string, relatedEntityId: string): Promise<void> {
 		await this.db
@@ -1990,6 +2047,39 @@ export class DatabaseService {
 			.limit(1);
 
 		return row?.slug ?? null;
+	}
+
+	/**
+	 * Look up a document by slug together with its lifecycle state — used by the maintenance
+	 * duplicate tool test, where the clone is addressable only by its generated `-copy` slug and must
+	 * come out draft-only.
+	 */
+	async getEntityDocumentBySlug(
+		slug: string,
+	): Promise<{ documentId: string; hasDraft: boolean; hasPublished: boolean } | null> {
+		const [row] = await this.db
+			.select({
+				documentId: schema.entities.id,
+				draftId: schema.documentLifecycle.draftId,
+				publishedId: schema.documentLifecycle.publishedId,
+			})
+			.from(schema.entities)
+			.leftJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.documentId, schema.entities.id),
+			)
+			.where(eq(schema.entities.slug, slug))
+			.limit(1);
+
+		if (row == null) {
+			return null;
+		}
+
+		return {
+			documentId: row.documentId,
+			hasDraft: row.draftId != null,
+			hasPublished: row.publishedId != null,
+		};
 	}
 
 	/** Whether an entity document still exists (a merged-away source should not). */

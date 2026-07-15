@@ -4,9 +4,9 @@ import slugify from "@sindresorhus/slugify";
 
 import { deleteDocumentRelations, getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import {
-	type MergeableEntityType,
+	type AdaptedEntityType,
 	getLifecycleAdapter,
-	isMergeableEntityType,
+	hasLifecycleAdapter,
 } from "@/lib/data/lifecycle-adapters";
 import type { Transaction } from "@/lib/db";
 import { eq, inArray, sql } from "@/lib/db/sql";
@@ -14,13 +14,13 @@ import { eq, inArray, sql } from "@/lib/db/sql";
 export interface EntityIdentity {
 	id: string;
 	slug: string;
-	type: MergeableEntityType;
+	type: AdaptedEntityType;
 }
 
 export interface MergeEntitiesResult {
 	sourceId: string;
 	targetId: string;
-	type: MergeableEntityType;
+	type: AdaptedEntityType;
 }
 
 async function loadMergeableEntity(tx: Transaction, documentId: string): Promise<EntityIdentity> {
@@ -33,7 +33,7 @@ async function loadMergeableEntity(tx: Transaction, documentId: string): Promise
 
 	assert(row, `Entity "${documentId}" not found.`);
 	assert(
-		isMergeableEntityType(row.type),
+		hasLifecycleAdapter(row.type),
 		`Entity type "${row.type}" cannot be merged (no lifecycle adapter).`,
 	);
 
@@ -379,7 +379,7 @@ async function repointInPlaceReferences(
 async function deleteSourceDocument(
 	tx: Transaction,
 	source: string,
-	type: MergeableEntityType,
+	type: AdaptedEntityType,
 ): Promise<void> {
 	const adapter = getLifecycleAdapter(type);
 	const { draftId, publishedId } = await getDocumentVersions(tx, source);

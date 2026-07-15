@@ -12,8 +12,9 @@ import { type ReactNode, useState, useTransition } from "react";
 
 import {
 	type EntityOption,
-	fetchEntityOptionsPage,
+	fetchMaintenanceEntityOptionsPage,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option";
+import { renderEntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option-item";
 import { updateEntitySlugAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/update-entity-slug.action";
 import { useRouter } from "@/lib/navigation/navigation";
 
@@ -60,13 +61,14 @@ export function SlugEditor(): ReactNode {
 		<div className="flex max-inline-xl flex-col gap-y-4">
 			<AsyncSelect<EntityOption>
 				aria-label={t("Entity")}
-				fetchPage={fetchEntityOptionsPage}
+				fetchPage={fetchMaintenanceEntityOptionsPage}
 				initialItems={[]}
 				initialTotal={0}
 				label={t("Entity")}
 				loadOnMount={true}
 				onSelect={onSelect}
 				placeholder={t("Search for an entity…")}
+				renderItem={renderEntityOption}
 				selectedItem={selected}
 			/>
 
@@ -83,11 +85,19 @@ export function SlugEditor(): ReactNode {
 				<Input placeholder={t("new-slug")} />
 			</TextField>
 
-			<Note intent="warning">
-				{t(
-					"Changing a slug changes the entity's public URL. Any existing links or bookmarks to the old URL will stop working (404). Slugs are normalised (lowercased, spaces and accents removed).",
-				)}
-			</Note>
+			{selected?.state === "draft" ? (
+				<Note intent="info">
+					{t(
+						"This entity has never been published, so it has no public URL yet and renaming it breaks nothing. Slugs are normalised (lowercased, spaces and accents removed).",
+					)}
+				</Note>
+			) : (
+				<Note intent="warning">
+					{t(
+						"Changing a slug changes the entity's public URL. Any existing links or bookmarks to the old URL will stop working (404). Slugs are normalised (lowercased, spaces and accents removed).",
+					)}
+				</Note>
+			)}
 
 			{error != null ? (
 				<Note intent="danger" role="alert">

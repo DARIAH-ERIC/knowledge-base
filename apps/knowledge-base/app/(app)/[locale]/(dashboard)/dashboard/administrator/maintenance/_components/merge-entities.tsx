@@ -5,7 +5,6 @@ import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Button } from "@dariah-eric/ui/button";
 import { Label } from "@dariah-eric/ui/field";
 import { Input } from "@dariah-eric/ui/input";
-import { ListBoxDescription, ListBoxLabel } from "@dariah-eric/ui/list-box";
 import {
 	ModalBody,
 	ModalClose,
@@ -23,6 +22,7 @@ import {
 	fetchEntityOptionsPage,
 	isSameEntityType,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option";
+import { renderEntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option-item";
 import { mergeEntitiesAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/merge-entities.action";
 import { useRouter } from "@/lib/navigation/navigation";
 
@@ -38,22 +38,6 @@ function EntitySummary(props: Readonly<{ item: EntityOption }>): ReactNode {
 			) : null}
 			{item.slug != null ? <span className="text-muted-fg"> · {item.slug}</span> : null}
 		</span>
-	);
-}
-
-/**
- * Dropdown option that surfaces the slug: two entities can share a label (e.g. two "Cyprus
- * University of Technology" institutions), so the slug is what tells them apart while picking.
- */
-function renderEntityOption(item: EntityOption): ReactNode {
-	const meta = [item.description, item.slug].filter((value) => value != null && value !== "");
-	return (
-		<div className="flex flex-col">
-			<ListBoxLabel className="truncate">{item.name}</ListBoxLabel>
-			{meta.length > 0 ? (
-				<ListBoxDescription className="break-all">{meta.join(" · ")}</ListBoxDescription>
-			) : null}
-		</div>
 	);
 }
 
