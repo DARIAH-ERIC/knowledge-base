@@ -29,6 +29,7 @@ export interface InstitutionsResult {
 			"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId"
 		> & {
 			countryName: string | null;
+			documentId: string;
 			ericRelationStatuses: Array<InstitutionEricRelationStatus>;
 			entity: Pick<schema.Entity, "slug">;
 			hasDraft: boolean;
@@ -216,6 +217,9 @@ async function getInstitutionRelationData(ids: ReadonlyArray<string>) {
 
 const itemSelect = {
 	acronym: schema.organisationalUnits.acronym,
+	// `id` is the picked *version* id (organisational_units is keyed by entity_versions.id); the
+	// document id is what mutations operate on.
+	documentId: schema.entities.id,
 	id: schema.organisationalUnits.id,
 	name: schema.organisationalUnits.name,
 	ror: schema.organisationalUnits.ror,
@@ -282,6 +286,7 @@ export async function getInstitutions(
 			data: items.map((institution) => {
 				return {
 					countryName: countryNameByInstitutionId.get(institution.id) ?? null,
+					documentId: institution.documentId,
 					entity: { slug: institution.slug },
 					hasDraft: institution.hasDraft,
 					isPublished: institution.isPublished,
@@ -302,6 +307,7 @@ export async function getInstitutions(
 	// oxlint-disable-next-line no-useless-assignment
 	let items: Array<{
 		acronym: string | null;
+		documentId: string;
 		id: string;
 		name: string;
 		ror: string | null;
@@ -465,6 +471,7 @@ export async function getInstitutions(
 			data: pagedItems.map((institution) => {
 				return {
 					countryName: countryNameByInstitutionId.get(institution.id) ?? null,
+					documentId: institution.documentId,
 					entity: { slug: institution.slug },
 					hasDraft: institution.hasDraft,
 					isPublished: institution.isPublished,
@@ -489,6 +496,7 @@ export async function getInstitutions(
 		.map((institution) => {
 			return {
 				countryName: countryNameByInstitutionId.get(institution.id) ?? null,
+				documentId: institution.documentId,
 				entity: { slug: institution.slug },
 				hasDraft: institution.hasDraft,
 				isPublished: institution.isPublished,

@@ -994,7 +994,7 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:533
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:503
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:223
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:209
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:238
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:220
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:240
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:210
@@ -4099,73 +4099,73 @@ msgstr "Merge a duplicate entity into a canonical one: all relations are re-poin
 msgid "pvT7BA"
 msgstr "Change an entity's slug. This is an administrator-only maintenance action — slugs are normally managed by the system and form part of the public URL."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:76
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:86
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:93
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:103
 msgid "EKv8mE"
 msgstr "Could not merge the entities. Please try again."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:97
 msgid "n9/uYl"
 msgstr "Merged “{source}” into “{target}”."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:94
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:112
 msgid "PN+Gke"
 msgstr "Duplicate (source)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:98
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:116
 msgid "YKmWzY"
 msgstr "Duplicate to remove (source)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:105
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:123
 msgid "QX/0hY"
 msgstr "Search for the duplicate entity…"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:110
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:134
 msgid "/GZGmr"
 msgstr "Canonical (target)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:114
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:138
 msgid "ZAK83h"
 msgstr "Canonical entity to keep (target)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:121
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:145
 msgid "AR4/KL"
 msgstr "Search for the canonical entity…"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:155
 msgid "Etmgfs"
 msgstr "Merging re-points every relation from the source onto the target, then permanently deletes the source entity (its versions, content, and fields are discarded — only relations are moved). Top-level fields are not merged. This cannot be undone."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:132
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:161
 msgid "9trV11"
 msgstr "Source and target must be different entities."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:137
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:166
 msgid "tYw0ae"
 msgstr "Source and target must be the same type. Pick two entities of the same type."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:163
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:176
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:192
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:205
 msgid "D/H/yK"
 msgstr "Merge entities"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:177
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:206
 msgid "ktAbCI"
 msgstr "Confirm the source and target below. The source will be permanently deleted."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:185
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:214
 msgid "ASNj0w"
 msgstr "Delete (source)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:191
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:220
 msgid "fiPdcc"
 msgstr "Keep (target)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:197
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:226
 msgid "YMfbo/"
 msgstr "Type {word} to confirm"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:216
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:245
 msgid "VOjHxG"
 msgstr "Merge and delete source"
 

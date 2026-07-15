@@ -184,6 +184,13 @@ test.describe("institutions admin", () => {
 		await expect(deleteDialog).toBeVisible();
 		await institutionsPage.confirmDelete(deleteDialog);
 
+		// The dialog only closes once the server action succeeded; the row alone would also disappear
+		// on the optimistic update, so it is not on its own evidence the delete went through.
+		await expect(deleteDialog).toBeHidden();
+		await expect(institutionsPage.rowByName(name)).toBeHidden();
+
+		// Re-query the list so the assertion sees server state rather than the optimistic one.
+		await institutionsPage.searchByName(name);
 		await expect(institutionsPage.rowByName(name)).toBeHidden();
 	});
 

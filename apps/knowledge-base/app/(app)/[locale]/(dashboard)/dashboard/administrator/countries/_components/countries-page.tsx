@@ -34,6 +34,7 @@ interface CountriesPageProps {
 	countries: {
 		data: Array<
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
+				documentId: string;
 				memberObserverFrom: Date | null;
 				memberObserverStatus: CountryMemberObserverStatus;
 				memberObserverUntil: Date | null;
@@ -67,7 +68,7 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 	const [items, optimisticallyRemoveItem] = useOptimistic(countries.data, (state, id: string) =>
 		state.filter((item) => item.id !== id),
 	);
-	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
@@ -158,7 +159,7 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 										danger={true}
 										icon={<TrashIcon className="me-2 block-4 inline-4" />}
 										onAction={() => {
-											setItemToDelete({ id: item.id });
+											setItemToDelete({ id: item.id, documentId: item.documentId });
 										}}
 									>
 										{t("Delete")}
@@ -186,13 +187,13 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 						return;
 					}
 
-					const id = itemToDelete.id;
+					const { id, documentId } = itemToDelete;
 					setDeleteError(null);
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
 						try {
-							const state = await deleteCountryAction(id);
+							const state = await deleteCountryAction(documentId);
 							if (isActionStateError(state)) {
 								const message = Array.isArray(state.message) ? state.message[0] : state.message;
 								setDeleteError(message ?? t("Could not delete country. Please try again."));
