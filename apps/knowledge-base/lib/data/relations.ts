@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
-import { type Transaction, db } from "@/lib/db";
+import { type Database, type Transaction, db } from "@/lib/db";
 import { unaccentIlike } from "@/lib/db/search";
 import { and, eq, inArray, or, sql } from "@/lib/db/sql";
 import {
@@ -36,6 +36,7 @@ interface GetRelationOptionsParams {
 
 export async function getEntityRelationOptions(
 	params: GetRelationOptionsParams = {},
+	executor: Database | Transaction = db,
 ): Promise<{ items: Array<RelationOptionItem>; total: number }> {
 	const { limit = relationOptionsPageSize, offset = 0, q } = params;
 	const query = q?.trim();
@@ -45,29 +46,42 @@ export async function getEntityRelationOptions(
 	// not just the raw stored token.
 	const { entityTypes: matchedEntityTypes, unitTypes: matchedUnitTypes } =
 		getEntityTypeTokensMatchingLabel(query ?? "");
-	const searchWhere =
-		query != null && query !== ""
-			? or(
-					unaccentIlike(schema.entities.slug, `%${query}%`),
-					unaccentIlike(schema.entities.label, `%${query}%`),
-					matchedEntityTypes.length > 0
-						? inArray(
-								schema.entityTypes.type,
-								matchedEntityTypes as Array<typeof schema.entityTypes.$inferSelect.type>,
-							)
-						: undefined,
-					matchedUnitTypes.length > 0
-						? inArray(
-								schema.organisationalUnitTypes.type,
-								matchedUnitTypes as Array<typeof schema.organisationalUnitTypes.$inferSelect.type>,
-							)
-						: undefined,
+	// Split the query into whitespace-separated terms and require every term to match the slug or
+	// label (AND across terms). This lets "clarin eric" find the "clarin-eric" slug — the separator
+	// differs, but each term is still a substring — and makes term order irrelevant. The type-label
+	// match keeps using the whole query, so a multi-word type like "working group" still resolves.
+	const terms = query != null ? query.split(/\s+/).filter((term) => term !== "") : [];
+	const allTermsMatchSlugOrLabel =
+		terms.length > 0
+			? and(
+					...terms.map((term) =>
+						or(
+							unaccentIlike(schema.entities.slug, `%${term}%`),
+							unaccentIlike(schema.entities.label, `%${term}%`),
+						),
+					),
 				)
 			: undefined;
+	const matchesType = or(
+		matchedEntityTypes.length > 0
+			? inArray(
+					schema.entityTypes.type,
+					matchedEntityTypes as Array<typeof schema.entityTypes.$inferSelect.type>,
+				)
+			: undefined,
+		matchedUnitTypes.length > 0
+			? inArray(
+					schema.organisationalUnitTypes.type,
+					matchedUnitTypes as Array<typeof schema.organisationalUnitTypes.$inferSelect.type>,
+				)
+			: undefined,
+	);
+	const searchWhere =
+		query != null && query !== "" ? or(allTermsMatchSlugOrLabel, matchesType) : undefined;
 	const where = and(publishedEntityVersionWhere(), searchWhere);
 
 	const [rows, aggregate] = await Promise.all([
-		db
+		executor
 			.selectDistinct({
 				entityType: schema.entityTypes.type,
 				id: schema.entities.id,
@@ -91,7 +105,7 @@ export async function getEntityRelationOptions(
 			.orderBy(schema.entities.slug)
 			.limit(limit)
 			.offset(offset),
-		db
+		executor
 			.select({ total: sql<number>`COUNT(DISTINCT ${schema.entities.id})` })
 			.from(schema.entities)
 			.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
