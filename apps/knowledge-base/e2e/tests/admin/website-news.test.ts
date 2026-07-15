@@ -403,7 +403,7 @@ test.describe("website news admin", () => {
 		expect(inlineParagraphText).toContain(inline.after.trim());
 	});
 
-	test("should delete a news item", async ({ createWebsiteNewsPage }) => {
+	test("should delete a news item", async ({ createWebsiteNewsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const newsPage = createWebsiteNewsPage(workerIndex);
 
@@ -417,10 +417,20 @@ test.describe("website news admin", () => {
 		await newsPage.searchByTitle(title);
 		await expect(newsPage.rowByTitle(title)).toBeVisible();
 
+		const created = await db.getNewsItemByTitle(title);
+		expect(created).not.toBeNull();
+
 		const deleteDialog = await newsPage.openDeleteDialog(title);
 		await expect(deleteDialog).toBeVisible();
 		await newsPage.confirmDelete(deleteDialog);
 
+		// The dialog only closes once the server action succeeded; the row alone would also disappear
+		// on the optimistic update, so it is not on its own evidence the delete went through.
+		await expect(deleteDialog).toBeHidden();
 		await expect(newsPage.rowByTitle(title)).toBeHidden();
+
+		// Source of truth: the entity document and its subtype rows are really gone.
+		expect(await db.entityDocumentExists(created!.documentId)).toBe(false);
+		expect(await db.getNewsItemByTitle(title)).toBeNull();
 	});
 });

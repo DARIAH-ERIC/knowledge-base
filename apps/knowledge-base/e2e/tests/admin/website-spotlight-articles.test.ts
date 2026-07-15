@@ -134,7 +134,7 @@ test.describe("website spotlight articles admin", () => {
 		expect(await db.getSpotlightArticleContentBlocksByTitle(title)).toHaveLength(0);
 	});
 
-	test("should delete a spotlight article", async ({ createWebsiteSpotlightArticlesPage }) => {
+	test("should delete a spotlight article", async ({ createWebsiteSpotlightArticlesPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const spotlightArticlesPage = createWebsiteSpotlightArticlesPage(workerIndex);
 
@@ -148,10 +148,20 @@ test.describe("website spotlight articles admin", () => {
 		await spotlightArticlesPage.searchByTitle(title);
 		await expect(spotlightArticlesPage.rowByTitle(title)).toBeVisible();
 
+		const created = await db.getSpotlightArticleByTitle(title);
+		expect(created).not.toBeNull();
+
 		const deleteDialog = await spotlightArticlesPage.openDeleteDialog(title);
 		await expect(deleteDialog).toBeVisible();
 		await spotlightArticlesPage.confirmDelete(deleteDialog);
 
+		// The dialog only closes once the server action succeeded; the row alone would also disappear
+		// on the optimistic update, so it is not on its own evidence the delete went through.
+		await expect(deleteDialog).toBeHidden();
 		await expect(spotlightArticlesPage.rowByTitle(title)).toBeHidden();
+
+		// Source of truth: the entity document and its subtype rows are really gone.
+		expect(await db.entityDocumentExists(created!.documentId)).toBe(false);
+		expect(await db.getSpotlightArticleByTitle(title)).toBeNull();
 	});
 });

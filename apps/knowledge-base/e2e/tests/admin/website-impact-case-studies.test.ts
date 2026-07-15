@@ -134,7 +134,7 @@ test.describe("website impact case studies admin", () => {
 		expect(await db.getImpactCaseStudyContentBlocksByTitle(title)).toHaveLength(0);
 	});
 
-	test("should delete an impact case study", async ({ createWebsiteImpactCaseStudiesPage }) => {
+	test("should delete an impact case study", async ({ createWebsiteImpactCaseStudiesPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const impactCaseStudiesPage = createWebsiteImpactCaseStudiesPage(workerIndex);
 
@@ -148,10 +148,20 @@ test.describe("website impact case studies admin", () => {
 		await impactCaseStudiesPage.searchByTitle(title);
 		await expect(impactCaseStudiesPage.rowByTitle(title)).toBeVisible();
 
+		const created = await db.getImpactCaseStudyByTitle(title);
+		expect(created).not.toBeNull();
+
 		const deleteDialog = await impactCaseStudiesPage.openDeleteDialog(title);
 		await expect(deleteDialog).toBeVisible();
 		await impactCaseStudiesPage.confirmDelete(deleteDialog);
 
+		// The dialog only closes once the server action succeeded; the row alone would also disappear
+		// on the optimistic update, so it is not on its own evidence the delete went through.
+		await expect(deleteDialog).toBeHidden();
 		await expect(impactCaseStudiesPage.rowByTitle(title)).toBeHidden();
+
+		// Source of truth: the entity document and its subtype rows are really gone.
+		expect(await db.entityDocumentExists(created!.documentId)).toBe(false);
+		expect(await db.getImpactCaseStudyByTitle(title)).toBeNull();
 	});
 });

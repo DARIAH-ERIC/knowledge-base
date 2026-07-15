@@ -131,7 +131,7 @@ test.describe("countries admin", () => {
 		expect(updated).toMatchObject({ acronym: null, imageId: null, summary: null });
 	});
 
-	test("should delete a country", async ({ createAdminCountriesPage }) => {
+	test("should delete a country", async ({ createAdminCountriesPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const countriesPage = createAdminCountriesPage(workerIndex);
 
@@ -140,6 +140,9 @@ test.describe("countries admin", () => {
 		await countriesPage.fillName(name);
 		await countriesPage.fillDescription("Description for delete test.");
 		await countriesPage.submitForm();
+
+		const created = await db.getCountryByName(name);
+		expect(created).not.toBeNull();
 
 		await countriesPage.searchByName(name);
 		await expect(countriesPage.rowByName(name)).toBeVisible();
@@ -153,9 +156,9 @@ test.describe("countries admin", () => {
 		await expect(deleteDialog).toBeHidden();
 		await expect(countriesPage.rowByName(name)).toBeHidden();
 
-		// Re-query the list so the assertion sees server state rather than the optimistic one.
-		await countriesPage.searchByName(name);
-		await expect(countriesPage.rowByName(name)).toBeHidden();
+		// Source of truth: the entity document and its subtype rows are really gone.
+		expect(await db.entityDocumentExists(created!.documentId)).toBe(false);
+		expect(await db.getCountryByName(name)).toBeNull();
 	});
 
 	test("version selector shows correct content per version", async ({

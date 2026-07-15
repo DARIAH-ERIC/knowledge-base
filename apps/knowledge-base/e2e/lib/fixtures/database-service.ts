@@ -228,11 +228,16 @@ export class DatabaseService {
 	 * Finds a news item by exact title. Returns the document entity ID (entities.id) so callers can
 	 * use it with getEntityRelations / getEntitiesToEntitiesRow.
 	 */
-	async getNewsItemByTitle(
-		title: string,
-	): Promise<{ id: string; imageId: string; publicationDate: Date; summary: string } | null> {
+	async getNewsItemByTitle(title: string): Promise<{
+		documentId: string;
+		id: string;
+		imageId: string;
+		publicationDate: Date;
+		summary: string;
+	} | null> {
 		const [row] = await this.db
 			.select({
+				documentId: schema.entityVersions.entityId,
 				id: schema.entityVersions.entityId,
 				imageId: schema.news.imageId,
 				publicationDate: schema.news.publicationDate,
@@ -1717,6 +1722,7 @@ export class DatabaseService {
 	}
 
 	async getPageItemByTitle(title: string): Promise<{
+		documentId: string;
 		id: string;
 		imageId: string | null;
 		publicationDate: Date;
@@ -1724,6 +1730,7 @@ export class DatabaseService {
 	} | null> {
 		const [row] = await this.db
 			.select({
+				documentId: schema.entityVersions.entityId,
 				id: schema.entityVersions.entityId,
 				imageId: schema.pages.imageId,
 				publicationDate: schema.pages.publicationDate,
@@ -1785,6 +1792,7 @@ export class DatabaseService {
 	}
 
 	async getEventByTitle(title: string): Promise<{
+		documentId: string;
 		duration: { start: Date; end?: Date };
 		id: string;
 		imageId: string;
@@ -1795,6 +1803,7 @@ export class DatabaseService {
 	} | null> {
 		const [row] = await this.db
 			.select({
+				documentId: schema.entityVersions.entityId,
 				duration: schema.events.duration,
 				id: schema.events.id,
 				imageId: schema.events.imageId,
@@ -1804,6 +1813,7 @@ export class DatabaseService {
 				website: schema.events.website,
 			})
 			.from(schema.events)
+			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
 			.where(eq(schema.events.title, title))
 			.limit(1);
 
@@ -1823,6 +1833,7 @@ export class DatabaseService {
 	}
 
 	async getImpactCaseStudyByTitle(title: string): Promise<{
+		documentId: string;
 		id: string;
 		imageId: string;
 		publicationDate: Date;
@@ -1830,12 +1841,14 @@ export class DatabaseService {
 	} | null> {
 		const [row] = await this.db
 			.select({
+				documentId: schema.entityVersions.entityId,
 				id: schema.impactCaseStudies.id,
 				imageId: schema.impactCaseStudies.imageId,
 				publicationDate: schema.impactCaseStudies.publicationDate,
 				summary: schema.impactCaseStudies.summary,
 			})
 			.from(schema.impactCaseStudies)
+			.innerJoin(schema.entityVersions, eq(schema.impactCaseStudies.id, schema.entityVersions.id))
 			.where(eq(schema.impactCaseStudies.title, title))
 			.limit(1);
 
@@ -1855,6 +1868,7 @@ export class DatabaseService {
 	}
 
 	async getSpotlightArticleByTitle(title: string): Promise<{
+		documentId: string;
 		id: string;
 		imageId: string;
 		publicationDate: Date;
@@ -1862,12 +1876,14 @@ export class DatabaseService {
 	} | null> {
 		const [row] = await this.db
 			.select({
+				documentId: schema.entityVersions.entityId,
 				id: schema.spotlightArticles.id,
 				imageId: schema.spotlightArticles.imageId,
 				publicationDate: schema.spotlightArticles.publicationDate,
 				summary: schema.spotlightArticles.summary,
 			})
 			.from(schema.spotlightArticles)
+			.innerJoin(schema.entityVersions, eq(schema.spotlightArticles.id, schema.entityVersions.id))
 			.where(eq(schema.spotlightArticles.title, title))
 			.limit(1);
 
@@ -1988,17 +2004,20 @@ export class DatabaseService {
 	}
 
 	async getFundingCallByTitle(title: string): Promise<{
+		documentId: string;
 		duration: { start: Date; end?: Date };
 		id: string;
 		summary: string | null;
 	} | null> {
 		const [row] = await this.db
 			.select({
+				documentId: schema.entityVersions.entityId,
 				duration: schema.fundingCalls.duration,
 				id: schema.fundingCalls.id,
 				summary: schema.fundingCalls.summary,
 			})
 			.from(schema.fundingCalls)
+			.innerJoin(schema.entityVersions, eq(schema.fundingCalls.id, schema.entityVersions.id))
 			.where(eq(schema.fundingCalls.title, title))
 			.limit(1);
 
@@ -2014,6 +2033,7 @@ export class DatabaseService {
 	}
 
 	async getOpportunityByTitle(title: string): Promise<{
+		documentId: string;
 		duration: { start: Date; end?: Date };
 		id: string;
 		sourceId: string;
@@ -2022,6 +2042,7 @@ export class DatabaseService {
 	} | null> {
 		const [row] = await this.db
 			.select({
+				documentId: schema.entityVersions.entityId,
 				duration: schema.opportunities.duration,
 				id: schema.opportunities.id,
 				sourceId: schema.opportunities.sourceId,
@@ -2029,6 +2050,7 @@ export class DatabaseService {
 				website: schema.opportunities.website,
 			})
 			.from(schema.opportunities)
+			.innerJoin(schema.entityVersions, eq(schema.opportunities.id, schema.entityVersions.id))
 			.where(eq(schema.opportunities.title, title))
 			.limit(1);
 
