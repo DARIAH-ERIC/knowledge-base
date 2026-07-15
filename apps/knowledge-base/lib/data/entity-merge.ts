@@ -237,11 +237,12 @@ async function repointArticleContributors(
 }
 
 /**
- * Re-point person↔org relations. These carry `country_report_contributions` children keyed by the
- * relation row id, so the rows must be updated in place (preserving the id) rather than
- * re-inserted. A source row that would overlap an existing target row (same other-endpoint + role +
- * overlapping duration — the `person_org_role_no_overlap` exclusion key) is deleted first (with its
- * children), so the in-place update cannot trip the exclusion constraint.
+ * Re-point person↔org relations. These carry children keyed by the relation row id
+ * (`country_report_contributions` and `working_group_report_chairs`), so the rows must be updated
+ * in place (preserving the id) rather than re-inserted. A source row that would overlap an existing
+ * target row (same other-endpoint + role + overlapping duration — the `person_org_role_no_overlap`
+ * exclusion key) is deleted first (with its children, neither of which cascades), so the in-place
+ * update cannot trip the exclusion constraint.
  */
 async function repointPersonsToOrganisationalUnits(
 	tx: Transaction,
@@ -249,18 +250,21 @@ async function repointPersonsToOrganisationalUnits(
 	target: string,
 ): Promise<void> {
 	// person endpoint (source is a person): collide on (org, role, duration).
-	await tx.execute(sql`
-		delete from country_report_contributions
-		where person_to_org_unit_id in (
-			select s.id from persons_to_organisational_units s
-			where s.person_document_id = ${source} and exists (
-				select 1 from persons_to_organisational_units t
-				where t.person_document_id = ${target}
-					and t.organisational_unit_document_id = s.organisational_unit_document_id
-					and t.role_type_id = s.role_type_id
-					and t.duration && s.duration
-			)
+	const overlappingByPerson = sql`
+		select s.id from persons_to_organisational_units s
+		where s.person_document_id = ${source} and exists (
+			select 1 from persons_to_organisational_units t
+			where t.person_document_id = ${target}
+				and t.organisational_unit_document_id = s.organisational_unit_document_id
+				and t.role_type_id = s.role_type_id
+				and t.duration && s.duration
 		)
+	`;
+	await tx.execute(sql`
+		delete from country_report_contributions where person_to_org_unit_id in (${overlappingByPerson})
+	`);
+	await tx.execute(sql`
+		delete from working_group_report_chairs where person_to_org_unit_id in (${overlappingByPerson})
 	`);
 	await tx.execute(sql`
 		delete from persons_to_organisational_units s
@@ -278,18 +282,21 @@ async function repointPersonsToOrganisationalUnits(
 		.where(eq(schema.personsToOrganisationalUnits.personDocumentId, source));
 
 	// org endpoint (source is an organisational unit): collide on (person, role, duration).
-	await tx.execute(sql`
-		delete from country_report_contributions
-		where person_to_org_unit_id in (
-			select s.id from persons_to_organisational_units s
-			where s.organisational_unit_document_id = ${source} and exists (
-				select 1 from persons_to_organisational_units t
-				where t.organisational_unit_document_id = ${target}
-					and t.person_document_id = s.person_document_id
-					and t.role_type_id = s.role_type_id
-					and t.duration && s.duration
-			)
+	const overlappingByOrg = sql`
+		select s.id from persons_to_organisational_units s
+		where s.organisational_unit_document_id = ${source} and exists (
+			select 1 from persons_to_organisational_units t
+			where t.organisational_unit_document_id = ${target}
+				and t.person_document_id = s.person_document_id
+				and t.role_type_id = s.role_type_id
+				and t.duration && s.duration
 		)
+	`;
+	await tx.execute(sql`
+		delete from country_report_contributions where person_to_org_unit_id in (${overlappingByOrg})
+	`);
+	await tx.execute(sql`
+		delete from working_group_report_chairs where person_to_org_unit_id in (${overlappingByOrg})
 	`);
 	await tx.execute(sql`
 		delete from persons_to_organisational_units s

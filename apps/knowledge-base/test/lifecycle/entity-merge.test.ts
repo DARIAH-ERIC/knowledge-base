@@ -27,6 +27,21 @@ async function getProjectRoleId(tx: Tx): Promise<string> {
 	return role.id;
 }
 
+async function getPersonTypeId(tx: Tx): Promise<string> {
+	const type = await tx.query.entityTypes.findFirst({
+		where: { type: "persons" },
+		columns: { id: true },
+	});
+	assert(type, "persons entity type not found in database");
+	return type.id;
+}
+
+async function getPersonRoleTypeId(tx: Tx): Promise<string> {
+	const role = await tx.query.personRoleTypes.findFirst({ columns: { id: true } });
+	assert(role, "no person_role_types seeded in database");
+	return role.id;
+}
+
 /** Insert a bare entity document to act as an FK target (e.g. a project↔unit relation endpoint). */
 async function createBareEntity(tx: Tx, typeId: string): Promise<string> {
 	const [row] = await tx
@@ -153,6 +168,77 @@ describe("mergeEntities", () => {
 
 			const sourceEntity = await tx.query.entities.findFirst({ where: { id: sourceId } });
 			expect(sourceEntity).toBeUndefined();
+		});
+	});
+
+	it("drops the children of an overlapping person↔org relation (chairs + contributions) instead of aborting", async () => {
+		await withTransaction(async (tx) => {
+			const personTypeId = await getPersonTypeId(tx);
+			const roleTypeId = await getPersonRoleTypeId(tx);
+
+			const source = await createPublishedDocument(tx, personTypeId, `merge-src-${randomUUID()}`);
+			const target = await createPublishedDocument(tx, personTypeId, `merge-tgt-${randomUUID()}`);
+			const orgUnit = await createBareEntity(tx, personTypeId);
+
+			// Same org, role, and (open-ended) period for both persons: once the source relation is
+			// re-pointed onto the target it overlaps the target's existing relation and must be dropped.
+			const duration = { start: new Date("2020-01-01T00:00:00.000Z") };
+			const [sourceRelation] = await tx
+				.insert(schema.personsToOrganisationalUnits)
+				.values({
+					personDocumentId: source.documentId,
+					organisationalUnitDocumentId: orgUnit,
+					roleTypeId,
+					duration,
+				})
+				.returning({ id: schema.personsToOrganisationalUnits.id });
+			assert(sourceRelation);
+			await tx.insert(schema.personsToOrganisationalUnits).values({
+				personDocumentId: target.documentId,
+				organisationalUnitDocumentId: orgUnit,
+				roleTypeId,
+				duration,
+			});
+
+			// Capture the source relation as a working-group-report chair — a child keyed by the relation
+			// id whose FK does NOT cascade, so it must be deleted before the overlapping relation is, or
+			// the merge aborts with a foreign-key violation.
+			const [campaign] = await tx
+				.insert(schema.reportingCampaigns)
+				.values({ year: 2_000_000 + Math.floor(Math.random() * 1_000_000) })
+				.returning({ id: schema.reportingCampaigns.id });
+			assert(campaign);
+			const [report] = await tx
+				.insert(schema.workingGroupReports)
+				.values({ campaignId: campaign.id, workingGroupDocumentId: orgUnit })
+				.returning({ id: schema.workingGroupReports.id });
+			assert(report);
+			await tx.insert(schema.workingGroupReportChairs).values({
+				workingGroupReportId: report.id,
+				personToOrgUnitId: sourceRelation.id,
+				chairRole: "is_chair_of",
+			});
+
+			// Pre-fix this raised a foreign_key_violation from the orphaned chair row.
+			await mergeEntities(tx, source.documentId, target.documentId);
+
+			expect(
+				await tx.query.entities.findFirst({ where: { id: source.documentId } }),
+			).toBeUndefined();
+			// The chair keyed to the deleted overlapping relation is cleaned up.
+			expect(
+				await tx
+					.select({ id: schema.workingGroupReportChairs.id })
+					.from(schema.workingGroupReportChairs)
+					.where(eq(schema.workingGroupReportChairs.workingGroupReportId, report.id)),
+			).toHaveLength(0);
+			// Target keeps exactly its own single relation to the org.
+			expect(
+				await tx
+					.select({ id: schema.personsToOrganisationalUnits.id })
+					.from(schema.personsToOrganisationalUnits)
+					.where(eq(schema.personsToOrganisationalUnits.personDocumentId, target.documentId)),
+			).toHaveLength(1);
 		});
 	});
 });
