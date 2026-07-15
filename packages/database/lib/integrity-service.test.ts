@@ -2,14 +2,18 @@ import { describe, expect, it } from "vitest";
 
 import {
 	type InactiveUnitRelationRule,
+	type MutuallyExclusiveUnitRelationRule,
 	type PersonRelationToUnit,
 	type RelationDuration,
 	type UnitDetail,
 	buildInactiveUnitRelationFindings,
+	buildMutuallyExclusiveUnitRelationFindings,
 	classifyRelationPair,
+	findOverlappingPeriods,
 	isRelationInconsistentWithInactiveUnit,
 	isUnitInactive,
 	mergeAdjacentDurations,
+	mutuallyExclusiveUnitRelationRules,
 	pairedRelationRules,
 } from "./integrity-service";
 
@@ -381,6 +385,254 @@ describe("buildInactiveUnitRelationFindings", () => {
 			personRelationEnd: "2025-01-01T00:00:00.000Z",
 			detail:
 				'Remains a "national coordinator" until 2025-01-01, after the country "Country 1" became inactive on 2019-01-01.',
+		});
+	});
+});
+
+describe("findOverlappingPeriods", () => {
+	it("finds no overlap when either side has no relations", () => {
+		expect(findOverlappingPeriods([], [{ start: d("2020-01-01T00:00:00Z") }])).toEqual([]);
+		expect(findOverlappingPeriods([{ start: d("2020-01-01T00:00:00Z") }], [])).toEqual([]);
+	});
+
+	it("finds no overlap for periods that never coincide", () => {
+		// The legitimate history case: partner institution until 2015, coordinating institution
+		// from 2020 — both rows are correct and must not be flagged.
+		expect(
+			findOverlappingPeriods(
+				[{ start: d("2010-01-01T00:00:00Z"), end: d("2015-01-01T00:00:00Z") }],
+				[{ start: d("2020-01-01T00:00:00Z") }],
+			),
+		).toEqual([]);
+	});
+
+	it("finds no overlap when one period ends exactly as the other begins", () => {
+		expect(
+			findOverlappingPeriods(
+				[{ start: d("2010-01-01T00:00:00Z"), end: d("2020-01-01T00:00:00Z") }],
+				[{ start: d("2020-01-01T00:00:00Z"), end: d("2025-01-01T00:00:00Z") }],
+			),
+		).toEqual([]);
+	});
+
+	it("returns the intersection of two partially overlapping periods", () => {
+		expect(
+			findOverlappingPeriods(
+				[{ start: d("2010-01-01T00:00:00Z"), end: d("2022-01-01T00:00:00Z") }],
+				[{ start: d("2020-01-01T00:00:00Z"), end: d("2025-01-01T00:00:00Z") }],
+			),
+		).toEqual([{ start: "2020-01-01T00:00:00.000Z", end: "2022-01-01T00:00:00.000Z" }]);
+	});
+
+	it("returns the contained period when one side encloses the other", () => {
+		expect(
+			findOverlappingPeriods(
+				[{ start: d("2010-01-01T00:00:00Z"), end: d("2030-01-01T00:00:00Z") }],
+				[{ start: d("2020-01-01T00:00:00Z"), end: d("2025-01-01T00:00:00Z") }],
+			),
+		).toEqual([{ start: "2020-01-01T00:00:00.000Z", end: "2025-01-01T00:00:00.000Z" }]);
+	});
+
+	it("reports an ongoing overlap with a null end when both sides are open-ended", () => {
+		expect(
+			findOverlappingPeriods(
+				[{ start: d("2010-01-01T00:00:00Z") }],
+				[{ start: d("2020-01-01T00:00:00Z") }],
+			),
+		).toEqual([{ start: "2020-01-01T00:00:00.000Z", end: null }]);
+	});
+
+	it("bounds the overlap by the side that has ended when the other is ongoing", () => {
+		expect(
+			findOverlappingPeriods(
+				[{ start: d("2010-01-01T00:00:00Z"), end: d("2022-01-01T00:00:00Z") }],
+				[{ start: d("2020-01-01T00:00:00Z") }],
+			),
+		).toEqual([{ start: "2020-01-01T00:00:00.000Z", end: "2022-01-01T00:00:00.000Z" }]);
+	});
+
+	it("merges the overlaps of consecutive rows into one continuous span", () => {
+		// Two coordinating terms back to back, both inside one long partner relation.
+		expect(
+			findOverlappingPeriods(
+				[{ start: d("2010-01-01T00:00:00Z"), end: d("2030-01-01T00:00:00Z") }],
+				[
+					{ start: d("2020-01-01T00:00:00Z"), end: d("2024-01-01T00:00:00Z") },
+					{ start: d("2024-01-01T00:00:00Z"), end: d("2028-01-01T00:00:00Z") },
+				],
+			),
+		).toEqual([{ start: "2020-01-01T00:00:00.000Z", end: "2028-01-01T00:00:00.000Z" }]);
+	});
+
+	it("keeps distinct overlaps separated by a gap as separate periods", () => {
+		const overlaps = findOverlappingPeriods(
+			[{ start: d("2010-01-01T00:00:00Z"), end: d("2030-01-01T00:00:00Z") }],
+			[
+				{ start: d("2012-01-01T00:00:00Z"), end: d("2014-01-01T00:00:00Z") },
+				{ start: d("2020-01-01T00:00:00Z"), end: d("2022-01-01T00:00:00Z") },
+			],
+		);
+
+		expect(overlaps).toEqual([
+			{ start: "2012-01-01T00:00:00.000Z", end: "2014-01-01T00:00:00.000Z" },
+			{ start: "2020-01-01T00:00:00.000Z", end: "2022-01-01T00:00:00.000Z" },
+		]);
+	});
+
+	it("does not merge a near-adjacent gap into a manufactured overlap", () => {
+		// Unlike the paired-relation checks, a sub-day gap must not be bridged here: these two
+		// relations genuinely never coincide.
+		expect(
+			findOverlappingPeriods(
+				[{ start: d("2010-01-01T00:00:00Z"), end: d("2020-01-01T00:00:00Z") }],
+				[{ start: d("2020-01-01T12:00:00Z"), end: d("2025-01-01T00:00:00Z") }],
+			),
+		).toEqual([]);
+	});
+});
+
+describe("mutuallyExclusiveUnitRelationRules", () => {
+	it("infers partner-institution status from the national coordinating institution, not the reverse", () => {
+		const rule = mutuallyExclusiveUnitRelationRules.find(
+			(rule) => rule.name === "partner-institution-implied-by-national-coordinating-institution",
+		);
+
+		// The partner relation is the redundant side: it is the one to remove.
+		expect(rule?.redundant.statuses).toEqual(["is_partner_institution_of"]);
+		expect(rule?.impliedBy.statuses).toEqual(["is_national_coordinating_institution_in"]);
+		// A coordinating institution is tied to whichever country it coordinates, so the related unit
+		// must not be pinned on that side.
+		expect(rule?.impliedBy.relatedUnitSlug).toBeUndefined();
+		expect(rule?.redundant.relatedUnitSlug).toBe("dariah-eu");
+		expect(rule?.unitType).toBe("institution");
+	});
+});
+
+describe("buildMutuallyExclusiveUnitRelationFindings", () => {
+	const rule: MutuallyExclusiveUnitRelationRule = {
+		name: "partner-institution-implied-by-national-coordinating-institution",
+		unitType: "institution",
+		redundant: {
+			statuses: ["is_partner_institution_of"],
+			relatedUnitSlug: "dariah-eu",
+			label: "Partner institution of DARIAH-EU",
+		},
+		impliedBy: {
+			statuses: ["is_national_coordinating_institution_in"],
+			label: "National coordinating institution in a country",
+		},
+	};
+
+	const details = new Map<string, UnitDetail>([
+		["i-1", { slug: "institution-1", label: "Institution 1", type: "institution" }],
+	]);
+
+	const build = (
+		redundant: Array<RelationDuration>,
+		impliedBy: Array<RelationDuration>,
+		unitDetails: Map<string, UnitDetail> = details,
+	) =>
+		buildMutuallyExclusiveUnitRelationFindings(
+			rule,
+			new Map([["i-1", redundant]]),
+			new Map([["i-1", impliedBy]]),
+			unitDetails,
+		);
+
+	it("flags an institution recorded as both for overlapping periods", () => {
+		const findings = build(
+			[{ start: d("2010-01-01T00:00:00Z") }],
+			[{ start: d("2020-01-01T00:00:00Z") }],
+		);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]).toMatchObject({
+			rule: "partner-institution-implied-by-national-coordinating-institution",
+			unitDocumentId: "i-1",
+			unitSlug: "institution-1",
+			unitLabel: "Institution 1",
+			unitType: "institution",
+			redundantLabel: "Partner institution of DARIAH-EU",
+			impliedByLabel: "National coordinating institution in a country",
+			overlaps: [{ start: "2020-01-01T00:00:00.000Z", end: null }],
+			detail:
+				'Is "National coordinating institution in a country", which already implies "Partner institution of DARIAH-EU", but both relations are recorded for the same period. Remove the redundant "Partner institution of DARIAH-EU" relation.',
+		});
+	});
+
+	it("does not flag an institution whose partner period ended before it became coordinating", () => {
+		const findings = build(
+			[{ start: d("2010-01-01T00:00:00Z"), end: d("2015-01-01T00:00:00Z") }],
+			[{ start: d("2020-01-01T00:00:00Z") }],
+		);
+
+		expect(findings).toEqual([]);
+	});
+
+	it("does not flag an institution which only has the coordinating relation", () => {
+		expect(build([], [{ start: d("2020-01-01T00:00:00Z") }])).toEqual([]);
+	});
+
+	it("does not flag an institution which only has the partner relation", () => {
+		expect(build([{ start: d("2020-01-01T00:00:00Z") }], [])).toEqual([]);
+	});
+
+	it("ignores a unit whose relations exist but which is not of the rule's subtype", () => {
+		// A country can also be a partner of DARIAH-EU, so the subtype must be pinned.
+		const countryDetails = new Map<string, UnitDetail>([
+			["i-1", { slug: "country-1", label: "Country 1", type: "country" }],
+		]);
+
+		expect(
+			build(
+				[{ start: d("2010-01-01T00:00:00Z") }],
+				[{ start: d("2020-01-01T00:00:00Z") }],
+				countryDetails,
+			),
+		).toEqual([]);
+	});
+
+	it("ignores a unit whose subtype could not be resolved", () => {
+		expect(
+			build(
+				[{ start: d("2010-01-01T00:00:00Z") }],
+				[{ start: d("2020-01-01T00:00:00Z") }],
+				new Map(),
+			),
+		).toEqual([]);
+	});
+
+	it("reports each overlapping unit once, with every overlapping period", () => {
+		const findings = buildMutuallyExclusiveUnitRelationFindings(
+			rule,
+			new Map([
+				["i-1", [{ start: d("2010-01-01T00:00:00Z"), end: d("2030-01-01T00:00:00Z") }]],
+				["i-2", [{ start: d("2010-01-01T00:00:00Z"), end: d("2015-01-01T00:00:00Z") }]],
+			]),
+			new Map([
+				[
+					"i-1",
+					[
+						{ start: d("2012-01-01T00:00:00Z"), end: d("2014-01-01T00:00:00Z") },
+						{ start: d("2020-01-01T00:00:00Z"), end: d("2022-01-01T00:00:00Z") },
+					],
+				],
+				// No overlap: partner until 2015, coordinating from 2020.
+				["i-2", [{ start: d("2020-01-01T00:00:00Z") }]],
+			]),
+			new Map<string, UnitDetail>([
+				["i-1", { slug: "institution-1", label: "Institution 1", type: "institution" }],
+				["i-2", { slug: "institution-2", label: "Institution 2", type: "institution" }],
+			]),
+		);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]).toMatchObject({
+			unitDocumentId: "i-1",
+			overlaps: [
+				{ start: "2012-01-01T00:00:00.000Z", end: "2014-01-01T00:00:00.000Z" },
+				{ start: "2020-01-01T00:00:00.000Z", end: "2022-01-01T00:00:00.000Z" },
+			],
 		});
 	});
 });

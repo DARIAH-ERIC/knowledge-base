@@ -79,19 +79,16 @@ interface Interval {
 	end: number;
 }
 
-function toIntervals(durations: Array<{ start: Date; end?: Date }>): Array<Interval> {
-	const sorted = durations
-		.map((duration) => {
-			return { start: duration.start.getTime(), end: duration.end?.getTime() ?? Infinity };
-		})
-		.toSorted((a, b) => a.start - b.start || a.end - b.end);
+/** Sorts, then collapses intervals separated by at most `gapMs` into one. */
+function mergeIntervals(intervals: Array<Interval>, gapMs: number): Array<Interval> {
+	const sorted = intervals.toSorted((a, b) => a.start - b.start || a.end - b.end);
 
 	const merged: Array<Interval> = [];
 
 	for (const interval of sorted) {
 		const last = merged.at(-1);
 
-		if (last != null && interval.start <= last.end + mergeGapMs) {
+		if (last != null && interval.start <= last.end + gapMs) {
 			last.end = Math.max(last.end, interval.end);
 		} else {
 			merged.push({ ...interval });
@@ -99,6 +96,15 @@ function toIntervals(durations: Array<{ start: Date; end?: Date }>): Array<Inter
 	}
 
 	return merged;
+}
+
+function toIntervals(durations: Array<{ start: Date; end?: Date }>): Array<Interval> {
+	return mergeIntervals(
+		durations.map((duration) => {
+			return { start: duration.start.getTime(), end: duration.end?.getTime() ?? Infinity };
+		}),
+		mergeGapMs,
+	);
 }
 
 function areIntervalSetsEqual(a: Array<Interval>, b: Array<Interval>): boolean {
@@ -221,16 +227,17 @@ async function resolveUnitIdBySlug(
 	return unit.id;
 }
 
-async function resolveEndpointUnitId(
+/** As {@link resolveUnitIdBySlug}, but an omitted slug resolves to `undefined` (match any unit). */
+async function resolveOptionalUnitIdBySlug(
 	db: Database | Transaction,
 	ruleName: string,
-	endpoint: RelationEndpoint,
+	slug: string | undefined,
 ): Promise<string | undefined> {
-	if (endpoint.unitSlug == null) {
+	if (slug == null) {
 		return undefined;
 	}
 
-	return resolveUnitIdBySlug(db, ruleName, endpoint.unitSlug);
+	return resolveUnitIdBySlug(db, ruleName, slug);
 }
 
 interface EndpointRelation {
@@ -278,8 +285,8 @@ async function checkRule(
 	rule: PairedRelationRule,
 ): Promise<Array<PairedRelationFinding>> {
 	const [aUnitId, bUnitId] = await Promise.all([
-		resolveEndpointUnitId(db, rule.name, rule.a),
-		resolveEndpointUnitId(db, rule.name, rule.b),
+		resolveOptionalUnitIdBySlug(db, rule.name, rule.a.unitSlug),
+		resolveOptionalUnitIdBySlug(db, rule.name, rule.b.unitSlug),
 	]);
 
 	const [aRows, bRows] = await Promise.all([
@@ -740,10 +747,14 @@ function latestEnd(durations: Array<RelationDuration>): Date | null {
 	return latest == null ? null : new Date(latest);
 }
 
-/** Groups the durations of every unit-to-unit relation of one of `statuses` by unit document id. */
+/**
+ * Groups the durations of every unit-to-unit relation of one of `statuses` (optionally only those
+ * pointing to `relatedUnitId`) by unit document id.
+ */
 async function getUnitDurationsByStatus(
 	db: Database | Transaction,
 	statuses: ReadonlyArray<(typeof schema.organisationalUnitStatusEnum)[number]>,
+	relatedUnitId?: string,
 ): Promise<Map<string, Array<RelationDuration>>> {
 	const rows = await db
 		.select({
@@ -755,7 +766,14 @@ async function getUnitDurationsByStatus(
 			schema.organisationalUnitStatus,
 			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 		)
-		.where(inArray(schema.organisationalUnitStatus.status, [...statuses]));
+		.where(
+			and(
+				inArray(schema.organisationalUnitStatus.status, [...statuses]),
+				relatedUnitId != null
+					? eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, relatedUnitId)
+					: undefined,
+			),
+		);
 
 	const byUnit = new Map<string, Array<RelationDuration>>();
 	for (const row of rows) {
@@ -921,6 +939,218 @@ export async function checkInactiveUnitRelations(
 			a.unitLabel.localeCompare(b.unitLabel) ||
 			a.personLabel.localeCompare(b.personLabel),
 	);
+
+	return { findings, errors };
+}
+
+/**
+ * Data-integrity checks for pairs of unit-to-unit relations which must never be recorded on the
+ * same unit for the same period, because one already implies the other — e.g. a national
+ * coordinating institution is by definition a partner institution, so recording both is redundant:
+ * the partner status is inferred from the coordinating relation instead, and only the latter is
+ * entered.
+ *
+ * Unlike the required-relation checks, these compare durations rather than mere presence, because
+ * both relations may legitimately co-exist in the database over _separate_ periods — an institution
+ * that was a partner institution until 2015 and became a national coordinating institution in 2020
+ * is correct history, not a data error. Only where the two periods actually overlap is the
+ * redundant relation reported. Two periods that merely touch at an endpoint (one ends exactly when
+ * the other begins — a clean handover) are not an overlap.
+ *
+ * Shared by the `@dariah-eric/audit` cli scripts and the admin dashboard.
+ */
+
+/** One side of a mutual-exclusion rule: a unit-to-unit relation of a given shape. */
+export interface ExclusiveRelationEndpoint {
+	/** A relation with any of these statuses satisfies this side. */
+	statuses: ReadonlyArray<(typeof schema.organisationalUnitStatusEnum)[number]>;
+	/**
+	 * Slug of the related-unit document the relation must point to (e.g. the DARIAH-EU eric). Omit to
+	 * match a relation to any related unit — e.g. a national coordinating institution is tied to
+	 * whichever country it coordinates, so the related unit must not be pinned.
+	 */
+	relatedUnitSlug?: string;
+	/** Human-readable name for this side, used in findings and the dashboard. */
+	label: string;
+}
+
+export interface MutuallyExclusiveUnitRelationRule {
+	name: string;
+	/**
+	 * Restrict the check to units of this subtype. Needed because the same status may exist on units
+	 * the rule cannot apply to (see `UnitRelationRequirementRule["trigger"]["unitType"]`).
+	 */
+	unitType?: (typeof schema.organisationalUnitTypesEnum)[number];
+	/** The relation which is inferable from `impliedBy`, and so must not be entered alongside it. */
+	redundant: ExclusiveRelationEndpoint;
+	/** The authoritative relation which already implies `redundant`. */
+	impliedBy: ExclusiveRelationEndpoint;
+}
+
+export const mutuallyExclusiveUnitRelationRules: Array<MutuallyExclusiveUnitRelationRule> = [
+	{
+		name: "partner-institution-implied-by-national-coordinating-institution",
+		unitType: "institution",
+		redundant: {
+			statuses: ["is_partner_institution_of"],
+			relatedUnitSlug: "dariah-eu",
+			label: "Partner institution of DARIAH-EU",
+		},
+		impliedBy: {
+			statuses: ["is_national_coordinating_institution_in"],
+			label: "National coordinating institution in a country",
+		},
+	},
+];
+
+export interface MutuallyExclusiveUnitRelationFinding {
+	rule: string;
+	unitDocumentId: string;
+	unitSlug: string;
+	unitLabel: string;
+	/** Organisational-unit subtype (e.g. `institution`), used to build the dashboard detail link. */
+	unitType: string;
+	/** Label of the redundant relation, i.e. the one to remove. */
+	redundantLabel: string;
+	/** Label of the relation which already implies the redundant one. */
+	impliedByLabel: string;
+	/** The periods during which both relations are recorded, i.e. what must be resolved. */
+	overlaps: Array<RelationInterval>;
+	detail: string;
+}
+
+export interface MutuallyExclusiveUnitRelationCheckResult {
+	findings: Array<MutuallyExclusiveUnitRelationFinding>;
+	/** Rules which could not run, e.g. because an endpoint's related-unit document is missing. */
+	errors: Array<string>;
+}
+
+/**
+ * The periods covered by both `a` and `b`, merged and display-ready; empty when the two never
+ * coincide. Intervals which only touch at an endpoint do not overlap: an institution whose partner
+ * relation ends exactly when its coordinating relation begins is a clean handover, so the
+ * intersection must be a non-empty span, not a single instant.
+ *
+ * Durations are compared as recorded — unlike {@link classifyRelationPair}, near-adjacent periods
+ * are deliberately not merged first, since bridging a gap between two relations could manufacture
+ * an overlap that does not exist.
+ */
+export function findOverlappingPeriods(
+	a: Array<RelationDuration>,
+	b: Array<RelationDuration>,
+): Array<RelationInterval> {
+	const toRaw = (durations: Array<RelationDuration>): Array<Interval> =>
+		durations.map((duration) => {
+			return { start: duration.start.getTime(), end: duration.end?.getTime() ?? Infinity };
+		});
+
+	const overlaps: Array<Interval> = [];
+
+	for (const x of toRaw(a)) {
+		for (const y of toRaw(b)) {
+			const start = Math.max(x.start, y.start);
+			const end = Math.min(x.end, y.end);
+
+			if (start < end) {
+				overlaps.push({ start, end });
+			}
+		}
+	}
+
+	return toSerializableIntervals(mergeIntervals(overlaps, 0));
+}
+
+/**
+ * Assembles a rule's findings from already-fetched data — pure, so the core logic is unit-testable
+ * without a database. Reports each unit of the rule's subtype whose two sides overlap in time.
+ */
+export function buildMutuallyExclusiveUnitRelationFindings(
+	rule: MutuallyExclusiveUnitRelationRule,
+	redundantByUnit: Map<string, Array<RelationDuration>>,
+	impliedByByUnit: Map<string, Array<RelationDuration>>,
+	details: Map<string, UnitDetail>,
+): Array<MutuallyExclusiveUnitRelationFinding> {
+	const findings: Array<MutuallyExclusiveUnitRelationFinding> = [];
+
+	for (const [unitDocumentId, redundantDurations] of redundantByUnit) {
+		const impliedByDurations = impliedByByUnit.get(unitDocumentId);
+		if (impliedByDurations == null) {
+			continue;
+		}
+
+		const detail = details.get(unitDocumentId);
+
+		// Drop units of the wrong subtype (see `unitType`), and any unit whose subtype could not be
+		// resolved when the rule is type-restricted.
+		if (rule.unitType != null && detail?.type !== rule.unitType) {
+			continue;
+		}
+
+		const overlaps = findOverlappingPeriods(redundantDurations, impliedByDurations);
+		if (overlaps.length === 0) {
+			continue;
+		}
+
+		findings.push({
+			rule: rule.name,
+			unitDocumentId,
+			unitSlug: detail?.slug ?? unitDocumentId,
+			unitLabel: detail?.label ?? unitDocumentId,
+			unitType: detail?.type ?? rule.unitType ?? "institution",
+			redundantLabel: rule.redundant.label,
+			impliedByLabel: rule.impliedBy.label,
+			overlaps,
+			detail: `Is "${rule.impliedBy.label}", which already implies "${rule.redundant.label}", but both relations are recorded for the same period. Remove the redundant "${rule.redundant.label}" relation.`,
+		});
+	}
+
+	return findings;
+}
+
+async function checkMutuallyExclusiveUnitRelationRule(
+	db: Database | Transaction,
+	rule: MutuallyExclusiveUnitRelationRule,
+): Promise<Array<MutuallyExclusiveUnitRelationFinding>> {
+	const [redundantRelatedUnitId, impliedByRelatedUnitId] = await Promise.all([
+		resolveOptionalUnitIdBySlug(db, rule.name, rule.redundant.relatedUnitSlug),
+		resolveOptionalUnitIdBySlug(db, rule.name, rule.impliedBy.relatedUnitSlug),
+	]);
+
+	const [redundantByUnit, impliedByByUnit] = await Promise.all([
+		getUnitDurationsByStatus(db, rule.redundant.statuses, redundantRelatedUnitId),
+		getUnitDurationsByStatus(db, rule.impliedBy.statuses, impliedByRelatedUnitId),
+	]);
+
+	// Only units carrying both sides can overlap, so details are fetched for those alone.
+	const candidateUnitIds = [...redundantByUnit.keys()].filter((unitDocumentId) =>
+		impliedByByUnit.has(unitDocumentId),
+	);
+	const details = await getUnitDetails(db, candidateUnitIds);
+
+	return buildMutuallyExclusiveUnitRelationFindings(
+		rule,
+		redundantByUnit,
+		impliedByByUnit,
+		details,
+	);
+}
+
+export async function checkMutuallyExclusiveUnitRelations(
+	db: Database | Transaction,
+): Promise<MutuallyExclusiveUnitRelationCheckResult> {
+	const findings: Array<MutuallyExclusiveUnitRelationFinding> = [];
+	const errors: Array<string> = [];
+
+	for (const rule of mutuallyExclusiveUnitRelationRules) {
+		try {
+			findings.push(...(await checkMutuallyExclusiveUnitRelationRule(db, rule)));
+		} catch (error) {
+			// oxlint-disable-next-line unicorn/no-instanceof-builtins
+			errors.push(error instanceof Error ? error.message : String(error));
+		}
+	}
+
+	findings.sort((a, b) => a.rule.localeCompare(b.rule) || a.unitLabel.localeCompare(b.unitLabel));
 
 	return { findings, errors };
 }

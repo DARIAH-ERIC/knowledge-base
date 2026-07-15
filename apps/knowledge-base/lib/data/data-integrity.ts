@@ -1,6 +1,8 @@
 import {
 	type InactiveUnitRelationCheckResult,
 	type InactiveUnitRelationFinding,
+	type MutuallyExclusiveUnitRelationCheckResult,
+	type MutuallyExclusiveUnitRelationFinding,
 	type PairedRelationCheckResult,
 	type PairedRelationFinding,
 	type PairedRelationFindingKind,
@@ -9,6 +11,7 @@ import {
 	type UnitRelationRequirementCheckResult,
 	type UnitRelationRequirementFinding,
 	checkInactiveUnitRelations,
+	checkMutuallyExclusiveUnitRelations,
 	checkPairedRelations,
 	checkUnitRelationRequirements,
 } from "@dariah-eric/database/integrity-service";
@@ -18,6 +21,8 @@ import { db } from "@/lib/db";
 export type {
 	InactiveUnitRelationCheckResult,
 	InactiveUnitRelationFinding,
+	MutuallyExclusiveUnitRelationCheckResult,
+	MutuallyExclusiveUnitRelationFinding,
 	PairedRelationCheckResult,
 	PairedRelationFinding,
 	PairedRelationFindingKind,
@@ -52,4 +57,13 @@ export async function getUnitRelationRequirementFindings(): Promise<UnitRelation
  */
 export async function getInactiveUnitRelationFindings(): Promise<InactiveUnitRelationCheckResult> {
 	return checkInactiveUnitRelations(db);
+}
+
+/**
+ * Runs the mutually-exclusive-unit-relation checks (e.g. a national coordinating institution is by
+ * definition a partner institution, so both relations must not be recorded for the same period).
+ * Same checks as the `@dariah-eric/audit` cli scripts.
+ */
+export async function getMutuallyExclusiveUnitRelationFindings(): Promise<MutuallyExclusiveUnitRelationCheckResult> {
+	return checkMutuallyExclusiveUnitRelations(db);
 }

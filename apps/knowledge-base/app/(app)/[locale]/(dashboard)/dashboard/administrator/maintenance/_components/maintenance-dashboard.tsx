@@ -12,6 +12,7 @@ import { SlugEditor } from "@/app/(app)/[locale]/(dashboard)/dashboard/administr
 interface MaintenanceDashboardProps {
 	emptyContentBlocks: ReactNode;
 	inactiveUnitRelations: ReactNode;
+	mutuallyExclusiveRelations: ReactNode;
 	pairedRelations: ReactNode;
 	richText: ReactNode;
 	unitRelationRequirements: ReactNode;
@@ -23,6 +24,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 	const {
 		emptyContentBlocks,
 		inactiveUnitRelations,
+		mutuallyExclusiveRelations,
 		pairedRelations,
 		richText,
 		unitRelationRequirements,
@@ -52,6 +54,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						<TabList aria-label={t("Data-integrity checks")}>
 							<Tab id="paired-relations">{t("Paired relations")}</Tab>
 							<Tab id="unit-relation-requirements">{t("Required relations")}</Tab>
+							<Tab id="mutually-exclusive-relations">{t("Redundant relations")}</Tab>
 							<Tab id="inactive-unit-relations">{t("Inactive units")}</Tab>
 						</TabList>
 
@@ -76,6 +79,19 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							</p>
 
 							{unitRelationRequirements}
+						</TabPanel>
+
+						<TabPanel
+							id="mutually-exclusive-relations"
+							className="flex flex-col gap-y-(--layout-padding)"
+						>
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Organisational units whose relations are redundant because one already implies the other, e.g. a national coordinating institution is by definition a partner institution of DARIAH-EU, so only the coordinating relation is recorded and the partner relation must be removed. Flagged only where both are recorded for overlapping periods — an institution that was a partner before it became a coordinating institution is valid history.",
+								)}
+							</p>
+
+							{mutuallyExclusiveRelations}
 						</TabPanel>
 
 						<TabPanel

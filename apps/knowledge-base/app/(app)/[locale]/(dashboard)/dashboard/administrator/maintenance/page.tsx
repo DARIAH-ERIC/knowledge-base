@@ -6,6 +6,7 @@ import { EmptyContentBlocksSection } from "@/app/(app)/[locale]/(dashboard)/dash
 import { InactiveUnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-section";
 import { MaintenanceDashboard } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard";
 import { MaintenanceSectionFallback } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-section-fallback";
+import { MutuallyExclusiveRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/mutually-exclusive-relations-section";
 import { PairedRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-section";
 import { RichTextSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-section";
 import { UnitRelationRequirementsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unit-relation-requirements-section";
@@ -44,6 +45,11 @@ export default async function DashboardAdministratorMaintenancePage(
 			inactiveUnitRelations={
 				<Suspense fallback={<MaintenanceSectionFallback />}>
 					<InactiveUnitRelationsSection />
+				</Suspense>
+			}
+			mutuallyExclusiveRelations={
+				<Suspense fallback={<MaintenanceSectionFallback />}>
+					<MutuallyExclusiveRelationsSection />
 				</Suspense>
 			}
 			pairedRelations={
