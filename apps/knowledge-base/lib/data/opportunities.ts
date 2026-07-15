@@ -3,7 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, desc, eq, sql } from "@/lib/db/sql";
 
 export type OpportunitiesSort = "duration" | "source" | "title";
@@ -22,9 +22,7 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 	const { limit = 10, offset = 0, q, sort = "duration", dir = "desc" } = params;
 	const query = q?.trim();
 	const where =
-		query != null && query !== ""
-			? unaccentIlike(schema.opportunities.title, `%${query}%`)
-			: undefined;
+		query != null && query !== "" ? matchesAllTerms(query, schema.opportunities.title) : undefined;
 	const orderBy =
 		sort === "title"
 			? dir === "asc"

@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, desc, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
@@ -23,8 +23,7 @@ interface GetPagesParams {
 export async function getPages(params: GetPagesParams) {
 	const { limit = 10, offset = 0, q, sort = "publicationDate", dir = "desc" } = params;
 	const query = q?.trim();
-	const where =
-		query != null && query !== "" ? unaccentIlike(schema.pages.title, `%${query}%`) : undefined;
+	const where = matchesAllTerms(query, schema.pages.title);
 	const orderBy =
 		sort === "title"
 			? dir === "asc"

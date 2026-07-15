@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, desc, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
@@ -25,7 +25,7 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
-			? unaccentIlike(schema.spotlightArticles.title, `%${query}%`)
+			? matchesAllTerms(query, schema.spotlightArticles.title)
 			: undefined;
 	const orderBy =
 		sort === "title"

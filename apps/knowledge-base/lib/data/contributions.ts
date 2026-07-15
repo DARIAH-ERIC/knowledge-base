@@ -8,8 +8,8 @@ import {
 	publishedEntityVersionWhere,
 } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
-import { alias, and, count, desc, eq, inArray, or, sql } from "@/lib/db/sql";
+import { matchesAllTerms } from "@/lib/db/search";
+import { alias, and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 
 export type ContributionsSort =
 	| "personName"
@@ -70,16 +70,14 @@ export async function getContributions(
 	// editable version (draft when present, else published) for display.
 	const personPickedVersion = sql`COALESCE(${personDocumentLifecycle.draftId}, ${personDocumentLifecycle.publishedId})`;
 	const organisationalUnitPickedVersion = sql`COALESCE(${organisationalUnitDocumentLifecycle.draftId}, ${organisationalUnitDocumentLifecycle.publishedId})`;
-	const searchWhere =
-		query != null && query !== ""
-			? or(
-					unaccentIlike(schema.persons.name, `%${query}%`),
-					unaccentIlike(schema.persons.sortName, `%${query}%`),
-					unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
-					unaccentIlike(schema.organisationalUnitTypes.type, `%${query}%`),
-					unaccentIlike(schema.personRoleTypes.type, `%${query}%`),
-				)
-			: undefined;
+	const searchWhere = matchesAllTerms(
+		query,
+		schema.persons.name,
+		schema.persons.sortName,
+		schema.organisationalUnits.name,
+		schema.organisationalUnitTypes.type,
+		schema.personRoleTypes.type,
+	);
 	const where = searchWhere;
 	const orderBy =
 		sort === "roleType"
@@ -337,13 +335,7 @@ export async function getContributionPersonOptions(
 ) {
 	const { limit = contributionOptionsPageSize, offset = 0, q, includeDrafts = false } = params;
 	const query = q?.trim();
-	const searchWhere =
-		query != null && query !== ""
-			? or(
-					unaccentIlike(schema.persons.name, `%${query}%`),
-					unaccentIlike(schema.persons.sortName, `%${query}%`),
-				)
-			: undefined;
+	const searchWhere = matchesAllTerms(query, schema.persons.name, schema.persons.sortName);
 	// Pickers normally offer published persons only. Delegated dashboards opt in to draft-or-published so
 	// a coordinator can relate a person they just created (still a draft) — one row per document.
 	const lifecycleWhere = includeDrafts
@@ -398,9 +390,7 @@ export async function getContributionOrganisationalUnitOptions(
 	const where = and(
 		publishedEntityVersionWhere(),
 		eq(schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId, roleTypeId),
-		query != null && query !== ""
-			? unaccentIlike(schema.organisationalUnits.name, `%${query}%`)
-			: undefined,
+		matchesAllTerms(query, schema.organisationalUnits.name),
 	);
 
 	const [items, aggregate] = await Promise.all([
@@ -527,9 +517,7 @@ export async function getCountryOptions(params: GetContributionOptionsParams = {
 	const where = and(
 		publishedEntityVersionWhere(),
 		eq(schema.organisationalUnitTypes.type, "country"),
-		query != null && query !== ""
-			? unaccentIlike(schema.organisationalUnits.name, `%${query}%`)
-			: undefined,
+		matchesAllTerms(query, schema.organisationalUnits.name),
 	);
 
 	const [items, aggregate] = await Promise.all([

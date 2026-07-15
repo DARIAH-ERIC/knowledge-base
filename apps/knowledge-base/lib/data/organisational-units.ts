@@ -8,7 +8,7 @@ import {
 	publishedEntityVersionWhere,
 } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, eq, exists, inArray, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import type { OrganisationalUnitOption } from "@/lib/organisational-unit-options";
@@ -58,10 +58,7 @@ export async function getOrganisationalUnitOptions(
 		includeDrafts = false,
 	} = params;
 	const query = q?.trim();
-	const searchWhere =
-		query != null && query !== ""
-			? unaccentIlike(schema.organisationalUnits.name, `%${query}%`)
-			: undefined;
+	const searchWhere = matchesAllTerms(query, schema.organisationalUnits.name);
 	const typeWhere =
 		unitType != null ? eq(schema.organisationalUnitTypes.type, unitType) : undefined;
 	// Correlated on the outer `entityVersions.entityId` (the unit's document id): keep only units

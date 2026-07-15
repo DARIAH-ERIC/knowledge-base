@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getUserAllCountryReports, getUserAllWorkingGroupReports } from "@/lib/data/reporting";
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { alias, and, desc, eq, or, sql } from "@/lib/db/sql";
 import { enforceApiGetRateLimit } from "@/lib/server/api-rate-limit";
 
@@ -180,7 +180,7 @@ async function searchCountryReportsForAdmin(
 		.innerJoin(schema.organisationalUnits, sql`${schema.organisationalUnits.id} = ${pickedVersion}`)
 		.where(
 			or(
-				unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
+				matchesAllTerms(query, schema.organisationalUnits.name),
 				sql<boolean>`${schema.reportingCampaigns.year}::text ilike ${`%${query}%`}`,
 			),
 		)
@@ -226,7 +226,7 @@ async function searchWorkingGroupReportsForAdmin(
 		.innerJoin(schema.organisationalUnits, sql`${schema.organisationalUnits.id} = ${pickedVersion}`)
 		.where(
 			or(
-				unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
+				matchesAllTerms(query, schema.organisationalUnits.name),
 				sql<boolean>`${schema.reportingCampaigns.year}::text ilike ${`%${query}%`}`,
 			),
 		)
@@ -259,7 +259,7 @@ async function searchPersons(query: string, limit: number): Promise<Array<Dashbo
 		.from(personEntities)
 		.innerJoin(personLifecycle, eq(personLifecycle.documentId, personEntities.id))
 		.innerJoin(schema.persons, sql`${schema.persons.id} = ${pickedVersion}`)
-		.where(unaccentIlike(schema.persons.name, `%${query}%`))
+		.where(matchesAllTerms(query, schema.persons.name))
 		.orderBy(schema.persons.sortName)
 		.limit(limit);
 
@@ -288,7 +288,7 @@ async function searchPages(query: string, limit: number): Promise<Array<Dashboar
 		.from(pageEntities)
 		.innerJoin(pageLifecycle, eq(pageLifecycle.documentId, pageEntities.id))
 		.innerJoin(schema.pages, sql`${schema.pages.id} = ${pickedVersion}`)
-		.where(unaccentIlike(schema.pages.title, `%${query}%`))
+		.where(matchesAllTerms(query, schema.pages.title))
 		.orderBy(schema.pages.title)
 		.limit(limit);
 
@@ -323,7 +323,7 @@ async function searchSpotlightArticles(
 		.from(spotlightEntities)
 		.innerJoin(spotlightLifecycle, eq(spotlightLifecycle.documentId, spotlightEntities.id))
 		.innerJoin(schema.spotlightArticles, sql`${schema.spotlightArticles.id} = ${pickedVersion}`)
-		.where(unaccentIlike(schema.spotlightArticles.title, `%${query}%`))
+		.where(matchesAllTerms(query, schema.spotlightArticles.title))
 		.orderBy(schema.spotlightArticles.title)
 		.limit(limit);
 
@@ -355,7 +355,7 @@ async function searchImpactCaseStudies(
 		.from(impactEntities)
 		.innerJoin(impactLifecycle, eq(impactLifecycle.documentId, impactEntities.id))
 		.innerJoin(schema.impactCaseStudies, sql`${schema.impactCaseStudies.id} = ${pickedVersion}`)
-		.where(unaccentIlike(schema.impactCaseStudies.title, `%${query}%`))
+		.where(matchesAllTerms(query, schema.impactCaseStudies.title))
 		.orderBy(schema.impactCaseStudies.title)
 		.limit(limit);
 
@@ -384,7 +384,7 @@ async function searchNews(query: string, limit: number): Promise<Array<Dashboard
 		.from(newsEntities)
 		.innerJoin(newsLifecycle, eq(newsLifecycle.documentId, newsEntities.id))
 		.innerJoin(schema.news, sql`${schema.news.id} = ${pickedVersion}`)
-		.where(unaccentIlike(schema.news.title, `%${query}%`))
+		.where(matchesAllTerms(query, schema.news.title))
 		.orderBy(schema.news.title)
 		.limit(limit);
 
@@ -413,7 +413,7 @@ async function searchEvents(query: string, limit: number): Promise<Array<Dashboa
 		.from(eventEntities)
 		.innerJoin(eventLifecycle, eq(eventLifecycle.documentId, eventEntities.id))
 		.innerJoin(schema.events, sql`${schema.events.id} = ${pickedVersion}`)
-		.where(unaccentIlike(schema.events.title, `%${query}%`))
+		.where(matchesAllTerms(query, schema.events.title))
 		.orderBy(schema.events.title)
 		.limit(limit);
 
@@ -448,7 +448,7 @@ async function searchOpportunities(
 		.from(opportunityEntities)
 		.innerJoin(opportunityLifecycle, eq(opportunityLifecycle.documentId, opportunityEntities.id))
 		.innerJoin(schema.opportunities, sql`${schema.opportunities.id} = ${pickedVersion}`)
-		.where(unaccentIlike(schema.opportunities.title, `%${query}%`))
+		.where(matchesAllTerms(query, schema.opportunities.title))
 		.orderBy(schema.opportunities.title)
 		.limit(limit);
 
@@ -483,7 +483,7 @@ async function searchFundingCalls(
 		.from(fundingCallEntities)
 		.innerJoin(fundingCallLifecycle, eq(fundingCallLifecycle.documentId, fundingCallEntities.id))
 		.innerJoin(schema.fundingCalls, sql`${schema.fundingCalls.id} = ${pickedVersion}`)
-		.where(unaccentIlike(schema.fundingCalls.title, `%${query}%`))
+		.where(matchesAllTerms(query, schema.fundingCalls.title))
 		.orderBy(schema.fundingCalls.title)
 		.limit(limit);
 
@@ -515,7 +515,7 @@ async function searchDocumentsPolicies(
 		.from(documentEntities)
 		.innerJoin(documentLifecycle, eq(documentLifecycle.documentId, documentEntities.id))
 		.innerJoin(schema.documentsPolicies, sql`${schema.documentsPolicies.id} = ${pickedVersion}`)
-		.where(unaccentIlike(schema.documentsPolicies.title, `%${query}%`))
+		.where(matchesAllTerms(query, schema.documentsPolicies.title))
 		.orderBy(schema.documentsPolicies.title)
 		.limit(limit);
 
@@ -545,12 +545,7 @@ async function searchProjects(query: string, limit: number): Promise<Array<Dashb
 		.from(projectEntities)
 		.innerJoin(projectLifecycle, eq(projectLifecycle.documentId, projectEntities.id))
 		.innerJoin(schema.projects, sql`${schema.projects.id} = ${pickedVersion}`)
-		.where(
-			or(
-				unaccentIlike(schema.projects.name, `%${query}%`),
-				unaccentIlike(schema.projects.acronym, `%${query}%`),
-			),
-		)
+		.where(matchesAllTerms(query, schema.projects.name, schema.projects.acronym))
 		.orderBy(schema.projects.name)
 		.limit(limit);
 
@@ -591,10 +586,7 @@ async function searchOrganisationalUnits(
 		.where(
 			and(
 				sql`${unitLifecycle.draftId} IS NOT NULL OR ${unitLifecycle.publishedId} IS NOT NULL`,
-				or(
-					unaccentIlike(schema.organisationalUnits.name, `%${query}%`),
-					unaccentIlike(schema.organisationalUnits.acronym, `%${query}%`),
-				),
+				matchesAllTerms(query, schema.organisationalUnits.name, schema.organisationalUnits.acronym),
 			),
 		)
 		.orderBy(schema.organisationalUnits.name)

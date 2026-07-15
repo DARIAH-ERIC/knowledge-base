@@ -9,7 +9,7 @@ import {
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import type { OrganisationalUnitType } from "@/lib/data/organisational-units";
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { alias, and, count, eq, inArray, sql } from "@/lib/db/sql";
 
 /**
@@ -163,9 +163,7 @@ export async function getUnitRelationRelatedUnitOptions(
 	const where = and(
 		publishedEntityVersionWhere(),
 		inArray(schema.organisationalUnits.typeId, relatedUnitTypeIds),
-		query != null && query !== ""
-			? unaccentIlike(schema.organisationalUnits.name, `%${query}%`)
-			: undefined,
+		matchesAllTerms(query, schema.organisationalUnits.name),
 	);
 
 	const [items, aggregate] = await Promise.all([

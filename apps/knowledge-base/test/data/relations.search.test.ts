@@ -87,4 +87,31 @@ describe("getEntityRelationOptions search", () => {
 			expect(items.map((item) => item.id)).not.toContain(documentId);
 		});
 	});
+
+	it("ignores punctuation differences between the query and the label", async () => {
+		await withTransaction(async (tx) => {
+			const ministrySlug = `ministry-culture-${suffix}`;
+			const ministryLabel = `Ministry of Culture, Innovation and Higher Education ${suffix}`;
+			const documentId = await seedPublishedEntity(tx, ministrySlug, ministryLabel);
+
+			// The stored label has a comma the user did not type; each term still matches once
+			// punctuation is normalized to spaces on both sides.
+			const { items } = await getEntityRelationOptions({ q: `Culture Innovation ${suffix}` }, tx);
+
+			expect(items.map((item) => item.id)).toContain(documentId);
+		});
+	});
+
+	it('treats "&" and "and" as interchangeable', async () => {
+		await withTransaction(async (tx) => {
+			const rndSlug = `research-development-${suffix}`;
+			const rndLabel = `R&D Foundation ${suffix}`;
+			const documentId = await seedPublishedEntity(tx, rndSlug, rndLabel);
+
+			// "R and D" must find the stored "R&D": "&" normalizes to " and " on the column side.
+			const { items } = await getEntityRelationOptions({ q: `R and D ${suffix}` }, tx);
+
+			expect(items.map((item) => item.id)).toContain(documentId);
+		});
+	});
 });

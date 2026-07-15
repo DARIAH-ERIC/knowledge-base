@@ -6,8 +6,8 @@ import { forbidden } from "next/navigation";
 
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
-import { alias, and, count, desc, eq, or, sql } from "@/lib/db/sql";
+import { matchesAllTerms } from "@/lib/db/search";
+import { alias, and, count, desc, eq, sql } from "@/lib/db/sql";
 
 export type ProjectsSort = "name" | "acronym" | "funding" | "scope";
 
@@ -44,13 +44,7 @@ function assertAdminUser(user: Pick<User, "role">): void {
 export async function getProjects(params: Readonly<GetProjectsParams>): Promise<ProjectsResult> {
 	const { limit, offset, q, sort = "name", dir = "asc" } = params;
 	const query = q?.trim();
-	const where =
-		query != null && query !== ""
-			? or(
-					unaccentIlike(schema.projects.name, `%${query}%`),
-					unaccentIlike(schema.projects.acronym, `%${query}%`),
-				)
-			: undefined;
+	const where = matchesAllTerms(query, schema.projects.name, schema.projects.acronym);
 	const orderBy =
 		sort === "acronym"
 			? dir === "asc"

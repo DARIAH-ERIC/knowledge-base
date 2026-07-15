@@ -3,7 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
+import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, desc, eq, sql } from "@/lib/db/sql";
 
 export type FundingCallsSort = "duration" | "title";
@@ -22,9 +22,7 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 	const { limit = 10, offset = 0, q, sort = "duration", dir = "desc" } = params;
 	const query = q?.trim();
 	const where =
-		query != null && query !== ""
-			? unaccentIlike(schema.fundingCalls.title, `%${query}%`)
-			: undefined;
+		query != null && query !== "" ? matchesAllTerms(query, schema.fundingCalls.title) : undefined;
 	const orderBy =
 		sort === "title"
 			? dir === "asc"

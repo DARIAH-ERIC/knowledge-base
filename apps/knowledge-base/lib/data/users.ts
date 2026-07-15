@@ -3,8 +3,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { unaccentIlike } from "@/lib/db/search";
-import { count, desc, eq, or, sql } from "@/lib/db/sql";
+import { matchesAllTerms } from "@/lib/db/search";
+import { count, desc, eq, sql } from "@/lib/db/sql";
 
 export type UsersSort = "name" | "email" | "role" | "canManageAdmins" | "isEmailVerified";
 
@@ -46,13 +46,7 @@ function assertAdminUser(user: Pick<User, "role">): void {
 async function getUsers(params: Readonly<GetUsersParams>): Promise<UsersResult> {
 	const { limit, offset, q, sort = "name", dir = "asc" } = params;
 	const query = q?.trim();
-	const where =
-		query != null && query !== ""
-			? or(
-					unaccentIlike(schema.users.name, `%${query}%`),
-					unaccentIlike(schema.users.email, `%${query}%`),
-				)
-			: undefined;
+	const where = matchesAllTerms(query, schema.users.name, schema.users.email);
 
 	const orderBy =
 		sort === "email"
