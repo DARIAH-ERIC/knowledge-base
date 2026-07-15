@@ -17,6 +17,10 @@ test.describe("non-admin admin access", () => {
 		"/en/dashboard/administrator/users",
 		"/en/dashboard/administrator/country-reports",
 		"/en/dashboard/administrator/working-group-reports",
+		// Destructive maintenance tooling (merge, duplicate, slug edits, cleanup deletes).
+		"/en/dashboard/administrator/maintenance",
+		// Lists unpublished content.
+		"/en/dashboard/administrator/drafts",
 	];
 
 	for (const route of adminRoutes) {

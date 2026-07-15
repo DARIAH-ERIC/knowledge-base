@@ -7,10 +7,10 @@ import { expect, test } from "@/e2e/lib/test";
 const MAINTENANCE_PATH = "/en/dashboard/administrator/maintenance";
 const WORKER_PREFIX = () => `[e2e-worker-${String(test.info().workerIndex)}]`;
 
-/** Open the maintenance dashboard and switch to the "Merge & rename" top-level tab. */
+/** Open the maintenance dashboard and switch to the "Merge, duplicate & rename" top-level tab. */
 async function gotoMergeAndRename(page: Page): Promise<void> {
 	await page.goto(MAINTENANCE_PATH);
-	await page.getByRole("tab", { name: "Merge & rename" }).click();
+	await page.getByRole("tab", { name: "Merge, duplicate & rename" }).click();
 }
 
 /** Pick an option in one of the maintenance AsyncSelect pickers, identified by its trigger label. */
@@ -80,6 +80,85 @@ test.describe("admin – maintenance merge & rename", () => {
 		expect(targetRelations.relatedEntityIds).toContain(relationTarget.id);
 	});
 
+	test("duplicates an entity into a draft copy, carrying relations but not publishing it", async ({
+		page,
+		db,
+	}) => {
+		const asset = await db.getTestAsset();
+		const relationTarget = await db.getTestEntity();
+
+		const suffix = randomUUID();
+		const sourceTitle = `${WORKER_PREFIX()} Duplicate Source ${suffix}`;
+		const sourceSlug = `duplicate-source-${suffix}`;
+
+		const source = await db.createCollidingPublishedNewsDocument({
+			slug: sourceSlug,
+			title: sourceTitle,
+			imageId: asset.id,
+		});
+
+		// Give the source a relation the copy must inherit.
+		await db.addEntityToEntityRelation(source.documentId, relationTarget.id);
+
+		await gotoMergeAndRename(page);
+		await page.getByRole("tab", { name: "Duplicate entity" }).click();
+
+		await pickEntity(page, "Search for the entity to duplicate…", sourceTitle, sourceTitle);
+
+		// The slug field prefills with the provisional `-copy`; name the copy instead.
+		const slugField = page.getByRole("textbox", { name: "Slug for the copy" });
+		await expect(slugField).toHaveValue(`${sourceSlug}-copy`);
+		const cloneSlug = `duplicate-clone-${suffix}`;
+		await slugField.fill(cloneSlug);
+
+		await page.getByRole("button", { name: "Duplicate entity" }).click();
+
+		await expect(page.getByText(/Created a draft copy of/)).toBeVisible();
+
+		// The copy exists under the requested slug, as a draft only — never published.
+		const clone = await db.getEntityDocumentBySlug(cloneSlug);
+		expect(clone).not.toBeNull();
+		expect(clone?.hasDraft).toBe(true);
+		expect(clone?.hasPublished).toBe(false);
+
+		// It inherited the source's relation, and the source kept its own.
+		const cloneRelations = await db.getEntityRelations(clone!.documentId);
+		expect(cloneRelations.relatedEntityIds).toContain(relationTarget.id);
+
+		const sourceRelations = await db.getEntityRelations(source.documentId);
+		expect(sourceRelations.relatedEntityIds).toContain(relationTarget.id);
+		expect(await db.entityDocumentExists(source.documentId)).toBe(true);
+	});
+
+	test("edits the slug of a never-published draft, which the relation pickers cannot see", async ({
+		page,
+		db,
+	}) => {
+		const asset = await db.getTestAsset();
+		const suffix = randomUUID();
+		const draftTitle = `${WORKER_PREFIX()} Draft Only ${suffix}`;
+
+		const draft = await db.createDraftNewsDocument({
+			slug: `draft-only-${suffix}`,
+			title: draftTitle,
+			imageId: asset.id,
+		});
+
+		await gotoMergeAndRename(page);
+		await page.getByRole("tab", { name: "Edit slug" }).click();
+
+		// Found by title even though `entities.label` is null until first publish, and badged as a draft.
+		await pickEntity(page, "Search for an entity…", draftTitle, draftTitle);
+		await expect(page.getByText("This entity has never been published")).toBeVisible();
+
+		const newSlug = `draft-renamed-${suffix}`;
+		await page.getByRole("textbox", { name: "New slug" }).fill(newSlug);
+		await page.getByRole("button", { name: "Update slug" }).click();
+
+		await expect(page.getByText("Slug updated.")).toBeVisible();
+		expect(await db.getEntitySlugByDocumentId(draft.documentId)).toBe(newSlug);
+	});
+
 	test("edits an entity slug, and rejects a colliding slug with a friendly error", async ({
 		page,
 		db,
@@ -100,7 +179,7 @@ test.describe("admin – maintenance merge & rename", () => {
 		const subjectTitle = `${WORKER_PREFIX()} Slug Subject ${suffix}`;
 
 		await page.goto(MAINTENANCE_PATH);
-		await page.getByRole("tab", { name: "Merge & rename" }).click();
+		await page.getByRole("tab", { name: "Merge, duplicate & rename" }).click();
 		await page.getByRole("tab", { name: "Edit slug" }).click();
 
 		// Happy path: rename to a fresh, unique slug.

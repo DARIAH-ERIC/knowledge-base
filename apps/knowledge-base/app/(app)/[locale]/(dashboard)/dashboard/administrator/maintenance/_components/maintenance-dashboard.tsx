@@ -6,6 +6,7 @@ import { Fragment, type ReactNode, useState } from "react";
 import type { Key } from "react-aria-components";
 
 import { EntityListHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
+import { DuplicateEntity } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/duplicate-entity";
 import { MergeEntities } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities";
 import { SlugEditor } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor";
 
@@ -48,7 +49,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 				<TabList aria-label={t("Maintenance")}>
 					<Tab id="integrity">{t("Data integrity")}</Tab>
 					<Tab id="cleanup">{t("Cleanup")}</Tab>
-					<Tab id="merge">{t("Merge & rename")}</Tab>
+					<Tab id="merge">{t("Merge, duplicate & rename")}</Tab>
 				</TabList>
 
 				<TabPanel id="integrity">
@@ -175,8 +176,9 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 
 				<TabPanel id="merge">
 					<Tabs>
-						<TabList aria-label={t("Merge & rename")}>
+						<TabList aria-label={t("Merge, duplicate & rename")}>
 							<Tab id="merge-entities">{t("Merge duplicates")}</Tab>
+							<Tab id="duplicate-entity">{t("Duplicate entity")}</Tab>
 							<Tab id="edit-slug">{t("Edit slug")}</Tab>
 						</TabList>
 
@@ -188,6 +190,16 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							</p>
 
 							<MergeEntities />
+						</TabPanel>
+
+						<TabPanel id="duplicate-entity" className="flex flex-col gap-y-(--layout-padding)">
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Copy an entity — content and relations, but no reporting data — into a new unpublished draft. Use it to split an imported “Institution A and Institution B” record into two, or to succeed a wound-up working group with a fresh entity instead of reopening the old one.",
+								)}
+							</p>
+
+							<DuplicateEntity />
 						</TabPanel>
 
 						<TabPanel id="edit-slug" className="flex flex-col gap-y-(--layout-padding)">

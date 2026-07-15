@@ -256,8 +256,11 @@ async function cloneTypedContentBlock(
 /**
  * Copy all fields and content blocks (including all typed block variants) from one entity version
  * to another. Does not touch the subtype row — that is the adapter's responsibility.
+ *
+ * Everything copied here is keyed by version id alone, so source and target may belong to different
+ * documents — `duplicateEntity` relies on that to seed a clone's draft from the source's version.
  */
-async function cloneVersionContent(
+export async function cloneVersionContent(
 	tx: Transaction,
 	sourceVersionId: string,
 	targetVersionId: string,
