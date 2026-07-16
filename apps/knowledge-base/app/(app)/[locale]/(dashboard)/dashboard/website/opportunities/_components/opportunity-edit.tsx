@@ -49,6 +49,7 @@ export function OpportunityEditForm(props: Readonly<OpportunityEditFormProps>): 
 
 			<OpportunityForm
 				contentBlocks={contentBlocks}
+				isPublished={isPublished}
 				formAction={updateOpportunityAction}
 				opportunity={opportunity}
 				sources={sources}

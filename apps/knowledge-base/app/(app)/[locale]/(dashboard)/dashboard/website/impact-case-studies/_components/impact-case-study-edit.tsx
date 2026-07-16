@@ -94,6 +94,7 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 
 					<ImpactCaseStudyForm
 						contentBlocks={contentBlocks}
+						isPublished={isPublished}
 						formAction={updateImpactCaseStudyAction}
 						formId={formId}
 						impactCaseStudy={impactCaseStudy}

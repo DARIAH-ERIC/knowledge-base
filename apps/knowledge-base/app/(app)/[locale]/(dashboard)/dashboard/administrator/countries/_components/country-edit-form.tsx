@@ -126,6 +126,7 @@ export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNod
 
 					<CountryForm
 						country={country}
+						isPublished={isPublished}
 						formAction={updateCountryAction}
 						formId={formId}
 						initialAssets={initialAssets}

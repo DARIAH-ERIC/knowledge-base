@@ -20,6 +20,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
+import { EntitySlugField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field";
 import {
 	FormLayout,
 	FormSection,
@@ -37,6 +38,8 @@ interface EventFormProps {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	formId?: string;
+	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
+	isPublished?: boolean;
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
 	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
@@ -65,6 +68,7 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 		selectedRelatedEntities,
 		selectedRelatedResources,
 		showRelationFields = true,
+		isPublished,
 	} = props;
 
 	const t = useExtracted();
@@ -136,6 +140,8 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 						<Input placeholder="https://" />
 						<FieldError />
 					</TextField>
+
+					<EntitySlugField isPublished={isPublished} slug={event?.entityVersion.entity.slug} />
 				</FormSection>
 
 				<Separator className="my-6" />

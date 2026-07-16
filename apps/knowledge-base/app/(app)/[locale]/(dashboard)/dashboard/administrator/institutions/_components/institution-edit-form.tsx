@@ -121,6 +121,7 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 					</div>
 
 					<InstitutionForm
+						isPublished={isPublished}
 						formAction={updateInstitutionAction}
 						formId={formId}
 						initialAssets={initialAssets}

@@ -1,12 +1,26 @@
+import { randomUUID } from "node:crypto";
+
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
+import slugify from "@sindresorhus/slugify";
 
 import type { Transaction } from "@/lib/db";
+import { isUniqueViolation } from "@/lib/db/errors";
 import { asc, eq, inArray, or } from "@/lib/db/sql";
+import { UserFacingError } from "@/lib/user-facing-error";
 
 export interface DocumentVersion {
 	documentId: string;
 	versionId: string;
+}
+
+/**
+ * A freshly inserted document. `slug` is the value the database actually stored, which callers must
+ * use in preference to re-deriving it from the title: it is the only source that stays correct once
+ * a requested slug is adjusted to keep `(type, slug)` unique.
+ */
+export interface CreatedDocument extends DocumentVersion {
+	slug: string;
 }
 
 export interface DocumentVersions {
@@ -335,36 +349,142 @@ export async function createPublishedDocument(
 	tx: Transaction,
 	typeId: string,
 	slug: string,
-): Promise<DocumentVersion> {
+): Promise<CreatedDocument> {
 	const [document] = await tx
 		.insert(schema.entities)
 		.values({ slug, typeId })
-		.returning({ id: schema.entities.id });
+		.returning({ id: schema.entities.id, slug: schema.entities.slug });
 	assert(document);
 
 	const versionId = await createVersionRow(tx, document.id, "published");
 
-	return { documentId: document.id, versionId };
+	return { documentId: document.id, versionId, slug: document.slug };
+}
+
+const maxSlugAttempts = 50;
+
+/**
+ * Insert an `entities` row under `baseSlug`, falling back to `<baseSlug>-2`, `-3`, … while the type
+ * already uses the candidate.
+ *
+ * Each attempt runs in its own savepoint: in Postgres a unique violation poisons the enclosing
+ * transaction, so without one the first collision would take the caller's whole mutation with it.
+ * Reserving a slug with a preceding `SELECT` instead would let two concurrent creates read the same
+ * candidate as free and leave the loser with the failure this is meant to prevent.
+ */
+async function insertDocumentWithFreeSlug(
+	tx: Transaction,
+	typeId: string,
+	baseSlug: string,
+): Promise<{ id: string; slug: string }> {
+	for (let attempt = 1; attempt <= maxSlugAttempts; attempt++) {
+		const candidate = attempt === 1 ? baseSlug : `${baseSlug}-${String(attempt)}`;
+
+		try {
+			return await tx.transaction(async (sp) => {
+				const [document] = await sp
+					.insert(schema.entities)
+					.values({ slug: candidate, typeId })
+					.returning({ id: schema.entities.id, slug: schema.entities.slug });
+				assert(document);
+
+				return document;
+			});
+		} catch (error) {
+			if (!isUniqueViolation(error, "entities_type_id_slug_unique")) {
+				throw error;
+			}
+		}
+	}
+
+	throw new Error(`Could not derive a free slug for "${baseSlug}".`);
 }
 
 /**
- * Insert a new document + draft version row. Subtype rows should be inserted with `id: versionId`.
- * Cross-document relations should reference `documentId`.
+ * A base slug for a title the slugifier reduces to nothing — one written entirely in a script it
+ * does not transliterate (CJK), or made only of punctuation.
+ *
+ * Such a title would otherwise store an empty slug, leaving the entity on an unreachable
+ * `/<type>//details` URL. The entity matters more here than the prettiness of its slug, so fall
+ * back to a meaningless but valid one the user can correct afterwards. The random token keeps
+ * concurrent creates from queueing up behind a shared `<type>`, `<type>-2`, … chain.
+ */
+async function createFallbackSlug(tx: Transaction, typeId: string): Promise<string> {
+	const entityType = await tx.query.entityTypes.findFirst({
+		where: { id: typeId },
+		columns: { type: true },
+	});
+	assert(entityType, `Entity type "${typeId}" not found in database.`);
+
+	return `${entityType.type}-${randomUUID().slice(0, 8)}`;
+}
+
+/**
+ * Insert a new document + draft version row, under a slug derived from the entity's title.
+ *
+ * Prefer this to `createDraftDocument` wherever the slug is derived rather than chosen: a title
+ * clash must not fail the create, because the user cannot see the slug field and so has no way to
+ * act on the error beyond rewording an otherwise valid title. A slug the user _did_ choose keeps
+ * the opposite handling — see `createDraftDocument`.
+ */
+export async function createDraftDocumentFromTitle(
+	tx: Transaction,
+	typeId: string,
+	title: string,
+): Promise<CreatedDocument> {
+	const derivedSlug = slugify(title);
+	const baseSlug = derivedSlug === "" ? await createFallbackSlug(tx, typeId) : derivedSlug;
+
+	const document = await insertDocumentWithFreeSlug(tx, typeId, baseSlug);
+
+	const versionId = await createVersionRow(tx, document.id, "draft");
+
+	return { documentId: document.id, versionId, slug: document.slug };
+}
+
+/**
+ * Insert a new document + draft version row under an exact slug. Subtype rows should be inserted
+ * with `id: versionId`. Cross-document relations should reference `documentId`.
+ *
+ * A slug already taken for the type raises `entities_type_id_slug_unique`, surfaced to the user as
+ * "an entity with this slug already exists". That is the right handling only when the caller passed
+ * a slug a user actually chose; for one derived from a title, use `createDraftDocumentFromTitle`.
  */
 export async function createDraftDocument(
 	tx: Transaction,
 	typeId: string,
 	slug: string,
-): Promise<DocumentVersion> {
+): Promise<CreatedDocument> {
 	const [document] = await tx
 		.insert(schema.entities)
 		.values({ slug, typeId })
-		.returning({ id: schema.entities.id });
+		.returning({ id: schema.entities.id, slug: schema.entities.slug });
 	assert(document);
 
 	const versionId = await createVersionRow(tx, document.id, "draft");
 
-	return { documentId: document.id, versionId };
+	return { documentId: document.id, versionId, slug: document.slug };
+}
+
+/**
+ * Insert a new document + draft version row, under the slug the user chose, or one derived from the
+ * title when they left the slug field empty.
+ *
+ * The single place the create forms express the rule that governs slugs: a slug the user chose is
+ * held to a collision error (`createDraftDocument`), a derived one is quietly deduplicated
+ * (`createDraftDocumentFromTitle`). Pass `requestedSlug: null` for the empty field — never an empty
+ * string, which would read as a choice.
+ */
+export async function createDraftDocumentWithSlug(
+	tx: Transaction,
+	typeId: string,
+	options: { requestedSlug: string | null; title: string },
+): Promise<CreatedDocument> {
+	const { requestedSlug, title } = options;
+
+	return requestedSlug != null
+		? createDraftDocument(tx, typeId, requestedSlug)
+		: createDraftDocumentFromTitle(tx, typeId, title);
 }
 
 /** Return the draft and published version IDs for a document (either may be null). */
@@ -382,6 +502,47 @@ export async function getDocumentVersions(
 		.then((rows) => rows[0]);
 
 	return { draftId: row?.draftId ?? null, publishedId: row?.publishedId ?? null };
+}
+
+/**
+ * Apply a user-chosen slug to a document that has never been published.
+ *
+ * Renaming a draft is the safe case: it has no public URL yet, so nothing can break. A published
+ * document's slug _is_ a live URL, and changing it needs the redirect and search-index cleanup the
+ * maintenance slug editor performs — which is why that stays an admin task and out of the entity
+ * forms. The published check is enforced here rather than in the form, so a forged submission
+ * cannot rename a live page.
+ *
+ * The slug is taken verbatim: the user chose it, so a collision raises
+ * `entities_type_id_slug_unique` and is reported to them, never deduplicated behind their back.
+ */
+export async function updateDraftDocumentSlug(
+	tx: Transaction,
+	documentId: string,
+	slug: string,
+): Promise<void> {
+	const [document] = await tx
+		.select({ slug: schema.entities.slug })
+		.from(schema.entities)
+		.where(eq(schema.entities.id, documentId))
+		.limit(1);
+	assert(document, `Entity "${documentId}" not found.`);
+
+	// Resubmitting the unchanged slug is what every ordinary save does; only an actual rename has to
+	// clear the published check.
+	if (document.slug === slug) {
+		return;
+	}
+
+	const { publishedId } = await getDocumentVersions(tx, documentId);
+	if (publishedId != null) {
+		// Reached only by a forged submission or a publish that raced this save — the form hides the
+		// field once published. A typed error so the action shows "change it on Maintenance" instead of
+		// a generic 500.
+		throw new UserFacingError("published-slug-rename");
+	}
+
+	await tx.update(schema.entities).set({ slug }).where(eq(schema.entities.id, documentId));
 }
 
 /** Return lifecycle state while treating a synced draft clone as "no draft changes". */

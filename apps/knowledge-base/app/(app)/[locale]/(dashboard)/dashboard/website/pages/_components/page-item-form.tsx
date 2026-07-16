@@ -20,6 +20,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
+import { EntitySlugField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field";
 import {
 	FormLayout,
 	FormSection,
@@ -34,6 +35,8 @@ interface PageItemFormProps {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	formId?: string;
+	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
+	isPublished?: boolean;
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
 	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
@@ -62,6 +65,7 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 		selectedRelatedEntities,
 		selectedRelatedResources,
 		showRelationFields = true,
+		isPublished,
 	} = props;
 
 	const t = useExtracted();
@@ -108,6 +112,8 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 						<Label>{t("Publication date")}</Label>
 						<DatePickerTrigger />
 					</DatePicker>
+
+					<EntitySlugField isPublished={isPublished} slug={pageItem?.entityVersion.entity.slug} />
 				</FormSection>
 
 				<Separator className="my-6" />

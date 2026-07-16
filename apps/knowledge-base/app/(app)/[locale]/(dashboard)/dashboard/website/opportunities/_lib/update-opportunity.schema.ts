@@ -2,8 +2,10 @@ import { OpportunityUpdateSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
+import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
 
 export const UpdateOpportunityActionInputSchema = v.object({
+	slug: EntitySlugInputSchema,
 	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(OpportunityUpdateSchema, ["title", "summary", "sourceId", "website"]).entries,
 	summary: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),

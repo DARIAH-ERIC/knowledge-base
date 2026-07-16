@@ -12,6 +12,7 @@ import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
+import { EntitySlugField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field";
 import {
 	FormLayout,
 	FormSection,
@@ -26,11 +27,13 @@ interface PersonFormProps {
 		biographyContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
+	/** Whether the edited person is published, which freezes its slug. Unused when creating. */
+	isPublished?: boolean;
 	formAction: ServerAction;
 }
 
 export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
-	const { initialAssets, formAction, person } = props;
+	const { initialAssets, formAction, isPublished, person } = props;
 
 	const t = useExtracted();
 
@@ -70,6 +73,8 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 						<Input />
 						<FieldError />
 					</TextField>
+
+					<EntitySlugField isPublished={isPublished} slug={person?.entityVersion.entity.slug} />
 				</FormSection>
 
 				<Separator className="my-6" />

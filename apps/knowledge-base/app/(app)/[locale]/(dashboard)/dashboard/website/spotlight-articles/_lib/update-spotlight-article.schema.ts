@@ -2,8 +2,10 @@ import { SpotlightArticleUpdateSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
+import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
 
 export const UpdateSpotlightArticleActionInputSchema = v.object({
+	slug: EntitySlugInputSchema,
 	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(SpotlightArticleUpdateSchema, ["title"]).entries,
 	...v.pick(SpotlightArticleUpdateSchema, ["summary"]).entries,

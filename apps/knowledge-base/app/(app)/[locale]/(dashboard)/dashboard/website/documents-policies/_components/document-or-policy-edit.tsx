@@ -57,6 +57,7 @@ export function DocumentOrPolicyEditForm(
 			<DocumentOrPolicyForm
 				contentBlocks={contentBlocks}
 				documentOrPolicy={documentOrPolicy}
+				isPublished={isPublished}
 				formAction={updateDocumentOrPolicyAction}
 				groups={groups}
 				initialAssets={initialAssets}

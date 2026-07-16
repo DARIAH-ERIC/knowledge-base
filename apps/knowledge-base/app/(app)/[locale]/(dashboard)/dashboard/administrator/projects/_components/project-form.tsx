@@ -32,6 +32,7 @@ import { Fragment, type ReactNode, useActionState, useState, useTransition } fro
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
+import { EntitySlugField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field";
 import {
 	FormLayout,
 	FormSection,
@@ -80,6 +81,8 @@ interface ProjectFormProps {
 		};
 		scope: Pick<schema.ProjectScope, "id" | "scope">;
 	} & { image: { key: string; label: string; url: string } | null };
+	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
+	isPublished?: boolean;
 	formAction: ServerAction;
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
 	initialSocialMediaItems: Array<AsyncOption>;
@@ -114,6 +117,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 		initialRelatedResourceTotal,
 		selectedRelatedEntities,
 		selectedRelatedResources,
+		isPublished,
 	} = props;
 
 	const t = useExtracted();
@@ -255,6 +259,8 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
+
+					<EntitySlugField isPublished={isPublished} slug={project?.entityVersion.entity.slug} />
 				</FormSection>
 
 				<Separator className="my-6" />

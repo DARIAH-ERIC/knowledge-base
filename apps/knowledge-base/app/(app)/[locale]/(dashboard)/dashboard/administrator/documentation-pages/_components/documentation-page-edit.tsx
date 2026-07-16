@@ -43,6 +43,7 @@ export function DocumentationPageEditForm(
 			<DocumentationPageForm
 				contentBlocks={contentBlocks}
 				documentationPage={documentationPage}
+				isPublished={isPublished}
 				formAction={updateDocumentationPageAction}
 			/>
 		</Fragment>

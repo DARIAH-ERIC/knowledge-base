@@ -3,14 +3,13 @@
 import { assert, getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import slugify from "@sindresorhus/slugify";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
-import { createDraftDocument } from "@/lib/data/entity-lifecycle";
+import { createDraftDocumentFromTitle } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -62,7 +61,7 @@ export const createDelegatedPersonAction = createServerAction(
 			});
 			assert(entityType);
 
-			const { documentId, versionId } = await createDraftDocument(tx, entityType.id, slugify(name));
+			const { documentId, versionId } = await createDraftDocumentFromTitle(tx, entityType.id, name);
 
 			await tx.insert(schema.persons).values({ id: versionId, name, sortName });
 

@@ -39,6 +39,26 @@ export function isExclusionViolation(error: unknown, constraint: string): boolea
 }
 
 /**
+ * Detects whether `error` is a Postgres unique-constraint violation for the given constraint.
+ *
+ * The counterpart to `isExclusionViolation`, for callers that recover from a specific collision
+ * rather than reporting it — above all slug derivation, which retries under a new candidate. Match
+ * on the constraint name so an unrelated unique violation still propagates.
+ *
+ * Walks the `cause` chain since drizzle may wrap the underlying driver error.
+ */
+export function isUniqueViolation(error: unknown, constraint: string): boolean {
+	let current: unknown = error;
+	for (let depth = 0; depth < 5 && isObject(current); depth++) {
+		if (current.code === UNIQUE_VIOLATION && current.constraint === constraint) {
+			return true;
+		}
+		current = current.cause;
+	}
+	return false;
+}
+
+/**
  * Classifies database integrity errors that callers can safely explain to users.
  *
  * PostgreSQL's structured error fields are stable and do not expose query details. Drizzle may wrap

@@ -18,6 +18,7 @@ import {
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
+import { EntitySlugField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field";
 import {
 	FormLayout,
 	FormSection,
@@ -32,11 +33,13 @@ interface FundingCallFormProps {
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 	};
+	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
+	isPublished?: boolean;
 	formAction: ServerAction;
 }
 
 export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNode {
-	const { contentBlocks, formAction, fundingCall } = props;
+	const { contentBlocks, formAction, fundingCall, isPublished } = props;
 
 	const t = useExtracted();
 
@@ -90,6 +93,11 @@ export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNod
 						<Label>{t("End date")}</Label>
 						<DatePickerTrigger />
 					</DatePicker>
+
+					<EntitySlugField
+						isPublished={isPublished}
+						slug={fundingCall?.entityVersion.entity.slug}
+					/>
 				</FormSection>
 
 				<Separator className="my-6" />

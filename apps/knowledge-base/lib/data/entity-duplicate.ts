@@ -1,10 +1,9 @@
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import slugify from "@sindresorhus/slugify";
 
 import {
 	cloneVersionContent,
-	createDraftDocument,
+	createDraftDocumentWithSlug,
 	getDocumentVersions,
 } from "@/lib/data/entity-lifecycle";
 import {
@@ -14,6 +13,7 @@ import {
 } from "@/lib/data/lifecycle-adapters";
 import type { Transaction } from "@/lib/db";
 import { and, eq, ne } from "@/lib/db/sql";
+import { getRequestedSlug } from "@/lib/entity-slug-input";
 
 interface DuplicableEntity {
 	id: string;
@@ -29,9 +29,6 @@ export interface DuplicateEntityResult {
 	/** The clone's slug: the caller's, or a derived `<source-slug>-copy`. */
 	slug: string;
 }
-
-/** Give up rather than probe forever if an implausible number of copies already exist. */
-const maxCopySlugAttempts = 100;
 
 async function loadDuplicableEntity(
 	tx: Transaction,
@@ -56,55 +53,6 @@ async function loadDuplicableEntity(
 	);
 
 	return { id: row.id, typeId: row.typeId, slug: row.slug, type: row.type };
-}
-
-/**
- * Derive a free fallback slug for the clone: `<slug>-copy`, then `-copy-2`, `-copy-3`, … Used when
- * the caller does not name one. Slugs are unique per type (`entities_type_id_slug_unique`), so
- * duplicating the same source twice must not collide.
- *
- * This only has to be free, not pretty — a caller that cares passes an explicit slug, and one that
- * does not gets a provisional slug it can correct later.
- */
-async function createCopySlug(tx: Transaction, typeId: string, slug: string): Promise<string> {
-	const base = slugify(`${slug}-copy`);
-
-	for (let attempt = 1; attempt <= maxCopySlugAttempts; attempt++) {
-		const candidate = attempt === 1 ? base : `${base}-${String(attempt)}`;
-
-		const taken = await tx
-			.select({ id: schema.entities.id })
-			.from(schema.entities)
-			.where(and(eq(schema.entities.typeId, typeId), eq(schema.entities.slug, candidate)))
-			.limit(1)
-			.then((rows) => rows[0]);
-
-		if (taken == null) {
-			return candidate;
-		}
-	}
-
-	throw new Error(`Could not derive a free copy slug for "${slug}".`);
-}
-
-/**
- * Resolve the clone's slug: the caller's, normalised, or a derived fallback when they did not name
- * one. An explicit slug is deliberately not deduped — the admin asked for that exact slug, so a
- * collision must surface as an error rather than quietly become `-2`.
- */
-async function resolveCloneSlug(
-	tx: Transaction,
-	source: DuplicableEntity,
-	rawSlug: string | undefined,
-): Promise<string> {
-	if (rawSlug == null || rawSlug.trim() === "") {
-		return createCopySlug(tx, source.typeId, source.slug);
-	}
-
-	const slug = slugify(rawSlug);
-	assert(slug.length > 0, "Slug must not be empty.");
-
-	return slug;
 }
 
 // ---------------------------------------------------------------------------
@@ -443,12 +391,18 @@ export async function duplicateEntity(
 	const sourceVersionId = publishedId ?? draftId;
 	assert(sourceVersionId != null, `Entity "${sourceId}" has no version to duplicate.`);
 
-	const slug = await resolveCloneSlug(tx, source, rawSlug);
-	const { documentId: cloneId, versionId: cloneVersionId } = await createDraftDocument(
-		tx,
-		source.typeId,
+	// Same rule as the entity forms: a slug the admin typed is inserted verbatim and errors on
+	// collision, an omitted one derives `<source-slug>-copy` and deduplicates to `-copy-2`, `-copy-3`.
+	// `slugify` is idempotent, so deriving from the already-slug `<source-slug>-copy` reproduces the
+	// old `createCopySlug` output without a second, race-prone existence probe.
+	const {
+		documentId: cloneId,
+		versionId: cloneVersionId,
 		slug,
-	);
+	} = await createDraftDocumentWithSlug(tx, source.typeId, {
+		requestedSlug: getRequestedSlug(rawSlug),
+		title: `${source.slug}-copy`,
+	});
 
 	await cloneVersionContent(tx, sourceVersionId, cloneVersionId);
 	await getLifecycleAdapter(source.type).cloneSubtype(tx, sourceVersionId, cloneVersionId);

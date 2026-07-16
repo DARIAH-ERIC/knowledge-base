@@ -66,6 +66,7 @@ export function NewsItemEditForm(props: Readonly<NewsItemEditFormProps>): ReactN
 
 			<NewsItemForm
 				contentBlocks={contentBlocks}
+				isPublished={isPublished}
 				formAction={updateNewsItemAction}
 				formId={formId}
 				initialAssets={initialAssets}

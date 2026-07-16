@@ -14,6 +14,7 @@ import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
+import { EntitySlugField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field";
 import {
 	FormLayout,
 	FormSection,
@@ -33,6 +34,8 @@ interface WorkingGroupFormProps {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	formId?: string;
+	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
+	isPublished?: boolean;
 	formAction: ServerAction;
 	initialSocialMediaIds?: Array<string>;
 	initialSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
@@ -55,6 +58,7 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 		selectedSocialMediaItems,
 		showSaveAndPublish,
 		children,
+		isPublished,
 	} = props;
 
 	const t = useExtracted();
@@ -100,6 +104,11 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
+
+					<EntitySlugField
+						isPublished={isPublished}
+						slug={workingGroup?.entityVersion.entity.slug}
+					/>
 				</FormSection>
 
 				<Separator className="my-6" />

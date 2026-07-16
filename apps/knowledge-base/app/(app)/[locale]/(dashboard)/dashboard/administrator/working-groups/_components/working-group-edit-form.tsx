@@ -119,6 +119,7 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 						initialSocialMediaIds={initialSocialMediaIds}
 						initialSocialMediaItems={initialSocialMediaItems}
 						initialSocialMediaTotal={initialSocialMediaTotal}
+						isPublished={isPublished}
 						selectedSocialMediaItems={selectedSocialMediaItems}
 						workingGroup={workingGroup}
 					>

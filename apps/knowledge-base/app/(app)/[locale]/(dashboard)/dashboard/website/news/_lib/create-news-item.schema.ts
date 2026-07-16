@@ -2,8 +2,10 @@ import { NewsItemInsertSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
+import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
 
 export const CreateNewsItemActionInputSchema = v.object({
+	slug: EntitySlugInputSchema,
 	...v.pick(NewsItemInsertSchema, ["title", "summary"]).entries,
 	publicationDate: v.pipe(v.string(), v.isoDate(), v.toDate()),
 	imageKey: v.pipe(v.string(), v.nonEmpty()),

@@ -73,6 +73,7 @@ export function PersonEditForm(props: Readonly<PersonEditFormProps>): ReactNode 
 					<PersonForm
 						formAction={updatePersonAction}
 						initialAssets={initialAssets}
+						isPublished={isPublished}
 						person={person}
 					/>
 				</TabPanel>

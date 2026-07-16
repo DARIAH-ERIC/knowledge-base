@@ -111,6 +111,7 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 					</div>
 
 					<ProjectForm
+						isPublished={isPublished}
 						formAction={updateProjectAction}
 						initialAssets={initialAssets}
 						initialRelatedEntityIds={initialRelatedEntityIds}
