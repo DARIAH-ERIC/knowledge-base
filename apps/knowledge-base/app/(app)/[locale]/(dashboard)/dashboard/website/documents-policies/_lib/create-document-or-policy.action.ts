@@ -2,18 +2,18 @@
 
 import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import slugify from "@sindresorhus/slugify";
 
 import { CreateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy.schema";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
-import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-lifecycle";
 import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
 import { db } from "@/lib/db";
 import { eq, isNull } from "@/lib/db/sql";
+import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getCreatedSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const createDocumentOrPolicyAction = createMutationAction<
@@ -24,11 +24,10 @@ export const createDocumentOrPolicyAction = createMutationAction<
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "documents_policies" },
 	revalidate: "/[locale]/dashboard/website/documents-policies",
-	redirect: ({ input }) => `/dashboard/website/documents-policies/${slugify(input.title)}/details`,
+	redirect: ({ result }) =>
+		`/dashboard/website/documents-policies/${getCreatedSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
-		const slug = slugify(input.title);
-
 		const type = await tx.query.entityTypes.findFirst({
 			where: { type: "documents_policies" },
 			columns: { id: true },
@@ -36,7 +35,10 @@ export const createDocumentOrPolicyAction = createMutationAction<
 
 		assert(type);
 
-		const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
+		const { documentId, versionId, slug } = await createDraftDocumentWithSlug(tx, type.id, {
+			requestedSlug: getRequestedSlug(input.slug),
+			title: input.title,
+		});
 
 		const asset = await tx.query.assets.findFirst({
 			where: { key: input.documentKey },
@@ -93,6 +95,7 @@ export const createDocumentOrPolicyAction = createMutationAction<
 
 		return {
 			subjectId: documentId,
+			subjectSlug: slug,
 			auditSummary: { lifecycle: published ? "published" : "draft" },
 			successData: { documentId, published },
 		};

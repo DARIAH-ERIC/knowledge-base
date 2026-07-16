@@ -66,6 +66,7 @@ export function PageItemEditForm(props: Readonly<PageItemEditFormProps>): ReactN
 
 			<PageItemForm
 				contentBlocks={contentBlocks}
+				isPublished={isPublished}
 				formAction={updatePageItemAction}
 				formId={formId}
 				initialAssets={initialAssets}

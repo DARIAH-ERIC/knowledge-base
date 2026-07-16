@@ -2,15 +2,15 @@
 
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import slugify from "@sindresorhus/slugify";
 
 import { CreateNationalConsortiumActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/create-national-consortium.schema";
-import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-lifecycle";
 import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { filterToPublishedDocumentIds } from "@/lib/data/relations";
+import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getCreatedSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const createNationalConsortiumAction = createMutationAction({
@@ -18,12 +18,10 @@ export const createNationalConsortiumAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "national_consortia" },
 	revalidate: "/[locale]/dashboard/administrator/national-consortia",
-	redirect: ({ input }) =>
-		`/dashboard/administrator/national-consortia/${slugify(input.name)}/details`,
+	redirect: ({ result }) =>
+		`/dashboard/administrator/national-consortia/${getCreatedSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
-		const slug = slugify(input.name);
-
 		const entityType = await tx.query.entityTypes.findFirst({
 			where: { type: "organisational_units" },
 			columns: { id: true },
@@ -36,7 +34,10 @@ export const createNationalConsortiumAction = createMutationAction({
 		});
 		assert(orgUnitType);
 
-		const { documentId, versionId } = await createDraftDocument(tx, entityType.id, slug);
+		const { documentId, versionId, slug } = await createDraftDocumentWithSlug(tx, entityType.id, {
+			requestedSlug: getRequestedSlug(input.slug),
+			title: input.name,
+		});
 
 		let imageId: string | null = null;
 		if (input.imageKey != null) {
@@ -92,6 +93,7 @@ export const createNationalConsortiumAction = createMutationAction({
 
 		return {
 			subjectId: documentId,
+			subjectSlug: slug,
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

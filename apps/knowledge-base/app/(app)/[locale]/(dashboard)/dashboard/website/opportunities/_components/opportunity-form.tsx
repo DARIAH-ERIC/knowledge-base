@@ -19,6 +19,7 @@ import {
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
+import { EntitySlugField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field";
 import {
 	FormLayout,
 	FormSection,
@@ -34,12 +35,14 @@ interface OpportunityFormProps {
 		};
 		source: Pick<schema.OpportunitySource, "id" | "source">;
 	};
+	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
+	isPublished?: boolean;
 	formAction: ServerAction;
 	sources: Array<Pick<schema.OpportunitySource, "id" | "source">>;
 }
 
 export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNode {
-	const { contentBlocks, formAction, opportunity, sources } = props;
+	const { contentBlocks, formAction, opportunity, sources, isPublished } = props;
 
 	const t = useExtracted();
 
@@ -116,6 +119,11 @@ export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNod
 						<Input placeholder="https://" />
 						<FieldError />
 					</TextField>
+
+					<EntitySlugField
+						isPublished={isPublished}
+						slug={opportunity?.entityVersion.entity.slug}
+					/>
 				</FormSection>
 
 				<Separator className="my-6" />

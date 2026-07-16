@@ -2,8 +2,10 @@ import { EventUpdateSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
+import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
 
 export const UpdateEventActionInputSchema = v.object({
+	slug: EntitySlugInputSchema,
 	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(EventUpdateSchema, ["title", "summary", "location", "website"]).entries,
 	isFullDay: v.pipe(

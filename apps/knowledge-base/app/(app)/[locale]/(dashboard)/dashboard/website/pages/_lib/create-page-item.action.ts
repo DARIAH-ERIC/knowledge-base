@@ -2,17 +2,17 @@
 
 import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import slugify from "@sindresorhus/slugify";
 
 import { CreatePageItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/create-page-item.schema";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
-import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-lifecycle";
 import { pagesLifecycleAdapter } from "@/lib/data/pages.lifecycle-adapter";
 import { filterToPublishedDocumentIds } from "@/lib/data/relations";
 import { db } from "@/lib/db";
+import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getCreatedSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const createPageItemAction = createMutationAction({
@@ -20,18 +20,19 @@ export const createPageItemAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "pages" },
 	revalidate: "/[locale]/dashboard/website/pages",
-	redirect: ({ input }) => `/dashboard/website/pages/${slugify(input.title)}/details`,
+	redirect: ({ result }) => `/dashboard/website/pages/${getCreatedSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
-		const slug = slugify(input.title);
-
 		const type = await tx.query.entityTypes.findFirst({
 			where: { type: "pages" },
 			columns: { id: true },
 		});
 		assert(type);
 
-		const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
+		const { documentId, versionId, slug } = await createDraftDocumentWithSlug(tx, type.id, {
+			requestedSlug: getRequestedSlug(input.slug),
+			title: input.title,
+		});
 
 		let imageId: string | undefined;
 		if (input.imageKey != null) {
@@ -107,6 +108,7 @@ export const createPageItemAction = createMutationAction({
 
 		return {
 			subjectId: documentId,
+			subjectSlug: slug,
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

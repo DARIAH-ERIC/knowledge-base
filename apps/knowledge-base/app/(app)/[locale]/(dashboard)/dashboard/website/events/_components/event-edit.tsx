@@ -70,6 +70,7 @@ export function EventEditForm(props: Readonly<EventEditFormProps>): ReactNode {
 			<EventForm
 				contentBlocks={contentBlocks}
 				event={event}
+				isPublished={isPublished}
 				formAction={updateEventAction}
 				formId={formId}
 				initialAssets={initialAssets}

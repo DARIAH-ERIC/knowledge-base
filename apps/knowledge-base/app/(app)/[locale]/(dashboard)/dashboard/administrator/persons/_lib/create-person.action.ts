@@ -2,15 +2,15 @@
 
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import slugify from "@sindresorhus/slugify";
 
 import { CreatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.schema";
-import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-lifecycle";
 import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
+import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getCreatedSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const createPersonAction = createMutationAction({
@@ -18,18 +18,19 @@ export const createPersonAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "persons" },
 	revalidate: "/[locale]/dashboard/administrator/persons",
-	redirect: ({ input }) => `/dashboard/administrator/persons/${slugify(input.name)}/details`,
+	redirect: ({ result }) => `/dashboard/administrator/persons/${getCreatedSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
-		const slug = slugify(input.name);
-
 		const type = await tx.query.entityTypes.findFirst({
 			where: { type: "persons" },
 			columns: { id: true },
 		});
 		assert(type);
 
-		const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
+		const { documentId, versionId, slug } = await createDraftDocumentWithSlug(tx, type.id, {
+			requestedSlug: getRequestedSlug(input.slug),
+			title: input.name,
+		});
 
 		const asset =
 			input.imageKey != null
@@ -62,6 +63,7 @@ export const createPersonAction = createMutationAction({
 
 		return {
 			subjectId: documentId,
+			subjectSlug: slug,
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

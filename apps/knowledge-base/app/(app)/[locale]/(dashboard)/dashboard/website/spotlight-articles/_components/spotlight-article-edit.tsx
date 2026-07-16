@@ -99,6 +99,7 @@ export function SpotlightArticleEditForm(
 
 					<SpotlightArticleForm
 						contentBlocks={contentBlocks}
+						isPublished={isPublished}
 						formAction={updateSpotlightArticleAction}
 						formId={formId}
 						initialAssets={initialAssets}

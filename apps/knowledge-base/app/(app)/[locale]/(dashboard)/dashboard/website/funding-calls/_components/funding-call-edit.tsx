@@ -44,6 +44,7 @@ export function FundingCallEditForm(props: Readonly<FundingCallEditFormProps>): 
 
 			<FundingCallForm
 				contentBlocks={contentBlocks}
+				isPublished={isPublished}
 				formAction={updateFundingCallAction}
 				fundingCall={fundingCall}
 			/>

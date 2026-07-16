@@ -2,34 +2,35 @@
 
 import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import slugify from "@sindresorhus/slugify";
 
 import { CreateDocumentationPageActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/create-documentation-page.schema";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { documentationPagesLifecycleAdapter } from "@/lib/data/documentation-pages.lifecycle-adapter";
-import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
+import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getCreatedSlug } from "@/lib/server/create-mutation-action";
 
 export const createDocumentationPageAction = createMutationAction({
 	schema: CreateDocumentationPageActionInputSchema,
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "documentation_pages" },
 	revalidate: "/[locale]/dashboard/administrator/documentation-pages",
-	redirect: ({ input }) =>
-		`/dashboard/administrator/documentation-pages/${slugify(input.title)}/details`,
+	redirect: ({ result }) =>
+		`/dashboard/administrator/documentation-pages/${getCreatedSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
-		const slug = slugify(input.title);
-
 		const type = await tx.query.entityTypes.findFirst({
 			where: { type: "documentation_pages" },
 			columns: { id: true },
 		});
 		assert(type);
 
-		const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
+		const { documentId, versionId, slug } = await createDraftDocumentWithSlug(tx, type.id, {
+			requestedSlug: getRequestedSlug(input.slug),
+			title: input.title,
+		});
 
 		await tx.insert(schema.documentationPages).values({
 			id: versionId,
@@ -72,6 +73,7 @@ export const createDocumentationPageAction = createMutationAction({
 
 		return {
 			subjectId: documentId,
+			subjectSlug: slug,
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

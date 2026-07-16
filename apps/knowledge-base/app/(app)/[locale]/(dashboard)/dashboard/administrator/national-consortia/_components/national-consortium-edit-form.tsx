@@ -127,6 +127,7 @@ export function NationalConsortiumEditForm(
 						initialSocialMediaIds={initialSocialMediaIds}
 						initialSocialMediaItems={initialSocialMediaItems}
 						initialSocialMediaTotal={initialSocialMediaTotal}
+						isPublished={isPublished}
 						nationalConsortium={nationalConsortium}
 						selectedSocialMediaItems={selectedSocialMediaItems}
 						showSaveAndPublish={true}

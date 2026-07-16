@@ -1,4 +1,4 @@
-import { getFormDataValues } from "@acdh-oeaw/lib";
+import { assert, getFormDataValues } from "@acdh-oeaw/lib";
 import type { User } from "@dariah-eric/auth";
 import {
 	type ActionState,
@@ -35,9 +35,27 @@ export interface MutationResult<TSuccessData = unknown> {
 	 * resolves the label live from the current version.
 	 */
 	subjectLabel?: string | null;
+	/**
+	 * The subject's slug as stored by the database. Set this in creates that redirect to a slug-based
+	 * route, and build the `redirect` from it via `getCreatedSlug`.
+	 */
+	subjectSlug?: string;
 	auditSummary?: Record<string, unknown>;
 	successMessage?: string;
 	successData?: TSuccessData;
+}
+
+/**
+ * Reads the slug of a just-created entity out of its mutate result, for building a `redirect`.
+ *
+ * Create actions must route to the slug `createDraftDocument` reports, never to a second
+ * `slugify(title)` call: the two agree only for as long as every requested slug is stored verbatim,
+ * so re-deriving would send the user to a stale — or another entity's — URL once a slug is adjusted
+ * to keep `(type, slug)` unique.
+ */
+export function getCreatedSlug(result: MutationResult): string {
+	assert(result.subjectSlug, "Create actions redirecting to a slug must return `subjectSlug`.");
+	return result.subjectSlug;
 }
 
 export interface MutationContext {

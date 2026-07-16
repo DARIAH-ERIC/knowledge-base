@@ -101,6 +101,65 @@ export class AdminPersonsPage {
 	}
 
 	// ---------------------------------------------------------------------------
+	// Slug field
+	// ---------------------------------------------------------------------------
+
+	slugInput(): Locator {
+		return this.page.locator('input[name="slug"]');
+	}
+
+	async fillSlug(slug: string): Promise<void> {
+		await this.slugInput().fill(slug);
+	}
+
+	/**
+	 * Submit a create, returning the slug the server actually stored — read back from the
+	 * `…/<slug>/details` URL it redirects to. That URL is the assertion: it proves the redirect
+	 * follows the stored (possibly deduplicated) slug rather than re-deriving it from the title.
+	 */
+	async submitCreateReturningSlug(): Promise<string> {
+		const detailsPattern = new RegExp(`^${BASE_PATH}/([^/]+)/details$`);
+		await waitForActionRedirect({
+			page: this.page,
+			redirectPathname: detailsPattern,
+			trigger: async () => {
+				await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
+			},
+		});
+		const match = new URL(this.page.url()).pathname.match(detailsPattern);
+		if (match?.[1] == null) {
+			throw new Error("Could not read the slug from the person details URL.");
+		}
+		return match[1];
+	}
+
+	/** Click the draft-save button without expecting a redirect — for submits the server rejects. */
+	async clickSaveDraft(): Promise<void> {
+		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
+	}
+
+	/**
+	 * Forge a slug rename that the UI does not allow: on a published entity the slug field is
+	 * disabled, so append a hidden `slug` input carrying a different value straight into the form,
+	 * then save. Drives the server-side guard through the real POST — the field being disabled is a
+	 * courtesy, not the check.
+	 */
+	async forgeSlugAndSaveDraft(slug: string): Promise<void> {
+		await this.page.evaluate((value) => {
+			const form = document.querySelector("form");
+			if (form == null) {
+				throw new Error("No form on the page to forge a slug into.");
+			}
+			const input = document.createElement("input");
+			input.type = "hidden";
+			input.name = "slug";
+			input.value = value;
+			form.append(input);
+		}, slug);
+		await this.clickSaveDraft();
+	}
+
+	// ---------------------------------------------------------------------------
 	// List page helpers
 	// ---------------------------------------------------------------------------
 

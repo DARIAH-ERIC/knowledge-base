@@ -109,6 +109,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 					</div>
 
 					<GovernanceBodyForm
+						isPublished={isPublished}
 						formAction={updateGovernanceBodyAction}
 						formId={formId}
 						governanceBody={governanceBody}

@@ -139,6 +139,9 @@ export function createCommandAction<
 				missingRelatedRecord: t(
 					"A related record no longer exists. Refresh the page and try again.",
 				),
+				publishedSlugRename: t(
+					"This entity is published, so its address can only be changed by an administrator on the Maintenance page.",
+				),
 				recordConflict: t("This record conflicts with an existing record."),
 				invalidData: t("The submitted data violates a data rule."),
 				missingData: t("The submitted data is incomplete."),

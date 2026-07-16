@@ -17,6 +17,7 @@ import {
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
+import { EntitySlugField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field";
 import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
 import type { ServerAction } from "@/lib/server/create-server-action";
@@ -31,11 +32,13 @@ interface DocumentOrPolicyFormProps {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { document: { key: string; label: string; url: string } };
 	groups: Array<Pick<schema.DocumentPolicyGroup, "id" | "label">>;
+	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
+	isPublished?: boolean;
 	formAction: ServerAction;
 }
 
 export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): ReactNode {
-	const { initialAssets, contentBlocks, formAction, documentOrPolicy, groups } = props;
+	const { initialAssets, contentBlocks, formAction, documentOrPolicy, groups, isPublished } = props;
 
 	const t = useExtracted();
 
@@ -95,6 +98,11 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 					</SelectContent>
 				</Select>
 				{selectedGroupId ? <input name="groupId" type="hidden" value={selectedGroupId} /> : null}
+
+				<EntitySlugField
+					isPublished={isPublished}
+					slug={documentOrPolicy?.entityVersion.entity.slug}
+				/>
 			</FormSection>
 
 			<Separator className="my-6" />
