@@ -2,6 +2,9 @@ import {
 	type CountryMembershipCheckResult,
 	type CountryMembershipFinding,
 	type CountryMembershipFindingKind,
+	type HeadingHierarchyCheckResult,
+	type HeadingHierarchyFinding,
+	type HeadingHierarchyFindingKind,
 	type InactiveUnitRelationCheckResult,
 	type InactiveUnitRelationFinding,
 	type MutuallyExclusiveFindingKind,
@@ -15,6 +18,7 @@ import {
 	type UnitRelationRequirementCheckResult,
 	type UnitRelationRequirementFinding,
 	checkCountryMembership,
+	checkHeadingHierarchy,
 	checkInactiveUnitRelations,
 	checkMutuallyExclusiveUnitRelations,
 	checkPairedRelations,
@@ -27,6 +31,9 @@ export type {
 	CountryMembershipCheckResult,
 	CountryMembershipFinding,
 	CountryMembershipFindingKind,
+	HeadingHierarchyCheckResult,
+	HeadingHierarchyFinding,
+	HeadingHierarchyFindingKind,
 	InactiveUnitRelationCheckResult,
 	InactiveUnitRelationFinding,
 	MutuallyExclusiveFindingKind,
@@ -84,4 +91,14 @@ export async function getMutuallyExclusiveUnitRelationFindings(): Promise<Mutual
  */
 export async function getCountryMembershipFindings(): Promise<CountryMembershipCheckResult> {
 	return checkCountryMembership(db);
+}
+
+/**
+ * Runs the rich-text heading-hierarchy check (e.g. a field must open at `h2` and must not skip from
+ * `h2` straight to `h4`, and no heading may fall outside the editor's `h2`–`h4` range). Reporting
+ * only — the fixes require editorial judgement. Same check as the `@dariah-eric/audit` cli
+ * scripts.
+ */
+export async function getHeadingHierarchyFindings(): Promise<HeadingHierarchyCheckResult> {
+	return checkHeadingHierarchy(db);
 }
