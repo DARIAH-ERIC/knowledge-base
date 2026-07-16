@@ -6,6 +6,7 @@
 	"sideEffects": false,
 	"scripts": {
 		"data:audit:country-membership": "tsx ./scripts/audit-country-membership.ts",
+		"data:audit:heading-hierarchy": "tsx ./scripts/audit-heading-hierarchy.ts",
 		"data:audit:inactive-unit-relations": "tsx ./scripts/audit-inactive-unit-relations.ts",
 		"data:audit:mutually-exclusive-relations": "tsx ./scripts/audit-mutually-exclusive-relations.ts",
 		"data:audit:paired-relations": "tsx ./scripts/audit-paired-relations.ts",

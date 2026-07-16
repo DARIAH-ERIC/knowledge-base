@@ -1,3 +1,4 @@
+import type { JSONContent } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -12,7 +13,9 @@ import {
 	buildInactiveUnitRelationFindings,
 	buildMutuallyExclusiveUnitRelationFindings,
 	classifyRelationPair,
+	collectHeadings,
 	countryMembershipRules,
+	findHeadingHierarchyViolations,
 	findOverlappingPeriods,
 	isRelationInconsistentWithInactiveUnit,
 	isUnitInactive,
@@ -977,5 +980,94 @@ describe("buildCountryMembershipFindings", () => {
 			countryDocumentId: "c-1",
 			periods: [{ start: "2010-01-01T00:00:00.000Z", end: "2015-01-01T00:00:00.000Z" }],
 		});
+	});
+});
+
+const heading = (level: number, text = ""): JSONContent => {
+	return {
+		type: "heading",
+		attrs: { level },
+		content: text !== "" ? [{ type: "text", text }] : [],
+	};
+};
+
+describe("collectHeadings", () => {
+	it("returns headings in document order with their level and trimmed text", () => {
+		const doc: JSONContent = {
+			type: "doc",
+			content: [
+				heading(2, "  Overview  "),
+				{ type: "paragraph", content: [{ type: "text", text: "body" }] },
+				heading(3, "Details"),
+			],
+		};
+
+		expect(collectHeadings(doc)).toStrictEqual([
+			{ level: 2, text: "Overview" },
+			{ level: 3, text: "Details" },
+		]);
+	});
+
+	it("defaults a heading with no level attribute to the top level", () => {
+		const doc: JSONContent = { type: "doc", content: [{ type: "heading", content: [] }] };
+
+		expect(collectHeadings(doc)).toStrictEqual([{ level: 2, text: "" }]);
+	});
+
+	it("returns no headings for an empty or missing document", () => {
+		expect(collectHeadings(null)).toStrictEqual([]);
+		expect(collectHeadings({ type: "doc" })).toStrictEqual([]);
+	});
+});
+
+describe("findHeadingHierarchyViolations", () => {
+	it("accepts a well-formed outline that opens at h2 and steps one level at a time", () => {
+		const violations = findHeadingHierarchyViolations([
+			{ level: 2, text: "A" },
+			{ level: 3, text: "A.1" },
+			{ level: 4, text: "A.1.a" },
+			{ level: 2, text: "B" },
+		]);
+
+		expect(violations).toStrictEqual([]);
+	});
+
+	it("flags a first heading deeper than h2", () => {
+		const violations = findHeadingHierarchyViolations([{ level: 3, text: "Sub" }]);
+
+		expect(violations).toStrictEqual([
+			{ kind: "does_not_start_at_top", index: 0, level: 3, previousLevel: null, text: "Sub" },
+		]);
+	});
+
+	it("flags a skipped level on the way down but not moving back up", () => {
+		const violations = findHeadingHierarchyViolations([
+			{ level: 2, text: "A" },
+			{ level: 4, text: "skips h3" },
+			{ level: 2, text: "back up is fine" },
+		]);
+
+		expect(violations).toStrictEqual([
+			{ kind: "skipped_level", index: 1, level: 4, previousLevel: 2, text: "skips h3" },
+		]);
+	});
+
+	it("flags a level outside the allowed h2-h4 range and does not use it as a baseline", () => {
+		const violations = findHeadingHierarchyViolations([
+			{ level: 1, text: "page title in body" },
+			{ level: 2, text: "proper top" },
+			{ level: 5, text: "too deep" },
+		]);
+
+		expect(violations).toStrictEqual([
+			{
+				kind: "disallowed_level",
+				index: 0,
+				level: 1,
+				previousLevel: null,
+				text: "page title in body",
+			},
+			{ kind: "disallowed_level", index: 2, level: 5, previousLevel: 2, text: "too deep" },
+		]);
 	});
 });

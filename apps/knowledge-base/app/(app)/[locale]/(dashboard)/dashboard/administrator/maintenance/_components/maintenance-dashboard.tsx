@@ -13,6 +13,7 @@ import { SlugEditor } from "@/app/(app)/[locale]/(dashboard)/dashboard/administr
 interface MaintenanceDashboardProps {
 	countryMembership: ReactNode;
 	emptyContentBlocks: ReactNode;
+	headingHierarchy: ReactNode;
 	inactiveUnitRelations: ReactNode;
 	mutuallyExclusiveRelations: ReactNode;
 	pairedRelations: ReactNode;
@@ -26,6 +27,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 	const {
 		countryMembership,
 		emptyContentBlocks,
+		headingHierarchy,
 		inactiveUnitRelations,
 		mutuallyExclusiveRelations,
 		pairedRelations,
@@ -60,6 +62,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							<Tab id="mutually-exclusive-relations">{t("Conflicting relations")}</Tab>
 							<Tab id="country-membership">{t("Country membership")}</Tab>
 							<Tab id="inactive-unit-relations">{t("Inactive units")}</Tab>
+							<Tab id="heading-hierarchy">{t("Heading hierarchy")}</Tab>
 						</TabList>
 
 						<TabPanel id="paired-relations" className="flex flex-col gap-y-(--layout-padding)">
@@ -119,6 +122,16 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							</p>
 
 							{inactiveUnitRelations}
+						</TabPanel>
+
+						<TabPanel id="heading-hierarchy" className="flex flex-col gap-y-(--layout-padding)">
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Rich-text fields whose headings do not form a proper outline. Every field should open at a level-2 heading (the page title is the only level-1), and levels must not be skipped on the way down — a level-2 heading may be followed by a level-3, but not straight by a level-4. These need an editor to correct; unlike rich-text normalisation, the right level cannot be guessed automatically.",
+								)}
+							</p>
+
+							{headingHierarchy}
 						</TabPanel>
 					</Tabs>
 				</TabPanel>

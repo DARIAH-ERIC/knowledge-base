@@ -1,3 +1,4 @@
+import type { JSONContent } from "@tiptap/core";
 import { and, eq, inArray } from "drizzle-orm";
 
 import type { Database, Transaction } from "./index";
@@ -1530,6 +1531,333 @@ export async function checkCountryMembership(
 			a.rule.localeCompare(b.rule) ||
 			a.unitLabel.localeCompare(b.unitLabel) ||
 			a.countryLabel.localeCompare(b.countryLabel),
+	);
+
+	return { findings, errors };
+}
+
+/**
+ * Data-integrity check for the heading structure of rich-text content. Headings must form a proper
+ * outline so the published pages are navigable and accessible: the editor offers `h2`–`h4` (the
+ * page title is the sole `h1`), each rich-text field should open at `h2`, and levels must not be
+ * skipped on the way down (an `h2` may be followed by an `h3`, but not straight by an `h4`).
+ *
+ * Unlike the {@link findRichTextNeedingCleanup} normalisation, these are **not** auto-fixable: the
+ * correct level for a mis-nested heading depends on authorial intent, so the check only reports
+ * them for an editor to correct. Shared by the `@dariah-eric/audit` cli scripts and the admin
+ * dashboard.
+ *
+ * A "document" is scanned as a single outline: for a `rich_text` field, all of its content blocks
+ * in `position` order (a heading may legitimately continue across an intervening image or embed
+ * block); for an `accordion`, each item's body independently (each is its own nested document).
+ */
+
+/** The heading levels the editor allows in body content; `h1` is reserved for the page title. */
+export const allowedHeadingLevels = [2, 3, 4] as const;
+
+const topHeadingLevel = allowedHeadingLevels[0];
+const deepestHeadingLevel = allowedHeadingLevels.at(-1)!;
+
+/**
+ * `disallowed_level`: a heading outside the allowed `h2`–`h4` range (e.g. an `h1` or `h5` that
+ * slipped in via import or paste). `does_not_start_at_top`: the first heading of a document is
+ * deeper than `h2`. `skipped_level`: a heading jumps more than one level below the previous one.
+ */
+export type HeadingHierarchyFindingKind =
+	| "disallowed_level"
+	| "does_not_start_at_top"
+	| "skipped_level";
+
+/** A single heading pulled from a document, in reading order. */
+export interface HeadingOccurrence {
+	level: number;
+	text: string;
+}
+
+export interface HeadingHierarchyViolation {
+	kind: HeadingHierarchyFindingKind;
+	/** Index of the offending heading within the document's heading sequence. */
+	index: number;
+	level: number;
+	/** The previous in-range heading level the violation is judged against, or `null` for the first. */
+	previousLevel: number | null;
+	text: string;
+}
+
+/** Collects heading nodes from a tiptap document in reading order, with their text. */
+export function collectHeadings(doc: JSONContent | null | undefined): Array<HeadingOccurrence> {
+	const headings: Array<HeadingOccurrence> = [];
+
+	function collectText(node: JSONContent): string {
+		if (typeof node.text === "string") {
+			return node.text;
+		}
+		if (Array.isArray(node.content)) {
+			return node.content.map((child) => collectText(child)).join("");
+		}
+		return "";
+	}
+
+	function walk(node: JSONContent | null | undefined): void {
+		if (node == null) {
+			return;
+		}
+		if (node.type === "heading") {
+			const level = typeof node.attrs?.level === "number" ? node.attrs.level : topHeadingLevel;
+			headings.push({ level, text: collectText(node).trim() });
+		}
+		if (Array.isArray(node.content)) {
+			for (const child of node.content) {
+				walk(child);
+			}
+		}
+	}
+
+	walk(doc);
+	return headings;
+}
+
+/**
+ * Pure hierarchy check over an ordered heading sequence, so the rules are unit-testable without a
+ * database. A heading may always move _back up_ to a shallower level (a new section); only skipping
+ * _down_ a level, opening below `h2`, or landing outside `h2`–`h4` is a violation.
+ */
+export function findHeadingHierarchyViolations(
+	headings: Array<HeadingOccurrence>,
+): Array<HeadingHierarchyViolation> {
+	const violations: Array<HeadingHierarchyViolation> = [];
+
+	// The last heading whose level was in range; the baseline for the skipped-level comparison.
+	let previousValidLevel: number | null = null;
+
+	headings.forEach((heading, index) => {
+		const { level, text } = heading;
+
+		if (level < topHeadingLevel || level > deepestHeadingLevel) {
+			violations.push({
+				kind: "disallowed_level",
+				index,
+				level,
+				previousLevel: previousValidLevel,
+				text,
+			});
+			// An out-of-range heading is not a valid baseline for the headings that follow it.
+			return;
+		}
+
+		if (previousValidLevel == null) {
+			if (level !== topHeadingLevel) {
+				violations.push({ kind: "does_not_start_at_top", index, level, previousLevel: null, text });
+			}
+		} else if (level > previousValidLevel + 1) {
+			violations.push({
+				kind: "skipped_level",
+				index,
+				level,
+				previousLevel: previousValidLevel,
+				text,
+			});
+		}
+
+		previousValidLevel = level;
+	});
+
+	return violations;
+}
+
+export interface HeadingHierarchyFinding {
+	kind: HeadingHierarchyFindingKind;
+	entityId: string;
+	entityType: string;
+	entityLabel: string | null;
+	entitySlug: string;
+	fieldName: string;
+	/** Lifecycle status of the owning entity version (e.g. `draft`, `published`). */
+	status: string;
+	blockType: "rich_text" | "accordion";
+	/** Position of the offending content block within its field. */
+	position: number;
+	contentBlockId: string;
+	level: number;
+	previousLevel: number | null;
+	/** Text of the offending heading, so an editor can find it. */
+	headingText: string;
+	detail: string;
+}
+
+export interface HeadingHierarchyCheckResult {
+	findings: Array<HeadingHierarchyFinding>;
+	errors: Array<string>;
+}
+
+/** One content block worth of headings, tagged with the block it came from. */
+interface TaggedHeadings {
+	headings: Array<HeadingOccurrence>;
+	blockType: "rich_text" | "accordion";
+	contentBlockId: string;
+	position: number;
+}
+
+interface AccordionItemContent {
+	content: JSONContent;
+}
+
+function describeHeadingViolation(violation: HeadingHierarchyViolation): string {
+	const heading = `"h${String(violation.level)}"`;
+	switch (violation.kind) {
+		case "disallowed_level": {
+			return `Heading level ${heading} is outside the allowed h2–h4 range and should be corrected.`;
+		}
+		case "does_not_start_at_top": {
+			return `The first heading is ${heading}; a field should open at "h2".`;
+		}
+		case "skipped_level": {
+			return `Heading level ${heading} follows "h${String(violation.previousLevel)}", skipping a level.`;
+		}
+	}
+}
+
+/** Metadata every finding for one scanned document shares. */
+type HeadingHierarchyMeta = Pick<
+	HeadingHierarchyFinding,
+	"entityId" | "entityLabel" | "entitySlug" | "entityType" | "fieldName" | "status"
+>;
+
+export async function checkHeadingHierarchy(
+	db: Database | Transaction,
+): Promise<HeadingHierarchyCheckResult> {
+	const findings: Array<HeadingHierarchyFinding> = [];
+	const errors: Array<string> = [];
+
+	function addFindings(meta: HeadingHierarchyMeta, tagged: Array<TaggedHeadings>): void {
+		const ordered = tagged.toSorted((a, b) => a.position - b.position);
+		// Flatten the field's headings into one sequence, remembering the block each came from.
+		const flat = ordered.flatMap((entry) =>
+			entry.headings.map((heading) => {
+				return {
+					heading,
+					blockType: entry.blockType,
+					contentBlockId: entry.contentBlockId,
+					position: entry.position,
+				};
+			}),
+		);
+
+		const violations = findHeadingHierarchyViolations(flat.map((entry) => entry.heading));
+		for (const violation of violations) {
+			const origin = flat[violation.index]!;
+			findings.push({
+				kind: violation.kind,
+				...meta,
+				blockType: origin.blockType,
+				position: origin.position,
+				contentBlockId: origin.contentBlockId,
+				level: violation.level,
+				previousLevel: violation.previousLevel,
+				headingText: violation.text,
+				detail: describeHeadingViolation(violation),
+			});
+		}
+	}
+
+	try {
+		const rows = await db
+			.select({
+				contentBlockId: schema.contentBlocks.id,
+				position: schema.contentBlocks.position,
+				richTextContent: schema.richTextContentBlocks.content,
+				accordionItems: schema.accordionContentBlocks.items,
+				entityVersionId: schema.entityVersions.id,
+				entityId: schema.entities.id,
+				entityLabel: schema.entities.label,
+				entitySlug: schema.entities.slug,
+				entityType: schema.entityTypes.type,
+				fieldName: schema.entityTypesFieldsNames.fieldName,
+				status: schema.entityStatus.type,
+			})
+			.from(schema.contentBlocks)
+			.innerJoin(schema.fields, eq(schema.fields.id, schema.contentBlocks.fieldId))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.entityTypesFieldsNames.id, schema.fields.fieldNameId),
+			)
+			.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.fields.entityVersionId))
+			.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+			.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
+			.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+			.leftJoin(
+				schema.richTextContentBlocks,
+				eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(
+				schema.accordionContentBlocks,
+				eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
+			);
+
+		// Per field (an entity version's rich-text field), the sequence of headings to validate as one
+		// outline, plus the metadata every finding for that field shares.
+		const richTextFields = new Map<
+			string,
+			{ meta: HeadingHierarchyMeta; sequences: Array<TaggedHeadings> }
+		>();
+		// Accordion bodies are self-contained documents, each validated on its own.
+		const accordionOutlines: Array<{ meta: HeadingHierarchyMeta; sequence: TaggedHeadings }> = [];
+
+		for (const row of rows) {
+			const meta: HeadingHierarchyMeta = {
+				entityId: row.entityId,
+				entityLabel: row.entityLabel,
+				entitySlug: row.entitySlug,
+				entityType: row.entityType,
+				fieldName: row.fieldName,
+				status: row.status,
+			};
+
+			if (row.richTextContent != null) {
+				const key = `${row.entityVersionId}:${row.fieldName}`;
+				const field = richTextFields.get(key) ?? { meta, sequences: [] };
+				field.sequences.push({
+					headings: collectHeadings(row.richTextContent),
+					blockType: "rich_text",
+					contentBlockId: row.contentBlockId,
+					position: row.position,
+				});
+				richTextFields.set(key, field);
+			} else if (row.accordionItems != null) {
+				const items = row.accordionItems as Array<AccordionItemContent>;
+				for (const item of items) {
+					accordionOutlines.push({
+						meta,
+						sequence: {
+							headings: collectHeadings(item.content),
+							blockType: "accordion",
+							contentBlockId: row.contentBlockId,
+							position: row.position,
+						},
+					});
+				}
+			}
+		}
+
+		for (const field of richTextFields.values()) {
+			addFindings(field.meta, field.sequences);
+		}
+		for (const outline of accordionOutlines) {
+			addFindings(outline.meta, [outline.sequence]);
+		}
+	} catch (error) {
+		// oxlint-disable-next-line unicorn/no-instanceof-builtins
+		errors.push(error instanceof Error ? error.message : String(error));
+	}
+
+	findings.sort(
+		(a, b) =>
+			a.entityType.localeCompare(b.entityType) ||
+			(a.entityLabel ?? a.entitySlug).localeCompare(b.entityLabel ?? b.entitySlug) ||
+			a.status.localeCompare(b.status) ||
+			a.fieldName.localeCompare(b.fieldName) ||
+			a.position - b.position ||
+			a.level - b.level,
 	);
 
 	return { findings, errors };
