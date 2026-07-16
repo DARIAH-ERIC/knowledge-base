@@ -7,7 +7,6 @@ ADD CONSTRAINT "entity_types_type_enum_check" CHECK (
 		'documentation_pages',
 		'documents_policies',
 		'events',
-		'external_links',
 		'funding_calls',
 		'impact_case_studies',
 		'internal_pages',

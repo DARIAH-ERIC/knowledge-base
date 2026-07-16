@@ -38,8 +38,8 @@ const currentVersionId = sql`COALESCE(${schema.documentLifecycle.publishedId}, $
 
 /**
  * Title/name of the current version, across every entity subtype — the same COALESCE the audit log
- * and the drafts list use. `external_links` has no subtype and so resolves to null, falling back to
- * the slug for display.
+ * and the drafts list use. Null when the current version has no subtype row yet, in which case
+ * callers fall back to the slug for display.
  */
 const currentLabel = sql<string | null>`COALESCE(
 	${schema.news.title},

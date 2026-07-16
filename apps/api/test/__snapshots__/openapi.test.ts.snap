@@ -8800,7 +8800,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "enum": [
                             "documents_policies",
                             "events",
-                            "external_links",
                             "funding_calls",
                             "impact_case_studies",
                             "news",
@@ -8880,7 +8879,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "enum": [
                       "documents_policies",
                       "events",
-                      "external_links",
                       "funding_calls",
                       "impact_case_studies",
                       "news",

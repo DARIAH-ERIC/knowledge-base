@@ -10,7 +10,6 @@ const entityTypeLabels: Record<string, string> = {
 	documentation_pages: "Documentation page",
 	documents_policies: "Document / policy",
 	events: "Event",
-	external_links: "External link",
 	funding_calls: "Funding call",
 	impact_case_studies: "Impact case study",
 	internal_pages: "Internal page",
