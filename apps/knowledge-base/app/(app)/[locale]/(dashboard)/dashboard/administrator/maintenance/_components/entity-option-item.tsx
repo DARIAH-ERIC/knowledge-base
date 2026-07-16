@@ -25,7 +25,7 @@ export function EntityOptionItem(props: Readonly<{ item: EntityOption }>): React
 	const meta = [item.description, item.slug].filter((value) => value != null && value !== "");
 
 	return (
-		<div className="flex flex-col">
+		<div className="col-start-2 flex flex-col">
 			<div className="flex items-center gap-x-2">
 				<ListBoxLabel className="truncate">{item.name}</ListBoxLabel>
 				{item.state === "draft" ? <Badge intent="emerald">{t("Draft")}</Badge> : null}
