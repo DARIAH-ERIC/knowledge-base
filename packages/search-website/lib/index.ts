@@ -9,6 +9,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { alias, and, eq, inArray, sql } from "@dariah-eric/database/sql";
 import type { SearchService, WebsiteDocument } from "@dariah-eric/search";
 import type { SearchAdminService } from "@dariah-eric/search/admin";
+import { getEntityHref, resolveInterimPagePath } from "@dariah-eric/website-routes";
 
 import { toPlainText } from "./json-content/to-plain-text";
 
@@ -584,7 +585,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(descriptions.get(entityId), item.summary ?? ""),
-					link: `/network/members-and-partners/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "country", slug: item.entityVersion.entity.slug }),
 				});
 			}
 
@@ -628,7 +629,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: item.summary ?? "",
-					link: "/about/documents",
+					link: getEntityHref({ type: "document-or-policy" }),
 				});
 			}
 
@@ -673,7 +674,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.duration.start,
 					label: item.title,
 					description: item.summary ?? "",
-					link: `/events/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "event", slug: item.entityVersion.entity.slug }),
 				});
 			}
 
@@ -717,7 +718,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: item.summary ?? "",
-					link: `/funding-calls/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "funding-call", slug: item.entityVersion.entity.slug }),
 				});
 			}
 
@@ -762,7 +763,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: item.summary,
-					link: `/about/impact-case-studies/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "impact-case-study", slug: item.entityVersion.entity.slug }),
 				});
 			}
 
@@ -809,7 +810,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: mergeDescription(content.get(entityId), item.summary),
-					link: `/news/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "news-item", slug: item.entityVersion.entity.slug }),
 				});
 			}
 
@@ -856,7 +857,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: mergeDescription(content.get(entityId), item.summary ?? ""),
-					link: `/opportunities/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "opportunity", slug: item.entityVersion.entity.slug }),
 				});
 			}
 
@@ -894,6 +895,15 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					return null;
 				}
 
+				// Interim: a page's real pathname is not yet stored in the CMS. Skip pages with no
+				// mapped website route so we never index a link that would 404. Remove once pages
+				// own a `path` column (docs/website-url-resolution.md).
+				const path = resolveInterimPagePath(item.entityVersion.entity.slug);
+
+				if (path == null) {
+					return null;
+				}
+
 				const content = await getPlainTextFieldContentByEntityId(db, [entityId], "content");
 
 				return createWebsiteEntityDocument({
@@ -903,7 +913,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: mergeDescription(content.get(entityId), item.summary),
-					link: `/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "page", path }),
 				});
 			}
 
@@ -948,7 +958,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: biographies.get(entityId) ?? "",
-					link: `/persons/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "person", slug: item.entityVersion.entity.slug }),
 				});
 			}
 
@@ -998,7 +1008,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(descriptions.get(entityId), item.summary),
-					link: `/projects/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "project", slug: item.entityVersion.entity.slug }),
 				});
 			}
 
@@ -1045,7 +1055,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: mergeDescription(content.get(entityId), item.summary),
-					link: `/spotlights/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "spotlight-article", slug: item.entityVersion.entity.slug }),
 				});
 			}
 
@@ -1095,7 +1105,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(descriptions.get(entityId), item.summary ?? ""),
-					link: `/network/working-groups/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "working-group", slug: item.entityVersion.entity.slug }),
 				});
 			}
 		}
@@ -1237,7 +1247,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: item.summary ?? "",
-					link: "/about/documents",
+					link: getEntityHref({ type: "document-or-policy" }),
 				}),
 			),
 		);
@@ -1280,7 +1290,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.duration.start,
 					label: item.title,
 					description: item.summary,
-					link: `/events/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "event", slug: item.entityVersion.entity.slug }),
 				}),
 			),
 		);
@@ -1322,7 +1332,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: item.summary ?? "",
-					link: `/funding-calls/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "funding-call", slug: item.entityVersion.entity.slug }),
 				}),
 			),
 		);
@@ -1365,7 +1375,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: item.summary,
-					link: `/about/impact-case-studies/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "impact-case-study", slug: item.entityVersion.entity.slug }),
 				}),
 			),
 		);
@@ -1407,7 +1417,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(countryDescriptions.get(item.id), item.summary ?? ""),
-					link: `/network/members-and-partners/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "country", slug: item.entityVersion.entity.slug }),
 				}),
 			),
 		);
@@ -1493,7 +1503,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						organisationalUnitDescriptions.get(item.itemId),
 						item.description ?? "",
 					),
-					link: `/network/members-and-partners/${item.countrySlug}`,
+					link: getEntityHref({ type: "country", slug: item.countrySlug }),
 				}),
 			),
 		);
@@ -1572,7 +1582,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						organisationalUnitDescriptions.get(item.itemId),
 						item.description ?? "",
 					),
-					link: `/network/members-and-partners/${item.countrySlug}`,
+					link: getEntityHref({ type: "country", slug: item.countrySlug }),
 				}),
 			),
 		);
@@ -1651,7 +1661,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						organisationalUnitDescriptions.get(item.itemId),
 						item.description ?? "",
 					),
-					link: `/network/members-and-partners/${item.countrySlug}`,
+					link: getEntityHref({ type: "country", slug: item.countrySlug }),
 				}),
 			),
 		);
@@ -1715,7 +1725,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				id: ["person", `${item.countrySlug}:${item.itemSlug}`].join(":"),
 				label: item.label,
 				description: personBiographies.get(item.itemId) ?? "",
-				link: `/network/members-and-partners/${item.countrySlug}`,
+				link: getEntityHref({ type: "country", slug: item.countrySlug }),
 			});
 		}
 
@@ -1759,7 +1769,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: mergeDescription(newsContent.get(item.id), item.summary),
-					link: `/news/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "news-item", slug: item.entityVersion.entity.slug }),
 				}),
 			),
 		);
@@ -1801,7 +1811,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: mergeDescription(opportunityContent.get(item.id), item.summary ?? ""),
-					link: `/opportunities/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "opportunity", slug: item.entityVersion.entity.slug }),
 				}),
 			),
 		);
@@ -1836,17 +1846,27 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			...pages.map((item) =>
-				createWebsiteEntityDocument({
-					importedAt,
-					type: "page",
-					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.publicationDate,
-					label: item.title,
-					description: mergeDescription(pageContent.get(item.id), item.summary),
-					link: `/${item.entityVersion.entity.slug}`,
-				}),
-			),
+			// Interim: skip pages whose slug has no mapped website route (they would 404). Remove
+			// once pages own a `path` column (docs/website-url-resolution.md).
+			...pages.flatMap((item) => {
+				const path = resolveInterimPagePath(item.entityVersion.entity.slug);
+
+				if (path == null) {
+					return [];
+				}
+
+				return [
+					createWebsiteEntityDocument({
+						importedAt,
+						type: "page",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.publicationDate,
+						label: item.title,
+						description: mergeDescription(pageContent.get(item.id), item.summary),
+						link: getEntityHref({ type: "page", path }),
+					}),
+				];
+			}),
 		);
 
 		const persons = await db.query.persons.findMany({
@@ -1885,7 +1905,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: personBiographies.get(item.id) ?? "",
-					link: `/persons/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "person", slug: item.entityVersion.entity.slug }),
 				}),
 			),
 		);
@@ -1927,7 +1947,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(projectDescriptions.get(item.id), item.summary),
-					link: `/projects/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "project", slug: item.entityVersion.entity.slug }),
 				}),
 			),
 		);
@@ -1970,7 +1990,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.publicationDate,
 					label: item.title,
 					description: mergeDescription(spotlightContent.get(item.id), item.summary),
-					link: `/spotlights/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "spotlight-article", slug: item.entityVersion.entity.slug }),
 				}),
 			),
 		);
@@ -2012,7 +2032,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(workingGroupDescriptions.get(item.id), item.summary ?? ""),
-					link: `/network/working-groups/${item.entityVersion.entity.slug}`,
+					link: getEntityHref({ type: "working-group", slug: item.entityVersion.entity.slug }),
 				}),
 			),
 		);

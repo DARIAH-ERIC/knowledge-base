@@ -1,12 +1,9 @@
 {
-	"name": "@dariah-eric/search-website",
+	"name": "@dariah-eric/website-routes",
 	"private": true,
 	"license": "MIT",
 	"type": "module",
 	"sideEffects": false,
-	"imports": {
-		"#/*": "./*"
-	},
 	"exports": {
 		".": {
 			"types": "./dist/index.d.mts",
@@ -20,21 +17,16 @@
 		"format:fix": "oxfmt --write",
 		"lint:check": "oxlint --report-unused-disable-directives --type-aware --type-check",
 		"lint:fix": "oxlint --fix --report-unused-disable-directives --type-aware --type-check",
+		"test": "vitest run",
 		"types:check": "tsc --noEmit"
 	},
 	"devDependencies": {
 		"@dariah-eric/configs": "workspace:^",
-		"@dariah-eric/database": "workspace:^",
-		"@dariah-eric/search": "workspace:^",
-		"@dariah-eric/website-routes": "workspace:^",
-		"@types/node": "catalog:",
 		"tsdown": "catalog:",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vitest": "catalog:"
 	},
-	"peerDependencies": {
-		"@acdh-oeaw/lib": "catalog:",
-		"@dariah-eric/database": "workspace:^",
-		"@dariah-eric/search": "workspace:^",
-		"@dariah-eric/website-routes": "workspace:^"
+	"engines": {
+		"node": "24.x"
 	}
 }
