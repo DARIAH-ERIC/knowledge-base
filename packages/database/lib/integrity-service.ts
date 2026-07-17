@@ -1,5 +1,6 @@
 import type { JSONContent } from "@tiptap/core";
 import { and, eq, inArray } from "drizzle-orm";
+import type { PgColumn } from "drizzle-orm/pg-core";
 
 import type { Database, Transaction } from "./index";
 import * as schema from "./schema";
@@ -1861,4 +1862,640 @@ export async function checkHeadingHierarchy(
 	);
 
 	return { findings, errors };
+}
+
+/**
+ * Heuristics which surface **candidate** duplicate documents — the same person, institution or
+ * project entered twice, usually because a bulk import and a hand-authored entry met, or because
+ * two editors created the same entry independently.
+ *
+ * Unlike every other rule set in this module these checks are _not_ about a violated invariant:
+ * nothing here is provably wrong, and every finding needs a human to confirm it before the two
+ * documents are merged. Findings are therefore scored rather than binary — each matching signal
+ * contributes its weight, and a pair is only reported once the weights sum to
+ * {@link defaultMinimumDuplicateScore}. Two weak signals on the same pair (a similar name _and_ a
+ * shared acronym) outrank one weak signal alone.
+ *
+ * Shared by the `@dariah-eric/audit` cli scripts and the admin dashboard.
+ */
+
+/** The entity types with enough identifying fields to compare. */
+export type DuplicateEntityType = "organisational_units" | "persons" | "projects";
+
+/**
+ * Why a pair looks like a duplicate.
+ *
+ * - `orcid` / `ror` — the same global identifier: two documents claiming one identifier is a
+ *   contradiction, so these are the only near-conclusive signals here.
+ * - `email` — the same mailbox. Strong for persons; weaker for units, where a shared institutional
+ *   mailbox (`office@…`) is legitimately reused across departments.
+ * - `link` — the same website or social-media url.
+ * - `name` — identical names after normalisation (case, diacritics, punctuation and word order).
+ * - `similar_name` — near-identical names (see {@link nameSimilarityThreshold}).
+ * - `acronym` — the same acronym. Weak on its own: unrelated projects reuse short acronyms.
+ */
+export type DuplicateSignalKind =
+	| "acronym"
+	| "email"
+	| "link"
+	| "name"
+	| "orcid"
+	| "ror"
+	| "similar_name";
+
+const duplicateSignalWeights: Record<DuplicateSignalKind, number> = {
+	orcid: 1,
+	ror: 1,
+	email: 0.8,
+	name: 0.7,
+	link: 0.6,
+	similar_name: 0.5,
+	acronym: 0.3,
+};
+
+/**
+ * The score a pair must reach to be reported. Tuned so that any single signal except `acronym` and
+ * `similar_name` reports on its own, while those two report as soon as anything corroborates them.
+ */
+export const defaultMinimumDuplicateScore = 0.5;
+
+/** Two names count as `similar_name` at or above this Sørensen–Dice coefficient over bigrams. */
+const nameSimilarityThreshold = 0.85;
+
+/**
+ * Tokens dropped from organisation and project names before comparison, so that "The University of
+ * Vienna" and "University of Vienna" normalise alike. Deliberately **not** applied to person names,
+ * where the same words are meaningful parts of a surname ("Jan de Vries").
+ */
+const nameStopwords = new Set(["and", "das", "der", "des", "die", "for", "of", "the", "und"]);
+
+/**
+ * A document reduced to the fields worth comparing. Built from the document's published version, or
+ * its draft when it has never been published.
+ */
+export interface DuplicateEntityRecord {
+	type: DuplicateEntityType;
+	documentId: string;
+	slug: string;
+	name: string;
+	/** Organisational-unit subtype (e.g. `institution`); absent for persons and projects. */
+	subtype?: string;
+	acronym?: string | null;
+	email?: string | null;
+	orcid?: string | null;
+	ror?: string | null;
+	/** Website and social-media urls recorded on the document. */
+	links?: Array<string>;
+}
+
+export interface DuplicateSignal {
+	kind: DuplicateSignalKind;
+	/** The shared value, or the two names which matched, for display. */
+	value: string;
+}
+
+/** One side of a candidate pair. */
+export interface DuplicateEntityDetail {
+	documentId: string;
+	slug: string;
+	name: string;
+	subtype?: string;
+}
+
+export interface DuplicateCandidateFinding {
+	type: DuplicateEntityType;
+	a: DuplicateEntityDetail;
+	b: DuplicateEntityDetail;
+	/** Every signal which matched, strongest first. */
+	signals: Array<DuplicateSignal>;
+	/** Sum of the matching signals' weights; higher means more corroboration, not more certainty. */
+	score: number;
+	detail: string;
+}
+
+export interface DuplicateCandidateCheckResult {
+	findings: Array<DuplicateCandidateFinding>;
+	errors: Array<string>;
+}
+
+/** Lowercased and trimmed; `null` when there is nothing left to compare. */
+export function normalizeEmail(value: string | null | undefined): string | null {
+	const normalized = value?.trim().toLowerCase();
+
+	return normalized == null || normalized === "" ? null : normalized;
+}
+
+/**
+ * The bare identifier from an orcid or ror, whether it was entered as a url
+ * (`https://ror.org/03prydq77`) or on its own (`03prydq77`), so the two forms compare equal.
+ */
+export function normalizeIdentifier(value: string | null | undefined): string | null {
+	if (value == null) {
+		return null;
+	}
+
+	const normalized = value
+		.trim()
+		.toLowerCase()
+		.replace(/^https?:\/\//, "")
+		.replace(/^(?:www\.)?(?:orcid\.org|ror\.org)\//, "")
+		.replaceAll(/[^a-z0-9]/g, "");
+
+	return normalized === "" ? null : normalized;
+}
+
+/**
+ * Host and path only: protocol, `www.`, a trailing slash and any fragment are dropped, so
+ * `https://www.example.org/` and `http://example.org` compare equal. The query string is kept —
+ * some sites still identify a page by it.
+ */
+export function normalizeUrl(value: string | null | undefined): string | null {
+	if (value == null) {
+		return null;
+	}
+
+	const normalized = value
+		.trim()
+		.toLowerCase()
+		.replace(/^https?:\/\//, "")
+		.replace(/^www\./, "")
+		.replace(/#.*$/, "")
+		.replace(/\/+$/, "");
+
+	return normalized === "" ? null : normalized;
+}
+
+/**
+ * Case, diacritics, punctuation and word order removed, so that "Müller, Anna" and "Anna Muller"
+ * compare equal. Tokens are sorted rather than kept in order because both a person's `name` and
+ * their `sortName` conventions, and an organisation's naming conventions, vary across importers.
+ */
+export function normalizeName(
+	value: string | null | undefined,
+	dropStopwords = false,
+): string | null {
+	if (value == null) {
+		return null;
+	}
+
+	const tokens = value
+		.normalize("NFKD")
+		.replaceAll(/[\u0300-\u036F]/g, "")
+		.toLowerCase()
+		.replaceAll(/[^a-z0-9]+/g, " ")
+		.trim()
+		.split(" ")
+		.filter((token) => token !== "" && !(dropStopwords && nameStopwords.has(token)));
+
+	return tokens.length === 0 ? null : tokens.toSorted().join(" ");
+}
+
+/** Person names keep their stopwords; organisation and project names drop them. */
+function normalizeRecordName(record: DuplicateEntityRecord): string | null {
+	return normalizeName(record.name, record.type !== "persons");
+}
+
+/** The set of character bigrams in `value`, used for {@link diceCoefficient}. */
+function toBigrams(value: string): Set<string> {
+	const bigrams = new Set<string>();
+
+	for (let index = 0; index < value.length - 1; index++) {
+		bigrams.add(value.slice(index, index + 2));
+	}
+
+	return bigrams;
+}
+
+/**
+ * Sørensen–Dice coefficient over character bigrams: `0` for no shared bigrams, `1` for identical
+ * strings. Preferred over an edit distance because it needs no length-dependent threshold.
+ */
+export function diceCoefficient(a: string, b: string): number {
+	if (a === b) {
+		return 1;
+	}
+
+	const [first, second] = [toBigrams(a), toBigrams(b)];
+
+	if (first.size === 0 || second.size === 0) {
+		return 0;
+	}
+
+	let shared = 0;
+
+	for (const bigram of first) {
+		if (second.has(bigram)) {
+			shared += 1;
+		}
+	}
+
+	return (2 * shared) / (first.size + second.size);
+}
+
+/**
+ * A name token shared by more than this many records (e.g. "institute") is not used to propose
+ * candidate pairs: it would pair up every record with every other one for no gain, since a pair
+ * which shares _only_ such a token scores below {@link nameSimilarityThreshold} anyway, and one
+ * which shares the whole name is already caught by the exact `name` signal.
+ */
+const maximumNameBlockSize = 200;
+
+/** Stable key for an unordered pair. */
+function toPairKey(a: string, b: string): string {
+	return a < b ? `${a}|${b}` : `${b}|${a}`;
+}
+
+function toDetail(record: DuplicateEntityRecord): DuplicateEntityDetail {
+	return {
+		documentId: record.documentId,
+		slug: record.slug,
+		name: record.name,
+		...(record.subtype != null && { subtype: record.subtype }),
+	};
+}
+
+/**
+ * Every exact-match signal a record contributes, as `kind` → the value to group it by.
+ *
+ * Deduplicated, because a record may well carry the same value twice — a unit which records both a
+ * website and a social-media entry pointing at the same url, say. Were the key kept twice the
+ * record would land in its own bucket twice and be paired with itself.
+ */
+function getExactKeys(record: DuplicateEntityRecord): Array<[DuplicateSignalKind, string]> {
+	const keys: Array<[DuplicateSignalKind, string]> = [];
+
+	const orcid = normalizeIdentifier(record.orcid);
+	if (orcid != null) {
+		keys.push(["orcid", orcid]);
+	}
+
+	const ror = normalizeIdentifier(record.ror);
+	if (ror != null) {
+		keys.push(["ror", ror]);
+	}
+
+	const email = normalizeEmail(record.email);
+	if (email != null) {
+		keys.push(["email", email]);
+	}
+
+	const acronym = normalizeName(record.acronym);
+	if (acronym != null) {
+		keys.push(["acronym", acronym]);
+	}
+
+	const name = normalizeRecordName(record);
+	if (name != null) {
+		keys.push(["name", name]);
+	}
+
+	for (const link of record.links ?? []) {
+		const url = normalizeUrl(link);
+
+		if (url != null) {
+			keys.push(["link", url]);
+		}
+	}
+
+	const seen = new Set<string>();
+
+	return keys.filter(([kind, value]) => {
+		const key = `${kind}|${value}`;
+
+		if (seen.has(key)) {
+			return false;
+		}
+
+		seen.add(key);
+
+		return true;
+	});
+}
+
+/**
+ * Candidate pairs which share a normalised name token, so that the fuzzy name comparison runs on a
+ * bounded number of pairs instead of every pair in the corpus (see {@link maximumNameBlockSize}).
+ */
+function getNameBlockCandidates(records: Array<DuplicateEntityRecord>): Set<string> {
+	const recordsByToken = new Map<string, Array<string>>();
+
+	for (const record of records) {
+		const name = normalizeRecordName(record);
+
+		if (name == null) {
+			continue;
+		}
+
+		for (const token of new Set(name.split(" "))) {
+			const bucket = recordsByToken.get(token) ?? [];
+			bucket.push(record.documentId);
+			recordsByToken.set(token, bucket);
+		}
+	}
+
+	const pairs = new Set<string>();
+
+	for (const bucket of recordsByToken.values()) {
+		if (bucket.length > maximumNameBlockSize) {
+			continue;
+		}
+
+		for (const [index, aId] of bucket.entries()) {
+			for (const bId of bucket.slice(index + 1)) {
+				pairs.add(toPairKey(aId, bId));
+			}
+		}
+	}
+
+	return pairs;
+}
+
+/**
+ * Groups records into candidate duplicate pairs. Records of different {@link DuplicateEntityType}s
+ * are never paired; organisational-unit subtypes are, since a duplicate is quite capable of having
+ * been filed under the wrong subtype.
+ *
+ * Pure, and the entry point the tests exercise: {@link checkDuplicateEntities} only adds the queries
+ * which build `records`.
+ */
+export function buildDuplicateCandidateFindings(
+	records: Array<DuplicateEntityRecord>,
+	minimumScore = defaultMinimumDuplicateScore,
+): Array<DuplicateCandidateFinding> {
+	const recordsById = new Map(records.map((record) => [record.documentId, record]));
+	const signalsByPair = new Map<string, Array<DuplicateSignal>>();
+
+	function addSignal(a: string, b: string, signal: DuplicateSignal): void {
+		const key = toPairKey(a, b);
+		const signals = signalsByPair.get(key) ?? [];
+		signals.push(signal);
+		signalsByPair.set(key, signals);
+	}
+
+	const recordsByExactKey = new Map<string, Array<string>>();
+
+	for (const record of records) {
+		for (const [kind, value] of getExactKeys(record)) {
+			const key = `${record.type}|${kind}|${value}`;
+			const bucket = recordsByExactKey.get(key) ?? [];
+			bucket.push(record.documentId);
+			recordsByExactKey.set(key, bucket);
+		}
+	}
+
+	for (const [key, bucket] of recordsByExactKey) {
+		if (bucket.length < 2) {
+			continue;
+		}
+
+		const [, kind, value] = key.split("|") as [string, DuplicateSignalKind, string];
+
+		for (const [index, aId] of bucket.entries()) {
+			for (const bId of bucket.slice(index + 1)) {
+				addSignal(aId, bId, { kind, value });
+			}
+		}
+	}
+
+	const recordsByType = new Map<DuplicateEntityType, Array<DuplicateEntityRecord>>();
+
+	for (const record of records) {
+		const bucket = recordsByType.get(record.type) ?? [];
+		bucket.push(record);
+		recordsByType.set(record.type, bucket);
+	}
+
+	for (const bucket of recordsByType.values()) {
+		for (const pairKey of getNameBlockCandidates(bucket)) {
+			const [aId, bId] = pairKey.split("|") as [string, string];
+			const [a, b] = [recordsById.get(aId), recordsById.get(bId)];
+
+			if (a == null || b == null) {
+				continue;
+			}
+
+			const [aName, bName] = [normalizeRecordName(a), normalizeRecordName(b)];
+
+			// Identical names are already reported by the exact `name` signal.
+			if (aName == null || bName == null || aName === bName) {
+				continue;
+			}
+
+			if (diceCoefficient(aName, bName) >= nameSimilarityThreshold) {
+				addSignal(aId, bId, { kind: "similar_name", value: `"${a.name}" / "${b.name}"` });
+			}
+		}
+	}
+
+	const findings: Array<DuplicateCandidateFinding> = [];
+
+	for (const [pairKey, signals] of signalsByPair) {
+		const [aId, bId] = pairKey.split("|") as [string, string];
+		const [a, b] = [recordsById.get(aId), recordsById.get(bId)];
+
+		if (a == null || b == null) {
+			continue;
+		}
+
+		const score = signals.reduce((total, signal) => total + duplicateSignalWeights[signal.kind], 0);
+
+		if (score < minimumScore) {
+			continue;
+		}
+
+		const sorted = signals.toSorted(
+			(first, second) => duplicateSignalWeights[second.kind] - duplicateSignalWeights[first.kind],
+		);
+
+		findings.push({
+			type: a.type,
+			a: toDetail(a),
+			b: toDetail(b),
+			signals: sorted,
+			score: Math.round(score * 100) / 100,
+			detail: sorted.map((signal) => `${signal.kind}: ${signal.value}`).join("; "),
+		});
+	}
+
+	return findings.toSorted(
+		(first, second) =>
+			second.score - first.score ||
+			first.type.localeCompare(second.type) ||
+			first.a.name.localeCompare(second.a.name) ||
+			first.b.name.localeCompare(second.b.name),
+	);
+}
+
+/**
+ * The version of each document to compare: the published one, falling back to the draft for
+ * documents which have never been published. Comparing every version instead would pair a
+ * document's own draft with its published version.
+ */
+function toPreferredVersions<T extends { documentId: string; status: string }>(
+	rows: Array<T>,
+): Array<T> {
+	const byDocument = new Map<string, T>();
+
+	for (const row of rows) {
+		const existing = byDocument.get(row.documentId);
+
+		if (existing == null || row.status === "published") {
+			byDocument.set(row.documentId, row);
+		}
+	}
+
+	return [...byDocument.values()];
+}
+
+/** Website and social-media urls per organisational-unit or project _version_ id. */
+async function getLinksByVersionId(
+	db: Database | Transaction,
+	table: typeof schema.organisationalUnitsToSocialMedia | typeof schema.projectsToSocialMedia,
+	versionIdColumn: PgColumn,
+): Promise<Map<string, Array<string>>> {
+	const rows = await db
+		.select({ versionId: versionIdColumn, url: schema.socialMedia.url })
+		.from(table)
+		.innerJoin(schema.socialMedia, eq(schema.socialMedia.id, table.socialMediaId));
+
+	const linksByVersion = new Map<string, Array<string>>();
+
+	for (const row of rows) {
+		const links = linksByVersion.get(row.versionId) ?? [];
+		links.push(row.url);
+		linksByVersion.set(row.versionId, links);
+	}
+
+	return linksByVersion;
+}
+
+async function getPersonRecords(db: Database | Transaction): Promise<Array<DuplicateEntityRecord>> {
+	const rows = await db
+		.select({
+			documentId: schema.entities.id,
+			slug: schema.entities.slug,
+			status: schema.entityStatus.type,
+			name: schema.persons.name,
+			email: schema.persons.email,
+			orcid: schema.persons.orcid,
+		})
+		.from(schema.persons)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.persons.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId));
+
+	return toPreferredVersions(rows).map((row) => {
+		return {
+			type: "persons",
+			documentId: row.documentId,
+			slug: row.slug,
+			name: row.name,
+			email: row.email,
+			orcid: row.orcid,
+		};
+	});
+}
+
+async function getOrganisationalUnitRecords(
+	db: Database | Transaction,
+): Promise<Array<DuplicateEntityRecord>> {
+	const rows = await db
+		.select({
+			documentId: schema.entities.id,
+			slug: schema.entities.slug,
+			status: schema.entityStatus.type,
+			versionId: schema.organisationalUnits.id,
+			name: schema.organisationalUnits.name,
+			acronym: schema.organisationalUnits.acronym,
+			email: schema.organisationalUnits.email,
+			ror: schema.organisationalUnits.ror,
+			subtype: schema.organisationalUnitTypes.type,
+		})
+		.from(schema.organisationalUnits)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		);
+
+	const links = await getLinksByVersionId(
+		db,
+		schema.organisationalUnitsToSocialMedia,
+		schema.organisationalUnitsToSocialMedia.organisationalUnitId,
+	);
+
+	return toPreferredVersions(rows).map((row) => {
+		return {
+			type: "organisational_units",
+			documentId: row.documentId,
+			slug: row.slug,
+			name: row.name,
+			subtype: row.subtype,
+			acronym: row.acronym,
+			email: row.email,
+			ror: row.ror,
+			links: links.get(row.versionId) ?? [],
+		};
+	});
+}
+
+async function getProjectRecords(
+	db: Database | Transaction,
+): Promise<Array<DuplicateEntityRecord>> {
+	const rows = await db
+		.select({
+			documentId: schema.entities.id,
+			slug: schema.entities.slug,
+			status: schema.entityStatus.type,
+			versionId: schema.projects.id,
+			name: schema.projects.name,
+			acronym: schema.projects.acronym,
+		})
+		.from(schema.projects)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.projects.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId));
+
+	const links = await getLinksByVersionId(
+		db,
+		schema.projectsToSocialMedia,
+		schema.projectsToSocialMedia.projectId,
+	);
+
+	return toPreferredVersions(rows).map((row) => {
+		return {
+			type: "projects",
+			documentId: row.documentId,
+			slug: row.slug,
+			name: row.name,
+			acronym: row.acronym,
+			links: links.get(row.versionId) ?? [],
+		};
+	});
+}
+
+export async function checkDuplicateEntities(
+	db: Database | Transaction,
+	minimumScore = defaultMinimumDuplicateScore,
+): Promise<DuplicateCandidateCheckResult> {
+	const errors: Array<string> = [];
+
+	try {
+		const records = (
+			await Promise.all([
+				getPersonRecords(db),
+				getOrganisationalUnitRecords(db),
+				getProjectRecords(db),
+			])
+		).flat();
+
+		return { findings: buildDuplicateCandidateFindings(records, minimumScore), errors };
+	} catch (error) {
+		// oxlint-disable-next-line unicorn/no-instanceof-builtins
+		errors.push(error instanceof Error ? error.message : String(error));
+
+		return { findings: [], errors };
+	}
 }
