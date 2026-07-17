@@ -8,6 +8,7 @@ interface ErrorMessages {
 	missingRelatedRecord: string;
 	publishedSlugRename: string;
 	recordConflict: string;
+	socialMediaKpiConflict: string;
 	uniqueConflict: string;
 }
 
@@ -20,6 +21,9 @@ export function getUserFacingErrorMessage(error: unknown, messages: ErrorMessage
 		switch (appError.kind) {
 			case "published-slug-rename": {
 				return messages.publishedSlugRename;
+			}
+			case "social-media-kpi-conflict": {
+				return messages.socialMediaKpiConflict;
 			}
 		}
 	}

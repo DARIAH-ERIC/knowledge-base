@@ -2525,6 +2525,36 @@ export class DatabaseService {
 		}
 	}
 
+	/**
+	 * Inserts a social-media entry. The name is expected to be worker-prefixed so the standard
+	 * `cleanupWorkerSocialMedia` helper removes it.
+	 */
+	async createSocialMedia(params: {
+		name: string;
+		type: (typeof schema.socialMediaTypesEnum)[number];
+		url: string;
+	}): Promise<{ id: string }> {
+		const { name, type, url } = params;
+
+		const typeRow = await this.db.query.socialMediaTypes.findFirst({
+			where: { type },
+			columns: { id: true },
+		});
+		if (typeRow == null) {
+			throw new Error(`Social-media type "${type}" not found.`);
+		}
+
+		const [row] = await this.db
+			.insert(schema.socialMedia)
+			.values({ name, typeId: typeRow.id, url })
+			.returning({ id: schema.socialMedia.id });
+		if (row == null) {
+			throw new Error("Failed to insert social-media entry.");
+		}
+
+		return row;
+	}
+
 	/** Deletes assets uploaded by tests after dependent rows have been removed. */
 	async cleanupWorkerAssets(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
