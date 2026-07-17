@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	type CountryMembershipRule,
+	type DuplicateEntityRecord,
 	type InactiveUnitRelationRule,
 	type MutuallyExclusiveUnitRelationRule,
 	type PersonRelationToUnit,
@@ -10,6 +11,7 @@ import {
 	type UnitDetail,
 	type UnitLocation,
 	buildCountryMembershipFindings,
+	buildDuplicateCandidateFindings,
 	buildInactiveUnitRelationFindings,
 	buildMutuallyExclusiveUnitRelationFindings,
 	classifyRelationPair,
@@ -21,6 +23,9 @@ import {
 	isUnitInactive,
 	mergeAdjacentDurations,
 	mutuallyExclusiveUnitRelationRules,
+	normalizeIdentifier,
+	normalizeName,
+	normalizeUrl,
 	pairedRelationRules,
 } from "./integrity-service";
 
@@ -1069,5 +1074,268 @@ describe("findHeadingHierarchyViolations", () => {
 			},
 			{ kind: "disallowed_level", index: 2, level: 5, previousLevel: 2, text: "too deep" },
 		]);
+	});
+});
+
+describe("normalizeName", () => {
+	it("ignores case, diacritics, punctuation and word order", () => {
+		expect(normalizeName("Müller, Anna")).toBe(normalizeName("Anna Muller"));
+	});
+
+	it("keeps stopwords in person names, where they are part of the surname", () => {
+		expect(normalizeName("Jan de Vries")).not.toBe(normalizeName("Jan Vries"));
+	});
+
+	it("drops stopwords when asked, so leading articles do not distinguish organisations", () => {
+		expect(normalizeName("The University of Vienna", true)).toBe(
+			normalizeName("University Vienna", true),
+		);
+	});
+
+	it("returns null when nothing comparable is left", () => {
+		expect(normalizeName("   ")).toBeNull();
+		expect(normalizeName(null)).toBeNull();
+	});
+});
+
+describe("normalizeIdentifier", () => {
+	it("compares a bare identifier equal to its url form", () => {
+		expect(normalizeIdentifier("https://ror.org/03prydq77")).toBe(normalizeIdentifier("03prydq77"));
+		expect(normalizeIdentifier("https://orcid.org/0000-0002-1825-0097")).toBe(
+			normalizeIdentifier("0000-0002-1825-0097"),
+		);
+	});
+});
+
+describe("normalizeUrl", () => {
+	it("ignores protocol, www, trailing slash and fragment", () => {
+		expect(normalizeUrl("https://www.example.org/")).toBe(normalizeUrl("http://example.org"));
+		expect(normalizeUrl("https://example.org/team#staff")).toBe(normalizeUrl("example.org/team"));
+	});
+
+	it("keeps the path and query, which distinguish two pages on one host", () => {
+		expect(normalizeUrl("https://example.org/a")).not.toBe(normalizeUrl("https://example.org/b"));
+		expect(normalizeUrl("https://example.org/?id=1")).not.toBe(
+			normalizeUrl("https://example.org/?id=2"),
+		);
+	});
+});
+
+describe("buildDuplicateCandidateFindings", () => {
+	const person = (
+		documentId: string,
+		name: string,
+		rest: Partial<DuplicateEntityRecord> = {},
+	): DuplicateEntityRecord => {
+		return { type: "persons", documentId, slug: documentId, name, ...rest };
+	};
+
+	it("pairs two persons who share an email", () => {
+		const findings = buildDuplicateCandidateFindings([
+			person("a", "Anna Muller", { email: "anna@example.org" }),
+			person("b", "A. Müller", { email: "ANNA@example.org " }),
+		]);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]?.signals).toContainEqual({ kind: "email", value: "anna@example.org" });
+	});
+
+	it("does not pair persons who share nothing", () => {
+		expect(
+			buildDuplicateCandidateFindings([
+				person("a", "Anna Muller", { email: "anna@example.org" }),
+				person("b", "Bob Smith", { email: "bob@example.org" }),
+			]),
+		).toStrictEqual([]);
+	});
+
+	it("accumulates every matching signal onto one pair and sums their weights", () => {
+		const findings = buildDuplicateCandidateFindings([
+			person("a", "Anna Muller", { email: "anna@example.org", orcid: "0000-0002-1825-0097" }),
+			person("b", "Anna Muller", {
+				email: "anna@example.org",
+				orcid: "https://orcid.org/0000-0002-1825-0097",
+			}),
+		]);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]?.signals.map((signal) => signal.kind)).toStrictEqual([
+			"orcid",
+			"email",
+			"name",
+		]);
+		// orcid 1 + email 0.8 + name 0.7
+		expect(findings[0]?.score).toBe(2.5);
+	});
+
+	it("reports the strongest signal first", () => {
+		const findings = buildDuplicateCandidateFindings([
+			person("a", "Anna Muller", { email: "anna@example.org" }),
+			person("b", "Anna Muller", { email: "anna@example.org" }),
+		]);
+
+		expect(findings[0]?.signals[0]?.kind).toBe("email");
+	});
+
+	it("never pairs documents of different entity types", () => {
+		expect(
+			buildDuplicateCandidateFindings([
+				person("a", "DARIAH", { email: "info@example.org" }),
+				{
+					type: "projects",
+					documentId: "b",
+					slug: "b",
+					name: "DARIAH",
+					email: "info@example.org",
+				},
+			]),
+		).toStrictEqual([]);
+	});
+
+	it("pairs organisational units which share a website, ignoring url spelling", () => {
+		const findings = buildDuplicateCandidateFindings([
+			{
+				type: "organisational_units",
+				documentId: "a",
+				slug: "a",
+				name: "Some Institute",
+				subtype: "institution",
+				links: ["https://www.example.org/"],
+			},
+			{
+				type: "organisational_units",
+				documentId: "b",
+				slug: "b",
+				name: "Another Body",
+				subtype: "institution",
+				links: ["http://example.org"],
+			},
+		]);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]?.signals).toStrictEqual([{ kind: "link", value: "example.org" }]);
+	});
+
+	it("does not treat a blank email as shared", () => {
+		// Some person rows store "" rather than null, so an empty email must not pair every one of
+		// them with every other.
+		expect(
+			buildDuplicateCandidateFindings([
+				person("a", "Anna Muller", { email: "" }),
+				person("b", "Bob Smith", { email: "  " }),
+			]),
+		).toStrictEqual([]);
+	});
+
+	it("never pairs a record with itself when it records one url twice", () => {
+		expect(
+			buildDuplicateCandidateFindings([
+				{
+					type: "organisational_units",
+					documentId: "a",
+					slug: "a",
+					name: "Huminfra",
+					links: ["https://huminfra.se", "https://www.huminfra.se/"],
+				},
+			]),
+		).toStrictEqual([]);
+	});
+
+	it("counts a url shared with another record once, however often each records it", () => {
+		const findings = buildDuplicateCandidateFindings([
+			{
+				type: "organisational_units",
+				documentId: "a",
+				slug: "a",
+				name: "Huminfra",
+				links: ["https://huminfra.se", "https://www.huminfra.se/"],
+			},
+			{
+				type: "organisational_units",
+				documentId: "b",
+				slug: "b",
+				name: "Some Consortium",
+				links: ["http://huminfra.se"],
+			},
+		]);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]?.signals).toStrictEqual([{ kind: "link", value: "huminfra.se" }]);
+		expect(findings[0]?.score).toBe(0.6);
+	});
+
+	it("pairs units of different subtypes, since a duplicate may be filed under the wrong one", () => {
+		const findings = buildDuplicateCandidateFindings([
+			{
+				type: "organisational_units",
+				documentId: "a",
+				slug: "a",
+				name: "Austria",
+				subtype: "country",
+				ror: "03prydq77",
+			},
+			{
+				type: "organisational_units",
+				documentId: "b",
+				slug: "b",
+				name: "Austria",
+				subtype: "institution",
+				ror: "03prydq77",
+			},
+		]);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]?.a.subtype).toBe("country");
+	});
+
+	it("flags a near-identical project name as similar_name, not name", () => {
+		const findings = buildDuplicateCandidateFindings([
+			{ type: "projects", documentId: "a", slug: "a", name: "Digital Humanities Course Registry" },
+			{ type: "projects", documentId: "b", slug: "b", name: "Digital Humanities Course Registy" },
+		]);
+
+		expect(findings).toHaveLength(1);
+		expect(findings[0]?.signals.map((signal) => signal.kind)).toStrictEqual(["similar_name"]);
+	});
+
+	it("does not report a shared acronym on its own, but does once a name corroborates it", () => {
+		const withAcronymOnly = buildDuplicateCandidateFindings([
+			{ type: "projects", documentId: "a", slug: "a", name: "Alpha One", acronym: "AO" },
+			{ type: "projects", documentId: "b", slug: "b", name: "Beta Two", acronym: "ao" },
+		]);
+
+		expect(withAcronymOnly).toStrictEqual([]);
+
+		const withSimilarName = buildDuplicateCandidateFindings([
+			{ type: "projects", documentId: "a", slug: "a", name: "Alpha One Project", acronym: "AO" },
+			{ type: "projects", documentId: "b", slug: "b", name: "Alpha One Projekt", acronym: "ao" },
+		]);
+
+		expect(withSimilarName).toHaveLength(1);
+		expect(withSimilarName[0]?.signals.map((signal) => signal.kind)).toStrictEqual([
+			"similar_name",
+			"acronym",
+		]);
+	});
+
+	it("honours a raised minimum score", () => {
+		const records: Array<DuplicateEntityRecord> = [
+			{ type: "projects", documentId: "a", slug: "a", name: "Alpha One Project" },
+			{ type: "projects", documentId: "b", slug: "b", name: "Alpha One Projekt" },
+		];
+
+		expect(buildDuplicateCandidateFindings(records)).toHaveLength(1);
+		expect(buildDuplicateCandidateFindings(records, 1)).toStrictEqual([]);
+	});
+
+	it("sorts findings by score, strongest pair first", () => {
+		const findings = buildDuplicateCandidateFindings([
+			{ type: "projects", documentId: "a", slug: "a", name: "Alpha One Project" },
+			{ type: "projects", documentId: "b", slug: "b", name: "Alpha One Projekt" },
+			person("c", "Anna Muller", { email: "anna@example.org", orcid: "0000-0002-1825-0097" }),
+			person("d", "Anna Muller", { email: "anna@example.org", orcid: "0000-0002-1825-0097" }),
+		]);
+
+		expect(findings.map((finding) => finding.type)).toStrictEqual(["persons", "projects"]);
 	});
 });
