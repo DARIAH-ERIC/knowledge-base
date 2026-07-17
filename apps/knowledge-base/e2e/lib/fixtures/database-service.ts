@@ -878,7 +878,7 @@ export class DatabaseService {
 		imageId: string | null;
 		name: string;
 		scopeId: string;
-		summary: string;
+		summary: string | null;
 		topic: string | null;
 	} | null> {
 		const [row] = await this.db

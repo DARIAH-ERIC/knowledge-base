@@ -1562,7 +1562,7 @@ async function main() {
 			name: string;
 			duration: { start: Date; end?: Date };
 			funding: number | null;
-			summary: string;
+			summary: string | null;
 			topic: string | null;
 		}
 	>();
@@ -1807,13 +1807,13 @@ async function main() {
 				if (meta.summary != null) {
 					if (
 						isBlank(existingProject.summary) ||
-						normalizeProjectLookupValue(existingProject.summary) ===
+						normalizeProjectLookupValue(existingProject.summary ?? "") ===
 							normalizeProjectLookupValue(acronym)
 					) {
 						projectUpdate.summary = meta.summary;
 					} else if (existingProject.summary !== meta.summary) {
 						await logProjectMetadataConflict(
-							`Project ${String(project.id)} matched existing project ${existingProjectId}: conflicting summary (db="${existingProject.summary}", wordpress="${meta.summary}").`,
+							`Project ${String(project.id)} matched existing project ${existingProjectId}: conflicting summary (db="${existingProject.summary ?? ""}", wordpress="${meta.summary}").`,
 						);
 					}
 				}
