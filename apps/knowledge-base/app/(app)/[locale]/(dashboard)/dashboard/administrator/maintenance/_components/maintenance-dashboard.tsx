@@ -8,6 +8,7 @@ import type { Key } from "react-aria-components";
 import { EntityListHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { DuplicateEntity } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/duplicate-entity";
 import { MergeEntities } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities";
+import { MergeSocialMedia } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media";
 import { SlugEditor } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor";
 
 interface MaintenanceDashboardProps {
@@ -191,6 +192,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 					<Tabs>
 						<TabList aria-label={t("Merge, duplicate & rename")}>
 							<Tab id="merge-entities">{t("Merge duplicates")}</Tab>
+							<Tab id="merge-social-media">{t("Merge social media")}</Tab>
 							<Tab id="duplicate-entity">{t("Duplicate entity")}</Tab>
 							<Tab id="edit-slug">{t("Edit slug")}</Tab>
 						</TabList>
@@ -203,6 +205,16 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							</p>
 
 							<MergeEntities />
+						</TabPanel>
+
+						<TabPanel id="merge-social-media" className="flex flex-col gap-y-(--layout-padding)">
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Merge a duplicate social-media account into a canonical one: every link from organisational units, projects, services, and reports is re-pointed onto the target and the source is permanently deleted. Use it to make sure a single account is the one everything points at, then clear out what is left via Unused social media.",
+								)}
+							</p>
+
+							<MergeSocialMedia />
 						</TabPanel>
 
 						<TabPanel id="duplicate-entity" className="flex flex-col gap-y-(--layout-padding)">

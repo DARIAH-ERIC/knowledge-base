@@ -33,6 +33,7 @@ test.describe("admin – maintenance merge & rename", () => {
 
 	test.afterAll(async ({ db }, testInfo) => {
 		await db.cleanupWorkerNewsItems(testInfo.workerIndex);
+		await db.cleanupWorkerSocialMedia(testInfo.workerIndex);
 	});
 
 	test("merges a duplicate into a canonical entity, re-pointing relations and deleting the source", async ({
@@ -78,6 +79,43 @@ test.describe("admin – maintenance merge & rename", () => {
 
 		const targetRelations = await db.getEntityRelations(target.documentId);
 		expect(targetRelations.relatedEntityIds).toContain(relationTarget.id);
+	});
+
+	test("merges a duplicate social-media account into the canonical one, deleting the source", async ({
+		page,
+		db,
+	}) => {
+		const suffix = randomUUID();
+		const sourceName = `${WORKER_PREFIX()} SM Source ${suffix}`;
+		const targetName = `${WORKER_PREFIX()} SM Target ${suffix}`;
+
+		await db.createSocialMedia({
+			name: sourceName,
+			type: "bluesky",
+			url: `https://example.com/sm-source-${suffix}`,
+		});
+		await db.createSocialMedia({
+			name: targetName,
+			type: "bluesky",
+			url: `https://example.com/sm-target-${suffix}`,
+		});
+
+		await gotoMergeAndRename(page);
+		await page.getByRole("tab", { name: "Merge social media" }).click();
+
+		await pickEntity(page, "Search for the duplicate account…", sourceName, sourceName);
+		await pickEntity(page, "Search for the canonical account…", targetName, targetName);
+
+		await page.getByRole("button", { name: "Merge accounts" }).click();
+
+		const modal = page.getByRole("dialog", { name: "Merge social-media accounts" });
+		await modal.getByRole("textbox", { name: /Type MERGE to confirm/ }).fill("MERGE");
+		await modal.getByRole("button", { name: "Merge and delete source" }).click();
+
+		await expect(page.getByText(/Merged .* into /)).toBeVisible();
+
+		expect(await db.getSocialMediaByName(sourceName)).toBeNull();
+		expect(await db.getSocialMediaByName(targetName)).not.toBeNull();
 	});
 
 	test("duplicates an entity into a draft copy, carrying relations but not publishing it", async ({

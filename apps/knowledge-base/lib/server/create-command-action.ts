@@ -143,6 +143,9 @@ export function createCommandAction<
 					"This entity is published, so its address can only be changed by an administrator on the Maintenance page.",
 				),
 				recordConflict: t("This record conflicts with an existing record."),
+				socialMediaKpiConflict: t(
+					"Both accounts have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge.",
+				),
 				invalidData: t("The submitted data violates a data rule."),
 				missingData: t("The submitted data is incomplete."),
 			});

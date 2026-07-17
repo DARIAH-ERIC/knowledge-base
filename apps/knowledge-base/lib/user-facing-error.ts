@@ -1,5 +1,5 @@
 /** The disallowed operations a mutation can reject with a message that is safe to show the user. */
-export type UserFacingErrorKind = "published-slug-rename";
+export type UserFacingErrorKind = "published-slug-rename" | "social-media-kpi-conflict";
 
 /**
  * A failure a mutation raises on purpose, having recognised a disallowed operation, so the action
