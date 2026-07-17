@@ -65,12 +65,6 @@ CREATE TRIGGER "events_sync_entity_label"
 	AFTER INSERT OR UPDATE OF "title" ON "events"
 	FOR EACH ROW EXECUTE FUNCTION "sync_entity_label_from_title"();
 --> statement-breakpoint
-DROP TRIGGER IF EXISTS "external_links_sync_entity_label" ON "external_links";
---> statement-breakpoint
-CREATE TRIGGER "external_links_sync_entity_label"
-	AFTER INSERT OR UPDATE OF "title" ON "external_links"
-	FOR EACH ROW EXECUTE FUNCTION "sync_entity_label_from_title"();
---> statement-breakpoint
 DROP TRIGGER IF EXISTS "funding_calls_sync_entity_label" ON "funding_calls";
 --> statement-breakpoint
 CREATE TRIGGER "funding_calls_sync_entity_label"
@@ -150,11 +144,6 @@ UPDATE "entities" AS e SET "label" = s."title"
 UPDATE "entities" AS e SET "label" = s."title"
 	FROM "entity_versions" AS ev JOIN "entity_status" AS es ON ev."status_id" = es."id"
 	JOIN "events" AS s ON s."id" = ev."id"
-	WHERE e."id" = ev."entity_id" AND es."type" = 'published';
---> statement-breakpoint
-UPDATE "entities" AS e SET "label" = s."title"
-	FROM "entity_versions" AS ev JOIN "entity_status" AS es ON ev."status_id" = es."id"
-	JOIN "external_links" AS s ON s."id" = ev."id"
 	WHERE e."id" = ev."entity_id" AND es."type" = 'published';
 --> statement-breakpoint
 UPDATE "entities" AS e SET "label" = s."title"

@@ -317,9 +317,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 				return null;
 			}
-			case "external_links": {
-				return null;
-			}
 			case "documentation_pages": {
 				return null;
 			}

@@ -376,15 +376,4 @@ describe("duplicateEntity", () => {
 			await expect(duplicateEntity(tx, source.documentId, taken.slug)).rejects.toThrow();
 		});
 	});
-
-	it("refuses to duplicate an entity type without a lifecycle adapter", async () => {
-		await withTransaction(async (tx) => {
-			const typeId = await getEntityTypeId(tx, "external_links");
-			const documentId = await createBareEntity(tx, typeId);
-
-			await expect(duplicateEntity(tx, documentId)).rejects.toThrow(
-				'Entity type "external_links" cannot be duplicated (no lifecycle adapter).',
-			);
-		});
-	});
 });

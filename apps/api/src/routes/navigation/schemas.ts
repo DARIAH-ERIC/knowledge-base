@@ -4,7 +4,6 @@ import * as v from "valibot";
 const publicNavigationEntityTypesEnum = [
 	"documents_policies",
 	"events",
-	"external_links",
 	"funding_calls",
 	"impact_case_studies",
 	"news",

@@ -54,7 +54,6 @@ export async function getRelatedEntities(
 					${schema.impactCaseStudies.title},
 					${schema.spotlightArticles.title},
 					${schema.documentsPolicies.title},
-					${schema.externalLinks.title},
 					${schema.persons.name},
 					${schema.organisationalUnits.name},
 					${schema.projects.name}
@@ -78,7 +77,6 @@ export async function getRelatedEntities(
 		.leftJoin(schema.impactCaseStudies, eq(publishedEntityVersions.id, schema.impactCaseStudies.id))
 		.leftJoin(schema.spotlightArticles, eq(publishedEntityVersions.id, schema.spotlightArticles.id))
 		.leftJoin(schema.documentsPolicies, eq(publishedEntityVersions.id, schema.documentsPolicies.id))
-		.leftJoin(schema.externalLinks, eq(publishedEntityVersions.id, schema.externalLinks.id))
 		.leftJoin(schema.persons, eq(publishedEntityVersions.id, schema.persons.id))
 		.leftJoin(
 			schema.organisationalUnits,
@@ -92,11 +90,7 @@ export async function getRelatedEntities(
 		.where(
 			and(
 				eq(schema.entitiesToEntities.entityId, documentId),
-				notInArray(schema.entityTypes.type, [
-					"documentation_pages",
-					"external_links",
-					"internal_pages",
-				]),
+				notInArray(schema.entityTypes.type, ["documentation_pages", "internal_pages"]),
 			),
 		)
 		.orderBy(

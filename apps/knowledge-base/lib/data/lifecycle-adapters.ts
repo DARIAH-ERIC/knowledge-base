@@ -24,8 +24,9 @@ export type EntityType = schema.EntityType["type"];
  * runtime (e.g. the maintenance merge and duplicate tools, which operate over an arbitrary picked
  * entity) resolve it here.
  *
- * `external_links` is the one entity type without a subtype/adapter, so it is intentionally absent
- * and can be neither merged nor duplicated.
+ * Every entity type currently has an adapter, but the registry stays partial and lookups stay
+ * guarded: callers resolve a type token read from the database, so an unregistered type has to fail
+ * with a clear error rather than a missing-key crash.
  */
 const lifecycleAdapters = {
 	documentation_pages: documentationPagesLifecycleAdapter,
