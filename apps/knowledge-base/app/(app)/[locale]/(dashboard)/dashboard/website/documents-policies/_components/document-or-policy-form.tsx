@@ -63,11 +63,7 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 					<FieldError />
 				</TextField>
 
-				<TextField
-					defaultValue={documentOrPolicy?.summary ?? undefined}
-					isRequired={true}
-					name="summary"
-				>
+				<TextField defaultValue={documentOrPolicy?.summary ?? undefined} name="summary">
 					<Label>{t("Summary")}</Label>
 					<TextArea rows={5} />
 					<FieldError />

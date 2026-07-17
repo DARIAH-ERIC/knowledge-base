@@ -260,6 +260,7 @@ test.describe("projects admin", () => {
 		await page.getByLabel("Funding").clear();
 		await adminProjectsPage.fillTopic("");
 		await adminProjectsPage.fillCall("");
+		await page.getByLabel("Summary").clear();
 		await adminProjectsPage.clearDatePicker("End date");
 		await adminProjectsPage.removeImage();
 		await adminProjectsPage.removeAllSelectedInControl("Social media");
@@ -271,6 +272,7 @@ test.describe("projects admin", () => {
 			call: null,
 			funding: null,
 			imageId: null,
+			summary: null,
 			topic: null,
 		});
 		expect(updated?.duration?.end).toBeUndefined();

@@ -254,7 +254,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						</SelectContent>
 					</Select>
 
-					<TextField defaultValue={project?.summary} isRequired={true} name="summary">
+					<TextField defaultValue={project?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
 						<TextArea rows={5} />
 						<FieldError />
