@@ -10,7 +10,13 @@ import { Input } from "@dariah-eric/ui/input";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
-import { CalendarDate } from "@internationalized/date";
+import {
+	CalendarDate,
+	CalendarDateTime,
+	type DateValue,
+	toCalendarDate,
+	toCalendarDateTime,
+} from "@internationalized/date";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -52,6 +58,23 @@ interface EventFormProps {
 	showRelationFields?: boolean;
 }
 
+/**
+ * Build a timezone-agnostic picker value from a stored UTC instant, reading UTC components so the
+ * displayed wall-clock matches the stored value (the app treats UTC as a standin for the event's
+ * local time). All-day events use a date-only `CalendarDate`; timed events a `CalendarDateTime`.
+ */
+function toDateValue(date: Date, isFullDay: boolean): DateValue {
+	return isFullDay
+		? new CalendarDate(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate())
+		: new CalendarDateTime(
+				date.getUTCFullYear(),
+				date.getUTCMonth() + 1,
+				date.getUTCDate(),
+				date.getUTCHours(),
+				date.getUTCMinutes(),
+			);
+}
+
 export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 	const {
 		initialAssets,
@@ -78,6 +101,29 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
 		event?.image ?? null,
 	);
+
+	// New events default to full-day — the large majority of events are all-day, so this saves the
+	// common case a toggle (and the time pickers for a timed event are one click away).
+	const [isFullDay, setIsFullDay] = useState(event?.isFullDay ?? true);
+	const [start, setStart] = useState<DateValue | null>(
+		event != null ? toDateValue(event.duration.start, event.isFullDay) : null,
+	);
+	const [end, setEnd] = useState<DateValue | null>(
+		event?.duration.end != null ? toDateValue(event.duration.end, event.isFullDay) : null,
+	);
+
+	function handleFullDayChange(nextIsFullDay: boolean) {
+		setIsFullDay(nextIsFullDay);
+		const convert = (value: DateValue | null): DateValue | null => {
+			if (value == null) {
+				return null;
+			}
+			return nextIsFullDay ? toCalendarDate(value) : toCalendarDateTime(value);
+		};
+		setStart(convert);
+		setEnd(convert);
+	}
+
 	return (
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" id={formId} state={state}>
@@ -93,43 +139,43 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 						<TextArea rows={5} />
 						<FieldError />
 					</TextField>
+					<Checkbox
+						isSelected={isFullDay}
+						name="isFullDay"
+						onChange={handleFullDayChange}
+						value="true"
+					>
+						{t("Full day")}
+					</Checkbox>
 					<DatePicker
-						defaultValue={
-							event != null
-								? new CalendarDate(
-										event.duration.start.getUTCFullYear(),
-										event.duration.start.getUTCMonth() + 1,
-										event.duration.start.getUTCDate(),
-									)
-								: undefined
-						}
-						granularity="day"
+						// Remount when the granularity flips: react-aria's DateField crashes if `granularity`
+						// changes on a live field whose value was previously cleared, so give each mode a
+						// stable-but-distinct key to force a clean re-init with the converted value.
+						key={isFullDay ? "start-day" : "start-time"}
+						granularity={isFullDay ? "day" : "minute"}
+						hideTimeZone={true}
 						isRequired={true}
 						name="duration.start"
+						onChange={setStart}
+						value={start}
 					>
-						<Label>{t("Start date")}</Label>
+						<Label>{isFullDay ? t("Start date") : t("Start")}</Label>
 						<DatePickerTrigger />
+						<FieldError />
 					</DatePicker>
 
 					<DatePicker
-						defaultValue={
-							event?.duration.end != null
-								? new CalendarDate(
-										event.duration.end.getUTCFullYear(),
-										event.duration.end.getUTCMonth() + 1,
-										event.duration.end.getUTCDate(),
-									)
-								: undefined
-						}
-						granularity="day"
+						key={isFullDay ? "end-day" : "end-time"}
+						granularity={isFullDay ? "day" : "minute"}
+						hideTimeZone={true}
 						name="duration.end"
+						onChange={setEnd}
+						value={end}
 					>
-						<Label>{t("End date")}</Label>
+						<Label>{isFullDay ? t("End date") : t("End")}</Label>
 						<DatePickerTrigger />
+						<FieldError />
 					</DatePicker>
-					<Checkbox defaultSelected={event?.isFullDay ?? false} name="isFullDay" value="true">
-						{t("Full day")}
-					</Checkbox>
 					<TextField defaultValue={event?.location ?? undefined} isRequired={true} name="location">
 						<Label>{t("Location")}</Label>
 						<Input />

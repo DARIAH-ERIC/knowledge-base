@@ -1,4 +1,4 @@
-import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
+import { createUrl, createUrlSearchParams, isNonEmptyString } from "@acdh-oeaw/lib";
 import type {
 	WP_REST_API_Attachment,
 	WP_REST_API_Attachments,
@@ -26,6 +26,40 @@ import { keyById } from "./key-by-id";
 export function parseWordPressGmt(value: string | Date): Date {
 	const iso = typeof value === "string" ? value : value.toISOString();
 	return new Date(iso.endsWith("Z") ? iso : `${iso}Z`);
+}
+
+function toUtcStartOfDay(value: Date): Date {
+	return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
+}
+
+function toUtcEndOfDay(value: Date): Date {
+	return new Date(
+		Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate(), 23, 59, 59),
+	);
+}
+
+/**
+ * Derive an event's stored `duration` from its WordPress local wall-clock (`start_date` /
+ * `end_date`, in the event's own timezone) treated as UTC, per the UTC-as-standin-for-local
+ * convention. All-day events span whole days (`[00:00:00, 23:59:59]`), so their range actually
+ * covers each day — important because the API filters events by range overlap. Timed events keep
+ * their wall-clock time. The range is always bounded — a missing end collapses to `start` — never
+ * open-ended, because the API's upcoming-events filter treats a null upper bound as "ongoing
+ * forever". (WordPress already delivers midnight/`23:59:59` for all-day events, so this matches the
+ * existing migrated data.)
+ */
+export function getEventDuration(event: Pick<WP_Event, "start_date" | "end_date" | "all_day">): {
+	start: Date;
+	end: Date;
+} {
+	const start = parseWordPressGmt(event.start_date);
+	const end = isNonEmptyString(event.end_date) ? parseWordPressGmt(event.end_date) : start;
+
+	if (!event.all_day) {
+		return { start, end };
+	}
+
+	return { start: toUtcStartOfDay(start), end: toUtcEndOfDay(end) };
 }
 
 export interface WP_Event {

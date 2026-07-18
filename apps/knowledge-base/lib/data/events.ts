@@ -41,6 +41,7 @@ export async function getEvents(params: GetEventsParams) {
 		db
 			.select({
 				duration: schema.events.duration,
+				isFullDay: schema.events.isFullDay,
 				id: schema.events.id,
 				documentId: schema.entities.id,
 				location: schema.events.location,
@@ -80,6 +81,7 @@ export async function getEvents(params: GetEventsParams) {
 	const data = items.map((item) => {
 		return {
 			duration: item.duration,
+			isFullDay: item.isFullDay,
 			id: item.id,
 			documentId: item.documentId,
 			location: item.location,

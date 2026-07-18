@@ -3,7 +3,6 @@ import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import {
-	CalendarDateSchema,
 	ImageSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
@@ -11,13 +10,28 @@ import {
 	RelatedResourcesSchema,
 } from "@/lib/schemas";
 
+/**
+ * Unlike the calendar-date `CalendarDateSchema` (day granularity), an event start/end is a full
+ * timestamp because timed events carry a meaningful time-of-day. The sibling `isFullDay` flag says
+ * how to read it.
+ */
+const EventDateTimeSchema = v.pipe(
+	v.string(),
+	v.isoTimestamp(),
+	v.description(
+		"Event date-time in UTC. The time-of-day is meaningful only for timed events (`isFullDay` = false); for an all-day event it is UTC midnight (start) or end-of-day 23:59:59 (end) and should be read as a calendar date. UTC stands in for the event's own timezone — do not convert to local time, or the day may shift.",
+	),
+);
+
+const EventDurationSchema = v.object({
+	start: EventDateTimeSchema,
+	end: v.optional(EventDateTimeSchema),
+});
+
 const eventBaseObject = v.object({
 	...v.pick(schema.EventSelectSchema, ["id", "title", "summary", "location", "isFullDay"]).entries,
 	image: ImageSchema,
-	duration: v.object({
-		start: CalendarDateSchema,
-		end: v.optional(CalendarDateSchema),
-	}),
+	duration: EventDurationSchema,
 	entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 });
@@ -52,10 +66,7 @@ export const EventSchema = v.pipe(
 			.entries,
 		website: v.nullable(v.string()),
 		image: ImageSchema,
-		duration: v.object({
-			start: v.pipe(v.string(), v.isoTimestamp()),
-			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
-		}),
+		duration: EventDurationSchema,
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		content: v.optional(v.array(ContentBlockSchema), []),

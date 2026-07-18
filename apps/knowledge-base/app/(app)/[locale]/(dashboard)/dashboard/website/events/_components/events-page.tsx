@@ -32,7 +32,10 @@ interface EventsPageProps {
 	dir: "asc" | "desc";
 	events: {
 		data: Array<
-			Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
+			Pick<
+				schema.Event,
+				"id" | "duration" | "isFullDay" | "location" | "title" | "summary" | "website"
+			> & {
 				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
 				hasDraft: boolean;
@@ -105,10 +108,19 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 							</TableCell>
 							<TableCell>
 								{item.duration.end != null
-									? format.dateTimeRange(item.duration.start, item.duration.end, {
-											dateStyle: "short",
-										})
-									: format.dateTime(item.duration.start, { dateStyle: "short" })}
+									? format.dateTimeRange(
+											item.duration.start,
+											item.duration.end,
+											item.isFullDay
+												? { dateStyle: "short" }
+												: { dateStyle: "short", timeStyle: "short" },
+										)
+									: format.dateTime(
+											item.duration.start,
+											item.isFullDay
+												? { dateStyle: "short" }
+												: { dateStyle: "short", timeStyle: "short" },
+										)}
 							</TableCell>
 							<TableCell>{item.location}</TableCell>
 							<TableCell>

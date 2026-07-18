@@ -4,6 +4,7 @@ import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
 import { CreateEventActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/create-event.schema";
+import { normalizeEventDuration } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/event-duration";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-lifecycle";
 import { eventsLifecycleAdapter } from "@/lib/data/events.lifecycle-adapter";
@@ -42,7 +43,7 @@ export const createEventAction = createMutationAction({
 
 		await tx.insert(schema.events).values({
 			id: versionId,
-			duration: input.duration,
+			duration: normalizeEventDuration(input.duration, input.isFullDay),
 			location: input.location,
 			imageId: asset.id,
 			isFullDay: input.isFullDay,

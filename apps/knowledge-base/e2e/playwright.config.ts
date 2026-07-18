@@ -64,6 +64,17 @@ function getConfig():
 				 * only honored when this flag is set on the server.
 				 */
 				E2E_FAILURE_INJECTION: "1",
+				/**
+				 * Run the server in a deliberately non-UTC timezone (a +05:30 half-hour offset, no DST) so
+				 * any code that accidentally depends on the server's local time surfaces instead of being
+				 * masked by a UTC CI host. Combined with the non-UTC _browser_ timezone some suites set
+				 * (e.g. website-events-datetime uses America/Los_Angeles), this exercises the client↔server
+				 * boundary from both sides. The app must stay timezone-independent: dates render via
+				 * next-intl's global `timeZone: "UTC"`, are stored/read as UTC, and wall-clock inputs are
+				 * parsed with an explicit `Z`. NOTE: with `reuseExistingServer` a stale local dev server
+				 * won't pick this up — it takes effect on a fresh start (always in CI).
+				 */
+				TZ: "Asia/Kolkata",
 			},
 		},
 	};
