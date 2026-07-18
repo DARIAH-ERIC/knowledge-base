@@ -65,6 +65,16 @@ async function fetchJson<T>(url: URL): Promise<T> {
 	return (await response.json()) as T;
 }
 
+/**
+ * WordPress REST returns `date_gmt` / `modified_gmt` without a timezone designator (e.g.
+ * "2026-05-20T12:38:00"), which `new Date()` parses as local time — shifting every timestamp by the
+ * runtime's UTC offset when this script runs on a developer machine. These are UTC by definition,
+ * so parse them as such.
+ */
+function parseWordPressGmt(value: string): Date {
+	return new Date(value.endsWith("Z") ? value : `${value}Z`);
+}
+
 async function getNewsCategoryId(): Promise<number> {
 	const url = createUrl({
 		baseUrl: apiBaseUrl,
@@ -179,8 +189,8 @@ async function main() {
 				.values({
 					slug: entitySlug,
 					typeId: typesByType.news.id,
-					createdAt: new Date(post.date_gmt),
-					updatedAt: new Date(post.modified_gmt),
+					createdAt: parseWordPressGmt(post.date_gmt),
+					updatedAt: parseWordPressGmt(post.modified_gmt),
 				})
 				.returning({ id: schema.entities.id });
 
@@ -211,9 +221,9 @@ async function main() {
 				title: toPlaintext(post.title.rendered),
 				summary: toSummary(post.excerpt.rendered),
 				imageId: imageId ?? placeholderImageId,
-				publicationDate: new Date(post.date_gmt),
-				createdAt: new Date(post.date_gmt),
-				updatedAt: new Date(post.modified_gmt),
+				publicationDate: parseWordPressGmt(post.date_gmt),
+				createdAt: parseWordPressGmt(post.date_gmt),
+				updatedAt: parseWordPressGmt(post.modified_gmt),
 			});
 
 			if (post.content.rendered.trim().length === 0) {
