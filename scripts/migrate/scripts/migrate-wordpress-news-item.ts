@@ -12,7 +12,7 @@ import type {
 
 import { apiBaseUrl, placeholderImageUrl } from "../config/data-migration.config";
 import { env } from "../config/env.config";
-import type { WordPressData } from "../src/lib/get-wordpress-data";
+import { type WordPressData, parseWordPressGmt } from "../src/lib/get-wordpress-data";
 import {
 	createWordPressContentMigrator,
 	normalizeWordPressSlug,
@@ -179,8 +179,8 @@ async function main() {
 				.values({
 					slug: entitySlug,
 					typeId: typesByType.news.id,
-					createdAt: new Date(post.date_gmt),
-					updatedAt: new Date(post.modified_gmt),
+					createdAt: parseWordPressGmt(post.date_gmt),
+					updatedAt: parseWordPressGmt(post.modified_gmt),
 				})
 				.returning({ id: schema.entities.id });
 
@@ -211,9 +211,9 @@ async function main() {
 				title: toPlaintext(post.title.rendered),
 				summary: toSummary(post.excerpt.rendered),
 				imageId: imageId ?? placeholderImageId,
-				publicationDate: new Date(post.date_gmt),
-				createdAt: new Date(post.date_gmt),
-				updatedAt: new Date(post.modified_gmt),
+				publicationDate: parseWordPressGmt(post.date_gmt),
+				createdAt: parseWordPressGmt(post.date_gmt),
+				updatedAt: parseWordPressGmt(post.modified_gmt),
 			});
 
 			if (post.content.rendered.trim().length === 0) {

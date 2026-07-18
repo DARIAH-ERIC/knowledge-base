@@ -1,3 +1,4 @@
+import { getFormatter } from "next-intl/server";
 import type { NextRequest } from "next/server";
 
 import { getWorkingGroupReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
@@ -10,6 +11,7 @@ import {
 	getWorkingGroupBranding,
 	getWorkingGroupExternalResourceSnapshots,
 } from "@/lib/data/report-marketplace-resources";
+import { defaultLocale } from "@/lib/i18n/locales";
 
 function value(value: number | string | null): string {
 	return value == null || value === "" ? "—" : String(value);
@@ -30,12 +32,13 @@ function formatExternalSectionTitle(section: string): string {
 	return section.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
-const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "medium" });
+type Formatter = Awaited<ReturnType<typeof getFormatter>>;
 
 function externalResourceSnapshotBlocks(
 	snapshot: ReportExternalResourceSnapshot,
+	format: Formatter,
 ): Array<ReportBlock> {
-	const captured = dateFormatter.format(snapshot.capturedAt);
+	const captured = format.dateTime(snapshot.capturedAt, { dateStyle: "medium" });
 
 	if (snapshot.items.length === 0) {
 		return [
@@ -97,6 +100,10 @@ export async function GET(
 			const report = result.data;
 			const summary = report.summary;
 
+			// The PDF is a fixed-locale artifact; `getFormatter` inherits the app's `timeZone: "UTC"`
+			// so stored calendar dates (e.g. event dates) render on the day they were entered.
+			const format = await getFormatter({ locale: defaultLocale });
+
 			const [externalResourceSnapshots, branding] = await Promise.all([
 				getWorkingGroupExternalResourceSnapshots(report.id),
 				getWorkingGroupBranding(report.workingGroupDocumentId),
@@ -141,7 +148,7 @@ export async function GET(
 					kind: "itemList",
 					items: summary.events.map((event) => {
 						const secondary = [
-							dateFormatter.format(new Date(event.date)),
+							format.dateTime(new Date(event.date), { dateStyle: "medium" }),
 							formatRole(event.role),
 							event.url,
 						]
@@ -169,7 +176,7 @@ export async function GET(
 
 			// External resources
 			for (const snapshot of externalResourceSnapshots) {
-				blocks.push(...externalResourceSnapshotBlocks(snapshot));
+				blocks.push(...externalResourceSnapshotBlocks(snapshot, format));
 			}
 
 			const pdf = await createReportPdf(
@@ -178,7 +185,7 @@ export async function GET(
 					meta: [
 						`Report ${report.campaign.year}`,
 						`Status: ${formatStatus(report.status)}`,
-						`Generated ${dateFormatter.format(new Date())}`,
+						`Generated ${format.dateTime(new Date(), { dateStyle: "medium" })}`,
 					],
 					brand: {
 						logoPng,
