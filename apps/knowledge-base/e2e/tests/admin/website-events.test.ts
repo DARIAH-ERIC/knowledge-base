@@ -153,10 +153,11 @@ test.describe("website events admin", () => {
 		]);
 
 		await eventsPage.fillWebsite("");
-		// Turning off "Full day" relabels the pickers "Start"/"End" and switches them to time
-		// granularity (the time defaults to 00:00).
+		// Clear the end while it is still the date-only picker ("End date"), then turn off "Full day"
+		// (which relabels the pickers "Start"/"End" and switches them to time granularity). The
+		// cleared end stays cleared through the toggle.
+		await eventsPage.clearDatePicker("End date");
 		await eventsPage.unsetFullDay();
-		await eventsPage.clearDatePicker("End");
 		await eventsPage.removeFirstContentBlock();
 		await eventsPage.submitForm();
 
