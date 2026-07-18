@@ -14,6 +14,7 @@ import { RichTextSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/admi
 import { UnitRelationRequirementsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unit-relation-requirements-section";
 import { UnusedAssetsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-section";
 import { UnusedSocialMediaSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-section";
+import { WebAddressesSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/web-addresses-section";
 import { assertAdminPageAccess } from "@/lib/auth/session";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -87,6 +88,11 @@ export default async function DashboardAdministratorMaintenancePage(
 			unusedSocialMedia={
 				<Suspense fallback={<MaintenanceSectionFallback />}>
 					<UnusedSocialMediaSection />
+				</Suspense>
+			}
+			webAddresses={
+				<Suspense fallback={<MaintenanceSectionFallback />}>
+					<WebAddressesSection />
 				</Suspense>
 			}
 		/>

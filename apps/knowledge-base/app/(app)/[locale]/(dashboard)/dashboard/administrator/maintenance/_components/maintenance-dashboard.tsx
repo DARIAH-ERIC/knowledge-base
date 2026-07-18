@@ -22,6 +22,7 @@ interface MaintenanceDashboardProps {
 	unitRelationRequirements: ReactNode;
 	unusedAssets: ReactNode;
 	unusedSocialMedia: ReactNode;
+	webAddresses: ReactNode;
 }
 
 export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>): ReactNode {
@@ -36,6 +37,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 		unitRelationRequirements,
 		unusedAssets,
 		unusedSocialMedia,
+		webAddresses,
 	} = props;
 
 	const t = useExtracted();
@@ -63,6 +65,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							<Tab id="mutually-exclusive-relations">{t("Conflicting relations")}</Tab>
 							<Tab id="country-membership">{t("Country membership")}</Tab>
 							<Tab id="inactive-unit-relations">{t("Inactive units")}</Tab>
+							<Tab id="web-addresses">{t("Web addresses")}</Tab>
 						</TabList>
 
 						<TabPanel id="paired-relations" className="flex flex-col gap-y-(--layout-padding)">
@@ -122,6 +125,16 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							</p>
 
 							{inactiveUnitRelations}
+						</TabPanel>
+
+						<TabPanel id="web-addresses" className="flex flex-col gap-y-(--layout-padding)">
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Records whose stored web address is not a valid https URL: a missing or non-https scheme, or a value that does not parse. Covers event and opportunity websites, document and policy links, license URLs, social-media links, embed blocks, and working-group report events. A social-media entry may also be an email address. Reported only — the correct address needs an editor.",
+								)}
+							</p>
+
+							{webAddresses}
 						</TabPanel>
 					</Tabs>
 				</TabPanel>
