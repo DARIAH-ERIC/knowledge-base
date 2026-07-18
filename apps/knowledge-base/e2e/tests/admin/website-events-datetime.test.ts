@@ -41,7 +41,9 @@ test.describe("website events date & time", () => {
 		const title = `${eventsPage.workerPrefix} Timed ${randomUUID()}`;
 
 		await startCreate(eventsPage, title);
-		// New events default to timed, so the pickers are labelled "Start"/"End".
+		// Timed event: turn off "Full day" (the default) so the pickers show a time and are labelled
+		// "Start"/"End".
+		await eventsPage.unsetFullDay();
 		await eventsPage.fillDateTimePicker("Start", 2025, 6, 15, 9, 0);
 		await eventsPage.fillDateTimePicker("End", 2025, 6, 15, 17, 0);
 		await eventsPage.submitForm();
@@ -60,6 +62,7 @@ test.describe("website events date & time", () => {
 		const title = `${eventsPage.workerPrefix} Timed no end ${randomUUID()}`;
 
 		await startCreate(eventsPage, title);
+		await eventsPage.unsetFullDay();
 		await eventsPage.fillDateTimePicker("Start", 2025, 6, 15, 9, 30);
 		await eventsPage.submitForm();
 
@@ -77,6 +80,7 @@ test.describe("website events date & time", () => {
 		const title = `${eventsPage.workerPrefix} Near midnight ${randomUUID()}`;
 
 		await startCreate(eventsPage, title);
+		await eventsPage.unsetFullDay();
 		await eventsPage.fillDateTimePicker("Start", 2025, 6, 16, 0, 30);
 		await eventsPage.fillDateTimePicker("End", 2025, 6, 16, 23, 45);
 		await eventsPage.submitForm();
@@ -115,8 +119,10 @@ test.describe("website events date & time", () => {
 		const title = `${eventsPage.workerPrefix} Timed to full ${randomUUID()}`;
 
 		await startCreate(eventsPage, title);
+		// Start timed (turn off the default full-day), then toggle back on: keeps the date, drops the
+		// time; the event becomes all-day.
+		await eventsPage.unsetFullDay();
 		await eventsPage.fillDateTimePicker("Start", 2025, 6, 15, 13, 30);
-		// Toggle on: keeps the date, drops the time; the event becomes all-day.
 		await eventsPage.setFullDay();
 		await eventsPage.submitForm();
 
@@ -156,6 +162,7 @@ test.describe("website events date & time", () => {
 		const title = `${eventsPage.workerPrefix} Edit keeps time ${randomUUID()}`;
 
 		await startCreate(eventsPage, title);
+		await eventsPage.unsetFullDay();
 		await eventsPage.fillDateTimePicker("Start", 2025, 6, 15, 9, 0);
 		await eventsPage.fillDateTimePicker("End", 2025, 6, 15, 17, 0);
 		await eventsPage.submitForm();
@@ -239,6 +246,7 @@ test.describe("website events date & time", () => {
 		const title = `${eventsPage.workerPrefix} Details time ${randomUUID()}`;
 
 		await startCreate(eventsPage, title);
+		await eventsPage.unsetFullDay();
 		await eventsPage.fillDateTimePicker("Start", 2025, 6, 15, 9, 0);
 		await eventsPage.fillDateTimePicker("End", 2025, 6, 15, 17, 0);
 		await eventsPage.submitForm();

@@ -102,7 +102,9 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 		event?.image ?? null,
 	);
 
-	const [isFullDay, setIsFullDay] = useState(event?.isFullDay ?? false);
+	// New events default to full-day — the large majority of events are all-day, so this saves the
+	// common case a toggle (and the time pickers for a timed event are one click away).
+	const [isFullDay, setIsFullDay] = useState(event?.isFullDay ?? true);
 	const [start, setStart] = useState<DateValue | null>(
 		event != null ? toDateValue(event.duration.start, event.isFullDay) : null,
 	);
