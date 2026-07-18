@@ -7,6 +7,7 @@
 	"scripts": {
 		"data:clean:wordpress": "tsx ./scripts/clean-wordpress-content.ts",
 		"data:migrate:clamp-image-resolution": "tsx ./scripts/clamp-image-resolution.ts",
+		"data:migrate:fix-event-durations": "tsx ./scripts/fix-event-durations.ts",
 		"data:migrate:get-unr-schema": "drizzle-kit introspect --config=./config/unr-db.config.ts",
 		"data:migrate:unr": "tsx ./scripts/migrate-unr.ts",
 		"data:migrate:wordpress": "tsx ./scripts/migrate-wordpress.ts",

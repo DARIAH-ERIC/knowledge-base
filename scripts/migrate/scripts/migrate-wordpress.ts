@@ -1502,8 +1502,12 @@ async function main() {
 						? ""
 						: [event.venue.venue, event.venue.country].filter(isNonEmptyString).join(", "),
 				duration: {
-					start: new Date(event.utc_start_date),
-					end: isNonEmptyString(event.utc_end_date) ? new Date(event.utc_end_date) : undefined,
+					// Store the event's local wall-clock time (in its own timezone, e.g. Europe/Dublin)
+					// treated as UTC, per the UTC-as-standin-for-local convention — NOT `utc_start_date`,
+					// whose true-instant conversion shifts all-day/evening events to the previous day when
+					// later displayed under the app's global UTC timezone.
+					start: parseWordPressGmt(event.start_date),
+					end: isNonEmptyString(event.end_date) ? parseWordPressGmt(event.end_date) : undefined,
 				},
 				isFullDay: event.all_day,
 				createdAt: parseWordPressGmt(event.date_utc),

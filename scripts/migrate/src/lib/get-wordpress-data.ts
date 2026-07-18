@@ -28,7 +28,7 @@ export function parseWordPressGmt(value: string | Date): Date {
 	return new Date(iso.endsWith("Z") ? iso : `${iso}Z`);
 }
 
-interface WP_Event {
+export interface WP_Event {
 	id: number;
 	global_id: string;
 	global_id_lineage: Array<string>;
@@ -544,7 +544,7 @@ function getCountries(baseUrl: string): Promise<Array<Country>> {
 	return getAll(url);
 }
 
-function getEvents(baseUrl: string): Promise<Array<WP_Event>> {
+export function getEvents(baseUrl: string): Promise<Array<WP_Event>> {
 	const url = createUrl({
 		baseUrl,
 		pathname: "/wp-json/tribe/events/v1/events",
