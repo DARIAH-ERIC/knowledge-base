@@ -20,6 +20,7 @@ import {
 import { env } from "../config/env.config";
 import {
 	type WordPressData,
+	getEventDuration,
 	getWordPressData,
 	parseWordPressGmt,
 } from "../src/lib/get-wordpress-data";
@@ -1501,14 +1502,7 @@ async function main() {
 					Array.isArray(event.venue) && event.venue.length === 0
 						? ""
 						: [event.venue.venue, event.venue.country].filter(isNonEmptyString).join(", "),
-				duration: {
-					// Store the event's local wall-clock time (in its own timezone, e.g. Europe/Dublin)
-					// treated as UTC, per the UTC-as-standin-for-local convention — NOT `utc_start_date`,
-					// whose true-instant conversion shifts all-day/evening events to the previous day when
-					// later displayed under the app's global UTC timezone.
-					start: parseWordPressGmt(event.start_date),
-					end: isNonEmptyString(event.end_date) ? parseWordPressGmt(event.end_date) : undefined,
-				},
+				duration: getEventDuration(event),
 				isFullDay: event.all_day,
 				createdAt: parseWordPressGmt(event.date_utc),
 				updatedAt: parseWordPressGmt(event.modified_utc),

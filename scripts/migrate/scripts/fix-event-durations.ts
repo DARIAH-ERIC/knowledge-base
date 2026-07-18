@@ -1,21 +1,22 @@
-import { isNonEmptyString, log } from "@acdh-oeaw/lib";
+import { log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { eq } from "drizzle-orm";
 
 import { apiBaseUrl } from "../config/data-migration.config";
 import { env } from "../config/env.config";
-import { getEvents, parseWordPressGmt } from "../src/lib/get-wordpress-data";
+import { getEventDuration, getEvents } from "../src/lib/get-wordpress-data";
 import { normalizeWordPressSlug, toPlaintext } from "../src/lib/migrate-wordpress-content";
 
 /**
  * The bulk `migrate-wordpress.ts` import derived event `duration` from `utc_start_date` /
  * `utc_end_date` (the UTC instant), so all-day and evening events were stored one day early once
  * displayed under the app's global `timeZone: "UTC"`. This script re-derives every event's duration
- * from the WordPress event's local wall-clock (`start_date` / `end_date`, in its own timezone, e.g.
- * Europe/Dublin) treated as UTC — the UTC-as-standin-for-local convention — matching what The
- * Events Calendar shows. It matches events by slug, is idempotent (unchanged durations are skipped)
- * and preserves each row's `updated_at`.
+ * via `getEventDuration` from the WordPress event's local wall-clock (`start_date` / `end_date`,
+ * treated as UTC — the UTC-as-standin-for-local convention, matching what The Events Calendar
+ * shows; all-day events normalized to UTC midnight, single-day all-day left open-ended). It matches
+ * events by slug, is idempotent (unchanged durations are skipped) and preserves each row's
+ * `updated_at`.
  *
  * Usage: `pnpm run data:migrate:fix-event-durations [--dry-run]`
  */
@@ -47,10 +48,7 @@ async function main() {
 	const durationBySlug = new Map<string, { start: Date; end: Date | undefined }>();
 	for (const event of wpEvents) {
 		const slug = normalizeWordPressSlug(event.slug, toPlaintext(event.title));
-		durationBySlug.set(slug, {
-			start: parseWordPressGmt(event.start_date),
-			end: isNonEmptyString(event.end_date) ? parseWordPressGmt(event.end_date) : undefined,
-		});
+		durationBySlug.set(slug, getEventDuration(event));
 	}
 
 	const rows = await db

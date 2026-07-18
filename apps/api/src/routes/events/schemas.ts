@@ -3,7 +3,6 @@ import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import {
-	CalendarDateSchema,
 	ImageSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
@@ -14,9 +13,12 @@ import {
 const eventBaseObject = v.object({
 	...v.pick(schema.EventSelectSchema, ["id", "title", "summary", "location", "isFullDay"]).entries,
 	image: ImageSchema,
+	// Full ISO timestamps; the time-of-day is meaningful only when `isFullDay` is false (for all-day
+	// events it is UTC midnight and should be read as a date). Never convert to local time — the app
+	// treats UTC as a standin for the event's own timezone, so converting would shift the day.
 	duration: v.object({
-		start: CalendarDateSchema,
-		end: v.optional(CalendarDateSchema),
+		start: v.pipe(v.string(), v.isoTimestamp()),
+		end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 	}),
 	entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	publishedAt: v.pipe(v.string(), v.isoTimestamp()),

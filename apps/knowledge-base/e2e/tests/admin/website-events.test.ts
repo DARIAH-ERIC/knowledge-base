@@ -32,11 +32,13 @@ test.describe("website events admin", () => {
 
 		await eventsPage.fillTitle(title);
 		await eventsPage.fillSummary(summary);
+		// Toggle "Full day" first: it switches the pickers to date-granularity and relabels them
+		// "Start date"/"End date" (timed events default otherwise, labelled "Start"/"End").
+		await eventsPage.setFullDay();
 		await eventsPage.fillDatePicker("Start date", 2025, 6, 15);
 		await eventsPage.fillDatePicker("End date", 2025, 6, 16);
 		await eventsPage.fillLocation(location);
 		await eventsPage.fillWebsite(website);
-		await eventsPage.setFullDay();
 		await eventsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await eventsPage.addContentBlock(content);
 
@@ -53,8 +55,9 @@ test.describe("website events admin", () => {
 			website,
 		});
 		expect(created?.imageId).toBeTruthy();
+		// All-day events span whole days: start-of-day → end-of-day of the last day.
 		expect(created?.duration.start).toStrictEqual(new Date("2025-06-15T00:00:00.000Z"));
-		expect(created?.duration.end).toStrictEqual(new Date("2025-06-16T00:00:00.000Z"));
+		expect(created?.duration.end).toStrictEqual(new Date("2025-06-16T23:59:59.000Z"));
 		const contentBlocks = await db.getEventContentBlocksByTitle(title);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
@@ -68,6 +71,7 @@ test.describe("website events admin", () => {
 		await eventsPage.gotoCreate();
 		await eventsPage.fillTitle(originalTitle);
 		await eventsPage.fillSummary("E2E test event to be edited");
+		await eventsPage.setFullDay();
 		await eventsPage.fillDatePicker("Start date", 2025, 6, 15);
 		await eventsPage.fillLocation("Vienna, Austria");
 		await eventsPage.fillWebsite("https://example.com/old-event");
@@ -117,7 +121,7 @@ test.describe("website events admin", () => {
 		});
 		expect(updated?.imageId).toBeTruthy();
 		expect(updated?.duration.start).toStrictEqual(new Date("2026-07-16T00:00:00.000Z"));
-		expect(updated?.duration.end).toStrictEqual(new Date("2026-07-17T00:00:00.000Z"));
+		expect(updated?.duration.end).toStrictEqual(new Date("2026-07-17T23:59:59.000Z"));
 		const contentBlocks = await db.getEventContentBlocksByTitle(updatedTitle);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);
@@ -131,11 +135,11 @@ test.describe("website events admin", () => {
 		await eventsPage.gotoCreate();
 		await eventsPage.fillTitle(title);
 		await eventsPage.fillSummary("Event with optional fields to clear");
+		await eventsPage.setFullDay();
 		await eventsPage.fillDatePicker("Start date", 2025, 6, 15);
 		await eventsPage.fillDatePicker("End date", 2025, 6, 16);
 		await eventsPage.fillLocation("Vienna, Austria");
 		await eventsPage.fillWebsite("https://example.com/event-clear");
-		await eventsPage.setFullDay();
 		await eventsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await eventsPage.addContentBlock("Optional event content");
 		await eventsPage.submitForm();
@@ -149,14 +153,18 @@ test.describe("website events admin", () => {
 		]);
 
 		await eventsPage.fillWebsite("");
+		// Turning off "Full day" relabels the pickers "Start"/"End" and switches them to time
+		// granularity (the time defaults to 00:00).
 		await eventsPage.unsetFullDay();
-		await eventsPage.clearDatePicker("End date");
+		await eventsPage.clearDatePicker("End");
 		await eventsPage.removeFirstContentBlock();
 		await eventsPage.submitForm();
 
 		const updated = await db.getEventByTitle(title);
 		expect(updated).toMatchObject({ isFullDay: false, website: null });
-		expect(updated?.duration.end).toBeUndefined();
+		// A cleared end collapses to the start — the range is always bounded, never open-ended.
+		expect(updated?.duration.start).toStrictEqual(new Date("2025-06-15T00:00:00.000Z"));
+		expect(updated?.duration.end).toStrictEqual(new Date("2025-06-15T00:00:00.000Z"));
 		expect(await db.getEventContentBlocksByTitle(title)).toHaveLength(0);
 	});
 
@@ -168,6 +176,7 @@ test.describe("website events admin", () => {
 		await eventsPage.gotoCreate();
 		await eventsPage.fillTitle(title);
 		await eventsPage.fillSummary("E2E test event to be deleted");
+		await eventsPage.setFullDay();
 		await eventsPage.fillDatePicker("Start date", 2025, 6, 15);
 		await eventsPage.fillLocation("Vienna, Austria");
 		await eventsPage.selectImageFromMediaLibrary("E2E Test Asset");

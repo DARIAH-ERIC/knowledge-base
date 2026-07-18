@@ -1,6 +1,7 @@
 import { EventInsertSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+import { EventDurationInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/event-duration";
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
 import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
 
@@ -11,10 +12,7 @@ export const CreateEventActionInputSchema = v.object({
 		v.optional(v.string(), "false"),
 		v.transform((s) => s === "true"),
 	),
-	duration: v.object({
-		start: v.pipe(v.string(), v.isoDate(), v.toDate()),
-		end: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),
-	}),
+	duration: EventDurationInputSchema,
 	imageKey: v.pipe(v.string(), v.nonEmpty()),
 	contentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),

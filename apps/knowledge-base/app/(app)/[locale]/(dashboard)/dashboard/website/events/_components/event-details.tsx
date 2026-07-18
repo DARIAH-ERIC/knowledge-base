@@ -21,7 +21,10 @@ interface EventDetailsProps {
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
-	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
+	event: Pick<
+		schema.Event,
+		"id" | "duration" | "isFullDay" | "location" | "title" | "summary" | "website"
+	> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
@@ -78,11 +81,16 @@ export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {
 
 				<DescriptionTerm>{t("Duration")}</DescriptionTerm>
 				<DescriptionDetails>
-					{event.duration.end
-						? format.dateTimeRange(event.duration.start, event.duration.end, {
-								dateStyle: "short",
-							})
-						: format.dateTime(event.duration.start, { dateStyle: "short" })}
+					{(() => {
+						// Timed events render the time-of-day; all-day events are date-only (their stored
+						// time is UTC midnight and carries no meaning).
+						const options = event.isFullDay
+							? ({ dateStyle: "short" } as const)
+							: ({ dateStyle: "short", timeStyle: "short" } as const);
+						return event.duration.end
+							? format.dateTimeRange(event.duration.start, event.duration.end, options)
+							: format.dateTime(event.duration.start, options);
+					})()}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Location")}</DescriptionTerm>

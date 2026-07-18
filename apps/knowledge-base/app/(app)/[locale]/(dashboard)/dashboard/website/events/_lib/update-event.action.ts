@@ -3,6 +3,7 @@
 import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
+import { normalizeEventDuration } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/event-duration";
 import { UpdateEventActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/update-event.schema";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import {
@@ -53,7 +54,7 @@ export const updateEventAction = createMutationAction({
 				summary: input.summary,
 				location: input.location,
 				website: input.website,
-				duration: input.duration,
+				duration: normalizeEventDuration(input.duration, input.isFullDay),
 				isFullDay: input.isFullDay,
 			})
 			.where(eq(schema.events.id, draftVersionId));
