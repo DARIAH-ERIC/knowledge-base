@@ -4,6 +4,7 @@ import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { Link } from "@dariah-eric/ui/link";
 import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
+import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import {
 	Table,
 	TableBody,
@@ -14,7 +15,8 @@ import {
 } from "@dariah-eric/ui/table";
 import { AlertTriangleIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useState, useTransition } from "react";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
+import type { Selection } from "react-aria-components";
 
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { deleteUnusedSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/delete-unused-social-media.action";
@@ -41,39 +43,37 @@ export function UnusedSocialMediaCleanup(
 	const t = useExtracted();
 	const router = useRouter();
 
-	const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+	const [removedIds, setRemovedIds] = useState<ReadonlySet<string>>(new Set());
+	const visibleItems = items.filter((item) => !removedIds.has(item.id));
+
+	const [selected, setSelected] = useState<Selection>(() => new Set());
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 	const [isPending, startTransition] = useTransition();
 	const [result, setResult] = useState<DeleteUnusedSocialMediaResult | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
-	const allSelected = items.length > 0 && selected.size === items.length;
+	// Selection persists across pages, so normalise to an explicit set of ids we can measure and
+	// delete. The `"all"` sentinel only arises from a keyboard select-all over the current page.
+	const selectedIds = selected === "all" ? new Set(visibleItems.map((item) => item.id)) : selected;
 
-	const { page, pageItems, perPage, setPage, totalItems, totalPages } = useClientPagination(items);
+	const allSelected = visibleItems.length > 0 && selectedIds.size === visibleItems.length;
 
-	function toggle(id: string, isSelected: boolean) {
-		setSelected((current) => {
-			const next = new Set(current);
-			if (isSelected) {
-				next.add(id);
-			} else {
-				next.delete(id);
-			}
-			return next;
-		});
-	}
+	const { page, pageItems, perPage, setPage, totalItems, totalPages } =
+		useClientPagination(visibleItems);
 
 	function toggleAll(isSelected: boolean) {
-		setSelected(isSelected ? new Set(items.map((item) => item.id)) : new Set());
+		setSelected(isSelected ? new Set(visibleItems.map((item) => item.id)) : new Set());
 	}
 
 	function confirmDelete() {
-		const ids = Array.from(selected);
+		const ids = Array.from(selectedIds, String);
 		setError(null);
 
 		startTransition(async () => {
 			try {
 				const deleteResult = await deleteUnusedSocialMediaAction(ids);
+				const deletedIds = ids.filter((id) => !deleteResult.skippedIds.includes(id));
+				setRemovedIds((current) => new Set([...current, ...deletedIds]));
 				setResult(deleteResult);
 				setSelected(new Set());
 				setIsConfirmOpen(false);
@@ -84,7 +84,7 @@ export function UnusedSocialMediaCleanup(
 		});
 	}
 
-	if (items.length === 0) {
+	if (visibleItems.length === 0) {
 		return (
 			<div className="my-8 text-balance text-muted-fg text-sm">
 				{result != null && result.deletedCount > 0
@@ -100,18 +100,18 @@ export function UnusedSocialMediaCleanup(
 		<div className="flex flex-col gap-y-(--layout-padding)">
 			<div className="flex flex-wrap items-center justify-between gap-2">
 				<Checkbox isSelected={allSelected} onChange={toggleAll}>
-					{t("{count} unused social-media entries", { count: String(items.length) })}
+					{t("{count} unused social-media entries", { count: String(visibleItems.length) })}
 				</Checkbox>
 
 				<Button
 					intent="danger"
-					isDisabled={selected.size === 0 || isPending}
+					isDisabled={selectedIds.size === 0 || isPending}
 					onPress={() => {
 						setIsConfirmOpen(true);
 					}}
 				>
-					{selected.size > 0
-						? t("Delete selected ({count})", { count: String(selected.size) })
+					{selectedIds.size > 0
+						? t("Delete selected ({count})", { count: String(selectedIds.size) })
 						: t("Delete selected")}
 				</Button>
 			</div>
@@ -131,29 +131,21 @@ export function UnusedSocialMediaCleanup(
 			<Table
 				aria-label={t("Unused social media")}
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSelectionChange={setSelected}
+				selectedKeys={selected}
+				selectionBehavior="toggle"
+				selectionMode="multiple"
 			>
 				<TableHeader>
-					<TableColumn className="inline-px" id="select">
-						{t("Select")}
-					</TableColumn>
 					<TableColumn className="max-inline-80" id="name" isRowHeader={true}>
 						{t("Name")}
 					</TableColumn>
 					<TableColumn id="type">{t("Type")}</TableColumn>
 					<TableColumn id="url">{t("URL")}</TableColumn>
 				</TableHeader>
-				<TableBody dependencies={[selected]} items={pageItems}>
+				<TableBody items={pageItems}>
 					{(item) => (
 						<TableRow id={item.id}>
-							<TableCell>
-								<Checkbox
-									aria-label={t("Select this entry")}
-									isSelected={selected.has(item.id)}
-									onChange={(value) => {
-										toggle(item.id, value);
-									}}
-								/>
-							</TableCell>
 							<TableCell>
 								<div className="max-inline-80 truncate" title={item.name}>
 									{item.name}
@@ -189,10 +181,12 @@ export function UnusedSocialMediaCleanup(
 				}}
 			>
 				<ModalHeader
-					title={t("Delete {count} unused social-media entries", { count: String(selected.size) })}
+					title={t("Delete {count} unused social-media entries", {
+						count: String(selectedIds.size),
+					})}
 					description={t(
 						"This permanently removes {count} social-media entries from the database. This action cannot be undone.",
-						{ count: String(selected.size) },
+						{ count: String(selectedIds.size) },
 					)}
 				/>
 				{error != null ? (
@@ -209,7 +203,14 @@ export function UnusedSocialMediaCleanup(
 				<ModalFooter>
 					<ModalClose isDisabled={isPending}>{t("Cancel")}</ModalClose>
 					<Button intent="danger" isPending={isPending} onPress={confirmDelete}>
-						{t("Delete")}
+						{isPending ? (
+							<Fragment>
+								<ProgressCircle aria-label={t("Deleting...")} isIndeterminate={true} />
+								<span aria-hidden={true}>{t("Deleting...")}</span>
+							</Fragment>
+						) : (
+							t("Delete")
+						)}
 					</Button>
 				</ModalFooter>
 			</ModalContent>
