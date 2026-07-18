@@ -148,6 +148,10 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 						{t("Full day")}
 					</Checkbox>
 					<DatePicker
+						// Remount when the granularity flips: react-aria's DateField crashes if `granularity`
+						// changes on a live field whose value was previously cleared, so give each mode a
+						// stable-but-distinct key to force a clean re-init with the converted value.
+						key={isFullDay ? "start-day" : "start-time"}
 						granularity={isFullDay ? "day" : "minute"}
 						hideTimeZone={true}
 						isRequired={true}
@@ -161,6 +165,7 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 					</DatePicker>
 
 					<DatePicker
+						key={isFullDay ? "end-day" : "end-time"}
 						granularity={isFullDay ? "day" : "minute"}
 						hideTimeZone={true}
 						name="duration.end"
