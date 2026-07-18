@@ -5,7 +5,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { getUnusedAssets } from "@/lib/data/asset-cleanup";
 
 export async function UnusedAssetsSection(): Promise<ReactNode> {
-	const { assets, totalSize } = await getUnusedAssets({ imageUrlOptions: imageGridOptions });
+	const { assets } = await getUnusedAssets({ imageUrlOptions: imageGridOptions });
 
-	return <UnusedAssetsCleanup assets={assets} totalSize={totalSize} />;
+	return <UnusedAssetsCleanup assets={assets} />;
 }

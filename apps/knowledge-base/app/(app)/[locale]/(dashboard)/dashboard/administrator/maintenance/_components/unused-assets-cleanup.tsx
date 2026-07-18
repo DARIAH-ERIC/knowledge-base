@@ -4,10 +4,11 @@ import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { GridList, GridListItem } from "@dariah-eric/ui/grid-list";
 import { Modal, ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
+import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import cn from "clsx/lite";
 import { AlertTriangleIcon, DownloadIcon, ExpandIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useState, useTransition } from "react";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 import type { Selection } from "react-aria-components";
 
 import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
@@ -20,14 +21,17 @@ import { useRouter } from "@/lib/navigation/navigation";
 
 interface UnusedAssetsCleanupProps {
 	assets: Array<UnusedAssetPreview>;
-	totalSize: number;
 }
 
 export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): ReactNode {
-	const { assets, totalSize } = props;
+	const { assets } = props;
 
 	const t = useExtracted();
 	const router = useRouter();
+
+	const [removedIds, setRemovedIds] = useState<ReadonlySet<string>>(new Set());
+	const visibleAssets = assets.filter((asset) => !removedIds.has(asset.id));
+	const visibleTotalSize = visibleAssets.reduce((sum, asset) => sum + (asset.size ?? 0), 0);
 
 	const [selected, setSelected] = useState<Selection>(() => new Set());
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -37,19 +41,21 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 
 	// Selection persists across pages, so normalise to an explicit set of ids we can measure and
 	// delete. The `"all"` sentinel only arises from a keyboard select-all over the current page.
-	const selectedIds = selected === "all" ? new Set(assets.map((asset) => asset.id)) : selected;
+	const selectedIds =
+		selected === "all" ? new Set(visibleAssets.map((asset) => asset.id)) : selected;
 
-	const selectedSize = assets.reduce(
+	const selectedSize = visibleAssets.reduce(
 		(sum, asset) => (selectedIds.has(asset.id) ? sum + (asset.size ?? 0) : sum),
 		0,
 	);
 
-	const allSelected = assets.length > 0 && selectedIds.size === assets.length;
+	const allSelected = visibleAssets.length > 0 && selectedIds.size === visibleAssets.length;
 
-	const { page, pageItems, perPage, setPage, totalItems, totalPages } = useClientPagination(assets);
+	const { page, pageItems, perPage, setPage, totalItems, totalPages } =
+		useClientPagination(visibleAssets);
 
 	function toggleAll(isSelected: boolean) {
-		setSelected(isSelected ? new Set(assets.map((asset) => asset.id)) : new Set());
+		setSelected(isSelected ? new Set(visibleAssets.map((asset) => asset.id)) : new Set());
 	}
 
 	function confirmDelete() {
@@ -59,6 +65,10 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 		startTransition(async () => {
 			try {
 				const deleteResult = await deleteUnusedAssetsAction(ids);
+				const deletedIds = ids.filter(
+					(id) => !deleteResult.skippedIds.includes(id) && !deleteResult.failedIds.includes(id),
+				);
+				setRemovedIds((current) => new Set([...current, ...deletedIds]));
 				setResult(deleteResult);
 				setSelected(new Set());
 				setIsConfirmOpen(false);
@@ -69,7 +79,7 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 		});
 	}
 
-	if (assets.length === 0) {
+	if (visibleAssets.length === 0) {
 		return (
 			<div className="my-8 text-balance text-muted-fg text-sm">
 				{result != null && result.deletedCount > 0
@@ -87,8 +97,8 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 			<div className="flex flex-wrap items-center justify-between gap-2">
 				<Checkbox isSelected={allSelected} onChange={toggleAll}>
 					{t("{count} unused assets · {size} reclaimable", {
-						count: String(assets.length),
-						size: formatFileSize(totalSize),
+						count: String(visibleAssets.length),
+						size: formatFileSize(visibleTotalSize),
 					})}
 				</Checkbox>
 
@@ -239,7 +249,14 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 				<ModalFooter>
 					<ModalClose isDisabled={isPending}>{t("Cancel")}</ModalClose>
 					<Button intent="danger" isPending={isPending} onPress={confirmDelete}>
-						{t("Delete")}
+						{isPending ? (
+							<Fragment>
+								<ProgressCircle aria-label={t("Deleting...")} isIndeterminate={true} />
+								<span aria-hidden={true}>{t("Deleting...")}</span>
+							</Fragment>
+						) : (
+							t("Delete")
+						)}
 					</Button>
 				</ModalFooter>
 			</ModalContent>
