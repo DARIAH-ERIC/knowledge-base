@@ -12,7 +12,7 @@ import type {
 
 import { apiBaseUrl, placeholderImageUrl } from "../config/data-migration.config";
 import { env } from "../config/env.config";
-import type { WordPressData } from "../src/lib/get-wordpress-data";
+import { type WordPressData, parseWordPressGmt } from "../src/lib/get-wordpress-data";
 import {
 	createWordPressContentMigrator,
 	normalizeWordPressSlug,
@@ -63,16 +63,6 @@ async function fetchJson<T>(url: URL): Promise<T> {
 	const response = await fetch(url);
 	assert(response.ok, `Request to "${url.href}" failed with status ${String(response.status)}.`);
 	return (await response.json()) as T;
-}
-
-/**
- * WordPress REST returns `date_gmt` / `modified_gmt` without a timezone designator (e.g.
- * "2026-05-20T12:38:00"), which `new Date()` parses as local time — shifting every timestamp by the
- * runtime's UTC offset when this script runs on a developer machine. These are UTC by definition,
- * so parse them as such.
- */
-function parseWordPressGmt(value: string): Date {
-	return new Date(value.endsWith("Z") ? value : `${value}Z`);
 }
 
 async function getNewsCategoryId(): Promise<number> {

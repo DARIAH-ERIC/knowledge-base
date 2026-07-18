@@ -18,7 +18,11 @@ import {
 	placeholderImageUrl,
 } from "../config/data-migration.config";
 import { env } from "../config/env.config";
-import { type WordPressData, getWordPressData } from "../src/lib/get-wordpress-data";
+import {
+	type WordPressData,
+	getWordPressData,
+	parseWordPressGmt,
+} from "../src/lib/get-wordpress-data";
 import {
 	type AssetsCache,
 	createWordPressContentMigrator,
@@ -633,8 +637,8 @@ async function main() {
 			.values({
 				slug,
 				typeId: typesByType.organisational_units.id,
-				createdAt: new Date(institution.date_gmt),
-				updatedAt: new Date(institution.modified_gmt),
+				createdAt: parseWordPressGmt(institution.date_gmt),
+				updatedAt: parseWordPressGmt(institution.modified_gmt),
 			})
 			.returning({ id: schema.entities.id });
 
@@ -669,8 +673,8 @@ async function main() {
 				typeId: organisationalUnitTypesByType.institution.id,
 				metadata,
 				imageId: imageId ?? placeholderImageId,
-				createdAt: new Date(institution.date_gmt),
-				updatedAt: new Date(institution.modified_gmt),
+				createdAt: parseWordPressGmt(institution.date_gmt),
+				updatedAt: parseWordPressGmt(institution.modified_gmt),
 			})
 			.returning({ id: schema.organisationalUnits.id });
 
@@ -722,8 +726,8 @@ async function main() {
 				.values({
 					slug: normalizeWordPressSlug(page.slug, toPlaintext(page.title.rendered)),
 					typeId: entityTypeId,
-					createdAt: new Date(page.date_gmt),
-					updatedAt: new Date(page.modified_gmt),
+					createdAt: parseWordPressGmt(page.date_gmt),
+					updatedAt: parseWordPressGmt(page.modified_gmt),
 				})
 				.returning({ id: schema.entities.id });
 
@@ -775,9 +779,9 @@ async function main() {
 					title: toPlaintext(page.title.rendered),
 					summary: toSummary(page.excerpt.rendered),
 					imageId: imageId ?? placeholderImage.id,
-					publicationDate: new Date(page.date_gmt),
-					createdAt: new Date(page.date_gmt),
-					updatedAt: new Date(page.modified_gmt),
+					publicationDate: parseWordPressGmt(page.date_gmt),
+					createdAt: parseWordPressGmt(page.date_gmt),
+					updatedAt: parseWordPressGmt(page.modified_gmt),
 				});
 				const authorNames = extractAuthorsFromHtml(page.content.rendered);
 				if (authorNames.length > 0) {
@@ -789,9 +793,9 @@ async function main() {
 					title: toPlaintext(page.title.rendered),
 					summary: toSummary(page.excerpt.rendered),
 					imageId: imageId ?? placeholderImage.id,
-					publicationDate: new Date(page.date_gmt),
-					createdAt: new Date(page.date_gmt),
-					updatedAt: new Date(page.modified_gmt),
+					publicationDate: parseWordPressGmt(page.date_gmt),
+					createdAt: parseWordPressGmt(page.date_gmt),
+					updatedAt: parseWordPressGmt(page.modified_gmt),
 				});
 				const authorNames = extractAuthorsFromHtml(page.content.rendered);
 				if (authorNames.length > 0) {
@@ -803,9 +807,9 @@ async function main() {
 					title: toPlaintext(page.title.rendered),
 					summary: toSummary(page.excerpt.rendered),
 					imageId,
-					publicationDate: new Date(page.date_gmt),
-					createdAt: new Date(page.date_gmt),
-					updatedAt: new Date(page.modified_gmt),
+					publicationDate: parseWordPressGmt(page.date_gmt),
+					createdAt: parseWordPressGmt(page.date_gmt),
+					updatedAt: parseWordPressGmt(page.modified_gmt),
 				});
 			}
 
@@ -1266,8 +1270,8 @@ async function main() {
 				.values({
 					slug: normalizeWordPressSlug(page.slug, toPlaintext(page.title.rendered)),
 					typeId: typesByType.pages.id,
-					createdAt: new Date(page.date_gmt),
-					updatedAt: new Date(page.modified_gmt),
+					createdAt: parseWordPressGmt(page.date_gmt),
+					updatedAt: parseWordPressGmt(page.modified_gmt),
 				})
 				.returning({ id: schema.entities.id });
 
@@ -1303,9 +1307,9 @@ async function main() {
 				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 				summary: toSummary(page.excerpt?.rendered ?? ""),
 				imageId,
-				publicationDate: new Date(page.date_gmt),
-				createdAt: new Date(page.date_gmt),
-				updatedAt: new Date(page.modified_gmt),
+				publicationDate: parseWordPressGmt(page.date_gmt),
+				createdAt: parseWordPressGmt(page.date_gmt),
+				updatedAt: parseWordPressGmt(page.modified_gmt),
 			});
 
 			if (page.content.rendered.trim().length === 0) {
@@ -1368,8 +1372,8 @@ async function main() {
 				.values({
 					slug: normalizeWordPressSlug(post.slug, toPlaintext(post.title.rendered)),
 					typeId: typesByType.news.id,
-					createdAt: new Date(post.date_gmt),
-					updatedAt: new Date(post.modified_gmt),
+					createdAt: parseWordPressGmt(post.date_gmt),
+					updatedAt: parseWordPressGmt(post.modified_gmt),
 				})
 				.returning({ id: schema.entities.id });
 
@@ -1403,9 +1407,9 @@ async function main() {
 				title: toPlaintext(post.title.rendered),
 				summary: toSummary(post.excerpt.rendered),
 				imageId: imageId ?? placeholderImage.id,
-				publicationDate: new Date(post.date_gmt),
-				createdAt: new Date(post.date_gmt),
-				updatedAt: new Date(post.modified_gmt),
+				publicationDate: parseWordPressGmt(post.date_gmt),
+				createdAt: parseWordPressGmt(post.date_gmt),
+				updatedAt: parseWordPressGmt(post.modified_gmt),
 			});
 
 			if (post.content.rendered.trim().length === 0) {
@@ -1459,8 +1463,8 @@ async function main() {
 				.values({
 					slug: normalizeWordPressSlug(event.slug, toPlaintext(event.title)),
 					typeId: typesByType.events.id,
-					createdAt: new Date(event.date_utc),
-					updatedAt: new Date(event.modified_utc),
+					createdAt: parseWordPressGmt(event.date_utc),
+					updatedAt: parseWordPressGmt(event.modified_utc),
 				})
 				.returning({ id: schema.entities.id });
 
@@ -1502,8 +1506,8 @@ async function main() {
 					end: isNonEmptyString(event.utc_end_date) ? new Date(event.utc_end_date) : undefined,
 				},
 				isFullDay: event.all_day,
-				createdAt: new Date(event.date_utc),
-				updatedAt: new Date(event.modified_utc),
+				createdAt: parseWordPressGmt(event.date_utc),
+				updatedAt: parseWordPressGmt(event.modified_utc),
 			});
 
 			if (event.description.trim().length === 0) {
@@ -1626,8 +1630,8 @@ async function main() {
 					.values({
 						slug: normalizeWordPressSlug(project.slug, toPlaintext(project.title.rendered)),
 						typeId: typesByType.projects.id,
-						createdAt: new Date(project.date_gmt),
-						updatedAt: new Date(project.modified_gmt),
+						createdAt: parseWordPressGmt(project.date_gmt),
+						updatedAt: parseWordPressGmt(project.modified_gmt),
 					})
 					.returning({ id: schema.entities.id });
 
@@ -1666,8 +1670,8 @@ async function main() {
 						topic: meta.topic,
 						imageId: imageId ?? placeholderImageId,
 						scopeId: projectScopesByType.eu.id /** We agreed to default to eu. */,
-						createdAt: new Date(project.date_gmt),
-						updatedAt: new Date(project.modified_gmt),
+						createdAt: parseWordPressGmt(project.date_gmt),
+						updatedAt: parseWordPressGmt(project.modified_gmt),
 					})
 					.returning({ id: schema.projects.id });
 

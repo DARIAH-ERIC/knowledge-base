@@ -15,6 +15,19 @@ import type {
 import { getAll } from "./get-all";
 import { keyById } from "./key-by-id";
 
+/**
+ * WordPress REST returns `date_gmt` / `modified_gmt` (and the Tribe Events `date_utc` /
+ * `modified_utc`) without a timezone designator (e.g. "2026-05-20T12:38:00"), which `new Date()`
+ * parses as local time — shifting every timestamp by the runtime's UTC offset when a migration runs
+ * on a developer machine rather than in a UTC container. These are UTC by definition, so parse them
+ * as such. (The interfaces below type these fields as `Date`, but the JSON payload delivers
+ * strings.)
+ */
+export function parseWordPressGmt(value: string | Date): Date {
+	const iso = typeof value === "string" ? value : value.toISOString();
+	return new Date(iso.endsWith("Z") ? iso : `${iso}Z`);
+}
+
 interface WP_Event {
 	id: number;
 	global_id: string;
