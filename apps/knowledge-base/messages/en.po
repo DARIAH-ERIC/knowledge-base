@@ -682,7 +682,7 @@ msgstr "Forgot password?"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:59
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:99
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx:108
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:140
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:141
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-details.tsx:101
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:77
@@ -934,7 +934,7 @@ msgstr "Rich text"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-page-details.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-page-form.tsx:51
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:91
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:145
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:141
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:122
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:128
@@ -993,12 +993,12 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx:619
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:533
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:503
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:223
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:214
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:222
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:235
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:220
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:240
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:210
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:211
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:250
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:204
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx:456
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:431
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:391
@@ -1160,7 +1160,7 @@ msgstr "selected"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1012
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1231
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx:190
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:143
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:144
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:55
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:402
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:59
@@ -1169,7 +1169,7 @@ msgstr "selected"
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:75
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:99
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:77
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx:152
 msgid "bWjdfa"
 msgstr "URL"
@@ -1309,7 +1309,7 @@ msgstr "Role"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:145
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/heading-hierarchy-check.tsx:78
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:140
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:142
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:143
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx:276
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:408
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:71
@@ -1632,8 +1632,8 @@ msgstr "This will permanently delete this contribution."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:362
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:142
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx:153
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:225
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:242
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:222
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:258
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:212
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:143
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:135
@@ -2267,9 +2267,6 @@ msgstr "Media library"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:316
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:570
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:140
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:135
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:137
 msgid "kQAf2d"
 msgstr "Select"
 
@@ -2595,7 +2592,7 @@ msgstr "ROR"
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-step-nav.tsx:30
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:93
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:71
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:67
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:71
@@ -3408,7 +3405,7 @@ msgstr "Enter the documentation page details."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:62
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-page-form.tsx:51
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:145
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:141
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:184
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:159
@@ -4026,38 +4023,38 @@ msgstr "Open drafts to rename and publish it."
 msgid "DTWnhz"
 msgstr "Duplicate entity"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:87
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:86
 msgid "mt0whq"
 msgstr "Could not delete the selected content blocks. Please try again."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:96
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:95
 msgid "UGpGaL"
 msgstr "Deleted {count} empty content blocks."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:97
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:96
 msgid "9t2r4W"
 msgstr "No empty content blocks found."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:106
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:105
 msgid "aGsOhv"
 msgstr "{count} empty content blocks"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:117
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:114
 msgid "AXmzdg"
 msgstr "Delete selected ({count})"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:118
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:107
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:117
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:117
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:115
 msgid "ELsv+o"
 msgstr "Delete selected"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:128
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:127
 msgid "Q78rFv"
 msgstr "{skipped} blocks were skipped (no longer empty)."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:135
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:134
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:133
 msgid "F0fEMW"
 msgstr "Empty content blocks"
@@ -4076,18 +4073,22 @@ msgstr "Entity"
 msgid "AbvQFb"
 msgstr "Field"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:161
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:157
-msgid "UsIAum"
-msgstr "Select this block"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:205
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:196
 msgid "S0dOZ4"
 msgstr "Delete {count} empty content blocks"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:206
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:197
 msgid "RQZLUJ"
 msgstr "This permanently removes {count} empty rich-text blocks from their entities. This action cannot be undone."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:218
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:219
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:254
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:255
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:208
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:209
+msgid "noZdV2"
+msgstr "Deleting..."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/heading-hierarchy-check.tsx:44
 msgid "Jt7Y3L"
@@ -4189,7 +4190,7 @@ msgid "6boAFD"
 msgstr "Cleanup tasks"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:132
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:128
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:138
 msgid "eUKwKz"
 msgstr "Unused assets"
 
@@ -4386,35 +4387,35 @@ msgstr "redundant"
 msgid "PLTJs2"
 msgstr "contradictory"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:82
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:81
 msgid "XW27V3"
 msgstr "Could not normalise the selected content blocks. Please try again."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:91
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:90
 msgid "tfbWba"
 msgstr "Normalised {count} content blocks."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:92
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:91
 msgid "DJ6qDO"
 msgstr "No rich-text content needs normalising."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:101
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:100
 msgid "OIt6A/"
 msgstr "{count} content blocks to normalise"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:112
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:111
 msgid "sodunc"
 msgstr "Normalise selected ({count})"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:113
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:112
 msgid "1Xnlv0"
 msgstr "Normalise selected"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:123
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:122
 msgid "V4L0tb"
 msgstr "{skipped} blocks were skipped (no longer changed)."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:130
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:129
 msgid "IZNXIG"
 msgstr "Rich-text to normalise"
 
@@ -4422,15 +4423,20 @@ msgstr "Rich-text to normalise"
 msgid "Up5U7K"
 msgstr "Block"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:202
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:193
 msgid "jQt8+7"
 msgstr "Normalise {count} content blocks"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:203
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:194
 msgid "UZ9vgC"
 msgstr "This rewrites the rich text of {count} content blocks to remove empty paragraphs, stray line breaks, non-breaking spaces, imported HTML attributes, and bold headings. This action cannot be undone."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:222
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:215
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:216
+msgid "nyw6Or"
+msgstr "Normalising..."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:219
 msgid "yN9OFd"
 msgstr "Normalise"
 
@@ -4479,48 +4485,48 @@ msgstr "Has"
 msgid "DkkVJF"
 msgstr "Missing"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:67
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:77
 msgid "oCzyFL"
 msgstr "Could not delete the selected assets. Please try again."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:76
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:86
 msgid "EM6orA"
 msgstr "Deleted {count} unused assets, reclaiming {size}."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:90
 msgid "xmzkws"
 msgstr "No unused assets found."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:89
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:99
 msgid "7vxT7w"
 msgstr "{count} unused assets · {size} reclaimable"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:103
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:113
 msgid "P66Q2h"
 msgstr "Delete selected ({count}) · {size}"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:117
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:127
 msgid "NQePyT"
 msgstr "{skipped} assets were skipped (no longer unused) and {failed} could not be removed from storage."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:161
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:171
 msgid "5GFb1S"
 msgstr "View full-size image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:185
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:195
 msgid "FRVN+N"
 msgstr "unknown size"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:195
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:205
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:230
 msgid "5q3qC0"
 msgstr "Download"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:222
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:232
 msgid "YBqMhH"
 msgstr "Delete {count} unused assets"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:223
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:233
 msgid "qZQETl"
 msgstr "This permanently removes {count} assets ({size}) from storage and the database. This action cannot be undone."
 
@@ -4544,15 +4550,11 @@ msgstr "{count} unused social-media entries"
 msgid "dwXvCF"
 msgstr "{skipped} entries were skipped (no longer unused)."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:150
-msgid "B3wlOH"
-msgstr "Select this entry"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:192
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:184
 msgid "chZ5Al"
 msgstr "Delete {count} unused social-media entries"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:193
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:187
 msgid "E3PgoW"
 msgstr "This permanently removes {count} social-media entries from the database. This action cannot be undone."
 
@@ -5452,7 +5454,7 @@ msgstr "Link to"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:171
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:114
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:92
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:88
 msgid "450Fty"
 msgstr "None"
 
@@ -6508,7 +6510,7 @@ msgstr "New document or policy"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:80
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:125
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:110
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:106
 msgid "wmirkP"
 msgstr "Document"
 
@@ -6518,17 +6520,17 @@ msgid "TnBQEa"
 msgstr "Edit document or policy"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:110
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:88
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:84
 msgid "HpoDwk"
 msgstr "Group"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:137
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:122
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:118
 msgid "t+2Jv7"
 msgstr "Select document"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:153
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:139
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:135
 msgid "Sprtdj"
 msgstr "Please select a document."
 
@@ -6536,11 +6538,11 @@ msgstr "Please select a document."
 msgid "+cdmAf"
 msgstr "Enter the document or policy details."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:110
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:106
 msgid "3uK0Qq"
 msgstr "Select or upload a document."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:157
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:153
 msgid "9PQRIm"
 msgstr "Document or policy"
 

@@ -4,6 +4,7 @@ import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { Link } from "@dariah-eric/ui/link";
 import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
+import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import {
 	Table,
 	TableBody,
@@ -14,7 +15,8 @@ import {
 } from "@dariah-eric/ui/table";
 import { AlertTriangleIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useState, useTransition } from "react";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
+import type { Selection } from "react-aria-components";
 
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { cleanRichTextAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/clean-richtext.action";
@@ -37,43 +39,40 @@ export function RichTextCleanup(props: Readonly<RichTextCleanupProps>): ReactNod
 	const t = useExtracted();
 	const router = useRouter();
 
-	const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+	const [removedIds, setRemovedIds] = useState<ReadonlySet<string>>(new Set());
+	const visibleBlocks = blocks.filter((block) => !removedIds.has(block.contentBlockId));
+
+	const [selected, setSelected] = useState<Selection>(() => new Set());
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 	const [isPending, startTransition] = useTransition();
 	const [result, setResult] = useState<CleanRichTextResult | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
-	const allSelected = blocks.length > 0 && selected.size === blocks.length;
-
-	const rows = blocks.map((block) => {
+	const rows = visibleBlocks.map((block) => {
 		return { ...block, id: block.contentBlockId };
 	});
 
+	// Selection persists across pages, so normalise to an explicit set of ids we can measure and
+	// clean. The `"all"` sentinel only arises from a keyboard select-all over the current page.
+	const selectedIds = selected === "all" ? new Set(rows.map((row) => row.id)) : selected;
+
+	const allSelected = rows.length > 0 && selectedIds.size === rows.length;
+
 	const { page, pageItems, perPage, setPage, totalItems, totalPages } = useClientPagination(rows);
 
-	function toggle(id: string, isSelected: boolean) {
-		setSelected((current) => {
-			const next = new Set(current);
-			if (isSelected) {
-				next.add(id);
-			} else {
-				next.delete(id);
-			}
-			return next;
-		});
-	}
-
 	function toggleAll(isSelected: boolean) {
-		setSelected(isSelected ? new Set(blocks.map((block) => block.contentBlockId)) : new Set());
+		setSelected(isSelected ? new Set(rows.map((row) => row.id)) : new Set());
 	}
 
 	function confirmClean() {
-		const ids = Array.from(selected);
+		const ids = Array.from(selectedIds, String);
 		setError(null);
 
 		startTransition(async () => {
 			try {
 				const cleanResult = await cleanRichTextAction(ids);
+				const cleanedIds = ids.filter((id) => !cleanResult.skippedIds.includes(id));
+				setRemovedIds((current) => new Set([...current, ...cleanedIds]));
 				setResult(cleanResult);
 				setSelected(new Set());
 				setIsConfirmOpen(false);
@@ -84,7 +83,7 @@ export function RichTextCleanup(props: Readonly<RichTextCleanupProps>): ReactNod
 		});
 	}
 
-	if (blocks.length === 0) {
+	if (visibleBlocks.length === 0) {
 		return (
 			<div className="my-8 text-balance text-muted-fg text-sm">
 				{result != null && result.cleanedCount > 0
@@ -98,18 +97,18 @@ export function RichTextCleanup(props: Readonly<RichTextCleanupProps>): ReactNod
 		<div className="flex flex-col gap-y-(--layout-padding)">
 			<div className="flex flex-wrap items-center justify-between gap-2">
 				<Checkbox isSelected={allSelected} onChange={toggleAll}>
-					{t("{count} content blocks to normalise", { count: String(blocks.length) })}
+					{t("{count} content blocks to normalise", { count: String(visibleBlocks.length) })}
 				</Checkbox>
 
 				<Button
 					intent="warning"
-					isDisabled={selected.size === 0 || isPending}
+					isDisabled={selectedIds.size === 0 || isPending}
 					onPress={() => {
 						setIsConfirmOpen(true);
 					}}
 				>
-					{selected.size > 0
-						? t("Normalise selected ({count})", { count: String(selected.size) })
+					{selectedIds.size > 0
+						? t("Normalise selected ({count})", { count: String(selectedIds.size) })
 						: t("Normalise selected")}
 				</Button>
 			</div>
@@ -129,11 +128,12 @@ export function RichTextCleanup(props: Readonly<RichTextCleanupProps>): ReactNod
 			<Table
 				aria-label={t("Rich-text to normalise")}
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSelectionChange={setSelected}
+				selectedKeys={selected}
+				selectionBehavior="toggle"
+				selectionMode="multiple"
 			>
 				<TableHeader>
-					<TableColumn className="inline-px" id="select">
-						{t("Select")}
-					</TableColumn>
 					<TableColumn id="entity" isRowHeader={true}>
 						{t("Entity")}
 					</TableColumn>
@@ -142,7 +142,7 @@ export function RichTextCleanup(props: Readonly<RichTextCleanupProps>): ReactNod
 					<TableColumn id="block">{t("Block")}</TableColumn>
 					<TableColumn id="status">{t("Status")}</TableColumn>
 				</TableHeader>
-				<TableBody dependencies={[selected]} items={pageItems}>
+				<TableBody items={pageItems}>
 					{(block) => {
 						const href = getEntityDetailHref({
 							entityType: block.entityType,
@@ -152,15 +152,6 @@ export function RichTextCleanup(props: Readonly<RichTextCleanupProps>): ReactNod
 
 						return (
 							<TableRow id={block.id}>
-								<TableCell>
-									<Checkbox
-										aria-label={t("Select this block")}
-										isSelected={selected.has(block.contentBlockId)}
-										onChange={(value) => {
-											toggle(block.contentBlockId, value);
-										}}
-									/>
-								</TableCell>
 								<TableCell>
 									{href != null ? (
 										<Link className="underline" href={href}>
@@ -199,10 +190,10 @@ export function RichTextCleanup(props: Readonly<RichTextCleanupProps>): ReactNod
 				}}
 			>
 				<ModalHeader
-					title={t("Normalise {count} content blocks", { count: String(selected.size) })}
+					title={t("Normalise {count} content blocks", { count: String(selectedIds.size) })}
 					description={t(
 						"This rewrites the rich text of {count} content blocks to remove empty paragraphs, stray line breaks, non-breaking spaces, imported HTML attributes, and bold headings. This action cannot be undone.",
-						{ count: String(selected.size) },
+						{ count: String(selectedIds.size) },
 					)}
 				/>
 				{error != null ? (
@@ -219,7 +210,14 @@ export function RichTextCleanup(props: Readonly<RichTextCleanupProps>): ReactNod
 				<ModalFooter>
 					<ModalClose isDisabled={isPending}>{t("Cancel")}</ModalClose>
 					<Button intent="warning" isPending={isPending} onPress={confirmClean}>
-						{t("Normalise")}
+						{isPending ? (
+							<Fragment>
+								<ProgressCircle aria-label={t("Normalising...")} isIndeterminate={true} />
+								<span aria-hidden={true}>{t("Normalising...")}</span>
+							</Fragment>
+						) : (
+							t("Normalise")
+						)}
 					</Button>
 				</ModalFooter>
 			</ModalContent>
