@@ -1,5 +1,5 @@
 import type { JSONContent } from "@tiptap/core";
-import { getExtracted } from "next-intl/server";
+import { getExtracted, getFormatter } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { RichTextView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-view";
@@ -46,14 +46,14 @@ function formatRole(role: string): string {
 		.replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
-const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "medium" });
-
 export async function WorkingGroupReportSummary(
 	props: Readonly<WorkingGroupReportSummaryProps>,
 ): Promise<ReactNode> {
 	const { data, extraSectionLinks } = props;
 
 	const t = await getExtracted();
+	// Inherits the app's global `timeZone: "UTC"`, so stored event dates never shift by timezone.
+	const format = await getFormatter();
 
 	const dataLabel = t("Working group data");
 	const chairsLabel = t("Chairs");
@@ -142,7 +142,7 @@ export async function WorkingGroupReportSummary(
 									<div className="flex flex-col gap-y-0.5">
 										<span className="text-sm font-medium text-fg">{event.title}</span>
 										<span className="text-xs text-muted-fg">
-											{dateFormatter.format(new Date(event.date))}
+											{format.dateTime(new Date(event.date), { dateStyle: "medium" })}
 											{" · "}
 											<span className="capitalize">{event.role}</span>
 										</span>

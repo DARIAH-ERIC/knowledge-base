@@ -93,14 +93,16 @@ export function WebAddressesCheck(props: Readonly<WebAddressesCheckProps>): Reac
 						return (
 							<TableRow id={finding.id}>
 								<TableCell>
-									<div className="flex flex-col items-start gap-y-1">
-										{href != null ? (
-											<Link className="underline" href={href}>
-												{finding.recordLabel}
-											</Link>
-										) : (
-											<span>{finding.recordLabel}</span>
-										)}
+									<div className="flex min-inline-0 flex-col items-start gap-y-1">
+										<div className="max-inline-80 truncate" title={finding.recordLabel}>
+											{href != null ? (
+												<Link className="underline" href={href}>
+													{finding.recordLabel}
+												</Link>
+											) : (
+												finding.recordLabel
+											)}
+										</div>
 										{finding.status != null ? (
 											<Badge intent="secondary">{finding.status}</Badge>
 										) : null}
