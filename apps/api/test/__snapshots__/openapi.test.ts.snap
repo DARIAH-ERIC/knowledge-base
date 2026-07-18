@@ -3264,10 +3264,12 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "duration": {
             "properties": {
               "end": {
+                "description": "Event date-time in UTC. The time-of-day is meaningful only for timed events (\`isFullDay\` = false); for an all-day event it is UTC midnight (start) or end-of-day 23:59:59 (end) and should be read as a calendar date. UTC stands in for the event's own timezone — do not convert to local time, or the day may shift.",
                 "format": "date-time",
                 "type": "string",
               },
               "start": {
+                "description": "Event date-time in UTC. The time-of-day is meaningful only for timed events (\`isFullDay\` = false); for an all-day event it is UTC midnight (start) or end-of-day 23:59:59 (end) and should be read as a calendar date. UTC stands in for the event's own timezone — do not convert to local time, or the day may shift.",
                 "format": "date-time",
                 "type": "string",
               },
@@ -3525,12 +3527,12 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "duration": {
             "properties": {
               "end": {
-                "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                "description": "Event date-time in UTC. The time-of-day is meaningful only for timed events (\`isFullDay\` = false); for an all-day event it is UTC midnight (start) or end-of-day 23:59:59 (end) and should be read as a calendar date. UTC stands in for the event's own timezone — do not convert to local time, or the day may shift.",
                 "format": "date-time",
                 "type": "string",
               },
               "start": {
-                "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                "description": "Event date-time in UTC. The time-of-day is meaningful only for timed events (\`isFullDay\` = false); for an all-day event it is UTC midnight (start) or end-of-day 23:59:59 (end) and should be read as a calendar date. UTC stands in for the event's own timezone — do not convert to local time, or the day may shift.",
                 "format": "date-time",
                 "type": "string",
               },
@@ -3645,12 +3647,12 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "duration": {
             "properties": {
               "end": {
-                "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                "description": "Event date-time in UTC. The time-of-day is meaningful only for timed events (\`isFullDay\` = false); for an all-day event it is UTC midnight (start) or end-of-day 23:59:59 (end) and should be read as a calendar date. UTC stands in for the event's own timezone — do not convert to local time, or the day may shift.",
                 "format": "date-time",
                 "type": "string",
               },
               "start": {
-                "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                "description": "Event date-time in UTC. The time-of-day is meaningful only for timed events (\`isFullDay\` = false); for an all-day event it is UTC midnight (start) or end-of-day 23:59:59 (end) and should be read as a calendar date. UTC stands in for the event's own timezone — do not convert to local time, or the day may shift.",
                 "format": "date-time",
                 "type": "string",
               },
