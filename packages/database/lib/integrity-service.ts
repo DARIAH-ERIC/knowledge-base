@@ -1,5 +1,5 @@
 import type { JSONContent } from "@tiptap/core";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import type { PgColumn } from "drizzle-orm/pg-core";
 
 import type { Database, Transaction } from "./index";
@@ -2498,4 +2498,412 @@ export async function checkDuplicateEntities(
 
 		return { findings: [], errors };
 	}
+}
+
+/**
+ * Data-integrity check that stored web addresses are well-formed. Every URL-bearing column should
+ * hold an absolute URL with an explicit scheme, and that scheme should be `https` rather than the
+ * insecure `http` — a value with no scheme, a non-web scheme, or anything that does not parse is
+ * flagged, and a plain `http` URL is flagged as insecure so it can be upgraded.
+ *
+ * Social-media entries are the one exception: a contact channel is sometimes an email address
+ * rather than a web page, so for that column a bare email address (or a `mailto:` link) is accepted
+ * in place of a URL.
+ *
+ * The check covers the dedicated URL columns only — the website of an event or opportunity, a
+ * document/policy link, a license URL, a social-media URL, an embed block's URL, and a
+ * working-group report event's URL. URLs embedded inside rich-text content (inline link marks, hero
+ * call-to-action buttons) are deliberately out of scope: those legitimately include relative,
+ * anchor, and `mailto:` links that this absolute-URL rule would mis-flag, and they need a separate
+ * check.
+ *
+ * Reporting only — the correct address cannot be guessed automatically. Shared by the
+ * `@dariah-eric/audit` cli scripts and the admin dashboard.
+ */
+
+/** Which column set a finding came from — groups findings and drives the dashboard's link. */
+export type WebAddressSource =
+	| "social_media"
+	| "event_website"
+	| "opportunity_website"
+	| "document_policy_url"
+	| "license_url"
+	| "embed_block_url"
+	| "working_group_report_event_url";
+
+/**
+ * `insecure_scheme`: a valid web URL that uses `http` instead of `https`. `invalid`: a value that
+ * is not an absolute `http(s)` URL at all (no scheme, a non-web scheme, or unparseable) — and, for
+ * columns that allow it, not an email address either.
+ */
+export type WebAddressFindingKind = "insecure_scheme" | "invalid";
+
+/** Per-column policy: whether a bare email address is an acceptable value in place of a URL. */
+export interface WebAddressPolicy {
+	/** Accept a bare email address or a `mailto:` link instead of a web URL (social-media only). */
+	allowEmail: boolean;
+}
+
+/** A bare email address with no scheme — the alternative some columns accept in place of a URL. */
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
+
+/**
+ * Pure validation of a single stored value against a column's policy, so the rules are
+ * unit-testable without a database. Returns the kind of problem, or `null` when the value is
+ * acceptable.
+ */
+export function validateWebAddress(
+	value: string,
+	policy: WebAddressPolicy,
+): WebAddressFindingKind | null {
+	const trimmed = value.trim();
+
+	if (policy.allowEmail) {
+		if (emailPattern.test(trimmed)) {
+			return null;
+		}
+		const withoutMailto = trimmed.replace(/^mailto:/iu, "");
+		if (withoutMailto !== trimmed) {
+			return emailPattern.test(withoutMailto) ? null : "invalid";
+		}
+	}
+
+	let parsed: URL;
+	try {
+		parsed = new URL(trimmed);
+	} catch {
+		return "invalid";
+	}
+
+	// A URL like `https:///path` parses but has no host, which is never a usable web address.
+	if (parsed.hostname === "") {
+		return "invalid";
+	}
+
+	switch (parsed.protocol) {
+		case "https:": {
+			return null;
+		}
+		case "http:": {
+			return "insecure_scheme";
+		}
+		default: {
+			return "invalid";
+		}
+	}
+}
+
+function describeWebAddress(kind: WebAddressFindingKind, policy: WebAddressPolicy): string {
+	switch (kind) {
+		case "insecure_scheme": {
+			return 'Uses an insecure "http" scheme; change it to "https".';
+		}
+		case "invalid": {
+			return policy.allowEmail
+				? "Is not a valid URL (with an https scheme) or email address."
+				: "Is not a valid URL with an https scheme.";
+		}
+	}
+}
+
+export interface WebAddressFinding {
+	kind: WebAddressFindingKind;
+	source: WebAddressSource;
+	/** Human-readable name of the column set, e.g. "Event website". */
+	sourceLabel: string;
+	/** Display name of the offending record (entity label, social-media name, etc.). */
+	recordLabel: string;
+	/** The stored value that failed validation. */
+	value: string;
+	detail: string;
+	/** For entity-backed records: the entity type and slug, so the dashboard can link to its page. */
+	entityType: string | null;
+	entitySlug: string | null;
+	/** Lifecycle status of the owning entity version (e.g. `draft`), when the record is versioned. */
+	status: string | null;
+	/** For social-media records: the row id, so the dashboard can link to its edit page. */
+	socialMediaId: string | null;
+}
+
+export interface WebAddressCheckResult {
+	findings: Array<WebAddressFinding>;
+	/** Sources which could not run. */
+	errors: Array<string>;
+}
+
+/** Shared fields every {@link WebAddressFinding} needs beyond the value being validated. */
+type WebAddressFindingMeta = Pick<
+	WebAddressFinding,
+	| "source"
+	| "sourceLabel"
+	| "recordLabel"
+	| "entityType"
+	| "entitySlug"
+	| "socialMediaId"
+	| "status"
+>;
+
+/** Validates one stored value and, if it fails, turns it into a finding under the given policy. */
+function toWebAddressFinding(
+	value: string,
+	policy: WebAddressPolicy,
+	meta: WebAddressFindingMeta,
+): WebAddressFinding | null {
+	const kind = validateWebAddress(value, policy);
+	if (kind == null) {
+		return null;
+	}
+	return { ...meta, kind, value, detail: describeWebAddress(kind, policy) };
+}
+
+const httpsPolicy: WebAddressPolicy = { allowEmail: false };
+const emailOrHttpsPolicy: WebAddressPolicy = { allowEmail: true };
+
+/** Turns rows from an entity-subtype URL column into findings, tagging each with its owning entity. */
+function buildEntityColumnFindings(
+	rows: Array<{
+		value: string | null;
+		entityType: string;
+		slug: string;
+		label: string | null;
+		status: string;
+	}>,
+	source: WebAddressSource,
+	sourceLabel: string,
+): Array<WebAddressFinding> {
+	const findings: Array<WebAddressFinding> = [];
+	for (const row of rows) {
+		if (row.value == null) {
+			continue;
+		}
+		const finding = toWebAddressFinding(row.value, httpsPolicy, {
+			source,
+			sourceLabel,
+			recordLabel: row.label ?? row.slug,
+			entityType: row.entityType,
+			entitySlug: row.slug,
+			status: row.status,
+			socialMediaId: null,
+		});
+		if (finding != null) {
+			findings.push(finding);
+		}
+	}
+	return findings;
+}
+
+async function checkEventWebsites(db: Database | Transaction): Promise<Array<WebAddressFinding>> {
+	const rows = await db
+		.select({
+			value: schema.events.website,
+			entityType: schema.entityTypes.type,
+			slug: schema.entities.slug,
+			label: schema.entities.label,
+			status: schema.entityStatus.type,
+		})
+		.from(schema.events)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.events.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+		.where(isNotNull(schema.events.website));
+
+	return buildEntityColumnFindings(rows, "event_website", "Event website");
+}
+
+async function checkOpportunityWebsites(
+	db: Database | Transaction,
+): Promise<Array<WebAddressFinding>> {
+	const rows = await db
+		.select({
+			value: schema.opportunities.website,
+			entityType: schema.entityTypes.type,
+			slug: schema.entities.slug,
+			label: schema.entities.label,
+			status: schema.entityStatus.type,
+		})
+		.from(schema.opportunities)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.opportunities.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+		.where(isNotNull(schema.opportunities.website));
+
+	return buildEntityColumnFindings(rows, "opportunity_website", "Opportunity website");
+}
+
+async function checkDocumentPolicyUrls(
+	db: Database | Transaction,
+): Promise<Array<WebAddressFinding>> {
+	const rows = await db
+		.select({
+			value: schema.documentsPolicies.url,
+			entityType: schema.entityTypes.type,
+			slug: schema.entities.slug,
+			label: schema.entities.label,
+			status: schema.entityStatus.type,
+		})
+		.from(schema.documentsPolicies)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.documentsPolicies.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+		.where(isNotNull(schema.documentsPolicies.url));
+
+	return buildEntityColumnFindings(rows, "document_policy_url", "Document/policy link");
+}
+
+async function checkSocialMediaUrls(db: Database | Transaction): Promise<Array<WebAddressFinding>> {
+	const rows = await db
+		.select({
+			id: schema.socialMedia.id,
+			name: schema.socialMedia.name,
+			url: schema.socialMedia.url,
+		})
+		.from(schema.socialMedia);
+
+	const findings: Array<WebAddressFinding> = [];
+	for (const row of rows) {
+		const finding = toWebAddressFinding(row.url, emailOrHttpsPolicy, {
+			source: "social_media",
+			sourceLabel: "Social media",
+			recordLabel: row.name,
+			entityType: null,
+			entitySlug: null,
+			status: null,
+			socialMediaId: row.id,
+		});
+		if (finding != null) {
+			findings.push(finding);
+		}
+	}
+	return findings;
+}
+
+async function checkLicenseUrls(db: Database | Transaction): Promise<Array<WebAddressFinding>> {
+	const rows = await db
+		.select({ name: schema.licenses.name, url: schema.licenses.url })
+		.from(schema.licenses);
+
+	const findings: Array<WebAddressFinding> = [];
+	for (const row of rows) {
+		const finding = toWebAddressFinding(row.url, httpsPolicy, {
+			source: "license_url",
+			sourceLabel: "License",
+			recordLabel: row.name,
+			entityType: null,
+			entitySlug: null,
+			status: null,
+			socialMediaId: null,
+		});
+		if (finding != null) {
+			findings.push(finding);
+		}
+	}
+	return findings;
+}
+
+async function checkEmbedBlockUrls(db: Database | Transaction): Promise<Array<WebAddressFinding>> {
+	const rows = await db
+		.select({
+			value: schema.embedContentBlocks.url,
+			title: schema.embedContentBlocks.title,
+			entityType: schema.entityTypes.type,
+			slug: schema.entities.slug,
+			label: schema.entities.label,
+			status: schema.entityStatus.type,
+		})
+		.from(schema.embedContentBlocks)
+		.innerJoin(schema.contentBlocks, eq(schema.contentBlocks.id, schema.embedContentBlocks.id))
+		.innerJoin(schema.fields, eq(schema.fields.id, schema.contentBlocks.fieldId))
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.fields.entityVersionId))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId));
+
+	const findings: Array<WebAddressFinding> = [];
+	for (const row of rows) {
+		const label = row.label ?? row.slug;
+		const finding = toWebAddressFinding(row.value, httpsPolicy, {
+			source: "embed_block_url",
+			sourceLabel: "Embed block",
+			// The embed's own title, plus the entity it lives on, so an editor can find it.
+			recordLabel: row.title !== "" ? `${row.title} (${label})` : label,
+			entityType: row.entityType,
+			entitySlug: row.slug,
+			status: row.status,
+			socialMediaId: null,
+		});
+		if (finding != null) {
+			findings.push(finding);
+		}
+	}
+	return findings;
+}
+
+async function checkWorkingGroupReportEventUrls(
+	db: Database | Transaction,
+): Promise<Array<WebAddressFinding>> {
+	const rows = await db
+		.select({
+			title: schema.workingGroupReportEvents.title,
+			url: schema.workingGroupReportEvents.url,
+		})
+		.from(schema.workingGroupReportEvents)
+		.where(isNotNull(schema.workingGroupReportEvents.url));
+
+	const findings: Array<WebAddressFinding> = [];
+	for (const row of rows) {
+		if (row.url == null) {
+			continue;
+		}
+		const finding = toWebAddressFinding(row.url, httpsPolicy, {
+			source: "working_group_report_event_url",
+			sourceLabel: "Working-group report event",
+			recordLabel: row.title,
+			entityType: null,
+			entitySlug: null,
+			status: null,
+			socialMediaId: null,
+		});
+		if (finding != null) {
+			findings.push(finding);
+		}
+	}
+	return findings;
+}
+
+export async function checkWebAddresses(
+	db: Database | Transaction,
+): Promise<WebAddressCheckResult> {
+	const findings: Array<WebAddressFinding> = [];
+	const errors: Array<string> = [];
+
+	const sources: Array<() => Promise<Array<WebAddressFinding>>> = [
+		() => checkSocialMediaUrls(db),
+		() => checkEventWebsites(db),
+		() => checkOpportunityWebsites(db),
+		() => checkDocumentPolicyUrls(db),
+		() => checkLicenseUrls(db),
+		() => checkEmbedBlockUrls(db),
+		() => checkWorkingGroupReportEventUrls(db),
+	];
+
+	for (const run of sources) {
+		try {
+			findings.push(...(await run()));
+		} catch (error) {
+			// oxlint-disable-next-line unicorn/no-instanceof-builtins
+			errors.push(error instanceof Error ? error.message : String(error));
+		}
+	}
+
+	findings.sort(
+		(a, b) =>
+			a.sourceLabel.localeCompare(b.sourceLabel) ||
+			a.recordLabel.localeCompare(b.recordLabel) ||
+			a.value.localeCompare(b.value),
+	);
+
+	return { findings, errors };
 }

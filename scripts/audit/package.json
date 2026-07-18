@@ -13,6 +13,7 @@
 		"data:audit:paired-relations": "tsx ./scripts/audit-paired-relations.ts",
 		"data:audit:relation-vocabulary": "tsx ./scripts/audit-relation-vocabulary.ts",
 		"data:audit:unit-relation-requirements": "tsx ./scripts/audit-unit-relation-requirements.ts",
+		"data:audit:web-addresses": "tsx ./scripts/audit-web-addresses.ts",
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",
 		"lint:check": "oxlint --report-unused-disable-directives --type-aware --type-check",

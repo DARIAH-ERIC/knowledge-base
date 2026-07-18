@@ -17,12 +17,17 @@ import {
 	type RelationSide,
 	type UnitRelationRequirementCheckResult,
 	type UnitRelationRequirementFinding,
+	type WebAddressCheckResult,
+	type WebAddressFinding,
+	type WebAddressFindingKind,
+	type WebAddressSource,
 	checkCountryMembership,
 	checkHeadingHierarchy,
 	checkInactiveUnitRelations,
 	checkMutuallyExclusiveUnitRelations,
 	checkPairedRelations,
 	checkUnitRelationRequirements,
+	checkWebAddresses,
 } from "@dariah-eric/database/integrity-service";
 
 import { db } from "@/lib/db";
@@ -46,6 +51,10 @@ export type {
 	RelationSide,
 	UnitRelationRequirementCheckResult,
 	UnitRelationRequirementFinding,
+	WebAddressCheckResult,
+	WebAddressFinding,
+	WebAddressFindingKind,
+	WebAddressSource,
 };
 
 /**
@@ -101,4 +110,13 @@ export async function getCountryMembershipFindings(): Promise<CountryMembershipC
  */
 export async function getHeadingHierarchyFindings(): Promise<HeadingHierarchyCheckResult> {
 	return checkHeadingHierarchy(db);
+}
+
+/**
+ * Runs the web-address checks (e.g. an event website, a social-media URL, or a document/policy link
+ * must be a valid `https` URL — a social-media entry may instead be an email address). Reporting
+ * only — the correct address needs an editor. Same check as the `@dariah-eric/audit` cli scripts.
+ */
+export async function getWebAddressFindings(): Promise<WebAddressCheckResult> {
+	return checkWebAddresses(db);
 }

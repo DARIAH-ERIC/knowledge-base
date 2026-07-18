@@ -27,6 +27,7 @@ import {
 	normalizeName,
 	normalizeUrl,
 	pairedRelationRules,
+	validateWebAddress,
 } from "./integrity-service";
 
 const d = (value: string): Date => new Date(value);
@@ -1337,5 +1338,63 @@ describe("buildDuplicateCandidateFindings", () => {
 		]);
 
 		expect(findings.map((finding) => finding.type)).toStrictEqual(["persons", "projects"]);
+	});
+});
+
+describe("validateWebAddress", () => {
+	const httpsOnly = { allowEmail: false };
+	const emailOrHttps = { allowEmail: true };
+
+	it("accepts an https URL", () => {
+		expect(validateWebAddress("https://example.org", httpsOnly)).toBeNull();
+		expect(validateWebAddress("https://example.org/path?q=1#x", httpsOnly)).toBeNull();
+	});
+
+	it("flags an http URL as insecure rather than invalid", () => {
+		expect(validateWebAddress("http://example.org", httpsOnly)).toBe("insecure_scheme");
+	});
+
+	it("trims surrounding whitespace before validating", () => {
+		expect(validateWebAddress("  https://example.org  ", httpsOnly)).toBeNull();
+	});
+
+	it("flags a value with no scheme as invalid", () => {
+		expect(validateWebAddress("example.org", httpsOnly)).toBe("invalid");
+		expect(validateWebAddress("www.example.org/path", httpsOnly)).toBe("invalid");
+	});
+
+	it("flags a non-web scheme as invalid", () => {
+		expect(validateWebAddress("ftp://example.org", httpsOnly)).toBe("invalid");
+	});
+
+	it("flags an empty or unparseable value as invalid", () => {
+		expect(validateWebAddress("", httpsOnly)).toBe("invalid");
+		expect(validateWebAddress("   ", httpsOnly)).toBe("invalid");
+		expect(validateWebAddress("not a url", httpsOnly)).toBe("invalid");
+	});
+
+	it("flags an https URL with no host as invalid", () => {
+		expect(validateWebAddress("https://", httpsOnly)).toBe("invalid");
+	});
+
+	it("does not accept an email address when the policy forbids it", () => {
+		expect(validateWebAddress("info@example.org", httpsOnly)).toBe("invalid");
+	});
+
+	it("accepts a bare email address when the policy allows it", () => {
+		expect(validateWebAddress("info@example.org", emailOrHttps)).toBeNull();
+	});
+
+	it("accepts a mailto: link when the policy allows email", () => {
+		expect(validateWebAddress("mailto:info@example.org", emailOrHttps)).toBeNull();
+	});
+
+	it("flags a malformed mailto: link as invalid", () => {
+		expect(validateWebAddress("mailto:not-an-email", emailOrHttps)).toBe("invalid");
+	});
+
+	it("still requires https for URLs even when email is allowed", () => {
+		expect(validateWebAddress("http://example.org", emailOrHttps)).toBe("insecure_scheme");
+		expect(validateWebAddress("https://example.org", emailOrHttps)).toBeNull();
 	});
 });
