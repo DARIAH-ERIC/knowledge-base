@@ -6,6 +6,7 @@ interface ErrorMessages {
 	invalidData: string;
 	missingData: string;
 	missingRelatedRecord: string;
+	publishedPathChange: string;
 	publishedSlugRename: string;
 	recordConflict: string;
 	socialMediaKpiConflict: string;
@@ -19,6 +20,9 @@ export function getUserFacingErrorMessage(error: unknown, messages: ErrorMessage
 	const appError = findUserFacingError(error);
 	if (appError != null) {
 		switch (appError.kind) {
+			case "published-path-change": {
+				return messages.publishedPathChange;
+			}
 			case "published-slug-rename": {
 				return messages.publishedSlugRename;
 			}

@@ -934,7 +934,7 @@ msgstr "Rich text"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-page-details.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-page-form.tsx:51
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:91
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:145
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:141
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:122
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:128
@@ -1169,7 +1169,7 @@ msgstr "selected"
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:75
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:99
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:77
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx:152
 msgid "bWjdfa"
 msgstr "URL"
@@ -2110,6 +2110,20 @@ msgstr "Discard"
 msgid "CYbwwJ"
 msgstr "Open actions menu"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-path-field.tsx:37
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-path-field.tsx:50
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:73
+msgid "Qp1beM"
+msgstr "Path"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-path-field.tsx:40
+msgid "aQdn2o"
+msgstr "This page is published, so its address is public. Changing it can break existing links, so it is done by an administrator on the Maintenance page."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-path-field.tsx:53
+msgid "ppRfqY"
+msgstr "The full website address this page renders at, like /about/strategy. It isn't public until the page is published, so you can still change it freely. Leave empty if the page has no address yet."
+
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:71
 msgid "zK20E5"
 msgstr "Link related entities."
@@ -2194,7 +2208,6 @@ msgstr "No related resources"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:78
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:69
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:76
 msgid "IoDlcd"
 msgstr "Slug"
@@ -2595,7 +2608,7 @@ msgstr "ROR"
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-step-nav.tsx:30
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:93
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:71
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:67
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:71
@@ -3408,7 +3421,7 @@ msgstr "Enter the documentation page details."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:62
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-page-form.tsx:51
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:145
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:141
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:184
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:159
@@ -5452,7 +5465,7 @@ msgstr "Link to"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:171
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:114
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:92
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:88
 msgid "450Fty"
 msgstr "None"
 
@@ -6508,7 +6521,7 @@ msgstr "New document or policy"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:80
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:125
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:110
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:106
 msgid "wmirkP"
 msgstr "Document"
 
@@ -6518,17 +6531,17 @@ msgid "TnBQEa"
 msgstr "Edit document or policy"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:110
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:88
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:84
 msgid "HpoDwk"
 msgstr "Group"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:137
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:122
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:118
 msgid "t+2Jv7"
 msgstr "Select document"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:153
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:139
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:135
 msgid "Sprtdj"
 msgstr "Please select a document."
 
@@ -6536,11 +6549,11 @@ msgstr "Please select a document."
 msgid "+cdmAf"
 msgstr "Enter the document or policy details."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:110
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:106
 msgid "3uK0Qq"
 msgstr "Select or upload a document."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:157
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:153
 msgid "9PQRIm"
 msgstr "Document or policy"
 
@@ -7375,30 +7388,35 @@ msgstr "A related record no longer exists. Refresh the page and try again."
 
 #: lib/server/create-command-action.ts:142
 #: lib/server/create-server-action.ts:116
-msgid "G5W8LK"
-msgstr "This entity is published, so its address can only be changed by an administrator on the Maintenance page."
+msgid "q9rxAh"
+msgstr "This page is published, so its path can only be changed by an administrator on the Maintenance page."
 
 #: lib/server/create-command-action.ts:145
 #: lib/server/create-server-action.ts:119
+msgid "G5W8LK"
+msgstr "This entity is published, so its address can only be changed by an administrator on the Maintenance page."
+
+#: lib/server/create-command-action.ts:148
+#: lib/server/create-server-action.ts:122
 msgid "FhIASk"
 msgstr "This record conflicts with an existing record."
 
-#: lib/server/create-command-action.ts:146
-#: lib/server/create-server-action.ts:120
+#: lib/server/create-command-action.ts:149
+#: lib/server/create-server-action.ts:123
 msgid "Jl3xT+"
 msgstr "Both accounts have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge."
 
-#: lib/server/create-command-action.ts:149
-#: lib/server/create-server-action.ts:123
+#: lib/server/create-command-action.ts:152
+#: lib/server/create-server-action.ts:126
 msgid "qDy0wr"
 msgstr "The submitted data violates a data rule."
 
-#: lib/server/create-command-action.ts:150
-#: lib/server/create-server-action.ts:124
+#: lib/server/create-command-action.ts:153
+#: lib/server/create-server-action.ts:127
 msgid "Bosjdo"
 msgstr "The submitted data is incomplete."
 
-#: lib/server/create-command-action.ts:153
-#: lib/server/create-server-action.ts:129
+#: lib/server/create-command-action.ts:156
+#: lib/server/create-server-action.ts:132
 msgid "lkI8/e"
 msgstr "Internal server error."

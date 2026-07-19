@@ -113,6 +113,9 @@ export function createServerAction<
 				missingRelatedRecord: t(
 					"A related record no longer exists. Refresh the page and try again.",
 				),
+				publishedPathChange: t(
+					"This page is published, so its path can only be changed by an administrator on the Maintenance page.",
+				),
 				publishedSlugRename: t(
 					"This entity is published, so its address can only be changed by an administrator on the Maintenance page.",
 				),

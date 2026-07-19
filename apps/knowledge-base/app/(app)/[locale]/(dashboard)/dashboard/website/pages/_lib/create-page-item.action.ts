@@ -5,11 +5,15 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { CreatePageItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/create-page-item.schema";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
-import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-lifecycle";
+import {
+	createDraftDocumentWithSlug,
+	publishVersion,
+	updateDraftDocumentPath,
+} from "@/lib/data/entity-lifecycle";
 import { pagesLifecycleAdapter } from "@/lib/data/pages.lifecycle-adapter";
 import { filterToPublishedDocumentIds } from "@/lib/data/relations";
 import { db } from "@/lib/db";
-import { getRequestedSlug } from "@/lib/entity-slug-input";
+import { getRequestedPath } from "@/lib/entity-path-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createMutationAction, getCreatedSlug } from "@/lib/server/create-mutation-action";
@@ -29,10 +33,18 @@ export const createPageItemAction = createMutationAction({
 		});
 		assert(type);
 
+		// Pages are addressed publicly by `path`; the slug is an internal dashboard handle, always
+		// derived (and deduplicated) from the title.
 		const { documentId, versionId, slug } = await createDraftDocumentWithSlug(tx, type.id, {
-			requestedSlug: getRequestedSlug(input.slug),
+			requestedSlug: null,
 			title: input.title,
 		});
+
+		// A page's website path is author-defined; leaving it empty means "not linkable yet".
+		const requestedPath = getRequestedPath(input.path);
+		if (requestedPath != null) {
+			await updateDraftDocumentPath(tx, documentId, requestedPath);
+		}
 
 		let imageId: string | undefined;
 		if (input.imageKey != null) {

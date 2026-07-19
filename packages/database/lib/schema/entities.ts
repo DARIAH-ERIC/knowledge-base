@@ -90,7 +90,10 @@ export const entities = p.snakeCase.table(
 	(t) => [
 		p.unique("entities_type_id_slug_unique").on(t.typeId, t.slug),
 		// Global uniqueness among real paths; nulls (non-pages / un-curated pages) are exempt.
-		p.uniqueIndex("entities_path_unique").on(t.path).where(sql`${t.path} IS NOT NULL`),
+		p
+			.uniqueIndex("entities_path_unique")
+			.on(t.path)
+			.where(sql`${t.path} IS NOT NULL`),
 	],
 );
 

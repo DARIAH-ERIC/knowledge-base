@@ -84,6 +84,7 @@ export default async function DashboardWebsiteEditPageItemPage(
 								columns: {
 									id: true,
 									slug: true,
+									path: true,
 								},
 							},
 							status: {

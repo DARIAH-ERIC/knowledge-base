@@ -111,3 +111,17 @@ export const GetPageBySlug = {
 	),
 	ResponseSchema: PageSchema,
 };
+
+export const GetPageByPath = {
+	QuerySchema: v.pipe(
+		v.object({
+			path: v.pipe(
+				v.string(),
+				v.description("Full root-relative website pathname of the page, e.g. /about/strategy"),
+			),
+		}),
+		v.description("Get page by path query"),
+		v.metadata({ ref: "GetPageByPathQuery" }),
+	),
+	ResponseSchema: PageSchema,
+};

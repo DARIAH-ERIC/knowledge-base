@@ -11,8 +11,6 @@
  * origin.
  */
 
-export { interimPagePathBySlug, resolveInterimPagePath } from "./interim-page-paths";
-
 /**
  * The full website entity vocabulary. Kept in sync with the CMS entity-type and
  * organisational-unit-subtype enums by tests in the consuming packages (a new content type must be

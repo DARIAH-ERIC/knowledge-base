@@ -9,7 +9,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { alias, and, eq, inArray, sql } from "@dariah-eric/database/sql";
 import type { SearchService, WebsiteDocument } from "@dariah-eric/search";
 import type { SearchAdminService } from "@dariah-eric/search/admin";
-import { getEntityHref, resolveInterimPagePath } from "@dariah-eric/website-routes";
+import { getEntityHref } from "@dariah-eric/website-routes";
 
 import { toPlainText } from "./json-content/to-plain-text";
 
@@ -884,6 +884,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 								entity: {
 									columns: {
 										slug: true,
+										path: true,
 									},
 								},
 							},
@@ -895,10 +896,10 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					return null;
 				}
 
-				// Interim: a page's real pathname is not yet stored in the CMS. Skip pages with no
-				// mapped website route so we never index a link that would 404. Remove once pages
-				// own a `path` column (docs/website-url-resolution.md).
-				const path = resolveInterimPagePath(item.entityVersion.entity.slug);
+				// A page's website pathname is author-defined and stored on the document
+				// (entities.path). Skip pages without one — they have no route, so a link would
+				// 404.
+				const path = item.entityVersion.entity.path;
 
 				if (path == null) {
 					return null;
@@ -1838,6 +1839,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						entity: {
 							columns: {
 								slug: true,
+								path: true,
 							},
 						},
 					},
@@ -1846,10 +1848,10 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			// Interim: skip pages whose slug has no mapped website route (they would 404). Remove
-			// once pages own a `path` column (docs/website-url-resolution.md).
+			// Skip pages whose document has no author-defined path (entities.path) — they have
+			// no route, so a link would 404.
 			...pages.flatMap((item) => {
-				const path = resolveInterimPagePath(item.entityVersion.entity.slug);
+				const path = item.entityVersion.entity.path;
 
 				if (path == null) {
 					return [];
