@@ -2,6 +2,13 @@
 
 "use client";
 
+import {
+	type PlaceholderValueVariant,
+	getPlaceholderValueVariants,
+	isPlaceholderValueKind,
+	normalizePlaceholderValueVariant,
+	placeholderValueVariantLabels,
+} from "@dariah-eric/database/placeholder-values";
 import { type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
 import { Typography } from "@tiptap/extension-typography";
@@ -905,10 +912,16 @@ function PlaceholderValueNodeView({
 	getPos,
 	node,
 	selected,
+	updateAttributes,
 	deleteNode,
 }: Readonly<NodeViewProps>): ReactNode {
 	const kind = node.attrs.kind as string | null;
 	const label = (node.attrs.label as string | null) ?? kind ?? "Placeholder value";
+	const variant = normalizePlaceholderValueVariant(node.attrs.variant);
+	// Only list kinds offer a `linked` variant; count kinds render a single number.
+	const variants: ReadonlyArray<PlaceholderValueVariant> = isPlaceholderValueKind(kind)
+		? getPlaceholderValueVariants(kind)
+		: ["plain"];
 
 	const chipClassName = twMerge(
 		"inline-flex items-center gap-x-1 rounded-full border border-border bg-muted px-2 py-0.5 text-sm text-muted-fg",
@@ -963,6 +976,29 @@ function PlaceholderValueNodeView({
 						<p className="text-xs text-muted-fg">
 							{"Replaced with the current value whenever the content is displayed."}
 						</p>
+						{variants.length > 1 ? (
+							<div className="flex flex-col gap-y-1">
+								<span className="text-sm/6 font-medium">{"Display"}</span>
+								<ToggleGroup
+									aria-label="Placeholder display"
+									disallowEmptySelection={true}
+									onSelectionChange={(keys) => {
+										const nextVariant = [...keys][0] as PlaceholderValueVariant | undefined;
+										if (nextVariant != null) {
+											updateAttributes({ variant: nextVariant });
+										}
+									}}
+									selectedKeys={[variant]}
+									size="sm"
+								>
+									{variants.map((value) => (
+										<ToggleGroupItem id={value} key={value}>
+											{placeholderValueVariantLabels[value]}
+										</ToggleGroupItem>
+									))}
+								</ToggleGroup>
+							</div>
+						) : null}
 						<Button intent="outline" onPress={deleteNode} size="sm" type="button">
 							{"Remove"}
 						</Button>
@@ -985,6 +1021,8 @@ export const PlaceholderValueNode = Node.create({
 		return {
 			kind: { default: null },
 			label: { default: null },
+			/** Requested presentation; advisory (see `placeholderValueVariantsEnum`). */
+			variant: { default: "plain" },
 			/** Resolved data attached by the server on read paths; never present in editor content. */
 			value: { default: null },
 		};
@@ -998,6 +1036,7 @@ export const PlaceholderValueNode = Node.create({
 					return {
 						kind: dom.dataset.placeholderValue ?? null,
 						label: dom.textContent,
+						variant: normalizePlaceholderValueVariant(dom.dataset.placeholderVariant),
 					};
 				},
 			},
@@ -1011,6 +1050,7 @@ export const PlaceholderValueNode = Node.create({
 			"span",
 			mergeAttributes({
 				"data-placeholder-value": node.attrs.kind as string | null,
+				"data-placeholder-variant": node.attrs.variant as string,
 			}),
 			resolved ?? (node.attrs.label as string | null) ?? (node.attrs.kind as string | null) ?? "",
 		];

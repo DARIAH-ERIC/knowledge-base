@@ -15,7 +15,7 @@ msgstr "Could not load options."
 
 #: lib/async-list-select.tsx:235
 #: lib/inline-rich-text-editor.tsx:245
-#: lib/rich-text-editor.tsx:1724
+#: lib/rich-text-editor.tsx:1764
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
@@ -164,27 +164,27 @@ msgid "4ZUjCU"
 msgstr "Reorder item"
 
 #: lib/inline-rich-text-editor.tsx:192
-#: lib/rich-text-editor.tsx:1613
+#: lib/rich-text-editor.tsx:1653
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
 #: lib/inline-rich-text-editor.tsx:200
-#: lib/rich-text-editor.tsx:1621
+#: lib/rich-text-editor.tsx:1661
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
 
 #: lib/inline-rich-text-editor.tsx:211
 #: lib/inline-rich-text-editor.tsx:219
-#: lib/rich-text-editor.tsx:1690
-#: lib/rich-text-editor.tsx:1698
+#: lib/rich-text-editor.tsx:1730
+#: lib/rich-text-editor.tsx:1738
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
 #: lib/inline-rich-text-editor.tsx:241
-#: lib/rich-text-editor.tsx:1720
+#: lib/rich-text-editor.tsx:1760
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
@@ -205,37 +205,37 @@ msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: lib/rich-text-editor.tsx:1629
+#: lib/rich-text-editor.tsx:1669
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: lib/rich-text-editor.tsx:1638
+#: lib/rich-text-editor.tsx:1678
 msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
-#: lib/rich-text-editor.tsx:1646
+#: lib/rich-text-editor.tsx:1686
 msgctxt "ui"
 msgid "BDbgCL"
 msgstr "Heading 3"
 
-#: lib/rich-text-editor.tsx:1654
+#: lib/rich-text-editor.tsx:1694
 msgctxt "ui"
 msgid "BKF2fN"
 msgstr "Heading 4"
 
-#: lib/rich-text-editor.tsx:1663
+#: lib/rich-text-editor.tsx:1703
 msgctxt "ui"
 msgid "6sdKFe"
 msgstr "Bullet List"
 
-#: lib/rich-text-editor.tsx:1671
+#: lib/rich-text-editor.tsx:1711
 msgctxt "ui"
 msgid "rU4xig"
 msgstr "Ordered List"
 
-#: lib/rich-text-editor.tsx:1679
+#: lib/rich-text-editor.tsx:1719
 msgctxt "ui"
 msgid "+RDJVD"
 msgstr "Blockquote"
