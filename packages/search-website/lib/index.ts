@@ -7,7 +7,7 @@ import {
 import { getPlaceholderValues } from "@dariah-eric/database/placeholder-values-service";
 import * as schema from "@dariah-eric/database/schema";
 import { alias, and, eq, inArray, sql } from "@dariah-eric/database/sql";
-import type { SearchService, WebsiteDocument } from "@dariah-eric/search";
+import type { SearchService, WebsiteDocument, WebsiteEntityDocument } from "@dariah-eric/search";
 import type { SearchAdminService } from "@dariah-eric/search/admin";
 import { getEntityHref, resolveInterimPagePath } from "@dariah-eric/website-routes";
 
@@ -18,7 +18,10 @@ export type SupportedWebsiteEntityType =
 	| "document-or-policy"
 	| "event"
 	| "funding-call"
+	| "governance-body"
 	| "impact-case-study"
+	| "institution"
+	| "national-consortium"
 	| "news-item"
 	| "opportunity"
 	| "page"
@@ -27,17 +30,26 @@ export type SupportedWebsiteEntityType =
 	| "spotlight-article"
 	| "working-group";
 
+/**
+ * Identifies the search documents belonging to one knowledge-base document (entity). Captured
+ * before an entity is deleted, so its documents can still be removed afterwards.
+ *
+ * `entityId` is the entity (document) id — never an entity _version_ id. Every function in this
+ * module that takes an `entityId` uses that same convention.
+ */
 export interface WebsiteDocumentDescriptor {
+	entityId: string;
 	slug: string;
 	type: SupportedWebsiteEntityType;
 }
 
 export interface SyncWebsiteDocumentResult {
-	entityId?: string;
-	documentId?: string;
-	error?: unknown;
+	entityId: string;
+	upsertedDocumentIds: Array<string>;
+	deletedDocumentIds: Array<string>;
+	errors?: Array<unknown>;
 	ok: boolean;
-	operation: "deleted" | "skipped" | "upserted";
+	operation: "deleted" | "skipped" | "synced";
 }
 
 export interface CreateWebsiteSearchIndexServiceParams {
@@ -56,6 +68,7 @@ type CanonicalWebsiteEntityType =
 	| "document-or-policy"
 	| "event"
 	| "funding-call"
+	| "governance-body"
 	| "impact-case-study"
 	| "institution"
 	| "national-consortium"
@@ -72,7 +85,10 @@ export const supportedWebsiteEntityTypes = [
 	"document-or-policy",
 	"event",
 	"funding-call",
+	"governance-body",
 	"impact-case-study",
+	"institution",
+	"national-consortium",
 	"news-item",
 	"opportunity",
 	"page",
@@ -97,15 +113,17 @@ function mergeDescription(...values: Array<string | null | undefined>): string {
 function createWebsiteEntityDocument(params: {
 	description: string;
 	documentId?: string;
+	entityId: string;
 	importedAt: number;
 	label: string;
 	link: string;
 	sourceId: string;
 	sourceUpdatedAt: Date;
 	type: CanonicalWebsiteEntityType;
-}): WebsiteDocument {
+}): WebsiteEntityDocument {
 	const {
 		description,
+		entityId,
 		importedAt,
 		label,
 		link,
@@ -117,6 +135,7 @@ function createWebsiteEntityDocument(params: {
 
 	return {
 		kind: "entity",
+		entity_id: entityId,
 		source: "dariah-knowledge-base",
 		source_id: sourceId,
 		source_updated_at: sourceUpdatedAt.getTime(),
@@ -151,18 +170,19 @@ function isMissingSearchDocumentError(error: unknown): boolean {
 	return false;
 }
 
-async function getPlainTextFieldContentByEntityId(
+/** Keyed by entity _version_ id — content blocks hang off a version, not off the document. */
+async function getPlainTextFieldContentByVersionId(
 	db: Database,
-	entityIds: Array<string>,
+	versionIds: Array<string>,
 	fieldName: string,
 ): Promise<Map<string, string>> {
-	if (entityIds.length === 0) {
+	if (versionIds.length === 0) {
 		return new Map();
 	}
 
 	const rows = await db
 		.select({
-			entityId: schema.fields.entityVersionId,
+			versionId: schema.fields.entityVersionId,
 			blockType: schema.contentBlockTypes.type,
 			richTextContent: schema.richTextContentBlocks.content,
 			calloutTitle: schema.calloutContentBlocks.title,
@@ -188,7 +208,7 @@ async function getPlainTextFieldContentByEntityId(
 		)
 		.where(
 			and(
-				inArray(schema.fields.entityVersionId, entityIds),
+				inArray(schema.fields.entityVersionId, versionIds),
 				eq(schema.entityTypesFieldsNames.fieldName, fieldName),
 				inArray(schema.contentBlockTypes.type, ["rich_text", "callout"]),
 			),
@@ -203,7 +223,7 @@ async function getPlainTextFieldContentByEntityId(
 			? annotatePlaceholderValues(rows, await getPlaceholderValues(db, placeholderValueKinds))
 			: rows;
 
-	const contentByEntityId = new Map<string, Array<string>>();
+	const contentByVersionId = new Map<string, Array<string>>();
 
 	for (const row of annotatedRows) {
 		const content =
@@ -217,18 +237,168 @@ async function getPlainTextFieldContentByEntityId(
 			continue;
 		}
 
-		const existing = contentByEntityId.get(row.entityId) ?? [];
+		const existing = contentByVersionId.get(row.versionId) ?? [];
 		existing.push(content);
-		contentByEntityId.set(row.entityId, existing);
+		contentByVersionId.set(row.versionId, existing);
 	}
 
 	return new Map(
-		[...contentByEntityId.entries()].map(([entityId, parts]) => [
-			entityId,
+		[...contentByVersionId.entries()].map(([versionId, parts]) => [
+			versionId,
 			mergeDescription(...parts),
 		]),
 	);
 }
+
+const countryEntities = alias(schema.entities, "country_entities");
+const countryEntityVersions = alias(schema.entityVersions, "country_entity_versions");
+const itemEntities = alias(schema.entities, "item_entities");
+const itemEntityVersions = alias(schema.entityVersions, "item_entity_versions");
+const organisationalRelationStatus = alias(
+	schema.organisationalUnitStatus,
+	"organisational_relation_status",
+);
+const organisationalUnitType = alias(schema.organisationalUnitTypes, "organisational_unit_type");
+const publishedEntityStatus = alias(schema.entityStatus, "published_entity_status");
+
+interface CountryScopedUnit {
+	countrySlug: string;
+	description: string | null;
+	entityId: string;
+	itemSlug: string;
+	label: string;
+	sourceUpdatedAt: Date;
+	versionId: string;
+}
+
+/**
+ * Units that are shown on a member/partner country page and have no detail page of their own, so
+ * they are indexed once per country they belong to (document id `<type>:<country>:<unit>`).
+ *
+ * Shared by the full and the per-entity sync — passing `entityId` narrows the same query to one
+ * document, which keeps the two paths from drifting apart.
+ */
+async function getCountryScopedUnits(
+	db: Database,
+	params: {
+		entityId?: string;
+		ericRelationStatus?: "is_cooperating_partner_of" | "is_partner_institution_of";
+		relationStatus: "is_located_in" | "is_national_consortium_of";
+		unitType: "institution" | "national_consortium";
+	},
+): Promise<Array<CountryScopedUnit>> {
+	const { entityId, ericRelationStatus, relationStatus, unitType } = params;
+
+	const conditions = [
+		eq(publishedEntityStatus.type, "published"),
+		eq(organisationalUnitType.type, unitType),
+		eq(organisationalRelationStatus.status, relationStatus),
+		sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
+	];
+
+	if (entityId != null) {
+		conditions.push(eq(itemEntities.id, entityId));
+	}
+
+	if (ericRelationStatus != null) {
+		conditions.push(sql`
+			EXISTS (
+				SELECT
+					1
+				FROM
+					${schema.organisationalUnitsRelations} eric_relations
+					INNER JOIN ${schema.organisationalUnitStatus} eric_relation_status ON eric_relations.status = eric_relation_status.id
+					INNER JOIN ${schema.entityVersions} eric_related_v ON eric_related_v.entity_id = eric_relations.related_unit_document_id
+					INNER JOIN ${schema.organisationalUnits} related_units ON related_units.id = eric_related_v.id
+					INNER JOIN ${schema.organisationalUnitTypes} related_unit_types ON related_units.type_id = related_unit_types.id
+				WHERE
+					eric_relations.unit_document_id = ${itemEntities.id}
+					AND eric_relation_status.status = ${ericRelationStatus}
+					AND related_unit_types.type = 'eric'
+					AND eric_relations.duration @> NOW()::TIMESTAMPTZ
+			)
+		`);
+	}
+
+	return db
+		.select({
+			versionId: schema.organisationalUnits.id,
+			entityId: itemEntities.id,
+			countrySlug: countryEntities.slug,
+			itemSlug: itemEntities.slug,
+			label: schema.organisationalUnits.name,
+			description: schema.organisationalUnits.summary,
+			sourceUpdatedAt: schema.organisationalUnits.updatedAt,
+		})
+		.from(schema.organisationalUnits)
+		.innerJoin(itemEntityVersions, eq(schema.organisationalUnits.id, itemEntityVersions.id))
+		.innerJoin(itemEntities, eq(itemEntityVersions.entityId, itemEntities.id))
+		.innerJoin(publishedEntityStatus, eq(itemEntityVersions.statusId, publishedEntityStatus.id))
+		.innerJoin(
+			organisationalUnitType,
+			eq(schema.organisationalUnits.typeId, organisationalUnitType.id),
+		)
+		.innerJoin(
+			schema.organisationalUnitsRelations,
+			// unit↔unit relations are document-level; the owner unit is pinned to its published version.
+			eq(schema.organisationalUnitsRelations.unitDocumentId, itemEntities.id),
+		)
+		.innerJoin(
+			organisationalRelationStatus,
+			eq(schema.organisationalUnitsRelations.status, organisationalRelationStatus.id),
+		)
+		.innerJoin(
+			countryEntities,
+			eq(countryEntities.id, schema.organisationalUnitsRelations.relatedUnitDocumentId),
+		)
+		.innerJoin(countryEntityVersions, eq(countryEntityVersions.entityId, countryEntities.id))
+		.innerJoin(
+			schema.membersAndPartners,
+			eq(schema.membersAndPartners.id, countryEntityVersions.id),
+		)
+		.where(and(...conditions));
+}
+
+/** Unit types that are indexed; the ones left out are not shown on the website on their own. */
+const websiteTypeByUnitType: Partial<
+	Record<(typeof schema.organisationalUnitTypesEnum)[number], SupportedWebsiteEntityType>
+> = {
+	country: "country",
+	governance_body: "governance-body",
+	institution: "institution",
+	national_consortium: "national-consortium",
+	working_group: "working-group",
+};
+
+/** The country-scoped document sets, in the order they are appended to the index. */
+const countryScopedUnitQueries = [
+	{
+		type: "national-consortium",
+		params: {
+			relationStatus: "is_national_consortium_of",
+			unitType: "national_consortium",
+		},
+	},
+	{
+		type: "institution",
+		params: {
+			ericRelationStatus: "is_partner_institution_of",
+			relationStatus: "is_located_in",
+			unitType: "institution",
+		},
+	},
+	{
+		type: "institution",
+		params: {
+			ericRelationStatus: "is_cooperating_partner_of",
+			relationStatus: "is_located_in",
+			unitType: "institution",
+		},
+	},
+] as const satisfies Array<{
+	type: CanonicalWebsiteEntityType;
+	params: Parameters<typeof getCountryScopedUnits>[1];
+}>;
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndexServiceParams) {
@@ -259,64 +429,62 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 		switch (entity.type.type) {
 			case "documents_policies": {
-				return { slug: entity.slug, type: "document-or-policy" };
+				return { entityId, slug: entity.slug, type: "document-or-policy" };
 			}
 			case "events": {
-				return { slug: entity.slug, type: "event" };
+				return { entityId, slug: entity.slug, type: "event" };
 			}
 			case "funding_calls": {
-				return { slug: entity.slug, type: "funding-call" };
+				return { entityId, slug: entity.slug, type: "funding-call" };
 			}
 			case "impact_case_studies": {
-				return { slug: entity.slug, type: "impact-case-study" };
+				return { entityId, slug: entity.slug, type: "impact-case-study" };
 			}
 			case "news": {
-				return { slug: entity.slug, type: "news-item" };
+				return { entityId, slug: entity.slug, type: "news-item" };
 			}
 			case "opportunities": {
-				return { slug: entity.slug, type: "opportunity" };
+				return { entityId, slug: entity.slug, type: "opportunity" };
 			}
 			case "pages": {
-				return { slug: entity.slug, type: "page" };
+				return { entityId, slug: entity.slug, type: "page" };
 			}
 			case "persons": {
-				return { slug: entity.slug, type: "person" };
+				return { entityId, slug: entity.slug, type: "person" };
 			}
 			case "projects": {
-				return { slug: entity.slug, type: "project" };
+				return { entityId, slug: entity.slug, type: "project" };
 			}
 			case "spotlight_articles": {
-				return { slug: entity.slug, type: "spotlight-article" };
+				return { entityId, slug: entity.slug, type: "spotlight-article" };
 			}
 			case "organisational_units": {
-				const [country, workingGroup] = await Promise.all([
-					db.query.membersAndPartners.findFirst({
-						where: {
-							id: entityId,
+				// Classify by unit type rather than by the members-and-partners / working-groups views,
+				// so institutions and national consortia are recognised too. Whether a unit actually
+				// warrants a document is decided when its documents are built.
+				const unit = await db.query.organisationalUnits.findFirst({
+					where: {
+						entityVersion: {
+							entityId,
 						},
-						columns: {
-							id: true,
+					},
+					columns: {},
+					with: {
+						type: {
+							columns: {
+								type: true,
+							},
 						},
-					}),
-					db.query.workingGroups.findFirst({
-						where: {
-							id: entityId,
-						},
-						columns: {
-							id: true,
-						},
-					}),
-				]);
+					},
+				});
 
-				if (country != null) {
-					return { slug: entity.slug, type: "country" };
+				const type = unit == null ? undefined : websiteTypeByUnitType[unit.type.type];
+
+				if (type == null) {
+					return null;
 				}
 
-				if (workingGroup != null) {
-					return { slug: entity.slug, type: "working-group" };
-				}
-
-				return null;
+				return { entityId, slug: entity.slug, type };
 			}
 			case "documentation_pages": {
 				return null;
@@ -331,10 +499,54 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		return getSyncableWebsiteEntityIdsByType();
 	}
 
+	/** The subtype tables are keyed by version id; the sync API speaks document ids. */
+	async function toEntityIds(versionIds: Array<string>): Promise<Array<string>> {
+		if (versionIds.length === 0) {
+			return [];
+		}
+
+		const rows = await db
+			.select({ entityId: schema.entityVersions.entityId })
+			.from(schema.entityVersions)
+			.where(inArray(schema.entityVersions.id, versionIds));
+
+		return rows.map((row) => row.entityId);
+	}
+
+	/** Returns entity (document) ids — see {@link WebsiteDocumentDescriptor}. */
 	async function getSyncableWebsiteEntityIdsByType(
 		entityType?: SupportedWebsiteEntityType,
 	): Promise<Array<string>> {
 		switch (entityType) {
+			case "institution":
+			case "national-consortium": {
+				const groups = await Promise.all(
+					countryScopedUnitQueries
+						.filter((query) => query.type === entityType)
+						.map((query) => getCountryScopedUnits(db, query.params)),
+				);
+
+				return [...new Set(groups.flat().map((item) => item.entityId))];
+			}
+
+			case "governance-body": {
+				const items = await db.query.organisationalUnits.findMany({
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+						type: {
+							type: "governance_body",
+						},
+					},
+					columns: { id: true },
+				});
+
+				return toEntityIds(items.map((item) => item.id));
+			}
+
 			case "country": {
 				const items = await db.query.membersAndPartners.findMany({
 					where: {
@@ -347,7 +559,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => item.id);
+				return toEntityIds(items.map((item) => item.id));
 			}
 
 			case "document-or-policy": {
@@ -362,7 +574,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => item.id);
+				return toEntityIds(items.map((item) => item.id));
 			}
 
 			case "event": {
@@ -377,7 +589,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => item.id);
+				return toEntityIds(items.map((item) => item.id));
 			}
 
 			case "funding-call": {
@@ -392,7 +604,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => item.id);
+				return toEntityIds(items.map((item) => item.id));
 			}
 
 			case "impact-case-study": {
@@ -407,7 +619,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => item.id);
+				return toEntityIds(items.map((item) => item.id));
 			}
 
 			case "news-item": {
@@ -422,7 +634,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => item.id);
+				return toEntityIds(items.map((item) => item.id));
 			}
 
 			case "opportunity": {
@@ -437,7 +649,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => item.id);
+				return toEntityIds(items.map((item) => item.id));
 			}
 
 			case "page": {
@@ -452,7 +664,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => item.id);
+				return toEntityIds(items.map((item) => item.id));
 			}
 
 			case "person": {
@@ -467,7 +679,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => item.id);
+				return toEntityIds(items.map((item) => item.id));
 			}
 
 			case "project": {
@@ -482,7 +694,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => item.id);
+				return toEntityIds(items.map((item) => item.id));
 			}
 
 			case "spotlight-article": {
@@ -497,7 +709,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => item.id);
+				return toEntityIds(items.map((item) => item.id));
 			}
 
 			case "working-group": {
@@ -512,7 +724,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => item.id);
+				return toEntityIds(items.map((item) => item.id));
 			}
 
 			case undefined: {
@@ -525,29 +737,81 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		}
 	}
 
-	async function getWebsiteDocumentForEntity(
+	/**
+	 * Every document a knowledge-base document (entity) currently warrants. Usually one, but a
+	 * country-scoped unit has one per country it belongs to, and an entity that is unpublished or not
+	 * indexable has none.
+	 */
+	async function getWebsiteDocumentsForEntity(
 		entityId: string,
 		params?: { importedAt?: number },
-	): Promise<WebsiteDocument | null> {
+	): Promise<Array<WebsiteEntityDocument>> {
 		const importedAt = params?.importedAt ?? Date.now();
 		const descriptor = await getWebsiteDocumentDescriptorByEntityId(entityId);
 
 		if (descriptor == null) {
-			return null;
+			return [];
 		}
 
 		switch (descriptor.type) {
+			case "institution":
+			case "national-consortium": {
+				const documentsById = new Map<string, WebsiteEntityDocument>();
+
+				const groups = await Promise.all(
+					countryScopedUnitQueries
+						.filter((query) => query.type === descriptor.type)
+						.map(async (query) => {
+							const items = await getCountryScopedUnits(db, { ...query.params, entityId });
+
+							return { items, type: query.type };
+						}),
+				);
+
+				const descriptions = await getPlainTextFieldContentByVersionId(
+					db,
+					groups.flatMap(({ items }) => items.map((item) => item.versionId)),
+					"description",
+				);
+
+				for (const { items, type } of groups) {
+					for (const item of items) {
+						const document = createWebsiteEntityDocument({
+							entityId,
+							importedAt,
+							type,
+							sourceId: item.itemSlug,
+							documentId: `${item.countrySlug}:${item.itemSlug}`,
+							sourceUpdatedAt: item.sourceUpdatedAt,
+							label: item.label,
+							description: mergeDescription(
+								descriptions.get(item.versionId),
+								item.description ?? "",
+							),
+							link: getEntityHref({ type: "country", slug: item.countrySlug }),
+						});
+
+						// A unit can be both a partner and a cooperating partner institution of the ERIC;
+						// that is still one document per country.
+						documentsById.set(document.id, document);
+					}
+				}
+
+				return [...documentsById.values()];
+			}
+
 			case "country": {
 				const item = await db.query.membersAndPartners.findFirst({
 					where: {
-						id: entityId,
 						entityVersion: {
+							entityId,
 							status: {
 								type: "published",
 							},
 						},
 					},
 					columns: {
+						id: true,
 						name: true,
 						summary: true,
 						updatedAt: true,
@@ -567,37 +831,41 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				});
 
 				if (item == null) {
-					return null;
+					return [];
 				}
 
-				const descriptions = await getPlainTextFieldContentByEntityId(
+				const descriptions = await getPlainTextFieldContentByVersionId(
 					db,
-					[entityId],
+					[item.id],
 					"description",
 				);
 
-				return createWebsiteEntityDocument({
-					importedAt,
-					type: "country",
-					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
-					label: item.name,
-					description: mergeDescription(descriptions.get(entityId), item.summary ?? ""),
-					link: getEntityHref({ type: "country", slug: item.entityVersion.entity.slug }),
-				});
+				return [
+					createWebsiteEntityDocument({
+						entityId,
+						importedAt,
+						type: "country",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.updatedAt,
+						label: item.name,
+						description: mergeDescription(descriptions.get(item.id), item.summary ?? ""),
+						link: getEntityHref({ type: "country", slug: item.entityVersion.entity.slug }),
+					}),
+				];
 			}
 
 			case "document-or-policy": {
 				const item = await db.query.documentsPolicies.findFirst({
 					where: {
-						id: entityId,
 						entityVersion: {
+							entityId,
 							status: {
 								type: "published",
 							},
 						},
 					},
 					columns: {
+						id: true,
 						summary: true,
 						title: true,
 						updatedAt: true,
@@ -617,31 +885,35 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				});
 
 				if (item == null) {
-					return null;
+					return [];
 				}
 
-				return createWebsiteEntityDocument({
-					importedAt,
-					type: "document-or-policy",
-					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
-					label: item.title,
-					description: item.summary ?? "",
-					link: getEntityHref({ type: "document-or-policy" }),
-				});
+				return [
+					createWebsiteEntityDocument({
+						entityId,
+						importedAt,
+						type: "document-or-policy",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.updatedAt,
+						label: item.title,
+						description: item.summary ?? "",
+						link: getEntityHref({ type: "document-or-policy" }),
+					}),
+				];
 			}
 
 			case "event": {
 				const item = await db.query.events.findFirst({
 					where: {
-						id: entityId,
 						entityVersion: {
+							entityId,
 							status: {
 								type: "published",
 							},
 						},
 					},
 					columns: {
+						id: true,
 						duration: true,
 						summary: true,
 						title: true,
@@ -662,31 +934,35 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				});
 
 				if (item == null) {
-					return null;
+					return [];
 				}
 
-				return createWebsiteEntityDocument({
-					importedAt,
-					type: "event",
-					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.duration.start,
-					label: item.title,
-					description: item.summary ?? "",
-					link: getEntityHref({ type: "event", slug: item.entityVersion.entity.slug }),
-				});
+				return [
+					createWebsiteEntityDocument({
+						entityId,
+						importedAt,
+						type: "event",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.duration.start,
+						label: item.title,
+						description: item.summary,
+						link: getEntityHref({ type: "event", slug: item.entityVersion.entity.slug }),
+					}),
+				];
 			}
 
 			case "funding-call": {
 				const item = await db.query.fundingCalls.findFirst({
 					where: {
-						id: entityId,
 						entityVersion: {
+							entityId,
 							status: {
 								type: "published",
 							},
 						},
 					},
 					columns: {
+						id: true,
 						summary: true,
 						title: true,
 						updatedAt: true,
@@ -706,31 +982,35 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				});
 
 				if (item == null) {
-					return null;
+					return [];
 				}
 
-				return createWebsiteEntityDocument({
-					importedAt,
-					type: "funding-call",
-					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
-					label: item.title,
-					description: item.summary ?? "",
-					link: getEntityHref({ type: "funding-call", slug: item.entityVersion.entity.slug }),
-				});
+				return [
+					createWebsiteEntityDocument({
+						entityId,
+						importedAt,
+						type: "funding-call",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.updatedAt,
+						label: item.title,
+						description: item.summary ?? "",
+						link: getEntityHref({ type: "funding-call", slug: item.entityVersion.entity.slug }),
+					}),
+				];
 			}
 
 			case "impact-case-study": {
 				const item = await db.query.impactCaseStudies.findFirst({
 					where: {
-						id: entityId,
 						entityVersion: {
+							entityId,
 							status: {
 								type: "published",
 							},
 						},
 					},
 					columns: {
+						id: true,
 						publicationDate: true,
 						summary: true,
 						title: true,
@@ -751,31 +1031,38 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				});
 
 				if (item == null) {
-					return null;
+					return [];
 				}
 
-				return createWebsiteEntityDocument({
-					importedAt,
-					type: "impact-case-study",
-					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.publicationDate,
-					label: item.title,
-					description: item.summary,
-					link: getEntityHref({ type: "impact-case-study", slug: item.entityVersion.entity.slug }),
-				});
+				return [
+					createWebsiteEntityDocument({
+						entityId,
+						importedAt,
+						type: "impact-case-study",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.publicationDate,
+						label: item.title,
+						description: item.summary,
+						link: getEntityHref({
+							type: "impact-case-study",
+							slug: item.entityVersion.entity.slug,
+						}),
+					}),
+				];
 			}
 
 			case "news-item": {
 				const item = await db.query.news.findFirst({
 					where: {
-						id: entityId,
 						entityVersion: {
+							entityId,
 							status: {
 								type: "published",
 							},
 						},
 					},
 					columns: {
+						id: true,
 						publicationDate: true,
 						summary: true,
 						title: true,
@@ -796,33 +1083,37 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				});
 
 				if (item == null) {
-					return null;
+					return [];
 				}
 
-				const content = await getPlainTextFieldContentByEntityId(db, [entityId], "content");
+				const content = await getPlainTextFieldContentByVersionId(db, [item.id], "content");
 
-				return createWebsiteEntityDocument({
-					importedAt,
-					type: "news-item",
-					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.publicationDate,
-					label: item.title,
-					description: mergeDescription(content.get(entityId), item.summary),
-					link: getEntityHref({ type: "news-item", slug: item.entityVersion.entity.slug }),
-				});
+				return [
+					createWebsiteEntityDocument({
+						entityId,
+						importedAt,
+						type: "news-item",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.publicationDate,
+						label: item.title,
+						description: mergeDescription(content.get(item.id), item.summary),
+						link: getEntityHref({ type: "news-item", slug: item.entityVersion.entity.slug }),
+					}),
+				];
 			}
 
 			case "opportunity": {
 				const item = await db.query.opportunities.findFirst({
 					where: {
-						id: entityId,
 						entityVersion: {
+							entityId,
 							status: {
 								type: "published",
 							},
 						},
 					},
 					columns: {
+						id: true,
 						publicationDate: true,
 						summary: true,
 						title: true,
@@ -843,33 +1134,37 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				});
 
 				if (item == null) {
-					return null;
+					return [];
 				}
 
-				const content = await getPlainTextFieldContentByEntityId(db, [entityId], "content");
+				const content = await getPlainTextFieldContentByVersionId(db, [item.id], "content");
 
-				return createWebsiteEntityDocument({
-					importedAt,
-					type: "opportunity",
-					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
-					label: item.title,
-					description: mergeDescription(content.get(entityId), item.summary ?? ""),
-					link: getEntityHref({ type: "opportunity", slug: item.entityVersion.entity.slug }),
-				});
+				return [
+					createWebsiteEntityDocument({
+						entityId,
+						importedAt,
+						type: "opportunity",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.updatedAt,
+						label: item.title,
+						description: mergeDescription(content.get(item.id), item.summary ?? ""),
+						link: getEntityHref({ type: "opportunity", slug: item.entityVersion.entity.slug }),
+					}),
+				];
 			}
 
 			case "page": {
 				const item = await db.query.pages.findFirst({
 					where: {
-						id: entityId,
 						entityVersion: {
+							entityId,
 							status: {
 								type: "published",
 							},
 						},
 					},
 					columns: {
+						id: true,
 						publicationDate: true,
 						summary: true,
 						title: true,
@@ -890,7 +1185,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				});
 
 				if (item == null) {
-					return null;
+					return [];
 				}
 
 				// Interim: a page's real pathname is not yet stored in the CMS. Skip pages with no
@@ -899,33 +1194,37 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				const path = resolveInterimPagePath(item.entityVersion.entity.slug);
 
 				if (path == null) {
-					return null;
+					return [];
 				}
 
-				const content = await getPlainTextFieldContentByEntityId(db, [entityId], "content");
+				const content = await getPlainTextFieldContentByVersionId(db, [item.id], "content");
 
-				return createWebsiteEntityDocument({
-					importedAt,
-					type: "page",
-					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.publicationDate,
-					label: item.title,
-					description: mergeDescription(content.get(entityId), item.summary),
-					link: getEntityHref({ type: "page", path }),
-				});
+				return [
+					createWebsiteEntityDocument({
+						entityId,
+						importedAt,
+						type: "page",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.publicationDate,
+						label: item.title,
+						description: mergeDescription(content.get(item.id), item.summary),
+						link: getEntityHref({ type: "page", path }),
+					}),
+				];
 			}
 
 			case "person": {
 				const item = await db.query.persons.findFirst({
 					where: {
-						id: entityId,
 						entityVersion: {
+							entityId,
 							status: {
 								type: "published",
 							},
 						},
 					},
 					columns: {
+						id: true,
 						name: true,
 						updatedAt: true,
 					},
@@ -944,33 +1243,37 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				});
 
 				if (item == null) {
-					return null;
+					return [];
 				}
 
-				const biographies = await getPlainTextFieldContentByEntityId(db, [entityId], "biography");
+				const biographies = await getPlainTextFieldContentByVersionId(db, [item.id], "biography");
 
-				return createWebsiteEntityDocument({
-					importedAt,
-					type: "person",
-					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
-					label: item.name,
-					description: biographies.get(entityId) ?? "",
-					link: getEntityHref({ type: "person", slug: item.entityVersion.entity.slug }),
-				});
+				return [
+					createWebsiteEntityDocument({
+						entityId,
+						importedAt,
+						type: "person",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.updatedAt,
+						label: item.name,
+						description: biographies.get(item.id) ?? "",
+						link: getEntityHref({ type: "person", slug: item.entityVersion.entity.slug }),
+					}),
+				];
 			}
 
 			case "project": {
 				const item = await db.query.dariahProjects.findFirst({
 					where: {
-						id: entityId,
 						entityVersion: {
+							entityId,
 							status: {
 								type: "published",
 							},
 						},
 					},
 					columns: {
+						id: true,
 						name: true,
 						summary: true,
 						updatedAt: true,
@@ -990,37 +1293,41 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				});
 
 				if (item == null) {
-					return null;
+					return [];
 				}
 
-				const descriptions = await getPlainTextFieldContentByEntityId(
+				const descriptions = await getPlainTextFieldContentByVersionId(
 					db,
-					[entityId],
+					[item.id],
 					"description",
 				);
 
-				return createWebsiteEntityDocument({
-					importedAt,
-					type: "project",
-					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
-					label: item.name,
-					description: mergeDescription(descriptions.get(entityId), item.summary),
-					link: getEntityHref({ type: "project", slug: item.entityVersion.entity.slug }),
-				});
+				return [
+					createWebsiteEntityDocument({
+						entityId,
+						importedAt,
+						type: "project",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.updatedAt,
+						label: item.name,
+						description: mergeDescription(descriptions.get(item.id), item.summary ?? ""),
+						link: getEntityHref({ type: "project", slug: item.entityVersion.entity.slug }),
+					}),
+				];
 			}
 
 			case "spotlight-article": {
 				const item = await db.query.spotlightArticles.findFirst({
 					where: {
-						id: entityId,
 						entityVersion: {
+							entityId,
 							status: {
 								type: "published",
 							},
 						},
 					},
 					columns: {
+						id: true,
 						publicationDate: true,
 						summary: true,
 						title: true,
@@ -1041,33 +1348,40 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				});
 
 				if (item == null) {
-					return null;
+					return [];
 				}
 
-				const content = await getPlainTextFieldContentByEntityId(db, [entityId], "content");
+				const content = await getPlainTextFieldContentByVersionId(db, [item.id], "content");
 
-				return createWebsiteEntityDocument({
-					importedAt,
-					type: "spotlight-article",
-					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.publicationDate,
-					label: item.title,
-					description: mergeDescription(content.get(entityId), item.summary),
-					link: getEntityHref({ type: "spotlight-article", slug: item.entityVersion.entity.slug }),
-				});
+				return [
+					createWebsiteEntityDocument({
+						entityId,
+						importedAt,
+						type: "spotlight-article",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.publicationDate,
+						label: item.title,
+						description: mergeDescription(content.get(item.id), item.summary),
+						link: getEntityHref({
+							type: "spotlight-article",
+							slug: item.entityVersion.entity.slug,
+						}),
+					}),
+				];
 			}
 
 			case "working-group": {
 				const item = await db.query.workingGroups.findFirst({
 					where: {
-						id: entityId,
 						entityVersion: {
+							entityId,
 							status: {
 								type: "published",
 							},
 						},
 					},
 					columns: {
+						id: true,
 						name: true,
 						summary: true,
 						updatedAt: true,
@@ -1087,24 +1401,87 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				});
 
 				if (item == null) {
-					return null;
+					return [];
 				}
 
-				const descriptions = await getPlainTextFieldContentByEntityId(
+				const descriptions = await getPlainTextFieldContentByVersionId(
 					db,
-					[entityId],
+					[item.id],
 					"description",
 				);
 
-				return createWebsiteEntityDocument({
-					importedAt,
-					type: "working-group",
-					sourceId: item.entityVersion.entity.slug,
-					sourceUpdatedAt: item.updatedAt,
-					label: item.name,
-					description: mergeDescription(descriptions.get(entityId), item.summary ?? ""),
-					link: getEntityHref({ type: "working-group", slug: item.entityVersion.entity.slug }),
+				return [
+					createWebsiteEntityDocument({
+						entityId,
+						importedAt,
+						type: "working-group",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.updatedAt,
+						label: item.name,
+						description: mergeDescription(descriptions.get(item.id), item.summary ?? ""),
+						link: getEntityHref({ type: "working-group", slug: item.entityVersion.entity.slug }),
+					}),
+				];
+			}
+
+			case "governance-body": {
+				const item = await db.query.organisationalUnits.findFirst({
+					where: {
+						entityVersion: {
+							entityId,
+							status: {
+								type: "published",
+							},
+						},
+						type: {
+							type: "governance_body",
+						},
+					},
+					columns: {
+						id: true,
+						name: true,
+						summary: true,
+						updatedAt: true,
+					},
+					with: {
+						entityVersion: {
+							columns: {},
+							with: {
+								entity: {
+									columns: {
+										slug: true,
+									},
+								},
+							},
+						},
+					},
 				});
+
+				if (item == null) {
+					return [];
+				}
+
+				const descriptions = await getPlainTextFieldContentByVersionId(
+					db,
+					[item.id],
+					"description",
+				);
+
+				return [
+					createWebsiteEntityDocument({
+						entityId,
+						importedAt,
+						type: "governance-body",
+						sourceId: item.entityVersion.entity.slug,
+						sourceUpdatedAt: item.updatedAt,
+						label: item.name,
+						description: mergeDescription(descriptions.get(item.id), item.summary ?? ""),
+						link: getEntityHref({
+							type: "governance-body",
+							slug: item.entityVersion.entity.slug,
+						}),
+					}),
+				];
 			}
 		}
 	}
@@ -1125,7 +1502,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			spotlightContent,
 			workingGroupDescriptions,
 		] = await Promise.all([
-			getPlainTextFieldContentByEntityId(
+			getPlainTextFieldContentByVersionId(
 				db,
 				(
 					await db.query.membersAndPartners.findMany({
@@ -1134,7 +1511,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				).map((item) => item.id),
 				"description",
 			),
-			getPlainTextFieldContentByEntityId(
+			getPlainTextFieldContentByVersionId(
 				db,
 				(
 					await db.query.news.findMany({
@@ -1143,7 +1520,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				).map((item) => item.id),
 				"content",
 			),
-			getPlainTextFieldContentByEntityId(
+			getPlainTextFieldContentByVersionId(
 				db,
 				(
 					await db.query.opportunities.findMany({
@@ -1152,7 +1529,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				).map((item) => item.id),
 				"content",
 			),
-			getPlainTextFieldContentByEntityId(
+			getPlainTextFieldContentByVersionId(
 				db,
 				(
 					await db.query.pages.findMany({
@@ -1161,7 +1538,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				).map((item) => item.id),
 				"content",
 			),
-			getPlainTextFieldContentByEntityId(
+			getPlainTextFieldContentByVersionId(
 				db,
 				(
 					await db.query.persons.findMany({
@@ -1170,7 +1547,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				).map((item) => item.id),
 				"biography",
 			),
-			getPlainTextFieldContentByEntityId(
+			getPlainTextFieldContentByVersionId(
 				db,
 				(
 					await db.query.dariahProjects.findMany({
@@ -1179,16 +1556,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				).map((item) => item.id),
 				"description",
 			),
-			getPlainTextFieldContentByEntityId(
-				db,
-				(
-					await db.query.workingGroups.findMany({
-						columns: { id: true },
-					})
-				).map((item) => item.id),
-				"description",
-			),
-			getPlainTextFieldContentByEntityId(
+			getPlainTextFieldContentByVersionId(
 				db,
 				(
 					await db.query.spotlightArticles.findMany({
@@ -1197,7 +1565,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				).map((item) => item.id),
 				"content",
 			),
-			getPlainTextFieldContentByEntityId(
+			getPlainTextFieldContentByVersionId(
 				db,
 				(
 					await db.query.workingGroups.findMany({
@@ -1224,7 +1592,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			},
 			with: {
 				entityVersion: {
-					columns: {},
+					columns: { entityId: true },
 					with: {
 						entity: {
 							columns: {
@@ -1240,6 +1608,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			...documentsPolicies.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
+					entityId: item.entityVersion.entityId,
 					type: "document-or-policy",
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
@@ -1267,7 +1636,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			},
 			with: {
 				entityVersion: {
-					columns: {},
+					columns: { entityId: true },
 					with: {
 						entity: {
 							columns: {
@@ -1283,6 +1652,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			...events.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
+					entityId: item.entityVersion.entityId,
 					type: "event",
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.duration.start,
@@ -1309,7 +1679,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			},
 			with: {
 				entityVersion: {
-					columns: {},
+					columns: { entityId: true },
 					with: {
 						entity: {
 							columns: {
@@ -1325,6 +1695,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			...fundingCalls.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
+					entityId: item.entityVersion.entityId,
 					type: "funding-call",
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
@@ -1352,7 +1723,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			},
 			with: {
 				entityVersion: {
-					columns: {},
+					columns: { entityId: true },
 					with: {
 						entity: {
 							columns: {
@@ -1368,6 +1739,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			...impactCaseStudies.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
+					entityId: item.entityVersion.entityId,
 					type: "impact-case-study",
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.publicationDate,
@@ -1394,7 +1766,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			},
 			with: {
 				entityVersion: {
-					columns: {},
+					columns: { entityId: true },
 					with: {
 						entity: {
 							columns: {
@@ -1410,6 +1782,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			...membersAndPartners.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
+					entityId: item.entityVersion.entityId,
 					type: "country",
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
@@ -1420,21 +1793,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			),
 		);
 
-		const countryEntities = alias(schema.entities, "country_entities");
-		const countryEntityVersions = alias(schema.entityVersions, "country_entity_versions");
-		const itemEntities = alias(schema.entities, "item_entities");
-		const itemEntityVersions = alias(schema.entityVersions, "item_entity_versions");
-		const organisationalRelationStatus = alias(
-			schema.organisationalUnitStatus,
-			"organisational_relation_status",
-		);
-		const organisationalUnitType = alias(
-			schema.organisationalUnitTypes,
-			"organisational_unit_type",
-		);
-		const publishedEntityStatus = alias(schema.entityStatus, "published_entity_status");
-
-		const organisationalUnitDescriptions = await getPlainTextFieldContentByEntityId(
+		const organisationalUnitDescriptions = await getPlainTextFieldContentByVersionId(
 			db,
 			(
 				await db.query.organisationalUnits.findMany({
@@ -1444,225 +1803,34 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			"description",
 		);
 
-		const nationalConsortia = await db
-			.select({
-				itemId: schema.organisationalUnits.id,
-				countrySlug: countryEntities.slug,
-				itemSlug: itemEntities.slug,
-				label: schema.organisationalUnits.name,
-				description: schema.organisationalUnits.summary,
-				sourceUpdatedAt: schema.organisationalUnits.updatedAt,
-			})
-			.from(schema.organisationalUnits)
-			.innerJoin(itemEntityVersions, eq(schema.organisationalUnits.id, itemEntityVersions.id))
-			.innerJoin(itemEntities, eq(itemEntityVersions.entityId, itemEntities.id))
-			.innerJoin(publishedEntityStatus, eq(itemEntityVersions.statusId, publishedEntityStatus.id))
-			.innerJoin(
-				organisationalUnitType,
-				eq(schema.organisationalUnits.typeId, organisationalUnitType.id),
-			)
-			.innerJoin(
-				schema.organisationalUnitsRelations,
-				// unit↔unit relations are document-level; the owner unit is pinned to its published version.
-				eq(schema.organisationalUnitsRelations.unitDocumentId, itemEntities.id),
-			)
-			.innerJoin(
-				organisationalRelationStatus,
-				eq(schema.organisationalUnitsRelations.status, organisationalRelationStatus.id),
-			)
-			.innerJoin(
-				countryEntities,
-				eq(countryEntities.id, schema.organisationalUnitsRelations.relatedUnitDocumentId),
-			)
-			.innerJoin(countryEntityVersions, eq(countryEntityVersions.entityId, countryEntities.id))
-			.innerJoin(
-				schema.membersAndPartners,
-				eq(schema.membersAndPartners.id, countryEntityVersions.id),
-			)
-			.where(
-				and(
-					eq(publishedEntityStatus.type, "published"),
-					eq(organisationalUnitType.type, "national_consortium"),
-					eq(organisationalRelationStatus.status, "is_national_consortium_of"),
-					sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
-				),
-			);
+		// Units shown on a country page, indexed once per country. Same queries the per-entity sync
+		// uses, so both paths always produce the same documents.
+		const countryScopedDocumentsById = new Map<string, WebsiteEntityDocument>();
 
-		website.push(
-			...nationalConsortia.map((item) =>
-				createWebsiteEntityDocument({
+		for (const { params: queryParams, type } of countryScopedUnitQueries) {
+			const items = await getCountryScopedUnits(db, queryParams);
+
+			for (const item of items) {
+				const document = createWebsiteEntityDocument({
 					importedAt,
-					type: "national-consortium",
+					type,
+					entityId: item.entityId,
 					sourceId: item.itemSlug,
 					documentId: `${item.countrySlug}:${item.itemSlug}`,
 					sourceUpdatedAt: item.sourceUpdatedAt,
 					label: item.label,
 					description: mergeDescription(
-						organisationalUnitDescriptions.get(item.itemId),
+						organisationalUnitDescriptions.get(item.versionId),
 						item.description ?? "",
 					),
 					link: getEntityHref({ type: "country", slug: item.countrySlug }),
-				}),
-			),
-		);
+				});
 
-		const partnerInstitutions = await db
-			.select({
-				itemId: schema.organisationalUnits.id,
-				countrySlug: countryEntities.slug,
-				itemSlug: itemEntities.slug,
-				label: schema.organisationalUnits.name,
-				description: schema.organisationalUnits.summary,
-				sourceUpdatedAt: schema.organisationalUnits.updatedAt,
-			})
-			.from(schema.organisationalUnits)
-			.innerJoin(itemEntityVersions, eq(schema.organisationalUnits.id, itemEntityVersions.id))
-			.innerJoin(itemEntities, eq(itemEntityVersions.entityId, itemEntities.id))
-			.innerJoin(publishedEntityStatus, eq(itemEntityVersions.statusId, publishedEntityStatus.id))
-			.innerJoin(
-				organisationalUnitType,
-				eq(schema.organisationalUnits.typeId, organisationalUnitType.id),
-			)
-			.innerJoin(
-				schema.organisationalUnitsRelations,
-				// unit↔unit relations are document-level; the owner unit is pinned to its published version.
-				eq(schema.organisationalUnitsRelations.unitDocumentId, itemEntities.id),
-			)
-			.innerJoin(
-				organisationalRelationStatus,
-				eq(schema.organisationalUnitsRelations.status, organisationalRelationStatus.id),
-			)
-			.innerJoin(
-				countryEntities,
-				eq(countryEntities.id, schema.organisationalUnitsRelations.relatedUnitDocumentId),
-			)
-			.innerJoin(countryEntityVersions, eq(countryEntityVersions.entityId, countryEntities.id))
-			.innerJoin(
-				schema.membersAndPartners,
-				eq(schema.membersAndPartners.id, countryEntityVersions.id),
-			)
-			.where(
-				and(
-					eq(publishedEntityStatus.type, "published"),
-					eq(organisationalUnitType.type, "institution"),
-					eq(organisationalRelationStatus.status, "is_located_in"),
-					sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
-					sql`
-						EXISTS (
-							SELECT
-								1
-							FROM
-								${schema.organisationalUnitsRelations} partner_relations
-								INNER JOIN ${schema.organisationalUnitStatus} partner_relation_status ON partner_relations.status = partner_relation_status.id
-								INNER JOIN ${schema.entityVersions} partner_related_v ON partner_related_v.entity_id = partner_relations.related_unit_document_id
-								INNER JOIN ${schema.organisationalUnits} related_units ON related_units.id = partner_related_v.id
-								INNER JOIN ${schema.organisationalUnitTypes} related_unit_types ON related_units.type_id = related_unit_types.id
-							WHERE
-								partner_relations.unit_document_id = ${itemEntities.id}
-								AND partner_relation_status.status = 'is_partner_institution_of'
-								AND related_unit_types.type = 'eric'
-								AND partner_relations.duration @> NOW()::TIMESTAMPTZ
-						)
-					`,
-				),
-			);
+				countryScopedDocumentsById.set(document.id, document);
+			}
+		}
 
-		website.push(
-			...partnerInstitutions.map((item) =>
-				createWebsiteEntityDocument({
-					importedAt,
-					type: "institution",
-					sourceId: item.itemSlug,
-					documentId: `${item.countrySlug}:${item.itemSlug}`,
-					sourceUpdatedAt: item.sourceUpdatedAt,
-					label: item.label,
-					description: mergeDescription(
-						organisationalUnitDescriptions.get(item.itemId),
-						item.description ?? "",
-					),
-					link: getEntityHref({ type: "country", slug: item.countrySlug }),
-				}),
-			),
-		);
-
-		const cooperatingPartnerInstitutions = await db
-			.select({
-				itemId: schema.organisationalUnits.id,
-				countrySlug: countryEntities.slug,
-				itemSlug: itemEntities.slug,
-				label: schema.organisationalUnits.name,
-				description: schema.organisationalUnits.summary,
-				sourceUpdatedAt: schema.organisationalUnits.updatedAt,
-			})
-			.from(schema.organisationalUnits)
-			.innerJoin(itemEntityVersions, eq(schema.organisationalUnits.id, itemEntityVersions.id))
-			.innerJoin(itemEntities, eq(itemEntityVersions.entityId, itemEntities.id))
-			.innerJoin(publishedEntityStatus, eq(itemEntityVersions.statusId, publishedEntityStatus.id))
-			.innerJoin(
-				organisationalUnitType,
-				eq(schema.organisationalUnits.typeId, organisationalUnitType.id),
-			)
-			.innerJoin(
-				schema.organisationalUnitsRelations,
-				// unit↔unit relations are document-level; the owner unit is pinned to its published version.
-				eq(schema.organisationalUnitsRelations.unitDocumentId, itemEntities.id),
-			)
-			.innerJoin(
-				organisationalRelationStatus,
-				eq(schema.organisationalUnitsRelations.status, organisationalRelationStatus.id),
-			)
-			.innerJoin(
-				countryEntities,
-				eq(countryEntities.id, schema.organisationalUnitsRelations.relatedUnitDocumentId),
-			)
-			.innerJoin(countryEntityVersions, eq(countryEntityVersions.entityId, countryEntities.id))
-			.innerJoin(
-				schema.membersAndPartners,
-				eq(schema.membersAndPartners.id, countryEntityVersions.id),
-			)
-			.where(
-				and(
-					eq(publishedEntityStatus.type, "published"),
-					eq(organisationalUnitType.type, "institution"),
-					eq(organisationalRelationStatus.status, "is_located_in"),
-					sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
-					sql`
-						EXISTS (
-							SELECT
-								1
-							FROM
-								${schema.organisationalUnitsRelations} cooperating_relations
-								INNER JOIN ${schema.organisationalUnitStatus} cooperating_relation_status ON cooperating_relations.status = cooperating_relation_status.id
-								INNER JOIN ${schema.entityVersions} cooperating_related_v ON cooperating_related_v.entity_id = cooperating_relations.related_unit_document_id
-								INNER JOIN ${schema.organisationalUnits} related_units ON related_units.id = cooperating_related_v.id
-								INNER JOIN ${schema.organisationalUnitTypes} related_unit_types ON related_units.type_id = related_unit_types.id
-							WHERE
-								cooperating_relations.unit_document_id = ${itemEntities.id}
-								AND cooperating_relation_status.status = 'is_cooperating_partner_of'
-								AND related_unit_types.type = 'eric'
-								AND cooperating_relations.duration @> NOW()::TIMESTAMPTZ
-						)
-					`,
-				),
-			);
-
-		website.push(
-			...cooperatingPartnerInstitutions.map((item) =>
-				createWebsiteEntityDocument({
-					importedAt,
-					type: "institution",
-					sourceId: item.itemSlug,
-					documentId: `${item.countrySlug}:${item.itemSlug}`,
-					sourceUpdatedAt: item.sourceUpdatedAt,
-					label: item.label,
-					description: mergeDescription(
-						organisationalUnitDescriptions.get(item.itemId),
-						item.description ?? "",
-					),
-					link: getEntityHref({ type: "country", slug: item.countrySlug }),
-				}),
-			),
-		);
+		website.push(...countryScopedDocumentsById.values());
 
 		const news = await db.query.news.findMany({
 			columns: {
@@ -1681,7 +1849,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			},
 			with: {
 				entityVersion: {
-					columns: {},
+					columns: { entityId: true },
 					with: {
 						entity: {
 							columns: {
@@ -1697,6 +1865,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			...news.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
+					entityId: item.entityVersion.entityId,
 					type: "news-item",
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.publicationDate,
@@ -1723,7 +1892,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			},
 			with: {
 				entityVersion: {
-					columns: {},
+					columns: { entityId: true },
 					with: {
 						entity: {
 							columns: {
@@ -1739,6 +1908,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			...opportunities.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
+					entityId: item.entityVersion.entityId,
 					type: "opportunity",
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
@@ -1766,7 +1936,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			},
 			with: {
 				entityVersion: {
-					columns: {},
+					columns: { entityId: true },
 					with: {
 						entity: {
 							columns: {
@@ -1791,6 +1961,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return [
 					createWebsiteEntityDocument({
 						importedAt,
+						entityId: item.entityVersion.entityId,
 						type: "page",
 						sourceId: item.entityVersion.entity.slug,
 						sourceUpdatedAt: item.publicationDate,
@@ -1817,7 +1988,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			},
 			with: {
 				entityVersion: {
-					columns: {},
+					columns: { entityId: true },
 					with: {
 						entity: {
 							columns: {
@@ -1833,6 +2004,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			...persons.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
+					entityId: item.entityVersion.entityId,
 					type: "person",
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
@@ -1859,7 +2031,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			},
 			with: {
 				entityVersion: {
-					columns: {},
+					columns: { entityId: true },
 					with: {
 						entity: {
 							columns: {
@@ -1875,11 +2047,12 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			...dariahProjects.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
+					entityId: item.entityVersion.entityId,
 					type: "project",
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
-					description: mergeDescription(projectDescriptions.get(item.id), item.summary),
+					description: mergeDescription(projectDescriptions.get(item.id), item.summary ?? ""),
 					link: getEntityHref({ type: "project", slug: item.entityVersion.entity.slug }),
 				}),
 			),
@@ -1902,7 +2075,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			},
 			with: {
 				entityVersion: {
-					columns: {},
+					columns: { entityId: true },
 					with: {
 						entity: {
 							columns: {
@@ -1918,6 +2091,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			...spotlightArticles.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
+					entityId: item.entityVersion.entityId,
 					type: "spotlight-article",
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.publicationDate,
@@ -1944,7 +2118,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			},
 			with: {
 				entityVersion: {
-					columns: {},
+					columns: { entityId: true },
 					with: {
 						entity: {
 							columns: {
@@ -1960,12 +2134,65 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			...workingGroups.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
+					entityId: item.entityVersion.entityId,
 					type: "working-group",
 					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(workingGroupDescriptions.get(item.id), item.summary ?? ""),
 					link: getEntityHref({ type: "working-group", slug: item.entityVersion.entity.slug }),
+				}),
+			),
+		);
+
+		const governanceBodies = await db.query.organisationalUnits.findMany({
+			columns: {
+				id: true,
+				name: true,
+				summary: true,
+				updatedAt: true,
+			},
+			where: {
+				entityVersion: {
+					status: {
+						type: "published",
+					},
+				},
+				type: {
+					type: "governance_body",
+				},
+			},
+			with: {
+				entityVersion: {
+					columns: { entityId: true },
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
+					},
+				},
+			},
+		});
+
+		website.push(
+			...governanceBodies.map((item) =>
+				createWebsiteEntityDocument({
+					importedAt,
+					entityId: item.entityVersion.entityId,
+					type: "governance-body",
+					sourceId: item.entityVersion.entity.slug,
+					sourceUpdatedAt: item.updatedAt,
+					label: item.name,
+					description: mergeDescription(
+						organisationalUnitDescriptions.get(item.id),
+						item.summary ?? "",
+					),
+					link: getEntityHref({
+						type: "governance-body",
+						slug: item.entityVersion.entity.slug,
+					}),
 				}),
 			),
 		);
@@ -2032,29 +2259,85 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		};
 	}
 
+	/**
+	 * The ids of the documents currently indexed for an entity. An entity may own more than one, and
+	 * a document whose source relation was removed can no longer be derived from the database — so
+	 * this asks the index itself.
+	 */
+	async function getIndexedDocumentIdsForEntity(entityId: string): Promise<Array<string>> {
+		const documentIds = new Set<string>();
+
+		let page = 1;
+		let totalPages;
+
+		do {
+			const result = await searchService.collections.website.search({
+				filterBy: `entity_id:=${entityId}`,
+				page,
+				perPage: 250,
+				query: "*",
+			});
+
+			if (result.isErr()) {
+				throw result.error;
+			}
+
+			for (const item of result.value.items) {
+				documentIds.add(item.document.id);
+			}
+
+			totalPages = result.value.pagination.totalPages;
+			page += 1;
+		} while (page <= totalPages);
+
+		return [...documentIds];
+	}
+
+	async function deleteDocumentIds(documentIds: Array<string>): Promise<Array<unknown>> {
+		const errors: Array<unknown> = [];
+
+		for (const documentId of documentIds) {
+			const result = await search.collections.website.delete(documentId);
+
+			if (result.isErr() && !isMissingSearchDocumentError(result.error)) {
+				log.error("Failed to delete website search document.", {
+					documentId,
+					error: result.error,
+				});
+
+				errors.push(result.error);
+			}
+		}
+
+		return errors;
+	}
+
+	/**
+	 * Removes every document belonging to an entity. Takes a descriptor rather than an entity id
+	 * because it is called after the entity row is already gone.
+	 */
 	async function deleteWebsiteDocument(
 		descriptor: WebsiteDocumentDescriptor,
 	): Promise<SyncWebsiteDocumentResult> {
-		const documentId = createWebsiteDocumentId(descriptor);
-		const result = await search.collections.website.delete(documentId);
+		const { entityId } = descriptor;
 
-		if (result.isErr() && !isMissingSearchDocumentError(result.error)) {
-			log.error("Failed to delete website search document.", {
-				documentId,
-				error: result.error,
-			});
+		// The derived id covers documents indexed before `entity_id` existed, and documents left
+		// behind by a slug change, where the descriptor holds the previous slug.
+		const documentIds = [
+			...new Set([
+				createWebsiteDocumentId(descriptor),
+				...(await getIndexedDocumentIdsForEntity(entityId)),
+			]),
+		];
 
-			return {
-				documentId,
-				error: result.error,
-				ok: false,
-				operation: "deleted",
-			};
-		}
+		const errors = await deleteDocumentIds(documentIds);
 
 		return {
-			documentId,
-			ok: true,
+			entityId,
+			upsertedDocumentIds: [],
+			deletedDocumentIds: documentIds,
+			...(errors.length > 0 ? { errors } : {}),
+			ok: errors.length === 0,
 			operation: "deleted",
 		};
 	}
@@ -2063,46 +2346,89 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		await syncWebsiteDocumentForEntityWithResult(entityId);
 	}
 
+	/**
+	 * Entity ids of the units indexed under a country. A country's own document is not the only one
+	 * that changes when it is published or unpublished: the institutions and national consortia shown
+	 * on its page link to it and disappear with it.
+	 */
+	async function getCountryScopedUnitEntityIds(countryEntityId: string): Promise<Array<string>> {
+		const rows = await db
+			.select({ entityId: schema.organisationalUnitsRelations.unitDocumentId })
+			.from(schema.organisationalUnitsRelations)
+			.where(eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, countryEntityId));
+
+		return [...new Set(rows.map((row) => row.entityId))];
+	}
+
 	async function syncWebsiteDocumentForEntityWithResult(
 		entityId: string,
+		params?: { cascade?: boolean },
 	): Promise<SyncWebsiteDocumentResult> {
 		const descriptor = await getWebsiteDocumentDescriptorByEntityId(entityId);
 
 		if (descriptor == null) {
-			return { entityId, ok: true, operation: "skipped" };
-		}
-
-		const document = await getWebsiteDocumentForEntity(entityId);
-
-		if (document == null) {
-			const result = await deleteWebsiteDocument(descriptor);
-
-			return { ...result, entityId };
-		}
-
-		const result = await search.collections.website.upsert(document);
-
-		if (result.isErr()) {
-			log.error("Failed to upsert website search document.", {
-				entityId,
-				documentId: document.id,
-				error: result.error,
-			});
-
 			return {
 				entityId,
-				documentId: document.id,
-				error: result.error,
-				ok: false,
-				operation: "upserted",
+				upsertedDocumentIds: [],
+				deletedDocumentIds: [],
+				ok: true,
+				operation: "skipped",
 			};
 		}
 
+		const documents = await getWebsiteDocumentsForEntity(entityId);
+		const documentIds = new Set(documents.map((document) => document.id));
+
+		// Prune what the entity no longer warrants: it was unpublished, or it lost the relation that
+		// put it on a country page. The derived id is included when nothing is left, to also catch
+		// documents indexed before `entity_id` existed.
+		const staleDocumentIds = [
+			...new Set([
+				...(await getIndexedDocumentIdsForEntity(entityId)),
+				...(documents.length === 0 ? [createWebsiteDocumentId(descriptor)] : []),
+			]),
+		].filter((documentId) => !documentIds.has(documentId));
+
+		const errors: Array<unknown> = [];
+
+		for (const document of documents) {
+			const result = await search.collections.website.upsert(document);
+
+			if (result.isErr()) {
+				log.error("Failed to upsert website search document.", {
+					entityId,
+					documentId: document.id,
+					error: result.error,
+				});
+
+				errors.push(result.error);
+			}
+		}
+
+		errors.push(...(await deleteDocumentIds(staleDocumentIds)));
+
+		const cascaded =
+			descriptor.type === "country" && params?.cascade !== false
+				? await Promise.all(
+						(await getCountryScopedUnitEntityIds(entityId)).map((unitEntityId) =>
+							syncWebsiteDocumentForEntityWithResult(unitEntityId, { cascade: false }),
+						),
+					)
+				: [];
+
 		return {
 			entityId,
-			documentId: document.id,
-			ok: true,
-			operation: "upserted",
+			upsertedDocumentIds: [
+				...documentIds,
+				...cascaded.flatMap((result) => result.upsertedDocumentIds),
+			],
+			deletedDocumentIds: [
+				...staleDocumentIds,
+				...cascaded.flatMap((result) => result.deletedDocumentIds),
+			],
+			...(errors.length > 0 ? { errors } : {}),
+			ok: errors.length === 0 && cascaded.every((result) => result.ok),
+			operation: documents.length === 0 ? "deleted" : "synced",
 		};
 	}
 
@@ -2112,7 +2438,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		getSyncableWebsiteEntityIds,
 		getSyncableWebsiteEntityIdsByType,
 		getWebsiteDocumentDescriptorByEntityId,
-		getWebsiteDocumentForEntity,
+		getWebsiteDocumentsForEntity,
 		supportedWebsiteEntityTypes,
 		syncWebsiteDocumentForEntity,
 		syncWebsiteDocumentForEntityWithResult,
