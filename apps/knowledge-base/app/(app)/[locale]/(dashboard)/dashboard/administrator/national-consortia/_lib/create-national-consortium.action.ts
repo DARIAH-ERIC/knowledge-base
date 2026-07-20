@@ -10,6 +10,7 @@ import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-u
 import { filterToPublishedDocumentIds } from "@/lib/data/relations";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
+import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createMutationAction, getCreatedSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
@@ -100,10 +101,11 @@ export const createNationalConsortiumAction = createMutationAction({
 		};
 	},
 
-	async postCommit({ ctx }) {
+	async postCommit({ result, ctx }) {
 		if (!shouldSaveAndPublish(ctx.formData)) {
 			return;
 		}
+		await syncWebsiteDocumentForEntity(result.subjectId);
 		await dispatchWebhook({ type: "members-partners" });
 	},
 });
