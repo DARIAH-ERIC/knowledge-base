@@ -26,6 +26,9 @@ async function pickEntity(
 	const option = dialog.getByRole("option", { name: optionName, exact: true });
 	await option.waitFor({ state: "visible" });
 	await option.click();
+	// Wait for the popover to close before returning, so a subsequent pickEntity call does not
+	// find this (still-closing) dialog alongside the next one and trip strict-mode on `searchbox`.
+	await dialog.waitFor({ state: "hidden" });
 }
 
 test.describe("admin – maintenance merge & rename", () => {
