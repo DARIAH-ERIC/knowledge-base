@@ -1,16 +1,13 @@
 import * as schema from "@dariah-eric/database/schema";
 
-import type { PublicRelatedEntityType } from "@/lib/schemas";
+import type { EntityRef, PublicRelatedEntityType } from "@/lib/schemas";
+import {
+	getCountrySlugsByOrganisationalUnitDocumentId,
+	getWebsiteHref,
+} from "@/lib/website-routes";
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, asc, eq, notInArray, sql } from "@/services/db/sql";
 import { search } from "@/services/search";
-
-export interface RelatedEntity {
-	id: string;
-	slug: string;
-	entityType: PublicRelatedEntityType;
-	label: string | null;
-}
 
 /**
  * Resolve a (published/draft) entity version id to its owning document id (`entities.id`). Returns
@@ -30,16 +27,16 @@ export async function resolveDocumentId(db: Database | Transaction, id: string):
 export async function getRelatedEntities(
 	db: Database | Transaction,
 	entityId: string,
-): Promise<Array<RelatedEntity>> {
+): Promise<Array<EntityRef>> {
 	const documentId = await resolveDocumentId(db, entityId);
 	const publishedEntityVersions = alias(schema.entityVersions, "published_entity_versions");
 	const publishedEntityStatus = alias(schema.entityStatus, "published_entity_status");
 
-	return db
+	const rows = await db
 		.select({
 			id: schema.entities.id,
 			slug: schema.entities.slug,
-			entityType: sql<RelatedEntity["entityType"]>`
+			type: sql<PublicRelatedEntityType>`
 				CASE
 					WHEN ${schema.entityTypes.type} = 'organisational_units'
 					THEN ${schema.organisationalUnitTypes.type}
@@ -97,6 +94,22 @@ export async function getRelatedEntities(
 			asc(schema.entitiesToEntities.position),
 			asc(schema.entitiesToEntities.relatedEntityId),
 		);
+
+	// Institutions and national consortia have no page of their own — they are surfaced on their
+	// country's members-and-partners page — so their country is resolved in one extra query.
+	const countrySlugs = await getCountrySlugsByOrganisationalUnitDocumentId(
+		db,
+		rows
+			.filter((row) => row.type === "institution" || row.type === "national_consortium")
+			.map((row) => row.id),
+	);
+
+	return rows.map((row) => {
+		return {
+			...row,
+			href: getWebsiteHref(row.type, { slug: row.slug, countrySlug: countrySlugs.get(row.id) }),
+		};
+	});
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

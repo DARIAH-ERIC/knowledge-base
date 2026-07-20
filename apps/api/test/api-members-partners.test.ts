@@ -852,14 +852,18 @@ describe("members-partners", () => {
 							id: contributor.person.id,
 							name: contributor.person.name,
 							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-							position: expect.arrayContaining([
+							positions: expect.arrayContaining([
 								expect.objectContaining({
 									role: "is_affiliated_with",
-									name: contributor.affiliation.organisationalUnit.name,
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+									entity: expect.objectContaining({
+										label: contributor.affiliation.organisationalUnit.name,
+									}),
 								}),
 								expect.objectContaining({
 									role: "national_coordinator",
-									name: item.organisationalUnit.name,
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+									entity: expect.objectContaining({ label: item.organisationalUnit.name }),
 								}),
 							]),
 							role: "national_coordinator",
@@ -868,14 +872,18 @@ describe("members-partners", () => {
 							id: contactContributor.person.id,
 							name: contactContributor.person.name,
 							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-							position: expect.arrayContaining([
+							positions: expect.arrayContaining([
 								expect.objectContaining({
 									role: "is_affiliated_with",
-									name: contactContributor.affiliation.organisationalUnit.name,
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+									entity: expect.objectContaining({
+										label: contactContributor.affiliation.organisationalUnit.name,
+									}),
 								}),
 								expect.objectContaining({
 									role: "is_contact_for",
-									name: item.organisationalUnit.name,
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+									entity: expect.objectContaining({ label: item.organisationalUnit.name }),
 								}),
 							]),
 							role: "is_contact_for",
@@ -1124,7 +1132,7 @@ describe("members-partners", () => {
 					expect(data.relatedEntities).toEqual([
 						expect.objectContaining({
 							slug: consortiumRelatedPage.entity.slug,
-							entityType: "pages",
+							type: "pages",
 							label: consortiumRelatedPage.page.title,
 						}),
 					]);
@@ -1199,7 +1207,7 @@ describe("members-partners", () => {
 				expect(detailData.relatedEntities).toEqual([
 					expect.objectContaining({
 						slug: countryRelatedPage.entity.slug,
-						entityType: "pages",
+						type: "pages",
 						label: countryRelatedPage.page.title,
 					}),
 				]);
@@ -1427,14 +1435,18 @@ describe("members-partners", () => {
 							id: contributor.person.id,
 							name: contributor.person.name,
 							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-							position: expect.arrayContaining([
+							positions: expect.arrayContaining([
 								expect.objectContaining({
 									role: "is_affiliated_with",
-									name: contributor.affiliation.organisationalUnit.name,
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+									entity: expect.objectContaining({
+										label: contributor.affiliation.organisationalUnit.name,
+									}),
 								}),
 								expect.objectContaining({
 									role: "national_coordinator",
-									name: item.organisationalUnit.name,
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+									entity: expect.objectContaining({ label: item.organisationalUnit.name }),
 								}),
 							]),
 							role: "national_coordinator",
@@ -1443,14 +1455,18 @@ describe("members-partners", () => {
 							id: contactContributor.person.id,
 							name: contactContributor.person.name,
 							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-							position: expect.arrayContaining([
+							positions: expect.arrayContaining([
 								expect.objectContaining({
 									role: "is_affiliated_with",
-									name: contactContributor.affiliation.organisationalUnit.name,
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+									entity: expect.objectContaining({
+										label: contactContributor.affiliation.organisationalUnit.name,
+									}),
 								}),
 								expect.objectContaining({
 									role: "is_contact_for",
-									name: item.organisationalUnit.name,
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+									entity: expect.objectContaining({ label: item.organisationalUnit.name }),
 								}),
 							]),
 							role: "is_contact_for",
@@ -1459,14 +1475,18 @@ describe("members-partners", () => {
 							id: staffContributor.person.id,
 							name: staffContributor.person.name,
 							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-							position: expect.arrayContaining([
+							positions: expect.arrayContaining([
 								expect.objectContaining({
 									role: "is_affiliated_with",
-									name: staffContributor.affiliation.organisationalUnit.name,
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+									entity: expect.objectContaining({
+										label: staffContributor.affiliation.organisationalUnit.name,
+									}),
 								}),
 								expect.objectContaining({
 									role: "national_coordination_staff",
-									name: item.organisationalUnit.name,
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+									entity: expect.objectContaining({ label: item.organisationalUnit.name }),
 								}),
 							]),
 							role: "national_coordination_staff",

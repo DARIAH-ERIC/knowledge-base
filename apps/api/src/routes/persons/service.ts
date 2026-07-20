@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl } from "@/lib/images";
-import { getPersonContributions, getPersonPositions } from "@/lib/persons";
+import { getPersonArticles, getPersonPositions } from "@/lib/persons";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -88,7 +88,7 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 
 		return {
 			...flattenEntityVersion(item),
-			position: positions.get(item.id) ?? null,
+			positions: positions.get(item.id) ?? null,
 			image,
 		};
 	});
@@ -105,7 +105,7 @@ interface GetPersonByIdParams {
 export async function getPersonById(db: Database | Transaction, params: GetPersonByIdParams) {
 	const { id } = params;
 
-	const [item, fields, contributions] = await Promise.all([
+	const [item, fields, articles] = await Promise.all([
 		db.query.persons.findFirst({
 			where: {
 				id,
@@ -149,7 +149,7 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 			},
 		}),
 		getContentBlocks(db, id),
-		getPersonContributions(db, id),
+		getPersonArticles(db, id),
 	]);
 
 	if (item == null) {
@@ -162,10 +162,10 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 
 	return {
 		...flattenEntityVersion(item),
-		position: positions.get(item.id) ?? null,
+		positions: positions.get(item.id) ?? null,
 		image,
 		...fields,
-		contributions,
+		articles,
 	};
 }
 
@@ -290,16 +290,16 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 
 	const image = generateImageUrl(item.image, imageWidth.featured);
 
-	const [fields, contributions] = await Promise.all([
+	const [fields, articles] = await Promise.all([
 		getContentBlocks(db, item.id),
-		getPersonContributions(db, item.id),
+		getPersonArticles(db, item.id),
 	]);
 
 	return {
 		...flattenEntityVersion(item),
-		position: positions.get(item.id) ?? null,
+		positions: positions.get(item.id) ?? null,
 		image,
 		...fields,
-		contributions,
+		articles,
 	};
 }

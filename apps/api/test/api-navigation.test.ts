@@ -176,8 +176,11 @@ describe("navigation", () => {
 						expect.objectContaining({
 							label,
 							entity: {
+								id: expect.any(String) as string,
 								type: "working_group",
 								slug,
+								// A navigation item carries its own label.
+								label: null,
 								href: `/network/working-groups/${slug}`,
 							},
 						}),

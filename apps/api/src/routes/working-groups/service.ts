@@ -261,7 +261,7 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 		({ imageKey, imageAlt, imageCaption, licenseName, licenseUrl, roleType, ...row }) => {
 			return {
 				...row,
-				position: positions.get(row.id) ?? null,
+				positions: positions.get(row.id) ?? null,
 				role: roleType,
 				image: generateImageUrl(
 					toImageAsset({

@@ -1,39 +1,13 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
-const publicNavigationEntityTypesEnum = [
-	"documents_policies",
-	"events",
-	"funding_calls",
-	"impact_case_studies",
-	"news",
-	"opportunities",
-	"pages",
-	"persons",
-	"projects",
-	"spotlight_articles",
-	...schema.organisationalUnitTypesEnum,
-] as const satisfies ReadonlyArray<
-	(typeof schema.entityTypesEnum)[number] | (typeof schema.organisationalUnitTypesEnum)[number]
->;
-
-const EntityRefSchema = v.nullable(
-	v.object({
-		type: v.picklist(publicNavigationEntityTypesEnum),
-		slug: v.string(),
-		href: v.pipe(
-			v.nullable(v.string()),
-			v.description(
-				"Root-relative, locale-less website href of the linked entity; null when it has no page. Prepend locale and origin.",
-			),
-		),
-	}),
-);
+import { EntityRefSchema } from "@/lib/schemas";
 
 const NavigationItemBaseSchema = v.object({
 	...v.pick(schema.NavigationItemSelectSchema, ["id", "label", "href", "isExternal", "position"])
 		.entries,
-	entity: EntityRefSchema,
+	/** Null for external links and for items whose href is typed in by hand. */
+	entity: v.nullable(EntityRefSchema),
 });
 
 const NavigationItemSchema = v.pipe(

@@ -72,35 +72,49 @@ export const CalendarDateSchema = v.pipe(
 );
 
 /**
- * A person's current roles in organisational units. Shared by every endpoint that embeds persons,
- * so the shape stays identical across them.
+ * A reference to another entity. Every place that points at an entity — positions, related
+ * entities, navigation items, article credits — uses this exact shape, so consumers need a single
+ * code path to render a link, and a new field (e.g. `href`) is added in one place.
  */
-export const PersonPositionSchema = v.nullable(
+export const EntityRefSchema = v.pipe(
+	v.object({
+		/** Document id (stable across versions), not the id of a particular version. */
+		id: v.pipe(v.string(), v.uuid()),
+		type: v.picklist(publicRelatedEntityTypesEnum),
+		slug: v.string(),
+		/**
+		 * Display name of the entity; null when the source has none to offer (e.g. navigation items,
+		 * which carry their own author-chosen label).
+		 */
+		label: v.nullable(v.string()),
+		href: v.pipe(
+			v.nullable(v.string()),
+			v.description(
+				"Root-relative, locale-less website href; null when the entity has no page. Prepend locale and origin.",
+			),
+		),
+	}),
+	v.description("Reference to an entity, with its website href"),
+	v.metadata({ ref: "EntityRef" }),
+);
+
+export type EntityRef = v.InferOutput<typeof EntityRefSchema>;
+
+/**
+ * A person's current roles in organisational units — a relation, so the role and its note sit
+ * alongside a reference to the unit itself.
+ */
+export const PersonPositionsSchema = v.nullable(
 	v.array(
 		v.object({
 			role: v.picklist(schema.personRoleTypesEnum),
-			name: v.string(),
-			slug: v.string(),
-			type: v.picklist(schema.organisationalUnitTypesEnum),
-			href: v.pipe(
-				v.nullable(v.string()),
-				v.description(
-					"Root-relative, locale-less website href of the organisational unit; null when it has no page. Prepend locale and origin.",
-				),
-			),
 			description: v.nullable(v.string()),
+			entity: EntityRefSchema,
 		}),
 	),
 );
 
-export const RelatedEntitiesSchema = v.array(
-	v.object({
-		id: v.pipe(v.string(), v.uuid()),
-		slug: v.string(),
-		entityType: v.picklist(publicRelatedEntityTypesEnum),
-		label: v.nullable(v.string()),
-	}),
-);
+export const RelatedEntitiesSchema = v.array(EntityRefSchema);
 
 export const RelatedResourcesSchema = v.array(
 	v.object({

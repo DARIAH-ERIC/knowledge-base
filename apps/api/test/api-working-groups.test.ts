@@ -524,15 +524,19 @@ describe("working-groups", () => {
 					chairs: expect.arrayContaining([
 						expect.objectContaining({
 							name: chair.person.name,
-							position: expect.arrayContaining([
+							positions: expect.arrayContaining([
 								expect.objectContaining({
 									role: "is_affiliated_with",
-									name: chair.affiliation.organisationalUnit.name,
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+									entity: expect.objectContaining({
+										label: chair.affiliation.organisationalUnit.name,
+									}),
 								}),
 								...items.slice(1).map((i) =>
 									expect.objectContaining({
 										role: "is_chair_of",
-										name: i.organisationalUnit.name,
+										// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+										entity: expect.objectContaining({ label: i.organisationalUnit.name }),
 									}),
 								),
 							]),
@@ -542,7 +546,7 @@ describe("working-groups", () => {
 					relatedEntities: expect.arrayContaining([
 						expect.objectContaining({
 							slug: relatedPage.entity.slug,
-							entityType: "pages",
+							type: "pages",
 							label: relatedPage.page.title,
 						}),
 					]),
@@ -687,15 +691,19 @@ describe("working-groups", () => {
 					chairs: expect.arrayContaining([
 						expect.objectContaining({
 							name: chair.person.name,
-							position: expect.arrayContaining([
+							positions: expect.arrayContaining([
 								expect.objectContaining({
 									role: "is_affiliated_with",
-									name: chair.affiliation.organisationalUnit.name,
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+									entity: expect.objectContaining({
+										label: chair.affiliation.organisationalUnit.name,
+									}),
 								}),
 								...items.slice(1).map((i) =>
 									expect.objectContaining({
 										role: "is_chair_of",
-										name: i.organisationalUnit.name,
+										// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+										entity: expect.objectContaining({ label: i.organisationalUnit.name }),
 									}),
 								),
 							]),
