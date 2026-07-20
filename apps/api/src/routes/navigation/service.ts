@@ -2,6 +2,11 @@
 
 import * as schema from "@dariah-eric/database/schema";
 
+import { isPublicRelatedEntityType } from "@/lib/schemas";
+import {
+	getCountrySlugsByOrganisationalUnitDocumentId,
+	getWebsiteHref,
+} from "@/lib/website-routes";
 import type { Database, Transaction } from "@/middlewares/db";
 import { and, asc, eq, isNotNull, isNull, or, sql } from "@/services/db/sql";
 
@@ -9,7 +14,7 @@ interface NavigationItem {
 	id: string;
 	label: string;
 	href: string | null;
-	entity: { type: string; slug: string } | null;
+	entity: { type: string; slug: string; href: string | null } | null;
 	isExternal: boolean;
 	position: number;
 	parentId: string | null;
@@ -54,6 +59,7 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 			isExternal: schema.navigationItems.isExternal,
 			position: schema.navigationItems.position,
 			parentId: schema.navigationItems.parentId,
+			entityId: schema.entities.id,
 			entitySlug: schema.entities.slug,
 			entityType: sql<string>`
 				CASE
@@ -88,6 +94,18 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 		)
 		.orderBy(asc(schema.navigationMenus.name), asc(schema.navigationItems.position));
 
+	// Institutions and national consortia have no page of their own — they are surfaced on their
+	// country's members-and-partners page — so their country is resolved in one extra query.
+	const countrySlugs = await getCountrySlugsByOrganisationalUnitDocumentId(
+		db,
+		rows.flatMap((row) =>
+			row.entityId != null &&
+			(row.entityType === "institution" || row.entityType === "national_consortium")
+				? [row.entityId]
+				: [],
+		),
+	);
+
 	const menus = new Map<string, { id: string; name: string; items: Array<NavigationItem> }>();
 
 	for (const row of rows) {
@@ -104,7 +122,16 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 			href: row.href ?? null,
 			entity:
 				row.entitySlug != null && row.entityType != null
-					? { type: row.entityType, slug: row.entitySlug }
+					? {
+							type: row.entityType,
+							slug: row.entitySlug,
+							href: isPublicRelatedEntityType(row.entityType)
+								? getWebsiteHref(row.entityType, {
+										slug: row.entitySlug,
+										countrySlug: row.entityId == null ? null : countrySlugs.get(row.entityId),
+									})
+								: null,
+						}
 					: null,
 			isExternal: row.isExternal!,
 			position: row.position!,

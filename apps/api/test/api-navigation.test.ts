@@ -175,7 +175,11 @@ describe("navigation", () => {
 					expect.arrayContaining([
 						expect.objectContaining({
 							label,
-							entity: { type: "working_group", slug },
+							entity: {
+								type: "working_group",
+								slug,
+								href: `/network/working-groups/${slug}`,
+							},
 						}),
 					]),
 				);

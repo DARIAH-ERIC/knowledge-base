@@ -3,6 +3,10 @@ import type { JSONContent } from "@tiptap/core";
 
 import { type Image, generateImageUrl, toImageAsset } from "@/lib/images";
 import { resolveDocumentId } from "@/lib/relations";
+import {
+	getCountrySlugsByOrganisationalUnitDocumentId,
+	getOrganisationalUnitHref,
+} from "@/lib/website-routes";
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, eq, inArray, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -13,6 +17,11 @@ export interface PersonPosition {
 	/** Slug of the related organisational unit, for constructing urls to its details page. */
 	slug: string;
 	type: (typeof schema.organisationalUnitTypesEnum)[number];
+	/**
+	 * Root-relative, locale-less website href of the organisational unit, or null when it has no page
+	 * to link to. Consumers prepend locale and origin.
+	 */
+	href: string | null;
 	/** Optional free-text note describing the person↔org relation. */
 	description: string | null;
 }
@@ -69,6 +78,7 @@ export async function getPersonPositions(
 			role: schema.personRoleTypes.type,
 			name: schema.organisationalUnits.name,
 			slug: schema.entities.slug,
+			unitDocumentId: schema.entities.id,
 			type: schema.organisationalUnitTypes.type,
 			description: schema.personsToOrganisationalUnits.description,
 		})
@@ -107,6 +117,15 @@ export async function getPersonPositions(
 			),
 		);
 
+	// Institutions and national consortia have no page of their own — they are surfaced on their
+	// country's members-and-partners page — so their country is resolved in one extra query.
+	const countrySlugs = await getCountrySlugsByOrganisationalUnitDocumentId(
+		db,
+		rows
+			.filter((row) => row.type === "institution" || row.type === "national_consortium")
+			.map((row) => row.unitDocumentId),
+	);
+
 	const rowsByPerson = new Map<string, Array<PersonPosition>>();
 
 	for (const row of rows) {
@@ -116,6 +135,10 @@ export async function getPersonPositions(
 			name: row.name,
 			slug: row.slug,
 			type: row.type,
+			href: getOrganisationalUnitHref(row.type, {
+				slug: row.slug,
+				countrySlug: countrySlugs.get(row.unitDocumentId),
+			}),
 			description: row.description,
 		});
 		rowsByPerson.set(row.personId, items);

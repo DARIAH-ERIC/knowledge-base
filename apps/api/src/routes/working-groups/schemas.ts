@@ -6,6 +6,7 @@ import {
 	ImageSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
+	PersonPositionSchema,
 	RelatedEntitiesSchema,
 	RelatedResourcesSchema,
 } from "@/lib/schemas";
@@ -82,17 +83,7 @@ export const WorkingGroupSchema = v.pipe(
 		chairs: v.array(
 			v.object({
 				...v.pick(schema.PersonSelectSchema, ["id", "name"]).entries,
-				position: v.nullable(
-					v.array(
-						v.object({
-							role: v.picklist(schema.personRoleTypesEnum),
-							name: v.string(),
-							slug: v.string(),
-							type: v.picklist(schema.organisationalUnitTypesEnum),
-							description: v.nullable(v.string()),
-						}),
-					),
-				),
+				position: PersonPositionSchema,
 				image: v.nullable(ImageSchema),
 				slug: v.string(),
 				role: v.picklist(schema.personRoleTypesEnum),

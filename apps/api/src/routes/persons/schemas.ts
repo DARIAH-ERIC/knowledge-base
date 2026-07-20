@@ -2,22 +2,17 @@ import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
-import { ImageSchema, PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
+import {
+	ImageSchema,
+	PaginatedResponseSchema,
+	PaginationQuerySchema,
+	PersonPositionSchema,
+} from "@/lib/schemas";
 
 export const PersonBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
-		position: v.nullable(
-			v.array(
-				v.object({
-					role: v.picklist(schema.personRoleTypesEnum),
-					name: v.string(),
-					slug: v.string(),
-					type: v.picklist(schema.organisationalUnitTypesEnum),
-					description: v.nullable(v.string()),
-				}),
-			),
-		),
+		position: PersonPositionSchema,
 		image: v.nullable(ImageSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
@@ -60,17 +55,7 @@ export type PersonContribution = v.InferOutput<typeof PersonContributionSchema>;
 export const PersonSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
-		position: v.nullable(
-			v.array(
-				v.object({
-					role: v.picklist(schema.personRoleTypesEnum),
-					name: v.string(),
-					slug: v.string(),
-					type: v.picklist(schema.organisationalUnitTypesEnum),
-					description: v.nullable(v.string()),
-				}),
-			),
-		),
+		position: PersonPositionSchema,
 		image: v.nullable(ImageSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),

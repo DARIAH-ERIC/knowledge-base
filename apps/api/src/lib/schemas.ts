@@ -21,6 +21,11 @@ export const publicRelatedEntityTypesEnum = [
 
 export type PublicRelatedEntityType = (typeof publicRelatedEntityTypesEnum)[number];
 
+/** Entity types not in the public vocabulary (documentation and internal pages) are never exposed. */
+export function isPublicRelatedEntityType(type: string): type is PublicRelatedEntityType {
+	return (publicRelatedEntityTypesEnum as ReadonlyArray<string>).includes(type);
+}
+
 export const LicenseSchema = v.object({
 	name: v.string(),
 	url: v.string(),
@@ -63,6 +68,28 @@ export const CalendarDateSchema = v.pipe(
 	v.isoTimestamp(),
 	v.description(
 		"Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+	),
+);
+
+/**
+ * A person's current roles in organisational units. Shared by every endpoint that embeds persons,
+ * so the shape stays identical across them.
+ */
+export const PersonPositionSchema = v.nullable(
+	v.array(
+		v.object({
+			role: v.picklist(schema.personRoleTypesEnum),
+			name: v.string(),
+			slug: v.string(),
+			type: v.picklist(schema.organisationalUnitTypesEnum),
+			href: v.pipe(
+				v.nullable(v.string()),
+				v.description(
+					"Root-relative, locale-less website href of the organisational unit; null when it has no page. Prepend locale and origin.",
+				),
+			),
+			description: v.nullable(v.string()),
+		}),
 	),
 );
 

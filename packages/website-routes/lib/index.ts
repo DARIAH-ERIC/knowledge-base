@@ -1,10 +1,14 @@
 /**
- * Canonical entity → DARIAH website pathname resolver.
+ * Canonical entity → DARIAH website href resolver.
  *
  * Single source of truth for the URL structure of the public DARIAH website
  * (github.com/DARIAH-ERIC/dariah-website). The templates below are derived from that repo's typed
  * route folders under `app/(default)/…` and MUST be kept in sync with them (see
  * docs/website-url-resolution.md).
+ *
+ * Values are root-relative and locale-less; most are bare pathnames, but a type whose entity is
+ * selected _within_ a page carries a query string (governance bodies) — hence "href", not
+ * "pathname".
  *
  * Pure, locale-less and zero-dependency by design, so the module can be published and consumed by
  * the website repo unchanged. Consumers are responsible for prepending the locale segment and
@@ -21,8 +25,10 @@ export { interimPagePathBySlug, resolveInterimPagePath } from "./interim-page-pa
 export const websiteEntityTypes = [
 	"country",
 	"document-or-policy",
+	"eric",
 	"event",
 	"funding-call",
+	"governance-body",
 	"impact-case-study",
 	"institution",
 	"national-consortium",
@@ -31,6 +37,7 @@ export const websiteEntityTypes = [
 	"page",
 	"person",
 	"project",
+	"regional-hub",
 	"spotlight-article",
 	"working-group",
 ] as const;
@@ -50,22 +57,31 @@ export type RoutableEntityType = (typeof routableEntityTypes)[number];
 
 /**
  * Params per type. Most detail pages need the entity's own slug; institutions and national
- * consortia have no page of their own and resolve to their country's page; document-or-policy is a
- * single listing page with no slug; a page carries its full author-defined `path`.
+ * consortia have no page of their own and resolve to their country's page; document-or-policy,
+ * regional-hub and eric are single pages with no slug; a page carries its full author-defined
+ * `path`.
  */
 export type GetEntityHrefParams =
 	| {
 			type: Exclude<
 				RoutableEntityType,
-				"document-or-policy" | "institution" | "national-consortium" | "page"
+				| "document-or-policy"
+				| "eric"
+				| "institution"
+				| "national-consortium"
+				| "page"
+				| "regional-hub"
 			>;
 			slug: string;
 	  }
-	| { type: "document-or-policy" }
+	| { type: "document-or-policy" | "eric" | "regional-hub" }
 	| { type: "institution" | "national-consortium"; countrySlug: string }
 	| { type: "page"; path: string };
 
-/** Resolve an entity to its locale-less website pathname (leading slash, no origin). */
+/**
+ * Resolve an entity to its locale-less website href (leading slash, no origin, may carry a query
+ * string).
+ */
 export function getEntityHref(params: GetEntityHrefParams): string {
 	switch (params.type) {
 		case "news-item": {
@@ -95,8 +111,21 @@ export function getEntityHref(params: GetEntityHrefParams): string {
 		case "working-group": {
 			return `/network/working-groups/${params.slug}`;
 		}
+		case "governance-body": {
+			// Governance bodies have no page of their own: the organisation-and-governance page
+			// selects one via a query param.
+			return `/about/organisation-and-governance?selectedBody=${encodeURIComponent(params.slug)}`;
+		}
 		case "country": {
 			return `/network/members-and-partners/${params.slug}`;
+		}
+		case "regional-hub": {
+			// The hub listing has no per-hub detail page.
+			return "/network/regional-hubs";
+		}
+		case "eric": {
+			// DARIAH-EU itself is the whole site, not an entity page.
+			return "/";
 		}
 		case "institution":
 		case "national-consortium": {
@@ -113,9 +142,9 @@ export function getEntityHref(params: GetEntityHrefParams): string {
 }
 
 /**
- * Types that have a collection/overview (listing) page on the website. `page`, `person`,
- * `institution` and `national-consortium` have no listing of their own (institutions/consortia are
- * surfaced within the country listing).
+ * Types that have a collection/overview (listing) page on the website. The rest have no listing of
+ * their own: institutions/consortia are surfaced within the country listing, governance bodies and
+ * regional hubs within a single CMS page, and `page`, `person` and `eric` have no collection.
  */
 export const listableEntityTypes = [
 	"country",
