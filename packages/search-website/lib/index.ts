@@ -325,8 +325,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return null;
 			}
 		}
-
-		return null;
 	}
 
 	async function getSyncableWebsiteEntityIds(): Promise<Array<string>> {
@@ -1665,71 +1663,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				}),
 			),
 		);
-
-		const personRoleType = alias(schema.personRoleTypes, "person_role_type");
-
-		const countryContributors = await db
-			.select({
-				itemId: schema.persons.id,
-				countrySlug: countryEntities.slug,
-				itemSlug: itemEntities.slug,
-				label: schema.persons.name,
-				sourceUpdatedAt: schema.persons.updatedAt,
-			})
-			.from(schema.personsToOrganisationalUnits)
-			// person↔org relations are document-level; resolve the person to its published version.
-			.innerJoin(
-				itemEntities,
-				eq(itemEntities.id, schema.personsToOrganisationalUnits.personDocumentId),
-			)
-			.innerJoin(itemEntityVersions, eq(itemEntityVersions.entityId, itemEntities.id))
-			.innerJoin(publishedEntityStatus, eq(itemEntityVersions.statusId, publishedEntityStatus.id))
-			.innerJoin(schema.persons, eq(schema.persons.id, itemEntityVersions.id))
-			.innerJoin(
-				personRoleType,
-				eq(schema.personsToOrganisationalUnits.roleTypeId, personRoleType.id),
-			)
-			// resolve the org to its published version via the members-and-partners view.
-			.innerJoin(
-				countryEntities,
-				eq(countryEntities.id, schema.personsToOrganisationalUnits.organisationalUnitDocumentId),
-			)
-			.innerJoin(countryEntityVersions, eq(countryEntityVersions.entityId, countryEntities.id))
-			.innerJoin(
-				schema.membersAndPartners,
-				eq(schema.membersAndPartners.id, countryEntityVersions.id),
-			)
-			.where(
-				and(
-					eq(publishedEntityStatus.type, "published"),
-					inArray(personRoleType.type, [
-						"national_coordinator",
-						"national_coordinator_deputy",
-						"national_representative",
-						"national_representative_deputy",
-					]),
-					sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
-				),
-			);
-
-		const contributorDocumentsById = new Map<string, WebsiteDocument>();
-
-		for (const item of countryContributors) {
-			contributorDocumentsById.set(`${item.countrySlug}:${item.itemSlug}`, {
-				kind: "entity",
-				source: "dariah-knowledge-base",
-				source_id: item.itemSlug,
-				source_updated_at: item.sourceUpdatedAt.getTime(),
-				imported_at: importedAt,
-				type: "person",
-				id: ["person", `${item.countrySlug}:${item.itemSlug}`].join(":"),
-				label: item.label,
-				description: personBiographies.get(item.itemId) ?? "",
-				link: getEntityHref({ type: "country", slug: item.countrySlug }),
-			});
-		}
-
-		website.push(...contributorDocumentsById.values());
 
 		const news = await db.query.news.findMany({
 			columns: {
