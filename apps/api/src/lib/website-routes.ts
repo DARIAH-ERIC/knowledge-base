@@ -12,9 +12,9 @@ type OrganisationalUnitType = (typeof schema.organisationalUnitTypesEnum)[number
  * website vocabulary spoken by `@dariah-eric/website-routes` (`news-item`, `country`, …).
  *
  * Returns null when an entity has no website page to link to (rather than emitting a href that
- * would 404): institutions and national consortia live on their country's page, so they need
- * {@link getCountrySlugsByOrganisationalUnitDocumentId}, and a page's real pathname is not stored
- * in the CMS yet.
+ * would 404 or navigate without informing): institutions and national consortia live on their
+ * country's page, so they need {@link getCountrySlugsByOrganisationalUnitDocumentId}; a page's real
+ * pathname is not stored in the CMS yet; and the ERIC itself has no page.
  */
 export function getWebsiteHref(
 	type: PublicRelatedEntityType,
@@ -77,7 +77,9 @@ export function getOrganisationalUnitHref(
 			return getEntityHref({ type: "country", slug: params.slug });
 		}
 		case "eric": {
-			return getEntityHref({ type: "eric" });
+			// DARIAH-EU itself is the whole site, not an entity page — better plain text than a link to
+			// the homepage.
+			return null;
 		}
 		case "governance_body": {
 			return getEntityHref({ type: "governance-body", slug: params.slug });

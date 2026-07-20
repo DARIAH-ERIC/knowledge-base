@@ -29,7 +29,6 @@ describe("getEntityHref", () => {
 			"/about/organisation-and-governance?selectedBody=board-of-directors",
 		);
 		expect(getEntityHref({ type: "regional-hub" })).toBe("/network/regional-hubs");
-		expect(getEntityHref({ type: "eric" })).toBe("/");
 		expect(getEntityHref({ type: "institution", countrySlug: "de" })).toBe(
 			"/network/members-and-partners/de",
 		);
@@ -89,10 +88,10 @@ describe("entity type vocabularies", () => {
 		}
 	});
 
-	it("every website type is routable", () => {
+	it("every website type is routable except the ERIC itself", () => {
 		const notRoutable = websiteEntityTypes.filter(
 			(type) => !(routableEntityTypes as ReadonlyArray<string>).includes(type),
 		);
-		expect(notRoutable).toStrictEqual([]);
+		expect(notRoutable).toStrictEqual(["eric"]);
 	});
 });

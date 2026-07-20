@@ -45,36 +45,51 @@ export const websiteEntityTypes = [
 export type WebsiteEntityType = (typeof websiteEntityTypes)[number];
 
 /**
- * Every website type is routable. Two routes are prerequisites for the links this resolver emits
- * (both on github.com/DARIAH-ERIC/dariah-website), and must ship before Phase 1 emits their links:
- * - `person` needs the `persons/[slug]` route. - `page` needs the single page catch-all that
- * renders a CMS page by its stored `path`; page paths are validated to not collide with the
- * website's existing typed routes (they win by priority).
+ * Every website type is routable except `eric`: DARIAH-EU itself is the whole site, not an entity
+ * page, and resolving it to `/` would emit a link that navigates without informing. Consumers
+ * surface it as plain text instead.
+ *
+ * Two routes are prerequisites for the links this resolver emits (both on
+ * github.com/DARIAH-ERIC/dariah-website), and must ship before Phase 1 emits their links: -
+ * `person` needs the `persons/[slug]` route. - `page` needs the single page catch-all that renders
+ * a CMS page by its stored `path`; page paths are validated to not collide with the website's
+ * existing typed routes (they win by priority).
  */
-export const routableEntityTypes = websiteEntityTypes;
+export const routableEntityTypes = [
+	"country",
+	"document-or-policy",
+	"event",
+	"funding-call",
+	"governance-body",
+	"impact-case-study",
+	"institution",
+	"national-consortium",
+	"news-item",
+	"opportunity",
+	"page",
+	"person",
+	"project",
+	"regional-hub",
+	"spotlight-article",
+	"working-group",
+] as const satisfies ReadonlyArray<WebsiteEntityType>;
 
 export type RoutableEntityType = (typeof routableEntityTypes)[number];
 
 /**
  * Params per type. Most detail pages need the entity's own slug; institutions and national
- * consortia have no page of their own and resolve to their country's page; document-or-policy,
- * regional-hub and eric are single pages with no slug; a page carries its full author-defined
- * `path`.
+ * consortia have no page of their own and resolve to their country's page; document-or-policy and
+ * regional-hub are single pages with no slug; a page carries its full author-defined `path`.
  */
 export type GetEntityHrefParams =
 	| {
 			type: Exclude<
 				RoutableEntityType,
-				| "document-or-policy"
-				| "eric"
-				| "institution"
-				| "national-consortium"
-				| "page"
-				| "regional-hub"
+				"document-or-policy" | "institution" | "national-consortium" | "page" | "regional-hub"
 			>;
 			slug: string;
 	  }
-	| { type: "document-or-policy" | "eric" | "regional-hub" }
+	| { type: "document-or-policy" | "regional-hub" }
 	| { type: "institution" | "national-consortium"; countrySlug: string }
 	| { type: "page"; path: string };
 
@@ -123,10 +138,6 @@ export function getEntityHref(params: GetEntityHrefParams): string {
 			// The hub listing has no per-hub detail page.
 			return "/network/regional-hubs";
 		}
-		case "eric": {
-			// DARIAH-EU itself is the whole site, not an entity page.
-			return "/";
-		}
 		case "institution":
 		case "national-consortium": {
 			return `/network/members-and-partners/${params.countrySlug}`;
@@ -144,7 +155,8 @@ export function getEntityHref(params: GetEntityHrefParams): string {
 /**
  * Types that have a collection/overview (listing) page on the website. The rest have no listing of
  * their own: institutions/consortia are surfaced within the country listing, governance bodies and
- * regional hubs within a single CMS page, and `page`, `person` and `eric` have no collection.
+ * regional hubs within a single CMS page, and `page`, `person` and `eric` have no collection
+ * (`eric` has no page at all).
  */
 export const listableEntityTypes = [
 	"country",
