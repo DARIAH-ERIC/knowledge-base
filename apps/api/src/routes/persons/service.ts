@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl } from "@/lib/images";
-import { getPersonPositions } from "@/lib/persons";
+import { getPersonContributions, getPersonPositions } from "@/lib/persons";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -105,7 +105,7 @@ interface GetPersonByIdParams {
 export async function getPersonById(db: Database | Transaction, params: GetPersonByIdParams) {
 	const { id } = params;
 
-	const [item, fields] = await Promise.all([
+	const [item, fields, contributions] = await Promise.all([
 		db.query.persons.findFirst({
 			where: {
 				id,
@@ -149,6 +149,7 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 			},
 		}),
 		getContentBlocks(db, id),
+		getPersonContributions(db, id),
 	]);
 
 	if (item == null) {
@@ -164,6 +165,7 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 		position: positions.get(item.id) ?? null,
 		image,
 		...fields,
+		contributions,
 	};
 }
 
@@ -288,12 +290,16 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 
 	const image = generateImageUrl(item.image, imageWidth.featured);
 
-	const fields = await getContentBlocks(db, item.id);
+	const [fields, contributions] = await Promise.all([
+		getContentBlocks(db, item.id),
+		getPersonContributions(db, item.id),
+	]);
 
 	return {
 		...flattenEntityVersion(item),
 		position: positions.get(item.id) ?? null,
 		image,
 		...fields,
+		contributions,
 	};
 }

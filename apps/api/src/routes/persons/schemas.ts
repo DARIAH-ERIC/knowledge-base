@@ -35,6 +35,27 @@ export const PersonListSchema = v.pipe(
 
 export type PersonList = v.InferOutput<typeof PersonListSchema>;
 
+export const personContributionTypesEnum = ["impact_case_study", "spotlight_article"] as const;
+
+/**
+ * An article a person is credited on. Spotlight articles and impact case studies share a shape, so
+ * they are returned as one chronological list discriminated by `type`.
+ */
+export const PersonContributionSchema = v.pipe(
+	v.object({
+		type: v.picklist(personContributionTypesEnum),
+		...v.pick(schema.SpotlightArticleSelectSchema, ["id", "title", "summary"]).entries,
+		image: ImageSchema,
+		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
+		role: v.picklist(schema.articleContributorRolesEnum),
+	}),
+	v.description("Article a person contributed to"),
+	v.metadata({ ref: "PersonContribution" }),
+);
+
+export type PersonContribution = v.InferOutput<typeof PersonContributionSchema>;
+
 export const PersonSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
@@ -52,6 +73,7 @@ export const PersonSchema = v.pipe(
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		biography: v.optional(v.array(ContentBlockSchema), []),
+		contributions: v.array(PersonContributionSchema),
 	}),
 	v.description("Person"),
 	v.metadata({ ref: "Person" }),

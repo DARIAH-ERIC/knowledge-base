@@ -138,6 +138,103 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	);
 }
 
+/**
+ * Seeds one published spotlight article, one published impact case study, and one _draft_ spotlight
+ * article, all crediting `personEntityId` (a document id).
+ */
+async function seedContributions(db: Database, personEntityId: string) {
+	const [publishedStatus, draftStatus, spotlightArticleType, impactCaseStudyType] =
+		await Promise.all([
+			db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+			db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "draft" } }),
+			db.query.entityTypes.findFirst({
+				columns: { id: true },
+				where: { type: "spotlight_articles" },
+			}),
+			db.query.entityTypes.findFirst({
+				columns: { id: true },
+				where: { type: "impact_case_studies" },
+			}),
+		]);
+
+	assert(publishedStatus, "No published entity status in database.");
+	assert(draftStatus, "No draft entity status in database.");
+	assert(spotlightArticleType, "No spotlight article entity type in database.");
+	assert(impactCaseStudyType, "No impact case study entity type in database.");
+
+	function createArticle(typeId: string, statusId: string, publicationDate: Date) {
+		const versionId = uuidv7();
+		const entityId = uuidv7();
+		const assetId = uuidv7();
+		const title = f.lorem.sentence();
+
+		return {
+			entity: { id: entityId, slug: slugify(title), typeId },
+			version: { id: versionId, entityId, statusId },
+			asset: {
+				id: assetId,
+				key: `articles/${assetId}.jpg`,
+				label: title,
+				mimeType: "image/jpeg",
+			},
+			article: {
+				id: versionId,
+				title,
+				summary: f.lorem.paragraph(),
+				publicationDate,
+				imageId: assetId,
+			},
+		};
+	}
+
+	const spotlightArticle = createArticle(
+		spotlightArticleType.id,
+		publishedStatus.id,
+		new Date("2026-03-01T00:00:00.000Z"),
+	);
+	const draftSpotlightArticle = createArticle(
+		spotlightArticleType.id,
+		draftStatus.id,
+		new Date("2026-04-01T00:00:00.000Z"),
+	);
+	const impactCaseStudy = createArticle(
+		impactCaseStudyType.id,
+		publishedStatus.id,
+		new Date("2026-01-01T00:00:00.000Z"),
+	);
+
+	const articles = [spotlightArticle, draftSpotlightArticle, impactCaseStudy];
+
+	await db.insert(schema.assets).values(articles.map((item) => item.asset));
+	await db.insert(schema.entities).values(articles.map((item) => item.entity));
+	await db.insert(schema.entityVersions).values(articles.map((item) => item.version));
+
+	await db
+		.insert(schema.spotlightArticles)
+		.values([spotlightArticle.article, draftSpotlightArticle.article]);
+	await db.insert(schema.impactCaseStudies).values([impactCaseStudy.article]);
+
+	await db.insert(schema.spotlightArticlesToPersons).values(
+		[spotlightArticle, draftSpotlightArticle].map((item) => {
+			return {
+				spotlightArticleDocumentId: item.entity.id,
+				personDocumentId: personEntityId,
+				role: "author" as const,
+			};
+		}),
+	);
+
+	await db.insert(schema.impactCaseStudiesToPersons).values([
+		{
+			impactCaseStudyDocumentId: impactCaseStudy.entity.id,
+			personDocumentId: personEntityId,
+			role: "editor" as const,
+		},
+	]);
+
+	return { spotlightArticle, draftSpotlightArticle, impactCaseStudy };
+}
+
 describe("persons", () => {
 	describe("GET /api/persons", () => {
 		it("should return paginated list of persons", async () => {
@@ -219,6 +316,48 @@ describe("persons", () => {
 				expect(data.entity).toMatchObject({ slug: item.entity.slug });
 				expect(data.biography).toHaveLength(1);
 				expect(data.biography[0]).toMatchObject({ type: "rich_text" });
+			});
+		});
+
+		it("should return articles the person contributed to, newest first", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(1);
+				await seed(db, items);
+
+				const item = items.at(0)!;
+				const { spotlightArticle, impactCaseStudy } = await seedContributions(db, item.entity.id);
+
+				const response = await client.persons[":id"].$get({
+					param: { id: item.version.id },
+				});
+
+				expect(response.status).toBe(200);
+
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as Person;
+
+				// The draft spotlight article is not published, so it must not surface.
+				expect(data.contributions).toHaveLength(2);
+				expect(data.contributions.at(0)).toMatchObject({
+					type: "spotlight_article",
+					id: spotlightArticle.article.id,
+					title: spotlightArticle.article.title,
+					summary: spotlightArticle.article.summary,
+					entity: { slug: spotlightArticle.entity.slug },
+					publishedAt: spotlightArticle.article.publicationDate.toISOString(),
+					role: "author",
+				});
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				expect(data.contributions.at(0)?.image).toMatchObject({ url: expect.any(String) });
+				expect(data.contributions.at(1)).toMatchObject({
+					type: "impact_case_study",
+					id: impactCaseStudy.article.id,
+					title: impactCaseStudy.article.title,
+					entity: { slug: impactCaseStudy.entity.slug },
+					role: "editor",
+				});
 			});
 		});
 
@@ -315,6 +454,40 @@ describe("persons", () => {
 				expect(data).toMatchObject({ name, position });
 				expect(data.biography).toHaveLength(1);
 				expect(data.biography[0]).toMatchObject({ type: "rich_text" });
+			});
+		});
+
+		it("should return articles the person contributed to", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(1);
+				await seed(db, items);
+
+				const item = items.at(0)!;
+				const { spotlightArticle, impactCaseStudy } = await seedContributions(db, item.entity.id);
+
+				const response = await client.persons.slugs[":slug"].$get({
+					param: { slug: item.entity.slug },
+				});
+
+				expect(response.status).toBe(200);
+
+				const data = await response.json();
+
+				assert("contributions" in data);
+				expect(data.contributions).toEqual([
+					expect.objectContaining({
+						type: "spotlight_article",
+						id: spotlightArticle.article.id,
+						role: "author",
+					}),
+					expect.objectContaining({
+						type: "impact_case_study",
+						id: impactCaseStudy.article.id,
+						role: "editor",
+					}),
+				]);
 			});
 		});
 

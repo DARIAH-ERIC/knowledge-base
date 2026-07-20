@@ -11452,6 +11452,12 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             },
             "type": "array",
           },
+          "contributions": {
+            "items": {
+              "$ref": "#/components/schemas/PersonContribution",
+            },
+            "type": "array",
+          },
           "email": {
             "anyOf": [
               {
@@ -11630,6 +11636,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "image",
           "entity",
           "publishedAt",
+          "contributions",
         ],
         "type": "object",
       },
@@ -11814,6 +11821,116 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "image",
           "entity",
           "publishedAt",
+        ],
+        "type": "object",
+      },
+      "PersonContribution": {
+        "description": "Article a person contributed to",
+        "properties": {
+          "entity": {
+            "properties": {
+              "slug": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "slug",
+            ],
+            "type": "object",
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string",
+          },
+          "image": {
+            "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {},
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "url": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "url",
+              "alt",
+              "caption",
+              "license",
+            ],
+            "type": "object",
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string",
+          },
+          "role": {
+            "enum": [
+              "author",
+              "editor",
+              "contributor",
+            ],
+            "type": "string",
+          },
+          "summary": {
+            "type": "string",
+          },
+          "title": {
+            "type": "string",
+          },
+          "type": {
+            "enum": [
+              "impact_case_study",
+              "spotlight_article",
+            ],
+            "type": "string",
+          },
+        },
+        "required": [
+          "type",
+          "id",
+          "title",
+          "summary",
+          "image",
+          "entity",
+          "publishedAt",
+          "role",
         ],
         "type": "object",
       },
