@@ -18,7 +18,7 @@ interface PageItemEditFormProps {
 	hasDraftChanges: boolean;
 	isPublished: boolean;
 	pageItem: Pick<schema.Page, "id" | "publicationDate" | "title" | "summary"> & {
-		entityVersion: { entity: { id: string; slug: string } };
+		entityVersion: { entity: { id: string; slug: string; path: string | null } };
 	} & { image: { key: string; label: string; url: string } | null };
 	initialRelatedEntityIds: Array<string>;
 	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;

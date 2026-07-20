@@ -103,6 +103,7 @@ export default async function DashboardWebsitePageItemDetailsPage(
 						columns: {
 							id: true,
 							slug: true,
+							path: true,
 						},
 					},
 				},

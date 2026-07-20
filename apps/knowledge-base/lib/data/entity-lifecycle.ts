@@ -545,6 +545,44 @@ export async function updateDraftDocumentSlug(
 	await tx.update(schema.entities).set({ slug }).where(eq(schema.entities.id, documentId));
 }
 
+/**
+ * Apply a user-chosen website path to a page that has never been published.
+ *
+ * The page-path twin of {@link updateDraftDocumentSlug}: a page's `path` is document-level (like
+ * slug) and therefore not version-isolated, so editing it on a draft would repoint the live route.
+ * The form only offers the field while the document is draft-only; the published check is enforced
+ * here as well, so a forged submission cannot move a live page. Changing a published path needs the
+ * redirect a maintenance action performs. The path is taken verbatim, so a collision raises
+ * `entities_path_unique` and is reported to the user rather than silently changed.
+ */
+export async function updateDraftDocumentPath(
+	tx: Transaction,
+	documentId: string,
+	path: string,
+): Promise<void> {
+	const [document] = await tx
+		.select({ path: schema.entities.path })
+		.from(schema.entities)
+		.where(eq(schema.entities.id, documentId))
+		.limit(1);
+	assert(document, `Entity "${documentId}" not found.`);
+
+	// Resubmitting the unchanged path is what every ordinary save does; only an actual change has to
+	// clear the published check.
+	if (document.path === path) {
+		return;
+	}
+
+	const { publishedId } = await getDocumentVersions(tx, documentId);
+	if (publishedId != null) {
+		// Reached only by a forged submission or a publish that raced this save — the form hides the
+		// field once published. A typed error so the action shows "change it on Maintenance".
+		throw new UserFacingError("published-path-change");
+	}
+
+	await tx.update(schema.entities).set({ path }).where(eq(schema.entities.id, documentId));
+}
+
 /** Return lifecycle state while treating a synced draft clone as "no draft changes". */
 export async function getDocumentLifecycleState(
 	tx: Transaction,

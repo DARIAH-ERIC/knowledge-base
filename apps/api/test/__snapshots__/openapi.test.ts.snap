@@ -200,6 +200,15 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "type": "string",
         },
       },
+      "GetPageByPathQuery": {
+        "description": "Full root-relative website pathname of the page, e.g. /about/strategy",
+        "in": "query",
+        "name": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+        },
+      },
       "GetPageBySlugParams": {
         "in": "path",
         "name": "slug",
@@ -17779,6 +17788,53 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
         },
         "summary": "Get pages",
+        "tags": [
+          "pages",
+        ],
+      },
+    },
+    "/api/v1/pages/by-path": {
+      "get": {
+        "description": "Retrieve a page by its full root-relative website path",
+        "operationId": "getPageByPath",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GetPageByPathQuery",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse",
+                },
+              },
+            },
+            "description": "Not Found",
+          },
+        },
+        "summary": "Get page by path",
         "tags": [
           "pages",
         ],

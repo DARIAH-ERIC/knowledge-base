@@ -315,3 +315,81 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 		relatedResources,
 	};
 }
+
+//
+
+interface GetPageByPathParams {
+	path: NonNullable<schema.Entity["path"]>;
+}
+
+export async function getPageByPath(db: Database | Transaction, params: GetPageByPathParams) {
+	// Stored paths are root-relative with no trailing slash; forgive a trailing slash from callers.
+	const path = params.path.length > 1 ? params.path.replace(/\/+$/, "") : params.path;
+
+	const item = await db.query.pages.findFirst({
+		where: {
+			entityVersion: {
+				status: {
+					type: "published",
+				},
+				entity: {
+					path,
+				},
+			},
+		},
+		columns: {
+			id: true,
+			publicationDate: true,
+			title: true,
+			summary: true,
+		},
+		with: {
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
+				},
+			},
+			image: {
+				columns: {
+					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
+				},
+			},
+		},
+	});
+
+	if (item == null) {
+		return null;
+	}
+
+	const image = generateImageUrl(item.image, imageWidth.featured);
+
+	const [fields, relatedEntities, relatedResources] = await Promise.all([
+		getContentBlocks(db, item.id),
+		getRelatedEntities(db, item.id),
+		getRelatedResources(db, item.id),
+	]);
+
+	const { publicationDate, ...data } = flattenEntityVersion(item);
+
+	return {
+		...data,
+		image,
+		publishedAt: publicationDate.toISOString(),
+		...fields,
+		relatedEntities,
+		relatedResources,
+	};
+}

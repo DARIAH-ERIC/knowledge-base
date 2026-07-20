@@ -5,8 +5,20 @@ import { createRouter } from "@/lib/factory";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, NOT_FOUND } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
-import { GetPageById, GetPageBySlug, GetPageSlugs, GetPages } from "@/routes/pages/schemas";
-import { getPageById, getPageBySlug, getPageSlugs, getPages } from "@/routes/pages/service";
+import {
+	GetPageById,
+	GetPageByPath,
+	GetPageBySlug,
+	GetPageSlugs,
+	GetPages,
+} from "@/routes/pages/schemas";
+import {
+	getPageById,
+	getPageByPath,
+	getPageBySlug,
+	getPageSlugs,
+	getPages,
+} from "@/routes/pages/service";
 
 export const router = createRouter()
 	/** GET /api/pages */
@@ -74,6 +86,46 @@ export const router = createRouter()
 			const data = await getPageSlugs(db, { limit, offset });
 
 			const payload = await validate(GetPageSlugs.ResponseSchema, data, 500);
+
+			return c.json(payload);
+		},
+	)
+
+	/** GET /api/pages/by-path */
+	.get(
+		"/by-path",
+		describeRoute({
+			tags: ["pages"],
+			summary: "Get page by path",
+			description: "Retrieve a page by its full root-relative website path",
+			operationId: "getPageByPath",
+			responses: {
+				200: {
+					description: "Success response",
+					content: {
+						"application/json": {
+							schema: resolver(GetPageByPath.ResponseSchema),
+						},
+					},
+				},
+				...BAD_REQUEST,
+				...NOT_FOUND,
+			},
+		}),
+		validator("query", GetPageByPath.QuerySchema),
+		async (c) => {
+			const { path } = c.req.valid("query");
+
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const data = await getPageByPath(db, { path });
+
+			if (data == null) {
+				return c.notFound();
+			}
+
+			const payload = await validate(GetPageByPath.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},

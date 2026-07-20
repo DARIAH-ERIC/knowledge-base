@@ -9,14 +9,14 @@ import {
 	ensureDraftVersion,
 	publishVersion,
 	touchVersion,
-	updateDraftDocumentSlug,
+	updateDraftDocumentPath,
 } from "@/lib/data/entity-lifecycle";
 import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
 import { pagesLifecycleAdapter } from "@/lib/data/pages.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
-import { getRequestedSlug } from "@/lib/entity-slug-input";
+import { getRequestedPath } from "@/lib/entity-path-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
@@ -32,11 +32,12 @@ export const updatePageItemAction = createMutationAction({
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(tx, input.documentId, pagesLifecycleAdapter);
 
-		// The form only offers the slug while the document is draft-only; `updateDraftDocumentSlug`
-		// re-checks that server-side, so a forged submission cannot rename a published page.
-		const requestedSlug = getRequestedSlug(input.slug);
-		if (requestedSlug != null) {
-			await updateDraftDocumentSlug(tx, input.documentId, requestedSlug);
+		// A page's slug is an internal, auto-derived handle and is not edited here; only its public
+		// `path` is. The form hides the path once published, and `updateDraftDocumentPath` re-checks
+		// server-side so a forged submission cannot move a live page.
+		const requestedPath = getRequestedPath(input.path);
+		if (requestedPath != null) {
+			await updateDraftDocumentPath(tx, input.documentId, requestedPath);
 		}
 
 		let imageId: string | null = null;

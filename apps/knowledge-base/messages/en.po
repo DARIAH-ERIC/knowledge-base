@@ -2110,6 +2110,20 @@ msgstr "Discard"
 msgid "CYbwwJ"
 msgstr "Open actions menu"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-path-field.tsx:37
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-path-field.tsx:50
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:73
+msgid "Qp1beM"
+msgstr "Path"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-path-field.tsx:40
+msgid "aQdn2o"
+msgstr "This page is published, so its address is public. Changing it can break existing links, so it is done by an administrator on the Maintenance page."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-path-field.tsx:53
+msgid "ppRfqY"
+msgstr "The full website address this page renders at, like /about/strategy. It isn't public until the page is published, so you can still change it freely. Leave empty if the page has no address yet."
+
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:71
 msgid "zK20E5"
 msgstr "Link related entities."
@@ -2194,7 +2208,6 @@ msgstr "No related resources"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:78
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:69
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:76
 msgid "IoDlcd"
 msgstr "Slug"
@@ -7377,30 +7390,35 @@ msgstr "A related record no longer exists. Refresh the page and try again."
 
 #: lib/server/create-command-action.ts:142
 #: lib/server/create-server-action.ts:116
-msgid "G5W8LK"
-msgstr "This entity is published, so its address can only be changed by an administrator on the Maintenance page."
+msgid "q9rxAh"
+msgstr "This page is published, so its path can only be changed by an administrator on the Maintenance page."
 
 #: lib/server/create-command-action.ts:145
 #: lib/server/create-server-action.ts:119
+msgid "G5W8LK"
+msgstr "This entity is published, so its address can only be changed by an administrator on the Maintenance page."
+
+#: lib/server/create-command-action.ts:148
+#: lib/server/create-server-action.ts:122
 msgid "FhIASk"
 msgstr "This record conflicts with an existing record."
 
-#: lib/server/create-command-action.ts:146
-#: lib/server/create-server-action.ts:120
+#: lib/server/create-command-action.ts:149
+#: lib/server/create-server-action.ts:123
 msgid "Jl3xT+"
 msgstr "Both accounts have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge."
 
-#: lib/server/create-command-action.ts:149
-#: lib/server/create-server-action.ts:123
+#: lib/server/create-command-action.ts:152
+#: lib/server/create-server-action.ts:126
 msgid "qDy0wr"
 msgstr "The submitted data violates a data rule."
 
-#: lib/server/create-command-action.ts:150
-#: lib/server/create-server-action.ts:124
+#: lib/server/create-command-action.ts:153
+#: lib/server/create-server-action.ts:127
 msgid "Bosjdo"
 msgstr "The submitted data is incomplete."
 
-#: lib/server/create-command-action.ts:153
-#: lib/server/create-server-action.ts:129
+#: lib/server/create-command-action.ts:156
+#: lib/server/create-server-action.ts:132
 msgid "lkI8/e"
 msgstr "Internal server error."

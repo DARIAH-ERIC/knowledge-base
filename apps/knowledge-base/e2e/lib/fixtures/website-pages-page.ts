@@ -40,6 +40,23 @@ export class WebsitePagesPage {
 		await this.page.getByLabel("Summary").fill(summary);
 	}
 
+	async fillPath(path: string): Promise<void> {
+		await this.page.getByLabel("Path").fill(path);
+	}
+
+	/** The page-path input, e.g. to assert it is disabled once the page is published. */
+	pathField(): Locator {
+		return this.page.getByLabel("Path");
+	}
+
+	/**
+	 * Click "Save … as draft" expecting the action to fail and stay on the form (e.g. a duplicate
+	 * path), rather than redirecting like {@link submitForm}.
+	 */
+	async submitFormExpectingError(): Promise<void> {
+		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
+	}
+
 	async fillPublicationDate(year: number, month: number, day: number): Promise<void> {
 		await clearDateSegments(this.page, "Publication date");
 

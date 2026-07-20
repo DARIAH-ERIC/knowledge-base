@@ -1725,6 +1725,7 @@ export class DatabaseService {
 		documentId: string;
 		id: string;
 		imageId: string | null;
+		path: string | null;
 		publicationDate: Date;
 		summary: string;
 	} | null> {
@@ -1733,11 +1734,14 @@ export class DatabaseService {
 				documentId: schema.entityVersions.entityId,
 				id: schema.entityVersions.entityId,
 				imageId: schema.pages.imageId,
+				// Document-level, so identical across a page's draft/published versions.
+				path: schema.entities.path,
 				publicationDate: schema.pages.publicationDate,
 				summary: schema.pages.summary,
 			})
 			.from(schema.pages)
 			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.where(eq(schema.pages.title, title))
 			.limit(1);
 

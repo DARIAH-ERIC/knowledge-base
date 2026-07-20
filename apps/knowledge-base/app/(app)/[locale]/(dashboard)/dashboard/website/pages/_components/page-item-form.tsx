@@ -19,8 +19,8 @@ import {
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
+import { EntityPathField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-path-field";
 import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
-import { EntitySlugField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field";
 import {
 	FormLayout,
 	FormSection,
@@ -32,7 +32,7 @@ interface PageItemFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	pageItem?: Pick<schema.Page, "id" | "publicationDate" | "title" | "summary"> & {
-		entityVersion: { entity: { id: string; slug: string } };
+		entityVersion: { entity: { id: string; slug: string; path: string | null } };
 	} & { image: { key: string; label: string; url: string } | null };
 	formId?: string;
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
@@ -113,7 +113,7 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 						<DatePickerTrigger />
 					</DatePicker>
 
-					<EntitySlugField isPublished={isPublished} slug={pageItem?.entityVersion.entity.slug} />
+					<EntityPathField isPublished={isPublished} path={pageItem?.entityVersion.entity.path} />
 				</FormSection>
 
 				<Separator className="my-6" />

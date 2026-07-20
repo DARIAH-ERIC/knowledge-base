@@ -1,4 +1,4 @@
-import { inArray } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
@@ -77,9 +77,24 @@ export const entities = p.snakeCase.table(
 		 * until the document has a published version.
 		 */
 		label: p.text("label"),
+		/**
+		 * Optional full, root-relative website pathname for this document (e.g. `/about/strategy`).
+		 * Only `pages` use it: a page's URL is author-defined and cannot be derived from its
+		 * single-segment slug. Document-level (like slug) so it survives republishes and is globally
+		 * unique across pages; null for every other type and for pages without a curated path (those
+		 * are not linkable — see `@dariah-eric/website-routes`). Backfilled from KB issue #703.
+		 */
+		path: p.text("path"),
 		...f.timestamps(),
 	},
-	(t) => [p.unique("entities_type_id_slug_unique").on(t.typeId, t.slug)],
+	(t) => [
+		p.unique("entities_type_id_slug_unique").on(t.typeId, t.slug),
+		// Global uniqueness among real paths; nulls (non-pages / un-curated pages) are exempt.
+		p
+			.uniqueIndex("entities_path_unique")
+			.on(t.path)
+			.where(sql`${t.path} IS NOT NULL`),
+	],
 );
 
 export type Entity = typeof entities.$inferSelect;

@@ -22,7 +22,7 @@ interface PageItemDetailsProps {
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
 	pageItem: Pick<schema.Page, "id" | "publicationDate" | "title" | "summary"> & {
-		entityVersion: { entity: { id: string; slug: string } };
+		entityVersion: { entity: { id: string; slug: string; path: string | null } };
 	} & { image: { key: string; label: string; url: string } | null };
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
@@ -70,8 +70,8 @@ export function PageItemDetails(props: Readonly<PageItemDetailsProps>): ReactNod
 				<DescriptionTerm>{t("Title")}</DescriptionTerm>
 				<DescriptionDetails>{pageItem.title}</DescriptionDetails>
 
-				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
-				<DescriptionDetails>{pageItem.entityVersion.entity.slug}</DescriptionDetails>
+				<DescriptionTerm>{t("Path")}</DescriptionTerm>
+				<DescriptionDetails>{pageItem.entityVersion.entity.path ?? "—"}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{pageItem.summary}</DescriptionDetails>
