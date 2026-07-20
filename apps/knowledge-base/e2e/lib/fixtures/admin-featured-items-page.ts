@@ -39,10 +39,14 @@ class FeaturedSection {
 		return this.featuredList().getByRole("row", { name });
 	}
 
+	/** All selected rows, for auto-retrying count assertions (`getFeaturedNames` is a snapshot). */
+	featuredRows(): Locator {
+		return this.featuredList().getByRole("row");
+	}
+
 	/** Names of the currently-selected featured items, in display order. */
 	async getFeaturedNames(): Promise<Array<string>> {
-		const rows = this.featuredList().getByRole("row");
-		const texts = await rows.allInnerTexts();
+		const texts = await this.featuredRows().allInnerTexts();
 		return texts.map((text) => text.trim()).filter((text) => text !== "");
 	}
 
@@ -98,6 +102,10 @@ class FeaturedSection {
 	 * the dragged item lands after it.
 	 */
 	async moveFeaturedDown(name: string): Promise<void> {
+		// `getFeaturedNames` does not auto-wait, so make sure the list has rendered the row we are
+		// about to move before taking the snapshot.
+		await this.featuredRow(name).waitFor({ state: "visible" });
+
 		const names = await this.getFeaturedNames();
 		const belowName = names[names.indexOf(name) + 1];
 		if (belowName === undefined) {
