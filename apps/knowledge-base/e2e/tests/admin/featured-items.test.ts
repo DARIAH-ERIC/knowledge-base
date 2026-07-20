@@ -43,11 +43,17 @@ const SECTION_CONFIGS: Array<SectionConfig> = [
 	},
 ];
 
-// site_metadata is a singleton, so these tests mutate shared state and must run serially.
+/**
+ * `site_metadata` is a singleton and `resetSiteMetadataFeaturedItems` rewrites the whole
+ * `featured_item_ids` column, so every describe in this file mutates the same row. A per-describe
+ * `mode: "serial"` is not enough: under `fullyParallel` the describes are still independent units
+ * that can run concurrently in different workers, where one group's reset clobbers another group's
+ * selection mid-test. `mode: "default"` at file level keeps all of them in one worker, in order.
+ */
+test.describe.configure({ mode: "default" });
+
 for (const config of SECTION_CONFIGS) {
 	test.describe(`website featured ${config.label}`, () => {
-		test.describe.configure({ mode: "serial" });
-
 		let items: Array<{ id: string; name: string }> = [];
 
 		test.beforeAll(async ({ db }) => {
@@ -93,7 +99,7 @@ for (const config of SECTION_CONFIGS) {
 			const section = config.section(featuredPage);
 			await featuredPage.goto();
 
-			expect(await section.getFeaturedNames()).toHaveLength(3);
+			await expect(section.featuredRows()).toHaveCount(3);
 			expect(await section.isOptionDisabled(fourth!.name)).toBe(true);
 		});
 
@@ -145,8 +151,6 @@ for (const config of SECTION_CONFIGS) {
 // The two sections write into distinct keys of the same singleton row; this guards against one
 // section's save clobbering the other's selection.
 test.describe("website featured items - news and events together", () => {
-	test.describe.configure({ mode: "serial" });
-
 	let newsItems: Array<{ id: string; name: string }> = [];
 	let events: Array<{ id: string; name: string }> = [];
 
