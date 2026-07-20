@@ -124,14 +124,14 @@ for (const config of SECTION_CONFIGS) {
 			const section = config.section(featuredPage);
 			await featuredPage.goto();
 
+			// The section hydrates its rows asynchronously; wait for the full initial order before
+			// reordering, otherwise the drag can read the list before the row below has rendered.
+			await section.expectFeaturedOrder([first!.name, second!.name, third!.name]);
+
 			// Move the first item down one position: [first, second, third] -> [second, first, third].
 			await section.moveFeaturedDown(first!.name);
 
-			expect(await section.getFeaturedNames()).toStrictEqual([
-				second!.name,
-				first!.name,
-				third!.name,
-			]);
+			await section.expectFeaturedOrder([second!.name, first!.name, third!.name]);
 
 			await featuredPage.save();
 

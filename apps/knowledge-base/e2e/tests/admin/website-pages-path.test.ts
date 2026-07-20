@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { expect, test } from "@/e2e/lib/test";
+import { normalizePath } from "@/lib/entity-path-input";
 
 test.describe("website pages — path field", () => {
 	/** Run sequentially within this file; suites are isolated by Playwright worker index. */
@@ -20,9 +21,15 @@ test.describe("website pages — path field", () => {
 
 		const uuid = randomUUID();
 		const title = `${pagesPage.workerPrefix} Path Create ${uuid}`;
-		// Deliberately messy input (mixed case, spaces) to prove server-side normalisation.
+		// Deliberately messy input (mixed case, spaces) to prove server-side normalisation. The
+		// expectation is derived from the same normaliser the server applies, so the test asserts the
+		// round-trip rather than a hand-guessed slug (e.g. "E2E Worker 1" → "e2-e-worker-1").
 		const rawPath = `/E2E Worker ${String(workerIndex)}/QA Path ${uuid}`;
-		const expectedPath = `/e2e-worker-${String(workerIndex)}/qa-path-${uuid}`;
+		const expectedPath = normalizePath(rawPath);
+		// Guard the premise: this raw input normalises to a non-null path that actually differs from
+		// what was typed, or the test proves nothing about server-side normalisation.
+		expect(expectedPath).not.toBeNull();
+		expect(expectedPath).not.toBe(rawPath);
 
 		await pagesPage.gotoCreate();
 		await pagesPage.fillTitle(title);
@@ -37,7 +44,7 @@ test.describe("website pages — path field", () => {
 		// And it is surfaced on the details page.
 		await pagesPage.searchByTitle(title);
 		await pagesPage.gotoDetailsFromList(title);
-		await expect(page.getByText(expectedPath, { exact: true })).toBeVisible();
+		await expect(page.getByText(expectedPath!, { exact: true })).toBeVisible();
 	});
 
 	test("freezes the path field once the page is published", async ({

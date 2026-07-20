@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 
 const BASE_PATH = "/en/dashboard/website/featured";
 
@@ -44,6 +44,15 @@ class FeaturedSection {
 		const rows = this.featuredList().getByRole("row");
 		const texts = await rows.allInnerTexts();
 		return texts.map((text) => text.trim()).filter((text) => text !== "");
+	}
+
+	/**
+	 * Web-first assertion that the selection list holds exactly these names, in order. The section is
+	 * an `AsyncListSelect` that hydrates its selected rows asynchronously after navigation, so a
+	 * one-shot {@link getFeaturedNames} read can observe a half-rendered list; polling waits that out.
+	 */
+	async expectFeaturedOrder(expected: Array<string>): Promise<void> {
+		await expect.poll(() => this.getFeaturedNames()).toStrictEqual(expected);
 	}
 
 	private async openOptions(): Promise<Locator> {
@@ -98,6 +107,10 @@ class FeaturedSection {
 	 * the dragged item lands after it.
 	 */
 	async moveFeaturedDown(name: string): Promise<void> {
+		// The section hydrates its rows asynchronously after navigation, so read the order only once
+		// the dragged row is present; otherwise it can transiently appear last (no row below it).
+		await this.featuredRow(name).waitFor({ state: "visible" });
+
 		const names = await this.getFeaturedNames();
 		const belowName = names[names.indexOf(name) + 1];
 		if (belowName === undefined) {
@@ -108,6 +121,7 @@ class FeaturedSection {
 		// auto-scroll, so bring it into view first.
 		const handle = this.featuredRow(name).locator('button[slot="drag"]');
 		await handle.scrollIntoViewIfNeeded();
+		await this.featuredRow(belowName).waitFor({ state: "visible" });
 
 		const handleBox = await handle.boundingBox();
 		const belowBox = await this.featuredRow(belowName).boundingBox();
