@@ -6,6 +6,8 @@ import { alias, and, eq, inArray, sql } from "@/services/db/sql";
 export interface PersonPosition {
 	role: (typeof schema.personRoleTypesEnum)[number];
 	name: string;
+	/** Slug of the related organisational unit, for constructing urls to its details page. */
+	slug: string;
 	type: (typeof schema.organisationalUnitTypesEnum)[number];
 	/** Optional free-text note describing the person↔org relation. */
 	description: string | null;
@@ -62,6 +64,7 @@ export async function getPersonPositions(
 			personId: personEntityVersions.id,
 			role: schema.personRoleTypes.type,
 			name: schema.organisationalUnits.name,
+			slug: schema.entities.slug,
 			type: schema.organisationalUnitTypes.type,
 			description: schema.personsToOrganisationalUnits.description,
 		})
@@ -86,6 +89,10 @@ export async function getPersonPositions(
 			eq(schema.organisationalUnits.id, organisationalUnitDocumentLifecycle.publishedId),
 		)
 		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, organisationalUnitDocumentLifecycle.documentId),
+		)
+		.innerJoin(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 		)
@@ -103,6 +110,7 @@ export async function getPersonPositions(
 		items.push({
 			role: row.role,
 			name: row.name,
+			slug: row.slug,
 			type: row.type,
 			description: row.description,
 		});
