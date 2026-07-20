@@ -255,6 +255,8 @@ describe("persons", () => {
 						role: "is_affiliated_with",
 						name: item.affiliation.organisationalUnit.name,
 						slug: item.affiliation.entity.slug,
+						// An institution with no country relation has no page on the website.
+						href: null,
 						description: item.affiliation.description,
 					}),
 				]);
@@ -298,6 +300,8 @@ describe("persons", () => {
 						role: "is_affiliated_with",
 						name: item.affiliation.organisationalUnit.name,
 						slug: item.affiliation.entity.slug,
+						// An institution with no country relation has no page on the website.
+						href: null,
 						description: item.affiliation.description,
 					}),
 				]);
@@ -440,6 +444,8 @@ describe("persons", () => {
 						role: "is_affiliated_with",
 						name: item.affiliation.organisationalUnit.name,
 						slug: item.affiliation.entity.slug,
+						// An institution with no country relation has no page on the website.
+						href: null,
 						description: item.affiliation.description,
 					}),
 				]);

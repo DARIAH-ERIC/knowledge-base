@@ -27,6 +27,7 @@
 		"@dariah-eric/request": "workspace:^",
 		"@dariah-eric/search": "workspace:^",
 		"@dariah-eric/storage": "workspace:^",
+		"@dariah-eric/website-routes": "workspace:^",
 		"@hono/node-server": "catalog:",
 		"@hono/standard-validator": "catalog:",
 		"@hono/swagger-ui": "catalog:",

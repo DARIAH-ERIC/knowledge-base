@@ -21,6 +21,12 @@ const EntityRefSchema = v.nullable(
 	v.object({
 		type: v.picklist(publicNavigationEntityTypesEnum),
 		slug: v.string(),
+		href: v.pipe(
+			v.nullable(v.string()),
+			v.description(
+				"Root-relative, locale-less website href of the linked entity; null when it has no page. Prepend locale and origin.",
+			),
+		),
 	}),
 );
 

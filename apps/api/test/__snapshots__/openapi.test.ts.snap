@@ -398,6 +398,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "href": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                      "description": "Root-relative, locale-less website href of the organisational unit; null when it has no page. Prepend locale and origin.",
+                    },
                     "name": {
                       "type": "string",
                     },
@@ -437,6 +448,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "name",
                     "slug",
                     "type",
+                    "href",
                     "description",
                   ],
                   "type": "object",
@@ -5845,6 +5857,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                               },
                             ],
                           },
+                          "href": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                              },
+                              {
+                                "type": "null",
+                              },
+                            ],
+                            "description": "Root-relative, locale-less website href of the organisational unit; null when it has no page. Prepend locale and origin.",
+                          },
                           "name": {
                             "type": "string",
                           },
@@ -5884,6 +5907,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "name",
                           "slug",
                           "type",
+                          "href",
                           "description",
                         ],
                         "type": "object",
@@ -6395,6 +6419,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                               },
                             ],
                           },
+                          "href": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                              },
+                              {
+                                "type": "null",
+                              },
+                            ],
+                            "description": "Root-relative, locale-less website href of the organisational unit; null when it has no page. Prepend locale and origin.",
+                          },
                           "name": {
                             "type": "string",
                           },
@@ -6434,6 +6469,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "name",
                           "slug",
                           "type",
+                          "href",
                           "description",
                         ],
                         "type": "object",
@@ -7044,6 +7080,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                               },
                             ],
                           },
+                          "href": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                              },
+                              {
+                                "type": "null",
+                              },
+                            ],
+                            "description": "Root-relative, locale-less website href of the organisational unit; null when it has no page. Prepend locale and origin.",
+                          },
                           "name": {
                             "type": "string",
                           },
@@ -7083,6 +7130,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "name",
                           "slug",
                           "type",
+                          "href",
                           "description",
                         ],
                         "type": "object",
@@ -8825,6 +8873,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "anyOf": [
                     {
                       "properties": {
+                        "href": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                          "description": "Root-relative, locale-less website href of the linked entity; null when it has no page. Prepend locale and origin.",
+                        },
                         "slug": {
                           "type": "string",
                         },
@@ -8854,6 +8913,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "required": [
                         "type",
                         "slug",
+                        "href",
                       ],
                       "type": "object",
                     },
@@ -8904,6 +8964,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "anyOf": [
               {
                 "properties": {
+                  "href": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                    "description": "Root-relative, locale-less website href of the linked entity; null when it has no page. Prepend locale and origin.",
+                  },
                   "slug": {
                     "type": "string",
                   },
@@ -8933,6 +9004,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "required": [
                   "type",
                   "slug",
+                  "href",
                 ],
                 "type": "object",
               },
@@ -11588,6 +11660,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "href": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                      "description": "Root-relative, locale-less website href of the organisational unit; null when it has no page. Prepend locale and origin.",
+                    },
                     "name": {
                       "type": "string",
                     },
@@ -11627,6 +11710,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "name",
                     "slug",
                     "type",
+                    "href",
                     "description",
                   ],
                   "type": "object",
@@ -11777,6 +11861,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "href": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                      "description": "Root-relative, locale-less website href of the organisational unit; null when it has no page. Prepend locale and origin.",
+                    },
                     "name": {
                       "type": "string",
                     },
@@ -11816,6 +11911,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "name",
                     "slug",
                     "type",
+                    "href",
                     "description",
                   ],
                   "type": "object",
@@ -13635,6 +13731,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                               },
                             ],
                           },
+                          "href": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                              },
+                              {
+                                "type": "null",
+                              },
+                            ],
+                            "description": "Root-relative, locale-less website href of the organisational unit; null when it has no page. Prepend locale and origin.",
+                          },
                           "name": {
                             "type": "string",
                           },
@@ -13674,6 +13781,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "name",
                           "slug",
                           "type",
+                          "href",
                           "description",
                         ],
                         "type": "object",
@@ -14184,6 +14292,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                               },
                             ],
                           },
+                          "href": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                              },
+                              {
+                                "type": "null",
+                              },
+                            ],
+                            "description": "Root-relative, locale-less website href of the organisational unit; null when it has no page. Prepend locale and origin.",
+                          },
                           "name": {
                             "type": "string",
                           },
@@ -14223,6 +14342,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "name",
                           "slug",
                           "type",
+                          "href",
                           "description",
                         ],
                         "type": "object",
