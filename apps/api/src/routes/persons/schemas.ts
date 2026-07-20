@@ -12,6 +12,7 @@ export const PersonBaseSchema = v.pipe(
 				v.object({
 					role: v.picklist(schema.personRoleTypesEnum),
 					name: v.string(),
+					slug: v.string(),
 					type: v.picklist(schema.organisationalUnitTypesEnum),
 					description: v.nullable(v.string()),
 				}),
@@ -64,6 +65,7 @@ export const PersonSchema = v.pipe(
 				v.object({
 					role: v.picklist(schema.personRoleTypesEnum),
 					name: v.string(),
+					slug: v.string(),
 					type: v.picklist(schema.organisationalUnitTypesEnum),
 					description: v.nullable(v.string()),
 				}),

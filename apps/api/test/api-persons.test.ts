@@ -254,6 +254,7 @@ describe("persons", () => {
 					expect.objectContaining({
 						role: "is_affiliated_with",
 						name: item.affiliation.organisationalUnit.name,
+						slug: item.affiliation.entity.slug,
 						description: item.affiliation.description,
 					}),
 				]);
@@ -296,6 +297,7 @@ describe("persons", () => {
 					expect.objectContaining({
 						role: "is_affiliated_with",
 						name: item.affiliation.organisationalUnit.name,
+						slug: item.affiliation.entity.slug,
 						description: item.affiliation.description,
 					}),
 				]);
@@ -437,6 +439,7 @@ describe("persons", () => {
 					expect.objectContaining({
 						role: "is_affiliated_with",
 						name: item.affiliation.organisationalUnit.name,
+						slug: item.affiliation.entity.slug,
 						description: item.affiliation.description,
 					}),
 				]);
