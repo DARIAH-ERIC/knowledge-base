@@ -416,6 +416,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "string",
                     },
+                    "slug": {
+                      "type": "string",
+                    },
                     "type": {
                       "enum": [
                         "governance_body",
@@ -432,6 +435,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "role",
                     "name",
+                    "slug",
                     "type",
                     "description",
                   ],
@@ -5859,6 +5863,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             ],
                             "type": "string",
                           },
+                          "slug": {
+                            "type": "string",
+                          },
                           "type": {
                             "enum": [
                               "governance_body",
@@ -5875,6 +5882,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "role",
                           "name",
+                          "slug",
                           "type",
                           "description",
                         ],
@@ -6405,6 +6413,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             ],
                             "type": "string",
                           },
+                          "slug": {
+                            "type": "string",
+                          },
                           "type": {
                             "enum": [
                               "governance_body",
@@ -6421,6 +6432,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "role",
                           "name",
+                          "slug",
                           "type",
                           "description",
                         ],
@@ -7050,6 +7062,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             ],
                             "type": "string",
                           },
+                          "slug": {
+                            "type": "string",
+                          },
                           "type": {
                             "enum": [
                               "governance_body",
@@ -7066,6 +7081,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "role",
                           "name",
+                          "slug",
                           "type",
                           "description",
                         ],
@@ -11584,6 +11600,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "string",
                     },
+                    "slug": {
+                      "type": "string",
+                    },
                     "type": {
                       "enum": [
                         "governance_body",
@@ -11600,6 +11619,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "role",
                     "name",
+                    "slug",
                     "type",
                     "description",
                   ],
@@ -11768,6 +11788,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "string",
                     },
+                    "slug": {
+                      "type": "string",
+                    },
                     "type": {
                       "enum": [
                         "governance_body",
@@ -11784,6 +11807,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "role",
                     "name",
+                    "slug",
                     "type",
                     "description",
                   ],
@@ -13512,6 +13536,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             ],
                             "type": "string",
                           },
+                          "slug": {
+                            "type": "string",
+                          },
                           "type": {
                             "enum": [
                               "governance_body",
@@ -13528,6 +13555,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "role",
                           "name",
+                          "slug",
                           "type",
                           "description",
                         ],
@@ -14057,6 +14085,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             ],
                             "type": "string",
                           },
+                          "slug": {
+                            "type": "string",
+                          },
                           "type": {
                             "enum": [
                               "governance_body",
@@ -14073,6 +14104,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "role",
                           "name",
+                          "slug",
                           "type",
                           "description",
                         ],
