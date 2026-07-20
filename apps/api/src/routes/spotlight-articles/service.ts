@@ -139,7 +139,7 @@ async function getContributors(db: Database | Transaction, spotlightArticleId: s
 	return rows.map(({ imageKey, imageAlt, imageCaption, licenseName, licenseUrl, ...row }) => {
 		return {
 			...row,
-			position: positions.get(row.id) ?? null,
+			positions: positions.get(row.id) ?? null,
 			image: generateImageUrl(
 				toImageAsset({
 					key: imageKey,

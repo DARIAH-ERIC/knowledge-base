@@ -250,14 +250,18 @@ describe("persons", () => {
 				const item = items.at(1)!;
 				const name = item.person.name;
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				const position = expect.arrayContaining([
+				const positions = expect.arrayContaining([
 					expect.objectContaining({
 						role: "is_affiliated_with",
-						name: item.affiliation.organisationalUnit.name,
-						slug: item.affiliation.entity.slug,
-						// An institution with no country relation has no page on the website.
-						href: null,
 						description: item.affiliation.description,
+						entity: {
+							id: item.affiliation.entity.id,
+							type: "institution",
+							slug: item.affiliation.entity.slug,
+							label: item.affiliation.organisationalUnit.name,
+							// An institution with no country relation has no page on the website.
+							href: null,
+						},
 					}),
 				]);
 
@@ -275,7 +279,7 @@ describe("persons", () => {
 				expect(data.total).toBeGreaterThanOrEqual(items.length);
 				expect(data.data).toEqual(
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					expect.arrayContaining([expect.objectContaining({ name, position })]),
+					expect.arrayContaining([expect.objectContaining({ name, positions })]),
 				);
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
@@ -295,14 +299,18 @@ describe("persons", () => {
 				const id = item.version.id;
 				const name = item.person.name;
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				const position = expect.arrayContaining([
+				const positions = expect.arrayContaining([
 					expect.objectContaining({
 						role: "is_affiliated_with",
-						name: item.affiliation.organisationalUnit.name,
-						slug: item.affiliation.entity.slug,
-						// An institution with no country relation has no page on the website.
-						href: null,
 						description: item.affiliation.description,
+						entity: {
+							id: item.affiliation.entity.id,
+							type: "institution",
+							slug: item.affiliation.entity.slug,
+							label: item.affiliation.organisationalUnit.name,
+							// An institution with no country relation has no page on the website.
+							href: null,
+						},
 					}),
 				]);
 
@@ -316,7 +324,7 @@ describe("persons", () => {
 				const data = (await response.json()) as Person;
 
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				expect(data).toMatchObject({ name, position });
+				expect(data).toMatchObject({ name, positions });
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				expect(data.image).toMatchObject({ url: expect.any(String) });
 				expect(data.entity).toMatchObject({ slug: item.entity.slug });
@@ -345,23 +353,35 @@ describe("persons", () => {
 				const data = (await response.json()) as Person;
 
 				// The draft spotlight article is not published, so it must not surface.
-				expect(data.contributions).toHaveLength(2);
-				expect(data.contributions.at(0)).toMatchObject({
+				expect(data.articles).toHaveLength(2);
+				expect(data.articles.at(0)).toMatchObject({
 					type: "spotlight_article",
 					id: spotlightArticle.article.id,
 					title: spotlightArticle.article.title,
 					summary: spotlightArticle.article.summary,
-					entity: { slug: spotlightArticle.entity.slug },
+					entity: {
+						id: spotlightArticle.entity.id,
+						type: "spotlight_articles",
+						slug: spotlightArticle.entity.slug,
+						label: spotlightArticle.article.title,
+						href: `/spotlights/${spotlightArticle.entity.slug}`,
+					},
 					publishedAt: spotlightArticle.article.publicationDate.toISOString(),
 					role: "author",
 				});
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				expect(data.contributions.at(0)?.image).toMatchObject({ url: expect.any(String) });
-				expect(data.contributions.at(1)).toMatchObject({
+				expect(data.articles.at(0)?.image).toMatchObject({ url: expect.any(String) });
+				expect(data.articles.at(1)).toMatchObject({
 					type: "impact_case_study",
 					id: impactCaseStudy.article.id,
 					title: impactCaseStudy.article.title,
-					entity: { slug: impactCaseStudy.entity.slug },
+					entity: {
+						id: impactCaseStudy.entity.id,
+						type: "impact_case_studies",
+						slug: impactCaseStudy.entity.slug,
+						label: impactCaseStudy.article.title,
+						href: `/about/impact-case-studies/${impactCaseStudy.entity.slug}`,
+					},
 					role: "editor",
 				});
 			});
@@ -439,14 +459,18 @@ describe("persons", () => {
 				const slug = item.entity.slug;
 				const name = item.person.name;
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				const position = expect.arrayContaining([
+				const positions = expect.arrayContaining([
 					expect.objectContaining({
 						role: "is_affiliated_with",
-						name: item.affiliation.organisationalUnit.name,
-						slug: item.affiliation.entity.slug,
-						// An institution with no country relation has no page on the website.
-						href: null,
 						description: item.affiliation.description,
+						entity: {
+							id: item.affiliation.entity.id,
+							type: "institution",
+							slug: item.affiliation.entity.slug,
+							label: item.affiliation.organisationalUnit.name,
+							// An institution with no country relation has no page on the website.
+							href: null,
+						},
 					}),
 				]);
 
@@ -460,7 +484,7 @@ describe("persons", () => {
 
 				assert("biography" in data);
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				expect(data).toMatchObject({ name, position });
+				expect(data).toMatchObject({ name, positions });
 				expect(data.biography).toHaveLength(1);
 				expect(data.biography[0]).toMatchObject({ type: "rich_text" });
 			});
@@ -484,8 +508,8 @@ describe("persons", () => {
 
 				const data = await response.json();
 
-				assert("contributions" in data);
-				expect(data.contributions).toEqual([
+				assert("articles" in data);
+				expect(data.articles).toEqual([
 					expect.objectContaining({
 						type: "spotlight_article",
 						id: spotlightArticle.article.id,

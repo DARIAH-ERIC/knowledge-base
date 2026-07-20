@@ -3,16 +3,17 @@ import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import {
+	EntityRefSchema,
 	ImageSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
-	PersonPositionSchema,
+	PersonPositionsSchema,
 } from "@/lib/schemas";
 
 export const PersonBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
-		position: PersonPositionSchema,
+		positions: PersonPositionsSchema,
 		image: v.nullable(ImageSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
@@ -31,36 +32,36 @@ export const PersonListSchema = v.pipe(
 
 export type PersonList = v.InferOutput<typeof PersonListSchema>;
 
-export const personContributionTypesEnum = ["impact_case_study", "spotlight_article"] as const;
+export const personArticleTypesEnum = ["impact_case_study", "spotlight_article"] as const;
 
 /**
  * An article a person is credited on. Spotlight articles and impact case studies share a shape, so
  * they are returned as one chronological list discriminated by `type`.
  */
-export const PersonContributionSchema = v.pipe(
+export const PersonArticleSchema = v.pipe(
 	v.object({
-		type: v.picklist(personContributionTypesEnum),
+		type: v.picklist(personArticleTypesEnum),
 		...v.pick(schema.SpotlightArticleSelectSchema, ["id", "title", "summary"]).entries,
 		image: ImageSchema,
-		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		entity: EntityRefSchema,
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		role: v.picklist(schema.articleContributorRolesEnum),
 	}),
-	v.description("Article a person contributed to"),
-	v.metadata({ ref: "PersonContribution" }),
+	v.description("Article a person is credited on"),
+	v.metadata({ ref: "PersonArticle" }),
 );
 
-export type PersonContribution = v.InferOutput<typeof PersonContributionSchema>;
+export type PersonArticle = v.InferOutput<typeof PersonArticleSchema>;
 
 export const PersonSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
-		position: PersonPositionSchema,
+		positions: PersonPositionsSchema,
 		image: v.nullable(ImageSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		biography: v.optional(v.array(ContentBlockSchema), []),
-		contributions: v.array(PersonContributionSchema),
+		articles: v.array(PersonArticleSchema),
 	}),
 	v.description("Person"),
 	v.metadata({ ref: "Person" }),

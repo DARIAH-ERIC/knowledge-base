@@ -27,7 +27,9 @@ interface GovernanceBodyPerson {
 	sortName: string;
 	email: string | null;
 	orcid: string | null;
-	position: Awaited<ReturnType<typeof getPersonPositions>> extends Map<string, infer T> ? T : never;
+	positions: Awaited<ReturnType<typeof getPersonPositions>> extends Map<string, infer T>
+		? T
+		: never;
 	image: { url: string } | null;
 	slug: string;
 	role: (typeof schema.personRoleTypesEnum)[number];
@@ -92,7 +94,7 @@ function mapGovernanceBodyPerson(
 		sortName: row.sortName,
 		email: row.email,
 		orcid: row.orcid,
-		position: positions.get(row.id) ?? null,
+		positions: positions.get(row.id) ?? null,
 		image: generateImageUrl(
 			toImageAsset({
 				key: row.imageKey,

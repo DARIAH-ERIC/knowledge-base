@@ -137,15 +137,12 @@ function mapPersonContributors(
 		role: string;
 		description: string | null;
 	}>,
-	positions: Map<
-		string,
-		Array<{ role: string; name: string; type: string; description: string | null }> | null
-	>,
+	positions: Awaited<ReturnType<typeof getPersonPositions>>,
 ) {
 	return rows.map(({ imageKey, imageAlt, imageCaption, licenseName, licenseUrl, role, ...row }) => {
 		return {
 			...row,
-			position: positions.get(row.id) ?? null,
+			positions: positions.get(row.id) ?? null,
 			role,
 			slug: row.slug,
 			image: generateImageUrl(

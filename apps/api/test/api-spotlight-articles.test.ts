@@ -237,10 +237,13 @@ describe("spotlight-articles", () => {
 				const title = item.spotlightArticle.title;
 				const contributorName = contributor.person.name;
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				const contributorPosition = expect.arrayContaining([
+				const contributorPositions = expect.arrayContaining([
 					expect.objectContaining({
 						role: "is_affiliated_with",
-						name: contributor.affiliation.organisationalUnit.name,
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						entity: expect.objectContaining({
+							label: contributor.affiliation.organisationalUnit.name,
+						}),
 					}),
 				]);
 
@@ -262,7 +265,7 @@ describe("spotlight-articles", () => {
 						expect.objectContaining({
 							name: contributorName,
 							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-							position: contributorPosition,
+							positions: contributorPositions,
 						}),
 					]),
 					title,
@@ -360,10 +363,13 @@ describe("spotlight-articles", () => {
 				const title = item.spotlightArticle.title;
 				const contributorName = contributor.person.name;
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				const contributorPosition = expect.arrayContaining([
+				const contributorPositions = expect.arrayContaining([
 					expect.objectContaining({
 						role: "is_affiliated_with",
-						name: contributor.affiliation.organisationalUnit.name,
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						entity: expect.objectContaining({
+							label: contributor.affiliation.organisationalUnit.name,
+						}),
 					}),
 				]);
 
@@ -385,7 +391,7 @@ describe("spotlight-articles", () => {
 						expect.objectContaining({
 							name: contributorName,
 							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-							position: contributorPosition,
+							positions: contributorPositions,
 						}),
 					]),
 					title,

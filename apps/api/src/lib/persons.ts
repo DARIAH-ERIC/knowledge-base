@@ -3,9 +3,11 @@ import type { JSONContent } from "@tiptap/core";
 
 import { type Image, generateImageUrl, toImageAsset } from "@/lib/images";
 import { resolveDocumentId } from "@/lib/relations";
+import type { EntityRef, PublicRelatedEntityType } from "@/lib/schemas";
 import {
 	getCountrySlugsByOrganisationalUnitDocumentId,
 	getOrganisationalUnitHref,
+	getWebsiteHref,
 } from "@/lib/website-routes";
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, eq, inArray, sql } from "@/services/db/sql";
@@ -13,17 +15,10 @@ import { imageWidth } from "~/config/api.config";
 
 export interface PersonPosition {
 	role: (typeof schema.personRoleTypesEnum)[number];
-	name: string;
-	/** Slug of the related organisational unit, for constructing urls to its details page. */
-	slug: string;
-	type: (typeof schema.organisationalUnitTypesEnum)[number];
-	/**
-	 * Root-relative, locale-less website href of the organisational unit, or null when it has no page
-	 * to link to. Consumers prepend locale and origin.
-	 */
-	href: string | null;
 	/** Optional free-text note describing the person↔org relation. */
 	description: string | null;
+	/** The organisational unit the role is held in. */
+	entity: EntityRef;
 }
 
 // Positions are surfaced in a fixed hierarchy of relation types so the order is consistent across
@@ -47,7 +42,7 @@ function comparePositions(a: PersonPosition, b: PersonPosition): number {
 	if (byRole !== 0) {
 		return byRole;
 	}
-	return a.name.localeCompare(b.name);
+	return (a.entity.label ?? "").localeCompare(b.entity.label ?? "");
 }
 
 export async function getPersonPositions(
@@ -132,14 +127,17 @@ export async function getPersonPositions(
 		const items = rowsByPerson.get(row.personId) ?? [];
 		items.push({
 			role: row.role,
-			name: row.name,
-			slug: row.slug,
-			type: row.type,
-			href: getOrganisationalUnitHref(row.type, {
-				slug: row.slug,
-				countrySlug: countrySlugs.get(row.unitDocumentId),
-			}),
 			description: row.description,
+			entity: {
+				id: row.unitDocumentId,
+				type: row.type,
+				slug: row.slug,
+				label: row.name,
+				href: getOrganisationalUnitHref(row.type, {
+					slug: row.slug,
+					countrySlug: countrySlugs.get(row.unitDocumentId),
+				}),
+			},
 		});
 		rowsByPerson.set(row.personId, items);
 	}
@@ -156,24 +154,25 @@ export async function getPersonPositions(
 
 //
 
-export type PersonContributionType = "impact_case_study" | "spotlight_article";
+export type PersonArticleType = "impact_case_study" | "spotlight_article";
 
-export interface PersonContribution {
-	type: PersonContributionType;
+export interface PersonArticle {
+	type: PersonArticleType;
 	id: string;
 	title: string;
 	summary: string;
 	image: Image;
-	entity: { slug: string };
+	entity: EntityRef;
 	publishedAt: string;
 	role: schema.ArticleContributorRole;
 }
 
-interface ContributionRow {
+interface ArticleRow {
 	id: string;
 	title: string;
 	summary: string;
 	publicationDate: Date;
+	entityId: string;
 	slug: string;
 	imageKey: string;
 	imageAlt: string | null;
@@ -183,8 +182,15 @@ interface ContributionRow {
 	role: schema.ArticleContributorRole;
 }
 
-function toContribution(type: PersonContributionType, row: ContributionRow): PersonContribution {
+/** The singular article kind maps to the plural CMS entity type of the article's own endpoint. */
+const entityTypeByArticleType = {
+	impact_case_study: "impact_case_studies",
+	spotlight_article: "spotlight_articles",
+} as const satisfies Record<PersonArticleType, PublicRelatedEntityType>;
+
+function toArticle(type: PersonArticleType, row: ArticleRow): PersonArticle {
 	const {
+		entityId,
 		imageKey,
 		imageAlt,
 		imageCaption,
@@ -194,6 +200,8 @@ function toContribution(type: PersonContributionType, row: ContributionRow): Per
 		slug,
 		...rest
 	} = row;
+
+	const entityType = entityTypeByArticleType[type];
 
 	return {
 		type,
@@ -208,7 +216,13 @@ function toContribution(type: PersonContributionType, row: ContributionRow): Per
 			}),
 			imageWidth.preview,
 		),
-		entity: { slug },
+		entity: {
+			id: entityId,
+			type: entityType,
+			slug,
+			label: row.title,
+			href: getWebsiteHref(entityType, { slug }),
+		},
 		publishedAt: publicationDate.toISOString(),
 	};
 }
@@ -218,10 +232,10 @@ function toContribution(type: PersonContributionType, row: ContributionRow): Per
  * person version id is resolved to its document once, and each article document is resolved to its
  * published version — unpublished articles never surface.
  */
-export async function getPersonContributions(
+export async function getPersonArticles(
 	db: Database | Transaction,
 	personId: string,
-): Promise<Array<PersonContribution>> {
+): Promise<Array<PersonArticle>> {
 	const personDocumentId = await resolveDocumentId(db, personId);
 
 	const spotlightArticleDocumentLifecycle = alias(
@@ -246,6 +260,7 @@ export async function getPersonContributions(
 				title: schema.spotlightArticles.title,
 				summary: schema.spotlightArticles.summary,
 				publicationDate: schema.spotlightArticles.publicationDate,
+				entityId: spotlightArticleEntities.id,
 				slug: spotlightArticleEntities.slug,
 				imageKey: spotlightArticleAssets.key,
 				imageAlt: spotlightArticleAssets.alt,
@@ -285,6 +300,7 @@ export async function getPersonContributions(
 				title: schema.impactCaseStudies.title,
 				summary: schema.impactCaseStudies.summary,
 				publicationDate: schema.impactCaseStudies.publicationDate,
+				entityId: impactCaseStudyEntities.id,
 				slug: impactCaseStudyEntities.slug,
 				imageKey: impactCaseStudyAssets.key,
 				imageAlt: impactCaseStudyAssets.alt,
@@ -317,12 +333,12 @@ export async function getPersonContributions(
 			.where(eq(schema.impactCaseStudiesToPersons.personDocumentId, personDocumentId)),
 	]);
 
-	const contributions = [
-		...spotlightArticles.map((row) => toContribution("spotlight_article", row)),
-		...impactCaseStudies.map((row) => toContribution("impact_case_study", row)),
+	const articles = [
+		...spotlightArticles.map((row) => toArticle("spotlight_article", row)),
+		...impactCaseStudies.map((row) => toArticle("impact_case_study", row)),
 	];
 
-	return contributions.toSorted((a, b) => {
+	return articles.toSorted((a, b) => {
 		const byDate = b.publishedAt.localeCompare(a.publishedAt);
 		if (byDate !== 0) {
 			return byDate;

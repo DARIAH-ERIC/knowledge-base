@@ -2,7 +2,7 @@
 
 import * as schema from "@dariah-eric/database/schema";
 
-import { isPublicRelatedEntityType } from "@/lib/schemas";
+import { type EntityRef, isPublicRelatedEntityType } from "@/lib/schemas";
 import {
 	getCountrySlugsByOrganisationalUnitDocumentId,
 	getWebsiteHref,
@@ -14,7 +14,7 @@ interface NavigationItem {
 	id: string;
 	label: string;
 	href: string | null;
-	entity: { type: string; slug: string; href: string | null } | null;
+	entity: EntityRef | null;
 	isExternal: boolean;
 	position: number;
 	parentId: string | null;
@@ -121,16 +121,18 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 			label: row.label!,
 			href: row.href ?? null,
 			entity:
-				row.entitySlug != null && row.entityType != null
+				row.entityId != null && row.entitySlug != null && isPublicRelatedEntityType(row.entityType)
 					? {
+							id: row.entityId,
 							type: row.entityType,
 							slug: row.entitySlug,
-							href: isPublicRelatedEntityType(row.entityType)
-								? getWebsiteHref(row.entityType, {
-										slug: row.entitySlug,
-										countrySlug: row.entityId == null ? null : countrySlugs.get(row.entityId),
-									})
-								: null,
+							// A navigation item carries its own author-chosen label; the entity's own name is
+							// not fetched here.
+							label: null,
+							href: getWebsiteHref(row.entityType, {
+								slug: row.entitySlug,
+								countrySlug: countrySlugs.get(row.entityId),
+							}),
 						}
 					: null,
 			isExternal: row.isExternal!,

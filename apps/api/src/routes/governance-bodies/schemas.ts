@@ -6,14 +6,14 @@ import {
 	ImageSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
-	PersonPositionSchema,
+	PersonPositionsSchema,
 	RelatedEntitiesSchema,
 	RelatedResourcesSchema,
 } from "@/lib/schemas";
 
 const GovernanceBodyPersonSchema = v.object({
 	...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
-	position: PersonPositionSchema,
+	positions: PersonPositionsSchema,
 	image: v.nullable(ImageSchema),
 	slug: v.string(),
 	role: v.picklist(schema.personRoleTypesEnum),
