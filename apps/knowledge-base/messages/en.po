@@ -3848,12 +3848,18 @@ msgid "BDKvax"
 msgstr "Private supplier"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:83
-msgid "srCJeL"
-msgstr "Owners"
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:162
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:167
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:59
+msgid "M7VlaO"
+msgstr "Service owners"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:101
-msgid "IL1Uey"
-msgstr "Providers"
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:183
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:188
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:76
+msgid "An9l/F"
+msgstr "Service providers"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-edit-form.tsx:38
 msgid "ddAGqA"
@@ -3883,12 +3889,6 @@ msgstr "Organisational units"
 msgid "C+im46"
 msgstr "Add service owner"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:162
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:167
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:59
-msgid "M7VlaO"
-msgstr "Service owners"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:163
 msgid "ZK3fsS"
 msgstr "No service owners"
@@ -3896,12 +3896,6 @@ msgstr "No service owners"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:182
 msgid "ip3W/m"
 msgstr "Add service provider"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:183
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:188
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:76
-msgid "An9l/F"
-msgstr "Service providers"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:184
 msgid "9SV1zD"
