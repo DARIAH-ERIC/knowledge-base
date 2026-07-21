@@ -995,7 +995,7 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:503
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:214
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:222
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:260
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:261
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:235
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:211
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:250
@@ -4328,7 +4328,7 @@ msgid "VGeUZU"
 msgstr "Merge social media"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:210
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:214
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:215
 msgid "hG1/No"
 msgstr "Merge services"
 
@@ -4362,13 +4362,13 @@ msgid "EKv8mE"
 msgstr "Could not merge the entities. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:81
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:119
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:120
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:102
 msgid "n9/uYl"
 msgstr "Merged “{source}” into “{target}”."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:96
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:134
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:135
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:117
 msgid "PN+Gke"
 msgstr "Duplicate (source)"
@@ -4382,7 +4382,7 @@ msgid "QX/0hY"
 msgstr "Search for the duplicate entity…"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:118
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:155
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:156
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:138
 msgid "/GZGmr"
 msgstr "Canonical (target)"
@@ -4413,69 +4413,69 @@ msgid "D/H/yK"
 msgstr "Merge entities"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:190
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:228
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:229
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:203
 msgid "ktAbCI"
 msgstr "Confirm the source and target below. The source will be permanently deleted."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:198
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:236
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:237
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:211
 msgid "ASNj0w"
 msgstr "Delete (source)"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:204
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:242
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:243
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:217
 msgid "fiPdcc"
 msgstr "Keep (target)"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:210
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:248
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:249
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:223
 msgid "YMfbo/"
 msgstr "Type {word} to confirm"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:229
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:267
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:268
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:242
 msgid "VOjHxG"
 msgstr "Merge and delete source"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:115
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:125
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:116
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:126
 msgid "plHJPX"
 msgstr "Could not merge the services. Please try again."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:138
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:139
 msgid "zvgWpk"
 msgstr "Duplicate service to remove (source)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:145
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:146
 msgid "dNpDbg"
 msgstr "Search for the duplicate service…"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:159
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:160
 msgid "oWb5gX"
 msgstr "Canonical service to keep (target)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:166
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:167
 msgid "EHMcWo"
 msgstr "Search for the canonical service…"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:175
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:176
 msgid "YlowVO"
 msgstr "Merging re-points every reference from the source onto the target — consortium roles, social-media links, and the country reports that list the service or report KPIs against it — then permanently deletes the source service. The target keeps its own name, type, status, and marketplace id; nothing from the source is copied over. This also rewrites which service past reports point at. This cannot be undone."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:181
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:182
 msgid "1W6OYI"
 msgstr "Source and target must be different services."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:186
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:187
 msgid "A8PXGD"
 msgstr "The source came from the SSHOC marketplace and may still be listed there. If it is, the next ingest will re-create it, because it matches on the marketplace id. Only the “Needs review” status shows the marketplace has dropped a service — every other status leaves it an open question. Merge now only if you will retire the source in the marketplace too."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:227
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:228
 msgid "HhLLVZ"
 msgstr "Merge duplicate services"
 

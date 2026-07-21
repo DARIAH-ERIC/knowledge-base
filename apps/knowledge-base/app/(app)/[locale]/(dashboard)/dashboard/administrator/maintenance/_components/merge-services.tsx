@@ -85,8 +85,8 @@ export function MergeServices(): ReactNode {
 	 *
 	 * "Needs review" is the only status that evidences the marketplace has dropped it: the ingest
 	 * sets it precisely when a service stops being returned, but _only_ for services currently "live"
-	 * (`markServicesNeedsReview` in `@dariah-eric/sshoc-services`). A "to be discontinued" or
-	 * "discontinued" service therefore keeps that status whether or not it is still listed, so it
+	 * (the `servicesToMarkNeedsReview` pass in `@dariah-eric/sshoc-services`). A "to be discontinued"
+	 * or "discontinued" service therefore keeps that status whether or not it is still listed, so it
 	 * says nothing either way and must be warned about too — the check is "not needs review", not
 	 * "live".
 	 *
