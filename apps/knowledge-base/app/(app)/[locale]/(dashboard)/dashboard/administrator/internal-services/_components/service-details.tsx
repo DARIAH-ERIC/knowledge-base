@@ -80,7 +80,7 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 					{service.privateSupplier === true ? t("Yes") : t("No")}
 				</DescriptionDetails>
 
-				<DescriptionTerm>{t("Owners")}</DescriptionTerm>
+				<DescriptionTerm>{t("Service owners")}</DescriptionTerm>
 				<DescriptionDetails>
 					{owners.length > 0 ? (
 						<ul className="flex flex-col gap-1">
@@ -98,7 +98,7 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 					) : null}
 				</DescriptionDetails>
 
-				<DescriptionTerm>{t("Providers")}</DescriptionTerm>
+				<DescriptionTerm>{t("Service providers")}</DescriptionTerm>
 				<DescriptionDetails>
 					{providers.length > 0 ? (
 						<ul className="flex flex-col gap-1">
