@@ -24,12 +24,46 @@ export interface IngestSshocServicesParams {
 	sshocMarketplaceBaseUrl: string;
 }
 
+/** Identifies a single service in the ingest report, enough to look it up in either system. */
+export interface IngestedSshocService {
+	id: string;
+	name: string;
+	sshocMarketplaceId: string;
+}
+
+/**
+ * A service that is still published upstream but whose local status is not `live`. Ingest never
+ * promotes a status back to `live` (see the `serviceStatuses` docs), so these stay put until an
+ * admin acts on them — without this report they are invisible.
+ */
+export interface ReappearedSshocService extends IngestedSshocService {
+	status: string;
+}
+
+/**
+ * An upstream contributor whose actor id maps to no published organisational unit, so the
+ * owner/provider relation it implies could not be created.
+ */
+export interface UnmappedSshocActor {
+	id: number;
+	name: string;
+	serviceCount: number;
+}
+
 export interface IngestSshocServicesResult {
 	createdCount: number;
 	fetchedCount: number;
 	markedNeedsReviewCount: number;
 	relationCount: number;
 	updatedCount: number;
+	/** Services inserted on this run. */
+	created: Array<IngestedSshocService>;
+	/** Services flipped from `live` to `needs_review` because they dropped out of the fetch. */
+	markedNeedsReview: Array<IngestedSshocService>;
+	/** Services returned upstream that are stuck at a non-`live` local status. */
+	reappeared: Array<ReappearedSshocService>;
+	/** Contributors that could not be resolved to an organisational unit. */
+	unmappedActors: Array<UnmappedSshocActor>;
 }
 
 function createSshocSnapshot(
@@ -118,6 +152,7 @@ export async function ingestSshocServices(
 			.select({
 				id: schema.services.id,
 				metadata: schema.services.metadata,
+				name: schema.services.name,
 				sshocMarketplaceId: schema.services.sshocMarketplaceId,
 				status: schema.serviceStatuses.status,
 			})
@@ -168,6 +203,13 @@ export async function ingestSshocServices(
 	let relationCount = 0;
 
 	const seenMarketplaceIds = new Set<string>();
+	const created: Array<IngestedSshocService> = [];
+	const reappeared: Array<ReappearedSshocService> = [];
+	/**
+	 * Keyed by actor id; the set holds marketplace ids so an actor listed under both relevant roles
+	 * on one service is still counted once.
+	 */
+	const unmappedActors = new Map<number, { id: number; name: string; services: Set<string> }>();
 
 	for (const item of sshocServices) {
 		const sshocMarketplaceId = item.persistentId;
@@ -181,9 +223,29 @@ export async function ingestSshocServices(
 		const providerUnitIds = new Set<string>();
 
 		for (const contributor of item.contributors) {
+			const isRelevantRole =
+				contributor.role.code === "reviewer" || contributor.role.code === "provider";
 			const organisationalUnitId = organisationalUnitIdsByActorId.get(contributor.actor.id);
 
 			if (organisationalUnitId == null) {
+				/**
+				 * Only owner/provider contributors imply a relation, so an unmapped actor in any other role
+				 * is expected and not worth reporting.
+				 */
+				if (isRelevantRole) {
+					const unmappedActor = unmappedActors.get(contributor.actor.id);
+
+					if (unmappedActor == null) {
+						unmappedActors.set(contributor.actor.id, {
+							id: contributor.actor.id,
+							name: contributor.actor.name,
+							services: new Set([sshocMarketplaceId]),
+						});
+					} else {
+						unmappedActor.services.add(sshocMarketplaceId);
+					}
+				}
+
 				continue;
 			}
 
@@ -220,6 +282,11 @@ export async function ingestSshocServices(
 								}
 
 								createdCount += 1;
+								created.push({
+									id: row.id,
+									name: item.label.trim(),
+									sshocMarketplaceId,
+								});
 
 								return row.id;
 							})
@@ -241,6 +308,15 @@ export async function ingestSshocServices(
 								}
 
 								updatedCount += 1;
+
+								if (existingService.status !== "live") {
+									reappeared.push({
+										id: row.id,
+										name: item.label.trim(),
+										sshocMarketplaceId,
+										status: existingService.status,
+									});
+								}
 
 								return row.id;
 							});
@@ -320,11 +396,33 @@ export async function ingestSshocServices(
 			);
 	}
 
+	const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name);
+
 	return {
 		createdCount,
 		fetchedCount: sshocServices.length,
 		markedNeedsReviewCount: servicesToMarkNeedsReview.length,
 		relationCount,
 		updatedCount,
+		created: created.toSorted(byName),
+		markedNeedsReview: servicesToMarkNeedsReview
+			.flatMap((service) =>
+				service.sshocMarketplaceId == null
+					? []
+					: [
+							{
+								id: service.id,
+								name: service.name,
+								sshocMarketplaceId: service.sshocMarketplaceId,
+							},
+						],
+			)
+			.toSorted(byName),
+		reappeared: reappeared.toSorted(byName),
+		unmappedActors: [...unmappedActors.values()]
+			.map((actor) => {
+				return { id: actor.id, name: actor.name, serviceCount: actor.services.size };
+			})
+			.toSorted(byName),
 	};
 }

@@ -51,8 +51,21 @@ export interface FetchSearchResourcesParams {
 
 export interface SyncSearchResourcesResult {
 	count: number;
+	/**
+	 * Stale documents that could not be removed from the index. Ingest failures are not counted here
+	 * — those throw and fail the whole job. A non-zero count means content that no longer exists
+	 * stays findable in search until the next successful run.
+	 */
 	failedCount: number;
+	/** The ids behind {@link SyncSearchResourcesResult.failedCount}. */
+	failedDeletions: Array<StaleDocumentDeletion>;
 	websiteCount: number;
+}
+
+/** A stale search document that could not be deleted. */
+export interface StaleDocumentDeletion {
+	collection: string;
+	documentId: string;
 }
 
 function getOrFetch<T, FetchError, CacheError>(
@@ -252,13 +265,15 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 	async function deleteStaleDocuments(params: {
 		currentDocuments: Array<ResourceDocument | WebsiteDocument>;
 		deleteDocument: (documentId: string) => Promise<Result<void, unknown>>;
+		collection: string;
 		existingDocumentIds: Set<string>;
 		logContext: "resource" | "website resource";
-	}): Promise<number> {
-		const { currentDocuments, deleteDocument, existingDocumentIds, logContext } = params;
+	}): Promise<Array<StaleDocumentDeletion>> {
+		const { collection, currentDocuments, deleteDocument, existingDocumentIds, logContext } =
+			params;
 		const currentDocumentIds = new Set(currentDocuments.map((document) => document.id));
 
-		let failedCount = 0;
+		const failedDeletions: Array<StaleDocumentDeletion> = [];
 
 		for (const documentId of existingDocumentIds) {
 			if (currentDocumentIds.has(documentId)) {
@@ -273,11 +288,11 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 					error: result.error,
 				});
 
-				failedCount += 1;
+				failedDeletions.push({ collection, documentId });
 			}
 		}
 
-		return failedCount;
+		return failedDeletions;
 	}
 
 	async function syncSearchResources(
@@ -301,7 +316,8 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 			throw websiteIngestResult.error;
 		}
 
-		const resourceDeleteFailedCount = await deleteStaleDocuments({
+		const resourceFailedDeletions = await deleteStaleDocuments({
+			collection: "resources",
 			currentDocuments: resources,
 			deleteDocument(documentId) {
 				return search.collections.resources.delete(documentId);
@@ -309,7 +325,8 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 			existingDocumentIds: existingResourceDocumentIds,
 			logContext: "resource",
 		});
-		const websiteDeleteFailedCount = await deleteStaleDocuments({
+		const websiteFailedDeletions = await deleteStaleDocuments({
+			collection: "website",
 			currentDocuments: websiteDocuments,
 			deleteDocument(documentId) {
 				return search.collections.website.delete(documentId);
@@ -318,9 +335,12 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 			logContext: "website resource",
 		});
 
+		const failedDeletions = [...resourceFailedDeletions, ...websiteFailedDeletions];
+
 		return {
 			count: resources.length,
-			failedCount: resourceDeleteFailedCount + websiteDeleteFailedCount,
+			failedCount: failedDeletions.length,
+			failedDeletions,
 			websiteCount: websiteDocuments.length,
 		};
 	}
