@@ -39,8 +39,9 @@ export default async function DashboardAdministratorEditServicePage(
 
 	return (
 		<ServiceDetails
-			service={serviceData.service}
 			selectedOrganisationalUnitItems={serviceData.selectedOrganisationalUnits}
+			service={serviceData.service}
+			serviceStatuses={serviceData.serviceStatuses}
 		/>
 	);
 }

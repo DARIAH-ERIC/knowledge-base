@@ -3038,10 +3038,11 @@ export class DatabaseService {
 
 	async createService(params: {
 		name: string;
+		sshocMarketplaceId?: string;
 		status?: (typeof schema.serviceStatusesEnum)[number];
 		type?: (typeof schema.serviceTypesEnum)[number];
 	}): Promise<{ id: string }> {
-		const { name, status = "live", type = "internal" } = params;
+		const { name, sshocMarketplaceId = null, status = "live", type = "internal" } = params;
 
 		const [typeRow, statusRow] = await Promise.all([
 			this.db.query.serviceTypes.findFirst({ where: { type }, columns: { id: true } }),
@@ -3056,13 +3057,26 @@ export class DatabaseService {
 
 		const [row] = await this.db
 			.insert(schema.services)
-			.values({ name, statusId: statusRow.id, typeId: typeRow.id })
+			.values({ name, sshocMarketplaceId, statusId: statusRow.id, typeId: typeRow.id })
 			.returning({ id: schema.services.id });
 		if (row == null) {
 			throw new Error("Failed to insert service.");
 		}
 
 		return row;
+	}
+
+	async getServiceStatus(
+		serviceId: string,
+	): Promise<(typeof schema.serviceStatusesEnum)[number] | null> {
+		const [row] = await this.db
+			.select({ status: schema.serviceStatuses.status })
+			.from(schema.services)
+			.innerJoin(schema.serviceStatuses, eq(schema.services.statusId, schema.serviceStatuses.id))
+			.where(eq(schema.services.id, serviceId))
+			.limit(1);
+
+		return row?.status ?? null;
 	}
 
 	/**
