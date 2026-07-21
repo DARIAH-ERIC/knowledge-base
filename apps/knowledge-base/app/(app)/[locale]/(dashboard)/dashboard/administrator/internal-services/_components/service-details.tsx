@@ -69,15 +69,15 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 
 				<DescriptionTerm>{t("DARIAH branding")}</DescriptionTerm>
 				<DescriptionDetails>
-					{service.dariahBranding !== null ? t("Yes") : t("No")}
+					{service.dariahBranding === true ? t("Yes") : t("No")}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Monitoring")}</DescriptionTerm>
-				<DescriptionDetails>{service.monitoring !== null ? t("Yes") : t("No")}</DescriptionDetails>
+				<DescriptionDetails>{service.monitoring === true ? t("Yes") : t("No")}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Private supplier")}</DescriptionTerm>
 				<DescriptionDetails>
-					{service.privateSupplier !== null ? t("Yes") : t("No")}
+					{service.privateSupplier === true ? t("Yes") : t("No")}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Owners")}</DescriptionTerm>
