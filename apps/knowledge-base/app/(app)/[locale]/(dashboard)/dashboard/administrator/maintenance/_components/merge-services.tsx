@@ -93,8 +93,7 @@ export function MergeServices(): ReactNode {
 	 * A warning rather than a hard block: an admin may knowingly merge and fix the source in the
 	 * marketplace afterwards.
 	 */
-	const willBeReingested =
-		source != null && source.sshocMarketplaceId != null && source.status !== "needs_review";
+	const willBeReingested = source?.sshocMarketplaceId != null && source.status !== "needs_review";
 
 	function reset() {
 		setSource(null);
