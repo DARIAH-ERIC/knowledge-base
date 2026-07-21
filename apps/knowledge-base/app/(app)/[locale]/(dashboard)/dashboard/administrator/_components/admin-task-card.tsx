@@ -16,7 +16,9 @@ import { SubmitButton } from "@dariah-eric/ui/submit-button";
 import { useExtracted, useFormatter } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 
+import { AdminTaskResult } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result";
 import type { BackgroundJobError } from "@/lib/admin-tasks/background-job-error";
+import { coerceBackgroundJobResult } from "@/lib/admin-tasks/background-job-result";
 import type { LatestBackgroundJob } from "@/lib/admin-tasks/get-latest-background-jobs";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
@@ -83,9 +85,11 @@ export function AdminTaskCard(props: Readonly<AdminTaskCardProps>): ReactNode {
 						) : null}
 						{latestJob.status === "succeeded" && latestJob.result != null ? (
 							<div>
-								<dt className="font-medium">{t("Result")}:</dt>
-								<dd className="font-mono text-[11px] break-all">
-									<pre className="overflow-auto">{JSON.stringify(latestJob.result, null, 2)}</pre>
+								<dt className="sr-only">{t("Result")}</dt>
+								<dd className="mbs-2">
+									<AdminTaskResult
+										result={coerceBackgroundJobResult(latestJob.kind, latestJob.result)}
+									/>
 								</dd>
 							</div>
 						) : null}

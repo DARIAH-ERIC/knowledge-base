@@ -60,7 +60,20 @@ export interface CreateWebsiteSearchIndexServiceParams {
 
 export interface SyncWebsiteSearchIndexResult {
 	count: number;
+	/**
+	 * Stale documents that could not be removed from the index. Ingest failures are not counted here
+	 * — those throw and fail the whole job. A non-zero count means content that no longer exists
+	 * stays findable in search until the next successful run.
+	 */
 	failedCount: number;
+	/** The ids behind {@link SyncWebsiteSearchIndexResult.failedCount}. */
+	failedDeletions: Array<StaleDocumentDeletion>;
+}
+
+/** A stale search document that could not be deleted. */
+export interface StaleDocumentDeletion {
+	collection: string;
+	documentId: string;
 }
 
 type CanonicalWebsiteEntityType =
@@ -2234,7 +2247,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			page += 1;
 		} while (page <= totalPages);
 
-		let failedCount = 0;
+		const failedDeletions: Array<StaleDocumentDeletion> = [];
 
 		for (const documentId of existingDocumentIds) {
 			if (currentDocumentIds.has(documentId)) {
@@ -2249,13 +2262,14 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					error: result.error,
 				});
 
-				failedCount += 1;
+				failedDeletions.push({ collection: "website", documentId });
 			}
 		}
 
 		return {
 			count: documents.length,
-			failedCount,
+			failedCount: failedDeletions.length,
+			failedDeletions,
 		};
 	}
 
