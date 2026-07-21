@@ -37,6 +37,7 @@ test.describe("admin – maintenance merge & rename", () => {
 	test.afterAll(async ({ db }, testInfo) => {
 		await db.cleanupWorkerNewsItems(testInfo.workerIndex);
 		await db.cleanupWorkerSocialMedia(testInfo.workerIndex);
+		await db.cleanupWorkerServices(testInfo.workerIndex);
 	});
 
 	test("merges a duplicate into a canonical entity, re-pointing relations and deleting the source", async ({
@@ -119,6 +120,37 @@ test.describe("admin – maintenance merge & rename", () => {
 
 		expect(await db.getSocialMediaByName(sourceName)).toBeNull();
 		expect(await db.getSocialMediaByName(targetName)).not.toBeNull();
+	});
+
+	test("merges a service the marketplace no longer lists into the canonical one", async ({
+		page,
+		db,
+	}) => {
+		const suffix = randomUUID();
+		const sourceName = `${WORKER_PREFIX()} Service Source ${suffix}`;
+		const targetName = `${WORKER_PREFIX()} Service Target ${suffix}`;
+
+		// "needs_review" is the status the SSHOC ingest sets once the marketplace stops returning a
+		// service — exactly the case merging exists for.
+		await db.createService({ name: sourceName, status: "needs_review" });
+		await db.createService({ name: targetName, status: "live" });
+
+		await gotoMergeAndRename(page);
+		await page.getByRole("tab", { name: "Merge services" }).click();
+
+		await pickEntity(page, "Search for the duplicate service…", sourceName, sourceName);
+		await pickEntity(page, "Search for the canonical service…", targetName, targetName);
+
+		await page.getByRole("button", { name: "Merge services" }).click();
+
+		const modal = page.getByRole("dialog", { name: "Merge duplicate services" });
+		await modal.getByRole("textbox", { name: /Type MERGE to confirm/ }).fill("MERGE");
+		await modal.getByRole("button", { name: "Merge and delete source" }).click();
+
+		await expect(page.getByText(/Merged .* into /)).toBeVisible();
+
+		expect(await db.getServiceByName(sourceName)).toBeNull();
+		expect(await db.getServiceByName(targetName)).not.toBeNull();
 	});
 
 	test("duplicates an entity into a draft copy, carrying relations but not publishing it", async ({

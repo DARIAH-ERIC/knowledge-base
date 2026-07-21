@@ -117,6 +117,9 @@ export function createServerAction<
 					"This entity is published, so its address can only be changed by an administrator on the Maintenance page.",
 				),
 				recordConflict: t("This record conflicts with an existing record."),
+				serviceKpiConflict: t(
+					"Both services have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge.",
+				),
 				socialMediaKpiConflict: t(
 					"Both accounts have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge.",
 				),

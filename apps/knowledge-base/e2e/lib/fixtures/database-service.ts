@@ -3036,6 +3036,35 @@ export class DatabaseService {
 		}
 	}
 
+	async createService(params: {
+		name: string;
+		status?: (typeof schema.serviceStatusesEnum)[number];
+		type?: (typeof schema.serviceTypesEnum)[number];
+	}): Promise<{ id: string }> {
+		const { name, status = "live", type = "internal" } = params;
+
+		const [typeRow, statusRow] = await Promise.all([
+			this.db.query.serviceTypes.findFirst({ where: { type }, columns: { id: true } }),
+			this.db.query.serviceStatuses.findFirst({ where: { status }, columns: { id: true } }),
+		]);
+		if (typeRow == null) {
+			throw new Error(`Service type "${type}" not found.`);
+		}
+		if (statusRow == null) {
+			throw new Error(`Service status "${status}" not found.`);
+		}
+
+		const [row] = await this.db
+			.insert(schema.services)
+			.values({ name, statusId: statusRow.id, typeId: typeRow.id })
+			.returning({ id: schema.services.id });
+		if (row == null) {
+			throw new Error("Failed to insert service.");
+		}
+
+		return row;
+	}
+
 	/**
 	 * Cascade-deletes a service and all its related records. Replicates the logic in
 	 * `delete-service.action.ts`.
