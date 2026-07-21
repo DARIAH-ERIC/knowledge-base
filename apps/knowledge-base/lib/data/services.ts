@@ -15,6 +15,7 @@ import {
 	toOrganisationalUnitDocumentOption,
 	toOrganisationalUnitDocumentOptionsPage,
 } from "@/lib/organisational-unit-options";
+import { getServiceStatusLabel } from "@/lib/service-status-label";
 
 export type ServicesSort = "name" | "type" | "status" | "sshocMarketplaceId";
 type ServiceTypes = (typeof schema.serviceTypesEnum)[number];
@@ -111,6 +112,76 @@ export async function getServices(params: Readonly<GetServicesParams>): Promise<
 		}),
 		limit,
 		offset,
+		total: aggregate.at(0)?.total ?? 0,
+	};
+}
+
+export interface ServiceOption {
+	id: string;
+	name: string;
+	/** Display line: "<type> · <status>", plus the marketplace id when the service was ingested. */
+	description: string;
+	status: string;
+	sshocMarketplaceId: string | null;
+}
+
+interface GetServiceOptionsParams {
+	limit?: number;
+	offset?: number;
+	q?: string;
+}
+
+/**
+ * Services for the admin maintenance picker. Unlike {@link getServices} this spans every type —
+ * merging an internal duplicate into a marketplace-ingested service (or the reverse) is the main
+ * reason the tool exists, so it must not be scoped to one tab's type filter.
+ */
+export async function getServiceOptions(
+	params: GetServiceOptionsParams = {},
+): Promise<{ items: Array<ServiceOption>; total: number }> {
+	const { limit = 20, offset = 0, q } = params;
+	const query = q?.trim();
+	const where = matchesAllTerms(query, schema.services.name, schema.services.sshocMarketplaceId);
+
+	const [rows, aggregate] = await Promise.all([
+		db
+			.select({
+				id: schema.services.id,
+				name: schema.services.name,
+				sshocMarketplaceId: schema.services.sshocMarketplaceId,
+				status: schema.serviceStatuses.status,
+				type: schema.serviceTypes.type,
+			})
+			.from(schema.services)
+			.innerJoin(schema.serviceTypes, eq(schema.services.typeId, schema.serviceTypes.id))
+			.innerJoin(schema.serviceStatuses, eq(schema.services.statusId, schema.serviceStatuses.id))
+			.where(where)
+			.orderBy(schema.services.name)
+			.limit(limit)
+			.offset(offset),
+		db
+			.select({ total: count() })
+			.from(schema.services)
+			.innerJoin(schema.serviceTypes, eq(schema.services.typeId, schema.serviceTypes.id))
+			.innerJoin(schema.serviceStatuses, eq(schema.services.statusId, schema.serviceStatuses.id))
+			.where(where),
+	]);
+
+	return {
+		items: rows.map((row) => {
+			const parts = [row.type, getServiceStatusLabel(row.status)];
+			if (row.sshocMarketplaceId != null) {
+				parts.push(`SSHOC ${row.sshocMarketplaceId}`);
+			}
+
+			return {
+				id: row.id,
+				name: row.name,
+				description: parts.join(" · "),
+				status: row.status,
+				sshocMarketplaceId: row.sshocMarketplaceId,
+			};
+		}),
 		total: aggregate.at(0)?.total ?? 0,
 	};
 }

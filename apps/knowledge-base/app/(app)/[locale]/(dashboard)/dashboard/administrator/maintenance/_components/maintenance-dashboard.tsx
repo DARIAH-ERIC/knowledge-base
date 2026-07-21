@@ -8,6 +8,7 @@ import type { Key } from "react-aria-components";
 import { EntityListHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { DuplicateEntity } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/duplicate-entity";
 import { MergeEntities } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities";
+import { MergeServices } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services";
 import { MergeSocialMedia } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media";
 import { SlugEditor } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor";
 
@@ -206,6 +207,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						<TabList aria-label={t("Merge, duplicate & rename")}>
 							<Tab id="merge-entities">{t("Merge duplicates")}</Tab>
 							<Tab id="merge-social-media">{t("Merge social media")}</Tab>
+							<Tab id="merge-services">{t("Merge services")}</Tab>
 							<Tab id="duplicate-entity">{t("Duplicate entity")}</Tab>
 							<Tab id="edit-slug">{t("Edit slug")}</Tab>
 						</TabList>
@@ -228,6 +230,16 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							</p>
 
 							<MergeSocialMedia />
+						</TabPanel>
+
+						<TabPanel id="merge-services" className="flex flex-col gap-y-(--layout-padding)">
+							<p className="text-balance text-muted-fg text-sm">
+								{t(
+									"Merge a duplicate service into a canonical one: consortium roles, social-media links, and every country report that lists the service or reports KPIs against it are re-pointed onto the target, and the source is permanently deleted. Use it to retire a service the SSHOC marketplace no longer lists — deleting one outright discards the reporting history attached to it, whereas merging carries that history over.",
+								)}
+							</p>
+
+							<MergeServices />
 						</TabPanel>
 
 						<TabPanel id="duplicate-entity" className="flex flex-col gap-y-(--layout-padding)">
