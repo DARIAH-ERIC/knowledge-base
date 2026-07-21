@@ -30,7 +30,7 @@ export const updateServiceStatusAction = createMutationAction({
 			columns: { sshocMarketplaceId: true },
 		});
 
-		if (service == null || service.sshocMarketplaceId == null) {
+		if (service?.sshocMarketplaceId == null) {
 			return createActionStateError({
 				message: t("Only SSHOC marketplace services can be updated here."),
 			});
