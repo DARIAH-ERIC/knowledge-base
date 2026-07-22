@@ -55,7 +55,9 @@ export async function getRelatedEntities(
 					${schema.documentsPolicies.title},
 					${schema.persons.name},
 					${schema.organisationalUnits.name},
-					${schema.projects.name}
+					${schema.projects.name},
+					${schema.entities.label},
+					${schema.entities.slug}
 				)
 			`.as("label"),
 		})

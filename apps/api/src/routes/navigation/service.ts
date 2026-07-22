@@ -127,7 +127,7 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 							id: row.entityId,
 							type: row.entityType,
 							slug: row.entitySlug,
-							label: row.entityLabel!,
+							label: row.entityLabel ?? row.entitySlug,
 							href: getWebsiteHref(row.entityType, {
 								slug: row.entitySlug,
 								countrySlug: countrySlugs.get(row.entityId),
