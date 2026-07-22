@@ -9,6 +9,7 @@ import { publishPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getPersonArticles } from "@/lib/data/article-contributors";
 import { getPersonContributions } from "@/lib/data/contributions";
 import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
 import { db } from "@/lib/db";
@@ -104,8 +105,9 @@ export default async function DashboardAdministratorPersonDetailsPage(
 		notFound();
 	}
 
-	const [contributions, biographyContentBlocks] = await Promise.all([
+	const [contributions, articles, biographyContentBlocks] = await Promise.all([
 		getPersonContributions(documentId),
+		getPersonArticles(documentId),
 		getResolvedEntityContentBlocks(versionId, "biography"),
 	]);
 
@@ -122,6 +124,7 @@ export default async function DashboardAdministratorPersonDetailsPage(
 
 	return (
 		<PersonDetails
+			articles={articles}
 			contributions={contributions}
 			discardDraftAction={discardPersonDraftAction}
 			documentId={documentId}
