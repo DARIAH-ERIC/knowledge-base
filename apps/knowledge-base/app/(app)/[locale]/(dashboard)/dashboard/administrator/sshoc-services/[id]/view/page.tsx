@@ -33,7 +33,7 @@ export default async function DashboardAdministratorEditServicePage(
 	const { user } = await assertAuthenticated();
 	const serviceData = await getServiceForAdmin(user, id);
 
-	if (serviceData == null || serviceData.service.sshocMarketplaceId == null) {
+	if (serviceData?.service.sshocMarketplaceId == null) {
 		notFound();
 	}
 
