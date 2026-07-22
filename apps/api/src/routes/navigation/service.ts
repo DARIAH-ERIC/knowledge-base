@@ -61,6 +61,7 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 			parentId: schema.navigationItems.parentId,
 			entityId: schema.entities.id,
 			entitySlug: schema.entities.slug,
+			entityLabel: schema.entities.label,
 			entityType: sql<string>`
 				CASE
 					WHEN ${schema.entityTypes.type} = 'organisational_units'
@@ -126,9 +127,7 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 							id: row.entityId,
 							type: row.entityType,
 							slug: row.entitySlug,
-							// A navigation item carries its own author-chosen label; the entity's own name is
-							// not fetched here.
-							label: null,
+							label: row.entityLabel ?? row.entitySlug,
 							href: getWebsiteHref(row.entityType, {
 								slug: row.entitySlug,
 								countrySlug: countrySlugs.get(row.entityId),

@@ -2829,14 +2829,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "type": "string",
           },
           "label": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "null",
-              },
-            ],
+            "type": "string",
           },
           "slug": {
             "type": "string",

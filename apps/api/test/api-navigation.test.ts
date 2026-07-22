@@ -179,8 +179,7 @@ describe("navigation", () => {
 								id: expect.any(String) as string,
 								type: "working_group",
 								slug,
-								// A navigation item carries its own label.
-								label: null,
+								label,
 								href: `/network/working-groups/${slug}`,
 							},
 						}),
