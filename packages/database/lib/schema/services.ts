@@ -60,7 +60,7 @@ export const ServiceStatusUpdateSchema = createUpdateSchema(serviceStatuses);
 export const services = p.snakeCase.table("services", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	name: p.text("name").notNull(),
-	sshocMarketplaceId: p.text("sshoc_marketplace_id"),
+	sshocMarketplaceId: p.text("sshoc_marketplace_id").unique(),
 	typeId: p
 		.uuid("type_id")
 		.notNull()
