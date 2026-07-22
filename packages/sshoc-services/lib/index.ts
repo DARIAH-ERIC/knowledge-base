@@ -298,6 +298,7 @@ export async function ingestSshocServices(
 								existingServicesByMarketplaceId.set(sshocMarketplaceId, {
 									id: row.id,
 									metadata,
+									name: item.label.trim(),
 									sshocMarketplaceId,
 									status: "live",
 								});
