@@ -221,6 +221,20 @@ export async function ingestSshocServices(
 
 								createdCount += 1;
 
+								/**
+								 * Register the freshly inserted row so a marketplace id that appears more than once
+								 * in a single fetch takes the update branch on its next occurrence instead of a
+								 * second insert that would violate the `sshoc_marketplace_id` unique constraint.
+								 * Upstream deep-paging is not snapshot-isolated, so an edit landing mid-fetch can
+								 * shift an item across a page boundary and return it twice.
+								 */
+								existingServicesByMarketplaceId.set(sshocMarketplaceId, {
+									id: row.id,
+									metadata,
+									sshocMarketplaceId,
+									status: "live",
+								});
+
 								return row.id;
 							})
 					: await tx
