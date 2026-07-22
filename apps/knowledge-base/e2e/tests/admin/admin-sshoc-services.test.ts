@@ -23,7 +23,7 @@ test.describe("sshoc services admin", () => {
 			type: "community",
 		});
 
-		await page.goto(`${BASE_PATH}/${service.id}/view`);
+		await page.goto(`${BASE_PATH}/${service.id}/edit`);
 
 		// Everything but status stays read-only: the ingest overwrites the rest.
 		await expect(page.getByRole("textbox")).toHaveCount(0);
@@ -40,7 +40,7 @@ test.describe("sshoc services admin", () => {
 		expect(await db.getServiceStatus(service.id)).toBe("discontinued");
 	});
 
-	test("rejects a status update for a service that is not from the marketplace", async ({
+	test("does not expose status editing for a service that is not from the marketplace", async ({
 		page,
 		db,
 	}) => {
@@ -49,19 +49,11 @@ test.describe("sshoc services admin", () => {
 
 		const service = await db.createService({ name, status: "live", type: "internal" });
 
-		await page.goto(`${BASE_PATH}/${service.id}/view`);
+		await page.goto(`${BASE_PATH}/${service.id}/edit`);
 
-		const control = page
-			.locator('[data-slot="control"]')
-			.filter({ has: page.getByText("Status", { exact: true }) });
-		await control.locator("button").click();
-		await page.getByRole("option", { name: "Discontinued", exact: true }).click();
-
-		await page.getByRole("button", { name: "Save" }).click();
-
-		await expect(
-			page.getByText("Only SSHOC marketplace services can be updated here."),
-		).toBeVisible();
+		await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
+		await expect(page.getByText("Error 404")).toBeVisible();
+		await expect(page.getByRole("button", { name: "Save" })).toBeHidden();
 		expect(await db.getServiceStatus(service.id)).toBe("live");
 	});
 });
