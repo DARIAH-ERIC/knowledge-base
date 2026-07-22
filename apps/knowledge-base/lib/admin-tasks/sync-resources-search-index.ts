@@ -5,17 +5,18 @@ import { createSshocClient } from "@dariah-eric/client-sshoc";
 import { createZenodoClient } from "@dariah-eric/client-zenodo";
 import { createZoteroClient } from "@dariah-eric/client-zotero";
 import { createSearchService } from "@dariah-eric/search";
-import { createSearchResourcesService, loadOrgUnitLookups } from "@dariah-eric/search-resources";
+import {
+	type SyncSearchResourcesResult,
+	createSearchResourcesService,
+	loadOrgUnitLookups,
+} from "@dariah-eric/search-resources";
 
 import { env } from "@/config/env.config";
 import { db } from "@/lib/db";
 import { search } from "@/lib/search/admin";
 
-export interface SyncResourcesSearchIndexResult {
-	count: number;
-	failedCount: number;
-	websiteCount: number;
-}
+/** Aliased rather than re-declared, so the admin task cannot drift from what the service returns. */
+export type SyncResourcesSearchIndexResult = SyncSearchResourcesResult;
 
 export async function syncResourcesSearchIndex(): Promise<SyncResourcesSearchIndexResult> {
 	assert(env.CAMPUS_API_BASE_URL, "Missing environment variable: `CAMPUS_API_BASE_URL`.");

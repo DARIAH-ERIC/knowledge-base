@@ -695,7 +695,7 @@ msgstr "Forgot password?"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:53
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx:92
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:49
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:68
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx:95
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:93
@@ -703,7 +703,7 @@ msgstr "Forgot password?"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:77
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:99
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx:340
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:70
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-menu-create-dialog.tsx:52
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:41
 msgid "HAlOn1"
@@ -773,6 +773,7 @@ msgstr "Verify the code from the app"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-social-media-amounts-form.tsx:63
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaign-form.tsx:86
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:125
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:149
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:228
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form.tsx:125
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-edit-form.tsx:90
@@ -908,8 +909,8 @@ msgstr "Hero"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:268
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx:119
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:116
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:99
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:152
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:107
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:198
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:127
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:84
@@ -938,8 +939,8 @@ msgstr "Rich text"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:122
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:128
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:94
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:184
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:102
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:230
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:83
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:146
@@ -995,6 +996,7 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:503
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:214
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:222
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:260
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:235
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:211
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:250
@@ -1080,7 +1082,7 @@ msgstr "Data type"
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form.tsx:48
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-step-nav.tsx:32
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx:61
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:73
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:76
 msgid "ZvKSfJ"
 msgstr "Events"
 
@@ -1189,8 +1191,8 @@ msgstr "URL"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:64
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:87
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:61
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:86
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:91
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:132
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:94
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:65
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:53
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:97
@@ -1274,6 +1276,10 @@ msgstr "Add item"
 msgid "oVDe1D"
 msgstr "Contributions"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:122
+msgid "3KNMbJ"
+msgstr "Articles"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:250
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:368
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:536
@@ -1314,7 +1320,7 @@ msgstr "Role"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:408
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:71
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx:95
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:51
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx:358
 msgid "+U6ozc"
@@ -1439,7 +1445,7 @@ msgstr "Select a role first"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:221
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:370
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:98
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:110
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:162
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:97
 msgid "n5QvJy"
@@ -1464,7 +1470,7 @@ msgstr "Start date"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:239
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:384
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:110
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:127
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:175
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:114
 msgid "Humfno"
@@ -1566,6 +1572,8 @@ msgstr "Description"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaign-form.tsx:83
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:121
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:122
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:145
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:146
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:224
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:225
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form.tsx:121
@@ -1647,7 +1655,7 @@ msgstr "This will permanently delete this contribution."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:154
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:132
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:141
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:142
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:154
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:146
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:148
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:154
@@ -1722,8 +1730,8 @@ msgstr "Drafts"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:66
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:67
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:47
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:52
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:50
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:55
 msgid "dudqv/"
 msgstr "Maintenance"
 
@@ -1894,8 +1902,8 @@ msgstr "Documentation pages"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:206
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-social-media-amounts-form.tsx:44
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:91
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:139
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:185
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:87
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:118
 msgid "JkLHGw"
@@ -2038,7 +2046,7 @@ msgstr "Save and publish"
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-reports-list-page.tsx:69
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:109
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:118
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:132
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:144
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:136
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:138
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:141
@@ -2123,7 +2131,7 @@ msgstr "Link related entities."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-details.tsx:172
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:190
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx:197
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:108
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:101
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:102
@@ -2156,7 +2164,7 @@ msgstr "Link related resources."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-details.tsx:199
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:204
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx:224
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:122
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:130
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:115
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:112
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:116
@@ -2189,7 +2197,7 @@ msgstr "No related resources"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx:107
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:67
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:73
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:68
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:78
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:73
@@ -2593,8 +2601,8 @@ msgstr "ROR"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:67
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:76
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:92
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:138
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:71
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:58
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:101
@@ -2758,7 +2766,8 @@ msgstr "Relations"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx:53
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx:277
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx:358
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:53
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:119
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:128
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx:101
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form.tsx:104
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-edit-form.tsx:49
@@ -2769,7 +2778,7 @@ msgstr "Relations"
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-summary-screen.tsx:48
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-summary-screen.tsx:48
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-step-nav.tsx:29
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:97
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:100
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:102
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:97
@@ -2820,65 +2829,149 @@ msgstr "Lorem ipsum"
 msgid "T8onXc"
 msgstr "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:62
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:64
 msgid "TDUfVk"
 msgstr "Started"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:69
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:71
 msgid "wTNySU"
 msgstr "by"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:75
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:77
 msgid "EQpfkS"
 msgstr "Finished"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:86
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:88
 msgid "ZpQ6us"
 msgstr "Result"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:94
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:98
 msgid "KN7zKn"
 msgstr "Error"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:119
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:123
 msgid "HoUSMi"
 msgstr "Possibly stuck"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:119
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:123
 msgid "nDyaq/"
 msgstr "Running"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:128
 msgid "LOghU6"
 msgstr "Succeeded"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:130
 msgid "vXCeIi"
 msgstr "Failed"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:139
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:143
 msgid "rcGnJO"
 msgstr "The server at {host} responded with an error ({reason})."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:145
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:149
 msgid "NzjkTr"
 msgstr "The request to {host} timed out."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:148
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:152
 msgid "OnR1tX"
 msgstr "Could not reach {host}. The service may be down or unreachable."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:153
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:157
 msgid "5mIl+Z"
 msgstr "Received an unexpected response from {host} that could not be parsed."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:158
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:162
 msgid "/1edmo"
 msgstr "The request to {host} was aborted."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:161
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx:165
 msgid "nWcIB/"
 msgstr "The previous run was marked as failed after exceeding its maximum runtime (the worker most likely terminated)."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:124
+msgid "iaeWzM"
+msgstr "actor {id}, on 1 service"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:125
+msgid "LrRKke"
+msgstr "actor {id}, on {count} services"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:148
+msgid "HPgoR+"
+msgstr "Fetched"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:149
+msgid "ORGv1Q"
+msgstr "Created"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:150
+msgid "xrk6zg"
+msgstr "Updated"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:151
+msgid "DHjGeY"
+msgstr "New relations"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:152
+msgid "UPFdxg"
+msgstr "Needs review"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:157
+msgid "HDsB32"
+msgstr "This run predates per-service reporting, so only totals are available."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:163
+msgid "gU5RvK"
+msgstr "No longer returned by the marketplace, so their status was set to needs review."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:166
+msgid "fMmYvA"
+msgstr "Marked as needs review ({count})"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:176
+msgid "PxhGVf"
+msgstr "Newly created ({count})"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:184
+msgid "1uikch"
+msgstr "Returned by the marketplace again, but their status is not live. Ingest never resets a status, so this has to be done by hand."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:187
+msgid "NULuEJ"
+msgstr "Back upstream, not live ({count})"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:197
+msgid "LTcPAH"
+msgstr "No published organisational unit carries these marketplace actor ids, so their owner and provider relations could not be created."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:200
+msgid "ItN173"
+msgstr "Unmatched contributors ({count})"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:222
+msgid "zeoBuC"
+msgstr "Documents indexed"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:224
+msgid "r7/L+M"
+msgstr "Website documents"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:226
+msgid "Fu/PaT"
+msgstr "Stale, not removed"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:231
+msgid "usKr9v"
+msgstr "Documents for content that no longer exists could not be deleted, so they stay findable in search until a later run removes them."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:234
+msgid "XwJyrc"
+msgstr "Stale, still in the index ({count})"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-result.tsx:254
+msgid "suWdIx"
+msgstr "This run predates per-document reporting, so only totals are available."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources.tsx:43
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources.tsx:65
@@ -3037,7 +3130,7 @@ msgstr "Manage all countries in the DARIAH knowledge base."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:80
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:86
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:78
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:81
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:84
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:86
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:79
@@ -3075,7 +3168,7 @@ msgstr "Observer"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:138
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-reports-list-page.tsx:65
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-reports-list-page.tsx:65
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:138
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:130
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:132
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:121
@@ -3141,7 +3234,7 @@ msgstr "Edit country"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:75
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_components/delegated-country-edit-form.tsx:81
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:59
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:84
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:130
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:51
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-edit.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:81
@@ -3198,7 +3291,7 @@ msgstr "Enter the country details."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:82
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:268
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:116
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:150
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:196
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:125
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:119
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:121
@@ -3406,7 +3499,7 @@ msgstr "Enter the documentation page details."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:62
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-page-form.tsx:51
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:141
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:184
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:230
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:159
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:153
@@ -3726,7 +3819,7 @@ msgstr "New internal service"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:67
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:124
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:57
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:74
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-form.tsx:37
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-form.tsx:44
 msgid "LgbKvU"
@@ -3764,12 +3857,18 @@ msgid "BDKvax"
 msgstr "Private supplier"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:83
-msgid "srCJeL"
-msgstr "Owners"
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:162
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:167
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:76
+msgid "M7VlaO"
+msgstr "Service owners"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:101
-msgid "IL1Uey"
-msgstr "Providers"
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:183
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:188
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:93
+msgid "An9l/F"
+msgstr "Service providers"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-edit-form.tsx:38
 msgid "ddAGqA"
@@ -3799,12 +3898,6 @@ msgstr "Organisational units"
 msgid "C+im46"
 msgstr "Add service owner"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:162
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:167
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:59
-msgid "M7VlaO"
-msgstr "Service owners"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:163
 msgid "ZK3fsS"
 msgstr "No service owners"
@@ -3812,12 +3905,6 @@ msgstr "No service owners"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:182
 msgid "ip3W/m"
 msgstr "Add service provider"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:183
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:188
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:76
-msgid "An9l/F"
-msgstr "Service providers"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:184
 msgid "9SV1zD"
@@ -3948,7 +4035,7 @@ msgid "2wsjxR"
 msgstr "ongoing"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/country-membership-check.tsx:81
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:64
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:67
 msgid "7Fw2wg"
 msgstr "Country membership"
 
@@ -3956,6 +4043,7 @@ msgstr "Country membership"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/heading-hierarchy-check.tsx:81
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/mutually-exclusive-relations-check.tsx:89
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:93
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/web-addresses-check.tsx:72
 msgid "4aal2m"
 msgstr "Detail"
 
@@ -3969,6 +4057,7 @@ msgstr "Affected periods"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/mutually-exclusive-relations-check.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:100
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unit-relation-requirements-check.tsx:63
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/web-addresses-check.tsx:78
 msgid "19AjgC"
 msgstr "No data-integrity issues found."
 
@@ -4019,7 +4108,7 @@ msgid "D5Ucfu"
 msgstr "Open drafts to rename and publish it."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/duplicate-entity.tsx:120
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:196
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:211
 msgid "DTWnhz"
 msgstr "Duplicate entity"
 
@@ -4055,7 +4144,7 @@ msgid "Q78rFv"
 msgstr "{skipped} blocks were skipped (no longer empty)."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:134
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:133
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:147
 msgid "F0fEMW"
 msgstr "Empty content blocks"
 
@@ -4103,7 +4192,7 @@ msgid "t4olJ8"
 msgstr "skipped level"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/heading-hierarchy-check.tsx:71
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:136
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:150
 msgid "SPpb8W"
 msgstr "Heading hierarchy"
 
@@ -4112,7 +4201,7 @@ msgid "jT6/da"
 msgstr "Heading"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-check.tsx:61
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:65
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:68
 msgid "bUbgzY"
 msgstr "Inactive units"
 
@@ -4131,123 +4220,141 @@ msgstr "Periods"
 msgid "6xofYo"
 msgstr "Unit inactive since"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:48
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:51
 msgid "6EvqZu"
 msgstr "Data-integrity checks and cleanup actions for administrators."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:53
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:56
 msgid "NLbnpZ"
 msgstr "Data integrity"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:54
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:57
 msgid "XslFtA"
 msgstr "Cleanup"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:55
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:193
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:58
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:207
 msgid "AbACi5"
 msgstr "Merge, duplicate & rename"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:60
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:63
 msgid "Q0xJn+"
 msgstr "Data-integrity checks"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:61
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:64
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:85
 msgid "vaRmzi"
 msgstr "Paired relations"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:62
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:65
 msgid "TUyqK9"
 msgstr "Required relations"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:63
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:66
 msgid "gO+mBW"
 msgstr "Conflicting relations"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:70
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:69
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/web-addresses-check.tsx:63
+msgid "EgOb1a"
+msgstr "Web addresses"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:74
 msgid "5UqO6/"
 msgstr "Pairs of relations which must always be recorded together, e.g. a national representative must also be a member of the General Assembly, and a national coordinator must also be a member of the National Coordinator Committee, for the same period."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:83
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:87
 msgid "klpL3K"
 msgstr "Organisational units whose relations imply another that is missing, e.g. every institution that is a partner institution or cooperating partner of DARIAH-EU must also record which country it is located in."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:96
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:100
 msgid "OQLD1f"
 msgstr "Institutions whose relations to DARIAH-EU cannot both hold at once. A national coordinating institution is by definition a partner institution, so the partner relation is redundant and should be removed; a cooperating partner, by contrast, contradicts the full partner statuses, so one of the two is simply wrong. Flagged only where the periods overlap — an institution that held one status before the other is valid history."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:106
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:110
 msgid "vrWdx3"
 msgstr "Institutions whose status with DARIAH-EU does not match the country they are located in. A partner, national coordinating, or national representative institution must sit in a country that is a member or observer of DARIAH-EU for the whole period it holds that status; a cooperating partner must sit in one that is neither."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:119
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:123
 msgid "8r+eF2"
 msgstr "Organisational units that are no longer active but still have open person relations, e.g. a working group whose membership in an ERIC has ended, or a country that is no longer a member, but whose chair, member, coordinator, representative, or contact relations have no end date."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:131
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:133
+msgid "5RySGP"
+msgstr "Records whose stored web address is not a valid https URL: a missing or non-https scheme, or a value that does not parse. Covers event and opportunity websites, document and policy links, license URLs, social-media links, embed blocks, and working-group report events. A social-media entry may also be an email address. Reported only — the correct address needs an editor."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:145
 msgid "6boAFD"
 msgstr "Cleanup tasks"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:132
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:146
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:138
 msgid "eUKwKz"
 msgstr "Unused assets"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:134
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:148
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:132
 msgid "83nm5m"
 msgstr "Unused social media"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:135
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:149
 msgid "JEU8B5"
 msgstr "Rich-text normalisation"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:155
 msgid "ZzEr58"
 msgstr "Assets (images) which are not referenced by any record or embedded in any rich-text field. Review and select the ones to permanently remove from storage and the database."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:151
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:165
 msgid "6qo9NM"
 msgstr "Rich-text content blocks with no meaningful content (empty paragraphs, stray line breaks). Review and select the ones to remove from their entities."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:161
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:175
 msgid "QbAq9u"
 msgstr "Social-media entries not linked to any project, organisational unit, service, or report. Review and select the ones to permanently remove from the database."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:171
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:185
 msgid "p1NYmD"
 msgstr "Content blocks whose rich text can be tidied: empty paragraphs, stray line breaks, non-breaking spaces, imported HTML attributes, and bold headings. Review and select the ones to rewrite."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:181
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:195
 msgid "VNp72D"
 msgstr "Rich-text fields whose headings do not form a proper outline. Every field should open at a level-2 heading (the page title is the only level-1), and levels must not be skipped on the way down — a level-2 heading may be followed by a level-3, but not straight by a level-4. Unlike the normalisation above, these are reported only: the right level cannot be guessed automatically and needs an editor to correct."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:194
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:208
 msgid "nX7ywS"
 msgstr "Merge duplicates"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:195
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:209
 msgid "VGeUZU"
 msgstr "Merge social media"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:197
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:210
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:214
+msgid "hG1/No"
+msgstr "Merge services"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:212
 msgid "IurB2k"
 msgstr "Edit slug"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:202
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:217
 msgid "zrqb0O"
 msgstr "Merge a duplicate entity into a canonical one: all relations are re-pointed onto the target and the source is permanently deleted. Both entities must be the same type."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:212
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:227
 msgid "1F1AR1"
 msgstr "Merge a duplicate social-media account into a canonical one: every link from organisational units, projects, services, and reports is re-pointed onto the target and the source is permanently deleted. Use it to make sure a single account is the one everything points at, then clear out what is left via Unused social media."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:222
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:237
+msgid "YvE706"
+msgstr "Merge a duplicate service into a canonical one: consortium roles, social-media links, and every country report that lists the service or reports KPIs against it are re-pointed onto the target, and the source is permanently deleted. Use it to retire a service the SSHOC marketplace no longer lists — deleting one outright discards the reporting history attached to it, whereas merging carries that history over."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:247
 msgid "mYkOkl"
 msgstr "Copy an entity — content and relations, but no reporting data — into a new unpublished draft. Use it to split an imported “Institution A and Institution B” record into two, or to succeed a wound-up working group with a fresh entity instead of reopening the old one."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:232
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:257
 msgid "pvT7BA"
 msgstr "Change an entity's slug. This is an administrator-only maintenance action — slugs are normally managed by the system and form part of the public URL."
 
@@ -4257,11 +4364,13 @@ msgid "EKv8mE"
 msgstr "Could not merge the entities. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:81
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:119
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:102
 msgid "n9/uYl"
 msgstr "Merged “{source}” into “{target}”."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:96
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:134
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:117
 msgid "PN+Gke"
 msgstr "Duplicate (source)"
@@ -4275,6 +4384,7 @@ msgid "QX/0hY"
 msgstr "Search for the duplicate entity…"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:118
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:155
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:138
 msgid "/GZGmr"
 msgstr "Canonical (target)"
@@ -4305,29 +4415,71 @@ msgid "D/H/yK"
 msgstr "Merge entities"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:190
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:228
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:203
 msgid "ktAbCI"
 msgstr "Confirm the source and target below. The source will be permanently deleted."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:198
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:236
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:211
 msgid "ASNj0w"
 msgstr "Delete (source)"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:204
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:242
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:217
 msgid "fiPdcc"
 msgstr "Keep (target)"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:210
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:248
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:223
 msgid "YMfbo/"
 msgstr "Type {word} to confirm"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-entities.tsx:229
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:267
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:242
 msgid "VOjHxG"
 msgstr "Merge and delete source"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:115
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:125
+msgid "plHJPX"
+msgstr "Could not merge the services. Please try again."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:138
+msgid "zvgWpk"
+msgstr "Duplicate service to remove (source)"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:145
+msgid "dNpDbg"
+msgstr "Search for the duplicate service…"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:159
+msgid "oWb5gX"
+msgstr "Canonical service to keep (target)"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:166
+msgid "EHMcWo"
+msgstr "Search for the canonical service…"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:175
+msgid "YlowVO"
+msgstr "Merging re-points every reference from the source onto the target — consortium roles, social-media links, and the country reports that list the service or report KPIs against it — then permanently deletes the source service. The target keeps its own name, type, status, and marketplace id; nothing from the source is copied over. This also rewrites which service past reports point at. This cannot be undone."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:181
+msgid "1W6OYI"
+msgstr "Source and target must be different services."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:186
+msgid "A8PXGD"
+msgstr "The source came from the SSHOC marketplace and may still be listed there. If it is, the next ingest will re-create it, because it matches on the marketplace id. Only the “Needs review” status shows the marketplace has dropped a service — every other status leaves it an open question. Merge now only if you will retire the source in the marketplace too."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:227
+msgid "HhLLVZ"
+msgstr "Merge duplicate services"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media.tsx:108
@@ -4558,7 +4710,30 @@ msgstr "Delete {count} unused social-media entries"
 msgid "E3PgoW"
 msgstr "This permanently removes {count} social-media entries from the database. This action cannot be undone."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/page.tsx:29
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/web-addresses-check.tsx:36
+msgid "fbzJIj"
+msgstr "insecure (http)"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/web-addresses-check.tsx:37
+msgid "7B9GNU"
+msgstr "invalid"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/web-addresses-check.tsx:68
+msgid "7Y6Yvq"
+msgstr "Record"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/web-addresses-check.tsx:70
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:102
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:72
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:66
+msgid "aH4De2"
+msgstr "Source"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/web-addresses-check.tsx:71
+msgid "GufXy5"
+msgstr "Value"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/page.tsx:30
 msgid "bXXV4t"
 msgstr "Administrator dashboard - Maintenance"
 
@@ -4760,8 +4935,8 @@ msgstr "New project"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:102
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:89
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:79
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:94
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:82
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:97
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:74
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:100
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:105
@@ -5356,9 +5531,13 @@ msgstr "Administrator dashboard - New social media"
 msgid "YTttDU"
 msgstr "Administrator dashboard - Social media"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:72
 msgid "jzRjPp"
 msgstr "SSHOC Marketplace ID"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:116
+msgid "mJl0U3"
+msgstr "Status is the only field not overwritten by the next SSHOC ingest, so it can be changed here."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx:83
 msgid "EKQJYm"
@@ -5367,6 +5546,14 @@ msgstr "Manage all SSHOC services in the DARIAH knowledge base."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx:104
 msgid "H35TXI"
 msgstr "SSHOC ID"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_lib/update-service-status.action.ts:35
+msgid "C+M+Om"
+msgstr "Only SSHOC marketplace services can be updated here."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_lib/update-service-status.action.ts:50
+msgid "MSc5By"
+msgstr "Service status updated."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/[id]/view/page.tsx:20
 msgid "JeNkr4"
@@ -6662,9 +6849,9 @@ msgstr "Website dashboard - Documents and policies"
 msgid "C+Npdp"
 msgstr "New event"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:88
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:134
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:96
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:96
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:180
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:99
 msgid "rvirM2"
 msgstr "Location"
 
@@ -6672,28 +6859,36 @@ msgstr "Location"
 msgid "j0OO6t"
 msgstr "Edit event"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:84
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:130
 msgid "uEcyd6"
 msgstr "Enter the event details."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:131
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:148
 msgid "c8fC8Z"
 msgstr "Full day"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:195
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:162
+msgid "mOFG3K"
+msgstr "Start"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:175
+msgid "3JVa6k"
+msgstr "End"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:241
 msgid "m1czzY"
 msgstr "Event"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:74
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:77
 msgid "tH9Pij"
 msgstr "Manage all events in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:155
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:167
 msgid "bHpXg4"
 msgstr "event"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:176
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:182
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:188
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:194
 msgid "+x4Xpo"
 msgstr "Could not delete event. Please try again."
 
@@ -7080,12 +7275,6 @@ msgstr "Website dashboard - News"
 msgid "wmj8mw"
 msgstr "Manage all opportunities in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:102
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:72
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:66
-msgid "aH4De2"
-msgstr "Source"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:169
 msgid "BZ7l2a"
 msgstr "opportunity"
@@ -7387,20 +7576,25 @@ msgstr "This record conflicts with an existing record."
 
 #: lib/server/create-command-action.ts:146
 #: lib/server/create-server-action.ts:120
-msgid "Jl3xT+"
-msgstr "Both accounts have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge."
+msgid "Hr85CO"
+msgstr "Both services have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge."
 
 #: lib/server/create-command-action.ts:149
 #: lib/server/create-server-action.ts:123
+msgid "Jl3xT+"
+msgstr "Both accounts have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge."
+
+#: lib/server/create-command-action.ts:152
+#: lib/server/create-server-action.ts:126
 msgid "qDy0wr"
 msgstr "The submitted data violates a data rule."
 
-#: lib/server/create-command-action.ts:150
-#: lib/server/create-server-action.ts:124
+#: lib/server/create-command-action.ts:153
+#: lib/server/create-server-action.ts:127
 msgid "Bosjdo"
 msgstr "The submitted data is incomplete."
 
-#: lib/server/create-command-action.ts:153
-#: lib/server/create-server-action.ts:129
+#: lib/server/create-command-action.ts:156
+#: lib/server/create-server-action.ts:132
 msgid "lkI8/e"
 msgstr "Internal server error."

@@ -226,6 +226,14 @@ export async function getContributionsForAdmin(
 /**
  * `personDocumentId` is the person's `entities.id`. The org endpoint is resolved to its latest
  * editable version for display.
+ *
+ * "Contribution" here is a data-migration leftover: these rows are simply relations between a
+ * person and an organisational unit, and not every role is a contribution to DARIAH. The same table
+ * is read from the org side as "person relations" (`lib/data/person-relations.ts`) and exposed by
+ * the api as `positions` (`apps/api/src/lib/persons.ts`) — one concept, three names.
+ *
+ * Unrelated to a person's article credits, despite `articleContributorRolesEnum` also using the
+ * word: those live in `lib/data/article-contributors.ts`.
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getPersonContributions(personDocumentId: string) {

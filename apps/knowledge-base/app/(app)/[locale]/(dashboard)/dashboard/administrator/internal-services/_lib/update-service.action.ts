@@ -19,6 +19,17 @@ export const updateServiceAction = createMutationAction({
 
 	async preCheck({ input }) {
 		const t = await getExtracted();
+		const service = await db.query.services.findFirst({
+			where: { id: input.id },
+			columns: { sshocMarketplaceId: true },
+		});
+
+		if (service == null || service.sshocMarketplaceId != null) {
+			return createActionStateError({
+				message: t("Only locally managed services can be updated here."),
+			});
+		}
+
 		const unitDocumentIds = [
 			...new Set([...input.ownerUnitDocumentIds, ...input.providerUnitDocumentIds]),
 		];
@@ -37,6 +48,7 @@ export const updateServiceAction = createMutationAction({
 			.update(schema.services)
 			.set({
 				name: input.name,
+				typeId: input.typeId,
 				statusId: input.statusId,
 				comment: input.comment,
 				dariahBranding: input.dariahBranding,

@@ -83,10 +83,10 @@ export const EntityRefSchema = v.pipe(
 		type: v.picklist(publicRelatedEntityTypesEnum),
 		slug: v.string(),
 		/**
-		 * Display name of the entity; null when the source has none to offer (e.g. navigation items,
-		 * which carry their own author-chosen label).
+		 * Display name of the entity. Some embedding records, such as navigation items, may override
+		 * it.
 		 */
-		label: v.nullable(v.string()),
+		label: v.string(),
 		href: v.pipe(
 			v.nullable(v.string()),
 			v.description(

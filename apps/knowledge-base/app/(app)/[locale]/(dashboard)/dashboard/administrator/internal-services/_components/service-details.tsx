@@ -21,6 +21,7 @@ interface ServiceDetailsProps {
 		schema.Service,
 		"id" | "name" | "statusId" | "comment" | "dariahBranding" | "monitoring" | "privateSupplier"
 	> & {
+		type: Pick<schema.ServiceType, "type">;
 		ownerUnitDocumentIds: Array<string>;
 		providerUnitDocumentIds: Array<string>;
 	};
@@ -59,6 +60,9 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 				<DescriptionTerm>{t("Name")}</DescriptionTerm>
 				<DescriptionDetails>{service.name}</DescriptionDetails>
 
+				<DescriptionTerm>{t("Type")}</DescriptionTerm>
+				<DescriptionDetails>{service.type.type}</DescriptionDetails>
+
 				<DescriptionTerm>{t("Status")}</DescriptionTerm>
 				<DescriptionDetails>
 					{status != null ? getServiceStatusLabel(status) : null}
@@ -69,18 +73,18 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 
 				<DescriptionTerm>{t("DARIAH branding")}</DescriptionTerm>
 				<DescriptionDetails>
-					{service.dariahBranding !== null ? t("Yes") : t("No")}
+					{service.dariahBranding === true ? t("Yes") : t("No")}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Monitoring")}</DescriptionTerm>
-				<DescriptionDetails>{service.monitoring !== null ? t("Yes") : t("No")}</DescriptionDetails>
+				<DescriptionDetails>{service.monitoring === true ? t("Yes") : t("No")}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Private supplier")}</DescriptionTerm>
 				<DescriptionDetails>
-					{service.privateSupplier !== null ? t("Yes") : t("No")}
+					{service.privateSupplier === true ? t("Yes") : t("No")}
 				</DescriptionDetails>
 
-				<DescriptionTerm>{t("Owners")}</DescriptionTerm>
+				<DescriptionTerm>{t("Service owners")}</DescriptionTerm>
 				<DescriptionDetails>
 					{owners.length > 0 ? (
 						<ul className="flex flex-col gap-1">
@@ -98,7 +102,7 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 					) : null}
 				</DescriptionDetails>
 
-				<DescriptionTerm>{t("Providers")}</DescriptionTerm>
+				<DescriptionTerm>{t("Service providers")}</DescriptionTerm>
 				<DescriptionDetails>
 					{providers.length > 0 ? (
 						<ul className="flex flex-col gap-1">

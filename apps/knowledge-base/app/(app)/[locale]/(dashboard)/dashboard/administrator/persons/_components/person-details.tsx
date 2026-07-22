@@ -14,8 +14,10 @@ import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import type { PersonArticle } from "@/lib/data/article-contributors";
 import type { PersonContribution } from "@/lib/data/contributions";
-import { getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
+import { getEntityDetailHref, getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
+import { getEntityTypeLabel } from "@/lib/entity-type-label";
 import { formatRoleType } from "@/lib/format-role-type";
 
 interface PersonDetailsProps {
@@ -28,12 +30,15 @@ interface PersonDetailsProps {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	contributions: Array<PersonContribution>;
+	/** Read-only lens: the edge is owned by the article, so it is not editable from here. */
+	articles: Array<PersonArticle>;
 	publishAction: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
 
 export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 	const {
+		articles,
 		contributions,
 		documentId,
 		hasDraft,
@@ -108,6 +113,27 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 										contribution.organisationalUnitSlug,
 									)}
 									targetType={formatRoleType(contribution.organisationalUnitType)}
+								/>
+							))}
+						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Articles")}</DescriptionTerm>
+				<DescriptionDetails>
+					{articles.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{articles.map((article) => (
+								<RelationStatement
+									key={`${article.entityType}-${article.documentId}`}
+									relation={formatRoleType(article.role)}
+									source={person.name}
+									target={article.title}
+									targetHref={getEntityDetailHref({
+										entityType: article.entityType,
+										slug: article.slug,
+									})}
+									targetType={getEntityTypeLabel({ entityType: article.entityType })}
 								/>
 							))}
 						</ul>
