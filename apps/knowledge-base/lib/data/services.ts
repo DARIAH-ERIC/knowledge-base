@@ -10,7 +10,7 @@ import {
 } from "@/lib/data/organisational-units";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
-import { and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
+import { and, count, desc, eq, isNotNull, isNull, sql } from "@/lib/db/sql";
 import {
 	toOrganisationalUnitDocumentOption,
 	toOrganisationalUnitDocumentOptionsPage,
@@ -18,10 +18,6 @@ import {
 import { getServiceStatusLabel } from "@/lib/service-status-label";
 
 export type ServicesSort = "name" | "type" | "status" | "sshocMarketplaceId";
-type ServiceTypes = (typeof schema.serviceTypesEnum)[number];
-
-const InternalServiceTypes: Array<ServiceTypes> = ["internal"];
-const SSHOCServiceTypes: Array<ServiceTypes> = ["community", "core"];
 
 interface GetServicesParams {
 	limit: number;
@@ -53,11 +49,11 @@ function assertAdminUser(user: Pick<User, "role">): void {
 export async function getServices(params: Readonly<GetServicesParams>): Promise<ServicesResult> {
 	const { limit, offset, q, sort = "name", type, dir = "asc" } = params;
 	const query = q?.trim();
-	const serviceTypes: Array<ServiceTypes> =
-		type === "internal" ? InternalServiceTypes : SSHOCServiceTypes;
 	const where = and(
 		matchesAllTerms(query, schema.services.name),
-		inArray(schema.serviceTypes.type, serviceTypes),
+		type === "internal"
+			? isNull(schema.services.sshocMarketplaceId)
+			: isNotNull(schema.services.sshocMarketplaceId),
 	);
 	const orderBy =
 		sort === "type"

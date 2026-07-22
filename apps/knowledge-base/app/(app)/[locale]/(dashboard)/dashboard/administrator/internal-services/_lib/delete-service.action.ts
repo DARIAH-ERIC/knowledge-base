@@ -11,6 +11,14 @@ import { eq } from "@/lib/db/sql";
 
 export async function deleteServiceAction(id: string): Promise<void> {
 	const auditSession = await assertAdmin();
+	const service = await db.query.services.findFirst({
+		where: { id },
+		columns: { sshocMarketplaceId: true },
+	});
+
+	if (service == null || service.sshocMarketplaceId != null) {
+		return;
+	}
 
 	// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
 	const subjectLabel = await resolveAuditSubjectLabel("internal_services", id);
