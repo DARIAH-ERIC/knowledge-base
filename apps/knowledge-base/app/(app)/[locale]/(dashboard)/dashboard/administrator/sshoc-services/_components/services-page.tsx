@@ -10,7 +10,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { EyeIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic } from "react";
 
@@ -123,6 +123,12 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 										icon={<EyeIcon className="me-2 block-4 inline-4" />}
 									>
 										{t("View")}
+									</RowActionsMenu.Link>
+									<RowActionsMenu.Link
+										href={`/dashboard/administrator/sshoc-services/${item.id}/edit`}
+										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
+									>
+										{t("Edit")}
 									</RowActionsMenu.Link>
 								</RowActionsMenu>
 							</TableCell>
