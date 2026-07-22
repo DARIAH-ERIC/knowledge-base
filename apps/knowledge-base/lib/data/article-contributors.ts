@@ -6,7 +6,7 @@ import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
-import { and, count, eq, inArray, sql } from "@/lib/db/sql";
+import { alias, and, count, eq, inArray, sql } from "@/lib/db/sql";
 
 export interface PersonOption {
 	id: string;
@@ -129,3 +129,98 @@ export async function getSpotlightArticleContributors(documentId: string) {
 export type SpotlightArticleContributor = Awaited<
 	ReturnType<typeof getSpotlightArticleContributors>
 >[number];
+
+export interface PersonArticle {
+	/** The article's `entities.id`, not the id of a particular version. */
+	documentId: string;
+	slug: string;
+	title: string;
+	publicationDate: Date;
+	entityType: "impact_case_studies" | "spotlight_articles";
+	role: schema.ArticleContributorRole;
+}
+
+/**
+ * The reverse lens: every article a person is credited on, newest first. `personDocumentId` is the
+ * person's `entities.id`. Each article is resolved to its latest editable version, so an editor
+ * sees drafts here too — unlike the public api, which resolves published versions only.
+ *
+ * Read-only on the person side: the edge is owned by the article, and is created and deleted from
+ * the spotlight-article and impact-case-study edit screens.
+ */
+export async function getPersonArticles(personDocumentId: string): Promise<Array<PersonArticle>> {
+	const spotlightArticleDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"spotlight_article_document_lifecycle",
+	);
+	const impactCaseStudyDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"impact_case_study_document_lifecycle",
+	);
+	const spotlightArticleEntities = alias(schema.entities, "spotlight_article_entities");
+	const impactCaseStudyEntities = alias(schema.entities, "impact_case_study_entities");
+
+	const [spotlightArticles, impactCaseStudies] = await Promise.all([
+		db
+			.select({
+				documentId: spotlightArticleEntities.id,
+				slug: spotlightArticleEntities.slug,
+				title: schema.spotlightArticles.title,
+				publicationDate: schema.spotlightArticles.publicationDate,
+				role: schema.spotlightArticlesToPersons.role,
+			})
+			.from(schema.spotlightArticlesToPersons)
+			.innerJoin(
+				spotlightArticleEntities,
+				eq(
+					spotlightArticleEntities.id,
+					schema.spotlightArticlesToPersons.spotlightArticleDocumentId,
+				),
+			)
+			.innerJoin(
+				spotlightArticleDocumentLifecycle,
+				eq(spotlightArticleDocumentLifecycle.documentId, spotlightArticleEntities.id),
+			)
+			.innerJoin(
+				schema.spotlightArticles,
+				sql`${schema.spotlightArticles.id} = COALESCE(${spotlightArticleDocumentLifecycle.draftId}, ${spotlightArticleDocumentLifecycle.publishedId})`,
+			)
+			.where(eq(schema.spotlightArticlesToPersons.personDocumentId, personDocumentId)),
+		db
+			.select({
+				documentId: impactCaseStudyEntities.id,
+				slug: impactCaseStudyEntities.slug,
+				title: schema.impactCaseStudies.title,
+				publicationDate: schema.impactCaseStudies.publicationDate,
+				role: schema.impactCaseStudiesToPersons.role,
+			})
+			.from(schema.impactCaseStudiesToPersons)
+			.innerJoin(
+				impactCaseStudyEntities,
+				eq(impactCaseStudyEntities.id, schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId),
+			)
+			.innerJoin(
+				impactCaseStudyDocumentLifecycle,
+				eq(impactCaseStudyDocumentLifecycle.documentId, impactCaseStudyEntities.id),
+			)
+			.innerJoin(
+				schema.impactCaseStudies,
+				sql`${schema.impactCaseStudies.id} = COALESCE(${impactCaseStudyDocumentLifecycle.draftId}, ${impactCaseStudyDocumentLifecycle.publishedId})`,
+			)
+			.where(eq(schema.impactCaseStudiesToPersons.personDocumentId, personDocumentId)),
+	]);
+
+	const articles = [
+		...spotlightArticles.map((row) => {
+			return { ...row, entityType: "spotlight_articles" as const };
+		}),
+		...impactCaseStudies.map((row) => {
+			return { ...row, entityType: "impact_case_studies" as const };
+		}),
+	];
+
+	return articles.toSorted((a, b) => {
+		const byDate = b.publicationDate.getTime() - a.publicationDate.getTime();
+		return byDate !== 0 ? byDate : a.title.localeCompare(b.title);
+	});
+}

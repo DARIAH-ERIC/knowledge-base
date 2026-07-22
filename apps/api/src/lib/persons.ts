@@ -45,6 +45,10 @@ function comparePositions(a: PersonPosition, b: PersonPosition): number {
 	return (a.entity.label ?? "").localeCompare(b.entity.label ?? "");
 }
 
+/**
+ * A person's _current_ relations to organisational units (`persons_to_organisational_units`).
+ * Distinct from article credits — see `contributors` on the article endpoints.
+ */
 export async function getPersonPositions(
 	db: Database | Transaction,
 	personIds: Array<string>,

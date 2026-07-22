@@ -1274,6 +1274,10 @@ msgstr "Add item"
 msgid "oVDe1D"
 msgstr "Contributions"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:122
+msgid "3KNMbJ"
+msgstr "Articles"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:250
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:368
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:536
