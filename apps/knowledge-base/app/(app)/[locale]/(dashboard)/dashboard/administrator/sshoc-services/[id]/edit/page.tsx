@@ -3,28 +3,28 @@ import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { ServiceDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details";
+import { ServiceStatusEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-status-edit-form";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getServiceForAdmin } from "@/lib/data/services";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorEditServicePageProps extends PageProps<"/[locale]/dashboard/administrator/sshoc-services/[id]/view"> {}
+interface DashboardAdministratorEditSshocServicePageProps extends PageProps<"/[locale]/dashboard/administrator/sshoc-services/[id]/edit"> {}
 
 export async function generateMetadata(
-	_props: Readonly<DashboardAdministratorEditServicePageProps>,
+	_props: Readonly<DashboardAdministratorEditSshocServicePageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Administrator dashboard - View SSHOC service"),
+		title: t("Administrator dashboard - Edit SSHOC service"),
 	});
 
 	return metadata;
 }
 
-export default async function DashboardAdministratorEditServicePage(
-	props: Readonly<DashboardAdministratorEditServicePageProps>,
+export default async function DashboardAdministratorEditSshocServicePage(
+	props: Readonly<DashboardAdministratorEditSshocServicePageProps>,
 ): Promise<ReactNode> {
 	const { params } = props;
 
@@ -38,9 +38,9 @@ export default async function DashboardAdministratorEditServicePage(
 	}
 
 	return (
-		<ServiceDetails
-			selectedOrganisationalUnitItems={serviceData.selectedOrganisationalUnits}
+		<ServiceStatusEditForm
 			service={serviceData.service}
+			serviceStatuses={serviceData.serviceStatuses}
 		/>
 	);
 }
