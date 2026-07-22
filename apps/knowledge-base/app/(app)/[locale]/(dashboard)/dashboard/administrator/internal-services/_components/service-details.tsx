@@ -21,6 +21,7 @@ interface ServiceDetailsProps {
 		schema.Service,
 		"id" | "name" | "statusId" | "comment" | "dariahBranding" | "monitoring" | "privateSupplier"
 	> & {
+		type: Pick<schema.ServiceType, "type">;
 		ownerUnitDocumentIds: Array<string>;
 		providerUnitDocumentIds: Array<string>;
 	};
@@ -58,6 +59,9 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 			<DescriptionList>
 				<DescriptionTerm>{t("Name")}</DescriptionTerm>
 				<DescriptionDetails>{service.name}</DescriptionDetails>
+
+				<DescriptionTerm>{t("Type")}</DescriptionTerm>
+				<DescriptionDetails>{service.type.type}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Status")}</DescriptionTerm>
 				<DescriptionDetails>

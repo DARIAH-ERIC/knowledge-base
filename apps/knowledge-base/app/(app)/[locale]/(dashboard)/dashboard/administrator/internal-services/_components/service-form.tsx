@@ -32,11 +32,19 @@ import { getServiceStatusLabel } from "@/lib/service-status-label";
 interface ServiceFormProps {
 	service?: Pick<
 		schema.Service,
-		"id" | "name" | "statusId" | "comment" | "dariahBranding" | "monitoring" | "privateSupplier"
+		| "id"
+		| "name"
+		| "typeId"
+		| "statusId"
+		| "comment"
+		| "dariahBranding"
+		| "monitoring"
+		| "privateSupplier"
 	> & {
 		ownerUnitDocumentIds: Array<string>;
 		providerUnitDocumentIds: Array<string>;
 	};
+	serviceTypes: Array<Pick<schema.ServiceType, "id" | "type">>;
 	serviceStatuses: Array<Pick<schema.ServiceStatus, "id" | "status">>;
 	initialOrganisationalUnitItems: Array<AsyncOption>;
 	initialOrganisationalUnitTotal: number;
@@ -72,6 +80,7 @@ async function fetchOrganisationalUnitOptionsPage(
 export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 	const {
 		service,
+		serviceTypes,
 		serviceStatuses,
 		initialOrganisationalUnitItems,
 		initialOrganisationalUnitTotal,
@@ -83,6 +92,11 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
+	const defaultTypeId =
+		service?.typeId ??
+		serviceTypes.find((serviceType) => serviceType.type === "internal")?.id ??
+		"";
+	const [selectedTypeId, setSelectedTypeId] = useState<string>(defaultTypeId);
 	const [selectedStatusId, setSelectedStatusId] = useState<string>(service?.statusId ?? "");
 	const [selectedOwnerUnitDocumentIds, setSelectedOwnerUnitDocumentIds] = useState<Array<string>>(
 		service?.ownerUnitDocumentIds ?? [],
@@ -100,6 +114,25 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						<Input />
 						<FieldError />
 					</TextField>
+					<Select
+						isRequired={true}
+						onChange={(key) => {
+							setSelectedTypeId(String(key));
+						}}
+						value={selectedTypeId || null}
+					>
+						<Label>{t("Type")}</Label>
+						<SelectTrigger />
+						<FieldError />
+						<SelectContent>
+							{serviceTypes.map((serviceType) => (
+								<SelectItem key={serviceType.id} id={serviceType.id}>
+									{serviceType.type}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+					<input name="typeId" type="hidden" value={selectedTypeId} />
 					<Select
 						isRequired={true}
 						onChange={(key) => {
