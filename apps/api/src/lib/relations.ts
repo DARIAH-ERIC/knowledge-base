@@ -48,6 +48,8 @@ export async function getRelatedEntities(
 					${schema.news.title},
 					${schema.events.title},
 					${schema.pages.title},
+					${schema.opportunities.title},
+					${schema.fundingCalls.title},
 					${schema.impactCaseStudies.title},
 					${schema.spotlightArticles.title},
 					${schema.documentsPolicies.title},
@@ -71,6 +73,8 @@ export async function getRelatedEntities(
 		.leftJoin(schema.news, eq(publishedEntityVersions.id, schema.news.id))
 		.leftJoin(schema.events, eq(publishedEntityVersions.id, schema.events.id))
 		.leftJoin(schema.pages, eq(publishedEntityVersions.id, schema.pages.id))
+		.leftJoin(schema.opportunities, eq(publishedEntityVersions.id, schema.opportunities.id))
+		.leftJoin(schema.fundingCalls, eq(publishedEntityVersions.id, schema.fundingCalls.id))
 		.leftJoin(schema.impactCaseStudies, eq(publishedEntityVersions.id, schema.impactCaseStudies.id))
 		.leftJoin(schema.spotlightArticles, eq(publishedEntityVersions.id, schema.spotlightArticles.id))
 		.leftJoin(schema.documentsPolicies, eq(publishedEntityVersions.id, schema.documentsPolicies.id))
