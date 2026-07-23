@@ -31,6 +31,7 @@ export interface IngestSshocServicesJobResult {
 	fetchedCount: number;
 	markedNeedsReviewCount: number;
 	relationCount: number;
+	removedRelationCount: number;
 	updatedCount: number;
 	created: Array<SshocServiceRef>;
 	markedNeedsReview: Array<SshocServiceRef>;
@@ -168,6 +169,7 @@ export function coerceBackgroundJobResult(
 				fetchedCount: toCount(record.fetchedCount),
 				markedNeedsReviewCount: toCount(record.markedNeedsReviewCount),
 				relationCount: toCount(record.relationCount),
+				removedRelationCount: toCount(record.removedRelationCount),
 				updatedCount: toCount(record.updatedCount),
 				created: toServiceRefs(record.created),
 				markedNeedsReview: toServiceRefs(record.markedNeedsReview),

@@ -149,6 +149,7 @@ function IngestSshocServicesResultView(
 				<Stat label={t("Created")} value={result.createdCount} />
 				<Stat label={t("Updated")} value={result.updatedCount} />
 				<Stat label={t("New relations")} value={result.relationCount} />
+				<Stat label={t("Removed relations")} value={result.removedRelationCount} />
 				<Stat intent="attention" label={t("Needs review")} value={result.markedNeedsReviewCount} />
 			</StatList>
 
