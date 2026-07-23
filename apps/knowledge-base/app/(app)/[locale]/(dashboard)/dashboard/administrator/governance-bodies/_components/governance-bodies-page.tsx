@@ -108,7 +108,7 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 							href={`/dashboard/administrator/governance-bodies/${item.entity.slug}/details`}
 						>
 							<TableCell>{item.name}</TableCell>
-							<TableCell className="uppercase">{item.acronym}</TableCell>
+							<TableCell>{item.acronym}</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
 									hasDraft={item.hasDraft}
