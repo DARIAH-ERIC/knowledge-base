@@ -5,6 +5,7 @@
 	"type": "module",
 	"sideEffects": false,
 	"scripts": {
+		"data:backfill:sshoc-actor-ids": "tsx ./scripts/backfill-sshoc-actor-ids.ts",
 		"data:clean:empty-content-blocks": "tsx ./scripts/clean-empty-content-blocks.ts",
 		"data:clean:richtext": "tsx ./scripts/clean-richtext.ts",
 		"data:clean:unused-assets": "tsx ./scripts/clean-unused-assets.ts",
@@ -17,6 +18,7 @@
 	},
 	"devDependencies": {
 		"@acdh-oeaw/lib": "catalog:",
+		"@dariah-eric/client-sshoc": "workspace:^",
 		"@dariah-eric/configs": "workspace:^",
 		"@dariah-eric/database": "workspace:^",
 		"@dariah-eric/env": "workspace:^",
