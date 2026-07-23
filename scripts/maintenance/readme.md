@@ -43,6 +43,22 @@ pnpm --filter @dariah-eric/maintenance run data:clean:empty-content-blocks -- --
 The empty set is recomputed at deletion time, so a block edited to have content since the report is
 protected. Only the database is touched (needs the `DATABASE_*` env vars).
 
+### `data:clean:richtext-links`
+
+Finds migrated WordPress links in `rich_text` blocks and accordion item rich text. Deterministic
+matches are rewritten to canonical website routes; unresolved internal links are reported for manual
+review and never changed automatically. Writes a combined TSV report to
+`.cache/richtext-link-cleanup.tsv` and split reports to `.cache/richtext-link-rewrites.tsv` and
+`.cache/richtext-link-review.tsv`.
+
+```bash
+pnpm --filter @dariah-eric/maintenance run data:clean:richtext-links            # dry run
+pnpm --filter @dariah-eric/maintenance run data:clean:richtext-links -- --apply # rewrite deterministic matches
+```
+
+The link set is recomputed at mutation time, so a block edited since the report is protected. Only
+the database is touched (needs the `DATABASE_*` env vars).
+
 ### `data:clean:unused-social-media`
 
 Finds social-media entries not referenced by any project, organisational unit, service, or report

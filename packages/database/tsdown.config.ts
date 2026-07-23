@@ -18,6 +18,7 @@ export default defineConfig({
 		"./lib/rich-text.ts",
 		"./lib/rich-text-normalize.ts",
 		"./lib/richtext-cleanup-service.ts",
+		"./lib/richtext-link-cleanup-service.ts",
 		"./lib/schema.ts",
 		"./lib/sql.ts",
 	],
