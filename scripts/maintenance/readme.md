@@ -6,10 +6,74 @@ dry run by default and only mutates when passed `--apply`.
 
 For the `data:clean:*` scripts the detection and mutation logic is the **same shared implementation**
 the admin dashboard's Maintenance page uses (in `@dariah-eric/database`), so the CLI and the dashboard
-can never diverge on what counts as, say, an "unused" asset. `data:backfill:sshoc-actor-ids` has no
-dashboard counterpart — it exists precisely because the work needs a reviewed report.
+can never diverge on what counts as, say, an "unused" asset. The `data:backfill:*` scripts have no
+dashboard counterpart — they exist precisely because the work needs a reviewed report.
 
 ## scripts
+
+The two `data:backfill:*` scripts share a shape — propose a value for one column by matching local
+records against an external register, write every proposal to a TSV, apply only the unambiguous ones
+— and share the helpers for it in `lib/`. Both write to **every version** of a unit, draft and
+published alike: these are external identifiers with no editorial content, and leaving one on a draft
+means the consumers (the SSHOC ingest reads published versions) keep ignoring it until somebody
+publishes each unit by hand. Neither ever overwrites an existing value.
+
+### `data:backfill:institution-rors`
+
+Proposes `organisational_units.ror` for institutions from
+[ROR's affiliation matcher](https://ror.readme.io/docs/match-organization-names-to-ror-ids). Writes a
+report to `.cache/institution-rors.tsv`.
+
+```bash
+pnpm --filter @dariah-eric/maintenance run data:backfill:institution-rors             # dry run (report only)
+pnpm --filter @dariah-eric/maintenance run data:backfill:institution-rors -- --limit=50
+pnpm --filter @dariah-eric/maintenance run data:backfill:institution-rors -- --apply  # write exact matches
+pnpm --filter @dariah-eric/maintenance run data:backfill:institution-rors -- --apply --from-file=.cache/institution-rors.tsv
+```
+
+Institutions only, on purpose. National consortia, countries, working groups and governance bodies
+are consortia, projects and administrative bodies rather than research organisations, so ROR mostly
+does not list them — of 25 national consortia exactly one resolves, which is quicker to enter by hand.
+
+| confidence         | basis                                                               | auto-applied |
+| ------------------ | ------------------------------------------------------------------- | ------------ |
+| `exact`            | a ROR name or alias identical to ours, in the country we have it in | yes          |
+| `country_mismatch` | the name matches, but ROR places it in another country              | no           |
+| `loose`            | ROR chose a record, but none of its names match ours                | no           |
+| `none`             | ROR declined to choose                                              | —            |
+
+Two independent gates, because they catch different failures and neither covers both.
+
+The **name** gate catches a _parent_ organisation standing in for a specific unit. Measured against
+the 47 institutions that already had a ROR, the matcher alone chose correctly 34 times, wrongly twice
+and declined 11 — and both errors were of this kind (`NOVA University of Lisbon` → University of
+Lisbon). They come back tagged exactly like correct answers (`SINGLE SEARCH`, score 1) and sit in the
+same country as the right answer, so only the name separates them; requiring an exact name accepted
+31 with no errors.
+
+The **country** gate catches the opposite case, a generic local name colliding with a real alias
+somewhere else. Our `National and University Library` (Croatia) matches an English alias of
+Strasbourg's BNU exactly, and ROR offers no competing exact match to signal the ambiguity — but the
+countries disagree, so it lands in `country_mismatch` instead of being written. On a 60-institution
+sample it demoted that row and nothing else.
+
+The unit's country comes from its `is_located_in` relation, which ~15% of institutions lack; an
+unknown country on either side is not treated as a mismatch, so the name gate then decides alone.
+Country names are canonicalised before comparison (ROR says Czechia, Türkiye and The Netherlands
+where we say Czech Republic, Turkey and Netherlands) — and a pair the alias map fails to reconcile
+reads as a mismatch, which means an omission there costs a reviewer a glance rather than writing a
+wrong value.
+
+The report carries `unit_country` next to `ror_country` and `ror_city` so a reviewer can settle a
+generic name at a glance.
+
+A ROR already used by another unit is never proposed, so the backfill cannot merge two records by
+giving them the same identifier.
+
+Requests are sequential with `--delay-ms` (default 250) between them, keeping well inside ROR's
+guideline of ~2000 requests per 5 minutes; a 429 or 5xx is retried with exponential backoff. A full
+run over ~800 institutions takes roughly five minutes. Needs the `DATABASE_*` env vars and optionally
+`ROR_API_BASE_URL` (defaults to `https://api.ror.org`).
 
 ### `data:backfill:sshoc-actor-ids`
 
@@ -50,11 +114,7 @@ skipped, so a stale report cannot overwrite work done since.
 `is_partner_institution_of` relation, `all` is every institution. Widening it roughly doubles the
 matches, because plenty of upstream providers are recorded locally as `is_located_in` only.
 
-The id is written to **every version** of the unit, draft and published alike. The admin form writes
-the draft only, which is right for editorial fields; this is an external identifier, and leaving it
-on the draft would keep the ingest (which reads published versions) ignoring the actor until someone
-publishes each unit. Existing ids are never overwritten. Needs the `DATABASE_*` env vars and
-`SSHOC_MARKETPLACE_API_BASE_URL`.
+Needs the `DATABASE_*` env vars and `SSHOC_MARKETPLACE_API_BASE_URL`.
 
 ### `data:clean:unused-assets`
 

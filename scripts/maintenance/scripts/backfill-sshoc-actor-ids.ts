@@ -1,4 +1,3 @@
-import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 import { assert, log } from "@acdh-oeaw/lib";
@@ -8,6 +7,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { and, eq, inArray, isNull } from "@dariah-eric/database/sql";
 
 import { env } from "../config/env.config";
+import { normalise, similarity, toRorId } from "../lib/matching";
+import { readTsvReport, writeTsvReport } from "../lib/tsv-report";
 
 /**
  * Proposes `organisational_units.sshoc_marketplace_actor_id` values for institutions, by matching
@@ -80,66 +81,12 @@ const db = createDatabaseService({
 	logger: false,
 }).unwrap();
 
-function toTsvCell(value: string): string {
-	return value.replaceAll("\t", " ").replaceAll(/\r?\n/g, " ");
-}
-
-/** Case, accents and punctuation all vary freely between the two systems; word order does not. */
-function normalise(value: string): string {
-	return value
-		.toLowerCase()
-		.normalize("NFKD")
-		.replaceAll(/\p{Diacritic}/gu, "")
-		.replaceAll(/[^\p{Letter}\p{Number}]+/gu, " ")
-		.trim();
-}
-
-/** Local units store a ROR as a URL, the marketplace stores the bare id. */
-function toRorId(value: string | null): string | null {
-	if (value == null) {
-		return null;
-	}
-
-	const rorId = value.trim().replace(/^https?:\/\/ror\.org\//, "");
-
-	return rorId.length > 0 ? rorId : null;
-}
-
 function getActorRor(actor: ActorDto): string | null {
 	const externalId = actor.externalIds.find(
 		(externalId) => externalId.identifierService.code === "ROR",
 	);
 
 	return toRorId(externalId?.identifier ?? null);
-}
-
-/**
- * Jaccard overlap of significant tokens. Short tokens are dropped so that articles and prepositions
- * ("of", "de", "the") cannot prop up a score on their own.
- */
-function similarity(a: string, b: string): number {
-	const toTokens = (value: string) =>
-		new Set(
-			normalise(value)
-				.split(" ")
-				.filter((token) => token.length > 2),
-		);
-
-	const tokensA = toTokens(a);
-	const tokensB = toTokens(b);
-
-	if (tokensA.size === 0 || tokensB.size === 0) {
-		return 0;
-	}
-
-	let shared = 0;
-	for (const token of tokensA) {
-		if (tokensB.has(token)) {
-			shared += 1;
-		}
-	}
-
-	return shared / (tokensA.size + tokensB.size - shared);
 }
 
 /**
@@ -470,14 +417,9 @@ async function writeReport(
 				"",
 				"",
 			]),
-	].map((cells) => cells.map((cell) => toTsvCell(cell)).join("\t"));
+	];
 
-	await fs.mkdir(cacheFolderPath, { recursive: true });
-	await fs.writeFile(
-		reportFilePath,
-		`${reportColumns.join("\t")}\n${rows.join("\n")}${rows.length > 0 ? "\n" : ""}`,
-		{ encoding: "utf-8" },
-	);
+	await writeTsvReport(reportFilePath, reportColumns, rows);
 }
 
 /**
@@ -489,29 +431,16 @@ async function readReviewedMatches(
 	actors: Array<CandidateActor>,
 	units: Array<CandidateUnit>,
 ): Promise<Array<ProposedMatch>> {
-	const content = await fs.readFile(filePath, { encoding: "utf-8" });
-	const [header, ...lines] = content.trim().split(/\r?\n/);
-
-	assert(header != null, `Empty report: \`${filePath}\`.`);
-
-	const columns = header.split("\t");
-	const actorIdColumn = columns.indexOf("actor_id");
-	const unitColumn = columns.indexOf("unit_document_id");
-
-	assert(
-		actorIdColumn !== -1 && unitColumn !== -1,
-		"Report must have `actor_id` and `unit_document_id` columns.",
-	);
+	const records = await readTsvReport(filePath, ["actor_id", "unit_document_id"]);
 
 	const actorsById = new Map(actors.map((actor) => [actor.id, actor]));
 	const unitsByDocumentId = new Map(units.map((unit) => [unit.documentId, unit]));
 
-	return lines.flatMap((line) => {
-		const cells = line.split("\t");
-		const actorId = Number(cells[actorIdColumn]);
-		const documentId = cells[unitColumn]?.trim();
+	return records.flatMap((record) => {
+		const actorId = Number(record.actor_id);
+		const documentId = record.unit_document_id ?? "";
 
-		if (!Number.isInteger(actorId) || documentId == null || documentId.length === 0) {
+		if (!Number.isInteger(actorId) || documentId.length === 0) {
 			return [];
 		}
 
