@@ -191,8 +191,8 @@ async function proposeMatches(
 			continue;
 		}
 
-		const names = getRorNames(match).map((name) => normalise(name));
-		const location = getRorLocation(match);
+		const names = getRorNames(match.organization).map((name) => normalise(name));
+		const location = getRorLocation(match.organization);
 
 		const unitCountry = canonicalCountry(unit.country);
 		const rorCountry = canonicalCountry(location.country);
@@ -203,7 +203,7 @@ async function proposeMatches(
 		matches.push({
 			unit,
 			rorId,
-			rorName: getRorDisplayName(match),
+			rorName: getRorDisplayName(match.organization),
 			rorCountry: location.country,
 			rorCity: location.city,
 			confidence: !names.includes(normalise(unit.name))
