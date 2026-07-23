@@ -1730,8 +1730,16 @@ msgstr "Drafts"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:66
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:67
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:50
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:55
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:47
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:52
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:49
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:54
+>>>>>>> Stashed changes
 msgid "dudqv/"
 msgstr "Maintenance"
 
@@ -4035,7 +4043,13 @@ msgid "2wsjxR"
 msgstr "ongoing"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/country-membership-check.tsx:81
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:67
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:64
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:66
+>>>>>>> Stashed changes
 msgid "7Fw2wg"
 msgstr "Country membership"
 
@@ -4108,7 +4122,13 @@ msgid "D5Ucfu"
 msgstr "Open drafts to rename and publish it."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/duplicate-entity.tsx:120
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:211
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:196
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:209
+>>>>>>> Stashed changes
 msgid "DTWnhz"
 msgstr "Duplicate entity"
 
@@ -4144,7 +4164,13 @@ msgid "Q78rFv"
 msgstr "{skipped} blocks were skipped (no longer empty)."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:134
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:147
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:133
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:146
+>>>>>>> Stashed changes
 msgid "F0fEMW"
 msgstr "Empty content blocks"
 
@@ -4192,7 +4218,13 @@ msgid "t4olJ8"
 msgstr "skipped level"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/heading-hierarchy-check.tsx:71
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:150
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:136
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:149
+>>>>>>> Stashed changes
 msgid "SPpb8W"
 msgstr "Heading hierarchy"
 
@@ -4201,7 +4233,13 @@ msgid "jT6/da"
 msgstr "Heading"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-check.tsx:61
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:68
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:65
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:67
+>>>>>>> Stashed changes
 msgid "bUbgzY"
 msgstr "Inactive units"
 
@@ -4220,141 +4258,325 @@ msgstr "Periods"
 msgid "6xofYo"
 msgstr "Unit inactive since"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:51
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:48
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:50
+>>>>>>> Stashed changes
 msgid "6EvqZu"
 msgstr "Data-integrity checks and cleanup actions for administrators."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:56
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:53
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:55
+>>>>>>> Stashed changes
 msgid "NLbnpZ"
 msgstr "Data integrity"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:57
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:54
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:56
+>>>>>>> Stashed changes
 msgid "XslFtA"
 msgstr "Cleanup"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:58
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:207
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:193
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:57
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:206
+>>>>>>> Stashed changes
 msgid "AbACi5"
 msgstr "Merge, duplicate & rename"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:63
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:60
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:62
+>>>>>>> Stashed changes
 msgid "Q0xJn+"
 msgstr "Data-integrity checks"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:64
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:61
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:63
+>>>>>>> Stashed changes
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx:85
 msgid "vaRmzi"
 msgstr "Paired relations"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:65
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:62
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:64
+>>>>>>> Stashed changes
 msgid "TUyqK9"
 msgstr "Required relations"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:66
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:63
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:65
+>>>>>>> Stashed changes
 msgid "gO+mBW"
 msgstr "Conflicting relations"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:69
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/web-addresses-check.tsx:63
 msgid "EgOb1a"
 msgstr "Web addresses"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:74
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:70
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:68
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/web-addresses-check.tsx:63
+msgid "EgOb1a"
+msgstr "Web addresses"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:73
+>>>>>>> Stashed changes
 msgid "5UqO6/"
 msgstr "Pairs of relations which must always be recorded together, e.g. a national representative must also be a member of the General Assembly, and a national coordinator must also be a member of the National Coordinator Committee, for the same period."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:87
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:83
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:86
+>>>>>>> Stashed changes
 msgid "klpL3K"
 msgstr "Organisational units whose relations imply another that is missing, e.g. every institution that is a partner institution or cooperating partner of DARIAH-EU must also record which country it is located in."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:100
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:96
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:99
+>>>>>>> Stashed changes
 msgid "OQLD1f"
 msgstr "Institutions whose relations to DARIAH-EU cannot both hold at once. A national coordinating institution is by definition a partner institution, so the partner relation is redundant and should be removed; a cooperating partner, by contrast, contradicts the full partner statuses, so one of the two is simply wrong. Flagged only where the periods overlap — an institution that held one status before the other is valid history."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:110
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:106
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:109
+>>>>>>> Stashed changes
 msgid "vrWdx3"
 msgstr "Institutions whose status with DARIAH-EU does not match the country they are located in. A partner, national coordinating, or national representative institution must sit in a country that is a member or observer of DARIAH-EU for the whole period it holds that status; a cooperating partner must sit in one that is neither."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:123
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:119
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:122
+>>>>>>> Stashed changes
 msgid "8r+eF2"
 msgstr "Organisational units that are no longer active but still have open person relations, e.g. a working group whose membership in an ERIC has ended, or a country that is no longer a member, but whose chair, member, coordinator, representative, or contact relations have no end date."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:133
 msgid "5RySGP"
 msgstr "Records whose stored web address is not a valid https URL: a missing or non-https scheme, or a value that does not parse. Covers event and opportunity websites, document and policy links, license URLs, social-media links, embed blocks, and working-group report events. A social-media entry may also be an email address. Reported only — the correct address needs an editor."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:145
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:131
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:132
+msgid "5RySGP"
+msgstr "Records whose stored web address is not a valid https URL: a missing or non-https scheme, or a value that does not parse. Covers event and opportunity websites, document and policy links, license URLs, social-media links, embed blocks, and working-group report events. A social-media entry may also be an email address. Reported only — the correct address needs an editor."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:144
+>>>>>>> Stashed changes
 msgid "6boAFD"
 msgstr "Cleanup tasks"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:146
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:132
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:145
+>>>>>>> Stashed changes
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:138
 msgid "eUKwKz"
 msgstr "Unused assets"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:148
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:134
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:147
+>>>>>>> Stashed changes
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:132
 msgid "83nm5m"
 msgstr "Unused social media"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:149
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:135
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:148
+>>>>>>> Stashed changes
 msgid "JEU8B5"
 msgstr "Rich-text normalisation"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:155
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:141
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:154
+>>>>>>> Stashed changes
 msgid "ZzEr58"
 msgstr "Assets (images) which are not referenced by any record or embedded in any rich-text field. Review and select the ones to permanently remove from storage and the database."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:165
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:151
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:164
+>>>>>>> Stashed changes
 msgid "6qo9NM"
 msgstr "Rich-text content blocks with no meaningful content (empty paragraphs, stray line breaks). Review and select the ones to remove from their entities."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:175
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:161
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:174
+>>>>>>> Stashed changes
 msgid "QbAq9u"
 msgstr "Social-media entries not linked to any project, organisational unit, service, or report. Review and select the ones to permanently remove from the database."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:185
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:171
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:184
+>>>>>>> Stashed changes
 msgid "p1NYmD"
 msgstr "Content blocks whose rich text can be tidied: empty paragraphs, stray line breaks, non-breaking spaces, imported HTML attributes, and bold headings. Review and select the ones to rewrite."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:195
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:181
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:194
+>>>>>>> Stashed changes
 msgid "VNp72D"
 msgstr "Rich-text fields whose headings do not form a proper outline. Every field should open at a level-2 heading (the page title is the only level-1), and levels must not be skipped on the way down — a level-2 heading may be followed by a level-3, but not straight by a level-4. Unlike the normalisation above, these are reported only: the right level cannot be guessed automatically and needs an editor to correct."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:208
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:194
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:207
+>>>>>>> Stashed changes
 msgid "nX7ywS"
 msgstr "Merge duplicates"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:209
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:195
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:208
+>>>>>>> Stashed changes
 msgid "VGeUZU"
 msgstr "Merge social media"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:210
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services.tsx:214
 msgid "hG1/No"
 msgstr "Merge services"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:212
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:197
+=======
+>>>>>>> Stashed changes
 msgid "IurB2k"
 msgstr "Edit slug"
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:217
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:202
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:215
+>>>>>>> Stashed changes
 msgid "zrqb0O"
 msgstr "Merge a duplicate entity into a canonical one: all relations are re-pointed onto the target and the source is permanently deleted. Both entities must be the same type."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:227
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:212
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:225
+>>>>>>> Stashed changes
 msgid "1F1AR1"
 msgstr "Merge a duplicate social-media account into a canonical one: every link from organisational units, projects, services, and reports is re-pointed onto the target and the source is permanently deleted. Use it to make sure a single account is the one everything points at, then clear out what is left via Unused social media."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:237
 msgid "YvE706"
 msgstr "Merge a duplicate service into a canonical one: consortium roles, social-media links, and every country report that lists the service or reports KPIs against it are re-pointed onto the target, and the source is permanently deleted. Use it to retire a service the SSHOC marketplace no longer lists — deleting one outright discards the reporting history attached to it, whereas merging carries that history over."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:247
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:222
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:235
+>>>>>>> Stashed changes
 msgid "mYkOkl"
 msgstr "Copy an entity — content and relations, but no reporting data — into a new unpublished draft. Use it to split an imported “Institution A and Institution B” record into two, or to succeed a wound-up working group with a fresh entity instead of reopening the old one."
 
+<<<<<<< Updated upstream
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:257
+||||||| Stash base
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:232
+=======
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:245
+>>>>>>> Stashed changes
 msgid "pvT7BA"
 msgstr "Change an entity's slug. This is an administrator-only maintenance action — slugs are normally managed by the system and form part of the public URL."
 
@@ -7548,6 +7770,10 @@ msgstr "Error 401"
 #: app/(app)/[locale]/unauthorized.tsx:32
 msgid "N1Yb+F"
 msgstr "You need to sign in to access this page. If you already have an account, please sign in below."
+
+#: lib/data/sshoc-marketplace-actor-id.ts:45
+msgid "yJqGgj"
+msgstr "This SSHOC marketplace actor id is already assigned to another organisational unit."
 
 #: lib/server/create-command-action.ts:137
 #: lib/server/create-server-action.ts:111

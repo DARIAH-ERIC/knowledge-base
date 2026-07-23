@@ -8,6 +8,7 @@ import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-l
 import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { filterToPublishedDocumentIds } from "@/lib/data/relations";
+import { checkSshocMarketplaceActorIdAvailable } from "@/lib/data/sshoc-marketplace-actor-id";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -21,6 +22,12 @@ export const createInstitutionAction = createMutationAction({
 	revalidate: "/[locale]/dashboard/administrator/institutions",
 	redirect: ({ result }) =>
 		`/dashboard/administrator/institutions/${getCreatedSlug(result)}/details`,
+
+	async preCheck({ input }) {
+		return checkSshocMarketplaceActorIdAvailable({
+			sshocMarketplaceActorId: input.sshocMarketplaceActorId,
+		});
+	},
 
 	async mutate(tx, input, { formData }) {
 		const entityType = await tx.query.entityTypes.findFirst({
