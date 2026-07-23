@@ -62,6 +62,7 @@ const retry: RequestOptions["retry"] = {
 
 export interface RorClient {
 	matchAffiliation(affiliation: string): Promise<RorMatch | null>;
+	getOrganization(rorId: string): Promise<RorOrganization | null>;
 }
 
 export function createRorClient(params: { baseUrl: string }): RorClient {
@@ -81,23 +82,44 @@ export function createRorClient(params: { baseUrl: string }): RorClient {
 
 			return data.items.find((item) => item.chosen) ?? null;
 		},
+
+		/** Direct lookup by id, for a unit whose ROR is already known. `null` if withdrawn or invalid. */
+		async getOrganization(rorId: string): Promise<RorOrganization | null> {
+			const result = await request<RorOrganization>(
+				createUrl({ baseUrl: params.baseUrl, pathname: `/v2/organizations/${rorId}` }),
+				{ responseType: "json", retry, timeout: 30_000 },
+			);
+
+			if (result.isErr()) {
+				if (HttpError.is(result.error) && result.error.response.status === 404) {
+					return null;
+				}
+
+				throw result.error;
+			}
+
+			return result.value.data;
+		},
 	};
 }
 
 /** Every name ROR knows the organisation by — display name, labels and aliases alike. */
-export function getRorNames(match: RorMatch): Array<string> {
-	return match.organization.names.map((name) => name.value);
+export function getRorNames(organization: RorOrganization): Array<string> {
+	return organization.names.map((name) => name.value);
 }
 
-export function getRorDisplayName(match: RorMatch): string | null {
-	const display = match.organization.names.find((name) => name.types.includes("ror_display"));
+export function getRorDisplayName(organization: RorOrganization): string | null {
+	const display = organization.names.find((name) => name.types.includes("ror_display"));
 
-	return display?.value ?? match.organization.names[0]?.value ?? null;
+	return display?.value ?? organization.names[0]?.value ?? null;
 }
 
 /** Primary location, used both to disambiguate generic names and to show a reviewer where it is. */
-export function getRorLocation(match: RorMatch): { country: string | null; city: string | null } {
-	const details = match.organization.locations?.[0]?.geonames_details;
+export function getRorLocation(organization: RorOrganization): {
+	country: string | null;
+	city: string | null;
+} {
+	const details = organization.locations?.[0]?.geonames_details;
 
 	return { country: details?.country_name ?? null, city: details?.name ?? null };
 }
