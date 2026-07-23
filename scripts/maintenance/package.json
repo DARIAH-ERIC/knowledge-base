@@ -5,6 +5,7 @@
 	"type": "module",
 	"sideEffects": false,
 	"scripts": {
+		"data:backfill:institution-rors": "tsx ./scripts/backfill-institution-rors.ts",
 		"data:backfill:sshoc-actor-ids": "tsx ./scripts/backfill-sshoc-actor-ids.ts",
 		"data:clean:empty-content-blocks": "tsx ./scripts/clean-empty-content-blocks.ts",
 		"data:clean:richtext": "tsx ./scripts/clean-richtext.ts",
@@ -22,6 +23,7 @@
 		"@dariah-eric/configs": "workspace:^",
 		"@dariah-eric/database": "workspace:^",
 		"@dariah-eric/env": "workspace:^",
+		"@dariah-eric/request": "workspace:^",
 		"@dariah-eric/storage": "workspace:^",
 		"@types/node": "catalog:",
 		"drizzle-orm": "catalog:",
