@@ -24,6 +24,7 @@
 		"./rich-text": "./dist/rich-text.mjs",
 		"./rich-text-normalize": "./dist/rich-text-normalize.mjs",
 		"./richtext-cleanup-service": "./dist/richtext-cleanup-service.mjs",
+		"./richtext-link-cleanup-service": "./dist/richtext-link-cleanup-service.mjs",
 		"./schema": "./dist/schema.mjs",
 		"./sql": "./dist/sql.mjs"
 	},
@@ -47,6 +48,7 @@
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
 		"@dariah-eric/env": "workspace:^",
+		"@dariah-eric/website-routes": "workspace:^",
 		"@tiptap/core": "catalog:",
 		"better-result": "catalog:",
 		"drizzle-orm": "catalog:",
