@@ -2907,3 +2907,123 @@ export async function checkWebAddresses(
 
 	return { findings, errors };
 }
+
+/**
+ * A `sshoc_marketplace_actor_id` maps an organisational unit onto a single actor in the SSH Open
+ * Marketplace; the ingest keys owner/provider service relations off it (see
+ * `@dariah-eric/sshoc-services`), so two units claiming the same actor id makes the mapping
+ * ambiguous and mis-attributes relations. It is a manually entered admin field, so a collision can
+ * only arise from two documents being given the same id by hand.
+ */
+export interface DuplicateSshocMarketplaceActorIdUnit {
+	documentId: string;
+	slug: string;
+	label: string | null;
+	type: string;
+}
+
+export interface DuplicateSshocMarketplaceActorIdFinding {
+	sshocMarketplaceActorId: number;
+	units: Array<DuplicateSshocMarketplaceActorIdUnit>;
+}
+
+export interface DuplicateSshocMarketplaceActorIdCheckResult {
+	findings: Array<DuplicateSshocMarketplaceActorIdFinding>;
+	errors: Array<string>;
+}
+
+/**
+ * Resolves every organisational unit **document** whose current data carries `actorId`. The actor
+ * id is stored on the version table and cloned across a document's draft/published versions, so a
+ * `selectDistinct` on the document id collapses that fan-out — one document yields one row here
+ * even when it has both a draft and a published version. Shared by the admin-form guard (which
+ * excludes the document being edited) and {@link checkDuplicateSshocMarketplaceActorIds}.
+ */
+export async function findOrganisationalUnitDocumentsBySshocMarketplaceActorId(
+	db: Database | Transaction,
+	actorId: number,
+): Promise<Array<DuplicateSshocMarketplaceActorIdUnit>> {
+	// The selected columns already match `DuplicateSshocMarketplaceActorIdUnit`, so the rows are
+	// returned as-is. `selectDistinct` on the document id collapses the draft/published version fan-out.
+	return db
+		.selectDistinct({
+			documentId: schema.entities.id,
+			slug: schema.entities.slug,
+			label: schema.entities.label,
+			type: schema.organisationalUnitTypes.type,
+		})
+		.from(schema.organisationalUnits)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.where(eq(schema.organisationalUnits.sshocMarketplaceActorId, actorId));
+}
+
+/**
+ * Reports SSHOC marketplace actor ids claimed by more than one organisational unit document.
+ * Read-only; shared by the `@dariah-eric/audit` cli and available to the admin dashboard.
+ */
+export async function checkDuplicateSshocMarketplaceActorIds(
+	db: Database | Transaction,
+): Promise<DuplicateSshocMarketplaceActorIdCheckResult> {
+	const errors: Array<string> = [];
+
+	// One distinct row per (actor id, document); the version fan-out is already collapsed here so a
+	// document with a draft and a published version is not mistaken for two claimants.
+	const rows = await db
+		.selectDistinct({
+			sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
+			documentId: schema.entities.id,
+			slug: schema.entities.slug,
+			label: schema.entities.label,
+			type: schema.organisationalUnitTypes.type,
+		})
+		.from(schema.organisationalUnits)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.where(isNotNull(schema.organisationalUnits.sshocMarketplaceActorId));
+
+	const unitsByActorId = new Map<number, Array<DuplicateSshocMarketplaceActorIdUnit>>();
+
+	for (const row of rows) {
+		if (row.sshocMarketplaceActorId == null) {
+			continue;
+		}
+
+		const unit: DuplicateSshocMarketplaceActorIdUnit = {
+			documentId: row.documentId,
+			slug: row.slug,
+			label: row.label,
+			type: row.type,
+		};
+
+		const units = unitsByActorId.get(row.sshocMarketplaceActorId);
+		if (units == null) {
+			unitsByActorId.set(row.sshocMarketplaceActorId, [unit]);
+		} else {
+			units.push(unit);
+		}
+	}
+
+	const findings: Array<DuplicateSshocMarketplaceActorIdFinding> = [];
+
+	for (const [sshocMarketplaceActorId, units] of unitsByActorId) {
+		if (units.length > 1) {
+			findings.push({
+				sshocMarketplaceActorId,
+				units: units.toSorted((a, b) => a.slug.localeCompare(b.slug)),
+			});
+		}
+	}
+
+	findings.sort((a, b) => a.sshocMarketplaceActorId - b.sshocMarketplaceActorId);
+
+	return { findings, errors };
+}
