@@ -112,7 +112,7 @@ export function getEntityHref(params: GetEntityHrefParams): string {
 			return `/projects/${params.slug}`;
 		}
 		case "spotlight-article": {
-			return `/spotlights/${params.slug}`;
+			return `/spotlight/${params.slug}`;
 		}
 		case "impact-case-study": {
 			return `/about/impact-case-studies/${params.slug}`;
@@ -190,7 +190,7 @@ export function getEntityListHref(type: ListableEntityType): string {
 			return "/projects";
 		}
 		case "spotlight-article": {
-			return "/spotlights";
+			return "/spotlight";
 		}
 		case "impact-case-study": {
 			return "/about/impact-case-studies";
