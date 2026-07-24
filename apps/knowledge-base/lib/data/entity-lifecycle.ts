@@ -158,6 +158,7 @@ async function cloneTypedContentBlock(
 					imageId: schema.imageContentBlocks.imageId,
 					caption: schema.imageContentBlocks.caption,
 					captionMode: schema.imageContentBlocks.captionMode,
+					layout: schema.imageContentBlocks.layout,
 				})
 				.from(schema.imageContentBlocks)
 				.where(eq(schema.imageContentBlocks.id, sourceBlockId))
@@ -262,6 +263,23 @@ async function cloneTypedContentBlock(
 					}),
 				);
 			}
+			break;
+		}
+
+		case "media_text": {
+			const [source] = await tx
+				.select({
+					imageId: schema.mediaTextContentBlocks.imageId,
+					side: schema.mediaTextContentBlocks.side,
+					content: schema.mediaTextContentBlocks.content,
+				})
+				.from(schema.mediaTextContentBlocks)
+				.where(eq(schema.mediaTextContentBlocks.id, sourceBlockId))
+				.limit(1);
+			if (source == null) {
+				return;
+			}
+			await tx.insert(schema.mediaTextContentBlocks).values({ id: targetBlockId, ...source });
 			break;
 		}
 	}

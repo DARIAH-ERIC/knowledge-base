@@ -5,6 +5,7 @@
 	"type": "module",
 	"sideEffects": false,
 	"scripts": {
+		"data:backfill:image-alignment": "tsx ./scripts/backfill-image-alignment.ts",
 		"data:backfill:institution-locations": "tsx ./scripts/backfill-institution-locations.ts",
 		"data:backfill:institution-rors": "tsx ./scripts/backfill-institution-rors.ts",
 		"data:backfill:sshoc-actor-ids": "tsx ./scripts/backfill-sshoc-actor-ids.ts",
@@ -12,6 +13,7 @@
 		"data:clean:richtext": "tsx ./scripts/clean-richtext.ts",
 		"data:clean:unused-assets": "tsx ./scripts/clean-unused-assets.ts",
 		"data:clean:unused-social-media": "tsx ./scripts/clean-unused-social-media.ts",
+		"data:convert:floated-images-to-media-text": "tsx ./scripts/convert-floated-images-to-media-text.ts",
 		"data:normalise:identifier-urls": "tsx ./scripts/normalise-identifier-urls.ts",
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",
@@ -27,6 +29,7 @@
 		"@dariah-eric/env": "workspace:^",
 		"@dariah-eric/request": "workspace:^",
 		"@dariah-eric/storage": "workspace:^",
+		"@sindresorhus/slugify": "catalog:",
 		"@types/node": "catalog:",
 		"drizzle-orm": "catalog:",
 		"tsx": "catalog:",

@@ -609,6 +609,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -618,6 +628,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -794,6 +805,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -1279,6 +1357,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -1288,6 +1376,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -1464,6 +1553,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -2212,6 +2368,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -2221,6 +2387,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -2397,6 +2564,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -3018,6 +3252,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -3027,6 +3271,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -3203,6 +3448,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -3812,6 +4124,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -3821,6 +4143,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -3997,6 +4320,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -5249,6 +5639,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -5258,6 +5658,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -5434,6 +5835,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -6536,6 +7004,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -6545,6 +7023,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -6721,6 +7200,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -7495,6 +8041,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -7504,6 +8060,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -7680,6 +8237,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -8758,6 +9382,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -8767,6 +9401,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -8943,6 +9578,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -9436,6 +10138,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -9445,6 +10157,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -9621,6 +10334,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -10059,6 +10839,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -10068,6 +10858,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -10244,6 +11035,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -10738,6 +11596,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -10747,6 +11615,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -10923,6 +11792,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -11583,6 +12519,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -11592,6 +12538,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -11768,6 +12715,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -12771,6 +13785,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -12780,6 +13804,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -12956,6 +13981,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },
@@ -13748,6 +14840,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       ],
                       "type": "object",
                     },
+                    "layout": {
+                      "enum": [
+                        "default",
+                        "wide",
+                        "full",
+                        "float-start",
+                        "float-end",
+                      ],
+                      "type": "string",
+                    },
                     "type": {
                       "const": "image",
                     },
@@ -13757,6 +14859,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "image",
                     "caption",
                     "captionSource",
+                    "layout",
                   ],
                   "type": "object",
                 },
@@ -13933,6 +15036,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "required": [
                     "type",
                     "items",
+                  ],
+                  "type": "object",
+                },
+                {
+                  "properties": {
+                    "content": {},
+                    "image": {
+                      "properties": {
+                        "alt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "license": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                },
+                                "url": {
+                                  "type": "string",
+                                },
+                              },
+                              "required": [
+                                "name",
+                                "url",
+                              ],
+                              "type": "object",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                        "alt",
+                        "license",
+                      ],
+                      "type": "object",
+                    },
+                    "side": {
+                      "enum": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "string",
+                    },
+                    "type": {
+                      "const": "media_text",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "image",
+                    "side",
+                    "content",
                   ],
                   "type": "object",
                 },

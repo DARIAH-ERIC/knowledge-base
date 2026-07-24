@@ -46,6 +46,7 @@ import {
 	Square3Stack3DIcon,
 	Squares2X2Icon,
 	TrashIcon,
+	ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
 import type { JSONContent } from "@tiptap/core";
 import { ImageIcon } from "lucide-react";
@@ -90,6 +91,7 @@ interface ImageContentBlockItem {
 		assetCaption?: JSONContent | null;
 		caption?: JSONContent | null;
 		captionMode?: ImageCaptionMode;
+		layout?: "default" | "wide" | "full" | "float-start" | "float-end";
 	};
 }
 
@@ -161,6 +163,19 @@ interface AccordionContentBlockItem {
 	};
 }
 
+interface MediaTextContentBlockItem {
+	id: Key;
+	type: "media_text";
+	position?: number;
+	content?: {
+		imageKey?: string;
+		imageUrl?: string;
+		alt?: string | null;
+		side?: "start" | "end";
+		content?: JSONContent;
+	};
+}
+
 export type ContentBlock =
 	| RichTextContentBlockItem
 	| ImageContentBlockItem
@@ -169,7 +184,8 @@ export type ContentBlock =
 	| DataContentBlockItem
 	| GalleryContentBlockItem
 	| HeroContentBlockItem
-	| AccordionContentBlockItem;
+	| AccordionContentBlockItem
+	| MediaTextContentBlockItem;
 
 interface UnifiedContentBlockItem {
 	id: Key;
@@ -421,6 +437,7 @@ function ContentBlockItem({
 		gallery: t("Gallery"),
 		hero: t("Hero"),
 		image: t("Image"),
+		media_text: t("Media with text"),
 		rich_text: t("Rich text"),
 		unified_content: t("Content"),
 	};
@@ -433,6 +450,7 @@ function ContentBlockItem({
 		gallery: <Squares2X2Icon className="block-4 inline-4 shrink-0" />,
 		hero: <RectangleGroupIcon className="block-4 inline-4 shrink-0" />,
 		image: <PhotoIcon className="block-4 inline-4 shrink-0" />,
+		media_text: <ViewColumnsIcon className="block-4 inline-4 shrink-0" />,
 		rich_text: <PencilSquareIcon className="block-4 inline-4 shrink-0" />,
 		unified_content: <PencilSquareIcon className="block-4 inline-4 shrink-0" />,
 	};
@@ -592,6 +610,12 @@ function ContentBlockPanel({
 		case "image": {
 			return (
 				<ImageContentBlockPanel initialAssets={initialAssets} item={item} onChange={onChange} />
+			);
+		}
+
+		case "media_text": {
+			return (
+				<MediaTextContentBlockPanel initialAssets={initialAssets} item={item} onChange={onChange} />
 			);
 		}
 
@@ -1064,6 +1088,7 @@ function ImageContentBlockPanel({
 	const imageKey = item.content?.imageKey;
 	const imageUrl = item.content?.imageUrl;
 	const caption = item.content?.caption;
+	const layout = item.content?.layout ?? "default";
 	const captionMode =
 		item.content?.captionMode ?? (item.content?.caption != null ? "override" : "inherit");
 	const { caption: resolvedCaption } = resolveImageCaption({
@@ -1100,6 +1125,27 @@ function ImageContentBlockPanel({
 				{imageKey != null && (
 					<input name="imageContentBlock.imageKey" type="hidden" value={imageKey} />
 				)}
+			</div>
+			<div className="flex flex-col gap-y-1">
+				<span className={labelStyles()}>{t("Layout")}</span>
+				<ToggleGroup
+					aria-label={t("Layout")}
+					disallowEmptySelection={true}
+					onSelectionChange={(keys) => {
+						const nextLayout = [...keys][0] as typeof layout | undefined;
+						if (nextLayout != null) {
+							onChange({ ...item.content, layout: nextLayout });
+						}
+					}}
+					selectedKeys={[layout]}
+					size="sm"
+				>
+					<ToggleGroupItem id="default">{t("Default")}</ToggleGroupItem>
+					<ToggleGroupItem id="wide">{t("Wide")}</ToggleGroupItem>
+					<ToggleGroupItem id="full">{t("Full width")}</ToggleGroupItem>
+					<ToggleGroupItem id="float-start">{t("Float left")}</ToggleGroupItem>
+					<ToggleGroupItem id="float-end">{t("Float right")}</ToggleGroupItem>
+				</ToggleGroup>
 			</div>
 			<div className="flex flex-col gap-y-1">
 				<span className={labelStyles()}>{t("Caption behavior")}</span>
@@ -1258,6 +1304,78 @@ function HeroContentBlockPanel({
 	);
 }
 
+interface MediaTextContentBlockPanelProps {
+	initialAssets?: Array<MediaLibraryAsset>;
+	item: MediaTextContentBlockItem;
+	onChange: (content: NonNullable<MediaTextContentBlockItem["content"]>) => void;
+}
+
+function MediaTextContentBlockPanel({
+	initialAssets,
+	item,
+	onChange,
+}: Readonly<MediaTextContentBlockPanelProps>): ReactNode {
+	const t = useExtracted();
+
+	const imageKey = item.content?.imageKey;
+	const imageUrl = item.content?.imageUrl;
+	const side = item.content?.side ?? "start";
+
+	return (
+		<div className="flex flex-col gap-y-4">
+			<div className="flex items-start gap-x-4">
+				{imageUrl != null && (
+					<img
+						alt={item.content?.alt ?? ""}
+						className="block-24 inline-auto max-inline-full rounded-lg object-cover shrink-0"
+						src={imageUrl}
+					/>
+				)}
+				<MediaLibraryDialog
+					defaultPrefix="images"
+					initialAssets={initialAssets ?? []}
+					onSelect={(key, url, asset) => {
+						onChange({ ...item.content, imageKey: key, imageUrl: url, alt: asset?.alt ?? null });
+					}}
+					prefixes={["avatars", "images", "logos"]}
+				/>
+				{imageKey != null && (
+					<input name="mediaTextContentBlock.imageKey" type="hidden" value={imageKey} />
+				)}
+			</div>
+			<div className="flex flex-col gap-y-1">
+				<span className={labelStyles()}>{t("Image placement")}</span>
+				<ToggleGroup
+					aria-label={t("Image placement")}
+					disallowEmptySelection={true}
+					onSelectionChange={(keys) => {
+						const nextSide = [...keys][0] as "start" | "end" | undefined;
+						if (nextSide != null) {
+							onChange({ ...item.content, side: nextSide });
+						}
+					}}
+					selectedKeys={[side]}
+					size="sm"
+				>
+					<ToggleGroupItem id="start">{t("Left")}</ToggleGroupItem>
+					<ToggleGroupItem id="end">{t("Right")}</ToggleGroupItem>
+				</ToggleGroup>
+			</div>
+			<div className="flex flex-col gap-y-1">
+				<Label>{t("Text")}</Label>
+				<RichTextEditor
+					aria-label={t("Text")}
+					className="inline-full"
+					content={item.content?.content}
+					onChange={(content: JSONContent) => {
+						onChange({ ...item.content, content });
+					}}
+				/>
+			</div>
+		</div>
+	);
+}
+
 interface AccordionContentBlockPanelProps {
 	initialAssets?: Array<MediaLibraryAsset>;
 	item: AccordionContentBlockItem;
@@ -1367,6 +1485,7 @@ const MENU_BLOCK_TYPES: Array<{
 	{ type: "data", icon: <Square3Stack3DIcon /> },
 	{ type: "hero", icon: <RectangleGroupIcon /> },
 	{ type: "accordion", icon: <ListBulletIcon /> },
+	{ type: "media_text", icon: <ViewColumnsIcon /> },
 ];
 
 export function ContentBlockMenu({ onAdd }: Readonly<ContentBlockMenuProps>): ReactNode {
@@ -1380,6 +1499,7 @@ export function ContentBlockMenu({ onAdd }: Readonly<ContentBlockMenuProps>): Re
 		gallery: t("Gallery"),
 		hero: t("Hero"),
 		image: t("Image"),
+		media_text: t("Media with text"),
 		rich_text: t("Rich text"),
 		unified_content: t("Content"),
 	};

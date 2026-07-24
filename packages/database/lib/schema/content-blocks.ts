@@ -16,6 +16,7 @@ export const contentBlockTypesEnum = [
 	"gallery",
 	"hero",
 	"image",
+	"media_text",
 	"rich_text",
 ] as const;
 
@@ -197,6 +198,19 @@ export const GalleryContentBlockItemUpdateSchema = createUpdateSchema(galleryCon
 
 export const imageCaptionModesEnum = ["hidden", "inherit", "override"] as const;
 
+/**
+ * How an `image` block sits in the content column. A deliberately closed vocabulary — not free-form
+ * width/alignment — so authors pick a named layout rather than arbitrary geometry:
+ *
+ * - `default`: centred, content-column width (the historical behaviour, and the column default);
+ * - `wide`/`full`: centred but broken out wider than the text column / to the viewport edge;
+ * - `float-start`/`float-end`: pulled to the inline-start/-end at a constrained width, with the
+ *   following text wrapping around it (what WordPress `alignleft`/`alignright` expressed). This is
+ *   presentational float; for an image _semantically bound_ to a passage of text, use `media_text`
+ *   instead.
+ */
+export const imageLayoutEnum = ["default", "wide", "full", "float-start", "float-end"] as const;
+
 export const imageContentBlocks = p.snakeCase.table(
 	"content_blocks_type_image",
 	{
@@ -213,6 +227,7 @@ export const imageContentBlocks = p.snakeCase.table(
 			.text("caption_mode", { enum: imageCaptionModesEnum })
 			.notNull()
 			.default("inherit"),
+		layout: p.text("layout", { enum: imageLayoutEnum }).notNull().default("default"),
 		...f.timestamps(),
 	},
 	(t) => [
@@ -220,6 +235,7 @@ export const imageContentBlocks = p.snakeCase.table(
 			"content_blocks_type_image_caption_mode_enum_check",
 			inArray(t.captionMode, imageCaptionModesEnum),
 		),
+		p.check("content_blocks_type_image_layout_enum_check", inArray(t.layout, imageLayoutEnum)),
 	],
 );
 
@@ -229,6 +245,43 @@ export type ImageContentBlockInput = typeof imageContentBlocks.$inferInsert;
 export const ImageContentBlockSelectSchema = createSelectSchema(imageContentBlocks);
 export const ImageContentBlockInsertSchema = createInsertSchema(imageContentBlocks);
 export const ImageContentBlockUpdateSchema = createUpdateSchema(imageContentBlocks);
+
+export const mediaTextSideEnum = ["start", "end"] as const;
+
+/**
+ * A small image _semantically bound_ to a passage of text — a working-group logo next to its blurb,
+ * or a person's portrait next to their bio — kept together as one block so the pairing travels with
+ * the content. Deliberately narrow: one fixed image size, and only inline-`start`/-`end` placement,
+ * so authors can't reach for arbitrary free-form layout. Hand-authored, not a migration target:
+ * WordPress `alignleft`/`alignright` floats are presentational and migrate to an `image` block's
+ * `float-start`/`float-end` layout instead (see `imageLayoutEnum`).
+ */
+export const mediaTextContentBlocks = p.snakeCase.table(
+	"content_blocks_type_media_text",
+	{
+		id: p
+			.uuid("id")
+			.primaryKey()
+			.references(() => contentBlocks.id, { onDelete: "cascade" }),
+		imageId: p
+			.uuid("image_id")
+			.notNull()
+			.references(() => assets.id),
+		side: p.text("side", { enum: mediaTextSideEnum }).notNull().default("start"),
+		content: p.jsonb("content").$type<JSONContent>().notNull(),
+		...f.timestamps(),
+	},
+	(t) => [
+		p.check("content_blocks_type_media_text_side_enum_check", inArray(t.side, mediaTextSideEnum)),
+	],
+);
+
+export type MediaTextContentBlock = typeof mediaTextContentBlocks.$inferSelect;
+export type MediaTextContentBlockInput = typeof mediaTextContentBlocks.$inferInsert;
+
+export const MediaTextContentBlockSelectSchema = createSelectSchema(mediaTextContentBlocks);
+export const MediaTextContentBlockInsertSchema = createInsertSchema(mediaTextContentBlocks);
+export const MediaTextContentBlockUpdateSchema = createUpdateSchema(mediaTextContentBlocks);
 
 export const heroContentBlocks = p.snakeCase.table("content_blocks_type_hero", {
 	id: p
