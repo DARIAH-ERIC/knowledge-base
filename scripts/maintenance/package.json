@@ -10,6 +10,7 @@
 		"data:backfill:image-alignment": "tsx ./scripts/backfill-image-alignment.ts",
 		"data:backfill:institution-locations": "tsx ./scripts/backfill-institution-locations.ts",
 		"data:backfill:institution-rors": "tsx ./scripts/backfill-institution-rors.ts",
+		"data:backfill:media-text-from-wordpress": "tsx ./scripts/backfill-media-text-from-wordpress.ts",
 		"data:backfill:sshoc-actor-ids": "tsx ./scripts/backfill-sshoc-actor-ids.ts",
 		"data:clean:empty-content-blocks": "tsx ./scripts/clean-empty-content-blocks.ts",
 		"data:clean:richtext": "tsx ./scripts/clean-richtext.ts",
