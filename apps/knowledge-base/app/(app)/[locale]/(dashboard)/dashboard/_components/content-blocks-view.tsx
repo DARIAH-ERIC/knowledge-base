@@ -254,6 +254,38 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			);
 		}
 
+		case "media_text": {
+			const imageUrl = contentBlock.content?.imageUrl;
+			const alt = contentBlock.content?.alt;
+			const side = contentBlock.content?.side ?? "left";
+			const content = contentBlock.content?.content;
+
+			if (imageUrl == null || !imageUrl || content == null) {
+				return null;
+			}
+
+			return (
+				<div>
+					<figure
+						className={
+							side === "right"
+								? "mbe-2 ms-4 float-end block-36 inline-36"
+								: "mbe-2 me-4 float-start block-36 inline-36"
+						}
+					>
+						<img
+							alt={alt ?? ""}
+							className="block-full inline-full rounded-lg object-cover"
+							src={imageUrl}
+						/>
+					</figure>
+					<div className="richtext richtext-sm">
+						{renderToReactElement({ content, extensions: richTextExtensions })}
+					</div>
+				</div>
+			);
+		}
+
 		case "rich_text": {
 			if (!contentBlock.content) {
 				return null;

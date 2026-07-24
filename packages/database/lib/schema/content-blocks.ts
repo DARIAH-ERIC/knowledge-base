@@ -16,6 +16,7 @@ export const contentBlockTypesEnum = [
 	"gallery",
 	"hero",
 	"image",
+	"media_text",
 	"rich_text",
 ] as const;
 
@@ -229,6 +230,40 @@ export type ImageContentBlockInput = typeof imageContentBlocks.$inferInsert;
 export const ImageContentBlockSelectSchema = createSelectSchema(imageContentBlocks);
 export const ImageContentBlockInsertSchema = createInsertSchema(imageContentBlocks);
 export const ImageContentBlockUpdateSchema = createUpdateSchema(imageContentBlocks);
+
+export const mediaTextSideEnum = ["left", "right"] as const;
+
+/**
+ * A small image with descriptive text wrapping around it — e.g. a working-group logo next to its
+ * blurb, or a person's portrait next to their bio. Deliberately narrow: one fixed image size, and
+ * only `left`/`right` placement, so authors can't reach for arbitrary free-form layout.
+ */
+export const mediaTextContentBlocks = p.snakeCase.table(
+	"content_blocks_type_media_text",
+	{
+		id: p
+			.uuid("id")
+			.primaryKey()
+			.references(() => contentBlocks.id, { onDelete: "cascade" }),
+		imageId: p
+			.uuid("image_id")
+			.notNull()
+			.references(() => assets.id),
+		side: p.text("side", { enum: mediaTextSideEnum }).notNull().default("left"),
+		content: p.jsonb("content").$type<JSONContent>().notNull(),
+		...f.timestamps(),
+	},
+	(t) => [
+		p.check("content_blocks_type_media_text_side_enum_check", inArray(t.side, mediaTextSideEnum)),
+	],
+);
+
+export type MediaTextContentBlock = typeof mediaTextContentBlocks.$inferSelect;
+export type MediaTextContentBlockInput = typeof mediaTextContentBlocks.$inferInsert;
+
+export const MediaTextContentBlockSelectSchema = createSelectSchema(mediaTextContentBlocks);
+export const MediaTextContentBlockInsertSchema = createInsertSchema(mediaTextContentBlocks);
+export const MediaTextContentBlockUpdateSchema = createUpdateSchema(mediaTextContentBlocks);
 
 export const heroContentBlocks = p.snakeCase.table("content_blocks_type_hero", {
 	id: p

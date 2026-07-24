@@ -2090,6 +2090,9 @@ importers:
       '@dariah-eric/storage':
         specifier: workspace:^
         version: link:../../packages/storage
+      '@sindresorhus/slugify':
+        specifier: 'catalog:'
+        version: 3.0.0
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.2

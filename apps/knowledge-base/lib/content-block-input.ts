@@ -108,6 +108,20 @@ export const ContentBlockInputSchema = v.union([
 	}),
 	v.object({
 		id: v.string(),
+		type: v.literal("media_text"),
+		position: v.optional(v.number()),
+		content: v.optional(
+			v.object({
+				imageKey: v.optional(v.string()),
+				imageUrl: v.optional(v.string()),
+				alt: v.optional(v.nullable(v.string())),
+				side: v.optional(v.picklist(["left", "right"] as const)),
+				content: v.optional(v.custom<JSONContent>(() => true)),
+			}),
+		),
+	}),
+	v.object({
+		id: v.string(),
 		type: v.literal("accordion"),
 		position: v.optional(v.number()),
 		content: v.optional(

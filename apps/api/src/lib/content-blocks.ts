@@ -66,6 +66,17 @@ export const AccordionContentBlockSchema = v.object({
 	items: v.array(v.object({ title: v.string(), content: v.optional(v.any()) })),
 });
 
+export const MediaTextContentBlockSchema = v.object({
+	type: v.literal("media_text"),
+	image: v.object({
+		url: v.string(),
+		alt: v.nullable(v.string()),
+		license: v.nullable(LicenseSchema),
+	}),
+	side: v.picklist(schema.mediaTextSideEnum),
+	content: v.any(),
+});
+
 export const ContentBlockSchema = v.union([
 	RichTextContentBlockSchema,
 	CalloutContentBlockSchema,
@@ -74,12 +85,15 @@ export const ContentBlockSchema = v.union([
 	DataContentBlockSchema,
 	HeroContentBlockSchema,
 	AccordionContentBlockSchema,
+	MediaTextContentBlockSchema,
 ]);
 
 export type ContentBlock = v.InferOutput<typeof ContentBlockSchema>;
 
 const heroAssets = alias(schema.assets, "hero_assets");
 const heroLicenses = alias(schema.licenses, "hero_licenses");
+const mediaTextAssets = alias(schema.assets, "media_text_assets");
+const mediaTextLicenses = alias(schema.licenses, "media_text_licenses");
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getContentBlocks(db: Database | Transaction, entityId: string) {
@@ -113,6 +127,12 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			heroLicenseUrl: heroLicenses.url,
 			heroCtas: schema.heroContentBlocks.ctas,
 			accordionItems: schema.accordionContentBlocks.items,
+			mediaTextSide: schema.mediaTextContentBlocks.side,
+			mediaTextContent: schema.mediaTextContentBlocks.content,
+			mediaTextImageKey: mediaTextAssets.key,
+			mediaTextImageAlt: mediaTextAssets.alt,
+			mediaTextLicenseName: mediaTextLicenses.name,
+			mediaTextLicenseUrl: mediaTextLicenses.url,
 		})
 		.from(schema.fields)
 		.innerJoin(
@@ -148,6 +168,12 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			schema.accordionContentBlocks,
 			eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
 		)
+		.leftJoin(
+			schema.mediaTextContentBlocks,
+			eq(schema.mediaTextContentBlocks.id, schema.contentBlocks.id),
+		)
+		.leftJoin(mediaTextAssets, eq(mediaTextAssets.id, schema.mediaTextContentBlocks.imageId))
+		.leftJoin(mediaTextLicenses, eq(mediaTextLicenses.id, mediaTextAssets.licenseId))
 		.where(eq(schema.fields.entityVersionId, entityId))
 		.orderBy(schema.contentBlocks.position);
 
@@ -204,6 +230,12 @@ function normalizeRow(row: {
 	heroLicenseUrl: string | null;
 	heroCtas: unknown;
 	accordionItems: unknown;
+	mediaTextSide: (typeof schema.mediaTextSideEnum)[number] | null;
+	mediaTextContent: JSONContent | null;
+	mediaTextImageKey: string | null;
+	mediaTextImageAlt: string | null;
+	mediaTextLicenseName: string | null;
+	mediaTextLicenseUrl: string | null;
 }): ContentBlock {
 	switch (row.blockType) {
 		case "callout": {
@@ -281,6 +313,26 @@ function normalizeRow(row: {
 			return {
 				type: "accordion",
 				items: (row.accordionItems as Array<{ title: string; content?: unknown }> | null) ?? [],
+			};
+		}
+		case "media_text": {
+			const assetImage = generateImageUrl(
+				toImageAsset({
+					key: row.mediaTextImageKey!,
+					alt: row.mediaTextImageAlt,
+					caption: null,
+					licenseName: row.mediaTextLicenseName,
+					licenseUrl: row.mediaTextLicenseUrl,
+				}),
+				imageWidth.avatar,
+			);
+			const { caption: _caption, ...image } = assetImage;
+
+			return {
+				type: "media_text",
+				image,
+				side: row.mediaTextSide!,
+				content: row.mediaTextContent,
 			};
 		}
 		default: {

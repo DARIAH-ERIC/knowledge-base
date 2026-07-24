@@ -241,6 +241,36 @@ export async function upsertTypedContentBlock(
 			}
 			break;
 		}
+
+		case "media_text": {
+			const imageKey = block.content?.imageKey;
+			if (imageKey == null) {
+				break;
+			}
+
+			const imageId = await getAssetIdByKey(tx, imageKey);
+			if (imageId == null) {
+				break;
+			}
+
+			const side = block.content?.side ?? "left";
+			const content = block.content?.content ?? { type: "doc", content: [{ type: "paragraph" }] };
+
+			if (isNew) {
+				await tx.insert(schema.mediaTextContentBlocks).values({
+					id: blockId,
+					imageId,
+					side,
+					content,
+				});
+			} else {
+				await tx
+					.update(schema.mediaTextContentBlocks)
+					.set({ imageId, side, content })
+					.where(eq(schema.mediaTextContentBlocks.id, blockId));
+			}
+			break;
+		}
 	}
 }
 
@@ -266,6 +296,7 @@ export async function getEntityContentBlocks(
 		galleryContentBlockRows,
 		heroContentBlockRows,
 		accordionContentBlockRows,
+		mediaTextContentBlockRows,
 	] = await Promise.all([
 		db
 			.select({
@@ -416,6 +447,28 @@ export async function getEntityContentBlocks(
 			)
 			.where(contentBlocksWhere)
 			.orderBy(schema.contentBlocks.position),
+		db
+			.select({
+				id: schema.mediaTextContentBlocks.id,
+				position: schema.contentBlocks.position,
+				imageKey: schema.assets.key,
+				alt: schema.assets.alt,
+				side: schema.mediaTextContentBlocks.side,
+				content: schema.mediaTextContentBlocks.content,
+			})
+			.from(schema.mediaTextContentBlocks)
+			.innerJoin(
+				schema.contentBlocks,
+				eq(schema.mediaTextContentBlocks.id, schema.contentBlocks.id),
+			)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.innerJoin(schema.assets, eq(schema.mediaTextContentBlocks.imageId, schema.assets.id))
+			.where(contentBlocksWhere)
+			.orderBy(schema.contentBlocks.position),
 	]);
 
 	const imageContentBlocks = imageContentBlockRows.map((row) => {
@@ -540,6 +593,26 @@ export async function getEntityContentBlocks(
 		};
 	});
 
+	const mediaTextContentBlocks = mediaTextContentBlockRows.map((row) => {
+		const { url: imageUrl } = images.generateSignedImageUrl({
+			key: row.imageKey,
+			options: imageGridOptions,
+		});
+
+		return {
+			id: row.id,
+			position: row.position,
+			type: "media_text" as const,
+			content: {
+				imageKey: row.imageKey,
+				imageUrl,
+				alt: row.alt,
+				side: row.side,
+				content: row.content,
+			},
+		};
+	});
+
 	return [
 		...calloutContentBlocks,
 		...richTextContentBlocks.map((row) => {
@@ -551,6 +624,7 @@ export async function getEntityContentBlocks(
 		...galleryContentBlocks,
 		...heroContentBlocks,
 		...accordionContentBlocks,
+		...mediaTextContentBlocks,
 	].toSorted((a, b) => (a.position ?? 0) - (b.position ?? 0));
 }
 
