@@ -20,6 +20,7 @@ import type { PersonRelation } from "@/lib/data/person-relations";
 import type { UnitProjectPartnership } from "@/lib/data/project-partners";
 import type { UnitRelation } from "@/lib/data/unit-relations";
 import { getEntityDetailHref, getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
+import { getRorUrl } from "@/lib/external-identifier-url";
 import { formatRoleType } from "@/lib/format-role-type";
 
 interface InstitutionDetailsProps {
@@ -78,6 +79,8 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 	const t = useExtracted();
 	const format = useFormatter();
 
+	const rorUrl = getRorUrl(institution.ror);
+
 	return (
 		<Fragment>
 			<div className="flex items-center justify-between">
@@ -108,7 +111,15 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 				<DescriptionDetails>{institution.acronym}</DescriptionDetails>
 
 				<DescriptionTerm>{t("ROR")}</DescriptionTerm>
-				<DescriptionDetails>{institution.ror}</DescriptionDetails>
+				<DescriptionDetails>
+					{rorUrl != null ? (
+						<a className="underline" href={rorUrl} rel="noreferrer" target="_blank">
+							{institution.ror}
+						</a>
+					) : (
+						institution.ror
+					)}
+				</DescriptionDetails>
 
 				<DescriptionTerm>{t("SSHOC actor ID")}</DescriptionTerm>
 				<DescriptionDetails>{institution.sshocMarketplaceActorId}</DescriptionDetails>

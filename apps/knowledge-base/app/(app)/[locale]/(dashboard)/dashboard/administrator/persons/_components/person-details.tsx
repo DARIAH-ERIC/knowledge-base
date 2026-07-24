@@ -18,6 +18,7 @@ import type { PersonArticle } from "@/lib/data/article-contributors";
 import type { PersonContribution } from "@/lib/data/contributions";
 import { getEntityDetailHref, getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
 import { getEntityTypeLabel } from "@/lib/entity-type-label";
+import { getOrcidUrl } from "@/lib/external-identifier-url";
 import { formatRoleType } from "@/lib/format-role-type";
 
 interface PersonDetailsProps {
@@ -50,6 +51,8 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 	} = props;
 
 	const t = useExtracted();
+
+	const orcidUrl = getOrcidUrl(person.orcid);
 
 	return (
 		<Fragment>
@@ -84,7 +87,15 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 				<DescriptionDetails>{person.email}</DescriptionDetails>
 
 				<DescriptionTerm>{t("ORCID")}</DescriptionTerm>
-				<DescriptionDetails>{person.orcid}</DescriptionDetails>
+				<DescriptionDetails>
+					{orcidUrl != null ? (
+						<a className="underline" href={orcidUrl} rel="noreferrer" target="_blank">
+							{person.orcid}
+						</a>
+					) : (
+						person.orcid
+					)}
+				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
