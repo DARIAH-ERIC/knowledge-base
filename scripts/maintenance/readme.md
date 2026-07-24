@@ -162,3 +162,20 @@ pnpm --filter @dariah-eric/maintenance run data:clean:unused-social-media -- --a
 
 The unused set is recomputed at deletion time. Only the database is touched (needs the `DATABASE_*`
 env vars).
+
+### `data:normalise:identifier-urls`
+
+Rewrites `persons.orcid` and `organisational_units.ror` to canonical urls (`https://orcid.org/…`,
+`https://ror.org/…`). Both fields accept freetext, so an editor may enter a bare id or a url — the
+details pages render either form, and this makes the stored value uniform. Writes a TSV report to
+`.cache/identifier-urls.tsv`.
+
+```bash
+pnpm --filter @dariah-eric/maintenance run data:normalise:identifier-urls            # dry run (report only)
+pnpm --filter @dariah-eric/maintenance run data:normalise:identifier-urls -- --apply # write canonical urls
+```
+
+A value that holds no recognisable ORCID or ROR id is left untouched and listed in the report with
+`action=unrecognised` for a human to look at — the script never guesses. Normalisation is idempotent
+and runs per version row, so a document's draft and published copies are both corrected. Only the
+database is touched (needs the `DATABASE_*` env vars).

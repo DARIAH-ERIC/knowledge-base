@@ -12,6 +12,7 @@
 		"data:clean:richtext": "tsx ./scripts/clean-richtext.ts",
 		"data:clean:unused-assets": "tsx ./scripts/clean-unused-assets.ts",
 		"data:clean:unused-social-media": "tsx ./scripts/clean-unused-social-media.ts",
+		"data:normalise:identifier-urls": "tsx ./scripts/normalise-identifier-urls.ts",
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",
 		"lint:check": "oxlint --report-unused-disable-directives --type-aware --type-check",
