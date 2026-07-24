@@ -45,6 +45,7 @@ export const ImageContentBlockSchema = v.object({
 	}),
 	caption: v.nullable(v.any()),
 	captionSource: v.nullable(v.picklist(["asset", "block"])),
+	layout: v.picklist(schema.imageLayoutEnum),
 });
 
 export const DataContentBlockSchema = v.object({
@@ -111,6 +112,7 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			embedCaption: schema.embedContentBlocks.caption,
 			imageCaption: schema.imageContentBlocks.caption,
 			imageCaptionMode: schema.imageContentBlocks.captionMode,
+			imageLayout: schema.imageContentBlocks.layout,
 			imageKey: schema.assets.key,
 			imageAlt: schema.assets.alt,
 			imageAssetCaption: schema.assets.caption,
@@ -214,6 +216,7 @@ function normalizeRow(row: {
 	embedCaption: JSONContent | null;
 	imageCaption: JSONContent | null;
 	imageCaptionMode: ImageCaptionMode | null;
+	imageLayout: (typeof schema.imageLayoutEnum)[number] | null;
 	imageKey: string | null;
 	imageAlt: string | null;
 	imageAssetCaption: JSONContent | null;
@@ -258,6 +261,10 @@ function normalizeRow(row: {
 			};
 		}
 		case "image": {
+			const layout = row.imageLayout ?? "default";
+			// Floated images render at a constrained width; centred layouts (default/wide/full) keep
+			// the full featured width so a breakout image stays sharp.
+			const isFloated = layout === "float-start" || layout === "float-end";
 			const assetImage = generateImageUrl(
 				toImageAsset({
 					key: row.imageKey!,
@@ -266,7 +273,7 @@ function normalizeRow(row: {
 					licenseName: row.imageLicenseName,
 					licenseUrl: row.imageLicenseUrl,
 				}),
-				imageWidth.featured,
+				isFloated ? imageWidth.preview : imageWidth.featured,
 			);
 			const { caption: _assetCaption, ...image } = assetImage;
 			const captionMode =
@@ -282,6 +289,7 @@ function normalizeRow(row: {
 				image,
 				caption,
 				captionSource,
+				layout,
 			};
 		}
 		case "data": {

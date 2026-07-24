@@ -91,6 +91,7 @@ interface ImageContentBlockItem {
 		assetCaption?: JSONContent | null;
 		caption?: JSONContent | null;
 		captionMode?: ImageCaptionMode;
+		layout?: "default" | "wide" | "full" | "float-start" | "float-end";
 	};
 }
 
@@ -170,7 +171,7 @@ interface MediaTextContentBlockItem {
 		imageKey?: string;
 		imageUrl?: string;
 		alt?: string | null;
-		side?: "left" | "right";
+		side?: "start" | "end";
 		content?: JSONContent;
 	};
 }
@@ -1087,6 +1088,7 @@ function ImageContentBlockPanel({
 	const imageKey = item.content?.imageKey;
 	const imageUrl = item.content?.imageUrl;
 	const caption = item.content?.caption;
+	const layout = item.content?.layout ?? "default";
 	const captionMode =
 		item.content?.captionMode ?? (item.content?.caption != null ? "override" : "inherit");
 	const { caption: resolvedCaption } = resolveImageCaption({
@@ -1123,6 +1125,27 @@ function ImageContentBlockPanel({
 				{imageKey != null && (
 					<input name="imageContentBlock.imageKey" type="hidden" value={imageKey} />
 				)}
+			</div>
+			<div className="flex flex-col gap-y-1">
+				<span className={labelStyles()}>{t("Layout")}</span>
+				<ToggleGroup
+					aria-label={t("Layout")}
+					disallowEmptySelection={true}
+					onSelectionChange={(keys) => {
+						const nextLayout = [...keys][0] as typeof layout | undefined;
+						if (nextLayout != null) {
+							onChange({ ...item.content, layout: nextLayout });
+						}
+					}}
+					selectedKeys={[layout]}
+					size="sm"
+				>
+					<ToggleGroupItem id="default">{t("Default")}</ToggleGroupItem>
+					<ToggleGroupItem id="wide">{t("Wide")}</ToggleGroupItem>
+					<ToggleGroupItem id="full">{t("Full width")}</ToggleGroupItem>
+					<ToggleGroupItem id="float-start">{t("Float left")}</ToggleGroupItem>
+					<ToggleGroupItem id="float-end">{t("Float right")}</ToggleGroupItem>
+				</ToggleGroup>
 			</div>
 			<div className="flex flex-col gap-y-1">
 				<span className={labelStyles()}>{t("Caption behavior")}</span>
@@ -1296,7 +1319,7 @@ function MediaTextContentBlockPanel({
 
 	const imageKey = item.content?.imageKey;
 	const imageUrl = item.content?.imageUrl;
-	const side = item.content?.side ?? "left";
+	const side = item.content?.side ?? "start";
 
 	return (
 		<div className="flex flex-col gap-y-4">
@@ -1326,7 +1349,7 @@ function MediaTextContentBlockPanel({
 					aria-label={t("Image placement")}
 					disallowEmptySelection={true}
 					onSelectionChange={(keys) => {
-						const nextSide = [...keys][0] as "left" | "right" | undefined;
+						const nextSide = [...keys][0] as "start" | "end" | undefined;
 						if (nextSide != null) {
 							onChange({ ...item.content, side: nextSide });
 						}
@@ -1334,8 +1357,8 @@ function MediaTextContentBlockPanel({
 					selectedKeys={[side]}
 					size="sm"
 				>
-					<ToggleGroupItem id="left">{t("Left")}</ToggleGroupItem>
-					<ToggleGroupItem id="right">{t("Right")}</ToggleGroupItem>
+					<ToggleGroupItem id="start">{t("Left")}</ToggleGroupItem>
+					<ToggleGroupItem id="end">{t("Right")}</ToggleGroupItem>
 				</ToggleGroup>
 			</div>
 			<div className="flex flex-col gap-y-1">

@@ -18,10 +18,10 @@ ON CONFLICT ("type") DO NOTHING;
 CREATE TABLE IF NOT EXISTS "content_blocks_type_media_text" (
 	"id" uuid PRIMARY KEY NOT NULL REFERENCES "content_blocks"("id") ON DELETE CASCADE,
 	"image_id" uuid NOT NULL REFERENCES "assets"("id"),
-	"side" text DEFAULT 'left' NOT NULL,
+	"side" text DEFAULT 'start' NOT NULL,
 	"content" jsonb NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "content_blocks_type_media_text_side_enum_check"
-		CHECK ("side" IN ('left', 'right'))
+		CHECK ("side" IN ('start', 'end'))
 );

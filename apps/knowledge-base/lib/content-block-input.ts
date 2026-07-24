@@ -22,6 +22,9 @@ export const ContentBlockInputSchema = v.union([
 				assetCaption: v.optional(v.nullable(v.custom<JSONContent>(() => true))),
 				caption: v.optional(v.nullable(v.custom<JSONContent>(() => true))),
 				captionMode: v.optional(ImageCaptionModeSchema),
+				layout: v.optional(
+					v.picklist(["default", "wide", "full", "float-start", "float-end"] as const),
+				),
 			}),
 		),
 	}),
@@ -115,7 +118,7 @@ export const ContentBlockInputSchema = v.union([
 				imageKey: v.optional(v.string()),
 				imageUrl: v.optional(v.string()),
 				alt: v.optional(v.nullable(v.string())),
-				side: v.optional(v.picklist(["left", "right"] as const)),
+				side: v.optional(v.picklist(["start", "end"] as const)),
 				content: v.optional(v.custom<JSONContent>(() => true)),
 			}),
 		),

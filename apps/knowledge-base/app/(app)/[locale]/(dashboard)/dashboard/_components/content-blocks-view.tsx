@@ -35,12 +35,32 @@ interface ContentBlocksViewProps {
 	contentBlocks: Array<ContentBlock>;
 }
 
-export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewProps>): ReactNode {
+function isFloatedImage(contentBlock: ContentBlock | undefined): boolean {
 	return (
-		<div className="flex flex-col gap-y-8">
-			{contentBlocks.map((contentBlock) => (
-				<ContentBlockView key={String(contentBlock.id)} contentBlock={contentBlock} />
-			))}
+		contentBlock?.type === "image" &&
+		(contentBlock.content?.layout === "float-start" || contentBlock.content?.layout === "float-end")
+	);
+}
+
+export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewProps>): ReactNode {
+	// Normal document flow (not a flex column) so a floated `image` block's float escapes into the
+	// following block and the text wraps around it. The immediately-following `rich_text` is allowed
+	// to wrap; every other block clears, so a float can never overlap a structural block below it.
+	return (
+		<div className="space-y-8">
+			{contentBlocks.map((contentBlock, index) => {
+				const wrapsPrecedingFloat =
+					contentBlock.type === "rich_text" && isFloatedImage(contentBlocks[index - 1]);
+
+				return (
+					<div
+						className={wrapsPrecedingFloat ? undefined : "clear-both"}
+						key={String(contentBlock.id)}
+					>
+						<ContentBlockView contentBlock={contentBlock} />
+					</div>
+				);
+			})}
 		</div>
 	);
 }
@@ -246,8 +266,20 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 				return null;
 			}
 
+			const layout = contentBlock.content?.layout ?? "default";
+			// `float-*` pulls a constrained image aside so the following block's text wraps (natural
+			// aspect ratio, so portrait images show in full); `wide`/`full` break out past the text
+			// column; `default` fills the column.
+			const figureClassName = {
+				"float-start": "float-start mie-4 mbe-2 inline-[min(18rem,45%)]",
+				"float-end": "float-end mis-4 mbe-2 inline-[min(18rem,45%)]",
+				wide: "mis-auto mie-auto inline-[min(56rem,92vw)]",
+				full: "inline-screen mis-[calc(50%-50vw)] mie-[calc(50%-50vw)]",
+				default: undefined,
+			}[layout];
+
 			return (
-				<figure>
+				<figure className={figureClassName}>
 					<img alt={contentBlock.content?.alt ?? ""} src={imageUrl} />
 					<CaptionFigcaption caption={caption} />
 				</figure>
@@ -257,7 +289,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 		case "media_text": {
 			const imageUrl = contentBlock.content?.imageUrl;
 			const alt = contentBlock.content?.alt;
-			const side = contentBlock.content?.side ?? "left";
+			const side = contentBlock.content?.side ?? "start";
 			const content = contentBlock.content?.content;
 
 			if (imageUrl == null || !imageUrl || content == null) {
@@ -265,10 +297,10 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			}
 
 			return (
-				<div>
+				<div className="flow-root">
 					<figure
 						className={
-							side === "right"
+							side === "end"
 								? "mbe-2 ms-4 float-end block-36 inline-36"
 								: "mbe-2 me-4 float-start block-36 inline-36"
 						}
