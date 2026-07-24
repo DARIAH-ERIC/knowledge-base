@@ -14,6 +14,7 @@ import { Fragment, type ReactNode } from "react";
 
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
+import { getSshocMarketplaceServiceUrl } from "@/lib/external-identifier-url";
 import { getServiceStatusLabel } from "@/lib/service-status-label";
 
 interface ServiceDetailsProps {
@@ -34,12 +35,18 @@ interface ServiceDetailsProps {
 		providerUnitDocumentIds: Array<string>;
 	};
 	selectedOrganisationalUnitItems: Array<{ id: string; name: string; type: string; slug: string }>;
+	sshocMarketplaceBaseUrl: string | null;
 }
 
 export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode {
-	const { service, selectedOrganisationalUnitItems } = props;
+	const { service, selectedOrganisationalUnitItems, sshocMarketplaceBaseUrl } = props;
 
 	const t = useExtracted();
+
+	const sshocMarketplaceUrl = getSshocMarketplaceServiceUrl(
+		service.sshocMarketplaceId,
+		sshocMarketplaceBaseUrl,
+	);
 
 	const owners = selectedOrganisationalUnitItems.filter((orgaUnit) =>
 		service.ownerUnitDocumentIds.includes(orgaUnit.id),
@@ -70,7 +77,15 @@ export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode 
 				<DescriptionDetails>{service.type.type}</DescriptionDetails>
 
 				<DescriptionTerm>{t("SSHOC Marketplace ID")}</DescriptionTerm>
-				<DescriptionDetails>{service.sshocMarketplaceId}</DescriptionDetails>
+				<DescriptionDetails>
+					{sshocMarketplaceUrl != null ? (
+						<a className="underline" href={sshocMarketplaceUrl} rel="noreferrer" target="_blank">
+							{service.sshocMarketplaceId}
+						</a>
+					) : (
+						service.sshocMarketplaceId
+					)}
+				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Comment")}</DescriptionTerm>
 				<DescriptionDetails>{service.comment}</DescriptionDetails>

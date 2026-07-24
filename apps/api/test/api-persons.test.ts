@@ -364,7 +364,7 @@ describe("persons", () => {
 						type: "spotlight_articles",
 						slug: spotlightArticle.entity.slug,
 						label: spotlightArticle.article.title,
-						href: `/spotlights/${spotlightArticle.entity.slug}`,
+						href: `/spotlight/${spotlightArticle.entity.slug}`,
 					},
 					publishedAt: spotlightArticle.article.publicationDate.toISOString(),
 					role: "author",

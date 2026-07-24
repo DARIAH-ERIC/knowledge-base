@@ -58,6 +58,49 @@ export function toRorUrl(rorId: string): string {
 	return `https://ror.org/${rorId}`;
 }
 
+/** A bare ROR id: a `0`, six crockford-base32 characters, then two check digits. */
+const rorIdPattern = /\b(0[a-hj-km-np-z0-9]{6}[0-9]{2})\b/i;
+
+/**
+ * The canonical `https://ror.org/…` url for a stored ROR value, or `null` when the value holds no
+ * recognisable ROR id. Accepts a bare id or any ror.org url (scheme, `www.`, trailing slash and
+ * query are all tolerated) and is idempotent on an already-canonical url. Used by the
+ * `data:normalise:identifier-urls` cleanup to rewrite freetext entries to a single form.
+ */
+export function canonicalRorUrl(value: string | null | undefined): string | null {
+	if (value == null) {
+		return null;
+	}
+
+	const rorId = rorIdPattern.exec(value)?.[1];
+	if (rorId == null) {
+		return null;
+	}
+
+	return `https://ror.org/${rorId.toLowerCase()}`;
+}
+
+/** A bare ORCID id: four groups of four digits, the last check digit optionally `X`. */
+const orcidIdPattern = /\b(\d{4}-\d{4}-\d{4}-\d{3}[\dx])\b/i;
+
+/**
+ * The canonical `https://orcid.org/…` url for a stored ORCID value, or `null` when the value holds
+ * no recognisable ORCID id. Accepts a bare id or any orcid.org url and is idempotent on an
+ * already-canonical url. The check digit is upper-cased to match the ORCID canonical form.
+ */
+export function canonicalOrcidUrl(value: string | null | undefined): string | null {
+	if (value == null) {
+		return null;
+	}
+
+	const orcidId = orcidIdPattern.exec(value)?.[1];
+	if (orcidId == null) {
+		return null;
+	}
+
+	return `https://orcid.org/${orcidId.toUpperCase()}`;
+}
+
 /**
  * Country units are stored by name and carry no ISO code, so a comparison against an external
  * register has to reconcile naming. Only the divergences that actually occur are listed; anything
