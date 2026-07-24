@@ -267,14 +267,15 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			}
 
 			const layout = contentBlock.content?.layout ?? "default";
-			// `float-*` pulls a constrained image aside so the following block's text wraps (natural
-			// aspect ratio, so portrait images show in full); `wide`/`full` break out past the text
-			// column; `default` fills the column.
+			// `float-*` only floats from `sm:` up (a constrained image pulled aside with the following
+			// block's text wrapping, natural aspect ratio so portrait images show in full, and gap on
+			// the text side); below that it spans the full column so text never wraps in a cramped
+			// column. `wide`/`full` break out past the text column; `default` fills the column.
 			const figureClassName = {
-				"float-start": "float-start mie-4 mbe-2 inline-[min(18rem,45%)]",
-				"float-end": "float-end mis-4 mbe-2 inline-[min(18rem,45%)]",
-				wide: "mis-auto mie-auto inline-[min(56rem,92vw)]",
-				full: "inline-screen mis-[calc(50%-50vw)] mie-[calc(50%-50vw)]",
+				"float-start": "mbe-4 sm:mbe-2 sm:me-6 sm:float-start sm:inline-[min(18rem,45%)]",
+				"float-end": "mbe-4 sm:mbe-2 sm:ms-6 sm:float-end sm:inline-[min(18rem,45%)]",
+				wide: "ms-auto me-auto inline-[min(56rem,92vw)]",
+				full: "inline-[100vw] ms-[calc(50%-50vw)] me-[calc(50%-50vw)]",
 				default: undefined,
 			}[layout];
 
