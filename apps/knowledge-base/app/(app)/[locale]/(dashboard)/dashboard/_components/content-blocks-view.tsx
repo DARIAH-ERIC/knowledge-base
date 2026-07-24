@@ -3,6 +3,7 @@
 "use client";
 
 import { resolveImageCaption } from "@dariah-eric/database/image-captions";
+import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
 import { Note } from "@dariah-eric/ui/note";
 import { isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
@@ -15,6 +16,29 @@ import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { getEmbedUrl } from "@/lib/embed-url";
 
 const richTextExtensions = createRichTextExtensions();
+
+/**
+ * The static renderer serialises each node via its extension `renderHTML`, which for the inline
+ * `buttonLink` node is a bare `<a data-button-link>` — indistinguishable from a normal link. Render
+ * it as the styled `ButtonLink` instead, mirroring the editor's read-only node view.
+ */
+function renderButtonLinkNode({
+	node,
+}: Readonly<{ node: { attrs?: Record<string, unknown> | null } }>): ReactNode {
+	const attrs = node.attrs ?? {};
+	const href = typeof attrs.href === "string" ? attrs.href : "#";
+	const label = typeof attrs.label === "string" ? attrs.label : "Button";
+	const intent =
+		attrs.variant === "secondary" || attrs.variant === "outline" ? attrs.variant : "primary";
+
+	return (
+		<ButtonLink href={href} intent={intent} size="sm">
+			{label}
+		</ButtonLink>
+	);
+}
+
+const richTextRenderOptions = { nodeMapping: { buttonLink: renderButtonLinkNode } };
 
 /** Renders a richtext caption inside a `figcaption`, or nothing when the caption is empty. */
 function CaptionFigcaption({
@@ -121,6 +145,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 									{renderToReactElement({
 										content: accordionItem.content,
 										extensions: richTextExtensions,
+										options: richTextRenderOptions,
 									})}
 								</div>
 							)}
@@ -313,7 +338,11 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 						/>
 					</figure>
 					<div className="richtext richtext-sm">
-						{renderToReactElement({ content, extensions: richTextExtensions })}
+						{renderToReactElement({
+							content,
+							extensions: richTextExtensions,
+							options: richTextRenderOptions,
+						})}
 					</div>
 				</div>
 			);
@@ -326,7 +355,11 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 
 			return (
 				<div className="richtext richtext-sm">
-					{renderToReactElement({ content: contentBlock.content, extensions: richTextExtensions })}
+					{renderToReactElement({
+						content: contentBlock.content,
+						extensions: richTextExtensions,
+						options: richTextRenderOptions,
+					})}
 				</div>
 			);
 		}
