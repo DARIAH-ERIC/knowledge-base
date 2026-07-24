@@ -2093,6 +2093,18 @@ importers:
       '@sindresorhus/slugify':
         specifier: 'catalog:'
         version: 3.0.0
+      '@tiptap/core':
+        specifier: 'catalog:'
+        version: 3.27.1(@tiptap/pm@3.27.1)
+      '@tiptap/extension-image':
+        specifier: 'catalog:'
+        version: 3.27.1(@tiptap/core@3.27.1(@tiptap/pm@3.27.1))
+      '@tiptap/html':
+        specifier: 'catalog:'
+        version: 3.27.1(@tiptap/core@3.27.1(@tiptap/pm@3.27.1))(@tiptap/pm@3.27.1)(happy-dom@20.9.0)
+      '@tiptap/starter-kit':
+        specifier: 'catalog:'
+        version: 3.27.1
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.2
