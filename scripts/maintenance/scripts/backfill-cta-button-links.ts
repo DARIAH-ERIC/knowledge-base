@@ -15,13 +15,15 @@ import { env } from "../config/env.config";
  * The migration (`@dariah-eric/migrate`) parses content with TipTap's `StarterKit`, whose `Link`
  * extension turned each `wp-block-button__link` anchor into an ordinary inline link at the right
  * place — so the CTA text, href, and position all survived; only the button _styling_ (the
- * `buttonLink` node, added later in #699) was lost. This finds those inline links (matched by the
- * href of a `wp-block-button` in the live source) and replaces them with a `buttonLink` node.
+ * `buttonLink` node, added later in #699) was lost. This finds those inline links and replaces them
+ * with a `buttonLink` node, matching on both `href` **and** label text: a CTA button and an
+ * ordinary link (e.g. a title linking to the same page) can share an href, so href alone would
+ * wrongly button the ordinary link.
  *
- * Idempotent and self-healing: it also removes any stray trailing block that is _only_ a
- * `buttonLink` whose href already appears as an inline link elsewhere in the same item — the
- * duplicates an earlier (buggy) version of this script appended. Re-running once everything is a
- * `buttonLink` is a no-op.
+ * Convergent and idempotent, so it also corrects earlier buggy runs: a `buttonLink` on a CTA href
+ * whose label is not itself a CTA is downgraded back to a plain link, and a duplicate `buttonLink`
+ * of an already-placed CTA is dropped (deleting its block if that leaves it empty). It scans both
+ * `rich_text` and `media_text` block content. Re-running once everything is correct is a no-op.
  *
  * @example
  * 	pnpm run data:backfill:cta-button-links
@@ -94,21 +96,26 @@ function toPlainLabel(html: string): string {
 		.trim();
 }
 
-/** Finds `<a class="… wp-block-button__link …" href="…">Label</a>` anchors, as href → label. */
-function extractCtaButtonLabels(html: string): Map<string, string> {
-	const labels = new Map<string, string>();
+/** Finds `<a class="… wp-block-button__link …" href="…">Label</a>` anchors as {href, label}. */
+function extractCtaButtons(html: string): Array<{ href: string; label: string }> {
+	const buttons: Array<{ href: string; label: string }> = [];
 	const re = /<a\b([^>]*\bclass="[^"]*\bwp-block-button__link\b[^"]*"[^>]*)>([\s\S]*?)<\/a>/gi;
 
 	let match: RegExpExecArray | null;
 	while ((match = re.exec(html)) !== null) {
 		const href = /\bhref="([^"]*)"/.exec(match[1]!)?.[1];
 		const label = toPlainLabel(match[2]!);
-		if (href != null && href !== "") {
-			labels.set(href, label);
+		if (href != null && href !== "" && label !== "") {
+			buttons.push({ href, label });
 		}
 	}
 
-	return labels;
+	return buttons;
+}
+
+/** Collapses whitespace and trims — CTA labels are matched on their normalised text. */
+function normalizeText(value: string): string {
+	return value.replaceAll(/\s+/g, " ").trim();
 }
 
 /** Minimal shape of a stored TipTap document node — what this script reads and rewrites. */
@@ -133,80 +140,96 @@ function linkHref(node: RtNode): string | null {
 	return null;
 }
 
-/** Collects every `link` mark href used anywhere in a document. */
-function collectLinkHrefs(node: RtNode, into: Set<string>): void {
-	const href = linkHref(node);
-	if (href != null) {
-		into.add(href);
-	}
-	for (const child of node.content ?? []) {
-		collectLinkHrefs(child, into);
-	}
+interface CtaContext {
+	/** `${href}\n${normalizedLabel}` for every WordPress button — the exact CTAs to materialise. */
+	keys: Set<string>;
+	/** Every href used by a button — links/buttons on these hrefs are in scope for a change. */
+	hrefs: Set<string>;
+	/** CTA keys already materialised as a `buttonLink`, so later duplicates are dropped. */
+	seen: Set<string>;
+}
+
+function ctaKey(href: string, label: string): string {
+	return `${href}\n${normalizeText(label)}`;
 }
 
 /**
- * If the document is (ignoring empty paragraphs) nothing but a single `buttonLink` node, returns
- * its href — the shape of the stray trailing block an earlier version of this script appended.
+ * Convergent CTA rewrite of a node's children: - an inline link whose (href, text) is a CTA and not
+ * yet placed → becomes a `buttonLink`; - a `buttonLink` whose href is a CTA href but whose label is
+ * not itself a CTA (e.g. a heading that merely links to the same page) → downgraded back to an
+ * inline link; - a duplicate `buttonLink` of an already-placed CTA → dropped. A CTA button and an
+ * ordinary link can share an href, so matching is by (href, label) — never href alone. Everything
+ * else is left untouched. Recurses into non-matching children.
  */
-function loneButtonLinkHref(doc: RtNode): string | null {
-	const state = { href: null as string | null, buttonLinks: 0, hasText: false };
-
-	const visit = (node: RtNode): void => {
-		if (node.type === "buttonLink") {
-			state.buttonLinks += 1;
-			if (typeof node.attrs?.href === "string") {
-				state.href = node.attrs.href;
-			}
-		} else if (typeof node.text === "string" && node.text.trim() !== "") {
-			state.hasText = true;
-		}
-		for (const child of node.content ?? []) {
-			visit(child);
-		}
-	};
-	visit(doc);
-
-	return !state.hasText && state.buttonLinks === 1 ? state.href : null;
-}
-
-/**
- * Rewrites a node's children, replacing each run of consecutive text nodes that carry a `link` mark
- * whose href is a CTA target with a single `buttonLink` node (label taken from the linked text,
- * falling back to the WordPress button label). Recurses into non-matching children.
- */
-function upgradeChildren(
-	children: Array<RtNode>,
-	labelByHref: Map<string, string>,
-	upgraded: Set<string>,
-): Array<RtNode> {
+function transformChildren(children: Array<RtNode>, ctx: CtaContext): Array<RtNode> {
 	const out: Array<RtNode> = [];
 	let i = 0;
 
 	while (i < children.length) {
-		const href = linkHref(children[i]!);
-		if (href != null && labelByHref.has(href)) {
+		const node = children[i]!;
+
+		if (node.type === "buttonLink") {
+			const href = typeof node.attrs?.href === "string" ? node.attrs.href : null;
+			const label = typeof node.attrs?.label === "string" ? node.attrs.label : "";
+			if (href != null && ctx.keys.has(ctaKey(href, label))) {
+				const key = ctaKey(href, label);
+				if (!ctx.seen.has(key)) {
+					ctx.seen.add(key);
+					out.push(node);
+				}
+				// else: duplicate of an already-placed CTA — drop it.
+			} else if (href != null && ctx.hrefs.has(href)) {
+				// A non-CTA link on a CTA href that was wrongly turned into a button — restore the link.
+				out.push({ type: "text", text: label, marks: [{ type: "link", attrs: { href } }] });
+			} else {
+				out.push(node);
+			}
+			i += 1;
+			continue;
+		}
+
+		const href = linkHref(node);
+		if (href != null) {
 			let text = "";
 			let j = i;
 			while (j < children.length && linkHref(children[j]!) === href) {
 				text += children[j]!.text ?? "";
 				j += 1;
 			}
-			const label = text.trim() !== "" ? text.trim() : (labelByHref.get(href) ?? href);
-			out.push({ type: "buttonLink", attrs: { href, label, variant: "primary" } });
-			upgraded.add(href);
+			const key = ctaKey(href, text);
+			if (ctx.keys.has(key) && !ctx.seen.has(key)) {
+				ctx.seen.add(key);
+				out.push({
+					type: "buttonLink",
+					attrs: { href, label: normalizeText(text), variant: "primary" },
+				});
+			} else {
+				for (let k = i; k < j; k++) {
+					out.push(children[k]!);
+				}
+			}
 			i = j;
-		} else {
-			const child = children[i]!;
-			out.push(
-				child.content != null
-					? { ...child, content: upgradeChildren(child.content, labelByHref, upgraded) }
-					: child,
-			);
-			i += 1;
+			continue;
 		}
+
+		out.push(
+			node.content != null ? { ...node, content: transformChildren(node.content, ctx) } : node,
+		);
+		i += 1;
 	}
 
 	return out;
+}
+
+/** Whether a document still has rendered content (text or a `buttonLink`) after transforming. */
+function docHasContent(node: RtNode): boolean {
+	if (node.type === "buttonLink") {
+		return true;
+	}
+	if (typeof node.text === "string" && node.text.trim() !== "") {
+		return true;
+	}
+	return (node.content ?? []).some((child) => docHasContent(child));
 }
 
 interface EntityBlock {
@@ -227,6 +250,7 @@ async function findNewsEntityBlocks(): Promise<Map<string, Array<EntityBlock>>> 
 			position: schema.contentBlocks.position,
 			blockType: schema.contentBlockTypes.type,
 			content: schema.richTextContentBlocks.content,
+			mediaTextContent: schema.mediaTextContentBlocks.content,
 		})
 		.from(schema.entities)
 		.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
@@ -245,6 +269,10 @@ async function findNewsEntityBlocks(): Promise<Map<string, Array<EntityBlock>>> 
 		.leftJoin(
 			schema.richTextContentBlocks,
 			eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
+		)
+		.leftJoin(
+			schema.mediaTextContentBlocks,
+			eq(schema.mediaTextContentBlocks.id, schema.contentBlocks.id),
 		)
 		.where(
 			and(
@@ -266,7 +294,9 @@ async function findNewsEntityBlocks(): Promise<Map<string, Array<EntityBlock>>> 
 			fieldId: row.fieldId,
 			position: row.position,
 			blockType: row.blockType,
-			content: (row.content as RtNode | null) ?? null,
+			// `rich_text` and `media_text` blocks both store the same rich-text doc shape and can hold
+			// a CTA link; only one join matches per row.
+			content: ((row.content ?? row.mediaTextContent) as RtNode | null) ?? null,
 		});
 	}
 
@@ -275,59 +305,62 @@ async function findNewsEntityBlocks(): Promise<Map<string, Array<EntityBlock>>> 
 
 interface Upgrade {
 	blockId: string;
+	blockType: string;
 	content: RtNode;
-	hrefs: Array<string>;
 }
 
 interface Plan {
 	entitySlug: string;
 	fieldId: string;
+	/** Blocks whose content changed (link ↔ buttonLink rewrites) and must be written back. */
 	upgrades: Array<Upgrade>;
-	/** Positions of stray lone-`buttonLink` blocks to delete (duplicates of an existing link). */
-	deletions: Array<{ blockId: string; position: number; href: string }>;
+	/** Blocks left empty after dropping a duplicate `buttonLink`, to delete. */
+	deletions: Array<{ blockId: string; position: number }>;
 }
 
 function planForItem(
 	entitySlug: string,
 	blocks: Array<EntityBlock>,
-	labelByHref: Map<string, string>,
+	buttons: Array<{ href: string; label: string }>,
 ): Plan | null {
 	const fieldId = blocks[0]?.fieldId;
 	if (fieldId == null) {
 		return null;
 	}
 
-	// Hrefs present as an inline link somewhere in the item (the "real", correctly-placed CTA).
-	const linkHrefs = new Set<string>();
-	for (const block of blocks) {
-		if (block.blockType === "rich_text" && block.content != null) {
-			collectLinkHrefs(block.content, linkHrefs);
-		}
-	}
+	const ctx: CtaContext = {
+		keys: new Set(buttons.map((button) => ctaKey(button.href, button.label))),
+		hrefs: new Set(buttons.map((button) => button.href)),
+		seen: new Set(),
+	};
 
 	const upgrades: Array<Upgrade> = [];
-	const deletions: Array<{ blockId: string; position: number; href: string }> = [];
+	const deletions: Array<{ blockId: string; position: number }> = [];
 
+	// Process in document order so the earliest, correctly-placed occurrence becomes the CTA and
+	// later duplicates are dropped. Both `rich_text` and `media_text` blocks carry body text.
 	for (const block of blocks) {
-		if (block.blockType !== "rich_text" || block.content == null) {
+		if (block.blockType !== "rich_text" && block.blockType !== "media_text") {
+			continue;
+		}
+		if (block.content == null) {
 			continue;
 		}
 
-		// A stray lone-`buttonLink` block is a duplicate only when the same CTA also exists as an
-		// inline link elsewhere — never delete the sole representation of a CTA.
-		const lone = loneButtonLinkHref(block.content);
-		if (lone != null && labelByHref.has(lone) && linkHrefs.has(lone)) {
-			deletions.push({ blockId: block.blockId, position: block.position, href: lone });
-			continue;
-		}
-
-		const upgradedHrefs = new Set<string>();
-		const content = {
+		const before = JSON.stringify(block.content);
+		const content: RtNode = {
 			...block.content,
-			content: upgradeChildren(block.content.content ?? [], labelByHref, upgradedHrefs),
+			content: transformChildren(block.content.content ?? [], ctx),
 		};
-		if (upgradedHrefs.size > 0) {
-			upgrades.push({ blockId: block.blockId, content, hrefs: [...upgradedHrefs] });
+		if (JSON.stringify(content) === before) {
+			continue;
+		}
+
+		// A `media_text` block always keeps its image, so it is only ever rewritten, never deleted.
+		if (block.blockType === "rich_text" && !docHasContent(content)) {
+			deletions.push({ blockId: block.blockId, position: block.position });
+		} else {
+			upgrades.push({ blockId: block.blockId, blockType: block.blockType, content });
 		}
 	}
 
@@ -345,8 +378,8 @@ function buildPlans(
 	const plans: Array<Plan> = [];
 
 	for (const post of posts) {
-		const labelByHref = extractCtaButtonLabels(post.content.rendered);
-		if (labelByHref.size === 0) {
+		const buttons = extractCtaButtons(post.content.rendered);
+		if (buttons.length === 0) {
 			continue;
 		}
 
@@ -356,7 +389,7 @@ function buildPlans(
 			continue;
 		}
 
-		const plan = planForItem(slug, blocks, labelByHref);
+		const plan = planForItem(slug, blocks, buttons);
 		if (plan != null) {
 			plans.push(plan);
 		}
@@ -372,11 +405,19 @@ async function applyPlans(plans: Array<Plan>): Promise<{ upgraded: number; remov
 	for (const plan of plans) {
 		await db.transaction(async (tx) => {
 			for (const upgrade of plan.upgrades) {
-				await tx
-					.update(schema.richTextContentBlocks)
-					.set({ content: upgrade.content as unknown as JSONContent })
-					.where(eq(schema.richTextContentBlocks.id, upgrade.blockId));
-				upgraded += upgrade.hrefs.length;
+				const content = upgrade.content as unknown as JSONContent;
+				if (upgrade.blockType === "media_text") {
+					await tx
+						.update(schema.mediaTextContentBlocks)
+						.set({ content })
+						.where(eq(schema.mediaTextContentBlocks.id, upgrade.blockId));
+				} else {
+					await tx
+						.update(schema.richTextContentBlocks)
+						.set({ content })
+						.where(eq(schema.richTextContentBlocks.id, upgrade.blockId));
+				}
+				upgraded += 1;
 			}
 
 			// Delete duplicates high-position-first so each position gap is closed independently.
@@ -413,24 +454,21 @@ async function main(): Promise<void> {
 	const totalUpgrades = plans.reduce((sum, plan) => sum + plan.upgrades.length, 0);
 	const totalDeletions = plans.reduce((sum, plan) => sum + plan.deletions.length, 0);
 	log.info(
-		`${String(totalUpgrades)} inline CTA links to upgrade and ${String(totalDeletions)} duplicate blocks to remove across ${String(plans.length)} items.`,
+		`${String(totalUpgrades)} block(s) to rewrite and ${String(totalDeletions)} empty duplicate block(s) to remove across ${String(plans.length)} items.`,
 	);
 	for (const plan of plans) {
-		for (const upgrade of plan.upgrades) {
-			log.info(`  ${plan.entitySlug}: upgrade → buttonLink (${upgrade.hrefs.join(", ")})`);
-		}
-		for (const deletion of plan.deletions) {
-			log.info(`  ${plan.entitySlug}: remove duplicate buttonLink block (${deletion.href})`);
-		}
+		log.info(
+			`  ${plan.entitySlug}: rewrite ${String(plan.upgrades.length)} block(s), delete ${String(plan.deletions.length)} block(s)`,
+		);
 	}
 
 	if (!apply) {
-		log.info(`Pass \`--apply\` to upgrade the links and remove the duplicates.`);
+		log.info(`Pass \`--apply\` to apply the CTA rewrites.`);
 		return;
 	}
 
 	const { upgraded, removed } = await applyPlans(plans);
-	log.success(`Upgraded ${String(upgraded)} CTA links and removed ${String(removed)} duplicates.`);
+	log.success(`Rewrote ${String(upgraded)} block(s) and removed ${String(removed)} duplicate(s).`);
 }
 
 main()

@@ -5,28 +5,29 @@ import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { and, eq, gt, sql } from "@dariah-eric/database/sql";
 import slugify from "@sindresorhus/slugify";
+import type { JSONContent } from "@tiptap/core";
 
 import { env } from "../config/env.config";
 import { writeTsvReport } from "../lib/tsv-report";
 
 /**
- * Reconstructs `media_text` content blocks from WordPress's native "Media & Text"
- * (`wp-block-media-text`) blocks, which the migration flattened. Dry run by default; `--apply`
+ * Re-scopes `media_text` content blocks that were derived from WordPress "Media & Text"
+ * (`wp-block-media-text`) blocks so each holds only that block's `__content` — the text that sits
+ * beside the media — rather than the whole rest of the article. Dry run by default; `--apply`
  * writes the changes.
  *
- * The migration (`@dariah-eric/migrate`) has no handler for `wp-block-media-text`, so it fell
- * through to the stock TipTap `StarterKit`, which doesn't understand the block: the `__media` image
- * became a standalone `image` block and the `__content` paragraphs a separate `rich_text` block —
- * losing the semantic pairing. Unlike a presentational `alignleft`/`alignright` float (handled by
- * `backfill-image-alignment`), a Media & Text block is an _explicit_ author choice to bind an image
- * to a passage of text, so it maps unambiguously onto `media_text` and needs no human vetting.
+ * Why this is needed: the migration flattened `wp-block-media-text` into a standalone `image` block
+ * followed by one `rich_text` block. When the media image was the only image in the post, that
+ * `rich_text` block held the _entire_ remaining article, and the earlier media_text reconstruction
+ * folded all of it into the `media_text` block — so a small media image ended up "bound" to the
+ * full article. Here the live WordPress `__content` (a bounded region) is used to find where the
+ * bound text actually ends: the over-captured tail is split back out into a following `rich_text`
+ * block.
  *
- * Matching is conservative and structural: a WordPress Media & Text block is paired with a local
- * item only when exactly one `image` content block's asset carries that block's media URL as its
- * `label` (set verbatim by the migration's `upload()`) and the very next block is `rich_text`. The
- * `media_text` `side` follows the WordPress media position (`has-media-on-the-right` → `end`, else
- * `start`). Anything ambiguous — image reused, next block not `rich_text`, already collapsed — is
- * left out rather than guessed at.
+ * Conservative and idempotent: the split point is only taken when the leading `media_text` nodes
+ * match the WordPress `__content` block-for-block (by normalised plain text); anything that no
+ * longer aligns (edited since, or an unusual `__content`) is skipped and reported. A `media_text`
+ * whose content already equals its `__content` is left untouched.
  *
  * @example
  * 	pnpm run data:backfill:media-text-from-wordpress
@@ -89,57 +90,124 @@ function normalizeWordPressSlug(rawSlug: string): string {
 	return slugify(decoded);
 }
 
-interface WordPressMediaText {
-	side: (typeof schema.mediaTextSideEnum)[number];
-	imageUrl: string;
+/** Collapses runs of whitespace and trims — the basis for comparing WordPress and migrated text. */
+function normalizeText(value: string): string {
+	return value.replaceAll(/\s+/g, " ").trim();
 }
 
-/**
- * Finds `<div class="wp-block-media-text …"><figure class="wp-block-media-text__media …"><img
- * src="…">` — a Media & Text block whose media is an image — in document order. The `__media`
- * figure precedes `__content` in the markup regardless of visual side, so the first `img` after the
- * container open is the media image. Regex-based, matching the migration's approach to WordPress
- * HTML rather than a full DOM parser.
- */
+/** Index just past the `</div>` closing the `<div>` whose content starts at `afterOpenTag`. */
+function findClosingDiv(html: string, afterOpenTag: number): number {
+	let depth = 1;
+	let i = afterOpenTag;
+	while (i < html.length && depth > 0) {
+		const nextOpen = html.indexOf("<div", i);
+		const nextClose = html.indexOf("</div>", i);
+		if (nextClose === -1) {
+			break;
+		}
+		if (nextOpen !== -1 && nextOpen < nextClose) {
+			depth++;
+			i = nextOpen + 4;
+		} else {
+			depth--;
+			i = nextClose + 6;
+		}
+	}
+	return i;
+}
+
+interface WordPressMediaText {
+	imageUrl: string;
+	/** Normalised plain text of each top-level block inside `__content`, in order. */
+	contentTexts: Array<string>;
+}
+
+/** Extracts each `wp-block-media-text`'s media image URL and its `__content` block texts. */
 function extractMediaTextBlocks(html: string): Array<WordPressMediaText> {
 	const results: Array<WordPressMediaText> = [];
-	const re =
-		/<div[^>]+class="([^"]*\bwp-block-media-text\b[^"]*)"[^>]*>\s*<figure[^>]+class="[^"]*\bwp-block-media-text__media\b[^"]*"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"/gi;
+	const containerRe = /<div[^>]+class="[^"]*\bwp-block-media-text\b[^"]*"[^>]*>/gi;
 
 	let match: RegExpExecArray | null;
-	while ((match = re.exec(html)) !== null) {
-		const containerClass = match[1]!;
-		results.push({
-			side: /\bhas-media-on-the-right\b/i.test(containerClass) ? "end" : "start",
-			imageUrl: match[2]!,
-		});
+	while ((match = containerRe.exec(html)) !== null) {
+		const end = findClosingDiv(html, match.index + match[0].length);
+		const slice = html.slice(match.index, end);
+
+		const imageUrl =
+			/<figure[^>]+class="[^"]*\bwp-block-media-text__media\b[^"]*"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"/i.exec(
+				slice,
+			)?.[1];
+		if (imageUrl == null) {
+			continue;
+		}
+
+		const contentOpen = /<div[^>]+class="[^"]*\bwp-block-media-text__content\b[^"]*"[^>]*>/i.exec(
+			slice,
+		);
+		if (contentOpen == null) {
+			continue;
+		}
+		const contentStart = contentOpen.index + contentOpen[0].length;
+		const contentEnd = findClosingDiv(slice, contentStart);
+		const contentHtml = slice.slice(contentStart, contentEnd - 6);
+
+		const contentTexts: Array<string> = [];
+		const blockRe = /<(p|h[1-6]|ul|ol|blockquote|pre|figure)\b[^>]*>([\s\S]*?)<\/\1>/gi;
+		let blockMatch: RegExpExecArray | null;
+		while ((blockMatch = blockRe.exec(contentHtml)) !== null) {
+			const text = normalizeText(
+				blockMatch[2]!.replaceAll(/<[^>]+>/g, "").replaceAll("&nbsp;", " "),
+			);
+			if (text !== "") {
+				contentTexts.push(text);
+			}
+		}
+
+		if (contentTexts.length > 0) {
+			results.push({ imageUrl, contentTexts });
+		}
 	}
 
 	return results;
 }
 
-interface EntityBlock {
-	blockId: string;
-	fieldId: string;
-	blockType: string;
-	position: number;
-	/** The exact source URL the migration uploaded this image from, for `image` blocks only. */
-	imageAssetLabel: string | null;
+interface RtNode {
+	text?: string;
+	content?: Array<RtNode> | null;
 }
 
-/** Published `news` entities' `content` field blocks, ordered by position, keyed by entity slug. */
-async function findNewsEntityBlocks(): Promise<
-	Map<string, { documentId: string; blocks: Array<EntityBlock> }>
-> {
+/** Normalised plain text of a stored TipTap node. */
+function nodePlainText(node: RtNode): string {
+	const parts: Array<string> = [];
+	const visit = (n: RtNode): void => {
+		if (typeof n.text === "string") {
+			parts.push(n.text);
+		}
+		for (const child of n.content ?? []) {
+			visit(child);
+		}
+	};
+	visit(node);
+	return normalizeText(parts.join(" "));
+}
+
+interface MediaTextBlock {
+	blockId: string;
+	fieldId: string;
+	position: number;
+	imageAssetLabel: string | null;
+	content: { content?: Array<RtNode> | null } | null;
+}
+
+/** Published `news` entities' `media_text` blocks, keyed by entity slug. */
+async function findNewsMediaTextBlocks(): Promise<Map<string, Array<MediaTextBlock>>> {
 	const rows = await db
 		.select({
-			documentId: schema.entities.id,
 			slug: schema.entities.slug,
 			blockId: schema.contentBlocks.id,
 			fieldId: schema.contentBlocks.fieldId,
-			blockType: schema.contentBlockTypes.type,
 			position: schema.contentBlocks.position,
 			imageAssetLabel: schema.assets.label,
+			content: schema.mediaTextContentBlocks.content,
 		})
 		.from(schema.entities)
 		.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
@@ -152,11 +220,10 @@ async function findNewsEntityBlocks(): Promise<
 		)
 		.innerJoin(schema.contentBlocks, eq(schema.contentBlocks.fieldId, schema.fields.id))
 		.innerJoin(
-			schema.contentBlockTypes,
-			eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+			schema.mediaTextContentBlocks,
+			eq(schema.mediaTextContentBlocks.id, schema.contentBlocks.id),
 		)
-		.leftJoin(schema.imageContentBlocks, eq(schema.imageContentBlocks.id, schema.contentBlocks.id))
-		.leftJoin(schema.assets, eq(schema.assets.id, schema.imageContentBlocks.imageId))
+		.innerJoin(schema.assets, eq(schema.assets.id, schema.mediaTextContentBlocks.imageId))
 		.where(
 			and(
 				eq(schema.entityTypes.type, "news"),
@@ -166,18 +233,18 @@ async function findNewsEntityBlocks(): Promise<
 		)
 		.orderBy(schema.entities.slug, schema.contentBlocks.position);
 
-	const bySlug = new Map<string, { documentId: string; blocks: Array<EntityBlock> }>();
+	const bySlug = new Map<string, Array<MediaTextBlock>>();
 
 	for (const row of rows) {
 		if (!bySlug.has(row.slug)) {
-			bySlug.set(row.slug, { documentId: row.documentId, blocks: [] });
+			bySlug.set(row.slug, []);
 		}
-		bySlug.get(row.slug)!.blocks.push({
+		bySlug.get(row.slug)!.push({
 			blockId: row.blockId,
 			fieldId: row.fieldId,
-			blockType: row.blockType,
 			position: row.position,
 			imageAssetLabel: row.imageAssetLabel,
+			content: (row.content as { content?: Array<RtNode> | null } | null) ?? null,
 		});
 	}
 
@@ -186,18 +253,18 @@ async function findNewsEntityBlocks(): Promise<
 
 interface Candidate {
 	entitySlug: string;
-	entityDocumentId: string;
-	side: (typeof schema.mediaTextSideEnum)[number];
-	wpImageUrl: string;
+	blockId: string;
 	fieldId: string;
-	imageContentBlockId: string;
-	imagePosition: number;
-	richTextContentBlockId: string;
+	position: number;
+	keptContent: JSONContent;
+	tailContent: JSONContent;
+	keptCount: number;
+	tailCount: number;
 }
 
 function findCandidates(
 	posts: Array<WordPressPost>,
-	entitiesBySlug: Map<string, { documentId: string; blocks: Array<EntityBlock> }>,
+	blocksBySlug: Map<string, Array<MediaTextBlock>>,
 ): Array<Candidate> {
 	const candidates: Array<Candidate> = [];
 
@@ -208,37 +275,45 @@ function findCandidates(
 		}
 
 		const slug = normalizeWordPressSlug(post.slug);
-		const entity = entitiesBySlug.get(slug);
-		if (entity == null) {
+		const blocks = blocksBySlug.get(slug);
+		if (blocks == null) {
 			continue;
 		}
 
-		const blocksByPosition = new Map(entity.blocks.map((block) => [block.position, block]));
-
 		for (const mediaText of mediaTexts) {
-			const matches = entity.blocks.filter(
-				(block) => block.blockType === "image" && block.imageAssetLabel === mediaText.imageUrl,
-			);
-			// Ambiguous (image reused) or unmatched — skip rather than guess.
+			const matches = blocks.filter((block) => block.imageAssetLabel === mediaText.imageUrl);
 			if (matches.length !== 1) {
 				continue;
 			}
-			const [imageBlock] = matches;
+			const block = matches[0]!;
+			const nodes = block.content?.content ?? [];
+			const k = mediaText.contentTexts.length;
 
-			const nextBlock = blocksByPosition.get(imageBlock!.position + 1);
-			if (nextBlock?.blockType !== "rich_text") {
+			if (nodes.length <= k) {
+				// Already scoped (equal), or fewer nodes than `__content` — nothing to split off.
+				continue;
+			}
+
+			// Only split when the leading nodes match `__content` block-for-block.
+			const aligned = mediaText.contentTexts.every(
+				(text, index) => nodePlainText(nodes[index]!) === text,
+			);
+			if (!aligned) {
+				log.warn(
+					`Skipping ${slug} (${mediaText.imageUrl}): media_text no longer aligns with WordPress __content.`,
+				);
 				continue;
 			}
 
 			candidates.push({
 				entitySlug: slug,
-				entityDocumentId: entity.documentId,
-				side: mediaText.side,
-				wpImageUrl: mediaText.imageUrl,
-				fieldId: imageBlock!.fieldId,
-				imageContentBlockId: imageBlock!.blockId,
-				imagePosition: imageBlock!.position,
-				richTextContentBlockId: nextBlock.blockId,
+				blockId: block.blockId,
+				fieldId: block.fieldId,
+				position: block.position,
+				keptContent: { type: "doc", content: nodes.slice(0, k) } as unknown as JSONContent,
+				tailContent: { type: "doc", content: nodes.slice(k) } as unknown as JSONContent,
+				keptCount: k,
+				tailCount: nodes.length - k,
 			});
 		}
 	}
@@ -248,11 +323,9 @@ function findCandidates(
 
 const reportColumns = [
 	"entity_slug",
-	"entity_document_id",
-	"side",
-	"wp_image_url",
-	"image_content_block_id",
-	"rich_text_content_block_id",
+	"media_text_block_id",
+	"kept_nodes",
+	"split_off_nodes",
 ] as const;
 
 async function writeReport(candidates: Array<Candidate>): Promise<void> {
@@ -261,108 +334,74 @@ async function writeReport(candidates: Array<Candidate>): Promise<void> {
 		reportColumns,
 		candidates.map((candidate) => [
 			candidate.entitySlug,
-			candidate.entityDocumentId,
-			candidate.side,
-			candidate.wpImageUrl,
-			candidate.imageContentBlockId,
-			candidate.richTextContentBlockId,
+			candidate.blockId,
+			String(candidate.keptCount),
+			String(candidate.tailCount),
 		]),
 	);
 }
 
 /**
- * Collapses each pair inside its own transaction, re-reading both blocks first so a pairing that
- * changed since the report was generated (an editor touched the item, or a previous run already
- * applied it) is skipped rather than forced. Reuses the `image` block's row for the new
- * `media_text` block — only its type and subtype row change — and deletes the `rich_text` block,
- * then closes the position gap that leaves in the field.
+ * Trims each `media_text` block to its `__content` nodes and inserts the split-off tail as a
+ * `rich_text` block immediately after it, re-reading the block first so a media_text edited since
+ * the report was generated is skipped rather than forced.
  */
 async function applyCandidates(candidates: Array<Candidate>): Promise<number> {
-	const [mediaTextType] = await db
+	const [richTextType] = await db
 		.select({ id: schema.contentBlockTypes.id })
 		.from(schema.contentBlockTypes)
-		.where(eq(schema.contentBlockTypes.type, "media_text"))
+		.where(eq(schema.contentBlockTypes.type, "rich_text"))
 		.limit(1);
-	assert(mediaTextType, "Missing `media_text` content block type.");
+	assert(richTextType, "Missing `rich_text` content block type.");
 
 	let applied = 0;
 
 	for (const candidate of candidates) {
 		await db.transaction(async (tx) => {
-			const [imageBlock] = await tx
-				.select({
-					id: schema.contentBlocks.id,
-					fieldId: schema.contentBlocks.fieldId,
-					position: schema.contentBlocks.position,
-					imageId: schema.imageContentBlocks.imageId,
-				})
-				.from(schema.contentBlocks)
-				.innerJoin(
-					schema.imageContentBlocks,
-					eq(schema.imageContentBlocks.id, schema.contentBlocks.id),
-				)
-				.where(eq(schema.contentBlocks.id, candidate.imageContentBlockId))
+			const [current] = await tx
+				.select({ content: schema.mediaTextContentBlocks.content })
+				.from(schema.mediaTextContentBlocks)
+				.where(eq(schema.mediaTextContentBlocks.id, candidate.blockId))
 				.limit(1);
 
-			const [richTextBlock] = await tx
-				.select({
-					id: schema.contentBlocks.id,
-					fieldId: schema.contentBlocks.fieldId,
-					position: schema.contentBlocks.position,
-					content: schema.richTextContentBlocks.content,
-				})
-				.from(schema.contentBlocks)
-				.innerJoin(
-					schema.richTextContentBlocks,
-					eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
-				)
-				.where(eq(schema.contentBlocks.id, candidate.richTextContentBlockId))
-				.limit(1);
-
-			if (imageBlock == null || richTextBlock == null) {
+			const currentCount = (current?.content as { content?: Array<unknown> } | null)?.content
+				?.length;
+			if (currentCount !== candidate.keptCount + candidate.tailCount) {
 				log.warn(
-					`Skipping ${candidate.entitySlug} (${candidate.wpImageUrl}): block no longer exists.`,
-				);
-				return;
-			}
-
-			if (
-				richTextBlock.fieldId !== imageBlock.fieldId ||
-				richTextBlock.position !== imageBlock.position + 1
-			) {
-				log.warn(
-					`Skipping ${candidate.entitySlug} (${candidate.wpImageUrl}): no longer adjacent — item was edited since the report was generated.`,
+					`Skipping ${candidate.entitySlug}: media_text changed since the report was generated.`,
 				);
 				return;
 			}
 
 			await tx
-				.delete(schema.imageContentBlocks)
-				.where(eq(schema.imageContentBlocks.id, imageBlock.id));
+				.update(schema.mediaTextContentBlocks)
+				.set({ content: candidate.keptContent })
+				.where(eq(schema.mediaTextContentBlocks.id, candidate.blockId));
 
-			await tx.insert(schema.mediaTextContentBlocks).values({
-				id: imageBlock.id,
-				imageId: imageBlock.imageId,
-				side: candidate.side,
-				content: richTextBlock.content,
-			});
-
+			// Open a position for the tail directly after the media_text block.
 			await tx
 				.update(schema.contentBlocks)
-				.set({ typeId: mediaTextType.id })
-				.where(eq(schema.contentBlocks.id, imageBlock.id));
-
-			await tx.delete(schema.contentBlocks).where(eq(schema.contentBlocks.id, richTextBlock.id));
-
-			await tx
-				.update(schema.contentBlocks)
-				.set({ position: sql`${schema.contentBlocks.position} - 1` })
+				.set({ position: sql`${schema.contentBlocks.position} + 1` })
 				.where(
 					and(
-						eq(schema.contentBlocks.fieldId, imageBlock.fieldId),
-						gt(schema.contentBlocks.position, richTextBlock.position),
+						eq(schema.contentBlocks.fieldId, candidate.fieldId),
+						gt(schema.contentBlocks.position, candidate.position),
 					),
 				);
+
+			const [block] = await tx
+				.insert(schema.contentBlocks)
+				.values({
+					fieldId: candidate.fieldId,
+					typeId: richTextType.id,
+					position: candidate.position + 1,
+				})
+				.returning({ id: schema.contentBlocks.id });
+			assert(block);
+
+			await tx
+				.insert(schema.richTextContentBlocks)
+				.values({ id: block.id, content: candidate.tailContent });
 
 			applied += 1;
 		});
@@ -377,25 +416,28 @@ async function main(): Promise<void> {
 	log.info("Fetching WordPress posts…");
 	const posts = await fetchAllPosts(wordPressApiBaseUrl);
 
-	log.info("Loading migrated news content blocks…");
-	const entitiesBySlug = await findNewsEntityBlocks();
+	log.info("Loading migrated news media_text blocks…");
+	const blocksBySlug = await findNewsMediaTextBlocks();
 
-	const candidates = findCandidates(posts, entitiesBySlug);
+	const candidates = findCandidates(posts, blocksBySlug);
 
 	await writeReport(candidates);
 
-	log.info(
-		`${String(candidates.length)} Media & Text blocks found across ${String(posts.length)} WordPress posts.`,
-	);
+	log.info(`${String(candidates.length)} over-captured media_text blocks to re-scope.`);
+	for (const candidate of candidates) {
+		log.info(
+			`  ${candidate.entitySlug}: keep ${String(candidate.keptCount)} node(s), split off ${String(candidate.tailCount)} into a new rich_text block.`,
+		);
+	}
 	log.info(`Report written to \`${reportFilePath}\`.`);
 
 	if (!apply) {
-		log.info(`Pass \`--apply\` to collapse them into \`media_text\` blocks.`);
+		log.info(`Pass \`--apply\` to re-scope them.`);
 		return;
 	}
 
 	const applied = await applyCandidates(candidates);
-	log.success(`Collapsed ${String(applied)} Media & Text blocks into media_text blocks.`);
+	log.success(`Re-scoped ${String(applied)} media_text blocks.`);
 }
 
 main()
