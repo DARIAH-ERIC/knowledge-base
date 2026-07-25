@@ -5,6 +5,7 @@ import {
 	placeholderValueKindsEnum,
 } from "@dariah-eric/database/placeholder-values";
 import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
+import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import { VariableIcon } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import { Button as AriaButton } from "react-aria-components";
@@ -23,12 +24,17 @@ export function PlaceholderValueInsertMenu({
 }: Readonly<PlaceholderValueInsertMenuProps>): ReactNode {
 	return (
 		<Menu>
-			<AriaButton
-				aria-label="Insert placeholder value"
-				className="relative inline-flex block-8 inline-8 items-center justify-center rounded-md transition-colors text-muted-fg hover:text-fg focus:outline-none focus:ring-2 focus:ring-ring"
-			>
-				<VariableIcon className="block-4 inline-4" />
-			</AriaButton>
+			{/* Every other control in the toolbar carries a tooltip via `RichTextEditorToolbarButton`;
+			    this one owns its trigger, so it wraps its own — same label as the `aria-label`. */}
+			<Tooltip>
+				<AriaButton
+					aria-label="Insert placeholder value"
+					className="relative inline-flex block-8 inline-8 items-center justify-center rounded-md transition-colors text-muted-fg hover:text-fg focus:outline-none focus:ring-2 focus:ring-ring"
+				>
+					<VariableIcon className="block-4 inline-4" />
+				</AriaButton>
+				<TooltipContent inverse={true}>Insert placeholder value</TooltipContent>
+			</Tooltip>
 			<MenuContent className="min-inline-60" placement="bottom">
 				{placeholderValueKindsEnum.map((kind) => (
 					<MenuItem
