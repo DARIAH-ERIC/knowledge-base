@@ -70,8 +70,10 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 	// Normal document flow (not a flex column) so a floated `image` block's float escapes into the
 	// following block and the text wraps around it. The immediately-following `rich_text` is allowed
 	// to wrap; every other block clears, so a float can never overlap a structural block below it.
+	// `@container` makes the float/full-width switch depend on the content column's width (via a
+	// container query on floated images), not on the viewport.
 	return (
-		<div className="space-y-8">
+		<div className="@container space-y-8">
 			{contentBlocks.map((contentBlock, index) => {
 				const wrapsPrecedingFloat =
 					contentBlock.type === "rich_text" && isFloatedImage(contentBlocks[index - 1]);
@@ -292,13 +294,14 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			}
 
 			const layout = contentBlock.content?.layout ?? "default";
-			// `float-*` only floats from `sm:` up (a constrained image pulled aside with the following
-			// block's text wrapping, natural aspect ratio so portrait images show in full, and gap on
-			// the text side); below that it spans the full column so text never wraps in a cramped
-			// column. `wide`/`full` break out past the text column; `default` fills the column.
+			// `float-*` only floats once the content column (a `@container`, not the viewport) is wide
+			// enough (`@lg` ≈ 32rem): a constrained image pulled aside with the following block's text
+			// wrapping, natural aspect ratio so portrait images show in full, and gap on the text side.
+			// In a narrower column it spans the full width so text never wraps in a cramped column.
+			// `wide`/`full` break out past the text column; `default` fills the column.
 			const figureClassName = {
-				"float-start": "mbe-4 sm:mbe-2 sm:me-6 sm:float-start sm:inline-[min(18rem,45%)]",
-				"float-end": "mbe-4 sm:mbe-2 sm:ms-6 sm:float-end sm:inline-[min(18rem,45%)]",
+				"float-start": "mbe-4 @lg:mbe-2 @lg:me-6 @lg:float-start @lg:inline-[min(18rem,45%)]",
+				"float-end": "mbe-4 @lg:mbe-2 @lg:ms-6 @lg:float-end @lg:inline-[min(18rem,45%)]",
 				wide: "ms-auto me-auto inline-[min(56rem,92vw)]",
 				full: "inline-[100vw] ms-[calc(50%-50vw)] me-[calc(50%-50vw)]",
 				default: undefined,
@@ -326,9 +329,11 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 				<div className="flow-root">
 					<figure
 						className={
+							// `mbs-1.5` nudges the image down to the text's cap height: the first line's
+							// half-leading otherwise makes the top-aligned text look lower than the image.
 							side === "end"
-								? "mbe-2 ms-4 float-end block-36 inline-36"
-								: "mbe-2 me-4 float-start block-36 inline-36"
+								? "mbs-1.5 mbe-2 ms-4 float-end block-36 inline-36"
+								: "mbs-1.5 mbe-2 me-4 float-start block-36 inline-36"
 						}
 					>
 						<img
