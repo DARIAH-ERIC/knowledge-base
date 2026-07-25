@@ -4,6 +4,7 @@
 
 import { type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
+import { TableKit } from "@tiptap/extension-table/kit";
 import { Typography } from "@tiptap/extension-typography";
 import {
 	EditorContent,
@@ -27,6 +28,7 @@ import {
 	ListOrderedIcon,
 	PencilIcon,
 	QuoteIcon,
+	TableIcon,
 	Trash2Icon,
 	VariableIcon,
 } from "lucide-react";
@@ -136,6 +138,18 @@ export type { RichTextEditorToolbarButtonProps } from "@/lib/rich-text-toolbar-b
 
 // Keep the internal alias for backward-compat within this file.
 const RichTextEditorIconButton = RichTextEditorToolbarButton;
+
+/** One row/column command in the table popover — a labelled entry rather than another icon. */
+function TableCommandButton({
+	label,
+	onPress,
+}: Readonly<{ label: string; onPress: () => void }>): ReactNode {
+	return (
+		<Button className="justify-start" intent="plain" onPress={onPress} size="sm" type="button">
+			{label}
+		</Button>
+	);
+}
 
 interface BlockNodeSurfaceProps {
 	children: ReactNode;
@@ -1368,6 +1382,11 @@ export function createRichTextExtensions(
 			superscriptTwo: false,
 			superscriptThree: false,
 		}),
+		// Tables carry data, not layout: column widths are left to the stylesheet (`resizable: false`,
+		// so no `colwidth` attributes are ever written) and cells hold ordinary block content. Without
+		// these node types a pasted or imported `<table>` is silently flattened into one paragraph of
+		// run-together cell text — which is exactly what the WordPress migration produced.
+		TableKit.configure({ table: { resizable: false } }),
 		Image,
 		createAssetImageNode(options?.renderImagePicker),
 		EmbedNode,
@@ -1442,6 +1461,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				isOrderedList: ctx.editor?.isActive("orderedList"),
 				isBlockquote: ctx.editor?.isActive("blockquote"),
 				isLink: ctx.editor?.isActive("link"),
+				isInTable: ctx.editor?.isActive("table"),
 				linkHref: ctx.editor?.getAttributes("link").href as string | undefined,
 			};
 		},
@@ -1683,6 +1703,90 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							editor.chain().focus().toggleBlockquote().run();
 						}}
 					/>
+					<span className="mx-1 block-4 inline-px bg-border" />
+					<Popover>
+						<Tooltip>
+							<PopoverTrigger
+								aria-label={t("Table")}
+								className={twMerge(
+									"relative inline-flex block-8 inline-8 cursor-pointer items-center justify-center rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+									activeState?.isInTable === true && "bg-primary-subtle/50 text-fg",
+								)}
+							>
+								<TableIcon className="block-4 inline-4" />
+							</PopoverTrigger>
+							<TooltipContent inverse={true}>{t("Table")}</TooltipContent>
+						</Tooltip>
+						{/* The row and column commands act on the cell holding the cursor, so they are only
+							    offered once the selection is inside a table. */}
+						<PopoverContent className="flex inline-56 flex-col gap-1 p-2">
+							{activeState?.isInTable === true ? (
+								<>
+									<TableCommandButton
+										label={t("Toggle header row")}
+										onPress={() => {
+											editor.chain().focus().toggleHeaderRow().run();
+										}}
+									/>
+									<TableCommandButton
+										label={t("Add row above")}
+										onPress={() => {
+											editor.chain().focus().addRowBefore().run();
+										}}
+									/>
+									<TableCommandButton
+										label={t("Add row below")}
+										onPress={() => {
+											editor.chain().focus().addRowAfter().run();
+										}}
+									/>
+									<TableCommandButton
+										label={t("Delete row")}
+										onPress={() => {
+											editor.chain().focus().deleteRow().run();
+										}}
+									/>
+									<span className="my-1 block-px inline-full bg-border" />
+									<TableCommandButton
+										label={t("Add column before")}
+										onPress={() => {
+											editor.chain().focus().addColumnBefore().run();
+										}}
+									/>
+									<TableCommandButton
+										label={t("Add column after")}
+										onPress={() => {
+											editor.chain().focus().addColumnAfter().run();
+										}}
+									/>
+									<TableCommandButton
+										label={t("Delete column")}
+										onPress={() => {
+											editor.chain().focus().deleteColumn().run();
+										}}
+									/>
+									<span className="my-1 block-px inline-full bg-border" />
+									<TableCommandButton
+										label={t("Delete table")}
+										onPress={() => {
+											editor.chain().focus().deleteTable().run();
+										}}
+									/>
+								</>
+							) : (
+								<TableCommandButton
+									label={t("Insert table")}
+									onPress={() => {
+										editor
+											.chain()
+											.focus()
+											.insertTable({ rows: 3, cols: 2, withHeaderRow: true })
+											.run();
+									}}
+								/>
+							)}
+						</PopoverContent>
+					</Popover>
 					<span className="mx-1 block-4 inline-px bg-border" />
 					<Popover isOpen={isLinkPopoverOpen} onOpenChange={handleLinkPopoverOpenChange}>
 						<Tooltip>

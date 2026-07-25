@@ -257,6 +257,8 @@ export async function upsertTypedContentBlock(
 
 			const side = block.content?.side ?? "start";
 			const content = block.content?.content ?? { type: "doc", content: [{ type: "paragraph" }] };
+			const caption = block.content?.caption ?? null;
+			const captionMode = block.content?.captionMode ?? (caption != null ? "override" : "inherit");
 
 			if (isNew) {
 				await tx.insert(schema.mediaTextContentBlocks).values({
@@ -264,11 +266,13 @@ export async function upsertTypedContentBlock(
 					imageId,
 					side,
 					content,
+					caption,
+					captionMode,
 				});
 			} else {
 				await tx
 					.update(schema.mediaTextContentBlocks)
-					.set({ imageId, side, content })
+					.set({ imageId, side, content, caption, captionMode })
 					.where(eq(schema.mediaTextContentBlocks.id, blockId));
 			}
 			break;
@@ -456,8 +460,11 @@ export async function getEntityContentBlocks(
 				position: schema.contentBlocks.position,
 				imageKey: schema.assets.key,
 				alt: schema.assets.alt,
+				assetCaption: schema.assets.caption,
 				side: schema.mediaTextContentBlocks.side,
 				content: schema.mediaTextContentBlocks.content,
+				caption: schema.mediaTextContentBlocks.caption,
+				captionMode: schema.mediaTextContentBlocks.captionMode,
 			})
 			.from(schema.mediaTextContentBlocks)
 			.innerJoin(
@@ -611,8 +618,11 @@ export async function getEntityContentBlocks(
 				imageKey: row.imageKey,
 				imageUrl,
 				alt: row.alt,
+				assetCaption: row.assetCaption,
 				side: row.side,
 				content: row.content,
+				caption: row.caption,
+				captionMode: row.captionMode,
 			},
 		};
 	});

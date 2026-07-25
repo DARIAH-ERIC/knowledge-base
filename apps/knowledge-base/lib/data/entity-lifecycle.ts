@@ -272,6 +272,8 @@ async function cloneTypedContentBlock(
 					imageId: schema.mediaTextContentBlocks.imageId,
 					side: schema.mediaTextContentBlocks.side,
 					content: schema.mediaTextContentBlocks.content,
+					caption: schema.mediaTextContentBlocks.caption,
+					captionMode: schema.mediaTextContentBlocks.captionMode,
 				})
 				.from(schema.mediaTextContentBlocks)
 				.where(eq(schema.mediaTextContentBlocks.id, sourceBlockId))

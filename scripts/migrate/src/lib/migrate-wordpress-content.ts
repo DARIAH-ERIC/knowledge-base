@@ -12,6 +12,7 @@ import { buffer } from "@dariah-eric/storage/lib";
 import slugify from "@sindresorhus/slugify";
 import type { JSONContent } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
+import { TableKit } from "@tiptap/extension-table/kit";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
 import { toText } from "hast-util-to-text";
@@ -23,6 +24,14 @@ import { cleanTiptapDoc } from "./clean-tiptap-content";
 import type { WordPressData } from "./get-wordpress-data";
 
 const processor = unified().use(fromHtml);
+
+/**
+ * Extensions used to parse WordPress HTML into TipTap JSON. Every node type the editor understands
+ * must be listed here, or its markup is silently unwrapped: a `<table>` parsed without `TableKit`
+ * collapses into a single paragraph of run-together cell text. Mirrors `createRichTextExtensions`
+ * in `@dariah-eric/ui`, which cannot be imported here (it is a client component).
+ */
+export const wordPressParseExtensions = [StarterKit, Image, TableKit];
 
 export function toPlaintext(html: string): string {
 	const ast = processor.parse(html);
@@ -327,14 +336,14 @@ export function createWordPressContentMigrator(
 					items: segment.items.map(({ title, bodyHtml }) => {
 						return {
 							title,
-							content: cleanTiptapDoc(generateJSON(bodyHtml, [StarterKit, Image])),
+							content: cleanTiptapDoc(generateJSON(bodyHtml, wordPressParseExtensions)),
 						};
 					}),
 				});
 				continue;
 			}
 
-			const doc = cleanTiptapDoc(generateJSON(segment.content, [StarterKit, Image]));
+			const doc = cleanTiptapDoc(generateJSON(segment.content, wordPressParseExtensions));
 			let richTextRun: Array<JSONContent> = [];
 
 			for (const node of doc.content ?? []) {

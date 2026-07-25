@@ -219,6 +219,8 @@ async function applyPairs(pairs: Array<Pair>): Promise<number> {
 					fieldId: schema.contentBlocks.fieldId,
 					position: schema.contentBlocks.position,
 					imageId: schema.imageContentBlocks.imageId,
+					caption: schema.imageContentBlocks.caption,
+					captionMode: schema.imageContentBlocks.captionMode,
 				})
 				.from(schema.contentBlocks)
 				.innerJoin(
@@ -262,11 +264,15 @@ async function applyPairs(pairs: Array<Pair>): Promise<number> {
 				.delete(schema.imageContentBlocks)
 				.where(eq(schema.imageContentBlocks.id, imageBlock.id));
 
+			// Both block types resolve captions the same way, so the image block's caption and its
+			// `captionMode` carry over untouched — a credit set on the float is not lost in the swap.
 			await tx.insert(schema.mediaTextContentBlocks).values({
 				id: imageBlock.id,
 				imageId: imageBlock.imageId,
 				side: pair.side,
 				content: richTextBlock.content,
+				caption: imageBlock.caption,
+				captionMode: imageBlock.captionMode,
 			});
 
 			await tx

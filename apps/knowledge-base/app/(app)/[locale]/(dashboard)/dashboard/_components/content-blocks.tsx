@@ -171,6 +171,9 @@ interface MediaTextContentBlockItem {
 		imageKey?: string;
 		imageUrl?: string;
 		alt?: string | null;
+		assetCaption?: JSONContent | null;
+		caption?: JSONContent | null;
+		captionMode?: ImageCaptionMode;
 		side?: "start" | "end";
 		content?: JSONContent;
 	};
@@ -1320,6 +1323,14 @@ function MediaTextContentBlockPanel({
 	const imageKey = item.content?.imageKey;
 	const imageUrl = item.content?.imageUrl;
 	const side = item.content?.side ?? "start";
+	const caption = item.content?.caption;
+	const captionMode =
+		item.content?.captionMode ?? (item.content?.caption != null ? "override" : "inherit");
+	const { caption: resolvedCaption } = resolveImageCaption({
+		assetCaption: item.content?.assetCaption,
+		blockCaption: caption,
+		captionMode,
+	});
 
 	return (
 		<div className="flex flex-col gap-y-4">
@@ -1335,7 +1346,14 @@ function MediaTextContentBlockPanel({
 					defaultPrefix="images"
 					initialAssets={initialAssets ?? []}
 					onSelect={(key, url, asset) => {
-						onChange({ ...item.content, imageKey: key, imageUrl: url, alt: asset?.alt ?? null });
+						onChange({
+							...item.content,
+							imageKey: key,
+							imageUrl: url,
+							alt: asset?.alt ?? null,
+							assetCaption: asset?.caption ?? null,
+							captionMode,
+						});
 					}}
 					prefixes={["avatars", "images", "logos"]}
 				/>
@@ -1360,6 +1378,41 @@ function MediaTextContentBlockPanel({
 					<ToggleGroupItem id="start">{t("Left")}</ToggleGroupItem>
 					<ToggleGroupItem id="end">{t("Right")}</ToggleGroupItem>
 				</ToggleGroup>
+			</div>
+			<div className="flex flex-col gap-y-1">
+				<span className={labelStyles()}>{t("Caption behavior")}</span>
+				<ToggleGroup
+					aria-label={t("Caption behavior")}
+					disallowEmptySelection={true}
+					onSelectionChange={(keys) => {
+						const mode = [...keys][0] as ImageCaptionMode | undefined;
+						if (mode != null) {
+							onChange({ ...item.content, captionMode: mode });
+						}
+					}}
+					selectedKeys={[captionMode]}
+					size="sm"
+				>
+					<ToggleGroupItem id="inherit">{t("Use asset caption")}</ToggleGroupItem>
+					<ToggleGroupItem id="override">{t("Custom caption")}</ToggleGroupItem>
+					<ToggleGroupItem id="hidden">{t("No caption")}</ToggleGroupItem>
+				</ToggleGroup>
+				{captionMode === "override" ? (
+					<InlineRichTextEditor
+						aria-label={t("Custom caption")}
+						content={caption ?? undefined}
+						onChange={(value) => {
+							onChange({
+								...item.content,
+								caption: isEmptyRichTextDocument(value) ? null : value,
+								captionMode: "override",
+							});
+						}}
+					/>
+				) : null}
+				{captionMode === "inherit" && !isEmptyRichTextDocument(resolvedCaption) ? (
+					<InlineRichTextRenderer content={resolvedCaption!} />
+				) : null}
 			</div>
 			<div className="flex flex-col gap-y-1">
 				<Label>{t("Text")}</Label>

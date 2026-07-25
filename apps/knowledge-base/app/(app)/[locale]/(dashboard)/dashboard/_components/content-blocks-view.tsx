@@ -11,6 +11,7 @@ import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 import { renderToReactElement } from "@tiptap/static-renderer/pm/react";
 import type { ReactNode } from "react";
+import { twMerge } from "tailwind-merge";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { getEmbedUrl } from "@/lib/embed-url";
@@ -43,13 +44,14 @@ const richTextRenderOptions = { nodeMapping: { buttonLink: renderButtonLinkNode 
 /** Renders a richtext caption inside a `figcaption`, or nothing when the caption is empty. */
 function CaptionFigcaption({
 	caption,
-}: Readonly<{ caption: JSONContent | null | undefined }>): ReactNode {
+	className,
+}: Readonly<{ caption: JSONContent | null | undefined; className?: string }>): ReactNode {
 	if (isEmptyRichTextDocument(caption)) {
 		return null;
 	}
 
 	return (
-		<figcaption>
+		<figcaption className={className}>
 			<InlineRichTextRenderer content={caption!} />
 		</figcaption>
 	);
@@ -66,21 +68,67 @@ function isFloatedImage(contentBlock: ContentBlock | undefined): boolean {
 	);
 }
 
+/** The heading level a `rich_text` block ends on, if it ends on a heading at all. */
+function trailingHeadingLevel(contentBlock: ContentBlock | undefined): number | undefined {
+	if (contentBlock?.type !== "rich_text") {
+		return undefined;
+	}
+
+	const nodes = contentBlock.content?.content ?? [];
+	const lastNode = nodes.at(-1);
+	if (lastNode?.type !== "heading") {
+		return undefined;
+	}
+
+	const level: unknown = lastNode.attrs?.level;
+	return typeof level === "number" ? level : 2;
+}
+
+/**
+ * Block-start margin for one block, given the block before it.
+ *
+ * A heading introduces what follows it, but authors routinely end a `rich_text` block on one and
+ * put the content it introduces in the next block (an image, a media_text speaker bio). The full
+ * inter-block gap then reads as a gap _after_ the heading, detaching it from its own section — and
+ * the heading's own bottom margin cannot take over, because `.richtext-sm > :last-child` zeroes it
+ * out. So a heading-terminated block hands the spacing back to the typographic scale: the same
+ * `margin-bottom` that heading level carries inside the richtext (`0.8em` at h2, `~0.5em` below).
+ */
+function blockSpacingClassName(previousBlock: ContentBlock | undefined): string | undefined {
+	if (previousBlock == null) {
+		return undefined;
+	}
+
+	const level = trailingHeadingLevel(previousBlock);
+	if (level == null) {
+		return "mbs-8";
+	}
+
+	return level <= 2 ? "mbs-4" : "mbs-2";
+}
+
 export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewProps>): ReactNode {
 	// Normal document flow (not a flex column) so a floated `image` block's float escapes into the
 	// following block and the text wraps around it. The immediately-following `rich_text` is allowed
 	// to wrap; every other block clears, so a float can never overlap a structural block below it.
 	// `@container` makes the float/full-width switch depend on the content column's width (via a
 	// container query on floated images), not on the viewport.
+	//
+	// Spacing is per-block rather than a blanket `space-y-8` on the container: a uniform gap cannot
+	// tell "next section" from "the content this heading introduces" — see `blockSpacingClassName`.
 	return (
-		<div className="@container space-y-8">
+		<div className="@container">
 			{contentBlocks.map((contentBlock, index) => {
+				const previousBlock = contentBlocks[index - 1];
 				const wrapsPrecedingFloat =
-					contentBlock.type === "rich_text" && isFloatedImage(contentBlocks[index - 1]);
+					contentBlock.type === "rich_text" && isFloatedImage(previousBlock);
 
 				return (
 					<div
-						className={wrapsPrecedingFloat ? undefined : "clear-both"}
+						className={twMerge(
+							wrapsPrecedingFloat ? undefined : "clear-both",
+							blockSpacingClassName(previousBlock),
+						)}
 						key={String(contentBlock.id)}
 					>
 						<ContentBlockView contentBlock={contentBlock} />
@@ -320,6 +368,14 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			const alt = contentBlock.content?.alt;
 			const side = contentBlock.content?.side ?? "start";
 			const content = contentBlock.content?.content;
+			const captionMode =
+				contentBlock.content?.captionMode ??
+				(contentBlock.content?.caption != null ? "override" : "inherit");
+			const { caption } = resolveImageCaption({
+				assetCaption: contentBlock.content?.assetCaption,
+				blockCaption: contentBlock.content?.caption,
+				captionMode,
+			});
 
 			if (imageUrl == null || !imageUrl || content == null) {
 				return null;
@@ -331,16 +387,19 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 						className={
 							// `mbs-1.5` nudges the image down to the text's cap height: the first line's
 							// half-leading otherwise makes the top-aligned text look lower than the image.
+							// The image keeps the fixed square size; the figure grows for the caption, so
+							// a credit sits under the image inside the same 9rem column.
 							side === "end"
-								? "mbs-1.5 mbe-2 ms-4 float-end block-36 inline-36"
-								: "mbs-1.5 mbe-2 me-4 float-start block-36 inline-36"
+								? "mbs-1.5 mbe-2 ms-4 float-end inline-36"
+								: "mbs-1.5 mbe-2 me-4 float-start inline-36"
 						}
 					>
 						<img
 							alt={alt ?? ""}
-							className="block-full inline-full rounded-lg object-cover"
+							className="block-36 inline-full rounded-lg object-cover"
 							src={imageUrl}
 						/>
+						<CaptionFigcaption caption={caption} className="mbs-1 text-xs text-muted-fg" />
 					</figure>
 					<div className="richtext richtext-sm">
 						{renderToReactElement({

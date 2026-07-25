@@ -255,6 +255,11 @@ export const mediaTextSideEnum = ["start", "end"] as const;
  * so authors can't reach for arbitrary free-form layout. Hand-authored, not a migration target:
  * WordPress `alignleft`/`alignright` floats are presentational and migrate to an `image` block's
  * `float-start`/`float-end` layout instead (see `imageLayoutEnum`).
+ *
+ * The bound text is not a substitute for a caption: a speaker's biography reads as prose, while the
+ * photo credit belongs to the image. So `caption`/`captionMode` work exactly as on `image` blocks
+ * (see `imageCaptionModesEnum`) — inherit the asset's caption, override it for this one placement,
+ * or suppress it.
  */
 export const mediaTextContentBlocks = p.snakeCase.table(
 	"content_blocks_type_media_text",
@@ -269,10 +274,19 @@ export const mediaTextContentBlocks = p.snakeCase.table(
 			.references(() => assets.id),
 		side: p.text("side", { enum: mediaTextSideEnum }).notNull().default("start"),
 		content: p.jsonb("content").$type<JSONContent>().notNull(),
+		caption: p.jsonb("caption").$type<JSONContent>(),
+		captionMode: p
+			.text("caption_mode", { enum: imageCaptionModesEnum })
+			.notNull()
+			.default("inherit"),
 		...f.timestamps(),
 	},
 	(t) => [
 		p.check("content_blocks_type_media_text_side_enum_check", inArray(t.side, mediaTextSideEnum)),
+		p.check(
+			"content_blocks_type_media_text_caption_mode_enum_check",
+			inArray(t.captionMode, imageCaptionModesEnum),
+		),
 	],
 );
 
