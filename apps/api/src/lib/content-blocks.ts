@@ -76,6 +76,8 @@ export const MediaTextContentBlockSchema = v.object({
 	}),
 	side: v.picklist(schema.mediaTextSideEnum),
 	content: v.any(),
+	caption: v.nullable(v.any()),
+	captionSource: v.nullable(v.picklist(["asset", "block"])),
 });
 
 export const ContentBlockSchema = v.union([
@@ -131,8 +133,11 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			accordionItems: schema.accordionContentBlocks.items,
 			mediaTextSide: schema.mediaTextContentBlocks.side,
 			mediaTextContent: schema.mediaTextContentBlocks.content,
+			mediaTextCaption: schema.mediaTextContentBlocks.caption,
+			mediaTextCaptionMode: schema.mediaTextContentBlocks.captionMode,
 			mediaTextImageKey: mediaTextAssets.key,
 			mediaTextImageAlt: mediaTextAssets.alt,
+			mediaTextImageCaption: mediaTextAssets.caption,
 			mediaTextLicenseName: mediaTextLicenses.name,
 			mediaTextLicenseUrl: mediaTextLicenses.url,
 		})
@@ -235,8 +240,11 @@ function normalizeRow(row: {
 	accordionItems: unknown;
 	mediaTextSide: (typeof schema.mediaTextSideEnum)[number] | null;
 	mediaTextContent: JSONContent | null;
+	mediaTextCaption: JSONContent | null;
+	mediaTextCaptionMode: ImageCaptionMode | null;
 	mediaTextImageKey: string | null;
 	mediaTextImageAlt: string | null;
+	mediaTextImageCaption: JSONContent | null;
 	mediaTextLicenseName: string | null;
 	mediaTextLicenseUrl: string | null;
 }): ContentBlock {
@@ -328,19 +336,28 @@ function normalizeRow(row: {
 				toImageAsset({
 					key: row.mediaTextImageKey!,
 					alt: row.mediaTextImageAlt,
-					caption: null,
+					caption: row.mediaTextImageCaption,
 					licenseName: row.mediaTextLicenseName,
 					licenseUrl: row.mediaTextLicenseUrl,
 				}),
 				imageWidth.avatar,
 			);
-			const { caption: _caption, ...image } = assetImage;
+			const { caption: _assetCaption, ...image } = assetImage;
+			const captionMode =
+				row.mediaTextCaptionMode ?? (row.mediaTextCaption != null ? "override" : "inherit");
+			const { caption, source: captionSource } = resolveImageCaption({
+				assetCaption: row.mediaTextImageCaption,
+				blockCaption: row.mediaTextCaption,
+				captionMode,
+			});
 
 			return {
 				type: "media_text",
 				image,
 				side: row.mediaTextSide!,
 				content: row.mediaTextContent,
+				caption,
+				captionSource,
 			};
 		}
 		default: {

@@ -43,13 +43,14 @@ const richTextRenderOptions = { nodeMapping: { buttonLink: renderButtonLinkNode 
 /** Renders a richtext caption inside a `figcaption`, or nothing when the caption is empty. */
 function CaptionFigcaption({
 	caption,
-}: Readonly<{ caption: JSONContent | null | undefined }>): ReactNode {
+	className,
+}: Readonly<{ caption: JSONContent | null | undefined; className?: string }>): ReactNode {
 	if (isEmptyRichTextDocument(caption)) {
 		return null;
 	}
 
 	return (
-		<figcaption>
+		<figcaption className={className}>
 			<InlineRichTextRenderer content={caption!} />
 		</figcaption>
 	);
@@ -320,6 +321,14 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			const alt = contentBlock.content?.alt;
 			const side = contentBlock.content?.side ?? "start";
 			const content = contentBlock.content?.content;
+			const captionMode =
+				contentBlock.content?.captionMode ??
+				(contentBlock.content?.caption != null ? "override" : "inherit");
+			const { caption } = resolveImageCaption({
+				assetCaption: contentBlock.content?.assetCaption,
+				blockCaption: contentBlock.content?.caption,
+				captionMode,
+			});
 
 			if (imageUrl == null || !imageUrl || content == null) {
 				return null;
@@ -331,16 +340,19 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 						className={
 							// `mbs-1.5` nudges the image down to the text's cap height: the first line's
 							// half-leading otherwise makes the top-aligned text look lower than the image.
+							// The image keeps the fixed square size; the figure grows for the caption, so
+							// a credit sits under the image inside the same 9rem column.
 							side === "end"
-								? "mbs-1.5 mbe-2 ms-4 float-end block-36 inline-36"
-								: "mbs-1.5 mbe-2 me-4 float-start block-36 inline-36"
+								? "mbs-1.5 mbe-2 ms-4 float-end inline-36"
+								: "mbs-1.5 mbe-2 me-4 float-start inline-36"
 						}
 					>
 						<img
 							alt={alt ?? ""}
-							className="block-full inline-full rounded-lg object-cover"
+							className="block-36 inline-full rounded-lg object-cover"
 							src={imageUrl}
 						/>
+						<CaptionFigcaption caption={caption} className="mbs-1 text-xs text-muted-fg" />
 					</figure>
 					<div className="richtext richtext-sm">
 						{renderToReactElement({
