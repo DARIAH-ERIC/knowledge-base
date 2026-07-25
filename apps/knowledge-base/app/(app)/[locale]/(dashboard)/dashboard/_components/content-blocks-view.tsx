@@ -11,7 +11,6 @@ import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 import { renderToReactElement } from "@tiptap/static-renderer/pm/react";
 import type { ReactNode } from "react";
-import { twMerge } from "tailwind-merge";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { getEmbedUrl } from "@/lib/embed-url";
@@ -68,43 +67,48 @@ function isFloatedImage(contentBlock: ContentBlock | undefined): boolean {
 	);
 }
 
-/** The heading level a `rich_text` block ends on, if it ends on a heading at all. */
-function trailingHeadingLevel(contentBlock: ContentBlock | undefined): number | undefined {
-	if (contentBlock?.type !== "rich_text") {
-		return undefined;
+/** An empty spacer paragraph — `{ "type": "paragraph" }`, or one holding only whitespace. */
+function isBlankNode(node: JSONContent): boolean {
+	if (node.type !== "paragraph") {
+		return false;
 	}
 
-	const nodes = contentBlock.content?.content ?? [];
-	const lastNode = nodes.at(-1);
-	if (lastNode?.type !== "heading") {
-		return undefined;
-	}
-
-	const level: unknown = lastNode.attrs?.level;
-	return typeof level === "number" ? level : 2;
+	return (node.content ?? []).every(
+		(child) => child.type === "text" && (child.text ?? "").trim() === "",
+	);
 }
 
 /**
- * Block-start margin for one block, given the block before it.
+ * Drops blank paragraphs from the start and end of a block's document.
  *
- * A heading introduces what follows it, but authors routinely end a `rich_text` block on one and
- * put the content it introduces in the next block (an image, a media_text speaker bio). The full
- * inter-block gap then reads as a gap _after_ the heading, detaching it from its own section — and
- * the heading's own bottom margin cannot take over, because `.richtext-sm > :last-child` zeroes it
- * out. So a heading-terminated block hands the spacing back to the typographic scale: the same
- * `margin-bottom` that heading level carries inside the richtext (`0.8em` at h2, `~0.5em` below).
+ * WordPress left spacer paragraphs all over the imported content. `normalizeRichTextDocument` drops
+ * them, but plenty of stored documents predate that cleanup, and each one rendered at the edge of a
+ * block adds an empty line box _plus_ its collapsed top margin to the gap between blocks — enough
+ * to swamp the block spacing below. Interior blanks are left alone: they sit between paragraphs
+ * that are visible either way, and removing them would change the author's copy rather than the
+ * block-to-block rhythm.
  */
-function blockSpacingClassName(previousBlock: ContentBlock | undefined): string | undefined {
-	if (previousBlock == null) {
-		return undefined;
+function trimBlankEdges(nodes: Array<JSONContent>): Array<JSONContent> {
+	let start = 0;
+	let end = nodes.length;
+
+	while (start < end && isBlankNode(nodes[start]!)) {
+		start += 1;
+	}
+	while (end > start && isBlankNode(nodes[end - 1]!)) {
+		end -= 1;
 	}
 
-	const level = trailingHeadingLevel(previousBlock);
-	if (level == null) {
-		return "mbs-8";
+	return nodes.slice(start, end);
+}
+
+/** A document with `trimBlankEdges` applied, ready to hand to the renderer. */
+export function withTrimmedBlankEdges(document: JSONContent): JSONContent {
+	if (document.content == null) {
+		return document;
 	}
 
-	return level <= 2 ? "mbs-4" : "mbs-2";
+	return { ...document, content: trimBlankEdges(document.content) };
 }
 
 export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewProps>): ReactNode {
@@ -114,21 +118,19 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 	// `@container` makes the float/full-width switch depend on the content column's width (via a
 	// container query on floated images), not on the viewport.
 	//
-	// Spacing is per-block rather than a blanket `space-y-8` on the container: a uniform gap cannot
-	// tell "next section" from "the content this heading introduces" — see `blockSpacingClassName`.
+	// Blocks are a storage split of one document, so the boundary should be invisible: `space-y-4`
+	// is the same 1rem the richtext scale puts between paragraphs (and, after margin collapsing,
+	// after a heading). Each block zeroes its own first/last child margins, so this gap is the whole
+	// spacing story — no per-block or neighbour-aware adjustment.
 	return (
-		<div className="@container">
+		<div className="@container space-y-4">
 			{contentBlocks.map((contentBlock, index) => {
-				const previousBlock = contentBlocks[index - 1];
 				const wrapsPrecedingFloat =
-					contentBlock.type === "rich_text" && isFloatedImage(previousBlock);
+					contentBlock.type === "rich_text" && isFloatedImage(contentBlocks[index - 1]);
 
 				return (
 					<div
-						className={twMerge(
-							wrapsPrecedingFloat ? undefined : "clear-both",
-							blockSpacingClassName(previousBlock),
-						)}
+						className={wrapsPrecedingFloat ? undefined : "clear-both"}
 						key={String(contentBlock.id)}
 					>
 						<ContentBlockView contentBlock={contentBlock} />
@@ -385,13 +387,20 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 				<div className="flow-root">
 					<figure
 						className={
-							// `mbs-1.5` nudges the image down to the text's cap height: the first line's
-							// half-leading otherwise makes the top-aligned text look lower than the image.
-							// The image keeps the fixed square size; the figure grows for the caption, so
-							// a credit sits under the image inside the same 9rem column.
+							// The image keeps its fixed square size; the figure grows for the caption, so a
+							// credit sits under the image inside the same 9rem column.
+							//
+							// It only floats once the content column (a `@container`, not the viewport) can
+							// spare the width: below `@sm` (≈24rem) a 9rem float plus its gutter leaves the
+							// text too narrow to wrap cleanly, so the pairing stacks instead — image on its
+							// own line, text below. Unlike an `image` block it never stretches to fill the
+							// column: this is a thumbnail (a portrait, a logo), and upscaling it would look
+							// worse than the narrow column does. `mbs-1.5` nudges the floated image down to
+							// the text's cap height — the first line's half-leading otherwise makes the
+							// top-aligned text look lower than the image — so it rides along with the float.
 							side === "end"
-								? "mbs-1.5 mbe-2 ms-4 float-end inline-36"
-								: "mbs-1.5 mbe-2 me-4 float-start inline-36"
+								? "mbe-2 inline-36 @sm:mbs-1.5 @sm:ms-4 @sm:float-end"
+								: "mbe-2 inline-36 @sm:mbs-1.5 @sm:me-4 @sm:float-start"
 						}
 					>
 						<img
@@ -403,7 +412,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 					</figure>
 					<div className="richtext richtext-sm">
 						{renderToReactElement({
-							content,
+							content: withTrimmedBlankEdges(content),
 							extensions: richTextExtensions,
 							options: richTextRenderOptions,
 						})}
@@ -420,7 +429,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			return (
 				<div className="richtext richtext-sm">
 					{renderToReactElement({
-						content: contentBlock.content,
+						content: withTrimmedBlankEdges(contentBlock.content),
 						extensions: richTextExtensions,
 						options: richTextRenderOptions,
 					})}
