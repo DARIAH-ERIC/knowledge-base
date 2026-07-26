@@ -235,17 +235,18 @@ async function annotateAssetLinks<T>(db: Database | Transaction, value: T): Prom
 	const assets = await getLinkTargetAssets(db, keys);
 
 	const resolved = new Map(
-		[...assets].map(([key, asset]) => {
-			return [
-				key,
-				{
-					url: getAssetDownloadUrl(key),
-					filename: getDownloadFilename(asset),
-					mimeType: asset.mimeType,
-					size: asset.size,
-				},
-			] as const;
-		}),
+		[...assets].map(
+			([key, asset]) =>
+				[
+					key,
+					{
+						url: getAssetDownloadUrl(key),
+						filename: getDownloadFilename(asset),
+						mimeType: asset.mimeType,
+						size: asset.size,
+					},
+				] as const,
+		),
 	);
 
 	return annotateLinkTargets(value, resolved);
