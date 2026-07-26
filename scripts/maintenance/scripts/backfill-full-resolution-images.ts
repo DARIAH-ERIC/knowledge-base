@@ -235,9 +235,7 @@ async function findCandidateAssets(): Promise<Array<CandidateAsset>> {
 		.where(like(schema.assets.label, "%/wp-content/uploads/%"))
 		.orderBy(schema.assets.label);
 
-	return assets.filter((asset) => 
-		derivativeUrlPattern.test(normaliseImageUrl(asset.label))
-	);
+	return assets.filter((asset) => derivativeUrlPattern.test(normaliseImageUrl(asset.label)));
 }
 
 type SkipReason =

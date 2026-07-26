@@ -247,10 +247,18 @@ async function findTargets(): Promise<Array<Target>> {
 	]);
 
 	return [
-		...richText.map((row): Target => {return { table: "rich_text", ...row }}),
-		...callout.map((row): Target => {return { table: "callout", ...row }}),
-		...mediaText.map((row): Target => {return { table: "media_text", ...row }}),
-		...accordion.map((row): Target => {return { table: "accordion", ...row }}),
+		...richText.map((row): Target => {
+			return { table: "rich_text", ...row };
+		}),
+		...callout.map((row): Target => {
+			return { table: "callout", ...row };
+		}),
+		...mediaText.map((row): Target => {
+			return { table: "media_text", ...row };
+		}),
+		...accordion.map((row): Target => {
+			return { table: "accordion", ...row };
+		}),
 	];
 }
 
