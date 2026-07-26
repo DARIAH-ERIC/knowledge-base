@@ -67,50 +67,6 @@ function isFloatedImage(contentBlock: ContentBlock | undefined): boolean {
 	);
 }
 
-/** An empty spacer paragraph — `{ "type": "paragraph" }`, or one holding only whitespace. */
-function isBlankNode(node: JSONContent): boolean {
-	if (node.type !== "paragraph") {
-		return false;
-	}
-
-	return (node.content ?? []).every(
-		(child) => child.type === "text" && (child.text ?? "").trim() === "",
-	);
-}
-
-/**
- * Drops blank paragraphs from the start and end of a block's document.
- *
- * WordPress left spacer paragraphs all over the imported content. `normalizeRichTextDocument` drops
- * them, but plenty of stored documents predate that cleanup, and each one rendered at the edge of a
- * block adds an empty line box _plus_ its collapsed top margin to the gap between blocks — enough
- * to swamp the block spacing below. Interior blanks are left alone: they sit between paragraphs
- * that are visible either way, and removing them would change the author's copy rather than the
- * block-to-block rhythm.
- */
-function trimBlankEdges(nodes: Array<JSONContent>): Array<JSONContent> {
-	let start = 0;
-	let end = nodes.length;
-
-	while (start < end && isBlankNode(nodes[start]!)) {
-		start += 1;
-	}
-	while (end > start && isBlankNode(nodes[end - 1]!)) {
-		end -= 1;
-	}
-
-	return nodes.slice(start, end);
-}
-
-/** A document with `trimBlankEdges` applied, ready to hand to the renderer. */
-export function withTrimmedBlankEdges(document: JSONContent): JSONContent {
-	if (document.content == null) {
-		return document;
-	}
-
-	return { ...document, content: trimBlankEdges(document.content) };
-}
-
 export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewProps>): ReactNode {
 	// Normal document flow (not a flex column) so a floated `image` block's float escapes into the
 	// following block and the text wraps around it. The immediately-following `rich_text` is allowed
@@ -412,7 +368,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 					</figure>
 					<div className="richtext richtext-sm">
 						{renderToReactElement({
-							content: withTrimmedBlankEdges(content),
+							content,
 							extensions: richTextExtensions,
 							options: richTextRenderOptions,
 						})}
@@ -429,7 +385,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			return (
 				<div className="richtext richtext-sm">
 					{renderToReactElement({
-						content: withTrimmedBlankEdges(contentBlock.content),
+						content: contentBlock.content,
 						extensions: richTextExtensions,
 						options: richTextRenderOptions,
 					})}

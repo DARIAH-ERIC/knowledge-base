@@ -11,7 +11,29 @@ dashboard counterpart — they exist precisely because the work needs a reviewed
 
 ## scripts
 
-The two `data:backfill:*` scripts share a shape — propose a value for one column by matching local
+### versions
+
+Every script here writes to **all** of a document's versions, draft and published alike, and the
+helper in `lib/entity-versions.ts` is how the content-block ones group their rows to do it.
+
+Scoping a maintenance script to `entity_status = 'published'` reads as the safe choice and is the
+opposite. The CMS edit pages call `ensureDraftVersion` and render the draft
+(`latestEditableEntityVersionWhere` prefers it), so a fix that lands only on the published version is
+invisible to editors — and is undone the next time somebody opens that item and saves, because the
+untouched draft then publishes over it. Nothing surfaces the divergence either: these scripts touch
+`content_blocks` and the subtype tables but never `entity_versions`, so `updated_at` does not move
+and `document_lifecycle.state` still reads `published`.
+
+That last property is also what makes writing to the draft safe: it cannot flip an item to
+`published_with_changes` or manufacture a draft that an editor then has to reconcile.
+
+Matching is done **per version**, never across versions pooled together. The guards these scripts
+rely on — "exactly one block uses this image", "exactly one node run matches this table", "this field
+has no accordion yet", block positions — are properties of a single version's block list. Evaluated
+over a draft and a published version at once they would double-count and reject nearly everything as
+ambiguous.
+
+The two `data:backfill:institution-*` scripts share a shape — propose a value for one column by matching local
 records against an external register, write every proposal to a TSV, apply only the unambiguous ones
 — and share the helpers for it in `lib/`. Both write to **every version** of a unit, draft and
 published alike: these are external identifiers with no editorial content, and leaving one on a draft

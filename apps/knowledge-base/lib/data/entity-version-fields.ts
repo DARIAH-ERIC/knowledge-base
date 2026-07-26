@@ -1,5 +1,5 @@
 import { assert } from "@acdh-oeaw/lib";
-import { isEmptyRichTextDocument } from "@dariah-eric/database/rich-text";
+import { isEmptyRichTextDocument, withoutBlankParagraphs } from "@dariah-eric/database/rich-text";
 import * as schema from "@dariah-eric/database/schema";
 
 import type { ContentBlockInput } from "@/lib/content-block-input";
@@ -54,8 +54,11 @@ export async function upsertRichTextEntityVersionField(
 	tx: Transaction,
 	entityVersionId: string,
 	fieldName: string,
-	content: schema.RichTextContentBlock["content"],
+	rawContent: schema.RichTextContentBlock["content"],
 ): Promise<void> {
+	// Spacer paragraphs are stripped before the empty check, so a field left holding only blank lines
+	// drops its content block instead of storing them.
+	const content = withoutBlankParagraphs(rawContent);
 	const field = await ensureEntityVersionField(tx, entityVersionId, fieldName);
 
 	const richTextType = await tx.query.contentBlockTypes.findFirst({

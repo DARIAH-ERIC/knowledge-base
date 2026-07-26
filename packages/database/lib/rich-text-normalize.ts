@@ -162,6 +162,14 @@ function normalizeInlineChildren(
 const DROP_WHEN_EMPTY = new Set(["listItem", "bulletList", "orderedList", "blockquote"]);
 
 /**
+ * Table cells are `block+` in the schema and cannot be dropped when cleaning empties them: a cell
+ * removed from one row leaves it short of its siblings and corrupts the table. An empty cell is
+ * legitimate content — a gap in a data table — so it keeps a placeholder paragraph instead, which
+ * is exactly what an empty cell holds in the editor.
+ */
+const KEEP_PLACEHOLDER_WHEN_EMPTY = new Set(["tableCell", "tableHeader"]);
+
+/**
  * Recursively cleans a node. Returns `null` when the node should be dropped: an emptied paragraph
  * or heading, or a list/list-item/blockquote that cleaning has left with no content.
  */
@@ -196,8 +204,13 @@ function cleanNode(node: JSONContent): JSONContent | null {
 
 	// Drop containers that cleaning has left empty — an empty bullet, list, or quote is noise.
 	// `doc` is never dropped; it stays as an empty document for the caller to handle.
-	if (children.length === 0 && cleanedNode.type != null && DROP_WHEN_EMPTY.has(cleanedNode.type)) {
-		return null;
+	if (children.length === 0 && cleanedNode.type != null) {
+		if (DROP_WHEN_EMPTY.has(cleanedNode.type)) {
+			return null;
+		}
+		if (KEEP_PLACEHOLDER_WHEN_EMPTY.has(cleanedNode.type)) {
+			return { ...cleanedNode, content: [{ type: "paragraph" }] };
+		}
 	}
 
 	return { ...cleanedNode, content: children };

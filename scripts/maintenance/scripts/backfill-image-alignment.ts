@@ -7,6 +7,7 @@ import { and, eq } from "@dariah-eric/database/sql";
 import slugify from "@sindresorhus/slugify";
 
 import { env } from "../config/env.config";
+import { type EntityStatusType, groupByEntityVersion } from "../lib/entity-versions";
 import { writeTsvReport } from "../lib/tsv-report";
 
 /**
@@ -135,14 +136,22 @@ interface ImageBlock {
 	layout: ImageLayout;
 }
 
-/** Published `news` entities' `image` content blocks, keyed by entity slug. */
-async function findNewsImageBlocks(): Promise<
-	Map<string, { documentId: string; blocks: Array<ImageBlock> }>
-> {
+/** One lifecycle version's `image` content blocks. */
+interface ImageVersion {
+	documentId: string;
+	fieldId: string;
+	status: EntityStatusType;
+	blocks: Array<ImageBlock>;
+}
+
+/** `news` entities' `image` content blocks, per version, keyed by entity slug. */
+async function findNewsImageBlocks(): Promise<Map<string, Array<ImageVersion>>> {
 	const rows = await db
 		.select({
 			documentId: schema.entities.id,
 			slug: schema.entities.slug,
+			status: schema.entityStatus.type,
+			fieldId: schema.contentBlocks.fieldId,
 			blockId: schema.contentBlocks.id,
 			imageAssetLabel: schema.assets.label,
 			layout: schema.imageContentBlocks.layout,
@@ -162,31 +171,35 @@ async function findNewsImageBlocks(): Promise<
 		.where(
 			and(
 				eq(schema.entityTypes.type, "news"),
-				eq(schema.entityStatus.type, "published"),
 				eq(schema.entityTypesFieldsNames.fieldName, "content"),
 			),
 		)
-		.orderBy(schema.entities.slug, schema.contentBlocks.position);
+		.orderBy(schema.entities.slug, schema.entityStatus.type, schema.contentBlocks.position);
 
-	const bySlug = new Map<string, { documentId: string; blocks: Array<ImageBlock> }>();
-
-	for (const row of rows) {
-		if (!bySlug.has(row.slug)) {
-			bySlug.set(row.slug, { documentId: row.documentId, blocks: [] });
-		}
-		bySlug.get(row.slug)!.blocks.push({
-			blockId: row.blockId,
-			imageAssetLabel: row.imageAssetLabel,
-			layout: row.layout,
-		});
-	}
-
-	return bySlug;
+	return groupByEntityVersion(rows, {
+		documentKey: (row) => row.slug,
+		create: (row): ImageVersion => {
+			return {
+				documentId: row.documentId,
+				fieldId: row.fieldId,
+				status: row.status,
+				blocks: [],
+			};
+		},
+		add: (version, row) => {
+			version.blocks.push({
+				blockId: row.blockId,
+				imageAssetLabel: row.imageAssetLabel,
+				layout: row.layout,
+			});
+		},
+	});
 }
 
 interface Candidate {
 	entitySlug: string;
 	entityDocumentId: string;
+	entityVersionStatus: EntityStatusType;
 	layout: WordPressFloatedImage["layout"];
 	wpImageUrl: string;
 	imageContentBlockId: string;
@@ -194,7 +207,7 @@ interface Candidate {
 
 function findCandidates(
 	posts: Array<WordPressPost>,
-	imagesBySlug: Map<string, { documentId: string; blocks: Array<ImageBlock> }>,
+	imagesBySlug: Map<string, Array<ImageVersion>>,
 ): Array<Candidate> {
 	const candidates: Array<Candidate> = [];
 
@@ -205,30 +218,38 @@ function findCandidates(
 		}
 
 		const slug = normalizeWordPressSlug(post.slug);
-		const entity = imagesBySlug.get(slug);
-		if (entity == null) {
+		const versions = imagesBySlug.get(slug);
+		if (versions == null) {
 			continue;
 		}
 
-		for (const floated of floatedImages) {
-			const matches = entity.blocks.filter((block) => block.imageAssetLabel === floated.imageUrl);
-			// Ambiguous (same image reused) or unmatched — skip rather than guess.
-			if (matches.length !== 1) {
-				continue;
-			}
-			const [imageBlock] = matches;
-			// An editor has already chosen a layout for this block; leave it be.
-			if (imageBlock!.layout !== "default") {
-				continue;
-			}
+		// Each version is matched on its own, so "exactly one block uses this image" is judged within
+		// one version rather than across draft and published together — which would always be
+		// ambiguous for a document that has both.
+		for (const version of versions) {
+			for (const floated of floatedImages) {
+				const matches = version.blocks.filter(
+					(block) => block.imageAssetLabel === floated.imageUrl,
+				);
+				// Ambiguous (same image reused) or unmatched — skip rather than guess.
+				if (matches.length !== 1) {
+					continue;
+				}
+				const [imageBlock] = matches;
+				// An editor has already chosen a layout for this block; leave it be.
+				if (imageBlock!.layout !== "default") {
+					continue;
+				}
 
-			candidates.push({
-				entitySlug: slug,
-				entityDocumentId: entity.documentId,
-				layout: floated.layout,
-				wpImageUrl: floated.imageUrl,
-				imageContentBlockId: imageBlock!.blockId,
-			});
+				candidates.push({
+					entitySlug: slug,
+					entityDocumentId: version.documentId,
+					entityVersionStatus: version.status,
+					layout: floated.layout,
+					wpImageUrl: floated.imageUrl,
+					imageContentBlockId: imageBlock!.blockId,
+				});
+			}
 		}
 	}
 
@@ -238,6 +259,7 @@ function findCandidates(
 const reportColumns = [
 	"entity_slug",
 	"entity_document_id",
+	"entity_version_status",
 	"layout",
 	"wp_image_url",
 	"image_content_block_id",
@@ -250,6 +272,7 @@ async function writeReport(candidates: Array<Candidate>): Promise<void> {
 		candidates.map((candidate) => [
 			candidate.entitySlug,
 			candidate.entityDocumentId,
+			candidate.entityVersionStatus,
 			candidate.layout,
 			candidate.wpImageUrl,
 			candidate.imageContentBlockId,
@@ -277,7 +300,7 @@ async function applyCandidates(candidates: Array<Candidate>): Promise<number> {
 
 		if (result.rowCount === 0) {
 			log.warn(
-				`Skipping ${candidate.entitySlug} (${candidate.wpImageUrl}): block missing or already has a non-default layout.`,
+				`Skipping ${candidate.entitySlug} (${candidate.entityVersionStatus}, ${candidate.wpImageUrl}): block missing or already has a non-default layout.`,
 			);
 			continue;
 		}
@@ -302,7 +325,7 @@ async function main(): Promise<void> {
 	await writeReport(candidates);
 
 	log.info(
-		`${String(candidates.length)} floated images found across ${String(posts.length)} WordPress posts.`,
+		`${String(candidates.length)} image blocks to update (counting each version) across ${String(posts.length)} WordPress posts.`,
 	);
 	log.info(`Report written to \`${reportFilePath}\`.`);
 
