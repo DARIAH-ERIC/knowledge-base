@@ -49,7 +49,7 @@ import {
 	ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
 import type { JSONContent } from "@tiptap/core";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, PaperclipIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { Fragment, type KeyboardEvent, type ReactNode, useRef, useState } from "react";
 import { type Key, useDrag, useDrop } from "react-aria";
@@ -670,6 +670,27 @@ function ContentBlockPanel({
 											<RichTextEditorToolbarButton
 												aria-label="Insert image"
 												icon={ImageIcon}
+												onClick={open}
+											/>
+										)}
+									/>
+								)
+							: undefined
+					}
+					renderDocumentPicker={
+						initialAssets != null
+							? (link) => (
+									<MediaLibraryDialog
+										defaultPrefix="documents"
+										initialAssets={initialAssets}
+										onSelect={(key, _url, asset) => {
+											link(key, asset?.label ?? key);
+										}}
+										prefixes={["documents"]}
+										trigger={({ open }) => (
+											<RichTextEditorToolbarButton
+												aria-label="Link to document"
+												icon={PaperclipIcon}
 												onClick={open}
 											/>
 										)}

@@ -12,6 +12,7 @@ import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
 
 import { env } from "../config/env.config";
+import { type EntityStatusType, groupByEntityVersion } from "../lib/entity-versions";
 import { writeTsvReport } from "../lib/tsv-report";
 
 /**
@@ -231,9 +232,12 @@ interface Target {
 	nodes: Array<RtNode>;
 }
 
-interface Entity {
+/** One lifecycle version's rewritable targets, within one document. */
+interface EntityVersion {
 	documentId: string;
 	entityType: EntityType;
+	fieldId: string;
+	status: EntityStatusType;
 	targets: Array<Target>;
 }
 
@@ -243,15 +247,19 @@ interface AccordionItem {
 }
 
 /**
- * Published entities' `rich_text` and `accordion` content blocks for the given types. Keyed by
- * `type/slug`, since slugs are only unique per entity type.
+ * Entities' `rich_text` and `accordion` content blocks for the given types, one entry per lifecycle
+ * version. Keyed by `type/slug`, since slugs are only unique per entity type.
  */
-async function findTargets(entityTypes: Array<EntityType>): Promise<Map<string, Entity>> {
+async function findTargets(
+	entityTypes: Array<EntityType>,
+): Promise<Map<string, Array<EntityVersion>>> {
 	const rows = await db
 		.select({
 			documentId: schema.entities.id,
 			entityType: schema.entityTypes.type,
 			slug: schema.entities.slug,
+			status: schema.entityStatus.type,
+			fieldId: schema.contentBlocks.fieldId,
 			blockId: schema.contentBlocks.id,
 			position: schema.contentBlocks.position,
 			richTextContent: schema.richTextContentBlocks.content,
@@ -278,49 +286,46 @@ async function findTargets(entityTypes: Array<EntityType>): Promise<Map<string, 
 		.where(
 			and(
 				inArray(schema.entityTypes.type, entityTypes),
-				eq(schema.entityStatus.type, "published"),
 				eq(schema.entityTypesFieldsNames.fieldName, "content"),
 			),
 		)
-		.orderBy(schema.entities.slug, schema.contentBlocks.position);
+		.orderBy(schema.entities.slug, schema.entityStatus.type, schema.contentBlocks.position);
 
-	const byKey = new Map<string, Entity>();
-
-	for (const row of rows) {
-		const entityKey = `${row.entityType}/${row.slug}`;
-		if (!byKey.has(entityKey)) {
-			byKey.set(entityKey, {
+	return groupByEntityVersion(rows, {
+		documentKey: (row) => `${row.entityType}/${row.slug}`,
+		create: (row): EntityVersion => {
+			return {
 				documentId: row.documentId,
 				entityType: row.entityType,
+				fieldId: row.fieldId,
+				status: row.status,
 				targets: [],
-			});
-		}
-		const entity = byKey.get(entityKey)!;
-
-		if (row.richTextContent != null) {
-			entity.targets.push({
-				key: `rich_text:${row.blockId}`,
-				blockKind: "rich_text",
-				blockId: row.blockId,
-				nodes: (row.richTextContent as { content?: Array<RtNode> | null }).content ?? [],
-			});
-			continue;
-		}
-
-		if (row.accordionItems != null) {
-			for (const [itemIndex, item] of (row.accordionItems as Array<AccordionItem>).entries()) {
-				entity.targets.push({
-					key: `accordion:${row.blockId}:${String(itemIndex)}`,
-					blockKind: "accordion",
+			};
+		},
+		add: (version, row) => {
+			if (row.richTextContent != null) {
+				version.targets.push({
+					key: `rich_text:${row.blockId}`,
+					blockKind: "rich_text",
 					blockId: row.blockId,
-					itemIndex,
-					nodes: item.content?.content ?? [],
+					nodes: (row.richTextContent as { content?: Array<RtNode> | null }).content ?? [],
 				});
+				return;
 			}
-		}
-	}
 
-	return byKey;
+			if (row.accordionItems != null) {
+				for (const [itemIndex, item] of (row.accordionItems as Array<AccordionItem>).entries()) {
+					version.targets.push({
+						key: `accordion:${row.blockId}:${String(itemIndex)}`,
+						blockKind: "accordion",
+						blockId: row.blockId,
+						itemIndex,
+						nodes: item.content?.content ?? [],
+					});
+				}
+			}
+		},
+	});
 }
 
 /** Start indices where `keys` occurs as a consecutive run in `nodes`. */
@@ -348,6 +353,7 @@ interface TargetUpdate {
 	entitySlug: string;
 	entityType: EntityType;
 	entityDocumentId: string;
+	status: EntityStatusType;
 	target: Target;
 	replacements: Array<Replacement>;
 }
@@ -355,7 +361,7 @@ interface TargetUpdate {
 function findUpdates(
 	items: Array<WordPressItem>,
 	entityTypeOf: (item: WordPressItem) => EntityType,
-	entitiesByKey: Map<string, Entity>,
+	entitiesByKey: Map<string, Array<EntityVersion>>,
 ): Array<TargetUpdate> {
 	const updatesByTarget = new Map<string, TargetUpdate>();
 
@@ -367,55 +373,61 @@ function findUpdates(
 
 		const slug = normalizeWordPressSlug(item.slug);
 		const entityType = entityTypeOf(item);
-		const entity = entitiesByKey.get(`${entityType}/${slug}`);
-		if (entity == null) {
-			log.warn(`Skipping ${entityType}/${slug}: no published entity with content blocks found.`);
+		const versions = entitiesByKey.get(`${entityType}/${slug}`);
+		if (versions == null) {
+			log.warn(`Skipping ${entityType}/${slug}: no entity with content blocks found.`);
 			continue;
 		}
 
-		for (const tableHtml of tables) {
-			const table = parseTable(tableHtml);
-			if (table == null) {
-				continue;
-			}
-
-			// A table restored by an earlier run leaves no flattened run to find, so idempotency falls
-			// out of the matching itself. A table edited in WordPress since the migration lands here
-			// too — reported, never guessed at.
-			const matches: Array<{ target: Target; startIndex: number }> = [];
-			for (const target of entity.targets) {
-				for (const startIndex of findRuns(target.nodes, table.flattenedKeys)) {
-					matches.push({ target, startIndex });
+		// One version at a time, so "exactly one matching node run" is judged within a version. Across
+		// draft and published together a flattened table present in both would always match twice and
+		// be skipped as ambiguous.
+		for (const version of versions) {
+			for (const tableHtml of tables) {
+				const table = parseTable(tableHtml);
+				if (table == null) {
+					continue;
 				}
-			}
 
-			if (matches.length !== 1) {
-				log.warn(
-					`Skipping a ${String(table.rows)}-row table in ${entityType}/${slug}: ${String(matches.length)} matching node runs (expected exactly 1) — "${table.preview}…"`,
-				);
-				continue;
-			}
+				// A table restored by an earlier run leaves no flattened run to find, so idempotency falls
+				// out of the matching itself. A table edited in WordPress since the migration lands here
+				// too — reported, never guessed at.
+				const matches: Array<{ target: Target; startIndex: number }> = [];
+				for (const target of version.targets) {
+					for (const startIndex of findRuns(target.nodes, table.flattenedKeys)) {
+						matches.push({ target, startIndex });
+					}
+				}
 
-			const [match] = matches;
-			assert(match);
+				if (matches.length !== 1) {
+					log.warn(
+						`Skipping a ${String(table.rows)}-row table in ${entityType}/${slug} (${version.status}): ${String(matches.length)} matching node runs (expected exactly 1) — "${table.preview}…"`,
+					);
+					continue;
+				}
 
-			if (!updatesByTarget.has(match.target.key)) {
-				updatesByTarget.set(match.target.key, {
-					entitySlug: slug,
-					entityType,
-					entityDocumentId: entity.documentId,
-					target: match.target,
-					replacements: [],
+				const [match] = matches;
+				assert(match);
+
+				if (!updatesByTarget.has(match.target.key)) {
+					updatesByTarget.set(match.target.key, {
+						entitySlug: slug,
+						entityType,
+						entityDocumentId: version.documentId,
+						status: version.status,
+						target: match.target,
+						replacements: [],
+					});
+				}
+
+				updatesByTarget.get(match.target.key)!.replacements.push({
+					startIndex: match.startIndex,
+					runLength: table.flattenedKeys.length,
+					node: table.node,
+					rows: table.rows,
+					preview: table.preview,
 				});
 			}
-
-			updatesByTarget.get(match.target.key)!.replacements.push({
-				startIndex: match.startIndex,
-				runLength: table.flattenedKeys.length,
-				node: table.node,
-				rows: table.rows,
-				preview: table.preview,
-			});
 		}
 	}
 
@@ -429,7 +441,9 @@ function findUpdates(
 		});
 
 		if (overlaps) {
-			log.warn(`Skipping ${update.entityType}/${update.entitySlug}: overlapping table matches.`);
+			log.warn(
+				`Skipping ${update.entityType}/${update.entitySlug} (${update.status}): overlapping table matches.`,
+			);
 			updatesByTarget.delete(key);
 			continue;
 		}
@@ -459,6 +473,7 @@ const reportColumns = [
 	"entity_type",
 	"entity_slug",
 	"entity_document_id",
+	"entity_version_status",
 	"block_kind",
 	"block_id",
 	"accordion_item_index",
@@ -477,6 +492,7 @@ async function writeReport(updates: Array<TargetUpdate>): Promise<void> {
 				update.entityType,
 				update.entitySlug,
 				update.entityDocumentId,
+				update.status,
 				update.target.blockKind,
 				update.target.blockId,
 				update.target.itemIndex != null ? String(update.target.itemIndex) : "",
@@ -507,7 +523,7 @@ async function applyUpdates(updates: Array<TargetUpdate>): Promise<number> {
 
 			const stale = (): void => {
 				log.warn(
-					`Skipping ${update.entityType}/${update.entitySlug}: ${update.target.blockKind} block changed since the report was generated.`,
+					`Skipping ${update.entityType}/${update.entitySlug} (${update.status}): ${update.target.blockKind} block changed since the report was generated.`,
 				);
 			};
 
@@ -603,11 +619,11 @@ async function main(): Promise<void> {
 
 	const tableCount = updates.reduce((total, update) => total + update.replacements.length, 0);
 
-	log.info(`${String(tableCount)} flattened tables to restore.`);
+	log.info(`${String(tableCount)} flattened tables to restore (counting each version).`);
 	for (const update of updates) {
 		for (const replacement of update.replacements) {
 			log.info(
-				`  ${update.entityType}/${update.entitySlug} (${update.target.blockKind}): ${String(replacement.rows)} row(s) from ${String(replacement.runLength)} node(s) — "${replacement.preview}…"`,
+				`  ${update.entityType}/${update.entitySlug} (${update.status}, ${update.target.blockKind}): ${String(replacement.rows)} row(s) from ${String(replacement.runLength)} node(s) — "${replacement.preview}…"`,
 			);
 		}
 	}

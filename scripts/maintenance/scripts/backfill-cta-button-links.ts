@@ -6,6 +6,7 @@ import slugify from "@sindresorhus/slugify";
 import type { JSONContent } from "@tiptap/core";
 
 import { env } from "../config/env.config";
+import { type EntityStatusType, groupByEntityVersion } from "../lib/entity-versions";
 
 /**
  * Restores the button affordance of WordPress "call to action" buttons (`wp-block-button__link`) by
@@ -234,17 +235,24 @@ function docHasContent(node: RtNode): boolean {
 
 interface EntityBlock {
 	blockId: string;
-	fieldId: string;
 	position: number;
 	blockType: string;
 	content: RtNode | null;
 }
 
-/** Published `news` entities' `content` field blocks, ordered by position, keyed by entity slug. */
-async function findNewsEntityBlocks(): Promise<Map<string, Array<EntityBlock>>> {
+/** One lifecycle version's `content` field and its blocks, in position order. */
+interface EntityVersion {
+	fieldId: string;
+	status: EntityStatusType;
+	blocks: Array<EntityBlock>;
+}
+
+/** `news` entities' `content` field blocks, ordered by position, per version, keyed by slug. */
+async function findNewsEntityBlocks(): Promise<Map<string, Array<EntityVersion>>> {
 	const rows = await db
 		.select({
 			slug: schema.entities.slug,
+			status: schema.entityStatus.type,
 			blockId: schema.contentBlocks.id,
 			fieldId: schema.contentBlocks.fieldId,
 			position: schema.contentBlocks.position,
@@ -277,30 +285,27 @@ async function findNewsEntityBlocks(): Promise<Map<string, Array<EntityBlock>>> 
 		.where(
 			and(
 				eq(schema.entityTypes.type, "news"),
-				eq(schema.entityStatus.type, "published"),
 				eq(schema.entityTypesFieldsNames.fieldName, "content"),
 			),
 		)
-		.orderBy(schema.entities.slug, schema.contentBlocks.position);
+		.orderBy(schema.entities.slug, schema.entityStatus.type, schema.contentBlocks.position);
 
-	const bySlug = new Map<string, Array<EntityBlock>>();
-
-	for (const row of rows) {
-		if (!bySlug.has(row.slug)) {
-			bySlug.set(row.slug, []);
-		}
-		bySlug.get(row.slug)!.push({
-			blockId: row.blockId,
-			fieldId: row.fieldId,
-			position: row.position,
-			blockType: row.blockType,
-			// `rich_text` and `media_text` blocks both store the same rich-text doc shape and can hold
-			// a CTA link; only one join matches per row.
-			content: ((row.content ?? row.mediaTextContent) as RtNode | null) ?? null,
-		});
-	}
-
-	return bySlug;
+	return groupByEntityVersion(rows, {
+		documentKey: (row) => row.slug,
+		create: (row): EntityVersion => {
+			return { fieldId: row.fieldId, status: row.status, blocks: [] };
+		},
+		add: (version, row) => {
+			version.blocks.push({
+				blockId: row.blockId,
+				position: row.position,
+				blockType: row.blockType,
+				// `rich_text` and `media_text` blocks both store the same rich-text doc shape and can hold
+				// a CTA link; only one join matches per row.
+				content: ((row.content ?? row.mediaTextContent) as RtNode | null) ?? null,
+			});
+		},
+	});
 }
 
 interface Upgrade {
@@ -311,6 +316,7 @@ interface Upgrade {
 
 interface Plan {
 	entitySlug: string;
+	status: EntityStatusType;
 	fieldId: string;
 	/** Blocks whose content changed (link ↔ buttonLink rewrites) and must be written back. */
 	upgrades: Array<Upgrade>;
@@ -318,16 +324,15 @@ interface Plan {
 	deletions: Array<{ blockId: string; position: number }>;
 }
 
-function planForItem(
+/**
+ * One version at a time: the duplicate-CTA bookkeeping (`ctx.seen`) walks a single version's blocks
+ * in document order, and the position fix-ups on deletion are scoped to that version's field.
+ */
+function planForVersion(
 	entitySlug: string,
-	blocks: Array<EntityBlock>,
+	version: EntityVersion,
 	buttons: Array<{ href: string; label: string }>,
 ): Plan | null {
-	const fieldId = blocks[0]?.fieldId;
-	if (fieldId == null) {
-		return null;
-	}
-
 	const ctx: CtaContext = {
 		keys: new Set(buttons.map((button) => ctaKey(button.href, button.label))),
 		hrefs: new Set(buttons.map((button) => button.href)),
@@ -339,7 +344,7 @@ function planForItem(
 
 	// Process in document order so the earliest, correctly-placed occurrence becomes the CTA and
 	// later duplicates are dropped. Both `rich_text` and `media_text` blocks carry body text.
-	for (const block of blocks) {
+	for (const block of version.blocks) {
 		if (block.blockType !== "rich_text" && block.blockType !== "media_text") {
 			continue;
 		}
@@ -368,12 +373,12 @@ function planForItem(
 		return null;
 	}
 
-	return { entitySlug, fieldId, upgrades, deletions };
+	return { entitySlug, status: version.status, fieldId: version.fieldId, upgrades, deletions };
 }
 
 function buildPlans(
 	posts: Array<WordPressPost>,
-	blocksBySlug: Map<string, Array<EntityBlock>>,
+	blocksBySlug: Map<string, Array<EntityVersion>>,
 ): Array<Plan> {
 	const plans: Array<Plan> = [];
 
@@ -384,14 +389,16 @@ function buildPlans(
 		}
 
 		const slug = normalizeWordPressSlug(post.slug);
-		const blocks = blocksBySlug.get(slug);
-		if (blocks == null) {
+		const versions = blocksBySlug.get(slug);
+		if (versions == null) {
 			continue;
 		}
 
-		const plan = planForItem(slug, blocks, buttons);
-		if (plan != null) {
-			plans.push(plan);
+		for (const version of versions) {
+			const plan = planForVersion(slug, version, buttons);
+			if (plan != null) {
+				plans.push(plan);
+			}
 		}
 	}
 
@@ -454,11 +461,11 @@ async function main(): Promise<void> {
 	const totalUpgrades = plans.reduce((sum, plan) => sum + plan.upgrades.length, 0);
 	const totalDeletions = plans.reduce((sum, plan) => sum + plan.deletions.length, 0);
 	log.info(
-		`${String(totalUpgrades)} block(s) to rewrite and ${String(totalDeletions)} empty duplicate block(s) to remove across ${String(plans.length)} items.`,
+		`${String(totalUpgrades)} block(s) to rewrite and ${String(totalDeletions)} empty duplicate block(s) to remove across ${String(plans.length)} item versions.`,
 	);
 	for (const plan of plans) {
 		log.info(
-			`  ${plan.entitySlug}: rewrite ${String(plan.upgrades.length)} block(s), delete ${String(plan.deletions.length)} block(s)`,
+			`  ${plan.entitySlug} (${plan.status}): rewrite ${String(plan.upgrades.length)} block(s), delete ${String(plan.deletions.length)} block(s)`,
 		);
 	}
 

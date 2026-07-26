@@ -6,6 +6,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { and, eq, gt, inArray, sql } from "@dariah-eric/database/sql";
 
 import { env } from "../config/env.config";
+import { type EntityStatusType, groupByEntityVersion } from "../lib/entity-versions";
 
 /**
  * Promotes a _presentational_ floated `image` block into a _semantic_ `media_text` block for the
@@ -28,6 +29,10 @@ import { env } from "../config/env.config";
  * 	image block's row (only its type and subtype row change), deleting the `rich_text` block, and
  * 	closing the position gap. The `media_text` `side` is taken from the float (`float-start` →
  * 	`start`, `float-end` → `end`). A floated image not followed by `rich_text` is left as an `image`.
+ *
+ * 	Every version of the item is converted, draft and published alike — see `lib/entity-versions`
+ * 	for why. One prompt covers all of them: a floated image that appears beside the same text in
+ * 	both versions is one editorial decision, and answering it twice could only make them diverge.
  */
 
 const db = createDatabaseService({
@@ -49,11 +54,18 @@ interface RichTextNode {
 
 interface EntityBlock {
 	blockId: string;
-	fieldId: string;
 	blockType: string;
 	position: number;
+	imageId: string | null;
 	imageLayout: (typeof schema.imageLayoutEnum)[number] | null;
 	richTextContent: RichTextNode | null;
+}
+
+/** One lifecycle version's `content` field and its blocks, in position order. */
+interface EntityVersion {
+	fieldId: string;
+	status: EntityStatusType;
+	blocks: Array<EntityBlock>;
 }
 
 /** Flattens a TipTap document's text nodes into a single string, for a decision-aiding preview. */
@@ -78,18 +90,19 @@ function truncate(text: string, max = 160): string {
 	return text.length > max ? `${text.slice(0, max).trimEnd()}…` : text;
 }
 
-/** Published `news` entities' `content` blocks, ordered by position, for the given slugs only. */
+/** `news` entities' `content` blocks, ordered by position, per version, for the given slugs only. */
 async function findNewsEntityBlocks(
 	slugs: Array<string>,
-): Promise<Map<string, { documentId: string; blocks: Array<EntityBlock> }>> {
+): Promise<Map<string, Array<EntityVersion>>> {
 	const rows = await db
 		.select({
-			documentId: schema.entities.id,
 			slug: schema.entities.slug,
+			status: schema.entityStatus.type,
 			blockId: schema.contentBlocks.id,
 			fieldId: schema.contentBlocks.fieldId,
 			blockType: schema.contentBlockTypes.type,
 			position: schema.contentBlocks.position,
+			imageId: schema.imageContentBlocks.imageId,
 			imageLayout: schema.imageContentBlocks.layout,
 			richTextContent: schema.richTextContentBlocks.content,
 		})
@@ -115,85 +128,128 @@ async function findNewsEntityBlocks(
 		.where(
 			and(
 				eq(schema.entityTypes.type, "news"),
-				eq(schema.entityStatus.type, "published"),
 				eq(schema.entityTypesFieldsNames.fieldName, "content"),
 				inArray(schema.entities.slug, slugs),
 			),
 		)
-		.orderBy(schema.entities.slug, schema.contentBlocks.position);
+		.orderBy(schema.entities.slug, schema.entityStatus.type, schema.contentBlocks.position);
 
-	const bySlug = new Map<string, { documentId: string; blocks: Array<EntityBlock> }>();
-
-	for (const row of rows) {
-		if (!bySlug.has(row.slug)) {
-			bySlug.set(row.slug, { documentId: row.documentId, blocks: [] });
-		}
-		bySlug.get(row.slug)!.blocks.push({
-			blockId: row.blockId,
-			fieldId: row.fieldId,
-			blockType: row.blockType,
-			position: row.position,
-			imageLayout: row.imageLayout,
-			richTextContent: row.richTextContent,
-		});
-	}
-
-	return bySlug;
+	return groupByEntityVersion(rows, {
+		documentKey: (row) => row.slug,
+		create: (row): EntityVersion => {
+			return { fieldId: row.fieldId, status: row.status, blocks: [] };
+		},
+		add: (version, row) => {
+			version.blocks.push({
+				blockId: row.blockId,
+				blockType: row.blockType,
+				position: row.position,
+				imageId: row.imageId,
+				imageLayout: row.imageLayout,
+				richTextContent: row.richTextContent,
+			});
+		},
+	});
 }
 
 interface Pair {
 	entitySlug: string;
+	status: EntityStatusType;
 	side: (typeof schema.mediaTextSideEnum)[number];
 	fieldId: string;
 	imageContentBlockId: string;
 	imagePosition: number;
 	richTextContentBlockId: string;
+	/** The asset, used to recognise the same floated image across a document's versions. */
+	imageId: string | null;
 	/** Plain-text preview of the wrapping rich_text, to decide whether the pairing is semantic. */
 	preview: string;
 }
 
+/**
+ * The same floated image usually exists in both the draft and the published version. That is one
+ * editorial decision, not two, so pairs are grouped by image and by the text beside it — matching
+ * on content rather than on position, which shifts between versions as soon as a draft diverges
+ * further up the field.
+ */
+interface Decision {
+	entitySlug: string;
+	side: (typeof schema.mediaTextSideEnum)[number];
+	preview: string;
+	pairs: Array<Pair>;
+}
+
 function findPairs(
 	slugs: Array<string>,
-	entitiesBySlug: Map<string, { documentId: string; blocks: Array<EntityBlock> }>,
+	versionsBySlug: Map<string, Array<EntityVersion>>,
 ): Array<Pair> {
 	const pairs: Array<Pair> = [];
 
 	for (const slug of slugs) {
-		const entity = entitiesBySlug.get(slug);
-		if (entity == null) {
-			log.warn(`No published news item with a \`content\` field for slug \`${slug}\`.`);
+		const versions = versionsBySlug.get(slug);
+		if (versions == null) {
+			log.warn(`No news item with a \`content\` field for slug \`${slug}\`.`);
 			continue;
 		}
 
-		const blocksByPosition = new Map(entity.blocks.map((block) => [block.position, block]));
+		for (const version of versions) {
+			const blocksByPosition = new Map(version.blocks.map((block) => [block.position, block]));
 
-		for (const block of entity.blocks) {
-			if (
-				block.blockType !== "image" ||
-				(block.imageLayout !== "float-start" && block.imageLayout !== "float-end")
-			) {
-				continue;
+			for (const block of version.blocks) {
+				if (
+					block.blockType !== "image" ||
+					(block.imageLayout !== "float-start" && block.imageLayout !== "float-end")
+				) {
+					continue;
+				}
+
+				const nextBlock = blocksByPosition.get(block.position + 1);
+				if (nextBlock?.blockType !== "rich_text") {
+					log.warn(
+						`Skipping a floated image in \`${slug}\` (${version.status}): not followed by a \`rich_text\` block.`,
+					);
+					continue;
+				}
+
+				pairs.push({
+					entitySlug: slug,
+					status: version.status,
+					side: block.imageLayout === "float-end" ? "end" : "start",
+					fieldId: version.fieldId,
+					imageContentBlockId: block.blockId,
+					imagePosition: block.position,
+					richTextContentBlockId: nextBlock.blockId,
+					imageId: block.imageId,
+					preview: truncate(extractPlainText(nextBlock.richTextContent)),
+				});
 			}
-
-			const nextBlock = blocksByPosition.get(block.position + 1);
-			if (nextBlock?.blockType !== "rich_text") {
-				log.warn(`Skipping a floated image in \`${slug}\`: not followed by a \`rich_text\` block.`);
-				continue;
-			}
-
-			pairs.push({
-				entitySlug: slug,
-				side: block.imageLayout === "float-end" ? "end" : "start",
-				fieldId: block.fieldId,
-				imageContentBlockId: block.blockId,
-				imagePosition: block.position,
-				richTextContentBlockId: nextBlock.blockId,
-				preview: truncate(extractPlainText(nextBlock.richTextContent)),
-			});
 		}
 	}
 
 	return pairs;
+}
+
+/** Collapses the per-version pairs into one decision per floated image. */
+function groupDecisions(pairs: Array<Pair>): Array<Decision> {
+	const byKey = new Map<string, Decision>();
+
+	for (const pair of pairs) {
+		const key = JSON.stringify([pair.entitySlug, pair.side, pair.imageId, pair.preview]);
+
+		const decision = byKey.get(key);
+		if (decision == null) {
+			byKey.set(key, {
+				entitySlug: pair.entitySlug,
+				side: pair.side,
+				preview: pair.preview,
+				pairs: [pair],
+			});
+		} else {
+			decision.pairs.push(pair);
+		}
+	}
+
+	return [...byKey.values()];
 }
 
 /**
@@ -246,7 +302,7 @@ async function applyPairs(pairs: Array<Pair>): Promise<number> {
 				.limit(1);
 
 			if (imageBlock == null || richTextBlock == null) {
-				log.warn(`Skipping ${pair.entitySlug}: block no longer exists.`);
+				log.warn(`Skipping ${pair.entitySlug} (${pair.status}): block no longer exists.`);
 				return;
 			}
 
@@ -255,7 +311,7 @@ async function applyPairs(pairs: Array<Pair>): Promise<number> {
 				richTextBlock.position !== imageBlock.position + 1
 			) {
 				log.warn(
-					`Skipping ${pair.entitySlug}: no longer adjacent — item was edited since it was found.`,
+					`Skipping ${pair.entitySlug} (${pair.status}): no longer adjacent — item was edited since it was found.`,
 				);
 				return;
 			}
@@ -299,22 +355,31 @@ async function applyPairs(pairs: Array<Pair>): Promise<number> {
 	return applied;
 }
 
+/** Names the versions a decision covers, so the prompt and the dry run say what will be touched. */
+function describeVersions(decision: Decision): string {
+	return decision.pairs
+		.map((pair) => pair.status)
+		.toSorted()
+		.join(", ");
+}
+
 /**
  * Prompts once per floated image, so an author can keep one floated and convert the next within the
- * same news item, and returns only the confirmed pairs. Skipped by `--all` (convert every pair) and
- * `--dry-run` (list only).
+ * same news item, and returns the pairs of the confirmed ones — every version of that image, since
+ * one answer settles it for the document. Skipped by `--all` (convert everything) and `--dry-run`
+ * (list only).
  */
-async function confirmPairs(pairs: Array<Pair>): Promise<Array<Pair>> {
+async function confirmDecisions(decisions: Array<Decision>): Promise<Array<Pair>> {
 	const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 	const confirmed: Array<Pair> = [];
 
 	try {
-		for (const pair of pairs) {
+		for (const decision of decisions) {
 			const answer = await rl.question(
-				`\n${pair.entitySlug} — floated image (${pair.side}), text beside it:\n  “${pair.preview}”\nConvert this to a media_text block? [y/N] `,
+				`\n${decision.entitySlug} — floated image (${decision.side}), in ${describeVersions(decision)}, text beside it:\n  “${decision.preview}”\nConvert this to a media_text block? [y/N] `,
 			);
 			if (answer.trim().toLowerCase().startsWith("y")) {
-				confirmed.push(pair);
+				confirmed.push(...decision.pairs);
 			}
 		}
 	} finally {
@@ -336,26 +401,29 @@ async function main(): Promise<void> {
 		return;
 	}
 
-	const entitiesBySlug = await findNewsEntityBlocks(slugs);
-	const pairs = findPairs(slugs, entitiesBySlug);
+	const versionsBySlug = await findNewsEntityBlocks(slugs);
+	const pairs = findPairs(slugs, versionsBySlug);
+	const decisions = groupDecisions(pairs);
 
 	log.info(
-		`${String(pairs.length)} floated-image/text pairs found across ${String(slugs.length)} slugs.`,
+		`${String(decisions.length)} floated images found across ${String(slugs.length)} slugs (${String(pairs.length)} blocks, counting each version).`,
 	);
 
-	if (dryRun || pairs.length === 0) {
-		for (const pair of pairs) {
-			log.info(`  ${pair.entitySlug} (${pair.side}): “${pair.preview}”`);
+	if (dryRun || decisions.length === 0) {
+		for (const decision of decisions) {
+			log.info(
+				`  ${decision.entitySlug} (${decision.side}, ${describeVersions(decision)}): “${decision.preview}”`,
+			);
 		}
-		if (pairs.length > 0) {
+		if (decisions.length > 0) {
 			log.info(`Dry run — re-run without \`--dry-run\` to choose which to convert (or \`--all\`).`);
 		}
 		return;
 	}
 
-	// `--all` converts every pair; otherwise prompt per image so floats can be kept or promoted
-	// individually within the same item.
-	const selected = convertAll ? pairs : await confirmPairs(pairs);
+	// `--all` converts everything; otherwise prompt per image so floats can be kept or promoted
+	// individually within the same item. Either way a converted image is converted in every version.
+	const selected = convertAll ? pairs : await confirmDecisions(decisions);
 
 	if (selected.length === 0) {
 		log.info("Nothing selected; no changes made.");

@@ -10,6 +10,7 @@ import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
 
 import { env } from "../config/env.config";
+import { type EntityStatusType, groupByEntityVersion } from "../lib/entity-versions";
 
 /**
  * Restores "Easy Accordion" (`sp-easy-accordion`) FAQ blocks that are present in the live WordPress
@@ -175,15 +176,22 @@ function extractAccordions(html: string): Array<Array<AccordionItem>> {
 
 interface NewsContentField {
 	fieldId: string;
+	status: EntityStatusType;
 	maxPosition: number;
 	hasAccordion: boolean;
 }
 
-/** Published `news` items' `content` field, keyed by slug: its id, last position, accordion state. */
-async function findNewsContentFields(): Promise<Map<string, NewsContentField>> {
+/**
+ * `news` items' `content` field per version, keyed by slug: its id, last position, accordion state.
+ *
+ * `maxPosition` and `hasAccordion` are deliberately per-version: an accordion is appended after a
+ * version's own last block, and a version that already has one is skipped on its own account.
+ */
+async function findNewsContentFields(): Promise<Map<string, Array<NewsContentField>>> {
 	const rows = await db
 		.select({
 			slug: schema.entities.slug,
+			status: schema.entityStatus.type,
 			fieldId: schema.contentBlocks.fieldId,
 			position: schema.contentBlocks.position,
 			blockType: schema.contentBlockTypes.type,
@@ -205,31 +213,28 @@ async function findNewsContentFields(): Promise<Map<string, NewsContentField>> {
 		.where(
 			and(
 				eq(schema.entityTypes.type, "news"),
-				eq(schema.entityStatus.type, "published"),
 				eq(schema.entityTypesFieldsNames.fieldName, "content"),
 			),
 		)
-		.orderBy(schema.entities.slug, schema.contentBlocks.position);
+		.orderBy(schema.entities.slug, schema.entityStatus.type, schema.contentBlocks.position);
 
-	const bySlug = new Map<string, NewsContentField>();
-
-	for (const row of rows) {
-		let field = bySlug.get(row.slug);
-		if (field == null) {
-			field = { fieldId: row.fieldId, maxPosition: -1, hasAccordion: false };
-			bySlug.set(row.slug, field);
-		}
-		field.maxPosition = Math.max(field.maxPosition, row.position);
-		if (row.blockType === "accordion") {
-			field.hasAccordion = true;
-		}
-	}
-
-	return bySlug;
+	return groupByEntityVersion(rows, {
+		documentKey: (row) => row.slug,
+		create: (row): NewsContentField => {
+			return { fieldId: row.fieldId, status: row.status, maxPosition: -1, hasAccordion: false };
+		},
+		add: (field, row) => {
+			field.maxPosition = Math.max(field.maxPosition, row.position);
+			if (row.blockType === "accordion") {
+				field.hasAccordion = true;
+			}
+		},
+	});
 }
 
 interface Candidate {
 	entitySlug: string;
+	status: EntityStatusType;
 	fieldId: string;
 	position: number;
 	items: Array<AccordionItem>;
@@ -237,7 +242,7 @@ interface Candidate {
 
 function findCandidates(
 	posts: Array<WordPressPost>,
-	fieldsBySlug: Map<string, NewsContentField>,
+	fieldsBySlug: Map<string, Array<NewsContentField>>,
 ): Array<Candidate> {
 	const candidates: Array<Candidate> = [];
 
@@ -248,15 +253,27 @@ function findCandidates(
 		}
 
 		const slug = normalizeWordPressSlug(post.slug);
-		const field = fieldsBySlug.get(slug);
-		if (field == null || field.hasAccordion) {
+		const versions = fieldsBySlug.get(slug);
+		if (versions == null) {
 			continue;
 		}
 
-		let nextPosition = field.maxPosition + 1;
-		for (const items of accordions) {
-			candidates.push({ entitySlug: slug, fieldId: field.fieldId, position: nextPosition, items });
-			nextPosition += 1;
+		for (const field of versions) {
+			if (field.hasAccordion) {
+				continue;
+			}
+
+			let nextPosition = field.maxPosition + 1;
+			for (const items of accordions) {
+				candidates.push({
+					entitySlug: slug,
+					status: field.status,
+					fieldId: field.fieldId,
+					position: nextPosition,
+					items,
+				});
+				nextPosition += 1;
+			}
 		}
 	}
 
@@ -307,10 +324,14 @@ async function main(): Promise<void> {
 
 	const candidates = findCandidates(posts, fieldsBySlug);
 
-	log.info(`${String(candidates.length)} accordions to append across the migrated news items.`);
+	log.info(
+		`${String(candidates.length)} accordions to append across the migrated news items (counting each version).`,
+	);
 	for (const candidate of candidates) {
 		const titles = candidate.items.map((item) => item.title).join(" · ");
-		log.info(`  ${candidate.entitySlug}: ${String(candidate.items.length)} items — ${titles}`);
+		log.info(
+			`  ${candidate.entitySlug} (${candidate.status}): ${String(candidate.items.length)} items — ${titles}`,
+		);
 	}
 
 	if (!apply) {

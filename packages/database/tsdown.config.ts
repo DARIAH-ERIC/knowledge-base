@@ -14,6 +14,8 @@ export default defineConfig({
 		"./lib/errors.ts",
 		"./lib/image-captions.ts",
 		"./lib/integrity-service.ts",
+		"./lib/link-targets.ts",
+		"./lib/link-targets-service.ts",
 		"./lib/relations.ts",
 		"./lib/rich-text.ts",
 		"./lib/rich-text-normalize.ts",

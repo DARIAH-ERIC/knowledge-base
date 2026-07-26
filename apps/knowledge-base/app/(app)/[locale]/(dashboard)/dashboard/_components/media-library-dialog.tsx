@@ -44,7 +44,11 @@ import { formatFileSize } from "@/lib/format-file-size";
 interface MediaLibraryDialogProps<T extends AssetPrefix> {
 	acceptedFileTypes?: ReadonlyArray<string>;
 	initialAssets: Array<MediaLibraryAsset>;
-	onSelect: (key: string, url: string, asset?: Pick<MediaLibraryAsset, "alt" | "caption">) => void;
+	onSelect: (
+		key: string,
+		url: string,
+		asset?: Pick<MediaLibraryAsset, "alt" | "caption" | "label">,
+	) => void;
 	defaultPrefix: T;
 	prefixes: ReadonlyArray<T>;
 	trigger?: ComponentType<{ open: () => void }>;
@@ -268,7 +272,12 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 			const result = await uploadImageAction(createActionStateInitial(), formData);
 
 			if (result.status === "success") {
-				onSelect(result.data.key, result.data.url, result.data);
+				// The upload action returns no label; `uploadAsset` stores `label ?? file.name`, and this
+				// dialog sends no label, so the filename is what was stored.
+				onSelect(result.data.key, result.data.url, {
+					...result.data,
+					label: pendingFile.name,
+				});
 				resetUploadTab();
 				setIsOpen(false);
 			}

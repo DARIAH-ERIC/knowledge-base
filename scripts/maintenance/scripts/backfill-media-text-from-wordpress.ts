@@ -8,6 +8,7 @@ import slugify from "@sindresorhus/slugify";
 import type { JSONContent } from "@tiptap/core";
 
 import { env } from "../config/env.config";
+import { type EntityStatusType, groupByEntityVersion } from "../lib/entity-versions";
 import { writeTsvReport } from "../lib/tsv-report";
 
 /**
@@ -198,11 +199,19 @@ interface MediaTextBlock {
 	content: { content?: Array<RtNode> | null } | null;
 }
 
-/** Published `news` entities' `media_text` blocks, keyed by entity slug. */
-async function findNewsMediaTextBlocks(): Promise<Map<string, Array<MediaTextBlock>>> {
+/** One lifecycle version's `media_text` blocks. */
+interface MediaTextVersion {
+	fieldId: string;
+	status: EntityStatusType;
+	blocks: Array<MediaTextBlock>;
+}
+
+/** `news` entities' `media_text` blocks, per version, keyed by entity slug. */
+async function findNewsMediaTextBlocks(): Promise<Map<string, Array<MediaTextVersion>>> {
 	const rows = await db
 		.select({
 			slug: schema.entities.slug,
+			status: schema.entityStatus.type,
 			blockId: schema.contentBlocks.id,
 			fieldId: schema.contentBlocks.fieldId,
 			position: schema.contentBlocks.position,
@@ -227,32 +236,31 @@ async function findNewsMediaTextBlocks(): Promise<Map<string, Array<MediaTextBlo
 		.where(
 			and(
 				eq(schema.entityTypes.type, "news"),
-				eq(schema.entityStatus.type, "published"),
 				eq(schema.entityTypesFieldsNames.fieldName, "content"),
 			),
 		)
-		.orderBy(schema.entities.slug, schema.contentBlocks.position);
+		.orderBy(schema.entities.slug, schema.entityStatus.type, schema.contentBlocks.position);
 
-	const bySlug = new Map<string, Array<MediaTextBlock>>();
-
-	for (const row of rows) {
-		if (!bySlug.has(row.slug)) {
-			bySlug.set(row.slug, []);
-		}
-		bySlug.get(row.slug)!.push({
-			blockId: row.blockId,
-			fieldId: row.fieldId,
-			position: row.position,
-			imageAssetLabel: row.imageAssetLabel,
-			content: (row.content as { content?: Array<RtNode> | null } | null) ?? null,
-		});
-	}
-
-	return bySlug;
+	return groupByEntityVersion(rows, {
+		documentKey: (row) => row.slug,
+		create: (row): MediaTextVersion => {
+			return { fieldId: row.fieldId, status: row.status, blocks: [] };
+		},
+		add: (version, row) => {
+			version.blocks.push({
+				blockId: row.blockId,
+				fieldId: row.fieldId,
+				position: row.position,
+				imageAssetLabel: row.imageAssetLabel,
+				content: (row.content as { content?: Array<RtNode> | null } | null) ?? null,
+			});
+		},
+	});
 }
 
 interface Candidate {
 	entitySlug: string;
+	status: EntityStatusType;
 	blockId: string;
 	fieldId: string;
 	position: number;
@@ -264,7 +272,7 @@ interface Candidate {
 
 function findCandidates(
 	posts: Array<WordPressPost>,
-	blocksBySlug: Map<string, Array<MediaTextBlock>>,
+	blocksBySlug: Map<string, Array<MediaTextVersion>>,
 ): Array<Candidate> {
 	const candidates: Array<Candidate> = [];
 
@@ -275,46 +283,53 @@ function findCandidates(
 		}
 
 		const slug = normalizeWordPressSlug(post.slug);
-		const blocks = blocksBySlug.get(slug);
-		if (blocks == null) {
+		const versions = blocksBySlug.get(slug);
+		if (versions == null) {
 			continue;
 		}
 
-		for (const mediaText of mediaTexts) {
-			const matches = blocks.filter((block) => block.imageAssetLabel === mediaText.imageUrl);
-			if (matches.length !== 1) {
-				continue;
-			}
-			const block = matches[0]!;
-			const nodes = block.content?.content ?? [];
-			const k = mediaText.contentTexts.length;
-
-			if (nodes.length <= k) {
-				// Already scoped (equal), or fewer nodes than `__content` — nothing to split off.
-				continue;
-			}
-
-			// Only split when the leading nodes match `__content` block-for-block.
-			const aligned = mediaText.contentTexts.every(
-				(text, index) => nodePlainText(nodes[index]!) === text,
-			);
-			if (!aligned) {
-				log.warn(
-					`Skipping ${slug} (${mediaText.imageUrl}): media_text no longer aligns with WordPress __content.`,
+		// Matched per version: "exactly one block uses this image" and the node alignment are both
+		// properties of a single version's blocks, and the tail is inserted at that version's position.
+		for (const version of versions) {
+			for (const mediaText of mediaTexts) {
+				const matches = version.blocks.filter(
+					(block) => block.imageAssetLabel === mediaText.imageUrl,
 				);
-				continue;
-			}
+				if (matches.length !== 1) {
+					continue;
+				}
+				const block = matches[0]!;
+				const nodes = block.content?.content ?? [];
+				const k = mediaText.contentTexts.length;
 
-			candidates.push({
-				entitySlug: slug,
-				blockId: block.blockId,
-				fieldId: block.fieldId,
-				position: block.position,
-				keptContent: { type: "doc", content: nodes.slice(0, k) } as unknown as JSONContent,
-				tailContent: { type: "doc", content: nodes.slice(k) } as unknown as JSONContent,
-				keptCount: k,
-				tailCount: nodes.length - k,
-			});
+				if (nodes.length <= k) {
+					// Already scoped (equal), or fewer nodes than `__content` — nothing to split off.
+					continue;
+				}
+
+				// Only split when the leading nodes match `__content` block-for-block.
+				const aligned = mediaText.contentTexts.every(
+					(text, index) => nodePlainText(nodes[index]!) === text,
+				);
+				if (!aligned) {
+					log.warn(
+						`Skipping ${slug} (${version.status}, ${mediaText.imageUrl}): media_text no longer aligns with WordPress __content.`,
+					);
+					continue;
+				}
+
+				candidates.push({
+					entitySlug: slug,
+					status: version.status,
+					blockId: block.blockId,
+					fieldId: block.fieldId,
+					position: block.position,
+					keptContent: { type: "doc", content: nodes.slice(0, k) } as unknown as JSONContent,
+					tailContent: { type: "doc", content: nodes.slice(k) } as unknown as JSONContent,
+					keptCount: k,
+					tailCount: nodes.length - k,
+				});
+			}
 		}
 	}
 
@@ -323,6 +338,7 @@ function findCandidates(
 
 const reportColumns = [
 	"entity_slug",
+	"entity_version_status",
 	"media_text_block_id",
 	"kept_nodes",
 	"split_off_nodes",
@@ -334,6 +350,7 @@ async function writeReport(candidates: Array<Candidate>): Promise<void> {
 		reportColumns,
 		candidates.map((candidate) => [
 			candidate.entitySlug,
+			candidate.status,
 			candidate.blockId,
 			String(candidate.keptCount),
 			String(candidate.tailCount),
@@ -368,7 +385,7 @@ async function applyCandidates(candidates: Array<Candidate>): Promise<number> {
 				?.length;
 			if (currentCount !== candidate.keptCount + candidate.tailCount) {
 				log.warn(
-					`Skipping ${candidate.entitySlug}: media_text changed since the report was generated.`,
+					`Skipping ${candidate.entitySlug} (${candidate.status}): media_text changed since the report was generated.`,
 				);
 				return;
 			}
@@ -423,10 +440,12 @@ async function main(): Promise<void> {
 
 	await writeReport(candidates);
 
-	log.info(`${String(candidates.length)} over-captured media_text blocks to re-scope.`);
+	log.info(
+		`${String(candidates.length)} over-captured media_text blocks to re-scope (counting each version).`,
+	);
 	for (const candidate of candidates) {
 		log.info(
-			`  ${candidate.entitySlug}: keep ${String(candidate.keptCount)} node(s), split off ${String(candidate.tailCount)} into a new rich_text block.`,
+			`  ${candidate.entitySlug} (${candidate.status}): keep ${String(candidate.keptCount)} node(s), split off ${String(candidate.tailCount)} into a new rich_text block.`,
 		);
 	}
 	log.info(`Report written to \`${reportFilePath}\`.`);

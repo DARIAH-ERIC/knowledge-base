@@ -266,4 +266,55 @@ describe("normalizeRichTextDocument", () => {
 		);
 		expect(normalizeRichTextDocument(input)).toStrictEqual(input);
 	});
+
+	/**
+	 * Cells are `block+`, so an emptied one must not be left with `content: []` — that is not a valid
+	 * document. Nor can it be dropped like an empty list item: the row would then be short of its
+	 * siblings. An empty cell is ordinary content in a data table, so it keeps a placeholder.
+	 */
+	function table(...cells: Array<JSONContent>): JSONContent {
+		return doc({ type: "table", content: [{ type: "tableRow", content: cells }] });
+	}
+
+	it("keeps an emptied table cell as a placeholder paragraph rather than an empty cell", () => {
+		const input = table(
+			{
+				type: "tableCell",
+				content: [{ type: "paragraph", content: [{ type: "text", text: "a" }] }],
+			},
+			{
+				type: "tableCell",
+				content: [{ type: "paragraph", content: [{ type: "text", text: "   " }] }],
+			},
+		);
+
+		expect(normalizeRichTextDocument(input)).toStrictEqual(
+			table(
+				{
+					type: "tableCell",
+					content: [{ type: "paragraph", content: [{ type: "text", text: "a" }] }],
+				},
+				{ type: "tableCell", content: [{ type: "paragraph" }] },
+			),
+		);
+	});
+
+	it("leaves an already-empty table cell structurally unchanged", () => {
+		const input = table({ type: "tableCell", content: [{ type: "paragraph" }] });
+		expect(normalizeRichTextDocument(input)).toStrictEqual(input);
+	});
+
+	it("keeps an emptied table header cell too", () => {
+		const input = table({ type: "tableHeader", content: [{ type: "paragraph" }] });
+		expect(normalizeRichTextDocument(input)).toStrictEqual(input);
+	});
+
+	it("is idempotent over emptied table cells", () => {
+		const input = table({
+			type: "tableCell",
+			content: [{ type: "paragraph", content: [{ type: "text", text: " " }] }],
+		});
+		const once = normalizeRichTextDocument(input);
+		expect(normalizeRichTextDocument(once)).toStrictEqual(once);
+	});
 });
