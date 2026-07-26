@@ -7,6 +7,7 @@
 	"scripts": {
 		"data:backfill:accordions": "tsx ./scripts/backfill-accordions.ts",
 		"data:backfill:cta-button-links": "tsx ./scripts/backfill-cta-button-links.ts",
+		"data:backfill:full-resolution-images": "tsx ./scripts/backfill-full-resolution-images.ts",
 		"data:backfill:image-alignment": "tsx ./scripts/backfill-image-alignment.ts",
 		"data:backfill:institution-locations": "tsx ./scripts/backfill-institution-locations.ts",
 		"data:backfill:institution-rors": "tsx ./scripts/backfill-institution-rors.ts",
@@ -41,6 +42,7 @@
 		"@tiptap/starter-kit": "catalog:",
 		"@types/node": "catalog:",
 		"drizzle-orm": "catalog:",
+		"sharp": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:",
 		"valibot": "catalog:"
