@@ -16093,6 +16093,70 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/assets/{prefix}/{name}/download": {
+      "get": {
+        "description": "Stream the S3-stored file for an asset, by storage key",
+        "operationId": "getAssetDownload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "prefix",
+            "required": true,
+            "schema": {
+              "enum": [
+                "avatars",
+                "documents",
+                "images",
+                "logos",
+              ],
+              "type": "string",
+            },
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "pattern": "^[\\w.-]+$",
+              "type": "string",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {},
+              "application/pdf": {},
+            },
+            "description": "Binary file stream",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse",
+                },
+              },
+            },
+            "description": "Not Found",
+          },
+        },
+        "summary": "Download asset file",
+        "tags": [
+          "assets",
+        ],
+      },
+    },
     "/api/v1/dariah-projects": {
       "get": {
         "description": "Retrieve a paginated list of DARIAH projects",

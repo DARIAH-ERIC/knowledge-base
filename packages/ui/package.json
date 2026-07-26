@@ -111,6 +111,7 @@
 		"@react-aria/utils": "catalog:",
 		"@tiptap/core": "catalog:",
 		"@tiptap/extension-image": "catalog:",
+		"@tiptap/extension-link": "catalog:",
 		"@tiptap/extension-table": "catalog:",
 		"@tiptap/extension-typography": "catalog:",
 		"@tiptap/pm": "catalog:",

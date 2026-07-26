@@ -1,5 +1,10 @@
 import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 import {
+	annotateLinkTargets,
+	collectLinkTargetAssetKeys,
+} from "@dariah-eric/database/link-targets";
+import { getLinkTargetAssets } from "@dariah-eric/database/link-targets-service";
+import {
 	annotatePlaceholderValues,
 	collectPlaceholderValueKinds,
 } from "@dariah-eric/database/placeholder-values";
@@ -8,6 +13,7 @@ import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 import * as v from "valibot";
 
+import { getAssetDownloadUrl, getDownloadFilename } from "@/lib/asset-download";
 import { getEmbedUrl } from "@/lib/embed-url";
 import { generateImageUrl, toImageAsset } from "@/lib/images";
 import { ImageSchema, LicenseSchema } from "@/lib/schemas";
@@ -199,16 +205,50 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 		[...fieldMap.values()].map(({ name, blocks }) => [name, blocks]),
 	);
 
+	// Both passes below resolve references the editor stored deliberately, so that nothing derived —
+	// a count, a download url — is ever frozen into the document at authoring time.
+
 	// Placeholder-value nodes are stored as references; attach the current data here (a `value`
 	// attribute: number for counts, name array for lists) so consumers render it themselves.
 	const placeholderValueKinds = collectPlaceholderValueKinds(fields);
-	if (placeholderValueKinds.size === 0) {
-		return fields;
+	const withPlaceholderValues =
+		placeholderValueKinds.size === 0
+			? fields
+			: annotatePlaceholderValues(fields, await getPlaceholderValues(db, placeholderValueKinds));
+
+	// Asset-targeted links store only the asset's storage key; attach the download url, filename and
+	// size so consumers can render the link (and any file chrome) without knowing our storage layout.
+	return annotateAssetLinks(db, withPlaceholderValues);
+}
+
+/**
+ * Resolves `asset`-targeted link marks anywhere in the given structure. A key whose asset has been
+ * deleted stays unresolved — the link keeps no href, and renderers degrade to plain text rather
+ * than emitting a dead download.
+ */
+async function annotateAssetLinks<T>(db: Database | Transaction, value: T): Promise<T> {
+	const keys = collectLinkTargetAssetKeys(value);
+	if (keys.size === 0) {
+		return value;
 	}
 
-	const placeholderValues = await getPlaceholderValues(db, placeholderValueKinds);
+	const assets = await getLinkTargetAssets(db, keys);
 
-	return annotatePlaceholderValues(fields, placeholderValues);
+	const resolved = new Map(
+		[...assets].map(([key, asset]) => {
+			return [
+				key,
+				{
+					url: getAssetDownloadUrl(key),
+					filename: getDownloadFilename(asset),
+					mimeType: asset.mimeType,
+					size: asset.size,
+				},
+			] as const;
+		}),
+	);
+
+	return annotateLinkTargets(value, resolved);
 }
 
 function normalizeRow(row: {

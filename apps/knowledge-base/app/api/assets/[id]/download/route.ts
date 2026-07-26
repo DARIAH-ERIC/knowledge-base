@@ -1,5 +1,6 @@
 import { Readable } from "node:stream";
 
+import { getContentDispositionHeader } from "@dariah-eric/storage/download";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth/session";
@@ -44,13 +45,15 @@ export async function GET(
 		return new NextResponse(null, { status: 502 });
 	}
 
-	const filename = asset.filename ?? asset.key.split("/").at(-1) ?? "download";
 	const body = Readable.toWeb(download.value) as unknown as ReadableStream<Uint8Array>;
 
 	return new NextResponse(body, {
 		headers: {
 			"Content-Type": asset.mimeType,
-			"Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+			"Content-Disposition": getContentDispositionHeader(
+				{ ...asset, label: "download" },
+				"attachment",
+			),
 		},
 	});
 }

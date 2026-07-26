@@ -4,6 +4,7 @@
 
 import { type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
+import { Link } from "@tiptap/extension-link";
 import { TableKit } from "@tiptap/extension-table/kit";
 import { Typography } from "@tiptap/extension-typography";
 import {
@@ -104,6 +105,12 @@ interface RichTextEditorProps {
 			asset?: { alt?: string | null; caption?: JSONContent | null },
 		) => void,
 	) => ReactNode;
+	/**
+	 * Picker for linking selected text to a stored document. Lives in the toolbar rather than in the
+	 * link popover: the picker is a modal dialog, and opening one from inside a popover dismisses the
+	 * popover it was opened from.
+	 */
+	renderDocumentPicker?: (link: (assetKey: string, label: string) => void) => ReactNode;
 }
 
 function normalizeInitialContent(content: JSONContent | undefined): JSONContent | undefined {
@@ -1339,6 +1346,55 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 	});
 }
 
+/**
+ * The built-in `link` mark, widened so a link can point at one of our own assets instead of a typed
+ * url — see `link-targets.ts` in `@dariah-eric/database` for the model and the read-time
+ * resolution.
+ *
+ * The extension is replaced rather than merely given extra attributes, because the target also
+ * changes when a link _parses_: an asset link stores a reference and no href, and the stock parse
+ * rule is `a[href]`, so a round-trip through HTML (copy/paste, the WordPress import) would drop the
+ * mark and leave bare text behind. The rules below are the stock ones plus one for our own markup.
+ *
+ * `asset` is write-only from the editor's point of view: read paths attach it (url, filename, size)
+ * and it is deliberately neither parsed nor serialised, so a resolved url can never end up in
+ * stored content and go stale.
+ */
+const LinkWithTargets = Link.extend({
+	addAttributes() {
+		return {
+			...this.parent?.(),
+			targetKind: {
+				default: null,
+				parseHTML: (element) => element.dataset.targetKind ?? null,
+				renderHTML: (attributes) => {
+					const targetKind = attributes.targetKind as string | null;
+					return targetKind == null ? {} : { "data-target-kind": targetKind };
+				},
+			},
+			assetKey: {
+				default: null,
+				parseHTML: (element) => element.dataset.assetKey ?? null,
+				renderHTML: (attributes) => {
+					const assetKey = attributes.assetKey as string | null;
+					return assetKey == null ? {} : { "data-asset-key": assetKey };
+				},
+			},
+			asset: {
+				default: null,
+				parseHTML: () => null,
+				renderHTML: () => {
+					return {};
+				},
+			},
+		};
+	},
+
+	parseHTML() {
+		return [...(this.parent?.() ?? []), { tag: "a[data-asset-key]" }];
+	},
+}).configure({ openOnClick: false, defaultProtocol: "https" });
+
 interface CreateRichTextExtensionsOptions {
 	renderImagePicker?: ImagePickerRenderer;
 }
@@ -1353,12 +1409,11 @@ export function createRichTextExtensions(
 	options?: Readonly<CreateRichTextExtensionsOptions>,
 ): Extensions {
 	return [
+		// The link mark comes from `LinkWithTargets` below instead, which extends it to carry asset
+		// targets; two link extensions would collide on the same mark name.
 		StarterKit.configure({
 			heading: { levels: [2, 3, 4] },
-			link: {
-				openOnClick: false,
-				defaultProtocol: "https",
-			},
+			link: false,
 		}),
 		// Normalise typography as authors type. Keep the unambiguous substitutions (smart
 		// quotes/apostrophes, `--` → em dash, `...` → ellipsis) and disable the rest, which corrupt
@@ -1387,6 +1442,7 @@ export function createRichTextExtensions(
 		// these node types a pasted or imported `<table>` is silently flattened into one paragraph of
 		// run-together cell text — which is exactly what the WordPress migration produced.
 		TableKit.configure({ table: { resizable: false } }),
+		LinkWithTargets,
 		Image,
 		createAssetImageNode(options?.renderImagePicker),
 		EmbedNode,
@@ -1410,6 +1466,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		renderButtonLinkInsert,
 		renderPlaceholderValueInsert,
 		renderImagePicker,
+		renderDocumentPicker,
 	} = props;
 
 	const t = useExtracted("ui");
@@ -1463,6 +1520,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				isLink: ctx.editor?.isActive("link"),
 				isInTable: ctx.editor?.isActive("table"),
 				linkHref: ctx.editor?.getAttributes("link").href as string | undefined,
+				linkTargetKind: ctx.editor?.getAttributes("link").targetKind as string | undefined,
 			};
 		},
 	});
@@ -1584,6 +1642,38 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					attrs: { kind: value.kind, label: value.label },
 				})
 				.run();
+		},
+		[editor],
+	);
+
+	/**
+	 * Turns the selection into a link to a stored document — or, with nothing selected, inserts the
+	 * document's label as the link text, so a picked document always ends up readable.
+	 *
+	 * No href is stored: `assetKey` is the reference, and read paths resolve it to a download url.
+	 */
+	const linkDocument = useCallback(
+		(assetKey: string, label: string) => {
+			if (!editor) {
+				return;
+			}
+
+			const attrs = { href: null, targetKind: "asset", assetKey };
+			const { from, to } = editor.state.selection;
+			const chain = editor.chain().focus();
+
+			if (from === to) {
+				chain.insertContent({ type: "text", text: label, marks: [{ type: "link", attrs }] }).run();
+				return;
+			}
+
+			if (editor.isActive("link")) {
+				chain.extendMarkRange("link");
+			}
+
+			// `setMark` rather than `setLink`: the link extension's setter takes (and validates) an href,
+			// and this link deliberately has none — the asset key is the target.
+			chain.setMark("link", attrs).run();
 		},
 		[editor],
 	);
@@ -1802,34 +1892,45 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							<TooltipContent inverse={true}>{t("Link")}</TooltipContent>
 						</Tooltip>
 						<PopoverContent className="p-3">
-							<form
-								className="flex inline-56 flex-col gap-2"
-								onSubmit={(e) => {
-									e.preventDefault();
-									applyLink();
-								}}
-							>
-								<Input
-									autoFocus={true}
-									onChange={(e) => {
-										setLinkHrefInput(e.target.value);
-									}}
-									placeholder="https://example.com"
-									required={true}
-									type="text"
-									value={linkHrefInput}
-								/>
-								<div className="flex gap-2">
-									<Button className="flex-1" intent="primary" size="sm" type="submit">
-										{t("Apply")}
+							{activeState?.linkTargetKind === "asset" ? (
+								// A document link holds a reference, not an href, so the url field would have
+								// nothing to show and applying it would silently replace the document.
+								<div className="flex inline-56 flex-col gap-2">
+									<Note intent="info">{t("This link points to a document.")}</Note>
+									<Button intent="outline" onPress={removeLink} size="sm" type="button">
+										{t("Remove")}
 									</Button>
-									{activeState?.isLink === true && (
-										<Button intent="outline" onPress={removeLink} size="sm" type="button">
-											{t("Remove")}
-										</Button>
-									)}
 								</div>
-							</form>
+							) : (
+								<form
+									className="flex inline-56 flex-col gap-2"
+									onSubmit={(e) => {
+										e.preventDefault();
+										applyLink();
+									}}
+								>
+									<Input
+										autoFocus={true}
+										onChange={(e) => {
+											setLinkHrefInput(e.target.value);
+										}}
+										placeholder="https://example.com"
+										required={true}
+										type="text"
+										value={linkHrefInput}
+									/>
+									<div className="flex gap-2">
+										<Button className="flex-1" intent="primary" size="sm" type="submit">
+											{t("Apply")}
+										</Button>
+										{activeState?.isLink === true && (
+											<Button intent="outline" onPress={removeLink} size="sm" type="button">
+												{t("Remove")}
+											</Button>
+										)}
+									</div>
+								</form>
+							)}
 						</PopoverContent>
 					</Popover>
 					{renderImagePicker != null ? (
@@ -1838,9 +1939,10 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							{renderImagePicker(insertImage)}
 						</>
 					) : null}
+					{renderDocumentPicker != null ? renderDocumentPicker(linkDocument) : null}
 					{renderEmbedInsert != null ? (
 						<>
-							{renderImagePicker == null ? (
+							{renderImagePicker == null && renderDocumentPicker == null ? (
 								<span className="mx-1 block-4 inline-px bg-border" />
 							) : null}
 							{renderEmbedInsert(insertEmbed)}

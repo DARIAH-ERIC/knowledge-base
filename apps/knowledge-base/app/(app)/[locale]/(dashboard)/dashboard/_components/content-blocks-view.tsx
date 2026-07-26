@@ -38,7 +38,44 @@ function renderButtonLinkNode({
 	);
 }
 
-const richTextRenderOptions = { nodeMapping: { buttonLink: renderButtonLinkNode } };
+/**
+ * A link that points at an asset stores only its key — the download url is resolved at read time,
+ * and the API does that for the public site (`annotateLinkTargets`). The dashboard reads content
+ * blocks straight from the database instead, so the preview resolves the key here, against the
+ * dashboard's own download route. Everything else about the link renders as usual.
+ */
+function renderLinkMark({
+	mark,
+	children,
+}: Readonly<{
+	mark: { attrs?: Record<string, unknown> | null };
+	children?: ReactNode | Array<ReactNode>;
+}>): ReactNode {
+	const attrs = mark.attrs ?? {};
+	const assetKey = typeof attrs.assetKey === "string" ? attrs.assetKey : null;
+
+	const href =
+		attrs.targetKind === "asset" && assetKey != null
+			? `/api/assets/download?key=${encodeURIComponent(assetKey)}`
+			: typeof attrs.href === "string"
+				? attrs.href
+				: undefined;
+
+	return (
+		<a
+			href={href}
+			rel={typeof attrs.rel === "string" ? attrs.rel : undefined}
+			target={typeof attrs.target === "string" ? attrs.target : undefined}
+		>
+			{children}
+		</a>
+	);
+}
+
+const richTextRenderOptions = {
+	markMapping: { link: renderLinkMark },
+	nodeMapping: { buttonLink: renderButtonLinkNode },
+};
 
 /** Renders a richtext caption inside a `figcaption`, or nothing when the caption is empty. */
 function CaptionFigcaption({

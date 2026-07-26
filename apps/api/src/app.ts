@@ -5,6 +5,7 @@ import { createApp, createRouter } from "@/lib/factory";
 import { createOpenApi } from "@/lib/openapi/index";
 import { database } from "@/middlewares/db";
 import { storage as storageMiddleware } from "@/middlewares/storage";
+import { router as assets } from "@/routes/assets";
 import { router as dariahProjects } from "@/routes/dariah-projects";
 import { router as documentsPolicies } from "@/routes/documents-policies";
 import { router as events } from "@/routes/events";
@@ -33,6 +34,7 @@ const app = createApp();
 const openapi = createOpenApi(app);
 
 const api = createRouter()
+	.route("/assets", assets)
 	.route("/dariah-projects", dariahProjects)
 	.route("/documents-policies", documentsPolicies)
 	.route("/navigation", navigation)
