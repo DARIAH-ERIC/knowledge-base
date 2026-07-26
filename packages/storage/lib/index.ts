@@ -4,8 +4,8 @@ import { Result } from "better-result";
 import { Client, type ItemBucketMetadata } from "minio";
 import { v7 as uuidv7 } from "uuid";
 
-import type { AssetPrefix } from "../config/images.config";
 import { StorageDeleteError, StorageDownloadError, StorageUploadError } from "./errors";
+import type { AssetPrefix } from "./images.config";
 
 function generateObjectKey(prefix: AssetPrefix): string {
 	const objectName = `${prefix}/${uuidv7()}`;

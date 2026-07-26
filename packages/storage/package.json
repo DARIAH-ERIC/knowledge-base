@@ -9,7 +9,7 @@
 		"./admin": "./dist/admin.mjs",
 		"./download": "./dist/download.mjs",
 		"./errors": "./dist/errors.mjs",
-		"./config": "./config/images.config.ts",
+		"./config": "./dist/images.config.mjs",
 		"./lib": "./lib/utils/index.ts"
 	},
 	"scripts": {
