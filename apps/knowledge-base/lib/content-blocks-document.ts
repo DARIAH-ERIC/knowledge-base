@@ -3,6 +3,15 @@ import type { JSONContent } from "@tiptap/core";
 
 import type { ContentBlockInput } from "@/lib/content-block-input";
 
+/** Mirrors `imageLayoutEnum` in `@dariah-eric/database`. */
+type ImageLayout = "default" | "wide" | "full" | "float-start" | "float-end";
+
+const imageLayouts = new Set<ImageLayout>(["default", "wide", "full", "float-start", "float-end"]);
+
+function normalizeImageLayout(value: unknown): ImageLayout {
+	return imageLayouts.has(value as ImageLayout) ? (value as ImageLayout) : "default";
+}
+
 interface RichTextBlock {
 	type: "rich_text";
 	content?: JSONContent;
@@ -17,6 +26,7 @@ interface ImageBlock {
 		assetCaption?: JSONContent | null;
 		caption?: JSONContent | null;
 		captionMode?: ImageCaptionMode;
+		layout?: ImageLayout;
 	};
 }
 
@@ -34,7 +44,26 @@ interface CalloutBlock {
 	};
 }
 
-export type MergeableBlock = RichTextBlock | ImageBlock | EmbedBlock | CalloutBlock;
+interface MediaTextBlock {
+	type: "media_text";
+	content?: {
+		imageKey?: string;
+		imageUrl?: string;
+		alt?: string | null;
+		assetCaption?: JSONContent | null;
+		caption?: JSONContent | null;
+		captionMode?: ImageCaptionMode;
+		side?: "start" | "end";
+		content?: JSONContent;
+	};
+}
+
+export type MergeableBlock =
+	| RichTextBlock
+	| ImageBlock
+	| EmbedBlock
+	| CalloutBlock
+	| MediaTextBlock;
 
 /**
  * Merges an ordered sequence of inline content blocks into a single Tiptap document. Typed blocks
@@ -60,7 +89,26 @@ export function mergeBlocksToDocument(blocks: Array<MergeableBlock>): JSONConten
 					assetCaption: block.content?.assetCaption ?? null,
 					caption: block.content?.caption ?? null,
 					captionMode,
+					layout: normalizeImageLayout(block.content?.layout),
 				},
+			});
+		} else if (block.type === "media_text") {
+			const captionMode =
+				block.content?.captionMode ?? (block.content?.caption != null ? "override" : "inherit");
+			// The stored body is a document; the node holds its children as real nested content.
+			const body = block.content?.content?.content ?? [];
+			nodes.push({
+				type: "mediaTextBlock",
+				attrs: {
+					imageKey: block.content?.imageKey ?? null,
+					imageUrl: block.content?.imageUrl ?? null,
+					alt: block.content?.alt ?? null,
+					assetCaption: block.content?.assetCaption ?? null,
+					caption: block.content?.caption ?? null,
+					captionMode,
+					side: block.content?.side ?? "start",
+				},
+				content: body.length > 0 ? body : [{ type: "paragraph" }],
 			});
 		} else if (block.type === "embed") {
 			nodes.push({
@@ -127,6 +175,35 @@ export function splitDocumentToBlocks(doc: JSONContent): Array<ContentBlockInput
 					caption: (node.attrs?.caption as JSONContent | null | undefined) ?? undefined,
 					captionMode:
 						(node.attrs?.captionMode as ImageCaptionMode | null | undefined) ?? "inherit",
+					layout: normalizeImageLayout(node.attrs?.layout),
+				},
+			});
+		} else if (node.type === "mediaTextBlock") {
+			const imageKey = node.attrs?.imageKey as string | null | undefined;
+			const body = node.content ?? [];
+
+			// `upsertTypedContentBlock` drops a media block that has no asset to bind to, which would
+			// take the prose with it. Demote an image-less block to an ordinary rich text run so the
+			// text an author already wrote survives the save.
+			if (imageKey == null || imageKey === "") {
+				richTextRun.push(...body);
+				continue;
+			}
+
+			flushRichText();
+			blocks.push({
+				id: crypto.randomUUID(),
+				type: "media_text",
+				content: {
+					imageKey,
+					imageUrl: (node.attrs?.imageUrl as string | null | undefined) ?? undefined,
+					alt: (node.attrs?.alt as string | null | undefined) ?? undefined,
+					assetCaption: (node.attrs?.assetCaption as JSONContent | null | undefined) ?? undefined,
+					caption: (node.attrs?.caption as JSONContent | null | undefined) ?? undefined,
+					captionMode:
+						(node.attrs?.captionMode as ImageCaptionMode | null | undefined) ?? "inherit",
+					side: node.attrs?.side === "end" ? "end" : "start",
+					content: { type: "doc", content: body },
 				},
 			});
 		} else if (node.type === "embedBlock") {

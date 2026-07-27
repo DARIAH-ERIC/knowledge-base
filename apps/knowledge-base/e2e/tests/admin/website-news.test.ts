@@ -311,6 +311,49 @@ test.describe("website news admin", () => {
 		expect(aboveBox!.y).toBeLessThan(belowBox!.y);
 	});
 
+	/**
+	 * Regression: image `layout` was stored on the block and offered in the UI, but neither the
+	 * `assetImage` node nor the merge/split seam carried it. Opening an entity dropped the layout and
+	 * saving wrote the default back over it, so a floated image silently un-floated the first time
+	 * anyone edited the page — without touching the image.
+	 *
+	 * The second save is the point of this test. Asserting only the first one passes even when
+	 * loading is broken, because the editor still holds the layout the author just picked.
+	 */
+	test("should keep a floated image floated across an edit round trip", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Image Layout ${randomUUID()}`;
+		const text = `Rich text before the image ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item with a floated image");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await newsPage.addContentWithImage({ text, assetLabel: "E2E Test Asset" });
+		await newsPage.setImageLayout("Float left");
+		await newsPage.submitForm();
+
+		let contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text", "image"]);
+		expect(contentBlocks[1]).toMatchObject({ imageLayout: "float-start" });
+
+		/** Re-open the editor and confirm the stored layout survived being loaded into the document. */
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoDetailsFromList(title);
+		await newsPage.gotoEditFromDetails();
+		await newsPage.expectImageLayout("Float left");
+
+		/** Save again without editing the image at all. */
+		await newsPage.submitForm();
+
+		contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text", "image"]);
+		expect(contentBlocks[1]).toMatchObject({ imageLayout: "float-start" });
+	});
+
 	test("should save standalone and inline button links in a content block", async ({
 		page,
 		createWebsiteNewsPage,

@@ -265,6 +265,8 @@ export class DatabaseService {
 			calloutIntent: string | null;
 			calloutTitle: string | null;
 			content: unknown;
+			imageLayout: string | null;
+			mediaTextSide: string | null;
 			position: number;
 			type: string;
 		}>
@@ -283,7 +285,9 @@ export class DatabaseService {
 			.select({
 				calloutIntent: schema.calloutContentBlocks.intent,
 				calloutTitle: schema.calloutContentBlocks.title,
-				content: sql<unknown>`coalesce(${schema.richTextContentBlocks.content}, ${schema.calloutContentBlocks.content})`,
+				content: sql<unknown>`coalesce(${schema.richTextContentBlocks.content}, ${schema.calloutContentBlocks.content}, ${schema.mediaTextContentBlocks.content})`,
+				imageLayout: schema.imageContentBlocks.layout,
+				mediaTextSide: schema.mediaTextContentBlocks.side,
 				position: schema.contentBlocks.position,
 				type: schema.contentBlockTypes.type,
 			})
@@ -300,6 +304,14 @@ export class DatabaseService {
 			.leftJoin(
 				schema.calloutContentBlocks,
 				eq(schema.calloutContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(
+				schema.imageContentBlocks,
+				eq(schema.imageContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(
+				schema.mediaTextContentBlocks,
+				eq(schema.mediaTextContentBlocks.id, schema.contentBlocks.id),
 			)
 			.where(eq(schema.fields.entityVersionId, newsItem.versionId))
 			.orderBy(schema.contentBlocks.position);

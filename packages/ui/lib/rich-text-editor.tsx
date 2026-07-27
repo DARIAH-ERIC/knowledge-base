@@ -9,6 +9,7 @@ import { TableKit } from "@tiptap/extension-table/kit";
 import { Typography } from "@tiptap/extension-typography";
 import {
 	EditorContent,
+	NodeViewContent,
 	type NodeViewProps,
 	NodeViewWrapper,
 	ReactNodeViewRenderer,
@@ -94,6 +95,7 @@ interface RichTextEditorProps {
 	onChange?: (content: JSONContent) => void;
 	renderEmbedInsert?: (insertEmbed: () => void) => ReactNode;
 	renderCalloutInsert?: (insertCallout: () => void) => ReactNode;
+	renderMediaTextInsert?: (insertMediaText: () => void) => ReactNode;
 	renderButtonLinkInsert?: (insertButtonLink: () => void) => ReactNode;
 	renderPlaceholderValueInsert?: (
 		insertPlaceholderValue: (value: { kind: string; label: string }) => void,
@@ -129,6 +131,15 @@ function normalizeInitialContent(content: JSONContent | undefined): JSONContent 
 
 type ImagePickerRenderer = NonNullable<RichTextEditorProps["renderImagePicker"]>;
 type ImageCaptionMode = "hidden" | "inherit" | "override";
+
+/** Mirrors `imageLayoutEnum` in `@dariah-eric/database` — the stored column is a closed set. */
+type ImageLayout = "default" | "wide" | "full" | "float-start" | "float-end";
+
+const imageLayouts = new Set<ImageLayout>(["default", "wide", "full", "float-start", "float-end"]);
+
+function normalizeImageLayout(value: unknown): ImageLayout {
+	return imageLayouts.has(value as ImageLayout) ? (value as ImageLayout) : "default";
+}
 
 function resolveImageCaption(
 	captionMode: ImageCaptionMode,
@@ -1063,6 +1074,7 @@ function AssetImageNodeView({
 	const assetCaption = node.attrs.assetCaption as JSONContent | null;
 	const caption = node.attrs.caption as JSONContent | null;
 	const captionMode = node.attrs.captionMode as ImageCaptionMode;
+	const layout = normalizeImageLayout(node.attrs.layout);
 	const resolvedCaption = resolveImageCaption(captionMode, caption, assetCaption);
 
 	const [isEditing, setIsEditing] = useState(
@@ -1072,6 +1084,7 @@ function AssetImageNodeView({
 	const [imageUrlInput, setImageUrlInput] = useState(imageUrl ?? "");
 	const [captionJson, setCaptionJson] = useState<JSONContent | null>(caption);
 	const [captionModeInput, setCaptionModeInput] = useState<ImageCaptionMode>(captionMode);
+	const [layoutInput, setLayoutInput] = useState<ImageLayout>(layout);
 
 	const imageKeyInputId = useId();
 	const imageUrlInputId = useId();
@@ -1081,6 +1094,7 @@ function AssetImageNodeView({
 		setImageUrlInput(imageUrl ?? "");
 		setCaptionJson(caption);
 		setCaptionModeInput(captionMode);
+		setLayoutInput(layout);
 	}
 
 	function selectNode() {
@@ -1102,6 +1116,7 @@ function AssetImageNodeView({
 			imageUrl: nextImageUrl,
 			caption: isEmptyRichTextDocument(captionJson) ? null : captionJson,
 			captionMode: captionModeInput,
+			layout: layoutInput,
 		});
 		setIsEditing(false);
 	}
@@ -1169,6 +1184,27 @@ function AssetImageNodeView({
 							</div>
 						</>
 					) : null}
+					<div className="flex flex-col gap-y-1">
+						<span className="text-sm/6 font-medium">{"Layout"}</span>
+						<ToggleGroup
+							aria-label="Layout"
+							disallowEmptySelection={true}
+							onSelectionChange={(keys) => {
+								const nextLayout = [...keys][0] as ImageLayout | undefined;
+								if (nextLayout != null) {
+									setLayoutInput(nextLayout);
+								}
+							}}
+							selectedKeys={[layoutInput]}
+							size="sm"
+						>
+							<ToggleGroupItem id="default">{"Default"}</ToggleGroupItem>
+							<ToggleGroupItem id="wide">{"Wide"}</ToggleGroupItem>
+							<ToggleGroupItem id="full">{"Full width"}</ToggleGroupItem>
+							<ToggleGroupItem id="float-start">{"Float left"}</ToggleGroupItem>
+							<ToggleGroupItem id="float-end">{"Float right"}</ToggleGroupItem>
+						</ToggleGroup>
+					</div>
 					<div className="flex flex-col gap-y-1">
 						<span className="text-sm/6 font-medium">{"Caption behavior"}</span>
 						<ToggleGroup
@@ -1293,6 +1329,7 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 				assetCaption: { default: null },
 				caption: { default: null },
 				captionMode: { default: "inherit" },
+				layout: { default: "default" },
 			};
 		},
 
@@ -1309,6 +1346,7 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 							assetCaption: parseCaptionAttr(el.dataset.assetCaption),
 							caption: parseCaptionAttr(el.dataset.caption),
 							captionMode: el.dataset.captionMode ?? "inherit",
+							layout: normalizeImageLayout(el.dataset.layout),
 						};
 					},
 				},
@@ -1325,6 +1363,7 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 						"data-asset-image": "",
 						"data-image-key": node.attrs.imageKey as string | null,
 						"data-caption-mode": node.attrs.captionMode as ImageCaptionMode,
+						"data-layout": normalizeImageLayout(node.attrs.layout),
 					},
 					node.attrs.assetCaption != null
 						? {
@@ -1343,6 +1382,305 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 		addNodeView() {
 			return ReactNodeViewRenderer((props) => (
 				<AssetImageNodeView {...props} renderImagePicker={renderImagePicker} />
+			));
+		},
+	});
+}
+
+type MediaTextSide = "start" | "end";
+
+function normalizeMediaTextSide(value: unknown): MediaTextSide {
+	return value === "end" ? "end" : "start";
+}
+
+interface MediaTextNodeViewProps extends NodeViewProps {
+	renderImagePicker?: ImagePickerRenderer;
+}
+
+/**
+ * Unlike the other custom nodes here, this one is not an atom: its prose is real document content
+ * rendered through `NodeViewContent`, so authors type into it with the outer toolbar and a single
+ * undo stack. Only the media settings are a form — those commit on Apply, because a nested
+ * `InlineRichTextEditor` writing to `updateAttributes` on every keystroke would dispatch a
+ * transaction into the outer editor per character and fight it for focus.
+ */
+function MediaTextNodeView({
+	editor,
+	node,
+	selected,
+	updateAttributes,
+	deleteNode,
+	renderImagePicker,
+}: Readonly<MediaTextNodeViewProps>): ReactNode {
+	const imageKey = node.attrs.imageKey as string | null;
+	const imageUrl = node.attrs.imageUrl as string | null;
+	const alt = node.attrs.alt as string | null;
+	const assetCaption = node.attrs.assetCaption as JSONContent | null;
+	const caption = node.attrs.caption as JSONContent | null;
+	const captionMode = (node.attrs.captionMode as ImageCaptionMode | null) ?? "inherit";
+	const side = normalizeMediaTextSide(node.attrs.side);
+
+	// Settings open while the block has no image: `upsertTypedContentBlock` cannot store a media
+	// block without one, so picking the image is the first thing an author needs to do.
+	const [isEditing, setIsEditing] = useState(imageKey == null && editor.isEditable);
+	const [captionModeInput, setCaptionModeInput] = useState<ImageCaptionMode>(captionMode);
+	const [captionInput, setCaptionInput] = useState<JSONContent | null>(caption);
+
+	const resolvedCaption = resolveImageCaption(captionMode, caption, assetCaption);
+
+	function resetInputs() {
+		setCaptionModeInput(captionMode);
+		setCaptionInput(caption);
+	}
+
+	return (
+		<NodeViewWrapper
+			className={twMerge(
+				"my-2 overflow-clip rounded-lg border border-input bg-bg transition-shadow",
+				selected && "border-primary ring-2 ring-primary/20",
+			)}
+		>
+			{isEditing && editor.isEditable ? (
+				<div
+					className="flex flex-col gap-y-3 border-be border-border bg-muted p-4"
+					contentEditable={false}
+				>
+					{renderImagePicker != null ? (
+						<div className="flex flex-col gap-y-2">
+							<span className="text-sm/6 font-medium">{"Pick image"}</span>
+							{renderImagePicker((nextImageKey, nextImageUrl, asset) => {
+								updateAttributes({
+									imageKey: nextImageKey,
+									imageUrl: nextImageUrl,
+									alt: asset?.alt ?? null,
+									assetCaption: asset?.caption ?? null,
+								});
+							})}
+						</div>
+					) : null}
+					<div className="flex flex-col gap-y-1">
+						<span className="text-sm/6 font-medium">{"Image placement"}</span>
+						<ToggleGroup
+							aria-label="Image placement"
+							disallowEmptySelection={true}
+							onSelectionChange={(keys) => {
+								const nextSide = [...keys][0] as MediaTextSide | undefined;
+								if (nextSide != null) {
+									updateAttributes({ side: nextSide });
+								}
+							}}
+							selectedKeys={[side]}
+							size="sm"
+						>
+							<ToggleGroupItem id="start">{"Left"}</ToggleGroupItem>
+							<ToggleGroupItem id="end">{"Right"}</ToggleGroupItem>
+						</ToggleGroup>
+					</div>
+					<div className="flex flex-col gap-y-1">
+						<span className="text-sm/6 font-medium">{"Caption behavior"}</span>
+						<ToggleGroup
+							aria-label="Caption behavior"
+							disallowEmptySelection={true}
+							onSelectionChange={(keys) => {
+								const mode = [...keys][0] as ImageCaptionMode | undefined;
+								if (mode != null) {
+									setCaptionModeInput(mode);
+								}
+							}}
+							selectedKeys={[captionModeInput]}
+							size="sm"
+						>
+							<ToggleGroupItem id="inherit">{"Use asset caption"}</ToggleGroupItem>
+							<ToggleGroupItem id="override">{"Custom caption"}</ToggleGroupItem>
+							<ToggleGroupItem id="hidden">{"No caption"}</ToggleGroupItem>
+						</ToggleGroup>
+						{captionModeInput === "override" ? (
+							<InlineRichTextEditor
+								aria-label="Custom caption"
+								content={captionInput ?? undefined}
+								onChange={setCaptionInput}
+							/>
+						) : null}
+						{captionModeInput === "inherit" && !isEmptyRichTextDocument(assetCaption) ? (
+							<InlineRichTextRenderer
+								className="rounded-lg border border-border px-3 py-2 text-muted-fg"
+								content={assetCaption!}
+							/>
+						) : null}
+					</div>
+					<div className="flex items-center gap-x-2">
+						<Button
+							intent="primary"
+							isDisabled={imageKey == null}
+							onPress={() => {
+								updateAttributes({
+									caption: isEmptyRichTextDocument(captionInput) ? null : captionInput,
+									captionMode: captionModeInput,
+								});
+								setIsEditing(false);
+							}}
+							size="sm"
+							type="button"
+						>
+							{"Apply"}
+						</Button>
+						{imageKey != null ? (
+							<Button
+								intent="outline"
+								onPress={() => {
+									resetInputs();
+									setIsEditing(false);
+								}}
+								size="sm"
+								type="button"
+							>
+								{"Cancel"}
+							</Button>
+						) : null}
+						<Button intent="outline" onPress={deleteNode} size="sm" type="button">
+							{"Remove"}
+						</Button>
+					</div>
+				</div>
+			) : null}
+			<div
+				className={twMerge(
+					"group flex flex-col gap-4 p-4 sm:flex-row",
+					side === "end" && "sm:flex-row-reverse",
+				)}
+			>
+				{/* The media column is chrome, not content — ProseMirror must not treat it as either
+				    editable text or a second content hole. It doubles as the drag handle so that
+				    dragging the block never competes with selecting its prose. */}
+				<div
+					className="relative shrink-0 sm:inline-1/3"
+					contentEditable={false}
+					data-drag-handle={editor.isEditable ? "" : undefined}
+				>
+					{imageUrl != null ? (
+						<img
+							alt={alt ?? ""}
+							className="block inline-full rounded-md object-cover"
+							draggable={false}
+							src={imageUrl}
+						/>
+					) : (
+						<div className="flex block-32 items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-fg">
+							{"No image"}
+						</div>
+					)}
+					{!isEmptyRichTextDocument(resolvedCaption) ? (
+						<InlineRichTextRenderer
+							className="mbs-1 text-sm text-muted-fg"
+							content={resolvedCaption!}
+						/>
+					) : null}
+					{editor.isEditable && !isEditing ? (
+						<div className="absolute inset-e-1 inset-bs-1 flex gap-x-1 opacity-0 transition-opacity group-hover:opacity-100">
+							<button
+								aria-label="Edit media settings"
+								className="rounded-sm bg-bg/90 p-1 text-muted-fg shadow-sm hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+								onClick={() => {
+									resetInputs();
+									setIsEditing(true);
+								}}
+								type="button"
+							>
+								<PencilIcon className="block-3.5 inline-3.5" />
+							</button>
+							<button
+								aria-label="Remove media with text"
+								className="rounded-sm bg-bg/90 p-1 text-muted-fg shadow-sm hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+								onClick={deleteNode}
+								type="button"
+							>
+								<Trash2Icon className="block-3.5 inline-3.5" />
+							</button>
+						</div>
+					) : null}
+				</div>
+				<NodeViewContent className="min-inline-0 flex-1" />
+			</div>
+		</NodeViewWrapper>
+	);
+}
+
+function createMediaTextNode(renderImagePicker?: ImagePickerRenderer): Node {
+	return Node.create({
+		name: "mediaTextBlock",
+		group: "block",
+		// Prose only. The body is a passage bound to the image — a speaker bio, typically — so
+		// excluding headings keeps the document outline meaningful and makes a heading nested inside
+		// a media block impossible by construction rather than something the toolbar has to police.
+		content: "(paragraph | bulletList | orderedList)+",
+		// `defining` keeps the wrapper when its content is replaced by a paste; `isolating` stops
+		// backspace at the start of the body from lifting the prose out into the paragraph above.
+		defining: true,
+		isolating: true,
+		draggable: true,
+		selectable: true,
+
+		addAttributes() {
+			return {
+				imageKey: { default: null },
+				imageUrl: { default: null },
+				alt: { default: null },
+				assetCaption: { default: null },
+				caption: { default: null },
+				captionMode: { default: "inherit" },
+				side: { default: "start" },
+			};
+		},
+
+		parseHTML() {
+			return [
+				{
+					tag: "div[data-media-text-block]",
+					getAttrs(dom) {
+						return {
+							imageKey: dom.dataset.imageKey ?? null,
+							imageUrl: dom.dataset.imageUrl ?? null,
+							alt: dom.dataset.alt ?? null,
+							assetCaption: parseCaptionAttr(dom.dataset.assetCaption),
+							caption: parseCaptionAttr(dom.dataset.caption),
+							captionMode: dom.dataset.captionMode ?? "inherit",
+							side: normalizeMediaTextSide(dom.dataset.side),
+						};
+					},
+				},
+			];
+		},
+
+		renderHTML({ node }) {
+			return [
+				"div",
+				mergeAttributes(
+					{
+						"data-media-text-block": "",
+						"data-image-key": node.attrs.imageKey as string | null,
+						"data-image-url": node.attrs.imageUrl as string | null,
+						"data-alt": node.attrs.alt as string | null,
+						"data-caption-mode": node.attrs.captionMode as ImageCaptionMode,
+						"data-side": normalizeMediaTextSide(node.attrs.side),
+					},
+					node.attrs.assetCaption != null
+						? {
+								"data-asset-caption": serializeCaptionAttr(
+									node.attrs.assetCaption as JSONContent | null,
+								),
+							}
+						: {},
+					node.attrs.caption != null
+						? { "data-caption": serializeCaptionAttr(node.attrs.caption as JSONContent | null) }
+						: {},
+				),
+				0,
+			];
+		},
+
+		addNodeView() {
+			return ReactNodeViewRenderer((props) => (
+				<MediaTextNodeView {...props} renderImagePicker={renderImagePicker} />
 			));
 		},
 	});
@@ -1462,6 +1800,7 @@ export function createRichTextExtensions(
 		LinkWithTargets,
 		Image,
 		createAssetImageNode(options?.renderImagePicker),
+		createMediaTextNode(options?.renderImagePicker),
 		EmbedNode,
 		CalloutNode,
 		ButtonLinkNode,
@@ -1480,6 +1819,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		size,
 		renderEmbedInsert,
 		renderCalloutInsert,
+		renderMediaTextInsert,
 		renderButtonLinkInsert,
 		renderPlaceholderValueInsert,
 		renderImagePicker,
@@ -1629,6 +1969,30 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			.insertContent({
 				type: "calloutBlock",
 				attrs: { intent: "info", title: null, content: null },
+			})
+			.run();
+	}, [editor]);
+
+	const insertMediaText = useCallback(() => {
+		if (!editor) {
+			return;
+		}
+		editor
+			.chain()
+			.focus()
+			.insertContent({
+				type: "mediaTextBlock",
+				attrs: {
+					imageKey: null,
+					imageUrl: null,
+					alt: null,
+					assetCaption: null,
+					caption: null,
+					captionMode: "inherit",
+					side: "start",
+				},
+				// The content expression requires at least one child; an empty node would be rejected.
+				content: [{ type: "paragraph" }],
 			})
 			.run();
 	}, [editor]);
@@ -1986,6 +2350,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						</>
 					) : null}
 					{renderCalloutInsert != null ? renderCalloutInsert(insertCallout) : null}
+					{renderMediaTextInsert != null ? renderMediaTextInsert(insertMediaText) : null}
 					{renderButtonLinkInsert != null ? renderButtonLinkInsert(insertButtonLink) : null}
 					{renderPlaceholderValueInsert != null
 						? renderPlaceholderValueInsert(insertPlaceholderValue)

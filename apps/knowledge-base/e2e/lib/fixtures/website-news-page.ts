@@ -241,6 +241,60 @@ export class WebsiteNewsPage {
 		await editor.pressSequentially(options.inline.after);
 	}
 
+	private imageBlock(): Locator {
+		return this.page.getByLabel("Image block", { exact: true });
+	}
+
+	/**
+	 * Add a content block holding a paragraph followed by an inline image node. The image is a node
+	 * inside the unified richtext document, not a block of its own — it is only split back out into
+	 * an `image` content block on save.
+	 */
+	async addContentWithImage(options: { text: string; assetLabel: string }): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+
+		const editor = this.contentBlockEditor();
+		await editor.click();
+		await editor.pressSequentially(options.text);
+		await editor.press("Control+End");
+		await editor.press("Enter");
+
+		await this.page.getByRole("button", { name: "Insert image" }).click();
+		await this.page.waitForSelector('[role="dialog"]');
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		const asset = dialog.getByRole("gridcell", { name: options.assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
+		await expect(this.imageBlock()).toBeVisible();
+	}
+
+	/** Open the image node's settings, pick a layout and apply it. */
+	async setImageLayout(layout: string): Promise<void> {
+		const block = this.imageBlock();
+		await block.dblclick();
+		await block.getByText(layout, { exact: true }).click();
+		await block.getByRole("button", { name: "Apply" }).click();
+		await expect(block.getByRole("button", { name: "Apply" })).toBeHidden();
+	}
+
+	/**
+	 * Assert the layout the image node's settings currently show. This reads the _editor_ state, so
+	 * it fails if loading an entity drops the stored layout — the half of the round trip a database
+	 * assertion after saving cannot distinguish from the editor never having had it.
+	 */
+	async expectImageLayout(layout: string): Promise<void> {
+		const block = this.imageBlock();
+		await block.dblclick();
+		await expect(block.getByRole("button", { name: layout, exact: true })).toHaveAttribute(
+			"aria-pressed",
+			"true",
+		);
+		await block.getByRole("button", { name: "Cancel" }).click();
+	}
+
 	async dragCalloutBeforeText(text: string): Promise<void> {
 		const editor = this.contentBlockEditor();
 		const callout = this.page.getByLabel("Callout block", { exact: true });

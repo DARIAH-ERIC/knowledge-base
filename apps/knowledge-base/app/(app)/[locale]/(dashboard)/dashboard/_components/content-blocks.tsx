@@ -1,14 +1,11 @@
-// oxlint-disable jsx-a11y/iframe-has-title
-
 "use client";
 
-import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import type { ContentBlockTypes } from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { Label, labelStyles } from "@dariah-eric/ui/field";
 import { InlineRichTextEditor } from "@dariah-eric/ui/inline-rich-text-editor";
-import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
 import { Input } from "@dariah-eric/ui/input";
 import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
 import {
@@ -72,7 +69,6 @@ import {
 	mergeBlocksToDocument,
 	splitDocumentToBlocks,
 } from "@/lib/content-blocks-document";
-import { getEmbedUrl } from "@/lib/embed-url";
 
 interface RichTextContentBlockItem {
 	id: Key;
@@ -204,6 +200,7 @@ const UNIFIED_BLOCK_TYPES = new Set<ContentBlock["type"]>([
 	"image",
 	"embed",
 	"callout",
+	"media_text",
 ]);
 const DATA_CONTENT_BLOCK_TYPES = [
 	"events",
@@ -587,16 +584,19 @@ function ContentBlockPanel({
 			);
 		}
 
-		case "callout": {
+		// These are in `UNIFIED_BLOCK_TYPES`, so they only ever exist as nodes inside a unified
+		// document and never reach the list as items of their own — they are edited through their
+		// node views in the richtext editor. The cases remain because the types stay in
+		// `ContentBlock`: that is the shape the server hands us before merging.
+		case "callout":
+		case "embed":
+		case "image":
+		case "media_text": {
 			return null;
 		}
 
 		case "data": {
 			return <DataContentBlockPanel item={item} onChange={onChange} />;
-		}
-
-		case "embed": {
-			return <EmbedContentBlockPanel item={item} onChange={onChange} />;
 		}
 
 		case "gallery": {
@@ -608,18 +608,6 @@ function ContentBlockPanel({
 		case "hero": {
 			return (
 				<HeroContentBlockPanel initialAssets={initialAssets} item={item} onChange={onChange} />
-			);
-		}
-
-		case "image": {
-			return (
-				<ImageContentBlockPanel initialAssets={initialAssets} item={item} onChange={onChange} />
-			);
-		}
-
-		case "media_text": {
-			return (
-				<MediaTextContentBlockPanel initialAssets={initialAssets} item={item} onChange={onChange} />
 			);
 		}
 
@@ -645,6 +633,13 @@ function ContentBlockPanel({
 							aria-label="Insert callout"
 							icon={InformationCircleIcon}
 							onClick={insertCallout}
+						/>
+					)}
+					renderMediaTextInsert={(insertMediaText) => (
+						<RichTextEditorToolbarButton
+							aria-label="Insert media with text"
+							icon={ViewColumnsIcon}
+							onClick={insertMediaText}
 						/>
 					)}
 					renderButtonLinkInsert={(insertButtonLink) => (
@@ -1044,185 +1039,6 @@ function DataContentBlockPanel({
 	);
 }
 
-interface EmbedContentBlockPanelProps {
-	item: EmbedContentBlockItem;
-	onChange: (content: NonNullable<EmbedContentBlockItem["content"]>) => void;
-}
-
-function EmbedContentBlockPanel({
-	item,
-	onChange,
-}: Readonly<EmbedContentBlockPanelProps>): ReactNode {
-	const t = useExtracted();
-
-	const url = item.content?.url;
-	const title = item.content?.title;
-	const caption = item.content?.caption;
-
-	const embedUrl = url != null && url.trim() !== "" ? getEmbedUrl(url.trim()) : null;
-
-	return (
-		<div className="flex flex-col gap-y-4">
-			<TextField
-				isRequired={true}
-				onChange={(value) => {
-					onChange({ ...item.content, url: value });
-				}}
-				value={url ?? ""}
-			>
-				<Label>{t("URL")}</Label>
-				<Input placeholder="https://" />
-			</TextField>
-			<TextField
-				isRequired={true}
-				onChange={(value) => {
-					onChange({ ...item.content, title: value });
-				}}
-				value={title ?? ""}
-			>
-				<Label>{t("Title")}</Label>
-				<Input placeholder={t("Descriptive title for screen readers")} />
-			</TextField>
-			<div className="flex flex-col gap-y-1">
-				<span className={labelStyles()}>{t("Caption")}</span>
-				<InlineRichTextEditor
-					aria-label={t("Caption")}
-					content={caption ?? undefined}
-					onChange={(value) => {
-						onChange({ ...item.content, caption: isEmptyRichTextDocument(value) ? null : value });
-					}}
-				/>
-			</div>
-			{embedUrl != null && (
-				<div className="aspect-video inline-full overflow-hidden rounded-lg border border-border">
-					<iframe
-						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-						allowFullScreen={true}
-						className="block-full inline-full"
-						sandbox="allow-scripts allow-same-origin allow-presentation"
-						src={embedUrl}
-						title={title ?? embedUrl}
-					/>
-				</div>
-			)}
-		</div>
-	);
-}
-
-interface ImageContentBlockPanelProps {
-	initialAssets?: Array<MediaLibraryAsset>;
-	item: ImageContentBlockItem;
-	onChange: (content: NonNullable<ImageContentBlockItem["content"]>) => void;
-}
-
-function ImageContentBlockPanel({
-	initialAssets,
-	item,
-	onChange,
-}: Readonly<ImageContentBlockPanelProps>): ReactNode {
-	const t = useExtracted();
-
-	const imageKey = item.content?.imageKey;
-	const imageUrl = item.content?.imageUrl;
-	const caption = item.content?.caption;
-	const layout = item.content?.layout ?? "default";
-	const captionMode =
-		item.content?.captionMode ?? (item.content?.caption != null ? "override" : "inherit");
-	const { caption: resolvedCaption } = resolveImageCaption({
-		assetCaption: item.content?.assetCaption,
-		blockCaption: caption,
-		captionMode,
-	});
-
-	return (
-		<div className="flex flex-col gap-y-4">
-			<div className="flex items-start gap-x-4">
-				{imageUrl != null && (
-					<img
-						alt={item.content?.alt ?? ""}
-						className="block-24 inline-auto max-inline-full rounded-lg object-cover shrink-0"
-						src={imageUrl}
-					/>
-				)}
-				<MediaLibraryDialog
-					defaultPrefix="images"
-					initialAssets={initialAssets ?? []}
-					onSelect={(key, url, asset) => {
-						onChange({
-							...item.content,
-							imageKey: key,
-							imageUrl: url,
-							alt: asset?.alt ?? null,
-							assetCaption: asset?.caption ?? null,
-							captionMode,
-						});
-					}}
-					prefixes={["avatars", "images", "logos"]}
-				/>
-				{imageKey != null && (
-					<input name="imageContentBlock.imageKey" type="hidden" value={imageKey} />
-				)}
-			</div>
-			<div className="flex flex-col gap-y-1">
-				<span className={labelStyles()}>{t("Layout")}</span>
-				<ToggleGroup
-					aria-label={t("Layout")}
-					disallowEmptySelection={true}
-					onSelectionChange={(keys) => {
-						const nextLayout = [...keys][0] as typeof layout | undefined;
-						if (nextLayout != null) {
-							onChange({ ...item.content, layout: nextLayout });
-						}
-					}}
-					selectedKeys={[layout]}
-					size="sm"
-				>
-					<ToggleGroupItem id="default">{t("Default")}</ToggleGroupItem>
-					<ToggleGroupItem id="wide">{t("Wide")}</ToggleGroupItem>
-					<ToggleGroupItem id="full">{t("Full width")}</ToggleGroupItem>
-					<ToggleGroupItem id="float-start">{t("Float left")}</ToggleGroupItem>
-					<ToggleGroupItem id="float-end">{t("Float right")}</ToggleGroupItem>
-				</ToggleGroup>
-			</div>
-			<div className="flex flex-col gap-y-1">
-				<span className={labelStyles()}>{t("Caption behavior")}</span>
-				<ToggleGroup
-					aria-label={t("Caption behavior")}
-					disallowEmptySelection={true}
-					onSelectionChange={(keys) => {
-						const mode = [...keys][0] as ImageCaptionMode | undefined;
-						if (mode != null) {
-							onChange({ ...item.content, captionMode: mode });
-						}
-					}}
-					selectedKeys={[captionMode]}
-					size="sm"
-				>
-					<ToggleGroupItem id="inherit">{t("Use asset caption")}</ToggleGroupItem>
-					<ToggleGroupItem id="override">{t("Custom caption")}</ToggleGroupItem>
-					<ToggleGroupItem id="hidden">{t("No caption")}</ToggleGroupItem>
-				</ToggleGroup>
-				{captionMode === "override" ? (
-					<InlineRichTextEditor
-						aria-label={t("Custom caption")}
-						content={caption ?? undefined}
-						onChange={(value) => {
-							onChange({
-								...item.content,
-								caption: isEmptyRichTextDocument(value) ? null : value,
-								captionMode: "override",
-							});
-						}}
-					/>
-				) : null}
-				{captionMode === "inherit" && !isEmptyRichTextDocument(resolvedCaption) ? (
-					<InlineRichTextRenderer content={resolvedCaption!} />
-				) : null}
-			</div>
-		</div>
-	);
-}
-
 interface HeroContentBlockPanelProps {
 	initialAssets?: Array<MediaLibraryAsset>;
 	item: HeroContentBlockItem;
@@ -1341,128 +1157,6 @@ function HeroContentBlockPanel({
 	);
 }
 
-interface MediaTextContentBlockPanelProps {
-	initialAssets?: Array<MediaLibraryAsset>;
-	item: MediaTextContentBlockItem;
-	onChange: (content: NonNullable<MediaTextContentBlockItem["content"]>) => void;
-}
-
-function MediaTextContentBlockPanel({
-	initialAssets,
-	item,
-	onChange,
-}: Readonly<MediaTextContentBlockPanelProps>): ReactNode {
-	const t = useExtracted();
-
-	const imageKey = item.content?.imageKey;
-	const imageUrl = item.content?.imageUrl;
-	const side = item.content?.side ?? "start";
-	const caption = item.content?.caption;
-	const captionMode =
-		item.content?.captionMode ?? (item.content?.caption != null ? "override" : "inherit");
-	const { caption: resolvedCaption } = resolveImageCaption({
-		assetCaption: item.content?.assetCaption,
-		blockCaption: caption,
-		captionMode,
-	});
-
-	return (
-		<div className="flex flex-col gap-y-4">
-			<div className="flex items-start gap-x-4">
-				{imageUrl != null && (
-					<img
-						alt={item.content?.alt ?? ""}
-						className="block-24 inline-auto max-inline-full rounded-lg object-cover shrink-0"
-						src={imageUrl}
-					/>
-				)}
-				<MediaLibraryDialog
-					defaultPrefix="images"
-					initialAssets={initialAssets ?? []}
-					onSelect={(key, url, asset) => {
-						onChange({
-							...item.content,
-							imageKey: key,
-							imageUrl: url,
-							alt: asset?.alt ?? null,
-							assetCaption: asset?.caption ?? null,
-							captionMode,
-						});
-					}}
-					prefixes={["avatars", "images", "logos"]}
-				/>
-				{imageKey != null && (
-					<input name="mediaTextContentBlock.imageKey" type="hidden" value={imageKey} />
-				)}
-			</div>
-			<div className="flex flex-col gap-y-1">
-				<span className={labelStyles()}>{t("Image placement")}</span>
-				<ToggleGroup
-					aria-label={t("Image placement")}
-					disallowEmptySelection={true}
-					onSelectionChange={(keys) => {
-						const nextSide = [...keys][0] as "start" | "end" | undefined;
-						if (nextSide != null) {
-							onChange({ ...item.content, side: nextSide });
-						}
-					}}
-					selectedKeys={[side]}
-					size="sm"
-				>
-					<ToggleGroupItem id="start">{t("Left")}</ToggleGroupItem>
-					<ToggleGroupItem id="end">{t("Right")}</ToggleGroupItem>
-				</ToggleGroup>
-			</div>
-			<div className="flex flex-col gap-y-1">
-				<span className={labelStyles()}>{t("Caption behavior")}</span>
-				<ToggleGroup
-					aria-label={t("Caption behavior")}
-					disallowEmptySelection={true}
-					onSelectionChange={(keys) => {
-						const mode = [...keys][0] as ImageCaptionMode | undefined;
-						if (mode != null) {
-							onChange({ ...item.content, captionMode: mode });
-						}
-					}}
-					selectedKeys={[captionMode]}
-					size="sm"
-				>
-					<ToggleGroupItem id="inherit">{t("Use asset caption")}</ToggleGroupItem>
-					<ToggleGroupItem id="override">{t("Custom caption")}</ToggleGroupItem>
-					<ToggleGroupItem id="hidden">{t("No caption")}</ToggleGroupItem>
-				</ToggleGroup>
-				{captionMode === "override" ? (
-					<InlineRichTextEditor
-						aria-label={t("Custom caption")}
-						content={caption ?? undefined}
-						onChange={(value) => {
-							onChange({
-								...item.content,
-								caption: isEmptyRichTextDocument(value) ? null : value,
-								captionMode: "override",
-							});
-						}}
-					/>
-				) : null}
-				{captionMode === "inherit" && !isEmptyRichTextDocument(resolvedCaption) ? (
-					<InlineRichTextRenderer content={resolvedCaption!} />
-				) : null}
-			</div>
-			<div className="flex flex-col gap-y-1">
-				<Label>{t("Text")}</Label>
-				<RichTextEditor
-					aria-label={t("Text")}
-					className="inline-full"
-					content={item.content?.content}
-					onChange={(content: JSONContent) => {
-						onChange({ ...item.content, content });
-					}}
-				/>
-			</div>
-		</div>
-	);
-}
-
 interface AccordionContentBlockPanelProps {
 	initialAssets?: Array<MediaLibraryAsset>;
 	item: AccordionContentBlockItem;
@@ -1572,7 +1266,6 @@ const MENU_BLOCK_TYPES: Array<{
 	{ type: "data", icon: <Square3Stack3DIcon /> },
 	{ type: "hero", icon: <RectangleGroupIcon /> },
 	{ type: "accordion", icon: <ListBulletIcon /> },
-	{ type: "media_text", icon: <ViewColumnsIcon /> },
 ];
 
 export function ContentBlockMenu({ onAdd }: Readonly<ContentBlockMenuProps>): ReactNode {
