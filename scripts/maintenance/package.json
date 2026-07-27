@@ -17,6 +17,7 @@
 		"data:backfill:tables-from-wordpress": "tsx ./scripts/backfill-tables-from-wordpress.ts",
 		"data:clean:empty-content-blocks": "tsx ./scripts/clean-empty-content-blocks.ts",
 		"data:clean:richtext": "tsx ./scripts/clean-richtext.ts",
+		"data:clean:richtext-links": "tsx ./scripts/clean-richtext-links.ts",
 		"data:clean:unused-assets": "tsx ./scripts/clean-unused-assets.ts",
 		"data:clean:unused-social-media": "tsx ./scripts/clean-unused-social-media.ts",
 		"data:convert:floated-images-to-media-text": "tsx ./scripts/convert-floated-images-to-media-text.ts",

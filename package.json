@@ -9,6 +9,7 @@
 		"data:audit:unused-assets": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"migrate\" run data:audit:unused-assets",
 		"data:audit:unused-social-media": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"migrate\" run data:audit:unused-social-media",
 		"data:clean:empty-content-blocks": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"migrate\" run data:clean:empty-content-blocks",
+		"data:clean:richtext-links": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"maintenance\" run data:clean:richtext-links",
 		"data:clean:wordpress": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"migrate\" run data:clean:wordpress",
 		"data:ingest:search": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"ingest\" run data:ingest:search",
 		"data:ingest:search:entities": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"ingest\" run data:ingest:search:entities",
