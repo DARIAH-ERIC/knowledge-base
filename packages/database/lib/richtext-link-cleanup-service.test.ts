@@ -1,3 +1,9 @@
+import {
+	getEntityHref,
+	getEntityListHref,
+	interimPagePathBySlug,
+	listableEntityTypes,
+} from "@dariah-eric/website-routes";
 import type { JSONContent } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 
@@ -80,7 +86,7 @@ describe("resolveLegacyDariahHref", () => {
 			resolveLegacyDariahHref("https://www.dariah.eu/tools-services/tools-and-services/"),
 		).toStrictEqual({
 			action: "rewrite",
-			href: "/resources/dariah-resource-catalogue",
+			href: "/resources/resource-catalogue",
 			reason: "legacy_dariah_url",
 		});
 	});
@@ -368,5 +374,45 @@ describe("cleanRichTextLinksInDocument", () => {
 				attrs: { href: "/about/documents", label: "Documents", variant: "primary" },
 			}),
 		);
+	});
+});
+
+/**
+ * The cleanup service hardcodes website paths — `canonicalPathPrefixes` and the mapping targets —
+ * that `@dariah-eric/website-routes` owns. A rename there (`/spotlights` → `/spotlight`) silently
+ * turns rewrites into 404s and makes already-correct links look unmapped, so assert the two agree:
+ * every path the mapper produces must survive a round trip unchanged.
+ */
+describe("canonical website paths stay in sync with @dariah-eric/website-routes", () => {
+	const slug = "example-slug";
+
+	const listingPaths = listableEntityTypes.map((type) => getEntityListHref(type));
+
+	// Types with no detail page of their own (governance bodies, regional hubs, institutions,
+	// documents, pages) are covered by their listing or resolve to a query string, so they are
+	// deliberately absent here.
+	const detailPaths = [
+		getEntityHref({ type: "country", slug }),
+		getEntityHref({ type: "event", slug }),
+		getEntityHref({ type: "funding-call", slug }),
+		getEntityHref({ type: "impact-case-study", slug }),
+		getEntityHref({ type: "news-item", slug }),
+		getEntityHref({ type: "opportunity", slug }),
+		getEntityHref({ type: "person", slug }),
+		getEntityHref({ type: "project", slug }),
+		getEntityHref({ type: "spotlight-article", slug }),
+		getEntityHref({ type: "working-group", slug }),
+	];
+
+	const canonicalPaths = [
+		...new Set([...listingPaths, ...detailPaths, ...Object.values(interimPagePathBySlug)]),
+	].toSorted();
+
+	it.each(canonicalPaths)("keeps %s canonical", (pathname) => {
+		expect(resolveLegacyDariahHref(`https://www.dariah.eu${pathname}/`)).toStrictEqual({
+			action: "rewrite",
+			href: pathname,
+			reason: "legacy_dariah_url",
+		});
 	});
 });

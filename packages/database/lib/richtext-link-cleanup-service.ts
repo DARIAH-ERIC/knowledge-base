@@ -49,7 +49,7 @@ const exactLegacyPathMappings = new Map<string, string>([
 		"/tools-services/tools-and-services/tools/hypotheses-org-academic-blogs",
 		"https://hypotheses.org/",
 	],
-	["/tools-services/tools-and-services", "/resources/dariah-resource-catalogue"],
+	["/tools-services/tools-and-services", "/resources/resource-catalogue"],
 ]);
 
 const prefixLegacyPathMappings = new Map<string, string>([
@@ -83,10 +83,9 @@ const canonicalPathPrefixes = [
 	"/privacy-policy",
 	"/privacy-and-legal/accessibility-declaration",
 	"/privacy-and-legal/legal-notice",
-	"/privacy-and-legal/practice",
 	"/projects",
 	"/resources/dariah-campus",
-	"/resources/dariah-resource-catalogue",
+	"/resources/resource-catalogue",
 	"/resources/ssh-open-marketplace",
 	"/resources/transformations",
 	"/spotlight",
