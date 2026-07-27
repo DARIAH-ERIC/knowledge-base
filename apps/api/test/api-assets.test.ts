@@ -282,6 +282,54 @@ describe("assets", () => {
 			});
 		});
 
+		it("should resolve an entity target to its current website url", async () => {
+			await withTransaction(async (db) => {
+				// The link points at a second news item; the first is only the carrier.
+				const target = await seedNewsItemWithContent(db, { type: "doc", content: [] });
+				const entity = await db.query.entityVersions.findFirst({
+					columns: { entityId: true },
+					where: { id: target.id },
+				});
+				assert(entity, "Seeded version has no entity.");
+
+				const { id } = await seedNewsItemWithContent(
+					db,
+					documentWithLink({ href: null, targetKind: "entity", entityId: entity.entityId }),
+				);
+
+				const response = await createTestClient(db).news[":id"].$get({ param: { id } });
+				const data = await response.json();
+
+				assert("content" in data);
+				const [mark] = firstBlockMarks(data.content);
+
+				expect(mark!.attrs).toMatchObject({
+					targetKind: "entity",
+					entityId: entity.entityId,
+					href: expect.stringContaining("/news/") as unknown as string,
+					entity: { type: "news" },
+				});
+			});
+		});
+
+		it("should leave an entity target that resolves to nothing without an href", async () => {
+			await withTransaction(async (db) => {
+				const { id } = await seedNewsItemWithContent(
+					db,
+					documentWithLink({ href: null, targetKind: "entity", entityId: uuidv7() }),
+				);
+
+				const response = await createTestClient(db).news[":id"].$get({ param: { id } });
+				const data = await response.json();
+
+				assert("content" in data);
+				const [mark] = firstBlockMarks(data.content);
+
+				expect(mark!.attrs!.href).toBeNull();
+				expect(mark!.attrs!.entity).toBeUndefined();
+			});
+		});
+
 		it("should leave a link whose asset has been deleted without an href", async () => {
 			await withTransaction(async (db) => {
 				const { id } = await seedNewsItemWithContent(

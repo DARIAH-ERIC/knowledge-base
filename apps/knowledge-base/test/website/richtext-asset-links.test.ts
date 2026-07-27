@@ -67,6 +67,35 @@ describe("asset-targeted links", () => {
 		expect(html).not.toContain("data-asset-key");
 	});
 
+	it("round-trips an entity target through html", () => {
+		const html = generateHTML(
+			assetLinkDocument({ href: null, targetKind: "entity", entityId: "019f-aaa" }),
+			extensions,
+		);
+
+		expect(html).toContain(`data-entity-id="019f-aaa"`);
+
+		expect(firstMarkAttrs(generateJSON(html, extensions))).toMatchObject({
+			targetKind: "entity",
+			entityId: "019f-aaa",
+		});
+	});
+
+	it("never serialises the resolved page back into content", () => {
+		const html = generateHTML(
+			assetLinkDocument({
+				href: "/news/atrium",
+				targetKind: "entity",
+				entityId: "019f-aaa",
+				entity: { href: "/news/atrium", label: "ATRIUM summer school", type: "news" },
+			}),
+			extensions,
+		);
+
+		expect(html).not.toContain("ATRIUM summer school");
+		expect(firstMarkAttrs(generateJSON(html, extensions)).entity).toBeNull();
+	});
+
 	it("produces a document the resolution pass recognises", () => {
 		const stored = generateJSON(
 			generateHTML(

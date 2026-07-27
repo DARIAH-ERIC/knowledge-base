@@ -54,12 +54,41 @@ function renderLinkMark({
 	const attrs = mark.attrs ?? {};
 	const assetKey = typeof attrs.assetKey === "string" ? attrs.assetKey : null;
 
+	// An entity link stores only a document id, and turning that into a url needs a lookup this
+	// client component cannot do — unlike an asset key, which is a url by string substitution. So the
+	// preview cannot make it clickable, and must not claim to know whether it still resolves. It is
+	// marked as a reference instead, so an editor can tell a working link from a broken one rather
+	// than seeing both as bare text.
+	if (attrs.targetKind === "entity") {
+		return (
+			<span
+				className="underline decoration-dotted underline-offset-2 text-muted-fg"
+				title="Links to a page on the website. Its address is resolved when the site renders it."
+			>
+				{children}
+			</span>
+		);
+	}
+
 	const href =
 		attrs.targetKind === "asset" && assetKey != null
 			? `/api/assets/download?key=${encodeURIComponent(assetKey)}`
 			: typeof attrs.href === "string"
 				? attrs.href
 				: undefined;
+
+	// A link with no href at all is broken — a reference whose target is gone, or malformed content.
+	// Rendering an anchor without an href would look identical to a working link.
+	if (href == null) {
+		return (
+			<span
+				className="underline decoration-wavy underline-offset-2 text-danger"
+				title="This link has no target."
+			>
+				{children}
+			</span>
+		);
+	}
 
 	return (
 		<a

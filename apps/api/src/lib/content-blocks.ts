@@ -1,7 +1,9 @@
 import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 import {
+	annotateEntityLinkTargets,
 	annotateLinkTargets,
 	collectLinkTargetAssetKeys,
+	collectLinkTargetEntityIds,
 } from "@dariah-eric/database/link-targets";
 import { getLinkTargetAssets } from "@dariah-eric/database/link-targets-service";
 import {
@@ -16,6 +18,7 @@ import * as v from "valibot";
 import { getAssetDownloadUrl, getDownloadFilename } from "@/lib/asset-download";
 import { getEmbedUrl } from "@/lib/embed-url";
 import { generateImageUrl, toImageAsset } from "@/lib/images";
+import { getEntityRefsByDocumentId } from "@/lib/relations";
 import { ImageSchema, LicenseSchema } from "@/lib/schemas";
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, eq } from "@/services/db/sql";
@@ -218,7 +221,32 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 
 	// Asset-targeted links store only the asset's storage key; attach the download url, filename and
 	// size so consumers can render the link (and any file chrome) without knowing our storage layout.
-	return annotateAssetLinks(db, withPlaceholderValues);
+	const withAssetLinks = await annotateAssetLinks(db, withPlaceholderValues);
+
+	// Entity-targeted links store only a document id; attach the page it currently lives at, so a
+	// renamed slug moves every link to it.
+	return annotateEntityLinks(db, withAssetLinks);
+}
+
+/**
+ * Resolves `entity`-targeted link marks. Unpublished, deleted and page-less entities all resolve to
+ * nothing and stay unannotated, so a renderer sees one "no href" case rather than three.
+ */
+async function annotateEntityLinks<T>(db: Database | Transaction, value: T): Promise<T> {
+	const ids = collectLinkTargetEntityIds(value);
+	if (ids.size === 0) {
+		return value;
+	}
+
+	const refs = await getEntityRefsByDocumentId(db, [...ids]);
+
+	const resolved = new Map(
+		[...refs]
+			.filter(([, ref]) => ref.href != null)
+			.map(([id, ref]) => [id, { href: ref.href!, label: ref.label, type: ref.type }] as const),
+	);
+
+	return annotateEntityLinkTargets(value, resolved);
 }
 
 /**

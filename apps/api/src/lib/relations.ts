@@ -6,7 +6,7 @@ import {
 	getWebsiteHref,
 } from "@/lib/website-routes";
 import type { Database, Transaction } from "@/middlewares/db";
-import { alias, and, asc, eq, notInArray, sql } from "@/services/db/sql";
+import { alias, and, asc, eq, inArray, notInArray, sql } from "@/services/db/sql";
 import { search } from "@/services/search";
 
 /**
@@ -24,11 +24,23 @@ export async function resolveDocumentId(db: Database | Transaction, id: string):
 	return entityVersion?.entityId ?? id;
 }
 
-export async function getRelatedEntities(
+/**
+ * The public entities with the given document ids, keyed by document id, each with the website href
+ * it is reachable at (null when its type has no page of its own).
+ *
+ * Shared by relation lists and by rich-text entity links, so both agree on which entities are
+ * linkable and where they live. Only published entities are returned; documentation and internal
+ * pages are never public. An id with no row simply has no entry — callers decide what to do with a
+ * reference that no longer resolves.
+ */
+export async function getEntityRefsByDocumentId(
 	db: Database | Transaction,
-	entityId: string,
-): Promise<Array<EntityRef>> {
-	const documentId = await resolveDocumentId(db, entityId);
+	documentIds: Array<string>,
+): Promise<Map<string, EntityRef>> {
+	if (documentIds.length === 0) {
+		return new Map();
+	}
+
 	const publishedEntityVersions = alias(schema.entityVersions, "published_entity_versions");
 	const publishedEntityStatus = alias(schema.entityStatus, "published_entity_status");
 
@@ -61,8 +73,7 @@ export async function getRelatedEntities(
 				)
 			`.as("label"),
 		})
-		.from(schema.entitiesToEntities)
-		.innerJoin(schema.entities, eq(schema.entitiesToEntities.relatedEntityId, schema.entities.id))
+		.from(schema.entities)
 		.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
 		.innerJoin(publishedEntityVersions, eq(schema.entities.id, publishedEntityVersions.entityId))
 		.innerJoin(
@@ -92,13 +103,9 @@ export async function getRelatedEntities(
 		.leftJoin(schema.projects, eq(publishedEntityVersions.id, schema.projects.id))
 		.where(
 			and(
-				eq(schema.entitiesToEntities.entityId, documentId),
+				inArray(schema.entities.id, documentIds),
 				notInArray(schema.entityTypes.type, ["documentation_pages", "internal_pages"]),
 			),
-		)
-		.orderBy(
-			asc(schema.entitiesToEntities.position),
-			asc(schema.entitiesToEntities.relatedEntityId),
 		);
 
 	// Institutions and national consortia have no page of their own — they are surfaced on their
@@ -110,12 +117,41 @@ export async function getRelatedEntities(
 			.map((row) => row.id),
 	);
 
-	return rows.map((row) => {
-		return {
-			...row,
-			href: getWebsiteHref(row.type, { slug: row.slug, countrySlug: countrySlugs.get(row.id) }),
-		};
-	});
+	return new Map(
+		rows.map((row) => [
+			row.id,
+			{
+				...row,
+				href: getWebsiteHref(row.type, { slug: row.slug, countrySlug: countrySlugs.get(row.id) }),
+			},
+		]),
+	);
+}
+
+/** The entities related to `entityId`, in the order an editor arranged them. */
+export async function getRelatedEntities(
+	db: Database | Transaction,
+	entityId: string,
+): Promise<Array<EntityRef>> {
+	const documentId = await resolveDocumentId(db, entityId);
+
+	const related = await db
+		.select({ relatedEntityId: schema.entitiesToEntities.relatedEntityId })
+		.from(schema.entitiesToEntities)
+		.where(eq(schema.entitiesToEntities.entityId, documentId))
+		.orderBy(
+			asc(schema.entitiesToEntities.position),
+			asc(schema.entitiesToEntities.relatedEntityId),
+		);
+
+	const refs = await getEntityRefsByDocumentId(
+		db,
+		related.map((row) => row.relatedEntityId),
+	);
+
+	// A relation whose target is unpublished or non-public resolves to nothing and drops out, exactly
+	// as it did when the filter lived in the join.
+	return related.map((row) => refs.get(row.relatedEntityId)).filter((ref) => ref != null);
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

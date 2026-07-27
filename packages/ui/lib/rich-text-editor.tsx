@@ -111,6 +111,8 @@ interface RichTextEditorProps {
 	 * popover it was opened from.
 	 */
 	renderDocumentPicker?: (link: (assetKey: string, label: string) => void) => ReactNode;
+	/** Picker for linking selected text to another entity. In the toolbar, for the same reason. */
+	renderEntityPicker?: (link: (entityId: string, label: string) => void) => ReactNode;
 }
 
 function normalizeInitialContent(content: JSONContent | undefined): JSONContent | undefined {
@@ -1380,7 +1382,22 @@ const LinkWithTargets = Link.extend({
 					return assetKey == null ? {} : { "data-asset-key": assetKey };
 				},
 			},
+			entityId: {
+				default: null,
+				parseHTML: (element) => element.dataset.entityId ?? null,
+				renderHTML: (attributes) => {
+					const entityId = attributes.entityId as string | null;
+					return entityId == null ? {} : { "data-entity-id": entityId };
+				},
+			},
 			asset: {
+				default: null,
+				parseHTML: () => null,
+				renderHTML: () => {
+					return {};
+				},
+			},
+			entity: {
 				default: null,
 				parseHTML: () => null,
 				renderHTML: () => {
@@ -1391,7 +1408,7 @@ const LinkWithTargets = Link.extend({
 	},
 
 	parseHTML() {
-		return [...(this.parent?.() ?? []), { tag: "a[data-asset-key]" }];
+		return [...(this.parent?.() ?? []), { tag: "a[data-asset-key]" }, { tag: "a[data-entity-id]" }];
 	},
 }).configure({ openOnClick: false, defaultProtocol: "https" });
 
@@ -1467,6 +1484,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		renderPlaceholderValueInsert,
 		renderImagePicker,
 		renderDocumentPicker,
+		renderEntityPicker,
 	} = props;
 
 	const t = useExtracted("ui");
@@ -1647,18 +1665,18 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 	);
 
 	/**
-	 * Turns the selection into a link to a stored document — or, with nothing selected, inserts the
-	 * document's label as the link text, so a picked document always ends up readable.
+	 * Turns the selection into a link to something we own — or, with nothing selected, inserts the
+	 * target's label as the link text, so a picked target always ends up readable.
 	 *
-	 * No href is stored: `assetKey` is the reference, and read paths resolve it to a download url.
+	 * No href is stored: the reference is, and read paths resolve it to wherever the target currently
+	 * lives.
 	 */
-	const linkDocument = useCallback(
-		(assetKey: string, label: string) => {
+	const linkTarget = useCallback(
+		(attrs: Record<string, unknown>, label: string) => {
 			if (!editor) {
 				return;
 			}
 
-			const attrs = { href: null, targetKind: "asset", assetKey };
 			const { from, to } = editor.state.selection;
 			const chain = editor.chain().focus();
 
@@ -1672,10 +1690,24 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			}
 
 			// `setMark` rather than `setLink`: the link extension's setter takes (and validates) an href,
-			// and this link deliberately has none — the asset key is the target.
+			// and these links deliberately have none — the reference is the target.
 			chain.setMark("link", attrs).run();
 		},
 		[editor],
+	);
+
+	const linkDocument = useCallback(
+		(assetKey: string, label: string) => {
+			linkTarget({ href: null, targetKind: "asset", assetKey }, label);
+		},
+		[linkTarget],
+	);
+
+	const linkEntity = useCallback(
+		(entityId: string, label: string) => {
+			linkTarget({ href: null, targetKind: "entity", entityId }, label);
+		},
+		[linkTarget],
 	);
 
 	const insertImage = useCallback(
@@ -1892,11 +1924,15 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							<TooltipContent inverse={true}>{t("Link")}</TooltipContent>
 						</Tooltip>
 						<PopoverContent className="p-3">
-							{activeState?.linkTargetKind === "asset" ? (
-								// A document link holds a reference, not an href, so the url field would have
-								// nothing to show and applying it would silently replace the document.
+							{activeState?.linkTargetKind != null ? (
+								// These links hold a reference, not an href, so the url field would have nothing
+								// to show and applying it would silently replace the target.
 								<div className="flex inline-56 flex-col gap-2">
-									<Note intent="info">{t("This link points to a document.")}</Note>
+									<Note intent="info">
+										{activeState.linkTargetKind === "asset"
+											? t("This link points to a document.")
+											: t("This link points to another page.")}
+									</Note>
 									<Button intent="outline" onPress={removeLink} size="sm" type="button">
 										{t("Remove")}
 									</Button>
@@ -1940,6 +1976,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						</>
 					) : null}
 					{renderDocumentPicker != null ? renderDocumentPicker(linkDocument) : null}
+					{renderEntityPicker != null ? renderEntityPicker(linkEntity) : null}
 					{renderEmbedInsert != null ? (
 						<>
 							{renderImagePicker == null && renderDocumentPicker == null ? (
