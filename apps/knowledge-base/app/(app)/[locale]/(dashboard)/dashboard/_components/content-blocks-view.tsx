@@ -11,6 +11,7 @@ import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 import { renderToReactElement } from "@tiptap/static-renderer/pm/react";
 import type { ReactNode } from "react";
+import { twMerge } from "tailwind-merge";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { getEmbedUrl } from "@/lib/embed-url";
@@ -116,8 +117,16 @@ function CaptionFigcaption({
 	}
 
 	return (
-		<figcaption className={className}>
-			<InlineRichTextRenderer content={caption!} />
+		/*
+		 * These figures sit outside any `richtext` container, so the `figcaption` styling that comes
+		 * with that scale never reaches them and a caption renders as ordinary body copy.
+		 *
+		 * The type has to be set on the renderer rather than on the `figcaption`: the renderer emits
+		 * its own `richtext` wrapper, which re-declares colour and size, so anything inherited from
+		 * the `figcaption` is overridden before it reaches the text. The element keeps the spacing.
+		 */
+		<figcaption className={twMerge("mbs-2", className)}>
+			<InlineRichTextRenderer className="text-xs text-muted-fg" content={caption!} />
 		</figcaption>
 	);
 }
@@ -430,7 +439,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							className="block-36 inline-full rounded-lg object-cover"
 							src={imageUrl}
 						/>
-						<CaptionFigcaption caption={caption} className="mbs-1 text-xs text-muted-fg" />
+						<CaptionFigcaption caption={caption} className="mbs-1" />
 					</figure>
 					<div className="richtext richtext-sm">
 						{renderToReactElement({

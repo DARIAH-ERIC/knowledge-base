@@ -146,6 +146,15 @@ export class WebsiteNewsPage {
 		);
 	}
 
+	/**
+	 * A dismissed menu stays mounted while it animates out and its overlay swallows clicks aimed at
+	 * the page underneath, so every block-insert flow that clicks into the form it just opened has to
+	 * wait for the menu to actually leave the DOM first.
+	 */
+	private async waitForMenuToClose(): Promise<void> {
+		await expect(this.page.getByRole("menu")).toHaveCount(0);
+	}
+
 	private contentBlockEditor(): Locator {
 		return this.page.getByRole("textbox", { name: "Content" });
 	}
@@ -153,6 +162,7 @@ export class WebsiteNewsPage {
 	async addContentBlock(text: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
 		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.waitForMenuToClose();
 		await this.contentBlockEditor().fill(text);
 	}
 
@@ -164,6 +174,7 @@ export class WebsiteNewsPage {
 	}): Promise<void> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
 		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.waitForMenuToClose();
 
 		const editor = this.contentBlockEditor();
 		await editor.fill(options.above);
@@ -194,12 +205,23 @@ export class WebsiteNewsPage {
 		const form = this.page
 			.locator("form")
 			.filter({ has: this.page.getByRole("textbox", { name: "Label" }) });
+
+		/**
+		 * A dismissed popover stays mounted for the length of its exit animation, so inserting a second
+		 * button while the first is still fading matches two forms and fails on strict mode. Wait for
+		 * this one to be alone before filling it, and for it to detach after applying, so each
+		 * insertion both starts and leaves from a single known state.
+		 */
+		await expect(form).toHaveCount(1);
+
 		await form.getByRole("textbox", { name: "Label" }).fill(options.label);
 		await form.getByRole("textbox", { name: "URL" }).fill(options.url);
 		if (options.variant != null) {
-			await form.getByText(options.variant, { exact: true }).click();
+			await form.getByRole("radio", { name: options.variant, exact: true }).click();
 		}
 		await form.getByRole("button", { name: "Apply" }).click();
+
+		await expect(form).toHaveCount(0);
 	}
 
 	/**
@@ -216,6 +238,7 @@ export class WebsiteNewsPage {
 	}): Promise<void> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
 		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.waitForMenuToClose();
 
 		const editor = this.contentBlockEditor();
 		await editor.click();
@@ -253,6 +276,7 @@ export class WebsiteNewsPage {
 	async addContentWithImage(options: { text: string; assetLabel: string }): Promise<void> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
 		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.waitForMenuToClose();
 
 		const editor = this.contentBlockEditor();
 		await editor.click();
@@ -406,6 +430,7 @@ export class WebsiteNewsPage {
 	async insertPlaceholderValue(label: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Insert placeholder value" }).click();
 		await this.page.getByRole("menuitem", { name: label, exact: true }).click();
+		await this.waitForMenuToClose();
 	}
 
 	private embedBlock(): Locator {
@@ -479,6 +504,7 @@ export class WebsiteNewsPage {
 	}): Promise<void> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
 		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.waitForMenuToClose();
 
 		const editor = this.contentBlockEditor();
 		await editor.click();
@@ -514,6 +540,7 @@ export class WebsiteNewsPage {
 	}): Promise<void> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
 		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.waitForMenuToClose();
 
 		const editor = this.contentBlockEditor();
 		await editor.click();
@@ -537,6 +564,7 @@ export class WebsiteNewsPage {
 	}): Promise<void> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
 		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.waitForMenuToClose();
 
 		const editor = this.contentBlockEditor();
 		await editor.click();
@@ -554,6 +582,7 @@ export class WebsiteNewsPage {
 	private async addBlock(type: string): Promise<Locator> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
 		await this.page.getByRole("menuitem", { name: type, exact: true }).click();
+		await this.waitForMenuToClose();
 		const panel = this.page.getByLabel(type, { exact: true }).last();
 		await expect(panel).toBeVisible();
 		return panel;

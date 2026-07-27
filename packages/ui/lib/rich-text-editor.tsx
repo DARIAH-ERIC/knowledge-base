@@ -304,7 +304,7 @@ function EmbedNodeView({
 		>
 			<div className={twMerge("transition-opacity", selected && "bg-primary-subtle/10")}>
 				{isEditing ? (
-					<div className="flex flex-col gap-y-3 p-4">
+					<div className="flex flex-col gap-y-3 p-4 select-none [&_[contenteditable]]:select-text [&_input]:select-text">
 						<div className="flex flex-col gap-y-1">
 							<label className="text-sm/6 font-medium" htmlFor={urlInputId}>
 								{"URL"}
@@ -544,7 +544,7 @@ function CalloutNodeView({
 			}}
 		>
 			{isEditing ? (
-				<div className="flex flex-col gap-y-3 border border-input bg-bg p-4">
+				<div className="flex flex-col gap-y-3 border border-input bg-bg p-4 select-none [&_[contenteditable]]:select-text [&_input]:select-text">
 					<div className="flex flex-col gap-y-1">
 						<span className="text-sm/6 font-medium">{"Style"}</span>
 						<ToggleGroup
@@ -1134,7 +1134,11 @@ function AssetImageNodeView({
 			}}
 		>
 			{isEditing ? (
-				<div className="flex flex-col gap-y-3 p-4">
+				/* Opening the panel puts a ProseMirror NodeSelection on the image, which spans this
+				   node's DOM — so every label rendered inside it comes up highlighted as if the user
+				   had dragged across it. The panel is a form, not document text, so nothing in its
+				   chrome is selectable; the fields inside it opt back in. */
+				<div className="flex select-none flex-col gap-y-3 p-4 [&_[contenteditable]]:select-text [&_input]:select-text">
 					{renderImagePicker != null ? (
 						<div className="flex flex-col gap-y-2">
 							<div className="text-sm/6 font-medium">{"Pick image"}</div>
@@ -1237,7 +1241,9 @@ function AssetImageNodeView({
 							/>
 						) : null}
 					</div>
-					<div className="flex items-center gap-x-2">
+					{/* These act on the block as a whole, not on the caption settings directly above
+					    them, so they sit below a rule with the panel's own padding reversed out. */}
+					<div className="-ms-4 -me-4 mbs-1 flex items-center gap-x-2 border-bs border-border pbs-3 pi-4">
 						<Button
 							intent="primary"
 							isDisabled={imageUrlInput.trim() === ""}
@@ -1443,7 +1449,7 @@ function MediaTextNodeView({
 		>
 			{isEditing && editor.isEditable ? (
 				<div
-					className="flex flex-col gap-y-3 border-be border-border bg-muted p-4"
+					className="flex flex-col gap-y-3 border-be border-border bg-muted p-4 select-none [&_[contenteditable]]:select-text [&_input]:select-text"
 					contentEditable={false}
 				>
 					{renderImagePicker != null ? (
