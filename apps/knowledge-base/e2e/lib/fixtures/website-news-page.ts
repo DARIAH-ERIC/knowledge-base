@@ -332,20 +332,29 @@ export class WebsiteNewsPage {
 			.getByRole("group", { name: "Content" })
 			.getByRole("button", { name: "ui", exact: true });
 		await expect(unnamedToolbarButtons).toHaveCount(11);
+
+		/**
+		 * The same fallback hits unrelated chrome outside the editor — the sidebar toggle and a nav
+		 * button are "ui" too — so measure the closed-popover count instead of assuming one.
+		 */
+		const unnamedButtons = this.page.getByRole("button", { name: "ui", exact: true });
+		const closedCount = await unnamedButtons.count();
+
 		await unnamedToolbarButtons.nth(TABLE_TRIGGER_INDEX).click();
 
 		/**
 		 * The popover portals to the end of the document, so its command is the last such button on the
 		 * page. Outside a table the popover offers exactly one: "Insert table".
 		 */
-		await this.page.getByRole("button", { name: "ui", exact: true }).last().click();
+		await unnamedButtons.last().click();
 
 		/**
-		 * Running a table command does not dismiss the popover, and its overlay swallows every click
-		 * aimed at the document underneath. Close it before touching the table it just inserted.
+		 * Running a table command does not dismiss the popover — it re-renders with the in-table
+		 * commands — and its overlay swallows every click aimed at the document underneath. Close it
+		 * before touching the table it just inserted.
 		 */
 		await this.page.keyboard.press("Escape");
-		await expect(this.page.getByRole("button", { name: "ui", exact: true })).toHaveCount(11);
+		await expect(unnamedButtons).toHaveCount(closedCount);
 
 		const editor = this.contentBlockEditor();
 		const headerCells = editor.locator("th");
@@ -575,8 +584,12 @@ export class WebsiteNewsPage {
 		const panel = await this.addBlock("Data");
 		await panel.getByRole("button", { name: "Data type" }).click();
 		await this.page.getByRole("option", { name: options.dataType, exact: true }).click();
-		/** `getByLabel` rather than a role: the number input is not exposed as a spinbutton. */
-		await panel.getByLabel("Number of entries").fill(String(options.limit));
+		/**
+		 * A textbox, not a spinbutton: the number field is a `type="text"` input carrying
+		 * `aria-roledescription="Number field"`. Addressing it by label alone is ambiguous, because the
+		 * increment and decrement buttons share its `aria-labelledby`.
+		 */
+		await panel.getByRole("textbox", { name: "Number of entries" }).fill(String(options.limit));
 	}
 
 	async addHeroBlock(options: {
