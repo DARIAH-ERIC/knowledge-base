@@ -275,7 +275,7 @@ export class WebsiteNewsPage {
 	async setImageLayout(layout: string): Promise<void> {
 		const block = this.imageBlock();
 		await block.dblclick();
-		await block.getByText(layout, { exact: true }).click();
+		await block.getByRole("radio", { name: layout, exact: true }).click();
 		await block.getByRole("button", { name: "Apply" }).click();
 		await expect(block.getByRole("button", { name: "Apply" })).toBeHidden();
 	}
@@ -288,11 +288,318 @@ export class WebsiteNewsPage {
 	async expectImageLayout(layout: string): Promise<void> {
 		const block = this.imageBlock();
 		await block.dblclick();
-		await expect(block.getByRole("button", { name: layout, exact: true })).toHaveAttribute(
-			"aria-pressed",
-			"true",
-		);
+		await expect(block.getByRole("radio", { name: layout, exact: true })).toBeChecked();
 		await block.getByRole("button", { name: "Cancel" }).click();
+	}
+
+	/**
+	 * Set the image node's caption behaviour. `text` is only meaningful for "Custom caption"; the
+	 * other two modes have no editor to type into.
+	 */
+	async setImageCaptionMode(mode: string, text?: string): Promise<void> {
+		const block = this.imageBlock();
+		await block.dblclick();
+		await block.getByRole("radio", { name: mode, exact: true }).click();
+		if (text != null) {
+			await block.getByRole("textbox", { name: "Custom caption" }).fill(text);
+		}
+		await block.getByRole("button", { name: "Apply" }).click();
+		await expect(block.getByRole("button", { name: "Apply" })).toBeHidden();
+	}
+
+	async expectImageCaptionMode(mode: string): Promise<void> {
+		const block = this.imageBlock();
+		await block.dblclick();
+		await expect(block.getByRole("radio", { name: mode, exact: true })).toBeChecked();
+		await block.getByRole("button", { name: "Cancel" }).click();
+	}
+
+	/** Insert a 3x2 table with a header row at the cursor, then fill the two header cells. */
+	async insertTable(headers: [string, string]): Promise<void> {
+		/**
+		 * Every toolbar control that comes from `@dariah-eric/ui` reports its accessible name as the
+		 * literal string "ui": those labels go through `useExtracted("ui")`, the namespace fails to
+		 * resolve in the built app (the server log fills with `MISSING_MESSAGE`), and the name falls
+		 * back to the namespace itself. Only the app-supplied labels ("Insert image", "Link to page",
+		 * …) survive, which is why every other helper here can use a real name.
+		 *
+		 * So the table controls cannot be addressed by name until that is fixed. Target the trigger by
+		 * its index among the unnamed toolbar buttons instead — they are, in order: bold, italic, code,
+		 * h2, h3, h4, bullet list, ordered list, blockquote, table, link.
+		 */
+		const TABLE_TRIGGER_INDEX = 9;
+		const unnamedToolbarButtons = this.page
+			.getByRole("group", { name: "Content" })
+			.getByRole("button", { name: "ui", exact: true });
+		await expect(unnamedToolbarButtons).toHaveCount(11);
+		await unnamedToolbarButtons.nth(TABLE_TRIGGER_INDEX).click();
+
+		/**
+		 * The popover portals to the end of the document, so its command is the last such button on the
+		 * page. Outside a table the popover offers exactly one: "Insert table".
+		 */
+		await this.page.getByRole("button", { name: "ui", exact: true }).last().click();
+
+		const editor = this.contentBlockEditor();
+		const headerCells = editor.locator("th");
+		await expect(headerCells).toHaveCount(2);
+		await headerCells.nth(0).click();
+		await this.page.keyboard.type(headers[0]);
+		await headerCells.nth(1).click();
+		await this.page.keyboard.type(headers[1]);
+	}
+
+	/**
+	 * Link the current selection to a stored document. No href is written — the asset key is, and
+	 * read paths resolve it, so the link survives the file being replaced.
+	 */
+	async insertDocumentLink(assetLabel: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Link to document" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
+		const asset = dialog.getByRole("gridcell", { name: assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	/** Link the current selection to another entity, stored as a document id rather than a path. */
+	async insertEntityLink(entityName: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Link to page" }).click();
+
+		/** Scoped to the modal: the toolbar's own link popover trigger is also named "Link". */
+		const dialog = this.page.getByRole("dialog").filter({ hasText: "Link to a page" });
+		await dialog.waitFor({ state: "visible" });
+
+		const control = dialog
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.locator("label").filter({ hasText: "Page to link to" }) })
+			.last();
+		await control.getByRole("button").click();
+
+		/** The options popover portals out of the modal, so it is located on the page. */
+		await this.page.getByRole("searchbox").last().fill(entityName);
+		await this.page.getByRole("option", { name: entityName, exact: true }).click();
+
+		await dialog.getByRole("button", { name: "Link", exact: true }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	/** Insert a placeholder-value chip, which stores a kind reference rather than a rendered value. */
+	async insertPlaceholderValue(label: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Insert placeholder value" }).click();
+		await this.page.getByRole("menuitem", { name: label, exact: true }).click();
+	}
+
+	private embedBlock(): Locator {
+		return this.page.getByLabel("Embed block", { exact: true });
+	}
+
+	/** Insert an inline embed node and fill its settings form. */
+	async insertEmbed(options: { url: string; title: string; caption: string }): Promise<void> {
+		await this.page.getByRole("button", { name: "Insert embed" }).click();
+
+		const block = this.embedBlock();
+		await block.getByRole("textbox", { name: "URL" }).fill(options.url);
+		await block.getByRole("textbox", { name: "Title" }).fill(options.title);
+		await block.getByRole("textbox", { name: "Caption" }).fill(options.caption);
+		await block.getByRole("button", { name: "Apply" }).click();
+	}
+
+	private mediaTextBlock(): Locator {
+		return this.page.getByLabel("Media with text block", { exact: true });
+	}
+
+	/**
+	 * Insert a media_text node at the cursor, pick its image and type its prose. The prose is real
+	 * nested document content, so it is typed into the outer editor rather than into a nested form.
+	 */
+	async insertMediaText(options: {
+		assetLabel: string;
+		text: string;
+		side?: string;
+	}): Promise<void> {
+		await this.page.getByRole("button", { name: "Insert media with text" }).click();
+
+		const block = this.mediaTextBlock();
+		await expect(block).toBeVisible();
+
+		/** `renderImagePicker` is the toolbar-shaped picker, so the trigger reads "Insert image". */
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await block.getByRole("button", { name: "Insert image" }).click();
+		await dialog.waitFor({ state: "visible" });
+		const asset = dialog.getByRole("gridcell", { name: options.assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
+
+		if (options.side != null) {
+			await block.getByRole("radio", { name: options.side, exact: true }).click();
+		}
+		await block.getByRole("button", { name: "Apply" }).click();
+
+		/** Scope to the content hole: the media column may also render a caption paragraph. */
+		await block.locator("[data-media-text-content] p").first().click();
+		await this.page.keyboard.type(options.text);
+	}
+
+	async expectMediaTextSide(side: string): Promise<void> {
+		const block = this.mediaTextBlock();
+		await block.getByRole("button", { name: "Edit media settings" }).click();
+		await expect(block.getByRole("radio", { name: side, exact: true })).toBeChecked();
+		await block.getByRole("button", { name: "Cancel" }).click();
+	}
+
+	/** Build one content block exercising the table, link-target and placeholder features. */
+	async addContentWithRichTextFeatures(options: {
+		intro: string;
+		headers: [string, string];
+		documentLinkText: string;
+		documentLabel: string;
+		entityName: string;
+		placeholderLabel: string;
+	}): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+
+		const editor = this.contentBlockEditor();
+		await editor.click();
+		await editor.pressSequentially(options.intro);
+
+		/** A document link needs a selection to wrap; an entity link inserts its own label text. */
+		await editor.press("Control+End");
+		await editor.press("Enter");
+		await editor.pressSequentially(options.documentLinkText);
+		await editor.press("Shift+Home");
+		await this.insertDocumentLink(options.documentLabel);
+
+		await editor.press("Control+End");
+		await editor.press("Enter");
+		await this.insertEntityLink(options.entityName);
+
+		await editor.press("Control+End");
+		await editor.press("Enter");
+		await this.insertPlaceholderValue(options.placeholderLabel);
+
+		/** The table goes last: the cursor ends inside it, and leaving it needs a gap cursor. */
+		await editor.press("Control+End");
+		await editor.press("Enter");
+		await this.insertTable(options.headers);
+	}
+
+	/** Build one content block with a paragraph followed by an inline media_text node. */
+	async addContentWithMediaText(options: {
+		above: string;
+		assetLabel: string;
+		text: string;
+		side?: string;
+	}): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+
+		const editor = this.contentBlockEditor();
+		await editor.click();
+		await editor.pressSequentially(options.above);
+		await editor.press("Control+End");
+		await editor.press("Enter");
+
+		await this.insertMediaText({
+			assetLabel: options.assetLabel,
+			text: options.text,
+			side: options.side,
+		});
+	}
+
+	/** Build one content block with a paragraph followed by an inline embed node. */
+	async addContentWithEmbed(options: {
+		above: string;
+		url: string;
+		title: string;
+		caption: string;
+	}): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+
+		const editor = this.contentBlockEditor();
+		await editor.click();
+		await editor.pressSequentially(options.above);
+		await editor.press("Control+End");
+		await editor.press("Enter");
+
+		await this.insertEmbed({ url: options.url, title: options.title, caption: options.caption });
+	}
+
+	/**
+	 * Add a top-level block from the "Add block" menu and return its disclosure panel. These four
+	 * types are not inlined into the unified document — they stay as their own collapsible items.
+	 */
+	private async addBlock(type: string): Promise<Locator> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: type, exact: true }).click();
+		const panel = this.page.getByLabel(type, { exact: true }).last();
+		await expect(panel).toBeVisible();
+		return panel;
+	}
+
+	async addGalleryBlock(options: {
+		layout: string;
+		assetLabel: string;
+		caption: string;
+	}): Promise<void> {
+		const panel = await this.addBlock("Gallery");
+		await panel.getByRole("radio", { name: options.layout, exact: true }).click();
+		await panel.getByRole("button", { name: "Add image" }).click();
+
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await panel.getByRole("button", { name: "Select image" }).click();
+		await dialog.waitFor({ state: "visible" });
+		const asset = dialog.getByRole("gridcell", { name: options.assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
+
+		await panel.getByRole("textbox", { name: "Caption" }).fill(options.caption);
+	}
+
+	async addDataBlock(options: { dataType: string; limit: number }): Promise<void> {
+		const panel = await this.addBlock("Data");
+		await panel.getByRole("button", { name: "Data type" }).click();
+		await this.page.getByRole("option", { name: options.dataType, exact: true }).click();
+		await panel.getByRole("spinbutton", { name: "Number of entries" }).fill(String(options.limit));
+	}
+
+	async addHeroBlock(options: {
+		title: string;
+		eyebrow: string;
+		assetLabel: string;
+		cta: { label: string; url: string };
+	}): Promise<void> {
+		const panel = await this.addBlock("Hero");
+		await panel.getByRole("textbox", { name: "Title" }).fill(options.title);
+		await panel.getByRole("textbox", { name: "Eyebrow" }).fill(options.eyebrow);
+
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await panel.getByRole("button", { name: "Select image" }).click();
+		await dialog.waitFor({ state: "visible" });
+		const asset = dialog.getByRole("gridcell", { name: options.assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
+
+		await panel.getByRole("button", { name: "Add CTA" }).click();
+		await panel.getByRole("textbox", { name: "Label" }).fill(options.cta.label);
+		await panel.getByRole("textbox", { name: "URL" }).fill(options.cta.url);
+	}
+
+	async addAccordionBlock(options: { title: string; body: string }): Promise<void> {
+		const panel = await this.addBlock("Accordion");
+		await panel.getByRole("button", { name: "Add item" }).click();
+		await panel.getByRole("textbox", { name: "Title" }).fill(options.title);
+		await panel.getByRole("textbox", { name: "Content" }).fill(options.body);
 	}
 
 	async dragCalloutBeforeText(text: string): Promise<void> {

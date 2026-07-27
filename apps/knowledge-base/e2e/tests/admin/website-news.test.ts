@@ -354,6 +354,240 @@ test.describe("website news admin", () => {
 		expect(contentBlocks[1]).toMatchObject({ imageLayout: "float-start" });
 	});
 
+	/**
+	 * `captionMode` is a sibling of `layout` on the same node, so it fails the same way if the
+	 * merge/split seam forgets it. Override is the mode worth asserting: it is the only one that also
+	 * carries a payload, so a dropped mode and a dropped caption are distinguishable.
+	 */
+	test("should keep an image caption override across an edit round trip", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Image Caption ${randomUUID()}`;
+		const text = `Rich text before the image ${randomUUID()}`;
+		const captionText = `Custom caption ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item with a custom image caption");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await newsPage.addContentWithImage({ text, assetLabel: "E2E Test Asset" });
+		await newsPage.setImageCaptionMode("Custom caption", captionText);
+		await newsPage.submitForm();
+
+		let contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks[1]).toMatchObject({ imageCaptionMode: "override" });
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoDetailsFromList(title);
+		await newsPage.gotoEditFromDetails();
+		await newsPage.expectImageCaptionMode("Custom caption");
+		await newsPage.submitForm();
+
+		contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks[1]).toMatchObject({ imageCaptionMode: "override" });
+	});
+
+	/**
+	 * Tables, document links, entity links and placeholder values all live inside a `rich_text` run.
+	 * They are the features added most recently and the ones with the least coverage; each stores
+	 * attributes that must survive the same load/save cycle image `layout` failed.
+	 *
+	 * Neither link kind stores an href — a document link stores the asset key and an entity link the
+	 * document id, both resolved at read time. Asserting on the stored attributes rather than on a
+	 * rendered url is the point: a regression that turned these back into plain hrefs would keep
+	 * rendering correctly today and break the moment a slug or file changed.
+	 */
+	test("should preserve tables, link targets and placeholder values across an edit round trip", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const testEntity = await db.getTestEntity();
+		const title = `${newsPage.workerPrefix} Richtext Features ${randomUUID()}`;
+		const intro = `Intro paragraph ${randomUUID()}`;
+		const headers: [string, string] = [`Term ${randomUUID()}`, `Meaning ${randomUUID()}`];
+		const documentLinkText = `the guidelines ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item exercising richtext features");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await newsPage.addContentWithRichTextFeatures({
+			intro,
+			headers,
+			documentLinkText,
+			documentLabel: "E2E Test Document",
+			entityName: testEntity.name,
+			placeholderLabel: "Number of member countries",
+		});
+		await newsPage.submitForm();
+
+		const assertFeatures = async () => {
+			const contentBlocks = await db.getNewsContentBlocksByTitle(title);
+			expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text"]);
+
+			const doc = JSON.stringify(contentBlocks[0]!.content);
+
+			/** The table survived as a real table node with its header cells. */
+			expect(doc).toContain('"type":"table"');
+			expect(doc).toContain('"type":"tableHeader"');
+			expect(doc).toContain(headers[0]);
+			expect(doc).toContain(headers[1]);
+
+			/** Both link kinds kept their reference rather than decaying to an href. */
+			expect(doc).toContain('"targetKind":"asset"');
+			expect(doc).toContain("documents/e2e-test-document");
+			expect(doc).toContain('"targetKind":"entity"');
+			expect(doc).toContain(testEntity.id);
+
+			/** The placeholder stored its kind, not a rendered number. */
+			expect(doc).toContain('"type":"placeholderValue"');
+			expect(doc).toContain('"kind":"member_countries_count"');
+		};
+
+		await assertFeatures();
+
+		/** Re-open and save untouched: the half of the round trip that dropped image `layout`. */
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoDetailsFromList(title);
+		await newsPage.gotoEditFromDetails();
+		await newsPage.submitForm();
+
+		await assertFeatures();
+	});
+
+	test("should save an inline media_text block with its prose and side", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Media Text ${randomUUID()}`;
+		const above = `Rich text above ${randomUUID()}`;
+		const bio = `Ada chairs the working group ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item with a media_text block");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await newsPage.addContentWithMediaText({
+			above,
+			assetLabel: "E2E Test Asset",
+			text: bio,
+			side: "Right",
+		});
+		await newsPage.submitForm();
+
+		let contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text", "media_text"]);
+		expect(contentBlocks[1]).toMatchObject({ mediaTextSide: "end" });
+		expect(JSON.stringify(contentBlocks[1]!.content)).toContain(bio);
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoDetailsFromList(title);
+		await newsPage.gotoEditFromDetails();
+		await newsPage.expectMediaTextSide("Right");
+		await newsPage.submitForm();
+
+		contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text", "media_text"]);
+		expect(contentBlocks[1]).toMatchObject({ mediaTextSide: "end" });
+		expect(JSON.stringify(contentBlocks[1]!.content)).toContain(bio);
+	});
+
+	test("should save an inline embed block with its title and caption", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Embed ${randomUUID()}`;
+		const above = `Rich text above ${randomUUID()}`;
+		const embedTitle = `Recording of the session ${randomUUID()}`;
+		const embedCaption = `Embed caption ${randomUUID()}`;
+		const embedUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item with an embed block");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await newsPage.addContentWithEmbed({
+			above,
+			url: embedUrl,
+			title: embedTitle,
+			caption: embedCaption,
+		});
+		await newsPage.submitForm();
+
+		let contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text", "embed"]);
+		expect(contentBlocks[1]).toMatchObject({ embedTitle, embedUrl });
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoDetailsFromList(title);
+		await newsPage.gotoEditFromDetails();
+		await newsPage.submitForm();
+
+		contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text", "embed"]);
+		expect(contentBlocks[1]).toMatchObject({ embedTitle, embedUrl });
+	});
+
+	/**
+	 * The four block types that stay out of the unified document. They had no e2e coverage at all,
+	 * because "Content" was the only entry ever chosen from the Add block menu — so nothing verified
+	 * that adding, saving or re-loading them works.
+	 */
+	test("should save the block types that are not inlined into the document", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Standalone Blocks ${randomUUID()}`;
+		const heroTitle = `Hero title ${randomUUID()}`;
+		const heroEyebrow = `Hero eyebrow ${randomUUID()}`;
+		const cta = { label: `Apply now ${randomUUID()}`, url: "https://example.com/apply" };
+		const galleryCaption = `Gallery caption ${randomUUID()}`;
+		const accordionTitle = `Accordion item ${randomUUID()}`;
+		const accordionBody = `Accordion body ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item with standalone content blocks");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+
+		await newsPage.addGalleryBlock({
+			layout: "Carousel",
+			assetLabel: "E2E Test Asset",
+			caption: galleryCaption,
+		});
+		await newsPage.addDataBlock({ dataType: "Events", limit: 3 });
+		await newsPage.addHeroBlock({
+			title: heroTitle,
+			eyebrow: heroEyebrow,
+			assetLabel: "E2E Test Asset",
+			cta,
+		});
+		await newsPage.addAccordionBlock({ title: accordionTitle, body: accordionBody });
+		await newsPage.submitForm();
+
+		const contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual([
+			"gallery",
+			"data",
+			"hero",
+			"accordion",
+		]);
+		expect(contentBlocks.map(({ position }) => position)).toStrictEqual([0, 1, 2, 3]);
+
+		expect(contentBlocks[0]).toMatchObject({ galleryLayout: "carousel" });
+		expect(contentBlocks[1]).toMatchObject({ dataLimit: 3 });
+		expect(contentBlocks[2]).toMatchObject({ heroTitle, heroEyebrow });
+		expect(JSON.stringify(contentBlocks[2]!.heroCtas)).toContain(cta.url);
+		expect(JSON.stringify(contentBlocks[3]!.accordionItems)).toContain(accordionTitle);
+		expect(JSON.stringify(contentBlocks[3]!.accordionItems)).toContain(accordionBody);
+	});
+
 	test("should save standalone and inline button links in a content block", async ({
 		page,
 		createWebsiteNewsPage,

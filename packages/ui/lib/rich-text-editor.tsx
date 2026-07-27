@@ -1435,6 +1435,7 @@ function MediaTextNodeView({
 
 	return (
 		<NodeViewWrapper
+			aria-label="Media with text block"
 			className={twMerge(
 				"my-2 overflow-clip rounded-lg border border-input bg-bg transition-shadow",
 				selected && "border-primary ring-2 ring-primary/20",
@@ -1599,7 +1600,7 @@ function MediaTextNodeView({
 						</div>
 					) : null}
 				</div>
-				<NodeViewContent className="min-inline-0 flex-1" />
+				<NodeViewContent className="min-inline-0 flex-1" data-media-text-content="" />
 			</div>
 		</NodeViewWrapper>
 	);

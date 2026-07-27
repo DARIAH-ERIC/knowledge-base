@@ -554,7 +554,9 @@ function ContentBlockItem({
 							</ModalContent>
 						</Modal>
 					</div>
-					<DisclosurePanel className="px-3 pbe-3">
+					{/* Named so the panel is announced as its own region rather than inheriting the
+					    surrounding form, and so each block's fields can be addressed unambiguously. */}
+					<DisclosurePanel aria-label={contentBlockTypeNames[item.type]} className="px-3 pbe-3">
 						<ContentBlockPanel initialAssets={initialAssets} item={item} onChange={onUpdate} />
 					</DisclosurePanel>
 				</Disclosure>
@@ -1204,7 +1206,10 @@ function AccordionContentBlockPanel({
 					</TextField>
 					<div className="flex flex-col gap-y-1">
 						<Label>{t("Content")}</Label>
+						{/* The editor is a contenteditable, not a form control, so the `Label` above is not
+						    programmatically associated with it — name it explicitly. */}
 						<RichTextEditor
+							aria-label={t("Content")}
 							className="inline-full"
 							content={accordionItem.content}
 							onChange={(content: JSONContent) => {
