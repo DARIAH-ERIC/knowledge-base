@@ -47,9 +47,14 @@ export function getDownloadFilename(asset: DownloadableAsset): string {
 	return `${slugify(asset.label)}${extension}`;
 }
 
-/** PDFs are readable in the browser, so they open in place; everything else downloads. */
+/**
+ * Types a browser renders itself open in place; everything else downloads. "Click here to see the
+ * flyer" should show the flyer, not drop a file in the downloads folder.
+ */
 export function getContentDisposition(asset: DownloadableAsset): "attachment" | "inline" {
-	return asset.mimeType === "application/pdf" ? "inline" : "attachment";
+	const isViewable = asset.mimeType === "application/pdf" || asset.mimeType.startsWith("image/");
+
+	return isViewable ? "inline" : "attachment";
 }
 
 /**

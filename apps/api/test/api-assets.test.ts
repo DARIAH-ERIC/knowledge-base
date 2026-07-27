@@ -119,7 +119,7 @@ describe("assets", () => {
 			});
 		});
 
-		it("should serve a non-pdf as an attachment with its mime type", async () => {
+		it("should serve an image inline, so a linked flyer opens rather than downloads", async () => {
 			await withTransaction(async (db) => {
 				const { name } = await seedAsset(db, { filename: "flyer.png", mimeType: "image/png" });
 				const client = createTestClient(db, createMockStorage());
@@ -128,10 +128,29 @@ describe("assets", () => {
 					param: { prefix: "documents", name },
 				});
 
-				expect(response.status).toBe(200);
 				expect(response.headers.get("Content-Type")).toBe("image/png");
 				expect(response.headers.get("Content-Disposition")).toBe(
-					`attachment; filename="flyer.png"; filename*=UTF-8''flyer.png`,
+					`inline; filename="flyer.png"; filename*=UTF-8''flyer.png`,
+				);
+			});
+		});
+
+		it("should serve a non-viewable type as an attachment", async () => {
+			await withTransaction(async (db) => {
+				const { name } = await seedAsset(db, {
+					filename: "posters.zip",
+					mimeType: "application/zip",
+				});
+				const client = createTestClient(db, createMockStorage());
+
+				const response = await client.assets[":prefix"][":name"].download.$get({
+					param: { prefix: "documents", name },
+				});
+
+				expect(response.status).toBe(200);
+				expect(response.headers.get("Content-Type")).toBe("application/zip");
+				expect(response.headers.get("Content-Disposition")).toBe(
+					`attachment; filename="posters.zip"; filename*=UTF-8''posters.zip`,
 				);
 			});
 		});
