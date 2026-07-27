@@ -2097,13 +2097,15 @@ export class DatabaseService {
 		documentId: string;
 		duration: { start: Date; end?: Date };
 		id: string;
-		summary: string | null;
+		imageId: string;
+		summary: string;
 	} | null> {
 		const [row] = await this.db
 			.select({
 				documentId: schema.entityVersions.entityId,
 				duration: schema.fundingCalls.duration,
 				id: schema.fundingCalls.id,
+				imageId: schema.fundingCalls.imageId,
 				summary: schema.fundingCalls.summary,
 			})
 			.from(schema.fundingCalls)
@@ -2126,8 +2128,9 @@ export class DatabaseService {
 		documentId: string;
 		duration: { start: Date; end?: Date };
 		id: string;
+		imageId: string;
 		sourceId: string;
-		summary: string | null;
+		summary: string;
 		website: string | null;
 	} | null> {
 		const [row] = await this.db
@@ -2135,6 +2138,7 @@ export class DatabaseService {
 				documentId: schema.entityVersions.entityId,
 				duration: schema.opportunities.duration,
 				id: schema.opportunities.id,
+				imageId: schema.opportunities.imageId,
 				sourceId: schema.opportunities.sourceId,
 				summary: schema.opportunities.summary,
 				website: schema.opportunities.website,

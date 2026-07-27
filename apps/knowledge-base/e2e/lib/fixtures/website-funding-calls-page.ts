@@ -94,6 +94,18 @@ export class WebsiteFundingCallsPage {
 		await dialog.waitFor({ state: "hidden" });
 	}
 
+	async uploadImageFromMediaLibrary(filePath: string, label: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Select image" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("tab", { name: "Upload" }).click();
+		await dialog.locator('input[type="file"]').setInputFiles(filePath);
+		await dialog.getByLabel("Label").fill(label);
+		await dialog.getByLabel("Alt text").fill(`${label} alt text`);
+		await dialog.getByRole("button", { name: "Upload" }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
 	async submitForm(): Promise<void> {
 		const isCreate = new URL(this.page.url()).pathname === `${BASE_PATH}/create`;
 		await waitForActionRedirect({

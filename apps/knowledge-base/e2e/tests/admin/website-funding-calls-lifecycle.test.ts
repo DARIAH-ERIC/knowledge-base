@@ -204,13 +204,12 @@ test.describe("website funding calls lifecycle", () => {
 			page.getByRole("menuitem", { name: "Edit" }).click(),
 		]);
 
-		await fundingCallsPage.fillSummary("");
+		// Summary and image are required, so only the end date and content remain optional.
 		await fundingCallsPage.clearDatePicker("End date");
 		await fundingCallsPage.removeFirstContentBlock();
 		await fundingCallsPage.submitForm();
 
 		const updated = await db.getFundingCallByTitle(title);
-		expect(updated?.summary).toBeNull();
 		expect(updated?.duration.end).toBeUndefined();
 		expect(await db.getFundingCallContentBlocksByTitle(title)).toHaveLength(0);
 	});

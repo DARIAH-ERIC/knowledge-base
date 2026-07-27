@@ -222,14 +222,13 @@ test.describe("website opportunities lifecycle", () => {
 			page.getByRole("menuitem", { name: "Edit" }).click(),
 		]);
 
-		await opportunitiesPage.fillSummary("");
+		// Summary and image are required, so the website, end date and content remain optional.
 		await opportunitiesPage.fillWebsite("");
 		await opportunitiesPage.clearDatePicker("End date");
 		await opportunitiesPage.removeFirstContentBlock();
 		await opportunitiesPage.submitForm();
 
 		const updated = await db.getOpportunityByTitle(title);
-		expect(updated?.summary).toBeNull();
 		expect(updated?.website).toBeNull();
 		expect(updated?.duration.end).toBeUndefined();
 		expect(await db.getOpportunityContentBlocksByTitle(title)).toHaveLength(0);

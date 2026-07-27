@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { join } from "node:path";
 
 import { expect, test } from "@/e2e/lib/test";
 
@@ -18,6 +19,29 @@ test.describe("website opportunities admin", () => {
 		await db.cleanupWorkerOpportunitiesLifecycleItems(testInfo.workerIndex);
 	});
 
+	test("should show an inline validation error when a required image is missing", async ({
+		createWebsiteOpportunitiesPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const opportunitiesPage = createWebsiteOpportunitiesPage(workerIndex);
+
+		await opportunitiesPage.gotoCreate();
+		await opportunitiesPage.fillTitle(
+			`${opportunitiesPage.workerPrefix} Missing Image ${randomUUID()}`,
+		);
+		await opportunitiesPage.selectFirstSource();
+		await opportunitiesPage.fillSummary("E2E test opportunity without image");
+		await opportunitiesPage.fillDatePicker("Start date", 2025, 6, 1);
+
+		const saveButton = opportunitiesPage.page.getByRole("button", {
+			name: /^Save(?! and publish\b).*$/,
+		});
+		await expect(saveButton).toBeEnabled();
+		await saveButton.click();
+
+		await expect(opportunitiesPage.page.getByText("Please select an image.")).toBeVisible();
+	});
+
 	test("should create an opportunity", async ({ createWebsiteOpportunitiesPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const opportunitiesPage = createWebsiteOpportunitiesPage(workerIndex);
@@ -26,6 +50,7 @@ test.describe("website opportunities admin", () => {
 		const summary = "E2E test opportunity summary";
 		const website = "https://example.com/opportunity";
 		const content = `E2E opportunity content ${randomUUID()}`;
+		const testAsset = await db.getTestAsset();
 
 		await opportunitiesPage.gotoCreate();
 		await opportunitiesPage.fillTitle(title);
@@ -42,7 +67,7 @@ test.describe("website opportunities admin", () => {
 		await expect(opportunitiesPage.rowByTitle(title)).toBeVisible();
 
 		const created = await db.getOpportunityByTitle(title);
-		expect(created).toMatchObject({ summary, website });
+		expect(created).toMatchObject({ summary, website, imageId: testAsset.id });
 		expect(created?.sourceId).toBeTruthy();
 		expect(created?.duration.start).toStrictEqual(new Date("2025-06-01T00:00:00.000Z"));
 		expect(created?.duration.end).toStrictEqual(new Date("2025-06-30T00:00:00.000Z"));
@@ -70,12 +95,16 @@ test.describe("website opportunities admin", () => {
 		await opportunitiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await opportunitiesPage.submitForm();
 
+		const before = await db.getOpportunityByTitle(originalTitle);
+		expect(before).not.toBeNull();
+
 		await opportunitiesPage.gotoEditFromList(originalTitle);
 
 		const updatedTitle = `${opportunitiesPage.workerPrefix} Updated ${randomUUID()}`;
 		const updatedSummary = "Updated E2E test opportunity summary";
 		const updatedWebsite = "https://example.com/updated-opportunity";
 		const updatedContent = `Updated E2E opportunity content ${randomUUID()}`;
+		const updatedImageLabel = `${opportunitiesPage.workerPrefix} Replacement Image ${randomUUID()}`;
 
 		await page.getByLabel("Title").fill(updatedTitle);
 		await opportunitiesPage.fillSummary(updatedSummary);
@@ -83,6 +112,10 @@ test.describe("website opportunities admin", () => {
 		await opportunitiesPage.fillDatePicker("Start date", 2026, 7, 1);
 		await opportunitiesPage.fillDatePicker("End date", 2026, 7, 31);
 		await opportunitiesPage.updateContentBlockText(updatedContent);
+		await opportunitiesPage.uploadImageFromMediaLibrary(
+			join(process.cwd(), "public/android-chrome-192x192.png"),
+			updatedImageLabel,
+		);
 		await opportunitiesPage.submitForm();
 
 		await opportunitiesPage.searchByTitle(updatedTitle);
@@ -90,8 +123,15 @@ test.describe("website opportunities admin", () => {
 		await opportunitiesPage.searchByTitle(originalTitle);
 		await expect(opportunitiesPage.rowByTitle(originalTitle)).toBeHidden();
 
+		const replacementAsset = await db.getAssetByLabel(updatedImageLabel);
+		expect(replacementAsset).not.toBeNull();
 		const updated = await db.getOpportunityByTitle(updatedTitle);
-		expect(updated).toMatchObject({ summary: updatedSummary, website: updatedWebsite });
+		expect(updated).toMatchObject({
+			summary: updatedSummary,
+			website: updatedWebsite,
+			imageId: replacementAsset!.id,
+		});
+		expect(updated?.imageId).not.toBe(before!.imageId);
 		expect(updated?.duration.start).toStrictEqual(new Date("2026-07-01T00:00:00.000Z"));
 		expect(updated?.duration.end).toStrictEqual(new Date("2026-07-31T00:00:00.000Z"));
 		const contentBlocks = await db.getOpportunityContentBlocksByTitle(updatedTitle);
