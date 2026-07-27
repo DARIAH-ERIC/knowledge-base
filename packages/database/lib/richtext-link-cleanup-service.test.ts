@@ -39,7 +39,7 @@ describe("resolveLegacyDariahHref", () => {
 	it("rewrites old WordPress spotlight and working group routes", () => {
 		expect(resolveLegacyDariahHref("/activities/spotlight/example/")).toStrictEqual({
 			action: "rewrite",
-			href: "/spotlights/example",
+			href: "/spotlight/example",
 			reason: "legacy_relative_url",
 		});
 		expect(resolveLegacyDariahHref("activities/working-groups/tools/")).toStrictEqual({
@@ -333,7 +333,7 @@ describe("cleanRichTextLinksInDocument", () => {
 
 		expect(result.content).toStrictEqual(
 			doc(
-				paragraphWithLink("/spotlights/example"),
+				paragraphWithLink("/spotlight/example"),
 				paragraphWithLink("https://www.dariah.eu/legacy/unknown/"),
 			),
 		);
@@ -341,7 +341,7 @@ describe("cleanRichTextLinksInDocument", () => {
 			{
 				location: "$.content[0].content[0].marks[0].attrs.href",
 				originalHref: "https://www.dariah.eu/activities/spotlight/example/",
-				replacementHref: "/spotlights/example",
+				replacementHref: "/spotlight/example",
 				reason: "legacy_dariah_url",
 			},
 		]);

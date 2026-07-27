@@ -89,7 +89,7 @@ const canonicalPathPrefixes = [
 	"/resources/dariah-resource-catalogue",
 	"/resources/ssh-open-marketplace",
 	"/resources/transformations",
-	"/spotlights",
+	"/spotlight",
 	"/terms-of-use",
 ];
 
