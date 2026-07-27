@@ -236,8 +236,13 @@ const cases: Array<RoundtripCase> = [
 		entityType: "funding_calls",
 		table: schema.fundingCalls,
 		adapter: fundingCallsLifecycleAdapter,
-		async seed(tx, versionId) {
-			const values = { title: f.lorem.sentence(), summary: f.lorem.paragraph(), duration };
+		async seed(tx, versionId, refs) {
+			const values = {
+				title: f.lorem.sentence(),
+				summary: f.lorem.paragraph(),
+				duration,
+				imageId: refs.assetId,
+			};
 			await tx.insert(schema.fundingCalls).values({ id: versionId, ...values });
 			return values;
 		},
@@ -287,6 +292,7 @@ const cases: Array<RoundtripCase> = [
 				duration,
 				sourceId: refs.opportunitySourceId,
 				website: f.internet.url(),
+				imageId: refs.assetId,
 			};
 			await tx.insert(schema.opportunities).values({ id: versionId, ...values });
 			return values;

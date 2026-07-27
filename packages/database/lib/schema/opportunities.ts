@@ -4,6 +4,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
+import { assets } from "./assets";
 import { entityVersions } from "./entities";
 
 export const opportunitySourcesEnum = ["dariah", "external"] as const;
@@ -33,13 +34,17 @@ export const opportunities = p.snakeCase.table("opportunities", {
 		.primaryKey()
 		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
-	summary: p.text("summary"),
+	summary: p.text("summary").notNull(),
 	duration: f.timestampRange("duration").notNull(),
 	sourceId: p
 		.uuid("source_id")
 		.notNull()
 		.references(() => opportunitySources.id),
 	website: p.text("website"),
+	imageId: p
+		.uuid("image_id")
+		.notNull()
+		.references(() => assets.id),
 	...f.timestamps(),
 });
 

@@ -35,6 +35,7 @@ test.describe("website opportunities admin", () => {
 		await opportunitiesPage.fillDatePicker("Start date", 2025, 6, 1);
 		await opportunitiesPage.fillDatePicker("End date", 2025, 6, 30);
 		await opportunitiesPage.addContentBlock(content);
+		await opportunitiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await opportunitiesPage.submitForm();
 
 		await opportunitiesPage.searchByTitle(title);
@@ -66,6 +67,7 @@ test.describe("website opportunities admin", () => {
 		await opportunitiesPage.fillWebsite("https://example.com/old-opportunity");
 		await opportunitiesPage.fillDatePicker("Start date", 2025, 6, 1);
 		await opportunitiesPage.addContentBlock("Old opportunity content");
+		await opportunitiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await opportunitiesPage.submitForm();
 
 		await opportunitiesPage.gotoEditFromList(originalTitle);
@@ -113,6 +115,7 @@ test.describe("website opportunities admin", () => {
 		await opportunitiesPage.fillDatePicker("Start date", 2025, 6, 1);
 		await opportunitiesPage.fillDatePicker("End date", 2025, 6, 30);
 		await opportunitiesPage.addContentBlock("Optional opportunity content");
+		await opportunitiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await opportunitiesPage.submitForm();
 
 		await opportunitiesPage.gotoEditFromList(title);
@@ -138,6 +141,7 @@ test.describe("website opportunities admin", () => {
 		await opportunitiesPage.selectFirstSource();
 		await opportunitiesPage.fillSummary("E2E test opportunity to be deleted");
 		await opportunitiesPage.fillDatePicker("Start date", 2025, 6, 1);
+		await opportunitiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await opportunitiesPage.submitForm();
 
 		await opportunitiesPage.searchByTitle(title);

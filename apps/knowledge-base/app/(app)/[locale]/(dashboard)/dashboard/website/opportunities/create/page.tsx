@@ -4,6 +4,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { OpportunityCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-create-form";
+import { imageGridOptions } from "@/config/assets.config";
+import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteCreateOpportunityPageProps extends PageProps<"/[locale]/dashboard/website/opportunities/create"> {}
@@ -24,15 +26,18 @@ export async function generateMetadata(
 export default async function DashboardWebsiteCreateOpportunityPage(
 	_props: Readonly<DashboardWebsiteCreateOpportunityPageProps>,
 ): Promise<ReactNode> {
-	const sources = await db.query.opportunitySources.findMany({
-		orderBy: {
-			source: "asc",
-		},
-		columns: {
-			id: true,
-			source: true,
-		},
-	});
+	const [{ items: initialAssets }, sources] = await Promise.all([
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
+		db.query.opportunitySources.findMany({
+			orderBy: {
+				source: "asc",
+			},
+			columns: {
+				id: true,
+				source: true,
+			},
+		}),
+	]);
 
-	return <OpportunityCreateForm sources={sources} />;
+	return <OpportunityCreateForm initialAssets={initialAssets} sources={sources} />;
 }

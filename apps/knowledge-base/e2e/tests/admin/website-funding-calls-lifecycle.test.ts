@@ -28,6 +28,7 @@ test.describe("website funding calls lifecycle", () => {
 		await fundingCallsPage.fillDatePicker("Start date", 2025, 6, 1);
 		await fundingCallsPage.fillDatePicker("End date", 2025, 7, 1);
 		await fundingCallsPage.addContentBlock(content);
+		await fundingCallsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await fundingCallsPage.submitForm();
 
 		let fundingCall = await db.getFundingCallByTitle(title);
@@ -128,6 +129,7 @@ test.describe("website funding calls lifecycle", () => {
 		await fundingCallsPage.fillSummary("Original E2E funding call summary");
 		await fundingCallsPage.fillDatePicker("Start date", 2025, 6, 1);
 		await fundingCallsPage.addContentBlock(originalContent);
+		await fundingCallsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await fundingCallsPage.submitForm();
 
 		await fundingCallsPage.searchByTitle(originalTitle);
@@ -191,6 +193,7 @@ test.describe("website funding calls lifecycle", () => {
 		await fundingCallsPage.fillDatePicker("Start date", 2025, 6, 1);
 		await fundingCallsPage.fillDatePicker("End date", 2025, 7, 1);
 		await fundingCallsPage.addContentBlock("Optional funding call content");
+		await fundingCallsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await fundingCallsPage.submitForm();
 
 		await fundingCallsPage.searchByTitle(title);

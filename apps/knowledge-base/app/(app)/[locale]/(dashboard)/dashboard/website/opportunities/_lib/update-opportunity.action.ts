@@ -42,6 +42,12 @@ export const updateOpportunityAction = createMutationAction({
 			await updateDraftDocumentSlug(tx, input.documentId, requestedSlug);
 		}
 
+		const asset = await tx.query.assets.findFirst({
+			where: { key: input.imageKey },
+			columns: { id: true },
+		});
+		assert(asset);
+
 		await tx
 			.update(schema.opportunities)
 			.set({
@@ -50,6 +56,7 @@ export const updateOpportunityAction = createMutationAction({
 				sourceId: input.sourceId,
 				website: input.website,
 				duration: input.duration,
+				imageId: asset.id,
 			})
 			.where(eq(schema.opportunities.id, draftVersionId));
 

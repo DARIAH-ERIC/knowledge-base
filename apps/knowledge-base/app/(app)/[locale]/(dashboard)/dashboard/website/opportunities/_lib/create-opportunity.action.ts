@@ -33,6 +33,12 @@ export const createOpportunityAction = createMutationAction({
 			title: input.title,
 		});
 
+		const asset = await tx.query.assets.findFirst({
+			where: { key: input.imageKey },
+			columns: { id: true },
+		});
+		assert(asset);
+
 		await tx.insert(schema.opportunities).values({
 			id: versionId,
 			duration: input.duration,
@@ -40,6 +46,7 @@ export const createOpportunityAction = createMutationAction({
 			title: input.title,
 			summary: input.summary,
 			website: input.website,
+			imageId: asset.id,
 		});
 
 		const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({

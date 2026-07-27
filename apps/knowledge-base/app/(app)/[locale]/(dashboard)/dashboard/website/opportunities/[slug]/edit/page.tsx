@@ -5,9 +5,12 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { OpportunityEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-edit";
+import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { opportunitiesLifecycleAdapter } from "@/lib/data/opportunities.lifecycle-adapter";
+import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteEditOpportunityPageProps extends PageProps<"/[locale]/dashboard/website/opportunities/[slug]/edit"> {}
@@ -89,6 +92,12 @@ export default async function DashboardWebsiteEditOpportunityPage(
 					source: true,
 				},
 			},
+			image: {
+				columns: {
+					key: true,
+					label: true,
+				},
+			},
 		},
 	});
 
@@ -96,12 +105,18 @@ export default async function DashboardWebsiteEditOpportunityPage(
 		notFound();
 	}
 
-	const [contentBlocks, sources] = await Promise.all([
+	const image = images.generateSignedImageUrl({
+		key: opportunity.image.key,
+		options: imageGridOptions,
+	});
+
+	const [contentBlocks, sources, { items: initialAssets }] = await Promise.all([
 		getEntityContentBlocks(opportunity.id, "content"),
 		db.query.opportunitySources.findMany({
 			orderBy: { source: "asc" },
 			columns: { id: true, source: true },
 		}),
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 	]);
 
 	return (
@@ -109,8 +124,9 @@ export default async function DashboardWebsiteEditOpportunityPage(
 			contentBlocks={contentBlocks}
 			documentId={documentId}
 			hasDraftChanges={hasDraftChanges}
+			initialAssets={initialAssets}
 			isPublished={publishedId != null}
-			opportunity={{ ...opportunity }}
+			opportunity={{ ...opportunity, image: { ...opportunity.image, url: image.url } }}
 			sources={sources}
 		/>
 	);

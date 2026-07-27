@@ -5,6 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { getContentBlocks } from "@/lib/content-blocks";
 import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
+import { generateImageUrl } from "@/lib/images";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { OpportunitySource, OpportunityStatus } from "@/routes/opportunities/schemas";
@@ -19,6 +20,7 @@ import {
 	or,
 	sql,
 } from "@/services/db/sql";
+import { imageWidth } from "~/config/api.config";
 
 interface GetOpportunitiesParams {
 	/** @default 10 */
@@ -93,6 +95,21 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 						},
 					},
 				},
+				image: {
+					columns: {
+						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
+					},
+				},
 				source: {
 					columns: {
 						id: true,
@@ -126,7 +143,9 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 	const data = items.map((item) => {
 		const duration = serializeDateRange(item.duration);
 
-		return { ...flattenEntityVersion(item), duration };
+		const image = generateImageUrl(item.image, imageWidth.preview);
+
+		return { ...flattenEntityVersion(item), duration, image };
 	});
 
 	return { data, limit, offset, total };
@@ -170,6 +189,21 @@ export async function getOpportunityById(
 						},
 					},
 				},
+				image: {
+					columns: {
+						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
+					},
+				},
 				source: {
 					columns: {
 						id: true,
@@ -191,10 +225,12 @@ export async function getOpportunityById(
 	]);
 
 	const duration = serializeDateRange(item.duration);
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
 	return {
 		...flattenEntityVersion(item),
 		duration,
+		image,
 		...fields,
 		relatedEntities,
 		relatedResources,
@@ -302,6 +338,21 @@ export async function getOpportunityBySlug(
 					},
 				},
 			},
+			image: {
+				columns: {
+					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
+				},
+			},
 			source: {
 				columns: {
 					id: true,
@@ -322,10 +373,12 @@ export async function getOpportunityBySlug(
 	]);
 
 	const duration = serializeDateRange(item.duration);
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
 	return {
 		...flattenEntityVersion(item),
 		duration,
+		image,
 		...fields,
 		relatedEntities,
 		relatedResources,

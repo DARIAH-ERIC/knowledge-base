@@ -4,6 +4,7 @@ import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import {
+	ImageSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
 	RelatedEntitiesSchema,
@@ -20,6 +21,7 @@ const opportunityBaseObject = v.object({
 	}),
 	entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	publishedAt: v.pipe(v.string(), v.isoTimestamp()),
+	image: ImageSchema,
 });
 
 export const OpportunityBaseSchema = v.pipe(

@@ -9,11 +9,12 @@ import { OpportunityForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/webs
 import { createOpportunityAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/create-opportunity.action";
 
 interface OpportunityCreateFormProps {
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	sources: Array<Pick<schema.OpportunitySource, "id" | "source">>;
 }
 
 export function OpportunityCreateForm(props: Readonly<OpportunityCreateFormProps>): ReactNode {
-	const { sources } = props;
+	const { initialAssets, sources } = props;
 
 	const t = useExtracted();
 
@@ -21,7 +22,11 @@ export function OpportunityCreateForm(props: Readonly<OpportunityCreateFormProps
 		<Fragment>
 			<EntityFormHeader title={t("New opportunity")} />
 
-			<OpportunityForm formAction={createOpportunityAction} sources={sources} />
+			<OpportunityForm
+				initialAssets={initialAssets}
+				formAction={createOpportunityAction}
+				sources={sources}
+			/>
 		</Fragment>
 	);
 }

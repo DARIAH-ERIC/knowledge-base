@@ -7,6 +7,7 @@ import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
 export const CreateFundingCallActionInputSchema = v.object({
 	slug: EntitySlugInputSchema,
 	...v.pick(FundingCallInsertSchema, ["title", "summary"]).entries,
+	imageKey: v.pipe(v.string(), v.nonEmpty()),
 	duration: v.object({
 		start: v.pipe(v.string(), v.isoDate(), v.toDate()),
 		end: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),

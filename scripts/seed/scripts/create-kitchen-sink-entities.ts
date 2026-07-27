@@ -914,6 +914,7 @@ async function main() {
 				title: "Kitchen Sink Funding Call",
 				summary: "A funding call seeded for API contract testing.",
 				duration: createTimestampRange("2026-06-01T00:00:00.000Z", "2026-06-30T23:59:59.000Z"),
+				imageId: createId("asset:image"),
 			});
 			await upsertById(tx, schema.opportunities, {
 				id: opportunityVersionId,
@@ -925,6 +926,7 @@ async function main() {
 					'Missing opportunity source "dariah".',
 				),
 				website: "https://example.org/opportunities/kitchen-sink",
+				imageId: createId("asset:image"),
 			});
 			await upsertById(tx, schema.spotlightArticles, {
 				id: spotlightVersionId,

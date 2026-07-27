@@ -7,6 +7,7 @@ import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
 export const CreateOpportunityActionInputSchema = v.object({
 	slug: EntitySlugInputSchema,
 	...v.pick(OpportunityInsertSchema, ["title", "summary", "sourceId", "website"]).entries,
+	imageKey: v.pipe(v.string(), v.nonEmpty()),
 	duration: v.object({
 		start: v.pipe(v.string(), v.isoDate(), v.toDate()),
 		end: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),

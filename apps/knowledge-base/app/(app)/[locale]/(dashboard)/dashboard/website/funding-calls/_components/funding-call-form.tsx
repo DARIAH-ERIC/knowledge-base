@@ -11,7 +11,7 @@ import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
 import { CalendarDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState } from "react";
+import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import {
 	type ContentBlock,
@@ -23,27 +23,33 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { ImageSelectField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface FundingCallFormProps {
 	contentBlocks?: Array<ContentBlock>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	fundingCall?: Pick<schema.FundingCall, "id" | "duration" | "title" | "summary"> & {
 		entityVersion: {
 			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
-	};
+	} & { image: { key: string; label: string; url: string } };
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
 	formAction: ServerAction;
 }
 
 export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNode {
-	const { contentBlocks, formAction, fundingCall, isPublished } = props;
+	const { initialAssets, contentBlocks, formAction, fundingCall, isPublished } = props;
 
 	const t = useExtracted();
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
+
+	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
+		fundingCall?.image ?? null,
+	);
 
 	return (
 		<FormLayout>
@@ -54,7 +60,11 @@ export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNod
 						<Input />
 						<FieldError />
 					</TextField>
-					<TextField defaultValue={fundingCall?.summary ?? undefined} name="summary">
+					<TextField
+						defaultValue={fundingCall?.summary ?? undefined}
+						isRequired={true}
+						name="summary"
+					>
 						<Label>{t("Summary")}</Label>
 						<TextArea rows={5} />
 						<FieldError />
@@ -97,6 +107,23 @@ export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNod
 					<EntitySlugField
 						isPublished={isPublished}
 						slug={fundingCall?.entityVersion.entity.slug}
+					/>
+				</FormSection>
+
+				<Separator className="my-6" />
+
+				<FormSection
+					description={t("Select or upload an image.")}
+					isRequired={true}
+					title={t("Image")}
+				>
+					<ImageSelectField
+						defaultPrefix="images"
+						initialAssets={initialAssets}
+						isRequired={true}
+						onChange={setSelectedImage}
+						prefixes={["avatars", "images", "logos"]}
+						selectedImage={selectedImage}
 					/>
 				</FormSection>
 

@@ -5,10 +5,12 @@ import * as schema from "@dariah-eric/database/schema";
 import { getContentBlocks } from "@/lib/content-blocks";
 import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
+import { generateImageUrl } from "@/lib/images";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { FundingCallStatus } from "@/routes/funding-calls/schemas";
 import { type SQL, type SQLWrapper, count, desc, eq, or, sql } from "@/services/db/sql";
+import { imageWidth } from "~/config/api.config";
 
 interface GetFundingCallsParams {
 	/** @default 10 */
@@ -70,6 +72,21 @@ export async function getFundingCalls(db: Database | Transaction, params: GetFun
 						},
 					},
 				},
+				image: {
+					columns: {
+						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
+					},
+				},
 			},
 			orderBy(t) {
 				return [desc(sql`LOWER(${t.duration})`), desc(t.id)];
@@ -93,7 +110,9 @@ export async function getFundingCalls(db: Database | Transaction, params: GetFun
 	const data = items.map((item) => {
 		const duration = serializeDateRange(item.duration);
 
-		return { ...flattenEntityVersion(item), duration };
+		const image = generateImageUrl(item.image, imageWidth.preview);
+
+		return { ...flattenEntityVersion(item), duration, image };
 	});
 
 	return { data, limit, offset, total };
@@ -136,6 +155,21 @@ export async function getFundingCallById(
 						},
 					},
 				},
+				image: {
+					columns: {
+						key: true,
+						alt: true,
+						caption: true,
+					},
+					with: {
+						license: {
+							columns: {
+								name: true,
+								url: true,
+							},
+						},
+					},
+				},
 			},
 		}),
 		getContentBlocks(db, id),
@@ -151,10 +185,12 @@ export async function getFundingCallById(
 	]);
 
 	const duration = serializeDateRange(item.duration);
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
 	return {
 		...flattenEntityVersion(item),
 		duration,
+		image,
 		...fields,
 		relatedEntities,
 		relatedResources,
@@ -261,6 +297,21 @@ export async function getFundingCallBySlug(
 					},
 				},
 			},
+			image: {
+				columns: {
+					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
+				},
+			},
 		},
 	});
 
@@ -275,10 +326,12 @@ export async function getFundingCallBySlug(
 	]);
 
 	const duration = serializeDateRange(item.duration);
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
 	return {
 		...flattenEntityVersion(item),
 		duration,
+		image,
 		...fields,
 		relatedEntities,
 		relatedResources,

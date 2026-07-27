@@ -294,6 +294,11 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.entityVersions.id,
 				optional: false,
 			}),
+			image: r.one.assets({
+				from: r.fundingCalls.imageId,
+				to: r.assets.id,
+				optional: false,
+			}),
 		},
 		membersAndPartners: {
 			image: r.one.assets({
@@ -321,6 +326,11 @@ export const relations = defineRelations(schema, (r) => {
 			source: r.one.opportunitySources({
 				from: r.opportunities.sourceId,
 				to: r.opportunitySources.id,
+				optional: false,
+			}),
+			image: r.one.assets({
+				from: r.opportunities.imageId,
+				to: r.assets.id,
 				optional: false,
 			}),
 		},

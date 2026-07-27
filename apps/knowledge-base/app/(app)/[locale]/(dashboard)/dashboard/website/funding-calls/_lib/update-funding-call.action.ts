@@ -42,9 +42,20 @@ export const updateFundingCallAction = createMutationAction({
 			await updateDraftDocumentSlug(tx, input.documentId, requestedSlug);
 		}
 
+		const asset = await tx.query.assets.findFirst({
+			where: { key: input.imageKey },
+			columns: { id: true },
+		});
+		assert(asset);
+
 		await tx
 			.update(schema.fundingCalls)
-			.set({ title: input.title, summary: input.summary, duration: input.duration })
+			.set({
+				title: input.title,
+				summary: input.summary,
+				duration: input.duration,
+				imageId: asset.id,
+			})
 			.where(eq(schema.fundingCalls.id, draftVersionId));
 
 		const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");

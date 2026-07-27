@@ -33,11 +33,18 @@ export const createFundingCallAction = createMutationAction({
 			title: input.title,
 		});
 
+		const asset = await tx.query.assets.findFirst({
+			where: { key: input.imageKey },
+			columns: { id: true },
+		});
+		assert(asset);
+
 		await tx.insert(schema.fundingCalls).values({
 			id: versionId,
 			duration: input.duration,
 			title: input.title,
 			summary: input.summary,
+			imageId: asset.id,
 		});
 
 		const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({

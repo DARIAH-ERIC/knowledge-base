@@ -4,10 +4,13 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { FundingCallEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-edit";
+import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { fundingCallsLifecycleAdapter } from "@/lib/data/funding-calls.lifecycle-adapter";
 import { db } from "@/lib/db";
+import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteEditFundingCallPageProps extends PageProps<"/[locale]/dashboard/website/funding-calls/[slug]/edit"> {}
@@ -81,6 +84,12 @@ export default async function DashboardWebsiteEditFundingCallPage(
 					},
 				},
 			},
+			image: {
+				columns: {
+					key: true,
+					label: true,
+				},
+			},
 		},
 	});
 
@@ -88,14 +97,23 @@ export default async function DashboardWebsiteEditFundingCallPage(
 		notFound();
 	}
 
-	const contentBlocks = await getEntityContentBlocks(fundingCall.id, "content");
+	const image = images.generateSignedImageUrl({
+		key: fundingCall.image.key,
+		options: imageGridOptions,
+	});
+
+	const [contentBlocks, { items: initialAssets }] = await Promise.all([
+		getEntityContentBlocks(fundingCall.id, "content"),
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
+	]);
 
 	return (
 		<FundingCallEditForm
 			contentBlocks={contentBlocks}
 			documentId={documentId}
-			fundingCall={{ ...fundingCall }}
+			fundingCall={{ ...fundingCall, image: { ...fundingCall.image, url: image.url } }}
 			hasDraftChanges={hasDraftChanges}
+			initialAssets={initialAssets}
 			isPublished={publishedId != null}
 		/>
 	);

@@ -27,6 +27,7 @@ test.describe("website funding calls admin", () => {
 		await fundingCallsPage.fillDatePicker("Start date", 2025, 6, 1);
 		await fundingCallsPage.fillDatePicker("End date", 2025, 6, 30);
 		await fundingCallsPage.addContentBlock(content);
+		await fundingCallsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await fundingCallsPage.submitForm();
 
 		await fundingCallsPage.searchByTitle(title);
@@ -55,6 +56,7 @@ test.describe("website funding calls admin", () => {
 		await fundingCallsPage.fillSummary("E2E test funding call to be edited");
 		await fundingCallsPage.fillDatePicker("Start date", 2025, 6, 1);
 		await fundingCallsPage.addContentBlock("Old funding call content");
+		await fundingCallsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await fundingCallsPage.submitForm();
 
 		await fundingCallsPage.gotoEditFromList(originalTitle);
@@ -98,6 +100,7 @@ test.describe("website funding calls admin", () => {
 		await fundingCallsPage.fillDatePicker("Start date", 2025, 6, 1);
 		await fundingCallsPage.fillDatePicker("End date", 2025, 6, 30);
 		await fundingCallsPage.addContentBlock("Optional funding call content");
+		await fundingCallsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await fundingCallsPage.submitForm();
 
 		await fundingCallsPage.gotoEditFromList(title);
@@ -120,6 +123,7 @@ test.describe("website funding calls admin", () => {
 		await fundingCallsPage.fillTitle(title);
 		await fundingCallsPage.fillSummary("E2E test funding call to be deleted");
 		await fundingCallsPage.fillDatePicker("Start date", 2025, 6, 1);
+		await fundingCallsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await fundingCallsPage.submitForm();
 
 		await fundingCallsPage.searchByTitle(title);

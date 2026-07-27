@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
@@ -93,6 +93,17 @@ export class WebsiteOpportunitiesPage {
 		await this.page.getByRole("button", { name: "Remove block" }).first().click();
 		const dialog = this.page.getByRole("alertdialog", { name: "Remove block" });
 		await dialog.getByRole("button", { name: "Remove" }).click();
+	}
+
+	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Select image" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
+		const asset = dialog.getByRole("gridcell", { name: assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
 	}
 
 	async submitForm(): Promise<void> {
