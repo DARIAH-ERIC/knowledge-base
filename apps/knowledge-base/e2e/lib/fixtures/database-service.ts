@@ -262,9 +262,20 @@ export class DatabaseService {
 
 	async getNewsContentBlocksByTitle(title: string): Promise<
 		Array<{
+			accordionItems: unknown;
 			calloutIntent: string | null;
 			calloutTitle: string | null;
 			content: unknown;
+			dataLimit: number | null;
+			embedTitle: string | null;
+			embedUrl: string | null;
+			galleryLayout: string | null;
+			heroCtas: unknown;
+			heroEyebrow: string | null;
+			heroTitle: string | null;
+			imageCaptionMode: string | null;
+			imageLayout: string | null;
+			mediaTextSide: string | null;
 			position: number;
 			type: string;
 		}>
@@ -281,9 +292,20 @@ export class DatabaseService {
 
 		const rows = await this.db
 			.select({
+				accordionItems: schema.accordionContentBlocks.items,
 				calloutIntent: schema.calloutContentBlocks.intent,
 				calloutTitle: schema.calloutContentBlocks.title,
-				content: sql<unknown>`coalesce(${schema.richTextContentBlocks.content}, ${schema.calloutContentBlocks.content})`,
+				content: sql<unknown>`coalesce(${schema.richTextContentBlocks.content}, ${schema.calloutContentBlocks.content}, ${schema.mediaTextContentBlocks.content})`,
+				dataLimit: schema.dataContentBlocks.limit,
+				embedTitle: schema.embedContentBlocks.title,
+				embedUrl: schema.embedContentBlocks.url,
+				galleryLayout: schema.galleryContentBlocks.layout,
+				heroCtas: schema.heroContentBlocks.ctas,
+				heroEyebrow: schema.heroContentBlocks.eyebrow,
+				heroTitle: schema.heroContentBlocks.title,
+				imageCaptionMode: schema.imageContentBlocks.captionMode,
+				imageLayout: schema.imageContentBlocks.layout,
+				mediaTextSide: schema.mediaTextContentBlocks.side,
 				position: schema.contentBlocks.position,
 				type: schema.contentBlockTypes.type,
 			})
@@ -300,6 +322,28 @@ export class DatabaseService {
 			.leftJoin(
 				schema.calloutContentBlocks,
 				eq(schema.calloutContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(
+				schema.imageContentBlocks,
+				eq(schema.imageContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(
+				schema.mediaTextContentBlocks,
+				eq(schema.mediaTextContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(
+				schema.embedContentBlocks,
+				eq(schema.embedContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(
+				schema.galleryContentBlocks,
+				eq(schema.galleryContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(schema.dataContentBlocks, eq(schema.dataContentBlocks.id, schema.contentBlocks.id))
+			.leftJoin(schema.heroContentBlocks, eq(schema.heroContentBlocks.id, schema.contentBlocks.id))
+			.leftJoin(
+				schema.accordionContentBlocks,
+				eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
 			)
 			.where(eq(schema.fields.entityVersionId, newsItem.versionId))
 			.orderBy(schema.contentBlocks.position);
