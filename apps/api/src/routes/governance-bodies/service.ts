@@ -10,7 +10,7 @@ import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
-import { hardcodedWorkingGroups } from "@/routes/governance-bodies/hardcoded-working-groups";
+import { hardcodedWorkingGroupsGovernanceBody } from "@/routes/governance-bodies/hardcoded-working-groups";
 import { alias, and, count, eq, inArray, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
@@ -115,19 +115,6 @@ function mapGovernanceBodyPerson(
 	};
 }
 
-const hardcodedWorkingGroupsGovernanceBody = {
-	id: "019b7a56-b301-7f93-9d24-91333bdc3ca8",
-	name: "Working groups",
-	acronym: null,
-	summary:
-		"Self-organised communities of practice within DARIAH which contribute to bringing together state-of-art digital arts and humanities activities and scaling their results to a European level.",
-	metadata: {},
-	image: null,
-	entity: { slug: "working-groups" },
-	publishedAt: "2026-01-01T00:00:00.000Z",
-	socialMedia: [],
-};
-
 async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 	const workingGroupDocumentLifecycle = alias(
 		schema.documentLifecycle,
@@ -217,8 +204,10 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 }
 
 async function getHardcodedWorkingGroupsGovernanceBody(db: Database | Transaction) {
+	const { description: _description, ...governanceBody } = hardcodedWorkingGroupsGovernanceBody;
+
 	return {
-		...hardcodedWorkingGroupsGovernanceBody,
+		...governanceBody,
 		persons: await getActiveWorkingGroupChairs(db),
 	};
 }
@@ -226,7 +215,7 @@ async function getHardcodedWorkingGroupsGovernanceBody(db: Database | Transactio
 async function getHardcodedWorkingGroupsGovernanceBodyDetails(db: Database | Transaction) {
 	return {
 		...(await getHardcodedWorkingGroupsGovernanceBody(db)),
-		description: hardcodedWorkingGroups.description,
+		description: hardcodedWorkingGroupsGovernanceBody.description,
 		relatedEntities: [],
 		relatedResources: [],
 	};
