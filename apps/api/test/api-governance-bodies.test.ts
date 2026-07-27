@@ -10,8 +10,6 @@ import type { GovernanceBody, GovernanceBodyBase } from "@/routes/governance-bod
 import { createTestClient } from "~/test/lib/create-test-client";
 import { withTransaction } from "~/test/lib/with-transaction";
 
-const workingGroupsGovernanceBodyId = "019b7a56-b301-7f93-9d24-91333bdc3ca8";
-
 function createWorkingGroup() {
 	const versionId = uuidv7();
 	const entityId = uuidv7();
@@ -123,24 +121,15 @@ describe("governance-bodies", () => {
 				const client = createTestClient(db);
 				const { chair } = await seedWorkingGroupChair(db);
 
-				const firstPageResponse = await client["governance-bodies"].$get({
-					query: { limit: "1", offset: "0" },
-				});
-
-				expect(firstPageResponse.status).toBe(200);
-				const firstPage = (await firstPageResponse.json()) as { total: number };
-				const workingGroupsOffset = firstPage.total - 1;
-
 				const response = await client["governance-bodies"].$get({
-					query: { limit: "1", offset: String(workingGroupsOffset) },
+					query: { limit: "100", offset: "0" },
 				});
 
 				expect(response.status).toBe(200);
 				const data = (await response.json()) as { data: Array<GovernanceBodyBase> };
-				const workingGroups = data.data.at(0);
+				const workingGroups = data.data.find((item) => item.entity.slug === "working-groups");
 
 				expect(workingGroups).toMatchObject({
-					id: workingGroupsGovernanceBodyId,
 					name: "Working groups",
 					entity: { slug: "working-groups" },
 				});
@@ -172,7 +161,6 @@ describe("governance-bodies", () => {
 				const data = (await response.json()) as GovernanceBody;
 
 				expect(data).toMatchObject({
-					id: workingGroupsGovernanceBodyId,
 					name: "Working groups",
 					entity: { slug: "working-groups" },
 				});
@@ -188,6 +176,71 @@ describe("governance-bodies", () => {
 				);
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
+			});
+		});
+
+		it("should ignore person relations attached to the working groups governance body", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const { chair } = await seedWorkingGroupChair(db);
+
+				// Its people are derived from the working group chairs, which is why the dashboard hides
+				// the people tab for it. A relation added anyway must not surface.
+				const [workingGroupsDocument, memberRoleType, personEntityType, status] = await Promise.all(
+					[
+						db.query.entities.findFirst({
+							columns: { id: true },
+							where: { slug: "working-groups", type: { type: "organisational_units" } },
+						}),
+						db.query.personRoleTypes.findFirst({
+							columns: { id: true },
+							where: { type: "is_member_of" },
+						}),
+						db.query.entityTypes.findFirst({
+							columns: { id: true },
+							where: { type: "persons" },
+						}),
+						db.query.entityStatus.findFirst({
+							columns: { id: true },
+							where: { type: "published" },
+						}),
+					],
+				);
+
+				assert(workingGroupsDocument, "No working groups governance body in database.");
+				assert(memberRoleType, "No member role type in database.");
+				assert(personEntityType, "No person entity type in database.");
+				assert(status, "No entity status in database.");
+
+				const outsider = createChair();
+				await db.insert(schema.entities).values({
+					...outsider.entity,
+					typeId: personEntityType.id,
+				});
+				await db.insert(schema.entityVersions).values({
+					...outsider.version,
+					statusId: status.id,
+				});
+				await db.insert(schema.assets).values(outsider.asset);
+				await db.insert(schema.persons).values(outsider.person);
+				await db.insert(schema.personsToOrganisationalUnits).values({
+					personDocumentId: outsider.entity.id,
+					organisationalUnitDocumentId: workingGroupsDocument.id,
+					roleTypeId: memberRoleType.id,
+					duration: { start: f.date.past({ years: 5 }) },
+					description: outsider.description,
+				});
+
+				const response = await client["governance-bodies"].slugs[":slug"].$get({
+					param: { slug: "working-groups" },
+				});
+
+				expect(response.status).toBe(200);
+				const data = (await response.json()) as GovernanceBody;
+
+				const personIds = data.persons.map((person) => person.id);
+				expect(personIds).toContain(chair.person.id);
+				expect(personIds).not.toContain(outsider.person.id);
 			});
 		});
 	});

@@ -11,6 +11,7 @@ interface ErrorMessages {
 	serviceKpiConflict: string;
 	socialMediaKpiConflict: string;
 	uniqueConflict: string;
+	workingGroupsGovernanceBodyLocked: string;
 }
 
 /** Returns a safe message for a recognised error, or null for unexpected failures. */
@@ -28,6 +29,9 @@ export function getUserFacingErrorMessage(error: unknown, messages: ErrorMessage
 			}
 			case "social-media-kpi-conflict": {
 				return messages.socialMediaKpiConflict;
+			}
+			case "working-groups-governance-body-locked": {
+				return messages.workingGroupsGovernanceBodyLocked;
 			}
 		}
 	}

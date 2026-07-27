@@ -2,7 +2,8 @@
 export type UserFacingErrorKind =
 	| "published-slug-rename"
 	| "service-kpi-conflict"
-	| "social-media-kpi-conflict";
+	| "social-media-kpi-conflict"
+	| "working-groups-governance-body-locked";
 
 /**
  * A failure a mutation raises on purpose, having recognised a disallowed operation, so the action

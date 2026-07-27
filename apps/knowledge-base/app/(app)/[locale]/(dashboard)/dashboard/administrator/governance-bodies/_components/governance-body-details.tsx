@@ -23,6 +23,11 @@ import { formatRoleType } from "@/lib/format-role-type";
 
 interface GovernanceBodyDetailsProps {
 	documentId: string;
+	/**
+	 * Whether this governance body's people are derived instead of maintained as relations — true for
+	 * the working groups governance body, whose people are the chairs of all working groups.
+	 */
+	hasDerivedPeople?: boolean;
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
@@ -55,6 +60,7 @@ interface GovernanceBodyDetailsProps {
 export function GovernanceBodyDetails(props: Readonly<GovernanceBodyDetailsProps>): ReactNode {
 	const {
 		documentId,
+		hasDerivedPeople = false,
 		hasDraft,
 		isPublished,
 		governanceBody,
@@ -194,7 +200,13 @@ export function GovernanceBodyDetails(props: Readonly<GovernanceBodyDetailsProps
 
 				<DescriptionTerm>{t("People")}</DescriptionTerm>
 				<DescriptionDetails>
-					{personRelations.length > 0 ? (
+					{hasDerivedPeople ? (
+						<p className="text-muted-fg text-sm">
+							{t(
+								"The people of this governance body are the chairs of all working groups. They are listed on the website automatically and cannot be edited here.",
+							)}
+						</p>
+					) : personRelations.length > 0 ? (
 						<ul className="flex flex-col gap-1">
 							{personRelations.map((relation) => (
 								<RelationStatement

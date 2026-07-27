@@ -10,6 +10,7 @@ import {
 } from "@/lib/data/lifecycle-adapters";
 import type { Transaction } from "@/lib/db";
 import { eq, inArray, sql } from "@/lib/db/sql";
+import { UserFacingError } from "@/lib/user-facing-error";
 
 export interface EntityIdentity {
 	id: string;
@@ -41,6 +42,17 @@ async function loadMergeableEntity(tx: Transaction, documentId: string): Promise
 }
 
 /**
+ * The working groups governance body is looked up by slug by the api, which replaces its people
+ * with the chairs of all working groups. Renaming or removing it would silently turn it into an
+ * ordinary, empty governance body, so both are blocked.
+ */
+function assertNotWorkingGroupsGovernanceBody(entity: EntityIdentity): void {
+	if (entity.slug === schema.workingGroupsGovernanceBodySlug) {
+		throw new UserFacingError("working-groups-governance-body-locked");
+	}
+}
+
+/**
  * Change an entity's slug. Slugs are normally system-managed; this is an admin-only maintenance
  * operation. The value is normalised with the same slugifier used at creation time, and per-type
  * uniqueness is enforced by the `entities_type_id_slug_unique` constraint — a conflict surfaces as
@@ -55,6 +67,7 @@ export async function updateEntitySlug(
 	rawSlug: string,
 ): Promise<EntityIdentity> {
 	const entity = await loadMergeableEntity(tx, documentId);
+	assertNotWorkingGroupsGovernanceBody(entity);
 
 	const slug = slugify(rawSlug);
 	assert(slug.length > 0, "Slug must not be empty.");
@@ -438,6 +451,8 @@ export async function mergeEntities(
 		source.type === target.type,
 		`Cannot merge entities of different types (${source.type} → ${target.type}).`,
 	);
+	// The source is deleted at the end of the merge.
+	assertNotWorkingGroupsGovernanceBody(source);
 
 	await repointEntitiesToEntities(tx, sourceId, targetId);
 	await repointEntitiesToResources(tx, sourceId, targetId);
