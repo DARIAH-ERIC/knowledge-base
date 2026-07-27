@@ -38,6 +38,7 @@ const exactLegacyPathMappings = new Map<string, string>([
 	["/activities/working-groups.html", getEntityListHref("working-group")],
 	["/category/news", getEntityListHref("news-item")],
 	["/contact", "/contact"],
+	["/news-events/annual-events", "https://annualevent.dariah.eu/documents"],
 	["/news-events/dariah-newsletters", "/newsletters"],
 	["/members-and-partners", getEntityListHref("country")],
 	["/privacy-policy", "/privacy-policy"],

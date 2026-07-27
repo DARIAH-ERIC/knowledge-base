@@ -162,6 +162,16 @@ describe("resolveLegacyDariahHref", () => {
 		});
 	});
 
+	it("rewrites old annual event page links to the external annual event site", () => {
+		expect(
+			resolveLegacyDariahHref("https://www.dariah.eu/news-events/annual-events/"),
+		).toStrictEqual({
+			action: "rewrite",
+			href: "https://annualevent.dariah.eu/documents",
+			reason: "legacy_dariah_url",
+		});
+	});
+
 	it("rewrites deterministic redirects from the website redirect table", () => {
 		expect(resolveLegacyDariahHref("https://www.dariah.eu/about/history-of-dariah/")).toStrictEqual(
 			{
