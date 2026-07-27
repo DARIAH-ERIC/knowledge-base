@@ -10,11 +10,11 @@ import type { JSONContent } from "@tiptap/core";
  * and an entity's url is derived from a slug that can be renamed out from under it. A reference
  * survives both.
  *
- * `asset` is the only kind so far. `entity` is the planned second one, which is why the target is a
- * discriminated `targetKind` from the start rather than an `assetKey` attribute that would have to
- * be widened later — the mark, the resolution pass and the pickers all key off the discriminant.
+ * `asset` points at a file we store, `entity` at one of our own documents — a news item, a country,
+ * a working group. Both are resolved the same way and for the same reason, but from different
+ * sources, so each has its own collect/annotate pair below.
  */
-export const linkTargetKindsEnum = ["asset"] as const;
+export const linkTargetKindsEnum = ["asset", "entity"] as const;
 
 export type LinkTargetKind = (typeof linkTargetKindsEnum)[number];
 
@@ -145,6 +145,128 @@ export function annotateLinkTargets<T>(value: T, assets: ResolvedAssetLinkTarget
 					...(node.attrs as Record<string, unknown>),
 					href: resolved.url,
 					asset: resolved,
+				},
+			} satisfies JSONContent;
+		}
+
+		let changed = false;
+		const result: Record<string, unknown> = {};
+		for (const [entry, item] of Object.entries(node)) {
+			const next = annotate(item);
+			if (next !== item) {
+				changed = true;
+			}
+			result[entry] = next;
+		}
+		return changed ? result : node;
+	}
+
+	return annotate(value) as T;
+}
+
+/**
+ * The document id an `entity`-targeted link mark references, or `null` for anything else.
+ *
+ * The reference is the entity's document id, never its slug: a slug is renamed freely by editors,
+ * and the whole point of storing a reference is that the link survives that. The url is derived at
+ * read time from whatever slug the entity has then.
+ */
+function getLinkTargetEntityId(value: unknown): string | null {
+	if (!isRecord(value) || value.type !== linkMarkType) {
+		return null;
+	}
+
+	const attrs = value.attrs;
+	if (!isRecord(attrs) || attrs.targetKind !== "entity") {
+		return null;
+	}
+
+	return typeof attrs.entityId === "string" && attrs.entityId !== "" ? attrs.entityId : null;
+}
+
+/** Collects the distinct document ids referenced by `entity`-targeted links. */
+export function collectLinkTargetEntityIds(value: unknown): Set<string> {
+	const ids = new Set<string>();
+
+	function visit(node: unknown) {
+		if (Array.isArray(node)) {
+			for (const item of node) {
+				visit(item);
+			}
+			return;
+		}
+
+		if (!isRecord(node)) {
+			return;
+		}
+
+		const id = getLinkTargetEntityId(node);
+		if (id != null) {
+			ids.add(id);
+		}
+
+		for (const item of Object.values(node)) {
+			visit(item);
+		}
+	}
+
+	visit(value);
+
+	return ids;
+}
+
+/** A resolved `entity` target: where it lives, and what it is called. */
+export interface ResolvedEntityLinkTarget {
+	href: string;
+	label: string;
+	/** The public entity type, e.g. `news`, `country`, `working_group`. */
+	type: string;
+}
+
+export type ResolvedEntityLinkTargets = ReadonlyMap<string, ResolvedEntityLinkTarget>;
+
+/**
+ * Attaches the resolved page to every `entity`-targeted link mark, as an `entity` attribute plus
+ * the `href` it lives at — the same contract as {@link annotateLinkTargets}, including that the url
+ * is only ever written onto the outgoing copy.
+ *
+ * An id with no entry is left unresolved, and there are three ordinary ways to get there: the
+ * entity was deleted, it is no longer published, or its type has no page of its own (DARIAH-EU
+ * itself, an institution not yet placed in a country). All three should render as plain text rather
+ * than a link to nowhere, so all three look the same to a renderer.
+ */
+export function annotateEntityLinkTargets<T>(value: T, entities: ResolvedEntityLinkTargets): T {
+	function annotate(node: unknown): unknown {
+		if (Array.isArray(node)) {
+			let changed = false;
+			const result: Array<unknown> = [];
+			for (const item of node) {
+				const next = annotate(item);
+				if (next !== item) {
+					changed = true;
+				}
+				result.push(next);
+			}
+			return changed ? result : node;
+		}
+
+		if (!isRecord(node)) {
+			return node;
+		}
+
+		const id = getLinkTargetEntityId(node);
+		if (id != null) {
+			const resolved = entities.get(id);
+			if (resolved == null) {
+				return node;
+			}
+
+			return {
+				...node,
+				attrs: {
+					...(node.attrs as Record<string, unknown>),
+					href: resolved.href,
+					entity: resolved,
 				},
 			} satisfies JSONContent;
 		}

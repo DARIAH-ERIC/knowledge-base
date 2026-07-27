@@ -1,3 +1,6 @@
+import { existsSync } from "node:fs";
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
 import * as path from "node:path";
 
 import { log } from "@acdh-oeaw/lib";
@@ -17,9 +20,9 @@ import { writeTsvReport } from "../lib/tsv-report";
  * href="…/wp-content/uploads/2026/04/flyer.pdf">Click here to see the flyer</a>` was copied
  * verbatim, so every linked pdf on the site is still served by WordPress and disappears with it.
  *
- * Each distinct url becomes one asset under the `documents` prefix, labelled with the url it came
- * from — the same convention `migrateHtmlContent` used for images, which is what makes this
- * re-runnable: a url that already has an asset is reused rather than uploaded twice.
+ * Each distinct url becomes one asset (under `documents`, or `images` for an image), labelled with
+ * the url it came from — the same convention `migrateHtmlContent` used for images, which is what
+ * makes this re-runnable: a url that already has an asset is reused rather than uploaded twice.
  *
  * The links are then rewritten to the target model in `@dariah-eric/database/link-targets`: the
  * mark keeps its text, drops its `href`, and gains `targetKind: "asset"` plus the asset's storage
@@ -29,12 +32,19 @@ import { writeTsvReport } from "../lib/tsv-report";
  * Every rich-text-bearing content block is scanned — `rich_text`, `callout`, `media_text` and
  * `accordion` item bodies — across all versions, draft and published alike.
  *
- * Only files are taken. An `uploads/` url ending in an image extension is left alone: inline images
- * were migrated as assets already, and a _link_ to an image is a link to a page, not a download.
+ * Any `uploads/` url ending in a known file extension is taken, images included — see
+ * {@link documentMimeTypes}.
+ *
+ * A file that will not transfer — dariah.eu drops the largest of them mid-stream — can be fetched
+ * by hand and dropped in a folder passed as `--files=…`. Any file there whose name matches the
+ * url's is used instead of downloading it, so an operator never has to hand-edit the database to
+ * get past one stubborn url. Everything else about that document is unchanged, and the report says
+ * `copied` rather than `downloaded`.
  *
  * @example
  * 	pnpm run data:backfill:linked-documents
  * 	pnpm run data:backfill:linked-documents -- --apply
+ * 	pnpm run data:backfill:linked-documents -- --apply --files=~/downloads
  */
 
 /** Generous, because the largest of these is a 55MB bundle served from a slow origin. */
@@ -43,7 +53,14 @@ const downloadTimeout = 10 * 60 * 1000;
 const cacheFolderPath = path.join(process.cwd(), ".cache");
 const reportFilePath = path.join(cacheFolderPath, "linked-documents.tsv");
 
-/** Extensions we treat as a downloadable document, with the mime type to store them under. */
+/**
+ * Extensions we treat as a linked file, with the mime type to store them under.
+ *
+ * Images are included. A `wp-content/uploads/` url _is_ the file — WordPress attachment pages carry
+ * no extension — so a link to a png is a link to a file, not to a page, and is exactly as fragile
+ * as a link to a pdf. (The images the migration already brought across were inline `<img>` sources,
+ * which is a different thing entirely.)
+ */
 const documentMimeTypes = new Map([
 	["pdf", "application/pdf"],
 	["doc", "application/msword"],
@@ -54,7 +71,18 @@ const documentMimeTypes = new Map([
 	["pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"],
 	["txt", "text/plain"],
 	["zip", "application/zip"],
+	["png", "image/png"],
+	["jpg", "image/jpeg"],
+	["jpeg", "image/jpeg"],
+	["webp", "image/webp"],
+	["gif", "image/gif"],
+	["svg", "image/svg+xml"],
 ]);
+
+/** Images belong in the `images` prefix, so the media library lists them where editors expect. */
+function prefixFor(mimeType: string): "documents" | "images" {
+	return mimeType.startsWith("image/") ? "images" : "documents";
+}
 
 const db = createDatabaseService({
 	connection: {
@@ -271,7 +299,7 @@ interface Document {
 	occurrences: number;
 	/** Set once the file exists in our storage. */
 	assetKey?: string;
-	action: "downloaded" | "failed" | "reused" | "to-download";
+	action: "copied" | "downloaded" | "failed" | "reused" | "to-download";
 	size?: number;
 }
 
@@ -296,18 +324,16 @@ async function findExistingAsset(
  * `error` event on the stream itself, asynchronously, which takes the whole run down instead of
  * failing this one document and moving on.
  */
-async function ingest(document: Document): Promise<void> {
-	const response = await fetch(document.url, { signal: AbortSignal.timeout(downloadTimeout) });
-	if (!response.ok) {
-		throw new Error(`WordPress answered ${String(response.status)}.`);
-	}
+async function ingest(document: Document, localFolderPath: string | null): Promise<void> {
+	const localPath = localFolderPath != null ? path.join(localFolderPath, document.filename) : null;
+	const isLocal = localPath != null && existsSync(localPath);
 
-	const file = Buffer.from(await response.arrayBuffer());
+	const file = isLocal ? await fs.readFile(localPath) : await download(document.url);
 	const size = file.byteLength;
 
 	const { key } = (
 		await storage.upload({
-			prefix: "documents",
+			prefix: prefixFor(document.mimeType),
 			input: file,
 			metadata: { "content-type": document.mimeType, name: document.filename },
 			size,
@@ -326,7 +352,17 @@ async function ingest(document: Document): Promise<void> {
 
 	document.assetKey = key;
 	document.size = size;
-	document.action = "downloaded";
+	document.action = isLocal ? "copied" : "downloaded";
+}
+
+async function download(url: string): Promise<Buffer> {
+	const response = await fetch(url, { signal: AbortSignal.timeout(downloadTimeout) });
+
+	if (!response.ok) {
+		throw new Error(`WordPress answered ${String(response.status)}.`);
+	}
+
+	return Buffer.from(await response.arrayBuffer());
 }
 
 const reportColumns = [
@@ -355,8 +391,21 @@ async function writeReport(documents: Array<Document>): Promise<void> {
 	);
 }
 
+/** Expands a leading `~`, which a shell does not do inside `--files=…`. */
+function resolveFolderPath(value: string): string {
+	return value.startsWith("~") ? path.join(os.homedir(), value.slice(1)) : path.resolve(value);
+}
+
 async function main(): Promise<void> {
 	const apply = process.argv.includes("--apply");
+
+	const localFolder = process.argv.find((argument) => argument.startsWith("--files="));
+	const localFolderPath =
+		localFolder != null ? resolveFolderPath(localFolder.slice("--files=".length)) : null;
+
+	if (localFolderPath != null) {
+		log.info(`Taking files from \`${localFolderPath}\` where one matches by name.`);
+	}
 
 	log.info("Loading rich-text content blocks…");
 	const targets = await findTargets();
@@ -396,7 +445,7 @@ async function main(): Promise<void> {
 			document.action = "reused";
 		} else if (apply) {
 			try {
-				await ingest(document);
+				await ingest(document, localFolderPath);
 			} catch (error) {
 				document.action = "failed";
 				log.error(`Failed to ingest ${url}: ${String(error)}`);

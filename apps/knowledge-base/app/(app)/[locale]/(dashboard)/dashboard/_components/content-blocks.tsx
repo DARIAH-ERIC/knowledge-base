@@ -49,7 +49,7 @@ import {
 	ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
 import type { JSONContent } from "@tiptap/core";
-import { ImageIcon, PaperclipIcon } from "lucide-react";
+import { ImageIcon, LinkIcon, PaperclipIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { Fragment, type KeyboardEvent, type ReactNode, useRef, useState } from "react";
 import { type Key, useDrag, useDrop } from "react-aria";
@@ -63,6 +63,7 @@ import {
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
+import { EntityLinkDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
 import { PlaceholderValueInsertMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/placeholder-value-insert-menu";
@@ -698,6 +699,18 @@ function ContentBlockPanel({
 								)
 							: undefined
 					}
+					renderEntityPicker={(link) => (
+						<EntityLinkDialog
+							onSelect={link}
+							trigger={({ open }) => (
+								<RichTextEditorToolbarButton
+									aria-label="Link to page"
+									icon={LinkIcon}
+									onClick={open}
+								/>
+							)}
+						/>
+					)}
 				/>
 			);
 		}

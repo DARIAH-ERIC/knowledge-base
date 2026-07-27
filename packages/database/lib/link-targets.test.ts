@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
 	type ResolvedAssetLinkTarget,
+	annotateEntityLinkTargets,
 	annotateLinkTargets,
 	collectLinkTargetAssetKeys,
+	collectLinkTargetEntityIds,
 } from "./link-targets";
 
 interface TestNode {
@@ -18,6 +20,14 @@ function assetLink(assetKey: string, text = "the flyer"): TestNode {
 		type: "text",
 		text,
 		marks: [{ type: "link", attrs: { href: null, targetKind: "asset", assetKey } }],
+	};
+}
+
+function entityLink(entityId: string, text = "our news item"): TestNode {
+	return {
+		type: "text",
+		text,
+		marks: [{ type: "link", attrs: { href: null, targetKind: "entity", entityId } }],
 	};
 }
 
@@ -120,5 +130,45 @@ describe("annotateLinkTargets", () => {
 		annotateLinkTargets(input, new Map([["documents/a", resolved("https://x/y")]]));
 
 		expect(input).toEqual(before);
+	});
+});
+
+describe("entity targets", () => {
+	const resolvedEntity = { href: "/news/atrium", label: "ATRIUM summer school", type: "news" };
+
+	it("collects document ids, and never confuses them with asset targets", () => {
+		const document = doc(entityLink("019f-aaa"), assetLink("documents/a"));
+
+		expect(collectLinkTargetEntityIds(document)).toEqual(new Set(["019f-aaa"]));
+		expect(collectLinkTargetAssetKeys(document)).toEqual(new Set(["documents/a"]));
+	});
+
+	it("attaches the resolved page and fills in `href`", () => {
+		const annotated = annotateEntityLinkTargets(
+			doc(entityLink("019f-aaa")),
+			new Map([["019f-aaa", resolvedEntity]]),
+		);
+
+		expect(firstMark(annotated).attrs).toMatchObject({
+			href: "/news/atrium",
+			targetKind: "entity",
+			entityId: "019f-aaa",
+			entity: { label: "ATRIUM summer school", type: "news" },
+		});
+	});
+
+	it("leaves an unresolvable entity without an href", () => {
+		// Deleted, unpublished, or a type with no page of its own — all one case to a renderer.
+		const input = doc(entityLink("019f-gone"));
+		const annotated = annotateEntityLinkTargets(input, new Map());
+
+		expect(annotated).toBe(input);
+		expect(firstMark(annotated).attrs.href).toBeNull();
+	});
+
+	it("never touches ordinary or asset links", () => {
+		const input = doc(externalLink("https://example.com"), assetLink("documents/a"));
+
+		expect(annotateEntityLinkTargets(input, new Map([["019f-aaa", resolvedEntity]]))).toBe(input);
 	});
 });
