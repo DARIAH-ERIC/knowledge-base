@@ -340,6 +340,13 @@ export class WebsiteNewsPage {
 		 */
 		await this.page.getByRole("button", { name: "ui", exact: true }).last().click();
 
+		/**
+		 * Running a table command does not dismiss the popover, and its overlay swallows every click
+		 * aimed at the document underneath. Close it before touching the table it just inserted.
+		 */
+		await this.page.keyboard.press("Escape");
+		await expect(this.page.getByRole("button", { name: "ui", exact: true })).toHaveCount(11);
+
 		const editor = this.contentBlockEditor();
 		const headerCells = editor.locator("th");
 		await expect(headerCells).toHaveCount(2);
@@ -568,7 +575,8 @@ export class WebsiteNewsPage {
 		const panel = await this.addBlock("Data");
 		await panel.getByRole("button", { name: "Data type" }).click();
 		await this.page.getByRole("option", { name: options.dataType, exact: true }).click();
-		await panel.getByRole("spinbutton", { name: "Number of entries" }).fill(String(options.limit));
+		/** `getByLabel` rather than a role: the number input is not exposed as a spinbutton. */
+		await panel.getByLabel("Number of entries").fill(String(options.limit));
 	}
 
 	async addHeroBlock(options: {
