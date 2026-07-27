@@ -7,8 +7,9 @@
 	"exports": {
 		".": "./dist/index.mjs",
 		"./admin": "./dist/admin.mjs",
+		"./download": "./dist/download.mjs",
 		"./errors": "./dist/errors.mjs",
-		"./config": "./config/images.config.ts",
+		"./config": "./dist/images.config.mjs",
 		"./lib": "./lib/utils/index.ts"
 	},
 	"scripts": {
@@ -25,6 +26,7 @@
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
 		"@dariah-eric/env": "workspace:^",
+		"@sindresorhus/slugify": "catalog:",
 		"better-result": "catalog:",
 		"minio": "catalog:",
 		"uuid": "catalog:",

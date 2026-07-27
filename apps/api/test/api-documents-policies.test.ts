@@ -419,7 +419,7 @@ describe("documents-policies", () => {
 				expect(response.status).toBe(200);
 				expect(response.headers.get("Content-Type")).toBe("application/pdf");
 				expect(response.headers.get("Content-Disposition")).toBe(
-					`inline; filename="policy-2024.pdf"`,
+					`inline; filename="policy-2024.pdf"; filename*=UTF-8''policy-2024.pdf`,
 				);
 				const body = await response.text();
 				expect(body).toBe(content);
@@ -439,7 +439,7 @@ describe("documents-policies", () => {
 				expect(response.status).toBe(200);
 				expect(response.headers.get("Content-Type")).toBe("application/msword");
 				expect(response.headers.get("Content-Disposition")).toBe(
-					`attachment; filename="policy-2024.docx"`,
+					`attachment; filename="policy-2024.docx"; filename*=UTF-8''policy-2024.docx`,
 				);
 			});
 		});
@@ -456,7 +456,7 @@ describe("documents-policies", () => {
 
 				expect(response.status).toBe(200);
 				expect(response.headers.get("Content-Disposition")).toBe(
-					`inline; filename="test-policy.pdf"`,
+					`inline; filename="test-policy.pdf"; filename*=UTF-8''test-policy.pdf`,
 				);
 			});
 		});

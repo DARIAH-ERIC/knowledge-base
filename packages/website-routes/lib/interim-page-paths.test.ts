@@ -11,7 +11,6 @@ describe("resolveInterimPagePath", () => {
 		// Slugs that deliberately differ from the path leaf — the reason a hardcoded map is needed.
 		expect(resolveInterimPagePath("dariah-in-nutshell")).toBe("/about/dariah-in-a-nutshell");
 		expect(resolveInterimPagePath("working-groups-list")).toBe("/network/working-groups");
-		expect(resolveInterimPagePath("privacy-notice")).toBe("/privacy-and-legal/practice");
 		// Footer legal pages are CMS `page` entities.
 		expect(resolveInterimPagePath("legal-notice")).toBe("/privacy-and-legal/legal-notice");
 	});
@@ -20,6 +19,8 @@ describe("resolveInterimPagePath", () => {
 		expect(resolveInterimPagePath("some-unrouted-page")).toBeNull();
 		// Unresolved target in #703 — intentionally excluded.
 		expect(resolveInterimPagePath("partnerships-and-collaborations")).toBeNull();
+		// The footer privacy-notice link no longer exists on the website.
+		expect(resolveInterimPagePath("privacy-notice")).toBeNull();
 	});
 
 	it("feeds getEntityHref verbatim (the interim path is the final page pathname)", () => {

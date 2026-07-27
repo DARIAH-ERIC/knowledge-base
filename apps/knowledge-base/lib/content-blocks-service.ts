@@ -3,7 +3,7 @@ import {
 	collectPlaceholderValueKinds,
 } from "@dariah-eric/database/placeholder-values";
 import { getPlaceholderValues } from "@dariah-eric/database/placeholder-values-service";
-import { isEmptyRichTextDocument } from "@dariah-eric/database/rich-text";
+import { isEmptyRichTextDocument, withoutBlankParagraphs } from "@dariah-eric/database/rich-text";
 import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
@@ -54,6 +54,22 @@ async function createGalleryItems(
 	return galleryItems.filter((item): item is schema.GalleryContentBlockItemInput => item != null);
 }
 
+/**
+ * The empty state for a body that must exist: a document needs at least one block child to be a
+ * valid ProseMirror doc, so a body stripped down to nothing goes back to a single empty paragraph
+ * rather than an empty `content` array.
+ */
+function emptyRichTextDocument(): JSONContent {
+	return { type: "doc", content: [{ type: "paragraph" }] };
+}
+
+/** Strips spacer paragraphs, falling back to the empty state for bodies that cannot be absent. */
+function cleanRequiredBody(content: JSONContent | null | undefined): JSONContent {
+	const cleaned = withoutBlankParagraphs(content ?? emptyRichTextDocument());
+
+	return isEmptyRichTextDocument(cleaned) ? emptyRichTextDocument() : cleaned;
+}
+
 export async function upsertTypedContentBlock(
 	tx: Transaction,
 	block: ContentBlockInput,
@@ -64,7 +80,7 @@ export async function upsertTypedContentBlock(
 		case "callout": {
 			const intent = block.content?.intent ?? "info";
 			const title = block.content?.title?.trim() ?? null;
-			const content = block.content?.content ?? { type: "doc", content: [{ type: "paragraph" }] };
+			const content = cleanRequiredBody(block.content?.content);
 			if (isNew) {
 				await tx
 					.insert(schema.calloutContentBlocks)
@@ -79,18 +95,19 @@ export async function upsertTypedContentBlock(
 		}
 
 		case "rich_text": {
-			if (isEmptyRichTextDocument(block.content)) {
+			// Strip spacer paragraphs first, so a block left holding nothing else is recognised as empty
+			// and removed rather than stored as a run of blank lines.
+			const content = withoutBlankParagraphs(block.content ?? {});
+			if (isEmptyRichTextDocument(content)) {
 				await tx.delete(schema.contentBlocks).where(eq(schema.contentBlocks.id, blockId));
 				break;
 			}
 			if (isNew) {
-				await tx
-					.insert(schema.richTextContentBlocks)
-					.values({ id: blockId, content: block.content ?? {} });
+				await tx.insert(schema.richTextContentBlocks).values({ id: blockId, content });
 			} else {
 				await tx
 					.update(schema.richTextContentBlocks)
-					.set({ content: block.content ?? {} })
+					.set({ content })
 					.where(eq(schema.richTextContentBlocks.id, blockId));
 			}
 			break;
@@ -109,6 +126,7 @@ export async function upsertTypedContentBlock(
 
 			const caption = block.content?.caption ?? null;
 			const captionMode = block.content?.captionMode ?? (caption != null ? "override" : "inherit");
+			const layout = block.content?.layout ?? "default";
 
 			if (isNew) {
 				await tx.insert(schema.imageContentBlocks).values({
@@ -116,11 +134,12 @@ export async function upsertTypedContentBlock(
 					imageId,
 					caption,
 					captionMode,
+					layout,
 				});
 			} else {
 				await tx
 					.update(schema.imageContentBlocks)
-					.set({ imageId, caption, captionMode })
+					.set({ imageId, caption, captionMode, layout })
 					.where(eq(schema.imageContentBlocks.id, blockId));
 			}
 			break;
@@ -230,7 +249,15 @@ export async function upsertTypedContentBlock(
 		}
 
 		case "accordion": {
-			const items = block.content?.items ?? [];
+			// An accordion item's body is `v.any()` in the input schema, so it needs narrowing before it
+			// can be treated as a rich-text document.
+			const items = (block.content?.items ?? []).map((item) => {
+				const itemContent = item.content as JSONContent | null | undefined;
+
+				return itemContent == null
+					? item
+					: { ...item, content: withoutBlankParagraphs(itemContent) };
+			});
 			if (isNew) {
 				await tx.insert(schema.accordionContentBlocks).values({ id: blockId, items });
 			} else {
@@ -238,6 +265,40 @@ export async function upsertTypedContentBlock(
 					.update(schema.accordionContentBlocks)
 					.set({ items })
 					.where(eq(schema.accordionContentBlocks.id, blockId));
+			}
+			break;
+		}
+
+		case "media_text": {
+			const imageKey = block.content?.imageKey;
+			if (imageKey == null) {
+				break;
+			}
+
+			const imageId = await getAssetIdByKey(tx, imageKey);
+			if (imageId == null) {
+				break;
+			}
+
+			const side = block.content?.side ?? "start";
+			const content = cleanRequiredBody(block.content?.content);
+			const caption = block.content?.caption ?? null;
+			const captionMode = block.content?.captionMode ?? (caption != null ? "override" : "inherit");
+
+			if (isNew) {
+				await tx.insert(schema.mediaTextContentBlocks).values({
+					id: blockId,
+					imageId,
+					side,
+					content,
+					caption,
+					captionMode,
+				});
+			} else {
+				await tx
+					.update(schema.mediaTextContentBlocks)
+					.set({ imageId, side, content, caption, captionMode })
+					.where(eq(schema.mediaTextContentBlocks.id, blockId));
 			}
 			break;
 		}
@@ -266,6 +327,7 @@ export async function getEntityContentBlocks(
 		galleryContentBlockRows,
 		heroContentBlockRows,
 		accordionContentBlockRows,
+		mediaTextContentBlockRows,
 	] = await Promise.all([
 		db
 			.select({
@@ -308,6 +370,7 @@ export async function getEntityContentBlocks(
 				assetCaption: schema.assets.caption,
 				caption: schema.imageContentBlocks.caption,
 				captionMode: schema.imageContentBlocks.captionMode,
+				layout: schema.imageContentBlocks.layout,
 			})
 			.from(schema.imageContentBlocks)
 			.innerJoin(schema.contentBlocks, eq(schema.imageContentBlocks.id, schema.contentBlocks.id))
@@ -416,6 +479,31 @@ export async function getEntityContentBlocks(
 			)
 			.where(contentBlocksWhere)
 			.orderBy(schema.contentBlocks.position),
+		db
+			.select({
+				id: schema.mediaTextContentBlocks.id,
+				position: schema.contentBlocks.position,
+				imageKey: schema.assets.key,
+				alt: schema.assets.alt,
+				assetCaption: schema.assets.caption,
+				side: schema.mediaTextContentBlocks.side,
+				content: schema.mediaTextContentBlocks.content,
+				caption: schema.mediaTextContentBlocks.caption,
+				captionMode: schema.mediaTextContentBlocks.captionMode,
+			})
+			.from(schema.mediaTextContentBlocks)
+			.innerJoin(
+				schema.contentBlocks,
+				eq(schema.mediaTextContentBlocks.id, schema.contentBlocks.id),
+			)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.innerJoin(schema.assets, eq(schema.mediaTextContentBlocks.imageId, schema.assets.id))
+			.where(contentBlocksWhere)
+			.orderBy(schema.contentBlocks.position),
 	]);
 
 	const imageContentBlocks = imageContentBlockRows.map((row) => {
@@ -435,6 +523,7 @@ export async function getEntityContentBlocks(
 				assetCaption: row.assetCaption,
 				caption: row.caption,
 				captionMode: row.captionMode,
+				layout: row.layout,
 			},
 		};
 	});
@@ -540,6 +629,29 @@ export async function getEntityContentBlocks(
 		};
 	});
 
+	const mediaTextContentBlocks = mediaTextContentBlockRows.map((row) => {
+		const { url: imageUrl } = images.generateSignedImageUrl({
+			key: row.imageKey,
+			options: imageGridOptions,
+		});
+
+		return {
+			id: row.id,
+			position: row.position,
+			type: "media_text" as const,
+			content: {
+				imageKey: row.imageKey,
+				imageUrl,
+				alt: row.alt,
+				assetCaption: row.assetCaption,
+				side: row.side,
+				content: row.content,
+				caption: row.caption,
+				captionMode: row.captionMode,
+			},
+		};
+	});
+
 	return [
 		...calloutContentBlocks,
 		...richTextContentBlocks.map((row) => {
@@ -551,6 +663,7 @@ export async function getEntityContentBlocks(
 		...galleryContentBlocks,
 		...heroContentBlocks,
 		...accordionContentBlocks,
+		...mediaTextContentBlocks,
 	].toSorted((a, b) => (a.position ?? 0) - (b.position ?? 0));
 }
 

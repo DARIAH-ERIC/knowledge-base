@@ -126,6 +126,10 @@ export const OrganisationalUnitServiceRoleUpdateSchema = createUpdateSchema(
  * The organisational-unit endpoint, however, is a versioned entity: it references `entities.id` (a
  * document id), not a version id, so the relation stays valid across the unit's draft/publish
  * lifecycle. Reads resolve the unit endpoint to its published version.
+ *
+ * Ownership of a row depends on its service: for a service with an `sshocMarketplaceId` the
+ * marketplace is the source of truth and the ingest reconciles the full set on every run (relations
+ * it does not see are deleted); for a local service the admin service form owns the set.
  */
 export const servicesToOrganisationalUnits = p.snakeCase.table("services_to_organisational_units", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),

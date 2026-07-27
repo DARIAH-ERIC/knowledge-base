@@ -4,7 +4,7 @@
  * CMS `page` entities carry only a single-segment slug: the WordPress import
  * (`normalizeWordPressSlug`) dropped the section prefix, so a page's real nested pathname
  * (`/about/strategy`) cannot be derived from CMS data — and slugs deliberately differ from the path
- * leaf (`privacy-notice` → `/privacy-and-legal/practice`, `working-groups-list` → …), so a
+ * leaf (`dariah-in-nutshell` → `/about/dariah-in-a-nutshell`, `working-groups-list` → …), so a
  * hardcoded map is required.
  *
  * Authoritative source: DARIAH-ERIC/knowledge-base issue #703 ("Map page slugs to website paths"),
@@ -29,19 +29,18 @@ export const interimPagePathBySlug: Readonly<Record<string, string>> = {
 	"regional-hubs": "/network/regional-hubs",
 	"working-groups-list": "/network/working-groups",
 	// Resources
-	"resource-catalogue": "/resources/dariah-resource-catalogue",
+	"resource-catalogue": "/resources/resource-catalogue",
 	"dariah-campus": "/resources/dariah-campus",
 	"transformation-a-dariah-journal": "/resources/transformations",
 	"ssh-open-marketplace": "/resources/ssh-open-marketplace",
 	// Projects / news / events / spotlights
 	"projects-list": "/projects",
-	spotlights: "/spotlights",
+	spotlights: "/spotlight",
 	newsletters: "/newsletters",
 	// Get involved
 	"join-dariah": "/get-involved/join-dariah",
 	// Footer (privacy & legal) — these are CMS `page` entities, not fixed chrome
 	"legal-notice": "/privacy-and-legal/legal-notice",
-	"privacy-notice": "/privacy-and-legal/practice",
 	"accessibility-declaration": "/privacy-and-legal/accessibility-declaration",
 };
 

@@ -1,5 +1,12 @@
 import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 import {
+	annotateEntityLinkTargets,
+	annotateLinkTargets,
+	collectLinkTargetAssetKeys,
+	collectLinkTargetEntityIds,
+} from "@dariah-eric/database/link-targets";
+import { getLinkTargetAssets } from "@dariah-eric/database/link-targets-service";
+import {
 	annotatePlaceholderValues,
 	collectPlaceholderValueKinds,
 } from "@dariah-eric/database/placeholder-values";
@@ -8,8 +15,10 @@ import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 import * as v from "valibot";
 
+import { getAssetDownloadUrl, getDownloadFilename } from "@/lib/asset-download";
 import { getEmbedUrl } from "@/lib/embed-url";
 import { generateImageUrl, toImageAsset } from "@/lib/images";
+import { getEntityRefsByDocumentId } from "@/lib/relations";
 import { ImageSchema, LicenseSchema } from "@/lib/schemas";
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, eq } from "@/services/db/sql";
@@ -45,6 +54,7 @@ export const ImageContentBlockSchema = v.object({
 	}),
 	caption: v.nullable(v.any()),
 	captionSource: v.nullable(v.picklist(["asset", "block"])),
+	layout: v.picklist(schema.imageLayoutEnum),
 });
 
 export const DataContentBlockSchema = v.object({
@@ -66,6 +76,19 @@ export const AccordionContentBlockSchema = v.object({
 	items: v.array(v.object({ title: v.string(), content: v.optional(v.any()) })),
 });
 
+export const MediaTextContentBlockSchema = v.object({
+	type: v.literal("media_text"),
+	image: v.object({
+		url: v.string(),
+		alt: v.nullable(v.string()),
+		license: v.nullable(LicenseSchema),
+	}),
+	side: v.picklist(schema.mediaTextSideEnum),
+	content: v.any(),
+	caption: v.nullable(v.any()),
+	captionSource: v.nullable(v.picklist(["asset", "block"])),
+});
+
 export const ContentBlockSchema = v.union([
 	RichTextContentBlockSchema,
 	CalloutContentBlockSchema,
@@ -74,12 +97,15 @@ export const ContentBlockSchema = v.union([
 	DataContentBlockSchema,
 	HeroContentBlockSchema,
 	AccordionContentBlockSchema,
+	MediaTextContentBlockSchema,
 ]);
 
 export type ContentBlock = v.InferOutput<typeof ContentBlockSchema>;
 
 const heroAssets = alias(schema.assets, "hero_assets");
 const heroLicenses = alias(schema.licenses, "hero_licenses");
+const mediaTextAssets = alias(schema.assets, "media_text_assets");
+const mediaTextLicenses = alias(schema.licenses, "media_text_licenses");
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getContentBlocks(db: Database | Transaction, entityId: string) {
@@ -97,6 +123,7 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			embedCaption: schema.embedContentBlocks.caption,
 			imageCaption: schema.imageContentBlocks.caption,
 			imageCaptionMode: schema.imageContentBlocks.captionMode,
+			imageLayout: schema.imageContentBlocks.layout,
 			imageKey: schema.assets.key,
 			imageAlt: schema.assets.alt,
 			imageAssetCaption: schema.assets.caption,
@@ -113,6 +140,15 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			heroLicenseUrl: heroLicenses.url,
 			heroCtas: schema.heroContentBlocks.ctas,
 			accordionItems: schema.accordionContentBlocks.items,
+			mediaTextSide: schema.mediaTextContentBlocks.side,
+			mediaTextContent: schema.mediaTextContentBlocks.content,
+			mediaTextCaption: schema.mediaTextContentBlocks.caption,
+			mediaTextCaptionMode: schema.mediaTextContentBlocks.captionMode,
+			mediaTextImageKey: mediaTextAssets.key,
+			mediaTextImageAlt: mediaTextAssets.alt,
+			mediaTextImageCaption: mediaTextAssets.caption,
+			mediaTextLicenseName: mediaTextLicenses.name,
+			mediaTextLicenseUrl: mediaTextLicenses.url,
 		})
 		.from(schema.fields)
 		.innerJoin(
@@ -148,6 +184,12 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			schema.accordionContentBlocks,
 			eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
 		)
+		.leftJoin(
+			schema.mediaTextContentBlocks,
+			eq(schema.mediaTextContentBlocks.id, schema.contentBlocks.id),
+		)
+		.leftJoin(mediaTextAssets, eq(mediaTextAssets.id, schema.mediaTextContentBlocks.imageId))
+		.leftJoin(mediaTextLicenses, eq(mediaTextLicenses.id, mediaTextAssets.licenseId))
 		.where(eq(schema.fields.entityVersionId, entityId))
 		.orderBy(schema.contentBlocks.position);
 
@@ -166,16 +208,76 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 		[...fieldMap.values()].map(({ name, blocks }) => [name, blocks]),
 	);
 
+	// Both passes below resolve references the editor stored deliberately, so that nothing derived —
+	// a count, a download url — is ever frozen into the document at authoring time.
+
 	// Placeholder-value nodes are stored as references; attach the current data here (a `value`
 	// attribute: number for counts, name array for lists) so consumers render it themselves.
 	const placeholderValueKinds = collectPlaceholderValueKinds(fields);
-	if (placeholderValueKinds.size === 0) {
-		return fields;
+	const withPlaceholderValues =
+		placeholderValueKinds.size === 0
+			? fields
+			: annotatePlaceholderValues(fields, await getPlaceholderValues(db, placeholderValueKinds));
+
+	// Asset-targeted links store only the asset's storage key; attach the download url, filename and
+	// size so consumers can render the link (and any file chrome) without knowing our storage layout.
+	const withAssetLinks = await annotateAssetLinks(db, withPlaceholderValues);
+
+	// Entity-targeted links store only a document id; attach the page it currently lives at, so a
+	// renamed slug moves every link to it.
+	return annotateEntityLinks(db, withAssetLinks);
+}
+
+/**
+ * Resolves `entity`-targeted link marks. Unpublished, deleted and page-less entities all resolve to
+ * nothing and stay unannotated, so a renderer sees one "no href" case rather than three.
+ */
+async function annotateEntityLinks<T>(db: Database | Transaction, value: T): Promise<T> {
+	const ids = collectLinkTargetEntityIds(value);
+	if (ids.size === 0) {
+		return value;
 	}
 
-	const placeholderValues = await getPlaceholderValues(db, placeholderValueKinds);
+	const refs = await getEntityRefsByDocumentId(db, [...ids]);
 
-	return annotatePlaceholderValues(fields, placeholderValues);
+	const resolved = new Map(
+		[...refs]
+			.filter(([, ref]) => ref.href != null)
+			.map(([id, ref]) => [id, { href: ref.href!, label: ref.label, type: ref.type }] as const),
+	);
+
+	return annotateEntityLinkTargets(value, resolved);
+}
+
+/**
+ * Resolves `asset`-targeted link marks anywhere in the given structure. A key whose asset has been
+ * deleted stays unresolved — the link keeps no href, and renderers degrade to plain text rather
+ * than emitting a dead download.
+ */
+async function annotateAssetLinks<T>(db: Database | Transaction, value: T): Promise<T> {
+	const keys = collectLinkTargetAssetKeys(value);
+	if (keys.size === 0) {
+		return value;
+	}
+
+	const assets = await getLinkTargetAssets(db, keys);
+
+	const resolved = new Map(
+		[...assets].map(
+			([key, asset]) =>
+				[
+					key,
+					{
+						url: getAssetDownloadUrl(key),
+						filename: getDownloadFilename(asset),
+						mimeType: asset.mimeType,
+						size: asset.size,
+					},
+				] as const,
+		),
+	);
+
+	return annotateLinkTargets(value, resolved);
 }
 
 function normalizeRow(row: {
@@ -188,6 +290,7 @@ function normalizeRow(row: {
 	embedCaption: JSONContent | null;
 	imageCaption: JSONContent | null;
 	imageCaptionMode: ImageCaptionMode | null;
+	imageLayout: (typeof schema.imageLayoutEnum)[number] | null;
 	imageKey: string | null;
 	imageAlt: string | null;
 	imageAssetCaption: JSONContent | null;
@@ -204,6 +307,15 @@ function normalizeRow(row: {
 	heroLicenseUrl: string | null;
 	heroCtas: unknown;
 	accordionItems: unknown;
+	mediaTextSide: (typeof schema.mediaTextSideEnum)[number] | null;
+	mediaTextContent: JSONContent | null;
+	mediaTextCaption: JSONContent | null;
+	mediaTextCaptionMode: ImageCaptionMode | null;
+	mediaTextImageKey: string | null;
+	mediaTextImageAlt: string | null;
+	mediaTextImageCaption: JSONContent | null;
+	mediaTextLicenseName: string | null;
+	mediaTextLicenseUrl: string | null;
 }): ContentBlock {
 	switch (row.blockType) {
 		case "callout": {
@@ -226,6 +338,10 @@ function normalizeRow(row: {
 			};
 		}
 		case "image": {
+			const layout = row.imageLayout ?? "default";
+			// Floated images render at a constrained width; centred layouts (default/wide/full) keep
+			// the full featured width so a breakout image stays sharp.
+			const isFloated = layout === "float-start" || layout === "float-end";
 			const assetImage = generateImageUrl(
 				toImageAsset({
 					key: row.imageKey!,
@@ -234,7 +350,7 @@ function normalizeRow(row: {
 					licenseName: row.imageLicenseName,
 					licenseUrl: row.imageLicenseUrl,
 				}),
-				imageWidth.featured,
+				isFloated ? imageWidth.preview : imageWidth.featured,
 			);
 			const { caption: _assetCaption, ...image } = assetImage;
 			const captionMode =
@@ -250,6 +366,7 @@ function normalizeRow(row: {
 				image,
 				caption,
 				captionSource,
+				layout,
 			};
 		}
 		case "data": {
@@ -281,6 +398,35 @@ function normalizeRow(row: {
 			return {
 				type: "accordion",
 				items: (row.accordionItems as Array<{ title: string; content?: unknown }> | null) ?? [],
+			};
+		}
+		case "media_text": {
+			const assetImage = generateImageUrl(
+				toImageAsset({
+					key: row.mediaTextImageKey!,
+					alt: row.mediaTextImageAlt,
+					caption: row.mediaTextImageCaption,
+					licenseName: row.mediaTextLicenseName,
+					licenseUrl: row.mediaTextLicenseUrl,
+				}),
+				imageWidth.avatar,
+			);
+			const { caption: _assetCaption, ...image } = assetImage;
+			const captionMode =
+				row.mediaTextCaptionMode ?? (row.mediaTextCaption != null ? "override" : "inherit");
+			const { caption, source: captionSource } = resolveImageCaption({
+				assetCaption: row.mediaTextImageCaption,
+				blockCaption: row.mediaTextCaption,
+				captionMode,
+			});
+
+			return {
+				type: "media_text",
+				image,
+				side: row.mediaTextSide!,
+				content: row.mediaTextContent,
+				caption,
+				captionSource,
 			};
 		}
 		default: {

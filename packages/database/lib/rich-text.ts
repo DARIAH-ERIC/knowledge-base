@@ -43,6 +43,49 @@ export function isEmptyRichTextDocument(content: JSONContent | null | undefined)
 }
 
 /**
+ * An empty spacer paragraph: `{ "type": "paragraph" }`, or one holding only whitespace and hard
+ * breaks — the same things {@link isEmptyRichTextDocument} treats as editor placeholders.
+ */
+function isBlankParagraph(node: JSONContent): boolean {
+	if (node.type !== "paragraph") {
+		return false;
+	}
+
+	return (node.content ?? []).every(
+		(child) =>
+			child.type === "hardBreak" || (child.type === "text" && (child.text ?? "").trim() === ""),
+	);
+}
+
+/**
+ * Drops blank paragraphs from the top level of a rich-text document, so they are never stored.
+ *
+ * An empty paragraph is not content: it renders as an empty line box _plus_ its own margins, which
+ * shows up on the site as uneven spacing between paragraphs. The editor is not WYSIWYG, so there is
+ * no round-trip to protect — vertical rhythm is the stylesheet's job, not something authors set by
+ * leaving blank lines.
+ *
+ * Deliberately narrower than {@link normalizeRichTextDocument}, which also rewrites headings, hard
+ * breaks and imported attributes: that one is a reviewed batch pass (`data:clean:richtext` and the
+ * admin Maintenance page both run it dry first), and silently applying all of it on every save
+ * would change author copy in ways nobody asked for.
+ *
+ * Only the top level is touched. A blank paragraph inside a `tableCell`, `listItem` or `blockquote`
+ * is structural — those require at least one block child, so dropping it would leave an invalid
+ * document. Returns the input unchanged (same reference) when there is nothing to drop, so callers
+ * can diff to skip no-op writes.
+ */
+export function withoutBlankParagraphs(content: JSONContent): JSONContent {
+	if (!Array.isArray(content.content)) {
+		return content;
+	}
+
+	const nodes = content.content.filter((node) => !isBlankParagraph(node));
+
+	return nodes.length === content.content.length ? content : { ...content, content: nodes };
+}
+
+/**
  * Wrap a plaintext string into a minimal single-paragraph Tiptap document, mirroring the shape the
  * `captions_to_richtext` migration produces. Blank/nullish input becomes `null`.
  */

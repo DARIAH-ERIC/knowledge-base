@@ -55,6 +55,8 @@ export interface IngestSshocServicesResult {
 	fetchedCount: number;
 	markedNeedsReviewCount: number;
 	relationCount: number;
+	/** Owner/provider relations dropped because upstream no longer lists them. */
+	removedRelationCount: number;
 	updatedCount: number;
 	/** Services inserted on this run. */
 	created: Array<IngestedSshocService>;
@@ -201,6 +203,7 @@ export async function ingestSshocServices(
 	let createdCount = 0;
 	let updatedCount = 0;
 	let relationCount = 0;
+	let removedRelationCount = 0;
 
 	const seenMarketplaceIds = new Set<string>();
 	const created: Array<IngestedSshocService> = [];
@@ -353,39 +356,47 @@ export async function ingestSshocServices(
 				}),
 			];
 
-			if (relations.length > 0) {
-				const existingRelations = await tx
-					.select({
-						organisationalUnitDocumentId:
-							schema.servicesToOrganisationalUnits.organisationalUnitDocumentId,
-						roleId: schema.servicesToOrganisationalUnits.roleId,
-					})
-					.from(schema.servicesToOrganisationalUnits)
-					.where(eq(schema.servicesToOrganisationalUnits.serviceId, serviceId));
+			/**
+			 * Upstream is the source of truth for owner/provider relations on SSHOC services — they are
+			 * not editable locally, since the admin service forms only cover services without a
+			 * marketplace id. So reconcile rather than merge: relations the marketplace no longer lists
+			 * are removed, including ones an earlier import created. Runs unconditionally, because a
+			 * service that lost all its contributors upstream must end up with no relations here.
+			 */
+			const existingRelations = await tx
+				.select({
+					id: schema.servicesToOrganisationalUnits.id,
+					organisationalUnitDocumentId:
+						schema.servicesToOrganisationalUnits.organisationalUnitDocumentId,
+					roleId: schema.servicesToOrganisationalUnits.roleId,
+				})
+				.from(schema.servicesToOrganisationalUnits)
+				.where(eq(schema.servicesToOrganisationalUnits.serviceId, serviceId));
 
-				const existingRelationKeys = new Set(
-					existingRelations.map((relation) =>
-						[relation.organisationalUnitDocumentId, relation.roleId].join(":"),
-					),
-				);
+			const toKey = (relation: { organisationalUnitDocumentId: string; roleId: string }) =>
+				[relation.organisationalUnitDocumentId, relation.roleId].join(":");
 
-				/**
-				 * Preserve locally curated relations for now. The correct fix is to store relation
-				 * provenance, then replace only the SSHOC-managed subset here. That also depends on a
-				 * product decision: are SSHOC service relations exclusively managed upstream, or can admins
-				 * add local owner/provider links that should survive re-ingest?
-				 */
-				const missingRelations = relations.filter(
-					(relation) =>
-						!existingRelationKeys.has(
-							[relation.organisationalUnitDocumentId, relation.roleId].join(":"),
-						),
-				);
+			const existingRelationKeys = new Set(existingRelations.map((relation) => toKey(relation)));
+			const expectedRelationKeys = new Set(relations.map((relation) => toKey(relation)));
 
-				if (missingRelations.length > 0) {
-					await tx.insert(schema.servicesToOrganisationalUnits).values(missingRelations);
-					relationCount += missingRelations.length;
-				}
+			const staleRelationIds = existingRelations
+				.filter((relation) => !expectedRelationKeys.has(toKey(relation)))
+				.map((relation) => relation.id);
+
+			if (staleRelationIds.length > 0) {
+				await tx
+					.delete(schema.servicesToOrganisationalUnits)
+					.where(inArray(schema.servicesToOrganisationalUnits.id, staleRelationIds));
+				removedRelationCount += staleRelationIds.length;
+			}
+
+			const missingRelations = relations.filter(
+				(relation) => !existingRelationKeys.has(toKey(relation)),
+			);
+
+			if (missingRelations.length > 0) {
+				await tx.insert(schema.servicesToOrganisationalUnits).values(missingRelations);
+				relationCount += missingRelations.length;
 			}
 		});
 
@@ -418,6 +429,7 @@ export async function ingestSshocServices(
 		fetchedCount: sshocServices.length,
 		markedNeedsReviewCount: servicesToMarkNeedsReview.length,
 		relationCount,
+		removedRelationCount,
 		updatedCount,
 		created: created.toSorted(byName),
 		markedNeedsReview: servicesToMarkNeedsReview

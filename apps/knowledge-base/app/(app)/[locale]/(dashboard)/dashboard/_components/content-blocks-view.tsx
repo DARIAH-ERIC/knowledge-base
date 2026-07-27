@@ -3,6 +3,7 @@
 "use client";
 
 import { resolveImageCaption } from "@dariah-eric/database/image-captions";
+import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
 import { Note } from "@dariah-eric/ui/note";
 import { isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
@@ -16,16 +17,106 @@ import { getEmbedUrl } from "@/lib/embed-url";
 
 const richTextExtensions = createRichTextExtensions();
 
+/**
+ * The static renderer serialises each node via its extension `renderHTML`, which for the inline
+ * `buttonLink` node is a bare `<a data-button-link>` — indistinguishable from a normal link. Render
+ * it as the styled `ButtonLink` instead, mirroring the editor's read-only node view.
+ */
+function renderButtonLinkNode({
+	node,
+}: Readonly<{ node: { attrs?: Record<string, unknown> | null } }>): ReactNode {
+	const attrs = node.attrs ?? {};
+	const href = typeof attrs.href === "string" ? attrs.href : "#";
+	const label = typeof attrs.label === "string" ? attrs.label : "Button";
+	const intent =
+		attrs.variant === "secondary" || attrs.variant === "outline" ? attrs.variant : "primary";
+
+	return (
+		<ButtonLink href={href} intent={intent} size="sm">
+			{label}
+		</ButtonLink>
+	);
+}
+
+/**
+ * A link that points at an asset stores only its key — the download url is resolved at read time,
+ * and the API does that for the public site (`annotateLinkTargets`). The dashboard reads content
+ * blocks straight from the database instead, so the preview resolves the key here, against the
+ * dashboard's own download route. Everything else about the link renders as usual.
+ */
+function renderLinkMark({
+	mark,
+	children,
+}: Readonly<{
+	mark: { attrs?: Record<string, unknown> | null };
+	children?: ReactNode | Array<ReactNode>;
+}>): ReactNode {
+	const attrs = mark.attrs ?? {};
+	const assetKey = typeof attrs.assetKey === "string" ? attrs.assetKey : null;
+
+	// An entity link stores only a document id, and turning that into a url needs a lookup this
+	// client component cannot do — unlike an asset key, which is a url by string substitution. So the
+	// preview cannot make it clickable, and must not claim to know whether it still resolves. It is
+	// marked as a reference instead, so an editor can tell a working link from a broken one rather
+	// than seeing both as bare text.
+	if (attrs.targetKind === "entity") {
+		return (
+			<span
+				className="underline decoration-dotted underline-offset-2 text-muted-fg"
+				title="Links to a page on the website. Its address is resolved when the site renders it."
+			>
+				{children}
+			</span>
+		);
+	}
+
+	const href =
+		attrs.targetKind === "asset" && assetKey != null
+			? `/api/assets/download?key=${encodeURIComponent(assetKey)}`
+			: typeof attrs.href === "string"
+				? attrs.href
+				: undefined;
+
+	// A link with no href at all is broken — a reference whose target is gone, or malformed content.
+	// Rendering an anchor without an href would look identical to a working link.
+	if (href == null) {
+		return (
+			<span
+				className="underline decoration-wavy underline-offset-2 text-danger"
+				title="This link has no target."
+			>
+				{children}
+			</span>
+		);
+	}
+
+	return (
+		<a
+			href={href}
+			rel={typeof attrs.rel === "string" ? attrs.rel : undefined}
+			target={typeof attrs.target === "string" ? attrs.target : undefined}
+		>
+			{children}
+		</a>
+	);
+}
+
+const richTextRenderOptions = {
+	markMapping: { link: renderLinkMark },
+	nodeMapping: { buttonLink: renderButtonLinkNode },
+};
+
 /** Renders a richtext caption inside a `figcaption`, or nothing when the caption is empty. */
 function CaptionFigcaption({
 	caption,
-}: Readonly<{ caption: JSONContent | null | undefined }>): ReactNode {
+	className,
+}: Readonly<{ caption: JSONContent | null | undefined; className?: string }>): ReactNode {
 	if (isEmptyRichTextDocument(caption)) {
 		return null;
 	}
 
 	return (
-		<figcaption>
+		<figcaption className={className}>
 			<InlineRichTextRenderer content={caption!} />
 		</figcaption>
 	);
@@ -35,12 +126,39 @@ interface ContentBlocksViewProps {
 	contentBlocks: Array<ContentBlock>;
 }
 
-export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewProps>): ReactNode {
+function isFloatedImage(contentBlock: ContentBlock | undefined): boolean {
 	return (
-		<div className="flex flex-col gap-y-8">
-			{contentBlocks.map((contentBlock) => (
-				<ContentBlockView key={String(contentBlock.id)} contentBlock={contentBlock} />
-			))}
+		contentBlock?.type === "image" &&
+		(contentBlock.content?.layout === "float-start" || contentBlock.content?.layout === "float-end")
+	);
+}
+
+export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewProps>): ReactNode {
+	// Normal document flow (not a flex column) so a floated `image` block's float escapes into the
+	// following block and the text wraps around it. The immediately-following `rich_text` is allowed
+	// to wrap; every other block clears, so a float can never overlap a structural block below it.
+	// `@container` makes the float/full-width switch depend on the content column's width (via a
+	// container query on floated images), not on the viewport.
+	//
+	// Blocks are a storage split of one document, so the boundary should be invisible: `space-y-4`
+	// is the same 1rem the richtext scale puts between paragraphs (and, after margin collapsing,
+	// after a heading). Each block zeroes its own first/last child margins, so this gap is the whole
+	// spacing story — no per-block or neighbour-aware adjustment.
+	return (
+		<div className="@container space-y-4">
+			{contentBlocks.map((contentBlock, index) => {
+				const wrapsPrecedingFloat =
+					contentBlock.type === "rich_text" && isFloatedImage(contentBlocks[index - 1]);
+
+				return (
+					<div
+						className={wrapsPrecedingFloat ? undefined : "clear-both"}
+						key={String(contentBlock.id)}
+					>
+						<ContentBlockView contentBlock={contentBlock} />
+					</div>
+				);
+			})}
 		</div>
 	);
 }
@@ -101,6 +219,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 									{renderToReactElement({
 										content: accordionItem.content,
 										extensions: richTextExtensions,
+										options: richTextRenderOptions,
 									})}
 								</div>
 							)}
@@ -246,11 +365,81 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 				return null;
 			}
 
+			const layout = contentBlock.content?.layout ?? "default";
+			// `float-*` only floats once the content column (a `@container`, not the viewport) is wide
+			// enough (`@lg` ≈ 32rem): a constrained image pulled aside with the following block's text
+			// wrapping, natural aspect ratio so portrait images show in full, and gap on the text side.
+			// In a narrower column it spans the full width so text never wraps in a cramped column.
+			// `wide`/`full` break out past the text column; `default` fills the column.
+			const figureClassName = {
+				"float-start": "mbe-4 @lg:mbe-2 @lg:me-6 @lg:float-start @lg:inline-[min(18rem,45%)]",
+				"float-end": "mbe-4 @lg:mbe-2 @lg:ms-6 @lg:float-end @lg:inline-[min(18rem,45%)]",
+				wide: "ms-auto me-auto inline-[min(56rem,92vw)]",
+				full: "inline-[100vw] ms-[calc(50%-50vw)] me-[calc(50%-50vw)]",
+				default: undefined,
+			}[layout];
+
 			return (
-				<figure>
+				<figure className={figureClassName}>
 					<img alt={contentBlock.content?.alt ?? ""} src={imageUrl} />
 					<CaptionFigcaption caption={caption} />
 				</figure>
+			);
+		}
+
+		case "media_text": {
+			const imageUrl = contentBlock.content?.imageUrl;
+			const alt = contentBlock.content?.alt;
+			const side = contentBlock.content?.side ?? "start";
+			const content = contentBlock.content?.content;
+			const captionMode =
+				contentBlock.content?.captionMode ??
+				(contentBlock.content?.caption != null ? "override" : "inherit");
+			const { caption } = resolveImageCaption({
+				assetCaption: contentBlock.content?.assetCaption,
+				blockCaption: contentBlock.content?.caption,
+				captionMode,
+			});
+
+			if (imageUrl == null || !imageUrl || content == null) {
+				return null;
+			}
+
+			return (
+				<div className="flow-root">
+					<figure
+						className={
+							// The image keeps its fixed square size; the figure grows for the caption, so a
+							// credit sits under the image inside the same 9rem column.
+							//
+							// It only floats once the content column (a `@container`, not the viewport) can
+							// spare the width: below `@sm` (≈24rem) a 9rem float plus its gutter leaves the
+							// text too narrow to wrap cleanly, so the pairing stacks instead — image on its
+							// own line, text below. Unlike an `image` block it never stretches to fill the
+							// column: this is a thumbnail (a portrait, a logo), and upscaling it would look
+							// worse than the narrow column does. `mbs-1.5` nudges the floated image down to
+							// the text's cap height — the first line's half-leading otherwise makes the
+							// top-aligned text look lower than the image — so it rides along with the float.
+							side === "end"
+								? "mbe-2 inline-36 @sm:mbs-1.5 @sm:ms-4 @sm:float-end"
+								: "mbe-2 inline-36 @sm:mbs-1.5 @sm:me-4 @sm:float-start"
+						}
+					>
+						<img
+							alt={alt ?? ""}
+							className="block-36 inline-full rounded-lg object-cover"
+							src={imageUrl}
+						/>
+						<CaptionFigcaption caption={caption} className="mbs-1 text-xs text-muted-fg" />
+					</figure>
+					<div className="richtext richtext-sm">
+						{renderToReactElement({
+							content,
+							extensions: richTextExtensions,
+							options: richTextRenderOptions,
+						})}
+					</div>
+				</div>
 			);
 		}
 
@@ -261,7 +450,11 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 
 			return (
 				<div className="richtext richtext-sm">
-					{renderToReactElement({ content: contentBlock.content, extensions: richTextExtensions })}
+					{renderToReactElement({
+						content: contentBlock.content,
+						extensions: richTextExtensions,
+						options: richTextRenderOptions,
+					})}
 				</div>
 			);
 		}

@@ -15,7 +15,7 @@ describe("getEntityHref", () => {
 		expect(getEntityHref({ type: "event", slug: "e" })).toBe("/events/e");
 		expect(getEntityHref({ type: "person", slug: "jane-doe" })).toBe("/persons/jane-doe");
 		expect(getEntityHref({ type: "project", slug: "p" })).toBe("/projects/p");
-		expect(getEntityHref({ type: "spotlight-article", slug: "s" })).toBe("/spotlights/s");
+		expect(getEntityHref({ type: "spotlight-article", slug: "s" })).toBe("/spotlight/s");
 		expect(getEntityHref({ type: "impact-case-study", slug: "i" })).toBe(
 			"/about/impact-case-studies/i",
 		);
@@ -55,7 +55,7 @@ describe("getEntityListHref", () => {
 		expect(getEntityListHref("news-item")).toBe("/news");
 		expect(getEntityListHref("event")).toBe("/events");
 		expect(getEntityListHref("project")).toBe("/projects");
-		expect(getEntityListHref("spotlight-article")).toBe("/spotlights");
+		expect(getEntityListHref("spotlight-article")).toBe("/spotlight");
 		expect(getEntityListHref("impact-case-study")).toBe("/about/impact-case-studies");
 		expect(getEntityListHref("funding-call")).toBe("/get-involved/funding-calls");
 		expect(getEntityListHref("opportunity")).toBe("/get-involved/opportunities");

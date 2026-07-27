@@ -4,6 +4,8 @@
 
 import { type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
+import { Link } from "@tiptap/extension-link";
+import { TableKit } from "@tiptap/extension-table/kit";
 import { Typography } from "@tiptap/extension-typography";
 import {
 	EditorContent,
@@ -27,6 +29,7 @@ import {
 	ListOrderedIcon,
 	PencilIcon,
 	QuoteIcon,
+	TableIcon,
 	Trash2Icon,
 	VariableIcon,
 } from "lucide-react";
@@ -102,6 +105,14 @@ interface RichTextEditorProps {
 			asset?: { alt?: string | null; caption?: JSONContent | null },
 		) => void,
 	) => ReactNode;
+	/**
+	 * Picker for linking selected text to a stored document. Lives in the toolbar rather than in the
+	 * link popover: the picker is a modal dialog, and opening one from inside a popover dismisses the
+	 * popover it was opened from.
+	 */
+	renderDocumentPicker?: (link: (assetKey: string, label: string) => void) => ReactNode;
+	/** Picker for linking selected text to another entity. In the toolbar, for the same reason. */
+	renderEntityPicker?: (link: (entityId: string, label: string) => void) => ReactNode;
 }
 
 function normalizeInitialContent(content: JSONContent | undefined): JSONContent | undefined {
@@ -136,6 +147,18 @@ export type { RichTextEditorToolbarButtonProps } from "@/lib/rich-text-toolbar-b
 
 // Keep the internal alias for backward-compat within this file.
 const RichTextEditorIconButton = RichTextEditorToolbarButton;
+
+/** One row/column command in the table popover — a labelled entry rather than another icon. */
+function TableCommandButton({
+	label,
+	onPress,
+}: Readonly<{ label: string; onPress: () => void }>): ReactNode {
+	return (
+		<Button className="justify-start" intent="plain" onPress={onPress} size="sm" type="button">
+			{label}
+		</Button>
+	);
+}
 
 interface BlockNodeSurfaceProps {
 	children: ReactNode;
@@ -1325,6 +1348,70 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 	});
 }
 
+/**
+ * The built-in `link` mark, widened so a link can point at one of our own assets instead of a typed
+ * url — see `link-targets.ts` in `@dariah-eric/database` for the model and the read-time
+ * resolution.
+ *
+ * The extension is replaced rather than merely given extra attributes, because the target also
+ * changes when a link _parses_: an asset link stores a reference and no href, and the stock parse
+ * rule is `a[href]`, so a round-trip through HTML (copy/paste, the WordPress import) would drop the
+ * mark and leave bare text behind. The rules below are the stock ones plus one for our own markup.
+ *
+ * `asset` is write-only from the editor's point of view: read paths attach it (url, filename, size)
+ * and it is deliberately neither parsed nor serialised, so a resolved url can never end up in
+ * stored content and go stale.
+ */
+const LinkWithTargets = Link.extend({
+	addAttributes() {
+		return {
+			...this.parent?.(),
+			targetKind: {
+				default: null,
+				parseHTML: (element) => element.dataset.targetKind ?? null,
+				renderHTML: (attributes) => {
+					const targetKind = attributes.targetKind as string | null;
+					return targetKind == null ? {} : { "data-target-kind": targetKind };
+				},
+			},
+			assetKey: {
+				default: null,
+				parseHTML: (element) => element.dataset.assetKey ?? null,
+				renderHTML: (attributes) => {
+					const assetKey = attributes.assetKey as string | null;
+					return assetKey == null ? {} : { "data-asset-key": assetKey };
+				},
+			},
+			entityId: {
+				default: null,
+				parseHTML: (element) => element.dataset.entityId ?? null,
+				renderHTML: (attributes) => {
+					const entityId = attributes.entityId as string | null;
+					return entityId == null ? {} : { "data-entity-id": entityId };
+				},
+			},
+			asset: {
+				default: null,
+				parseHTML: () => null,
+				renderHTML: () => {
+					return {};
+				},
+			},
+			entity: {
+				default: null,
+				parseHTML: () => null,
+				renderHTML: () => {
+					return {};
+				},
+			},
+		};
+	},
+
+	parseHTML() {
+		return [...(this.parent?.() ?? []), { tag: "a[data-asset-key]" }, { tag: "a[data-entity-id]" }];
+	},
+}).configure({ openOnClick: false, defaultProtocol: "https" });
+
 interface CreateRichTextExtensionsOptions {
 	renderImagePicker?: ImagePickerRenderer;
 }
@@ -1339,12 +1426,11 @@ export function createRichTextExtensions(
 	options?: Readonly<CreateRichTextExtensionsOptions>,
 ): Extensions {
 	return [
+		// The link mark comes from `LinkWithTargets` below instead, which extends it to carry asset
+		// targets; two link extensions would collide on the same mark name.
 		StarterKit.configure({
 			heading: { levels: [2, 3, 4] },
-			link: {
-				openOnClick: false,
-				defaultProtocol: "https",
-			},
+			link: false,
 		}),
 		// Normalise typography as authors type. Keep the unambiguous substitutions (smart
 		// quotes/apostrophes, `--` → em dash, `...` → ellipsis) and disable the rest, which corrupt
@@ -1368,6 +1454,12 @@ export function createRichTextExtensions(
 			superscriptTwo: false,
 			superscriptThree: false,
 		}),
+		// Tables carry data, not layout: column widths are left to the stylesheet (`resizable: false`,
+		// so no `colwidth` attributes are ever written) and cells hold ordinary block content. Without
+		// these node types a pasted or imported `<table>` is silently flattened into one paragraph of
+		// run-together cell text — which is exactly what the WordPress migration produced.
+		TableKit.configure({ table: { resizable: false } }),
+		LinkWithTargets,
 		Image,
 		createAssetImageNode(options?.renderImagePicker),
 		EmbedNode,
@@ -1391,6 +1483,8 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		renderButtonLinkInsert,
 		renderPlaceholderValueInsert,
 		renderImagePicker,
+		renderDocumentPicker,
+		renderEntityPicker,
 	} = props;
 
 	const t = useExtracted("ui");
@@ -1442,7 +1536,9 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				isOrderedList: ctx.editor?.isActive("orderedList"),
 				isBlockquote: ctx.editor?.isActive("blockquote"),
 				isLink: ctx.editor?.isActive("link"),
+				isInTable: ctx.editor?.isActive("table"),
 				linkHref: ctx.editor?.getAttributes("link").href as string | undefined,
+				linkTargetKind: ctx.editor?.getAttributes("link").targetKind as string | undefined,
 			};
 		},
 	});
@@ -1568,6 +1664,52 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		[editor],
 	);
 
+	/**
+	 * Turns the selection into a link to something we own — or, with nothing selected, inserts the
+	 * target's label as the link text, so a picked target always ends up readable.
+	 *
+	 * No href is stored: the reference is, and read paths resolve it to wherever the target currently
+	 * lives.
+	 */
+	const linkTarget = useCallback(
+		(attrs: Record<string, unknown>, label: string) => {
+			if (!editor) {
+				return;
+			}
+
+			const { from, to } = editor.state.selection;
+			const chain = editor.chain().focus();
+
+			if (from === to) {
+				chain.insertContent({ type: "text", text: label, marks: [{ type: "link", attrs }] }).run();
+				return;
+			}
+
+			if (editor.isActive("link")) {
+				chain.extendMarkRange("link");
+			}
+
+			// `setMark` rather than `setLink`: the link extension's setter takes (and validates) an href,
+			// and these links deliberately have none — the reference is the target.
+			chain.setMark("link", attrs).run();
+		},
+		[editor],
+	);
+
+	const linkDocument = useCallback(
+		(assetKey: string, label: string) => {
+			linkTarget({ href: null, targetKind: "asset", assetKey }, label);
+		},
+		[linkTarget],
+	);
+
+	const linkEntity = useCallback(
+		(entityId: string, label: string) => {
+			linkTarget({ href: null, targetKind: "entity", entityId }, label);
+		},
+		[linkTarget],
+	);
+
 	const insertImage = useCallback(
 		(
 			imageKey: string,
@@ -1684,6 +1826,90 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						}}
 					/>
 					<span className="mx-1 block-4 inline-px bg-border" />
+					<Popover>
+						<Tooltip>
+							<PopoverTrigger
+								aria-label={t("Table")}
+								className={twMerge(
+									"relative inline-flex block-8 inline-8 cursor-pointer items-center justify-center rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+									activeState?.isInTable === true && "bg-primary-subtle/50 text-fg",
+								)}
+							>
+								<TableIcon className="block-4 inline-4" />
+							</PopoverTrigger>
+							<TooltipContent inverse={true}>{t("Table")}</TooltipContent>
+						</Tooltip>
+						{/* The row and column commands act on the cell holding the cursor, so they are only
+							    offered once the selection is inside a table. */}
+						<PopoverContent className="flex inline-56 flex-col gap-1 p-2">
+							{activeState?.isInTable === true ? (
+								<>
+									<TableCommandButton
+										label={t("Toggle header row")}
+										onPress={() => {
+											editor.chain().focus().toggleHeaderRow().run();
+										}}
+									/>
+									<TableCommandButton
+										label={t("Add row above")}
+										onPress={() => {
+											editor.chain().focus().addRowBefore().run();
+										}}
+									/>
+									<TableCommandButton
+										label={t("Add row below")}
+										onPress={() => {
+											editor.chain().focus().addRowAfter().run();
+										}}
+									/>
+									<TableCommandButton
+										label={t("Delete row")}
+										onPress={() => {
+											editor.chain().focus().deleteRow().run();
+										}}
+									/>
+									<span className="my-1 block-px inline-full bg-border" />
+									<TableCommandButton
+										label={t("Add column before")}
+										onPress={() => {
+											editor.chain().focus().addColumnBefore().run();
+										}}
+									/>
+									<TableCommandButton
+										label={t("Add column after")}
+										onPress={() => {
+											editor.chain().focus().addColumnAfter().run();
+										}}
+									/>
+									<TableCommandButton
+										label={t("Delete column")}
+										onPress={() => {
+											editor.chain().focus().deleteColumn().run();
+										}}
+									/>
+									<span className="my-1 block-px inline-full bg-border" />
+									<TableCommandButton
+										label={t("Delete table")}
+										onPress={() => {
+											editor.chain().focus().deleteTable().run();
+										}}
+									/>
+								</>
+							) : (
+								<TableCommandButton
+									label={t("Insert table")}
+									onPress={() => {
+										editor
+											.chain()
+											.focus()
+											.insertTable({ rows: 3, cols: 2, withHeaderRow: true })
+											.run();
+									}}
+								/>
+							)}
+						</PopoverContent>
+					</Popover>
+					<span className="mx-1 block-4 inline-px bg-border" />
 					<Popover isOpen={isLinkPopoverOpen} onOpenChange={handleLinkPopoverOpenChange}>
 						<Tooltip>
 							<PopoverTrigger
@@ -1698,34 +1924,49 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							<TooltipContent inverse={true}>{t("Link")}</TooltipContent>
 						</Tooltip>
 						<PopoverContent className="p-3">
-							<form
-								className="flex inline-56 flex-col gap-2"
-								onSubmit={(e) => {
-									e.preventDefault();
-									applyLink();
-								}}
-							>
-								<Input
-									autoFocus={true}
-									onChange={(e) => {
-										setLinkHrefInput(e.target.value);
-									}}
-									placeholder="https://example.com"
-									required={true}
-									type="text"
-									value={linkHrefInput}
-								/>
-								<div className="flex gap-2">
-									<Button className="flex-1" intent="primary" size="sm" type="submit">
-										{t("Apply")}
+							{activeState?.linkTargetKind != null ? (
+								// These links hold a reference, not an href, so the url field would have nothing
+								// to show and applying it would silently replace the target.
+								<div className="flex inline-56 flex-col gap-2">
+									<Note intent="info">
+										{activeState.linkTargetKind === "asset"
+											? t("This link points to a document.")
+											: t("This link points to another page.")}
+									</Note>
+									<Button intent="outline" onPress={removeLink} size="sm" type="button">
+										{t("Remove")}
 									</Button>
-									{activeState?.isLink === true && (
-										<Button intent="outline" onPress={removeLink} size="sm" type="button">
-											{t("Remove")}
-										</Button>
-									)}
 								</div>
-							</form>
+							) : (
+								<form
+									className="flex inline-56 flex-col gap-2"
+									onSubmit={(e) => {
+										e.preventDefault();
+										applyLink();
+									}}
+								>
+									<Input
+										autoFocus={true}
+										onChange={(e) => {
+											setLinkHrefInput(e.target.value);
+										}}
+										placeholder="https://example.com"
+										required={true}
+										type="text"
+										value={linkHrefInput}
+									/>
+									<div className="flex gap-2">
+										<Button className="flex-1" intent="primary" size="sm" type="submit">
+											{t("Apply")}
+										</Button>
+										{activeState?.isLink === true && (
+											<Button intent="outline" onPress={removeLink} size="sm" type="button">
+												{t("Remove")}
+											</Button>
+										)}
+									</div>
+								</form>
+							)}
 						</PopoverContent>
 					</Popover>
 					{renderImagePicker != null ? (
@@ -1734,9 +1975,11 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							{renderImagePicker(insertImage)}
 						</>
 					) : null}
+					{renderDocumentPicker != null ? renderDocumentPicker(linkDocument) : null}
+					{renderEntityPicker != null ? renderEntityPicker(linkEntity) : null}
 					{renderEmbedInsert != null ? (
 						<>
-							{renderImagePicker == null ? (
+							{renderImagePicker == null && renderDocumentPicker == null ? (
 								<span className="mx-1 block-4 inline-px bg-border" />
 							) : null}
 							{renderEmbedInsert(insertEmbed)}

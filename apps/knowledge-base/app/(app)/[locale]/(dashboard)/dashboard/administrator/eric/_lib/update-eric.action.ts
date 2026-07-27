@@ -9,6 +9,7 @@ import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-versio
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { syncOrganisationalUnitSocialMedia } from "@/lib/data/social-media-relations";
+import { checkSshocMarketplaceActorIdAvailable } from "@/lib/data/sshoc-marketplace-actor-id";
 import { eq } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -21,6 +22,13 @@ export const updateEricAction = createMutationAction({
 	audit: { action: "update", subjectType: "eric" },
 	revalidate: "/[locale]/dashboard/administrator/eric",
 	redirect: "/dashboard/administrator/eric",
+
+	async preCheck({ input }) {
+		return checkSshocMarketplaceActorIdAvailable({
+			sshocMarketplaceActorId: input.sshocMarketplaceActorId,
+			excludeDocumentId: input.documentId,
+		});
+	},
 
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(

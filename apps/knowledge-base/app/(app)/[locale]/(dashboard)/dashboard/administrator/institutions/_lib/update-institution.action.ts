@@ -14,6 +14,7 @@ import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-versio
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { syncOrganisationalUnitSocialMedia } from "@/lib/data/social-media-relations";
+import { checkSshocMarketplaceActorIdAvailable } from "@/lib/data/sshoc-marketplace-actor-id";
 import { eq } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
@@ -27,6 +28,13 @@ export const updateInstitutionAction = createMutationAction({
 	audit: { action: "update", subjectType: "institutions" },
 	revalidate: "/[locale]/dashboard/administrator/institutions",
 	redirect: "/dashboard/administrator/institutions",
+
+	async preCheck({ input }) {
+		return checkSshocMarketplaceActorIdAvailable({
+			sshocMarketplaceActorId: input.sshocMarketplaceActorId,
+			excludeDocumentId: input.documentId,
+		});
+	},
 
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(
