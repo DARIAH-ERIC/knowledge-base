@@ -186,11 +186,11 @@ export class WebsiteNewsPage {
 		await editor.press("End");
 		await this.page.getByRole("button", { name: "Insert callout" }).click();
 
-		const callout = this.page.getByLabel("Callout block", { exact: true });
-		await callout.getByText("Warning", { exact: true }).click();
-		await callout.getByRole("textbox", { name: "Title (optional)" }).fill(options.title);
-		await callout.getByRole("textbox", { name: "Callout content" }).fill(options.body);
-		await callout.getByRole("button", { name: "Apply" }).click();
+		await this.fillInlineCallout({
+			title: options.title,
+			body: options.body,
+			intent: "Warning",
+		});
 	}
 
 	/** Insert a button-link inline node at the current cursor via the toolbar + popover form. */
@@ -340,37 +340,8 @@ export class WebsiteNewsPage {
 
 	/** Insert a 3x2 table with a header row at the cursor, then fill the two header cells. */
 	async insertTable(headers: [string, string]): Promise<void> {
-		/**
-		 * Every toolbar control that comes from `@dariah-eric/ui` reports its accessible name as the
-		 * literal string "ui": those labels go through `useExtracted("ui")`, the namespace fails to
-		 * resolve in the built app (the server log fills with `MISSING_MESSAGE`), and the name falls
-		 * back to the namespace itself. Only the app-supplied labels ("Insert image", "Link to page",
-		 * …) survive, which is why every other helper here can use a real name.
-		 *
-		 * So the table controls cannot be addressed by name until that is fixed. Target the trigger by
-		 * its index among the unnamed toolbar buttons instead — they are, in order: bold, italic, code,
-		 * h2, h3, h4, bullet list, ordered list, blockquote, table, link.
-		 */
-		const TABLE_TRIGGER_INDEX = 9;
-		const unnamedToolbarButtons = this.page
-			.getByRole("group", { name: "Content" })
-			.getByRole("button", { name: "ui", exact: true });
-		await expect(unnamedToolbarButtons).toHaveCount(11);
-
-		/**
-		 * The same fallback hits unrelated chrome outside the editor — the sidebar toggle and a nav
-		 * button are "ui" too — so measure the closed-popover count instead of assuming one.
-		 */
-		const unnamedButtons = this.page.getByRole("button", { name: "ui", exact: true });
-		const closedCount = await unnamedButtons.count();
-
-		await unnamedToolbarButtons.nth(TABLE_TRIGGER_INDEX).click();
-
-		/**
-		 * The popover portals to the end of the document, so its command is the last such button on the
-		 * page. Outside a table the popover offers exactly one: "Insert table".
-		 */
-		await unnamedButtons.last().click();
+		await this.page.getByRole("button", { name: "Table", exact: true }).click();
+		await this.page.getByRole("button", { name: "Insert table" }).click();
 
 		/**
 		 * Running a table command does not dismiss the popover — it re-renders with the in-table
@@ -378,7 +349,7 @@ export class WebsiteNewsPage {
 		 * before touching the table it just inserted.
 		 */
 		await this.page.keyboard.press("Escape");
-		await expect(unnamedButtons).toHaveCount(closedCount);
+		await expect(this.page.getByRole("button", { name: "Insert table" })).toHaveCount(0);
 
 		const editor = this.contentBlockEditor();
 		const headerCells = editor.locator("th");
@@ -491,6 +462,77 @@ export class WebsiteNewsPage {
 		await block.getByRole("button", { name: "Edit media settings" }).click();
 		await expect(block.getByRole("radio", { name: side, exact: true })).toBeChecked();
 		await block.getByRole("button", { name: "Cancel" }).click();
+	}
+
+	private slashMenu(): Locator {
+		return this.page.getByRole("listbox", { name: "Insert block" });
+	}
+
+	/** Put the cursor on a fresh, empty paragraph at the end of the content block. */
+	async startNewParagraph(): Promise<void> {
+		const editor = this.contentBlockEditor();
+		await editor.press("Control+End");
+		await editor.press("Enter");
+	}
+
+	async clearCurrentParagraph(): Promise<void> {
+		const editor = this.contentBlockEditor();
+		await editor.press("Shift+Home");
+		await editor.press("Backspace");
+	}
+
+	/** Fill the callout node view that a slash command or the toolbar just inserted. */
+	async fillInlineCallout(options: {
+		title: string;
+		body: string;
+		intent?: string;
+	}): Promise<void> {
+		const callout = this.page.getByLabel("Callout block", { exact: true });
+		await expect(callout).toBeVisible();
+		if (options.intent != null) {
+			await callout.getByText(options.intent, { exact: true }).click();
+		}
+		await callout.getByRole("textbox", { name: "Title (optional)" }).fill(options.title);
+		await callout.getByRole("textbox", { name: "Callout content" }).fill(options.body);
+		await callout.getByRole("button", { name: "Apply" }).click();
+	}
+
+	/**
+	 * Type a `/query` at the cursor and take the block the menu offers first, with Enter — the path
+	 * an author actually takes, and the one that has to leave no `/query` text behind.
+	 */
+	async insertViaSlashMenu(options: { query: string; option: string }): Promise<void> {
+		const editor = this.contentBlockEditor();
+		await editor.pressSequentially(`/${options.query}`);
+
+		const menu = this.slashMenu();
+		await expect(menu).toBeVisible();
+
+		/** The query is expected to rank the wanted block first, so Enter is unambiguous. */
+		await expect(menu.getByRole("option").first()).toHaveText(options.option);
+
+		await editor.press("Enter");
+		await expect(menu).toBeHidden();
+	}
+
+	/** Open the menu, walk it with the keyboard, and dismiss it without inserting anything. */
+	async expectSlashMenuKeyboardNavigation(options: {
+		query: string;
+		first: string;
+		second: string;
+	}): Promise<void> {
+		const editor = this.contentBlockEditor();
+		await editor.pressSequentially(`/${options.query}`);
+
+		const menu = this.slashMenu();
+		await expect(menu).toBeVisible();
+		await expect(menu.getByRole("option", { selected: true })).toHaveText(options.first);
+
+		await editor.press("ArrowDown");
+		await expect(menu.getByRole("option", { selected: true })).toHaveText(options.second);
+
+		await editor.press("Escape");
+		await expect(menu).toBeHidden();
 	}
 
 	/** Build one content block exercising the table, link-target and placeholder features. */

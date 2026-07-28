@@ -311,6 +311,52 @@ test.describe("website news admin", () => {
 		expect(aboveBox!.y).toBeLessThan(belowBox!.y);
 	});
 
+	test("should insert a block mid-document from the slash command menu", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Slash Menu ${randomUUID()}`;
+		const above = `Rich text above ${randomUUID()}`;
+		const calloutTitle = `Slash callout ${randomUUID()}`;
+		const calloutBody = `Slash callout body ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item built with the slash command menu");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+
+		await newsPage.addContentBlock(above);
+
+		/** Escape has to close the menu without inserting, and leave the typed text alone. */
+		await newsPage.startNewParagraph();
+		await newsPage.expectSlashMenuKeyboardNavigation({
+			query: "head",
+			first: "Heading 2",
+			second: "Heading 3",
+		});
+		await newsPage.clearCurrentParagraph();
+
+		await newsPage.insertViaSlashMenu({ query: "callout", option: "Callout" });
+		await newsPage.fillInlineCallout({ title: calloutTitle, body: calloutBody });
+
+		await newsPage.submitForm();
+
+		const contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text", "callout"]);
+		expect(contentBlocks[1]).toMatchObject({ calloutTitle });
+		expect(JSON.stringify(contentBlocks[1]!.content)).toContain(calloutBody);
+
+		/**
+		 * The point of the test: the `/callout` the author typed is consumed by the command, not left
+		 * behind as literal text in the paragraph above it.
+		 */
+		const richText = JSON.stringify(contentBlocks[0]!.content);
+		expect(richText).toContain(above);
+		expect(richText).not.toContain("/callout");
+		expect(richText).not.toContain("/head");
+	});
+
 	/**
 	 * Regression: image `layout` was stored on the block and offered in the UI, but neither the
 	 * `assetImage` node nor the merge/split seam carried it. Opening an entity dropped the layout and
