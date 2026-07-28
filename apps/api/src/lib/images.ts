@@ -1,3 +1,4 @@
+import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 import type { JSONContent } from "@tiptap/core";
 
 import { images } from "@/services/images";
@@ -46,6 +47,39 @@ export function toImageAsset(
 		caption: image.caption,
 		license: { name: image.licenseName, url: image.licenseUrl },
 	};
+}
+
+interface FeaturedImageCaption {
+	imageCaption: JSONContent | null;
+	imageCaptionMode: ImageCaptionMode;
+}
+
+/**
+ * Applies an entity's caption choice to its featured image: the caption belongs to the asset and is
+ * shared by every placement, so an entity either inherits it, replaces it for its own page, or
+ * suppresses it. Consumers only ever see the resolved caption, exactly as for image content
+ * blocks.
+ */
+export function withResolvedCaption(image: ImageAsset, entity: FeaturedImageCaption): ImageAsset;
+export function withResolvedCaption(
+	image: ImageAsset | null | undefined,
+	entity: FeaturedImageCaption,
+): ImageAsset | null;
+export function withResolvedCaption(
+	image: ImageAsset | null | undefined,
+	entity: FeaturedImageCaption,
+): ImageAsset | null {
+	if (image == null) {
+		return null;
+	}
+
+	const { caption } = resolveImageCaption({
+		assetCaption: image.caption,
+		blockCaption: entity.imageCaption,
+		captionMode: entity.imageCaptionMode,
+	});
+
+	return { ...image, caption };
 }
 
 export function generateImageUrl(image: ImageAsset, width: number): Image;

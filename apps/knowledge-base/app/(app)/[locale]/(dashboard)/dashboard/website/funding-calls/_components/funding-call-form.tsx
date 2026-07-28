@@ -1,5 +1,6 @@
 "use client";
 
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
@@ -10,6 +11,7 @@ import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
 import { CalendarDate } from "@internationalized/date";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -23,7 +25,10 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { ImageSelectField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
+import {
+	ImageSelectField,
+	type SelectedImage,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface FundingCallFormProps {
@@ -34,7 +39,11 @@ interface FundingCallFormProps {
 			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
-	} & { image: { key: string; label: string; url: string } };
+	} & {
+		image: SelectedImage;
+		imageCaption?: JSONContent | null;
+		imageCaptionMode?: ImageCaptionMode;
+	};
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
 	formAction: ServerAction;
@@ -47,7 +56,7 @@ export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNod
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
+	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
 		fundingCall?.image ?? null,
 	);
 
@@ -118,6 +127,9 @@ export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNod
 					title={t("Image")}
 				>
 					<ImageSelectField
+						captionName="imageCaption"
+						defaultCaption={fundingCall?.imageCaption}
+						defaultCaptionMode={fundingCall?.imageCaptionMode}
 						defaultPrefix="images"
 						initialAssets={initialAssets}
 						isRequired={true}

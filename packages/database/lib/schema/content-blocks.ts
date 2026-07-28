@@ -7,6 +7,7 @@ import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { assets } from "./assets";
 import { fields } from "./entities";
+import { imageCaptionModeColumn, imageCaptionModesEnum } from "./image-captions";
 
 export const contentBlockTypesEnum = [
 	"accordion",
@@ -196,8 +197,6 @@ export const GalleryContentBlockItemSelectSchema = createSelectSchema(galleryCon
 export const GalleryContentBlockItemInsertSchema = createInsertSchema(galleryContentBlockItems);
 export const GalleryContentBlockItemUpdateSchema = createUpdateSchema(galleryContentBlockItems);
 
-export const imageCaptionModesEnum = ["hidden", "inherit", "override"] as const;
-
 /**
  * How an `image` block sits in the content column. A deliberately closed vocabulary — not free-form
  * width/alignment — so authors pick a named layout rather than arbitrary geometry:
@@ -223,10 +222,7 @@ export const imageContentBlocks = p.snakeCase.table(
 			.notNull()
 			.references(() => assets.id),
 		caption: p.jsonb("caption").$type<JSONContent>(),
-		captionMode: p
-			.text("caption_mode", { enum: imageCaptionModesEnum })
-			.notNull()
-			.default("inherit"),
+		captionMode: imageCaptionModeColumn("caption_mode"),
 		layout: p.text("layout", { enum: imageLayoutEnum }).notNull().default("default"),
 		...f.timestamps(),
 	},
@@ -275,10 +271,7 @@ export const mediaTextContentBlocks = p.snakeCase.table(
 		side: p.text("side", { enum: mediaTextSideEnum }).notNull().default("start"),
 		content: p.jsonb("content").$type<JSONContent>().notNull(),
 		caption: p.jsonb("caption").$type<JSONContent>(),
-		captionMode: p
-			.text("caption_mode", { enum: imageCaptionModesEnum })
-			.notNull()
-			.default("inherit"),
+		captionMode: imageCaptionModeColumn("caption_mode"),
 		...f.timestamps(),
 	},
 	(t) => [

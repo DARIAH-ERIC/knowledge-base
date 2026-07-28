@@ -50,6 +50,8 @@ export const updateEventAction = createMutationAction({
 			.update(schema.events)
 			.set({
 				imageId: asset.id,
+				imageCaption: input.imageCaption,
+				imageCaptionMode: input.imageCaptionMode,
 				title: input.title,
 				summary: input.summary,
 				location: input.location,

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -7,6 +8,7 @@ import { Form } from "@dariah-eric/ui/form";
 import { Input } from "@dariah-eric/ui/input";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -17,7 +19,10 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { ImageSelectField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
+import {
+	ImageSelectField,
+	type SelectedImage,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import { RichTextContentBlocksField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-content-blocks-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
@@ -26,7 +31,11 @@ interface PersonFormProps {
 	person?: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
 		biographyContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } | null };
+	} & {
+		image: SelectedImage | null;
+		imageCaption?: JSONContent | null;
+		imageCaptionMode?: ImageCaptionMode;
+	};
 	/** Whether the edited person is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
 	formAction: ServerAction;
@@ -39,9 +48,7 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
-		person?.image ?? null,
-	);
+	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(person?.image ?? null);
 
 	return (
 		<FormLayout>
@@ -82,6 +89,9 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 				<FormSection description={t("Select or upload an image.")} title={t("Image")}>
 					<ImageSelectField
 						allowRemove={true}
+						captionName="imageCaption"
+						defaultCaption={person?.imageCaption}
+						defaultCaptionMode={person?.imageCaptionMode}
 						defaultPrefix="avatars"
 						initialAssets={initialAssets}
 						onChange={setSelectedImage}

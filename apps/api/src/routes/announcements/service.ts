@@ -3,7 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { serializeDateRange } from "@/lib/date-range";
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, withResolvedCaption } from "@/lib/images";
 import type { Database, Transaction } from "@/middlewares/db";
 import {
 	type Announcement,
@@ -157,14 +157,28 @@ export async function getAnnouncements(db: Database | Transaction, params: GetAn
 		idsByType.news.length > 0
 			? db.query.news.findMany({
 					where: { id: { in: idsByType.news } },
-					columns: { id: true, title: true, summary: true },
+					columns: {
+						id: true,
+						title: true,
+						summary: true,
+						imageCaption: true,
+						imageCaptionMode: true,
+					},
 					with: { entityVersion: entityVersionColumns, image: imageColumns },
 				})
 			: [],
 		idsByType.opportunities.length > 0
 			? db.query.opportunities.findMany({
 					where: { id: { in: idsByType.opportunities } },
-					columns: { id: true, title: true, summary: true, duration: true, website: true },
+					columns: {
+						id: true,
+						title: true,
+						summary: true,
+						duration: true,
+						website: true,
+						imageCaption: true,
+						imageCaptionMode: true,
+					},
 					with: {
 						entityVersion: entityVersionColumns,
 						image: imageColumns,
@@ -175,7 +189,14 @@ export async function getAnnouncements(db: Database | Transaction, params: GetAn
 		idsByType.funding_calls.length > 0
 			? db.query.fundingCalls.findMany({
 					where: { id: { in: idsByType.funding_calls } },
-					columns: { id: true, title: true, summary: true, duration: true },
+					columns: {
+						id: true,
+						title: true,
+						summary: true,
+						duration: true,
+						imageCaption: true,
+						imageCaptionMode: true,
+					},
 					with: { entityVersion: entityVersionColumns, image: imageColumns },
 				})
 			: [],
@@ -201,7 +222,7 @@ export async function getAnnouncements(db: Database | Transaction, params: GetAn
 						id: item.id,
 						title: item.title,
 						summary: item.summary,
-						image: generateImageUrl(item.image, imageWidth.preview),
+						image: generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview),
 						entity: item.entityVersion.entity,
 						publishedAt,
 					},
@@ -219,7 +240,7 @@ export async function getAnnouncements(db: Database | Transaction, params: GetAn
 						id: item.id,
 						title: item.title,
 						summary: item.summary,
-						image: generateImageUrl(item.image, imageWidth.preview),
+						image: generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview),
 						entity: item.entityVersion.entity,
 						publishedAt,
 						duration: serializeDateRange(item.duration),
@@ -240,7 +261,7 @@ export async function getAnnouncements(db: Database | Transaction, params: GetAn
 						id: item.id,
 						title: item.title,
 						summary: item.summary,
-						image: generateImageUrl(item.image, imageWidth.preview),
+						image: generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview),
 						entity: item.entityVersion.entity,
 						publishedAt,
 						duration: serializeDateRange(item.duration),

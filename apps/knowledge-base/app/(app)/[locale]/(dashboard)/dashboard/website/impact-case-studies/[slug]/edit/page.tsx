@@ -18,8 +18,12 @@ import {
 	getResourceRelationOptions,
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteEditImpactCaseStudyPageProps extends PageProps<"/[locale]/dashboard/website/impact-case-studies/[slug]/edit"> {}
@@ -83,6 +87,8 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 			where: { id: draftVersionId },
 			columns: {
 				id: true,
+				imageCaption: true,
+				imageCaptionMode: true,
 				publicationDate: true,
 				title: true,
 				summary: true,
@@ -106,10 +112,8 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 					},
 				},
 				image: {
-					columns: {
-						key: true,
-						label: true,
-					},
+					columns: selectedImageColumns,
+					with: selectedImageWith,
 				},
 			},
 		}),
@@ -122,10 +126,7 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 		notFound();
 	}
 
-	const image = images.generateSignedImageUrl({
-		key: impactCaseStudy.image.key,
-		options: imageGridOptions,
-	});
+	const image = toSelectedImage(impactCaseStudy.image, imageGridOptions);
 	const [{ relatedEntityIds, relatedResourceIds }, contributors, contentBlocks] = await Promise.all(
 		[
 			getEntityRelations(documentId),
@@ -147,7 +148,7 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 			hasDraftChanges={hasDraftChanges}
 			impactCaseStudy={{
 				...impactCaseStudy,
-				image: { ...impactCaseStudy.image, url: image.url },
+				image,
 			}}
 			initialAssets={initialAssets}
 			initialPersonItems={initialPersons.items}

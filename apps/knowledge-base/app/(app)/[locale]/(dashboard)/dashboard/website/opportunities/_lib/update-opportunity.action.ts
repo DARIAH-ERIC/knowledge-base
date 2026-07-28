@@ -57,6 +57,8 @@ export const updateOpportunityAction = createMutationAction({
 				website: input.website,
 				duration: input.duration,
 				imageId: asset.id,
+				imageCaption: input.imageCaption,
+				imageCaptionMode: input.imageCaptionMode,
 			})
 			.where(eq(schema.opportunities.id, draftVersionId));
 

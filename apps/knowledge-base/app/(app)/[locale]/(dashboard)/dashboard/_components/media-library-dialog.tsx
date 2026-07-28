@@ -1,5 +1,6 @@
 "use client";
 
+import { isNonEmptyString } from "@acdh-oeaw/lib";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import type { AssetPrefix } from "@dariah-eric/storage/config";
 import { Button } from "@dariah-eric/ui/button";
@@ -44,11 +45,7 @@ import { formatFileSize } from "@/lib/format-file-size";
 interface MediaLibraryDialogProps<T extends AssetPrefix> {
 	acceptedFileTypes?: ReadonlyArray<string>;
 	initialAssets: Array<MediaLibraryAsset>;
-	onSelect: (
-		key: string,
-		url: string,
-		asset?: Pick<MediaLibraryAsset, "alt" | "caption" | "label">,
-	) => void;
+	onSelect: (key: string, url: string, asset?: MediaLibraryAsset) => void;
 	defaultPrefix: T;
 	prefixes: ReadonlyArray<T>;
 	trigger?: ComponentType<{ open: () => void }>;
@@ -263,6 +260,17 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		setUploadError(null);
 	}
 
+	/** Labels a license id from the options this dialog already loaded, for the selection callback. */
+	function resolveLicense(licenseId: string | null | undefined) {
+		if (licenseId == null || licenseId === "" || licenseId === "none") {
+			return null;
+		}
+
+		const license = licenseOptions.find((option) => option.id === licenseId);
+
+		return license != null ? { code: license.code, name: license.name } : null;
+	}
+
 	function handleUploadAction(formData: FormData) {
 		if (pendingFile == null || pendingFile.size > imageSizeLimit) {
 			return;
@@ -272,11 +280,16 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 			const result = await uploadImageAction(createActionStateInitial(), formData);
 
 			if (result.status === "success") {
-				// The upload action returns no label; `uploadAsset` stores `label ?? file.name`, and this
-				// dialog sends no label, so the filename is what was stored.
+				// The upload action returns no label; `uploadAsset` stores `label ?? file.name`, so the
+				// label typed into the form - or the filename - is what was stored.
+				const submittedLabel = formData.get("label");
+				const label = isNonEmptyString(submittedLabel)
+					? submittedLabel.trim() || pendingFile.name
+					: pendingFile.name;
 				onSelect(result.data.key, result.data.url, {
 					...result.data,
-					label: pendingFile.name,
+					label,
+					license: resolveLicense(result.data.licenseId),
 				});
 				resetUploadTab();
 				setIsOpen(false);
@@ -288,7 +301,10 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		if (selectedAsset == null) {
 			return;
 		}
-		onSelect(selectedAsset.key, selectedAsset.url, selectedAsset);
+		onSelect(selectedAsset.key, selectedAsset.url, {
+			...selectedAsset,
+			license: resolveLicense(selectedAsset.licenseId),
+		});
 		resetUploadTab();
 		setIsOpen(false);
 	}

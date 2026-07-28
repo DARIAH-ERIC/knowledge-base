@@ -4,6 +4,7 @@ import * as v from "valibot";
 import { EventDurationInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/event-duration";
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
 import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
+import { FeaturedImageInputSchema } from "@/lib/featured-image-input";
 
 export const UpdateEventActionInputSchema = v.object({
 	slug: EntitySlugInputSchema,
@@ -14,7 +15,7 @@ export const UpdateEventActionInputSchema = v.object({
 		v.transform((s) => s === "true"),
 	),
 	duration: EventDurationInputSchema,
-	imageKey: v.pipe(v.string(), v.nonEmpty()),
+	...FeaturedImageInputSchema,
 	website: v.nullish(v.pipe(v.string(), v.url()), null),
 	contentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),

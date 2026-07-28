@@ -61,7 +61,7 @@ export class WebsiteNewsPage {
 	}
 
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Select image" }).click();
+		await this.page.getByRole("button", { name: /^(Select|Change) image$/ }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
 		const asset = dialog.getByRole("gridcell", { name: assetLabel });
@@ -72,7 +72,7 @@ export class WebsiteNewsPage {
 	}
 
 	async uploadImageFromMediaLibrary(filePath: string, label: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Select image" }).click();
+		await this.page.getByRole("button", { name: /^(Select|Change) image$/ }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
 		await dialog.getByRole("tab", { name: "Upload" }).click();
@@ -640,7 +640,7 @@ export class WebsiteNewsPage {
 		await panel.getByRole("button", { name: "Add image" }).click();
 
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
-		await panel.getByRole("button", { name: "Select image" }).click();
+		await panel.getByRole("button", { name: /^(Select|Change) image$/ }).click();
 		await dialog.waitFor({ state: "visible" });
 		const asset = dialog.getByRole("gridcell", { name: options.assetLabel });
 		await expect(asset).toHaveCount(1);
@@ -674,7 +674,7 @@ export class WebsiteNewsPage {
 		await panel.getByRole("textbox", { name: "Eyebrow" }).fill(options.eyebrow);
 
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
-		await panel.getByRole("button", { name: "Select image" }).click();
+		await panel.getByRole("button", { name: /^(Select|Change) image$/ }).click();
 		await dialog.waitFor({ state: "visible" });
 		const asset = dialog.getByRole("gridcell", { name: options.assetLabel });
 		await expect(asset).toHaveCount(1);

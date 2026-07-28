@@ -1,3 +1,4 @@
+import type { JSONContent } from "@tiptap/core";
 import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
@@ -6,6 +7,7 @@ import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { assets } from "./assets";
 import { entities, entityVersions } from "./entities";
+import { imageCaptionModeColumn, imageCaptionModesEnum } from "./image-captions";
 import { organisationalUnitTypes } from "./organisational-units";
 
 export const personRoleTypesEnum = [
@@ -21,18 +23,34 @@ export const personRoleTypesEnum = [
 	"national_representative_deputy",
 ] as const;
 
-export const persons = p.snakeCase.table("persons", {
-	id: p
-		.uuid("id")
-		.primaryKey()
-		.references(() => entityVersions.id),
-	name: p.text("name").notNull(),
-	sortName: p.text("sort_name").notNull(),
-	email: p.text("email"),
-	orcid: p.text("orcid"),
-	imageId: p.uuid("image_id").references(() => assets.id),
-	...f.timestamps(),
-});
+export const persons = p.snakeCase.table(
+	"persons",
+	{
+		id: p
+			.uuid("id")
+			.primaryKey()
+			.references(() => entityVersions.id),
+		name: p.text("name").notNull(),
+		sortName: p.text("sort_name").notNull(),
+		email: p.text("email"),
+		orcid: p.text("orcid"),
+		imageId: p.uuid("image_id").references(() => assets.id),
+		/**
+		 * Caption for the portrait at this placement — typically the photo credit. `inherit` shows the
+		 * asset's own caption, `override` shows {@link imageCaption}, `hidden` shows none, exactly as
+		 * for image content blocks (see `imageCaptionModesEnum`).
+		 */
+		imageCaption: p.jsonb("image_caption").$type<JSONContent>(),
+		imageCaptionMode: imageCaptionModeColumn("image_caption_mode"),
+		...f.timestamps(),
+	},
+	(t) => [
+		p.check(
+			"persons_image_caption_mode_enum_check",
+			inArray(t.imageCaptionMode, imageCaptionModesEnum),
+		),
+	],
+);
 
 export type Person = typeof persons.$inferSelect;
 export type PersonInput = typeof persons.$inferInsert;

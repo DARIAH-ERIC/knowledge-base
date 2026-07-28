@@ -76,7 +76,7 @@ export class WebsiteSpotlightArticlesPage {
 	}
 
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Select image" }).click();
+		await this.page.getByRole("button", { name: /^(Select|Change) image$/ }).click();
 		await this.page.waitForSelector('[role="dialog"]');
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		const asset = dialog.getByRole("gridcell", { name: assetLabel });

@@ -1,5 +1,16 @@
 import type { JSONContent } from "@tiptap/core";
 
+/** What `uploadImageAction` reports back about the asset it just created. */
+export interface UploadedAsset {
+	id: string;
+	key: string;
+	url: string;
+	alt: string | null;
+	caption: JSONContent | null;
+	licenseId: string | null;
+	mimeType: string;
+}
+
 export interface MediaLibraryAsset {
 	key: string;
 	label: string;
@@ -13,4 +24,9 @@ export interface MediaLibraryAsset {
 	caption?: JSONContent | null;
 	licenseId?: string | null;
 	size?: number | null;
+	/**
+	 * Resolved from {@link MediaLibraryAsset.licenseId} when the media library hands an asset to a
+	 * caller, so consumers can label the license without loading the license list themselves.
+	 */
+	license?: { code: string; name: string } | null;
 }

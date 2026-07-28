@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl, toImageAsset } from "@/lib/images";
+import { generateImageUrl, toImageAsset, withResolvedCaption } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
@@ -34,6 +34,8 @@ export async function getImpactCaseStudies(
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				publicationDate: true,
 				title: true,
@@ -83,7 +85,7 @@ export async function getImpactCaseStudies(
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = generateImageUrl(item.image, imageWidth.preview);
+		const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview);
 		const { publicationDate, ...data } = flattenEntityVersion(item);
 
 		return { ...data, image, publishedAt: publicationDate.toISOString() };
@@ -111,6 +113,8 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 			imageKey: schema.assets.key,
 			imageAlt: schema.assets.alt,
 			imageCaption: schema.assets.caption,
+			personImageCaption: schema.persons.imageCaption,
+			personImageCaptionMode: schema.persons.imageCaptionMode,
 			licenseName: schema.licenses.name,
 			licenseUrl: schema.licenses.url,
 			role: schema.impactCaseStudiesToPersons.role,
@@ -136,22 +140,36 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 		rows.map((row) => row.id),
 	);
 
-	return rows.map(({ imageKey, imageAlt, imageCaption, licenseName, licenseUrl, ...row }) => {
-		return {
-			...row,
-			positions: positions.get(row.id) ?? null,
-			image: generateImageUrl(
-				toImageAsset({
-					key: imageKey,
-					alt: imageAlt,
-					caption: imageCaption,
-					licenseName,
-					licenseUrl,
-				}),
-				imageWidth.avatar,
-			),
-		};
-	});
+	return rows.map(
+		({
+			imageKey,
+			imageAlt,
+			imageCaption,
+			personImageCaption,
+			personImageCaptionMode,
+			licenseName,
+			licenseUrl,
+			...row
+		}) => {
+			return {
+				...row,
+				positions: positions.get(row.id) ?? null,
+				image: generateImageUrl(
+					withResolvedCaption(
+						toImageAsset({
+							key: imageKey,
+							alt: imageAlt,
+							caption: imageCaption,
+							licenseName,
+							licenseUrl,
+						}),
+						{ imageCaption: personImageCaption, imageCaptionMode: personImageCaptionMode },
+					),
+					imageWidth.avatar,
+				),
+			};
+		},
+	);
 }
 
 //
@@ -173,6 +191,8 @@ export async function getImpactCaseStudyById(
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				publicationDate: true,
 				title: true,
@@ -217,7 +237,7 @@ export async function getImpactCaseStudyById(
 		getRelatedResources(db, id),
 	]);
 
-	const image = generateImageUrl(item.image, imageWidth.featured);
+	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 	const { publicationDate, ...data } = flattenEntityVersion(item);
 
 	return {
@@ -256,6 +276,8 @@ export async function getImpactCaseStudySlugs(
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				publicationDate: true,
 			},
@@ -333,6 +355,8 @@ export async function getImpactCaseStudyBySlug(
 			},
 		},
 		columns: {
+			imageCaption: true,
+			imageCaptionMode: true,
 			id: true,
 			publicationDate: true,
 			title: true,
@@ -371,7 +395,7 @@ export async function getImpactCaseStudyBySlug(
 
 	const contributors = await getContributors(db, item.id);
 
-	const image = generateImageUrl(item.image, imageWidth.featured);
+	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 	const { publicationDate, ...data } = flattenEntityVersion(item);
 
 	const [fields, relatedEntities, relatedResources] = await Promise.all([

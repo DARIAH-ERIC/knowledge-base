@@ -9,8 +9,12 @@ import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { fundingCallsLifecycleAdapter } from "@/lib/data/funding-calls.lifecycle-adapter";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteEditFundingCallPageProps extends PageProps<"/[locale]/dashboard/website/funding-calls/[slug]/edit"> {}
@@ -62,6 +66,8 @@ export default async function DashboardWebsiteEditFundingCallPage(
 		where: { id: draftVersionId },
 		columns: {
 			id: true,
+			imageCaption: true,
+			imageCaptionMode: true,
 			duration: true,
 			title: true,
 			summary: true,
@@ -85,10 +91,8 @@ export default async function DashboardWebsiteEditFundingCallPage(
 				},
 			},
 			image: {
-				columns: {
-					key: true,
-					label: true,
-				},
+				columns: selectedImageColumns,
+				with: selectedImageWith,
 			},
 		},
 	});
@@ -97,10 +101,7 @@ export default async function DashboardWebsiteEditFundingCallPage(
 		notFound();
 	}
 
-	const image = images.generateSignedImageUrl({
-		key: fundingCall.image.key,
-		options: imageGridOptions,
-	});
+	const image = toSelectedImage(fundingCall.image, imageGridOptions);
 
 	const [contentBlocks, { items: initialAssets }] = await Promise.all([
 		getEntityContentBlocks(fundingCall.id, "content"),
@@ -111,7 +112,7 @@ export default async function DashboardWebsiteEditFundingCallPage(
 		<FundingCallEditForm
 			contentBlocks={contentBlocks}
 			documentId={documentId}
-			fundingCall={{ ...fundingCall, image: { ...fundingCall.image, url: image.url } }}
+			fundingCall={{ ...fundingCall, image }}
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			isPublished={publishedId != null}

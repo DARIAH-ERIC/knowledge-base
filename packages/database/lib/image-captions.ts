@@ -1,6 +1,6 @@
 import type { JSONContent } from "@tiptap/core";
 
-import type { imageCaptionModesEnum } from "./schema/content-blocks";
+import type { imageCaptionModesEnum } from "./schema/image-captions";
 
 export type ImageCaptionMode = (typeof imageCaptionModesEnum)[number];
 export type ImageCaptionSource = "asset" | "block" | null;

@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, withResolvedCaption } from "@/lib/images";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
@@ -30,6 +30,8 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				publicationDate: true,
 				title: true,
@@ -79,7 +81,7 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = generateImageUrl(item.image, imageWidth.preview);
+		const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview);
 		const { publicationDate, ...data } = flattenEntityVersion(item);
 
 		return { ...data, image, publishedAt: publicationDate.toISOString() };
@@ -108,6 +110,8 @@ export async function getNewsItemById(db: Database | Transaction, params: GetNew
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				publicationDate: true,
 				title: true,
@@ -151,7 +155,7 @@ export async function getNewsItemById(db: Database | Transaction, params: GetNew
 		getRelatedResources(db, id),
 	]);
 
-	const image = generateImageUrl(item.image, imageWidth.featured);
+	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 	const { publicationDate, ...data } = flattenEntityVersion(item);
 
 	return {
@@ -186,6 +190,8 @@ export async function getNewsItemSlugs(db: Database | Transaction, params: GetNe
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				publicationDate: true,
 			},
@@ -263,6 +269,8 @@ export async function getNewsItemBySlug(
 			},
 		},
 		columns: {
+			imageCaption: true,
+			imageCaptionMode: true,
 			id: true,
 			publicationDate: true,
 			title: true,
@@ -299,7 +307,7 @@ export async function getNewsItemBySlug(
 		return null;
 	}
 
-	const image = generateImageUrl(item.image, imageWidth.featured);
+	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 	const { publicationDate, ...data } = flattenEntityVersion(item);
 
 	const [fields, relatedEntities, relatedResources] = await Promise.all([

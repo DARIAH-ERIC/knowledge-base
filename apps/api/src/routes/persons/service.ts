@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, withResolvedCaption } from "@/lib/images";
 import { getPersonArticles, getPersonPositions } from "@/lib/persons";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
@@ -30,6 +30,8 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				name: true,
 				sortName: true,
@@ -84,7 +86,7 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 	);
 
 	const data = items.map((item) => {
-		const image = generateImageUrl(item.image, imageWidth.avatar);
+		const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.avatar);
 
 		return {
 			...flattenEntityVersion(item),
@@ -116,6 +118,8 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				name: true,
 				sortName: true,
@@ -158,7 +162,7 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 
 	const positions = await getPersonPositions(db, [item.id]);
 
-	const image = generateImageUrl(item.image, imageWidth.featured);
+	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 
 	return {
 		...flattenEntityVersion(item),
@@ -249,6 +253,8 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 			},
 		},
 		columns: {
+			imageCaption: true,
+			imageCaptionMode: true,
 			id: true,
 			name: true,
 			sortName: true,
@@ -288,7 +294,7 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 
 	const positions = await getPersonPositions(db, [item.id]);
 
-	const image = generateImageUrl(item.image, imageWidth.featured);
+	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 
 	const [fields, articles] = await Promise.all([
 		getContentBlocks(db, item.id),

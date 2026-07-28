@@ -11,8 +11,12 @@ import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { getContributionRoleOptions, getPersonContributions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorEditPersonPageProps extends PageProps<"/[locale]/dashboard/administrator/persons/[slug]/edit"> {}
@@ -66,6 +70,8 @@ export default async function DashboardAdministratorEditPersonPage(
 				name: true,
 				orcid: true,
 				sortName: true,
+				imageCaption: true,
+				imageCaptionMode: true,
 			},
 			with: {
 				entityVersion: {
@@ -86,10 +92,8 @@ export default async function DashboardAdministratorEditPersonPage(
 					},
 				},
 				image: {
-					columns: {
-						key: true,
-						label: true,
-					},
+					columns: selectedImageColumns,
+					with: selectedImageWith,
 				},
 			},
 		}),
@@ -105,16 +109,7 @@ export default async function DashboardAdministratorEditPersonPage(
 		getEntityContentBlocks(person.id, "biography"),
 	]);
 
-	const image =
-		person.image != null
-			? {
-					...person.image,
-					url: images.generateSignedImageUrl({
-						key: person.image.key,
-						options: imageGridOptions,
-					}).url,
-				}
-			: null;
+	const image = person.image != null ? toSelectedImage(person.image, imageGridOptions) : null;
 
 	return (
 		<PersonEditForm

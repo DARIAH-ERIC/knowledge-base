@@ -44,6 +44,8 @@ export const createSpotlightArticleAction = createMutationAction({
 		await tx.insert(schema.spotlightArticles).values({
 			id: versionId,
 			imageId: asset.id,
+			imageCaption: input.imageCaption,
+			imageCaptionMode: input.imageCaptionMode,
 			publicationDate: input.publicationDate,
 			title: input.title,
 			summary: input.summary,

@@ -55,6 +55,8 @@ export const updateFundingCallAction = createMutationAction({
 				summary: input.summary,
 				duration: input.duration,
 				imageId: asset.id,
+				imageCaption: input.imageCaption,
+				imageCaptionMode: input.imageCaptionMode,
 			})
 			.where(eq(schema.fundingCalls.id, draftVersionId));
 

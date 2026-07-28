@@ -10,7 +10,11 @@ import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { opportunitiesLifecycleAdapter } from "@/lib/data/opportunities.lifecycle-adapter";
-import { images } from "@/lib/images";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteEditOpportunityPageProps extends PageProps<"/[locale]/dashboard/website/opportunities/[slug]/edit"> {}
@@ -62,6 +66,8 @@ export default async function DashboardWebsiteEditOpportunityPage(
 		where: { id: draftVersionId },
 		columns: {
 			id: true,
+			imageCaption: true,
+			imageCaptionMode: true,
 			duration: true,
 			sourceId: true,
 			title: true,
@@ -93,10 +99,8 @@ export default async function DashboardWebsiteEditOpportunityPage(
 				},
 			},
 			image: {
-				columns: {
-					key: true,
-					label: true,
-				},
+				columns: selectedImageColumns,
+				with: selectedImageWith,
 			},
 		},
 	});
@@ -105,10 +109,7 @@ export default async function DashboardWebsiteEditOpportunityPage(
 		notFound();
 	}
 
-	const image = images.generateSignedImageUrl({
-		key: opportunity.image.key,
-		options: imageGridOptions,
-	});
+	const image = toSelectedImage(opportunity.image, imageGridOptions);
 
 	const [contentBlocks, sources, { items: initialAssets }] = await Promise.all([
 		getEntityContentBlocks(opportunity.id, "content"),
@@ -126,7 +127,7 @@ export default async function DashboardWebsiteEditOpportunityPage(
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			isPublished={publishedId != null}
-			opportunity={{ ...opportunity, image: { ...opportunity.image, url: image.url } }}
+			opportunity={{ ...opportunity, image }}
 			sources={sources}
 		/>
 	);

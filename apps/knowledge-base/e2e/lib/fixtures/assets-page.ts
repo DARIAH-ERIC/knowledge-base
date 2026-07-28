@@ -41,7 +41,7 @@ export class AssetsPage {
 
 	async openMediaLibraryDialog(): Promise<Locator> {
 		await this.page.goto(MEDIA_LIBRARY_HOST_PATH);
-		await this.page.getByRole("button", { name: "Select image" }).click();
+		await this.page.getByRole("button", { name: /^(Select|Change) image$/ }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
 		return dialog;
