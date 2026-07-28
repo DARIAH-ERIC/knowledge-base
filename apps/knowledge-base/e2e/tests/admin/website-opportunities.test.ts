@@ -17,6 +17,8 @@ test.describe("website opportunities admin", () => {
 
 	test.afterAll(async ({ db }, testInfo) => {
 		await db.cleanupWorkerOpportunitiesLifecycleItems(testInfo.workerIndex);
+		/** The edit test uploads a replacement image, which outlives the opportunity referencing it. */
+		await db.cleanupWorkerAssets(testInfo.workerIndex);
 	});
 
 	test("should show an inline validation error when a required image is missing", async ({

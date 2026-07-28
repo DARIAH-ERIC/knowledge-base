@@ -12,6 +12,8 @@ test.describe("website funding calls admin", () => {
 
 	test.afterAll(async ({ db }, testInfo) => {
 		await db.cleanupWorkerFundingCallsLifecycleItems(testInfo.workerIndex);
+		/** The edit test uploads a replacement image, which outlives the funding call referencing it. */
+		await db.cleanupWorkerAssets(testInfo.workerIndex);
 	});
 
 	test("should show an inline validation error when a required image is missing", async ({
