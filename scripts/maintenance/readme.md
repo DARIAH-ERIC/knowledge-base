@@ -158,6 +158,26 @@ Requires `DATABASE_HOST`, `DATABASE_NAME`, `DATABASE_PASSWORD`, `DATABASE_PORT`,
 `S3_ACCESS_KEY`, `S3_BUCKET_NAME`, `S3_HOST`, `S3_PORT`, `S3_PROTOCOL`, `S3_SECRET_KEY` in the
 environment.
 
+### `data:deduplicate:assets`
+
+Finds binary-identical image assets in the database/object store and rewrites every reference to one
+canonical asset. Writes a TSV report to `.cache/duplicate-assets.tsv`.
+
+```bash
+pnpm --filter @dariah-eric/maintenance run data:deduplicate:assets                         # dry run (report only)
+pnpm --filter @dariah-eric/maintenance run data:deduplicate:assets -- --label hiring-banner # narrow the scan
+pnpm --filter @dariah-eric/maintenance run data:deduplicate:assets -- --canonical-key images/...
+pnpm --filter @dariah-eric/maintenance run data:deduplicate:assets -- --label hiring-banner --apply
+```
+
+Duplicates are matched by mime type, file size, dimensions and SHA-256 hash of the stored object.
+The oldest asset is canonical by default; pass `--canonical-key` to force one after reviewing the
+report. The script rewrites both foreign-key references to `assets.id` and exact asset-key strings in
+JSON/rich-text fields. It does not delete stale rows or objects — run
+`data:clean:unused-assets` afterwards to review and remove the now-unused duplicates.
+
+Requires the same `DATABASE_*` and `S3_*` environment variables as `data:clean:unused-assets`.
+
 ### `data:clean:empty-content-blocks`
 
 Removes semantically empty `rich_text` content blocks (empty paragraphs, stray hard breaks,
