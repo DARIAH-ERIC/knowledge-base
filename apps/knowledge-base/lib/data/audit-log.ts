@@ -100,7 +100,10 @@ export async function resolveEntityDocumentLabel(
 }
 
 /** Resolves country/working-group report ids to "<org unit name> <campaign year>". */
-async function resolveReportLabels(reportIds: Array<string>): Promise<Map<string, string>> {
+async function resolveReportLabels(
+	client: AuditLogClient,
+	reportIds: Array<string>,
+): Promise<Map<string, string>> {
 	if (reportIds.length === 0) {
 		return new Map();
 	}
@@ -109,7 +112,7 @@ async function resolveReportLabels(reportIds: Array<string>): Promise<Map<string
 	const labels = new Map<string, string>();
 
 	const [countryReports, workingGroupReports] = await Promise.all([
-		db
+		client
 			.select({
 				id: schema.countryReports.id,
 				name: schema.organisationalUnits.name,
@@ -126,7 +129,7 @@ async function resolveReportLabels(reportIds: Array<string>): Promise<Map<string
 			)
 			.innerJoin(schema.organisationalUnits, eq(schema.organisationalUnits.id, versionId))
 			.where(inArray(schema.countryReports.id, reportIds)),
-		db
+		client
 			.select({
 				id: schema.workingGroupReports.id,
 				name: schema.organisationalUnits.name,
@@ -152,12 +155,15 @@ async function resolveReportLabels(reportIds: Array<string>): Promise<Map<string
 }
 
 /** Resolves reporting-campaign ids to "Reporting campaign <year>". */
-async function resolveCampaignLabels(campaignIds: Array<string>): Promise<Map<string, string>> {
+async function resolveCampaignLabels(
+	client: AuditLogClient,
+	campaignIds: Array<string>,
+): Promise<Map<string, string>> {
 	if (campaignIds.length === 0) {
 		return new Map();
 	}
 
-	const rows = await db
+	const rows = await client
 		.select({ id: schema.reportingCampaigns.id, year: schema.reportingCampaigns.year })
 		.from(schema.reportingCampaigns)
 		.where(inArray(schema.reportingCampaigns.id, campaignIds));
@@ -170,7 +176,10 @@ async function resolveCampaignLabels(campaignIds: Array<string>): Promise<Map<st
  * unit>". Both endpoints are `entities.id` document ids, so each is resolved through its
  * draft-or-published version, matching the admin-side reads.
  */
-async function resolveContributionLabels(ids: Array<string>): Promise<Map<string, string>> {
+async function resolveContributionLabels(
+	client: AuditLogClient,
+	ids: Array<string>,
+): Promise<Map<string, string>> {
 	if (ids.length === 0) {
 		return new Map();
 	}
@@ -180,7 +189,7 @@ async function resolveContributionLabels(ids: Array<string>): Promise<Map<string
 	const personVersionId = sql`COALESCE(${personLifecycle.draftId}, ${personLifecycle.publishedId})`;
 	const unitVersionId = sql`COALESCE(${unitLifecycle.draftId}, ${unitLifecycle.publishedId})`;
 
-	const rows = await db
+	const rows = await client
 		.select({
 			id: schema.personsToOrganisationalUnits.id,
 			personName: schema.persons.name,
@@ -222,7 +231,10 @@ async function resolveContributionLabels(ids: Array<string>): Promise<Map<string
  * (<status>)". Both endpoints are `entities.id` document ids, resolved through their
  * draft-or-published versions.
  */
-async function resolveUnitRelationLabels(ids: Array<string>): Promise<Map<string, string>> {
+async function resolveUnitRelationLabels(
+	client: AuditLogClient,
+	ids: Array<string>,
+): Promise<Map<string, string>> {
 	if (ids.length === 0) {
 		return new Map();
 	}
@@ -233,7 +245,7 @@ async function resolveUnitRelationLabels(ids: Array<string>): Promise<Map<string
 	const unitVersionId = sql`COALESCE(${unitLifecycle.draftId}, ${unitLifecycle.publishedId})`;
 	const relatedVersionId = sql`COALESCE(${relatedLifecycle.draftId}, ${relatedLifecycle.publishedId})`;
 
-	const rows = await db
+	const rows = await client
 		.select({
 			id: schema.organisationalUnitsRelations.id,
 			unitName: schema.organisationalUnits.name,
@@ -267,12 +279,15 @@ async function resolveUnitRelationLabels(ids: Array<string>): Promise<Map<string
 	return labels;
 }
 
-async function resolveActorLabels(actorIds: Array<string>): Promise<Map<string, string>> {
+async function resolveActorLabels(
+	client: AuditLogClient,
+	actorIds: Array<string>,
+): Promise<Map<string, string>> {
 	if (actorIds.length === 0) {
 		return new Map();
 	}
 
-	const rows = await db
+	const rows = await client
 		.select({ id: schema.users.id, name: schema.users.name, email: schema.users.email })
 		.from(schema.users)
 		.where(inArray(schema.users.id, actorIds));
@@ -284,18 +299,61 @@ function humanizeSubjectType(subjectType: string): string {
 	return subjectType.replaceAll("_", " ");
 }
 
+/** Resolves asset ids to their media-library label. */
+async function resolveAssetLabels(
+	client: AuditLogClient,
+	assetIds: Array<string>,
+): Promise<Map<string, string>> {
+	if (assetIds.length === 0) {
+		return new Map();
+	}
+
+	const rows = await client
+		.select({ id: schema.assets.id, label: schema.assets.label })
+		.from(schema.assets)
+		.where(inArray(schema.assets.id, assetIds));
+
+	return new Map(rows.map((row) => [row.id, row.label]));
+}
+
+/** Resolves a single asset id to its media-library label. */
+export async function resolveAssetLabel(
+	client: AuditLogClient,
+	assetId: string,
+): Promise<string | null> {
+	return (await resolveAssetLabels(client, [assetId])).get(assetId) ?? null;
+}
+
 /** Resolves a `services.id` / `social_media.id` (etc.) to its `name`. */
+async function resolveNamedRecordLabels(
+	client: AuditLogClient,
+	table: typeof schema.services | typeof schema.socialMedia,
+	ids: Array<string>,
+): Promise<Map<string, string>> {
+	if (ids.length === 0) {
+		return new Map();
+	}
+
+	const rows = await client
+		.select({ id: table.id, name: table.name })
+		.from(table)
+		.where(inArray(table.id, ids));
+
+	return new Map(rows.map((row) => [row.id, row.name]));
+}
+
+/** Resolves a single `services.id` / `social_media.id` (etc.) to its `name`. */
 async function resolveNamedRecordLabel(
+	client: AuditLogClient,
 	table: typeof schema.services | typeof schema.socialMedia,
 	id: string,
 ): Promise<string | null> {
-	const [row] = await db.select({ name: table.name }).from(table).where(eq(table.id, id)).limit(1);
-	return row?.name ?? null;
+	return (await resolveNamedRecordLabels(client, table, [id])).get(id) ?? null;
 }
 
 /** Resolves a navigation id, trying menu-item labels first, then top-level menu names. */
-async function resolveNavigationLabel(id: string): Promise<string | null> {
-	const [item] = await db
+async function resolveNavigationLabel(client: AuditLogClient, id: string): Promise<string | null> {
+	const [item] = await client
 		.select({ label: schema.navigationItems.label })
 		.from(schema.navigationItems)
 		.where(eq(schema.navigationItems.id, id))
@@ -304,7 +362,7 @@ async function resolveNavigationLabel(id: string): Promise<string | null> {
 		return item.label;
 	}
 
-	const [menu] = await db
+	const [menu] = await client
 		.select({ name: schema.navigationMenus.name })
 		.from(schema.navigationMenus)
 		.where(eq(schema.navigationMenus.id, id))
@@ -313,13 +371,16 @@ async function resolveNavigationLabel(id: string): Promise<string | null> {
 }
 
 /** Resolves a `projects_to_organisational_units.id` to "<project> — <organisation>". */
-async function resolveProjectPartnerLabel(id: string): Promise<string | null> {
+async function resolveProjectPartnerLabel(
+	client: AuditLogClient,
+	id: string,
+): Promise<string | null> {
 	const projectLifecycle = alias(schema.documentLifecycle, "project_partner_project_lifecycle");
 	const unitLifecycle = alias(schema.documentLifecycle, "project_partner_unit_lifecycle");
 	const projectVersionId = sql`COALESCE(${projectLifecycle.draftId}, ${projectLifecycle.publishedId})`;
 	const unitVersionId = sql`COALESCE(${unitLifecycle.draftId}, ${unitLifecycle.publishedId})`;
 
-	const [row] = await db
+	const [row] = await client
 		.select({ projectName: schema.projects.name, unitName: schema.organisationalUnits.name })
 		.from(schema.projectsToOrganisationalUnits)
 		.leftJoin(
@@ -382,43 +443,47 @@ const entityDocumentSubjectTypes = new Set([
 export async function resolveAuditSubjectLabel(
 	subjectType: string,
 	subjectId: string,
+	client: AuditLogClient = db,
 ): Promise<string | null> {
 	if (!isUuid(subjectId)) {
 		return null;
 	}
 
 	if (entityDocumentSubjectTypes.has(subjectType)) {
-		return resolveEntityDocumentLabel(db, subjectId);
+		return resolveEntityDocumentLabel(client, subjectId);
 	}
 
 	switch (subjectType) {
+		case "assets": {
+			return resolveAssetLabel(client, subjectId);
+		}
 		case "country_reports":
 		case "working_group_reports": {
-			return (await resolveReportLabels([subjectId])).get(subjectId) ?? null;
+			return (await resolveReportLabels(client, [subjectId])).get(subjectId) ?? null;
 		}
 		case "reporting_campaigns": {
-			return (await resolveCampaignLabels([subjectId])).get(subjectId) ?? null;
+			return (await resolveCampaignLabels(client, [subjectId])).get(subjectId) ?? null;
 		}
 		case "contributions": {
-			return (await resolveContributionLabels([subjectId])).get(subjectId) ?? null;
+			return (await resolveContributionLabels(client, [subjectId])).get(subjectId) ?? null;
 		}
 		case "unit_relations": {
-			return (await resolveUnitRelationLabels([subjectId])).get(subjectId) ?? null;
+			return (await resolveUnitRelationLabels(client, [subjectId])).get(subjectId) ?? null;
 		}
 		case "users": {
-			return (await resolveActorLabels([subjectId])).get(subjectId) ?? null;
+			return (await resolveActorLabels(client, [subjectId])).get(subjectId) ?? null;
 		}
 		case "project_partners": {
-			return resolveProjectPartnerLabel(subjectId);
+			return resolveProjectPartnerLabel(client, subjectId);
 		}
 		case "social_media": {
-			return resolveNamedRecordLabel(schema.socialMedia, subjectId);
+			return resolveNamedRecordLabel(client, schema.socialMedia, subjectId);
 		}
 		case "internal_services": {
-			return resolveNamedRecordLabel(schema.services, subjectId);
+			return resolveNamedRecordLabel(client, schema.services, subjectId);
 		}
 		case "navigation": {
-			return resolveNavigationLabel(subjectId);
+			return resolveNavigationLabel(client, subjectId);
 		}
 		default: {
 			return null;
@@ -469,6 +534,9 @@ export async function getAuditLogEntries(
 	// the ones it owns.
 	const [
 		entityTitles,
+		assetLabels,
+		socialMediaLabels,
+		internalServiceLabels,
 		reportLabels,
 		campaignLabels,
 		contributionLabels,
@@ -476,11 +544,14 @@ export async function getAuditLogEntries(
 		actorLabels,
 	] = await Promise.all([
 		resolveEntityDocumentTitles(db, uuidSubjectIds),
-		resolveReportLabels(uuidSubjectIds),
-		resolveCampaignLabels(uuidSubjectIds),
-		resolveContributionLabels(uuidSubjectIds),
-		resolveUnitRelationLabels(uuidSubjectIds),
-		resolveActorLabels(actorIds),
+		resolveAssetLabels(db, uuidSubjectIds),
+		resolveNamedRecordLabels(db, schema.socialMedia, uuidSubjectIds),
+		resolveNamedRecordLabels(db, schema.services, uuidSubjectIds),
+		resolveReportLabels(db, uuidSubjectIds),
+		resolveCampaignLabels(db, uuidSubjectIds),
+		resolveContributionLabels(db, uuidSubjectIds),
+		resolveUnitRelationLabels(db, uuidSubjectIds),
+		resolveActorLabels(db, actorIds),
 	]);
 
 	const data: Array<AuditLogEntry> = items.map((item) => {
@@ -490,6 +561,9 @@ export async function getAuditLogEntries(
 		const subjectLabel =
 			item.subjectLabel ??
 			entityTitles.get(item.subjectId) ??
+			assetLabels.get(item.subjectId) ??
+			socialMediaLabels.get(item.subjectId) ??
+			internalServiceLabels.get(item.subjectId) ??
 			reportLabels.get(item.subjectId) ??
 			campaignLabels.get(item.subjectId) ??
 			contributionLabels.get(item.subjectId) ??

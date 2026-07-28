@@ -64,8 +64,9 @@ export const createSocialMediaAction = createServerAction<CreatedSocialMedia>(
 			await recordAuditEvent(tx, {
 				actorUserId: user?.id,
 				action: "create",
-				subjectType: "projects",
+				subjectType: "social_media",
 				subjectId: row.id,
+				subjectLabel: name,
 				summary: getAuditSummaryFromFormData(formData),
 			});
 
