@@ -230,6 +230,14 @@ function BlockNodeSurface({
 	);
 }
 
+/**
+ * Footer of a block edit panel. Its buttons act on the block as a whole rather than on the setting
+ * directly above them, so they sit below a rule which spans the full panel — the panel's own `p-4`
+ * is reversed out and then reapplied.
+ */
+const blockPanelFooterClassName =
+	"-ms-4 -me-4 mbs-1 flex items-center gap-x-2 border-bs border-border px-4 pbs-3";
+
 function getEmbedUrl(url: string): string {
 	const watchMatch = /youtube\.com\/watch\?.*?v=([\w-]+)/.exec(url);
 	if (watchMatch != null) {
@@ -304,7 +312,7 @@ function EmbedNodeView({
 		>
 			<div className={twMerge("transition-opacity", selected && "bg-primary-subtle/10")}>
 				{isEditing ? (
-					<div className="flex flex-col gap-y-3 p-4 select-none [&_[contenteditable]]:select-text [&_input]:select-text">
+					<div className="flex flex-col gap-y-3 p-4 select-none **:[[contenteditable]]:select-text [&_input]:select-text">
 						<div className="flex flex-col gap-y-1">
 							<label className="text-sm/6 font-medium" htmlFor={urlInputId}>
 								{"URL"}
@@ -341,7 +349,7 @@ function EmbedNodeView({
 								onChange={setCaptionJson}
 							/>
 						</div>
-						<div className="flex items-center gap-x-2">
+						<div className={blockPanelFooterClassName}>
 							<Button
 								intent="primary"
 								isDisabled={!urlInput.trim() || !titleInput.trim()}
@@ -544,7 +552,7 @@ function CalloutNodeView({
 			}}
 		>
 			{isEditing ? (
-				<div className="flex flex-col gap-y-3 border border-input bg-bg p-4 select-none [&_[contenteditable]]:select-text [&_input]:select-text">
+				<div className="flex flex-col gap-y-3 border border-input bg-bg p-4 select-none **:[[contenteditable]]:select-text [&_input]:select-text">
 					<div className="flex flex-col gap-y-1">
 						<span className="text-sm/6 font-medium">{"Style"}</span>
 						<ToggleGroup
@@ -586,7 +594,7 @@ function CalloutNodeView({
 							onChange={setContentInput}
 						/>
 					</div>
-					<div className="flex items-center gap-x-2">
+					<div className={blockPanelFooterClassName}>
 						<Button
 							intent="primary"
 							onPress={() => {
@@ -1138,7 +1146,7 @@ function AssetImageNodeView({
 				   node's DOM — so every label rendered inside it comes up highlighted as if the user
 				   had dragged across it. The panel is a form, not document text, so nothing in its
 				   chrome is selectable; the fields inside it opt back in. */
-				<div className="flex select-none flex-col gap-y-3 p-4 [&_[contenteditable]]:select-text [&_input]:select-text">
+				<div className="flex select-none flex-col gap-y-3 p-4 **:[[contenteditable]]:select-text [&_input]:select-text">
 					{renderImagePicker != null ? (
 						<div className="flex flex-col gap-y-2">
 							<div className="text-sm/6 font-medium">{"Pick image"}</div>
@@ -1241,9 +1249,7 @@ function AssetImageNodeView({
 							/>
 						) : null}
 					</div>
-					{/* These act on the block as a whole, not on the caption settings directly above
-					    them, so they sit below a rule with the panel's own padding reversed out. */}
-					<div className="-ms-4 -me-4 mbs-1 flex items-center gap-x-2 border-bs border-border pbs-3 pi-4">
+					<div className={blockPanelFooterClassName}>
 						<Button
 							intent="primary"
 							isDisabled={imageUrlInput.trim() === ""}
@@ -1449,7 +1455,7 @@ function MediaTextNodeView({
 		>
 			{isEditing && editor.isEditable ? (
 				<div
-					className="flex flex-col gap-y-3 border-be border-border bg-muted p-4 select-none [&_[contenteditable]]:select-text [&_input]:select-text"
+					className="flex flex-col gap-y-3 border-be border-border bg-muted p-4 select-none **:[[contenteditable]]:select-text [&_input]:select-text"
 					contentEditable={false}
 				>
 					{renderImagePicker != null ? (
@@ -1515,7 +1521,7 @@ function MediaTextNodeView({
 							/>
 						) : null}
 					</div>
-					<div className="flex items-center gap-x-2">
+					<div className={blockPanelFooterClassName}>
 						<Button
 							intent="primary"
 							isDisabled={imageKey == null}
