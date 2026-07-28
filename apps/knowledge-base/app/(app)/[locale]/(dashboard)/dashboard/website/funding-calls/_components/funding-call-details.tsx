@@ -22,7 +22,7 @@ interface FundingCallDetailsProps {
 	selectedVersion: "draft" | "published";
 	fundingCall: Pick<schema.FundingCall, "id" | "duration" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
-	};
+	} & { image: { key: string; label: string; url: string } };
 	publishAction: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
@@ -78,6 +78,15 @@ export function FundingCallDetails(props: Readonly<FundingCallDetailsProps>): Re
 								dateStyle: "short",
 							})
 						: format.dateTime(fundingCall.duration.start, { dateStyle: "short" })}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Image")}</DescriptionTerm>
+				<DescriptionDetails>
+					<img
+						alt=""
+						className="block-24 inline-auto max-inline-full rounded-lg object-contain"
+						src={fundingCall.image.url}
+					/>
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>

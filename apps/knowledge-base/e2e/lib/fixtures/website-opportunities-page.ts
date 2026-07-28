@@ -204,6 +204,10 @@ export class WebsiteOpportunitiesPage {
 		return this.page.getByText("Published with draft changes");
 	}
 
+	detailsImage(): Locator {
+		return this.page.locator('dt:has-text("Image") + dd img');
+	}
+
 	// ---------------------------------------------------------------------------
 	// Details page — lifecycle actions
 	// ---------------------------------------------------------------------------

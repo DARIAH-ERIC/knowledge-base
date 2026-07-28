@@ -23,7 +23,7 @@ interface OpportunityDetailsProps {
 	opportunity: Pick<schema.Opportunity, "id" | "duration" | "title" | "summary" | "website"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 		source: { id: string; source: string };
-	};
+	} & { image: { key: string; label: string; url: string } };
 	publishAction: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
@@ -86,6 +86,15 @@ export function OpportunityDetails(props: Readonly<OpportunityDetailsProps>): Re
 
 				<DescriptionTerm>{t("Website")}</DescriptionTerm>
 				<DescriptionDetails>{opportunity.website}</DescriptionDetails>
+
+				<DescriptionTerm>{t("Image")}</DescriptionTerm>
+				<DescriptionDetails>
+					<img
+						alt=""
+						className="block-24 inline-auto max-inline-full rounded-lg object-contain"
+						src={opportunity.image.url}
+					/>
+				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>
 				<DescriptionDetails>
