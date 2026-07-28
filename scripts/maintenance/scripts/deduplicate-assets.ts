@@ -101,6 +101,7 @@ async function streamToBuffer(stream: Readable): Promise<Buffer> {
 	const chunks: Array<Buffer> = [];
 
 	for await (const chunk of stream) {
+		// oxlint-disable-next-line typescript/no-unsafe-argument
 		chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
 	}
 
