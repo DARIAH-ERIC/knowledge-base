@@ -2185,12 +2185,12 @@ msgstr "Link"
 msgid "CYbwwJ"
 msgstr "Open actions menu"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:71
-msgid "zK20E5"
-msgstr "Link related entities."
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:72
+msgid "QAIpE4"
+msgstr "Link related entities to display on the website."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:71
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:74
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:73
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:77
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-details.tsx:171
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx:178
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-details.tsx:158
@@ -2206,24 +2206,24 @@ msgstr "Link related entities."
 msgid "RivADq"
 msgstr "Related entities"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:73
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:76
 msgid "0VfeRH"
 msgstr "Add related entity"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:75
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:78
 msgid "1isLwG"
 msgstr "No related entities found."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:76
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:79
 msgid "gYmSWm"
 msgstr "No related entities"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:100
-msgid "nQEmiU"
-msgstr "Link related resources."
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:104
+msgid "FIGT0F"
+msgstr "Link related resources to display on the website."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:100
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:103
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:105
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:109
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-details.tsx:194
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx:201
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-details.tsx:181
@@ -2239,15 +2239,15 @@ msgstr "Link related resources."
 msgid "k24S36"
 msgstr "Related resources"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:102
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:108
 msgid "+UQrTP"
 msgstr "Add related resource"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:104
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:110
 msgid "2M+HPV"
 msgstr "No related resources found."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:105
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:111
 msgid "DBl0j9"
 msgstr "No related resources"
 
