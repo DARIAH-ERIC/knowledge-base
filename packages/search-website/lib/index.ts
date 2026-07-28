@@ -284,6 +284,136 @@ interface CountryScopedUnit {
 	versionId: string;
 }
 
+interface ViewBackedWebsiteEntity {
+	entityId: string;
+	id: string;
+	name: string;
+	slug: string;
+	summary: string | null;
+	updatedAt: Date;
+}
+
+interface PublishedOpportunity {
+	entityId: string;
+	id: string;
+	slug: string;
+	summary: string;
+	title: string;
+	updatedAt: Date;
+}
+
+async function getPublishedOpportunities(
+	db: Database,
+	params?: {
+		entityId?: string;
+	},
+): Promise<Array<PublishedOpportunity>> {
+	const conditions = [eq(schema.entityStatus.type, "published")];
+
+	if (params?.entityId != null) {
+		conditions.push(eq(schema.entities.id, params.entityId));
+	}
+
+	return db
+		.select({
+			id: schema.opportunities.id,
+			entityId: schema.entities.id,
+			slug: schema.entities.slug,
+			title: schema.opportunities.title,
+			summary: schema.opportunities.summary,
+			updatedAt: schema.opportunities.updatedAt,
+		})
+		.from(schema.opportunities)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.opportunities.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+		.where(and(...conditions));
+}
+
+async function getPublishedMembersAndPartners(
+	db: Database,
+	params?: {
+		entityId?: string;
+	},
+): Promise<Array<ViewBackedWebsiteEntity>> {
+	const conditions = [eq(schema.entityStatus.type, "published")];
+
+	if (params?.entityId != null) {
+		conditions.push(eq(schema.entities.id, params.entityId));
+	}
+
+	return db
+		.select({
+			id: schema.membersAndPartners.id,
+			entityId: schema.entities.id,
+			slug: schema.entities.slug,
+			name: schema.membersAndPartners.name,
+			summary: schema.membersAndPartners.summary,
+			updatedAt: schema.membersAndPartners.updatedAt,
+		})
+		.from(schema.membersAndPartners)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.membersAndPartners.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+		.where(and(...conditions));
+}
+
+async function getPublishedDariahProjects(
+	db: Database,
+	params?: {
+		entityId?: string;
+	},
+): Promise<Array<ViewBackedWebsiteEntity>> {
+	const conditions = [eq(schema.entityStatus.type, "published")];
+
+	if (params?.entityId != null) {
+		conditions.push(eq(schema.entities.id, params.entityId));
+	}
+
+	return db
+		.select({
+			id: schema.dariahProjects.id,
+			entityId: schema.entities.id,
+			slug: schema.entities.slug,
+			name: schema.dariahProjects.name,
+			summary: schema.dariahProjects.summary,
+			updatedAt: schema.dariahProjects.updatedAt,
+		})
+		.from(schema.dariahProjects)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.dariahProjects.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+		.where(and(...conditions));
+}
+
+async function getPublishedWorkingGroups(
+	db: Database,
+	params?: {
+		entityId?: string;
+	},
+): Promise<Array<ViewBackedWebsiteEntity>> {
+	const conditions = [eq(schema.entityStatus.type, "published")];
+
+	if (params?.entityId != null) {
+		conditions.push(eq(schema.entities.id, params.entityId));
+	}
+
+	return db
+		.select({
+			id: schema.workingGroups.id,
+			entityId: schema.entities.id,
+			slug: schema.entities.slug,
+			name: schema.workingGroups.name,
+			summary: schema.workingGroups.summary,
+			updatedAt: schema.workingGroups.updatedAt,
+		})
+		.from(schema.workingGroups)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.workingGroups.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+		.where(and(...conditions));
+}
+
 /**
  * Units that are shown on a member/partner country page and have no detail page of their own, so
  * they are indexed once per country they belong to (document id `<type>:<country>:<unit>`).
@@ -814,34 +944,9 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			}
 
 			case "country": {
-				const item = await db.query.membersAndPartners.findFirst({
-					where: {
-						entityVersion: {
-							entityId,
-							status: {
-								type: "published",
-							},
-						},
-					},
-					columns: {
-						id: true,
-						name: true,
-						summary: true,
-						updatedAt: true,
-					},
-					with: {
-						entityVersion: {
-							columns: {},
-							with: {
-								entity: {
-									columns: {
-										slug: true,
-									},
-								},
-							},
-						},
-					},
-				});
+				const item = await getPublishedMembersAndPartners(db, { entityId }).then(
+					(rows) => rows[0] ?? null,
+				);
 
 				if (item == null) {
 					return [];
@@ -858,11 +963,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						entityId,
 						importedAt,
 						type: "country",
-						sourceId: item.entityVersion.entity.slug,
+						sourceId: item.slug,
 						sourceUpdatedAt: item.updatedAt,
 						label: item.name,
 						description: mergeDescription(descriptions.get(item.id), item.summary ?? ""),
-						link: getEntityHref({ type: "country", slug: item.entityVersion.entity.slug }),
+						link: getEntityHref({ type: "country", slug: item.slug }),
 					}),
 				];
 			}
@@ -1116,35 +1221,9 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			}
 
 			case "opportunity": {
-				const item = await db.query.opportunities.findFirst({
-					where: {
-						entityVersion: {
-							entityId,
-							status: {
-								type: "published",
-							},
-						},
-					},
-					columns: {
-						id: true,
-						publicationDate: true,
-						summary: true,
-						title: true,
-						updatedAt: true,
-					},
-					with: {
-						entityVersion: {
-							columns: {},
-							with: {
-								entity: {
-									columns: {
-										slug: true,
-									},
-								},
-							},
-						},
-					},
-				});
+				const item = await getPublishedOpportunities(db, { entityId }).then(
+					(rows) => rows[0] ?? null,
+				);
 
 				if (item == null) {
 					return [];
@@ -1157,11 +1236,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						entityId,
 						importedAt,
 						type: "opportunity",
-						sourceId: item.entityVersion.entity.slug,
+						sourceId: item.slug,
 						sourceUpdatedAt: item.updatedAt,
 						label: item.title,
 						description: mergeDescription(content.get(item.id), item.summary ?? ""),
-						link: getEntityHref({ type: "opportunity", slug: item.entityVersion.entity.slug }),
+						link: getEntityHref({ type: "opportunity", slug: item.slug }),
 					}),
 				];
 			}
@@ -1276,34 +1355,9 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			}
 
 			case "project": {
-				const item = await db.query.dariahProjects.findFirst({
-					where: {
-						entityVersion: {
-							entityId,
-							status: {
-								type: "published",
-							},
-						},
-					},
-					columns: {
-						id: true,
-						name: true,
-						summary: true,
-						updatedAt: true,
-					},
-					with: {
-						entityVersion: {
-							columns: {},
-							with: {
-								entity: {
-									columns: {
-										slug: true,
-									},
-								},
-							},
-						},
-					},
-				});
+				const item = await getPublishedDariahProjects(db, { entityId }).then(
+					(rows) => rows[0] ?? null,
+				);
 
 				if (item == null) {
 					return [];
@@ -1320,11 +1374,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						entityId,
 						importedAt,
 						type: "project",
-						sourceId: item.entityVersion.entity.slug,
+						sourceId: item.slug,
 						sourceUpdatedAt: item.updatedAt,
 						label: item.name,
 						description: mergeDescription(descriptions.get(item.id), item.summary ?? ""),
-						link: getEntityHref({ type: "project", slug: item.entityVersion.entity.slug }),
+						link: getEntityHref({ type: "project", slug: item.slug }),
 					}),
 				];
 			}
@@ -1384,34 +1438,9 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			}
 
 			case "working-group": {
-				const item = await db.query.workingGroups.findFirst({
-					where: {
-						entityVersion: {
-							entityId,
-							status: {
-								type: "published",
-							},
-						},
-					},
-					columns: {
-						id: true,
-						name: true,
-						summary: true,
-						updatedAt: true,
-					},
-					with: {
-						entityVersion: {
-							columns: {},
-							with: {
-								entity: {
-									columns: {
-										slug: true,
-									},
-								},
-							},
-						},
-					},
-				});
+				const item = await getPublishedWorkingGroups(db, { entityId }).then(
+					(rows) => rows[0] ?? null,
+				);
 
 				if (item == null) {
 					return [];
@@ -1428,11 +1457,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						entityId,
 						importedAt,
 						type: "working-group",
-						sourceId: item.entityVersion.entity.slug,
+						sourceId: item.slug,
 						sourceUpdatedAt: item.updatedAt,
 						label: item.name,
 						description: mergeDescription(descriptions.get(item.id), item.summary ?? ""),
-						link: getEntityHref({ type: "working-group", slug: item.entityVersion.entity.slug }),
+						link: getEntityHref({ type: "working-group", slug: item.slug }),
 					}),
 				];
 			}
@@ -1763,45 +1792,19 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			),
 		);
 
-		const membersAndPartners = await db.query.membersAndPartners.findMany({
-			columns: {
-				id: true,
-				name: true,
-				summary: true,
-				updatedAt: true,
-			},
-			where: {
-				entityVersion: {
-					status: {
-						type: "published",
-					},
-				},
-			},
-			with: {
-				entityVersion: {
-					columns: { entityId: true },
-					with: {
-						entity: {
-							columns: {
-								slug: true,
-							},
-						},
-					},
-				},
-			},
-		});
+		const membersAndPartners = await getPublishedMembersAndPartners(db);
 
 		website.push(
 			...membersAndPartners.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
-					entityId: item.entityVersion.entityId,
+					entityId: item.entityId,
 					type: "country",
-					sourceId: item.entityVersion.entity.slug,
+					sourceId: item.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(countryDescriptions.get(item.id), item.summary ?? ""),
-					link: getEntityHref({ type: "country", slug: item.entityVersion.entity.slug }),
+					link: getEntityHref({ type: "country", slug: item.slug }),
 				}),
 			),
 		);
@@ -1889,45 +1892,19 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			),
 		);
 
-		const opportunities = await db.query.opportunities.findMany({
-			columns: {
-				id: true,
-				summary: true,
-				title: true,
-				updatedAt: true,
-			},
-			where: {
-				entityVersion: {
-					status: {
-						type: "published",
-					},
-				},
-			},
-			with: {
-				entityVersion: {
-					columns: { entityId: true },
-					with: {
-						entity: {
-							columns: {
-								slug: true,
-							},
-						},
-					},
-				},
-			},
-		});
+		const opportunities = await getPublishedOpportunities(db);
 
 		website.push(
 			...opportunities.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
-					entityId: item.entityVersion.entityId,
+					entityId: item.entityId,
 					type: "opportunity",
-					sourceId: item.entityVersion.entity.slug,
+					sourceId: item.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: mergeDescription(opportunityContent.get(item.id), item.summary ?? ""),
-					link: getEntityHref({ type: "opportunity", slug: item.entityVersion.entity.slug }),
+					link: getEntityHref({ type: "opportunity", slug: item.slug }),
 				}),
 			),
 		);
@@ -2028,45 +2005,19 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			),
 		);
 
-		const dariahProjects = await db.query.dariahProjects.findMany({
-			columns: {
-				id: true,
-				name: true,
-				summary: true,
-				updatedAt: true,
-			},
-			where: {
-				entityVersion: {
-					status: {
-						type: "published",
-					},
-				},
-			},
-			with: {
-				entityVersion: {
-					columns: { entityId: true },
-					with: {
-						entity: {
-							columns: {
-								slug: true,
-							},
-						},
-					},
-				},
-			},
-		});
+		const dariahProjects = await getPublishedDariahProjects(db);
 
 		website.push(
 			...dariahProjects.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
-					entityId: item.entityVersion.entityId,
+					entityId: item.entityId,
 					type: "project",
-					sourceId: item.entityVersion.entity.slug,
+					sourceId: item.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(projectDescriptions.get(item.id), item.summary ?? ""),
-					link: getEntityHref({ type: "project", slug: item.entityVersion.entity.slug }),
+					link: getEntityHref({ type: "project", slug: item.slug }),
 				}),
 			),
 		);
@@ -2115,45 +2066,19 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			),
 		);
 
-		const workingGroups = await db.query.workingGroups.findMany({
-			columns: {
-				id: true,
-				name: true,
-				summary: true,
-				updatedAt: true,
-			},
-			where: {
-				entityVersion: {
-					status: {
-						type: "published",
-					},
-				},
-			},
-			with: {
-				entityVersion: {
-					columns: { entityId: true },
-					with: {
-						entity: {
-							columns: {
-								slug: true,
-							},
-						},
-					},
-				},
-			},
-		});
+		const workingGroups = await getPublishedWorkingGroups(db);
 
 		website.push(
 			...workingGroups.map((item) =>
 				createWebsiteEntityDocument({
 					importedAt,
-					entityId: item.entityVersion.entityId,
+					entityId: item.entityId,
 					type: "working-group",
-					sourceId: item.entityVersion.entity.slug,
+					sourceId: item.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(workingGroupDescriptions.get(item.id), item.summary ?? ""),
-					link: getEntityHref({ type: "working-group", slug: item.entityVersion.entity.slug }),
+					link: getEntityHref({ type: "working-group", slug: item.slug }),
 				}),
 			),
 		);
