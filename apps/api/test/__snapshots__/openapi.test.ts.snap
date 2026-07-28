@@ -38,10 +38,18 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "type": "string",
         },
       },
-      "GetDocumentOrPolicyDocumentParams": {
-        "description": "Document or policy version id, or the published entity slug",
+      "GetDocumentOrPolicyDocumentByIdParams": {
         "in": "path",
         "name": "id",
+        "required": true,
+        "schema": {
+          "format": "uuid",
+          "type": "string",
+        },
+      },
+      "GetDocumentOrPolicyDocumentBySlugParams": {
+        "in": "path",
+        "name": "slug",
         "required": true,
         "schema": {
           "type": "string",
@@ -17258,6 +17266,40 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
       },
     },
+    "/api/v1/documents-policies/slugs/{slug}/document": {
+      "get": {
+        "description": "Stream the S3-stored file for a document or policy by slug",
+        "operationId": "getDocumentOrPolicyFileBySlug",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GetDocumentOrPolicyDocumentBySlugParams",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {},
+              "application/pdf": {},
+            },
+            "description": "Binary file stream",
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse",
+                },
+              },
+            },
+            "description": "Not Found",
+          },
+        },
+        "summary": "Download document or policy file by slug",
+        "tags": [
+          "documents-policies",
+        ],
+      },
+    },
     "/api/v1/documents-policies/tree": {
       "get": {
         "description": "Retrieve documents and policies grouped and ordered for display",
@@ -17329,11 +17371,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
     },
     "/api/v1/documents-policies/{id}/document": {
       "get": {
-        "description": "Stream the S3-stored file for a document or policy by id or slug",
-        "operationId": "getDocumentOrPolicyFile",
+        "description": "Stream the S3-stored file for a document or policy by id",
+        "operationId": "getDocumentOrPolicyFileById",
         "parameters": [
           {
-            "$ref": "#/components/parameters/GetDocumentOrPolicyDocumentParams",
+            "$ref": "#/components/parameters/GetDocumentOrPolicyDocumentByIdParams",
           },
         ],
         "responses": {

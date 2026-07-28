@@ -102,6 +102,44 @@ function createMockStorage(content = "test file content"): StorageService {
 	};
 }
 
+async function seedDocument(
+	db: Database,
+	key: string,
+	filename: string | null = "policy-2024.pdf",
+	mimeType = "application/pdf",
+) {
+	const [status, type] = await Promise.all([
+		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "documents_policies" },
+		}),
+	]);
+
+	assert(status, "No entity status in database.");
+	assert(type, "No entity type in database.");
+
+	const versionId = uuidv7();
+	const entityId = uuidv7();
+	const assetId = uuidv7();
+	const title = "Test Policy";
+	const summary = "Test summary";
+	await db.insert(schema.assets).values({ id: assetId, key, label: title, filename, mimeType });
+	await db
+		.insert(schema.entities)
+		.values({ id: entityId, slug: `doc-${versionId}`, typeId: type.id });
+	await db.insert(schema.entityVersions).values({ id: versionId, entityId, statusId: status.id });
+	await db.insert(schema.documentsPolicies).values({
+		id: versionId,
+		title,
+		summary,
+		url: "https://example.com",
+		documentId: assetId,
+	});
+
+	return { id: versionId, slug: `doc-${versionId}` };
+}
+
 describe("documents-policies", () => {
 	describe("GET /api/documents-policies", () => {
 		it("should return paginated list of documents and policies", async () => {
@@ -258,8 +296,8 @@ describe("documents-policies", () => {
 				const data = await response.json();
 
 				assert("description" in data);
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				expect(data).toMatchObject({ title, document: { url: expect.stringContaining(slug) } });
+				expect(data.title).toBe(title);
+				expect(data.document.url).toContain(`/slugs/${slug}/document`);
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});
@@ -366,46 +404,6 @@ describe("documents-policies", () => {
 	});
 
 	describe("GET /api/documents-policies/:id/document", () => {
-		async function seedDocument(
-			db: Database,
-			key: string,
-			filename: string | null = "policy-2024.pdf",
-			mimeType = "application/pdf",
-		) {
-			const [status, type] = await Promise.all([
-				db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
-				db.query.entityTypes.findFirst({
-					columns: { id: true },
-					where: { type: "documents_policies" },
-				}),
-			]);
-
-			assert(status, "No entity status in database.");
-			assert(type, "No entity type in database.");
-
-			const versionId = uuidv7();
-			const entityId = uuidv7();
-			const assetId = uuidv7();
-			const title = "Test Policy";
-			const summary = "Test summary";
-			await db.insert(schema.assets).values({ id: assetId, key, label: title, filename, mimeType });
-			await db
-				.insert(schema.entities)
-				.values({ id: entityId, slug: `doc-${versionId}`, typeId: type.id });
-			await db
-				.insert(schema.entityVersions)
-				.values({ id: versionId, entityId, statusId: status.id });
-			await db.insert(schema.documentsPolicies).values({
-				id: versionId,
-				title,
-				summary,
-				url: "https://example.com",
-				documentId: assetId,
-			});
-
-			return { id: versionId, slug: `doc-${versionId}` };
-		}
-
 		it("should stream file with correct headers for existing record", async () => {
 			await withTransaction(async (db) => {
 				const content = "test file content";
@@ -415,27 +413,6 @@ describe("documents-policies", () => {
 
 				const response = await client["documents-policies"][":id"].document.$get({
 					param: { id },
-				});
-
-				expect(response.status).toBe(200);
-				expect(response.headers.get("Content-Type")).toBe("application/pdf");
-				expect(response.headers.get("Content-Disposition")).toBe(
-					`inline; filename="policy-2024.pdf"; filename*=UTF-8''policy-2024.pdf`,
-				);
-				const body = await response.text();
-				expect(body).toBe(content);
-			});
-		});
-
-		it("should stream file by slug with correct headers for existing record", async () => {
-			await withTransaction(async (db) => {
-				const content = "test file content";
-				const key = "documents/019b7605-b88f-7893-84af-22aaf476e41f";
-				const { slug } = await seedDocument(db, key);
-				const client = createTestClient(db, createMockStorage(content));
-
-				const response = await client["documents-policies"][":id"].document.$get({
-					param: { id: slug },
 				});
 
 				expect(response.status).toBe(200);
@@ -498,12 +475,47 @@ describe("documents-policies", () => {
 			});
 		});
 
-		it("should return 404 for non-existing slug", async () => {
+		it("should return 400 for non-UUID id", async () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db, createMockStorage());
 
 				const response = await client["documents-policies"][":id"].document.$get({
 					param: { id: "no-uuid" },
+				});
+
+				expect(response.status).toBe(400);
+			});
+		});
+	});
+
+	describe("GET /api/documents-policies/slugs/:slug/document", () => {
+		it("should stream file by slug with correct headers for existing record", async () => {
+			await withTransaction(async (db) => {
+				const content = "test file content";
+				const key = "documents/019b7605-b88f-7893-84af-22aaf476e41f";
+				const { slug } = await seedDocument(db, key);
+				const client = createTestClient(db, createMockStorage(content));
+
+				const response = await client["documents-policies"].slugs[":slug"].document.$get({
+					param: { slug },
+				});
+
+				expect(response.status).toBe(200);
+				expect(response.headers.get("Content-Type")).toBe("application/pdf");
+				expect(response.headers.get("Content-Disposition")).toBe(
+					`inline; filename="policy-2024.pdf"; filename*=UTF-8''policy-2024.pdf`,
+				);
+				const body = await response.text();
+				expect(body).toBe(content);
+			});
+		});
+
+		it("should return 404 for non-existing slug", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db, createMockStorage());
+
+				const response = await client["documents-policies"].slugs[":slug"].document.$get({
+					param: { slug: "no-uuid" },
 				});
 
 				expect(response.status).toBe(404);

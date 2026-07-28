@@ -11,7 +11,8 @@ import { validate, validator } from "@/lib/openapi/validator";
 import {
 	GetDocumentOrPolicyById,
 	GetDocumentOrPolicyBySlug,
-	GetDocumentOrPolicyDocument,
+	GetDocumentOrPolicyDocumentById,
+	GetDocumentOrPolicyDocumentBySlug,
 	GetDocumentOrPolicySlugs,
 	GetDocumentsPolicies,
 	GetDocumentsPoliciesTree,
@@ -24,12 +25,11 @@ import {
 	getDocumentOrPolicySlugs,
 	getDocumentsPolicies,
 	getDocumentsPoliciesTree,
-	isUuid,
 } from "@/routes/documents-policies/service";
 import { env } from "~/config/env.config";
 
-function documentUrl(reference: string) {
-	return new URL(`/api/v1/documents-policies/${reference}/document`, env.API_BASE_URL).href;
+function documentUrl(slug: string) {
+	return new URL(`/api/v1/documents-policies/slugs/${slug}/document`, env.API_BASE_URL).href;
 }
 
 export const router = createRouter()
@@ -203,8 +203,56 @@ export const router = createRouter()
 		describeRoute({
 			tags: ["documents-policies"],
 			summary: "Download document or policy file",
-			description: "Stream the S3-stored file for a document or policy by id or slug",
-			operationId: "getDocumentOrPolicyFile",
+			description: "Stream the S3-stored file for a document or policy by id",
+			operationId: "getDocumentOrPolicyFileById",
+			responses: {
+				200: {
+					description: "Binary file stream",
+					content: {
+						"application/pdf": {},
+						"application/octet-stream": {},
+					},
+				},
+				...BAD_REQUEST,
+				...NOT_FOUND,
+			},
+		}),
+		validator("param", GetDocumentOrPolicyDocumentById.ParamsSchema),
+		async (c) => {
+			const { id } = c.req.valid("param");
+
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const item = await getDocumentOrPolicyDocument(db, { id });
+
+			if (item == null) {
+				return c.notFound();
+			}
+
+			const { key } = item.document;
+
+			const storage = c.get("storage");
+			assert(storage, "Storage must be provided via middleware.");
+
+			const nodeStream = (await storage.download(key)).unwrap();
+			const webStream = Readable.toWeb(nodeStream) as ReadableStream;
+
+			return c.body(webStream, 200, {
+				"Content-Disposition": getContentDispositionHeader(item.document),
+				"Content-Type": item.document.mimeType,
+			});
+		},
+	)
+
+	/** GET /api/documents-policies/slugs/:slug/document */
+	.get(
+		"/slugs/:slug/document",
+		describeRoute({
+			tags: ["documents-policies"],
+			summary: "Download document or policy file by slug",
+			description: "Stream the S3-stored file for a document or policy by slug",
+			operationId: "getDocumentOrPolicyFileBySlug",
 			responses: {
 				200: {
 					description: "Binary file stream",
@@ -216,16 +264,14 @@ export const router = createRouter()
 				...NOT_FOUND,
 			},
 		}),
-		validator("param", GetDocumentOrPolicyDocument.ParamsSchema),
+		validator("param", GetDocumentOrPolicyDocumentBySlug.ParamsSchema),
 		async (c) => {
-			const idOrSlug = c.req.valid("param").id;
+			const { slug } = c.req.valid("param");
 
 			const db = c.get("db");
 			assert(db, "Database must be provided via middleware.");
 
-			const item = isUuid(idOrSlug)
-				? await getDocumentOrPolicyDocument(db, { id: idOrSlug })
-				: await getDocumentOrPolicyDocumentBySlug(db, { slug: idOrSlug });
+			const item = await getDocumentOrPolicyDocumentBySlug(db, { slug });
 
 			if (item == null) {
 				return c.notFound();

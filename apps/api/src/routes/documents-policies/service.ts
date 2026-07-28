@@ -7,12 +7,6 @@ import { flattenEntityVersion } from "@/lib/entity-version";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
 
-const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
-
-export function isUuid(value: string): boolean {
-	return uuidPattern.test(value);
-}
-
 interface GetDocumentsPoliciesParams {
 	/** @default 10 */
 	limit?: number;
