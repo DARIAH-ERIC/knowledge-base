@@ -17386,6 +17386,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             },
             "description": "Binary file stream",
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
           "404": {
             "content": {
               "application/json": {
