@@ -68,7 +68,10 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 
 	return (
 		<Fragment>
-			<FormSection description={t("Link related entities.")} title={t("Related entities")}>
+			<FormSection
+				description={t("Link related entities to display on the website.")}
+				title={t("Related entities")}
+			>
 				<AsyncListSelect
 					addLabel={t("Add related entity")}
 					aria-label={t("Related entities")}
@@ -97,7 +100,10 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 
 			<Separator className="my-6" />
 
-			<FormSection description={t("Link related resources.")} title={t("Related resources")}>
+			<FormSection
+				description={t("Link related resources to display on the website.")}
+				title={t("Related resources")}
+			>
 				<AsyncListSelect
 					addLabel={t("Add related resource")}
 					aria-label={t("Related resources")}
