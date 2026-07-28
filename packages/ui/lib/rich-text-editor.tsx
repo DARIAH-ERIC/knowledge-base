@@ -21,22 +21,28 @@ import cn from "clsx/lite";
 import {
 	BoldIcon,
 	CodeIcon,
+	Columns2Icon,
 	Heading2Icon,
 	Heading3Icon,
 	Heading4Icon,
+	ImageIcon,
+	InfoIcon,
 	ItalicIcon,
 	LinkIcon,
 	ListIcon,
 	ListOrderedIcon,
+	MousePointerClickIcon,
 	PencilIcon,
 	QuoteIcon,
 	TableIcon,
 	Trash2Icon,
 	VariableIcon,
+	VideoIcon,
 } from "lucide-react";
 import { useExtracted } from "next-intl";
 import {
 	type ReactNode,
+	type RefObject,
 	useCallback,
 	useId,
 	useLayoutEffect,
@@ -55,6 +61,13 @@ import { Input } from "@/lib/input";
 import { Note } from "@/lib/note";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
 import { formatPlaceholderValue, isEmptyRichTextDocument } from "@/lib/rich-text";
+import {
+	type SlashCommandHandlers,
+	type SlashCommandItem,
+	SlashCommandMenu,
+	canInsertBlock,
+	createSlashCommandExtension,
+} from "@/lib/rich-text-slash-menu";
 import { RichTextEditorToolbarButton } from "@/lib/rich-text-toolbar-button";
 import { ToggleGroup, ToggleGroupItem } from "@/lib/toggle-group";
 import { Tooltip, TooltipContent } from "@/lib/tooltip";
@@ -230,6 +243,14 @@ function BlockNodeSurface({
 	);
 }
 
+/**
+ * Footer of a block edit panel. Its buttons act on the block as a whole rather than on the setting
+ * directly above them, so they sit below a rule which spans the full panel — the panel's own `p-4`
+ * is reversed out and then reapplied.
+ */
+const blockPanelFooterClassName =
+	"-ms-4 -me-4 mbs-1 flex items-center gap-x-2 border-bs border-border px-4 pbs-3";
+
 function getEmbedUrl(url: string): string {
 	const watchMatch = /youtube\.com\/watch\?.*?v=([\w-]+)/.exec(url);
 	if (watchMatch != null) {
@@ -304,7 +325,7 @@ function EmbedNodeView({
 		>
 			<div className={twMerge("transition-opacity", selected && "bg-primary-subtle/10")}>
 				{isEditing ? (
-					<div className="flex flex-col gap-y-3 p-4 select-none [&_[contenteditable]]:select-text [&_input]:select-text">
+					<div className="flex flex-col gap-y-3 p-4 select-none **:[[contenteditable]]:select-text [&_input]:select-text">
 						<div className="flex flex-col gap-y-1">
 							<label className="text-sm/6 font-medium" htmlFor={urlInputId}>
 								{"URL"}
@@ -341,7 +362,7 @@ function EmbedNodeView({
 								onChange={setCaptionJson}
 							/>
 						</div>
-						<div className="flex items-center gap-x-2">
+						<div className={blockPanelFooterClassName}>
 							<Button
 								intent="primary"
 								isDisabled={!urlInput.trim() || !titleInput.trim()}
@@ -544,7 +565,7 @@ function CalloutNodeView({
 			}}
 		>
 			{isEditing ? (
-				<div className="flex flex-col gap-y-3 border border-input bg-bg p-4 select-none [&_[contenteditable]]:select-text [&_input]:select-text">
+				<div className="flex flex-col gap-y-3 border border-input bg-bg p-4 select-none **:[[contenteditable]]:select-text [&_input]:select-text">
 					<div className="flex flex-col gap-y-1">
 						<span className="text-sm/6 font-medium">{"Style"}</span>
 						<ToggleGroup
@@ -586,7 +607,7 @@ function CalloutNodeView({
 							onChange={setContentInput}
 						/>
 					</div>
-					<div className="flex items-center gap-x-2">
+					<div className={blockPanelFooterClassName}>
 						<Button
 							intent="primary"
 							onPress={() => {
@@ -1138,7 +1159,7 @@ function AssetImageNodeView({
 				   node's DOM — so every label rendered inside it comes up highlighted as if the user
 				   had dragged across it. The panel is a form, not document text, so nothing in its
 				   chrome is selectable; the fields inside it opt back in. */
-				<div className="flex select-none flex-col gap-y-3 p-4 [&_[contenteditable]]:select-text [&_input]:select-text">
+				<div className="flex select-none flex-col gap-y-3 p-4 **:[[contenteditable]]:select-text [&_input]:select-text">
 					{renderImagePicker != null ? (
 						<div className="flex flex-col gap-y-2">
 							<div className="text-sm/6 font-medium">{"Pick image"}</div>
@@ -1241,9 +1262,7 @@ function AssetImageNodeView({
 							/>
 						) : null}
 					</div>
-					{/* These act on the block as a whole, not on the caption settings directly above
-					    them, so they sit below a rule with the panel's own padding reversed out. */}
-					<div className="-ms-4 -me-4 mbs-1 flex items-center gap-x-2 border-bs border-border pbs-3 pi-4">
+					<div className={blockPanelFooterClassName}>
 						<Button
 							intent="primary"
 							isDisabled={imageUrlInput.trim() === ""}
@@ -1449,7 +1468,7 @@ function MediaTextNodeView({
 		>
 			{isEditing && editor.isEditable ? (
 				<div
-					className="flex flex-col gap-y-3 border-be border-border bg-muted p-4 select-none [&_[contenteditable]]:select-text [&_input]:select-text"
+					className="flex flex-col gap-y-3 border-be border-border bg-muted p-4 select-none **:[[contenteditable]]:select-text [&_input]:select-text"
 					contentEditable={false}
 				>
 					{renderImagePicker != null ? (
@@ -1515,7 +1534,7 @@ function MediaTextNodeView({
 							/>
 						) : null}
 					</div>
-					<div className="flex items-center gap-x-2">
+					<div className={blockPanelFooterClassName}>
 						<Button
 							intent="primary"
 							isDisabled={imageKey == null}
@@ -1759,6 +1778,11 @@ const LinkWithTargets = Link.extend({
 
 interface CreateRichTextExtensionsOptions {
 	renderImagePicker?: ImagePickerRenderer;
+	/**
+	 * Enables the slash command menu. Left out by the read-only renderer, which has no caret to
+	 * trigger it from.
+	 */
+	slashCommandHandlersRef?: RefObject<SlashCommandHandlers | null>;
 }
 
 /**
@@ -1812,6 +1836,9 @@ export function createRichTextExtensions(
 		CalloutNode,
 		ButtonLinkNode,
 		PlaceholderValueNode,
+		...(options?.slashCommandHandlersRef != null
+			? [createSlashCommandExtension(options.slashCommandHandlersRef)]
+			: []),
 	];
 }
 
@@ -1838,9 +1865,15 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const initialContent = useMemo(() => normalizeInitialContent(content), [content]);
 
+	const slashCommandHandlersRef = useRef<SlashCommandHandlers | null>(null);
+
 	const extensions = useMemo(
-		() => createRichTextExtensions({ renderImagePicker }),
-		[renderImagePicker],
+		() =>
+			createRichTextExtensions({
+				renderImagePicker,
+				slashCommandHandlersRef: isEditable ? slashCommandHandlersRef : undefined,
+			}),
+		[renderImagePicker, isEditable],
 	);
 
 	const editor = useEditor({
@@ -2112,6 +2145,186 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		[editor],
 	);
 
+	/**
+	 * Blocks the author can reach by typing `/`. Everything self-contained is here; the toolbar's
+	 * remaining entries — document links, entity links and placeholder values — are not, because each
+	 * needs the host's own picker dialog, which nothing here can open on the author's behalf.
+	 *
+	 * The optional block types are gated on the same render props as the toolbar, so a menu never
+	 * offers a block the surrounding form did not enable.
+	 */
+	const slashCommandItems = useMemo<Array<SlashCommandItem>>(() => {
+		if (editor == null) {
+			return [];
+		}
+
+		const items: Array<SlashCommandItem> = [
+			{
+				id: "heading-2",
+				label: t("Heading 2"),
+				keywords: ["h2"],
+				icon: Heading2Icon,
+				run() {
+					editor.chain().focus().setNode("heading", { level: 2 }).run();
+				},
+			},
+			{
+				id: "heading-3",
+				label: t("Heading 3"),
+				keywords: ["h3"],
+				icon: Heading3Icon,
+				run() {
+					editor.chain().focus().setNode("heading", { level: 3 }).run();
+				},
+			},
+			{
+				id: "heading-4",
+				label: t("Heading 4"),
+				keywords: ["h4"],
+				icon: Heading4Icon,
+				run() {
+					editor.chain().focus().setNode("heading", { level: 4 }).run();
+				},
+			},
+			{
+				id: "bullet-list",
+				label: t("Bullet List"),
+				keywords: ["ul", "unordered"],
+				icon: ListIcon,
+				run() {
+					editor.chain().focus().toggleBulletList().run();
+				},
+			},
+			{
+				id: "ordered-list",
+				label: t("Ordered List"),
+				keywords: ["ol", "numbered"],
+				icon: ListOrderedIcon,
+				run() {
+					editor.chain().focus().toggleOrderedList().run();
+				},
+			},
+			{
+				id: "blockquote",
+				label: t("Blockquote"),
+				keywords: ["quote"],
+				icon: QuoteIcon,
+				run() {
+					editor.chain().focus().toggleBlockquote().run();
+				},
+			},
+			{
+				id: "table",
+				label: t("Insert table"),
+				keywords: ["table", "grid"],
+				icon: TableIcon,
+				isAvailable() {
+					return canInsertBlock(editor, "table");
+				},
+				run() {
+					editor.chain().focus().insertTable({ rows: 3, cols: 2, withHeaderRow: true }).run();
+				},
+			},
+		];
+
+		if (renderImagePicker != null) {
+			items.push({
+				id: "image",
+				label: t("Image"),
+				keywords: ["picture", "photo"],
+				icon: ImageIcon,
+				isAvailable() {
+					return canInsertBlock(editor, "assetImage");
+				},
+				run() {
+					/**
+					 * Inserted without an asset, the way a media and text block is: the node view opens its
+					 * own panel — and so the host's image picker — as soon as it mounts empty.
+					 */
+					editor
+						.chain()
+						.focus()
+						.insertContent({
+							type: "assetImage",
+							attrs: {
+								imageKey: null,
+								imageUrl: null,
+								alt: null,
+								assetCaption: null,
+								caption: null,
+								captionMode: "inherit",
+								layout: "default",
+							},
+						})
+						.run();
+				},
+			});
+		}
+
+		if (renderEmbedInsert != null) {
+			items.push({
+				id: "embed",
+				label: t("Embed"),
+				keywords: ["video", "youtube", "iframe"],
+				icon: VideoIcon,
+				isAvailable() {
+					return canInsertBlock(editor, "embedBlock");
+				},
+				run: insertEmbed,
+			});
+		}
+
+		if (renderCalloutInsert != null) {
+			items.push({
+				id: "callout",
+				label: t("Callout"),
+				keywords: ["note", "info", "warning"],
+				icon: InfoIcon,
+				isAvailable() {
+					return canInsertBlock(editor, "calloutBlock");
+				},
+				run: insertCallout,
+			});
+		}
+
+		if (renderMediaTextInsert != null) {
+			items.push({
+				id: "media-text",
+				label: t("Media and text"),
+				keywords: ["image", "biography", "speaker"],
+				icon: Columns2Icon,
+				isAvailable() {
+					return canInsertBlock(editor, "mediaTextBlock");
+				},
+				run: insertMediaText,
+			});
+		}
+
+		if (renderButtonLinkInsert != null) {
+			items.push({
+				id: "button-link",
+				label: t("Button"),
+				keywords: ["cta", "link"],
+				icon: MousePointerClickIcon,
+				run: insertButtonLink,
+			});
+		}
+
+		return items;
+	}, [
+		editor,
+		t,
+		renderImagePicker,
+		renderEmbedInsert,
+		renderCalloutInsert,
+		renderMediaTextInsert,
+		renderButtonLinkInsert,
+		insertEmbed,
+		insertCallout,
+		insertMediaText,
+		insertButtonLink,
+	]);
+
 	if (editor == null) {
 		return null;
 	}
@@ -2372,6 +2585,15 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				/>
 			)}
 			<EditorContent editor={editor} />
+			{isEditable ? (
+				<SlashCommandMenu
+					editor={editor}
+					emptyLabel={t("No matching blocks")}
+					handlersRef={slashCommandHandlersRef}
+					items={slashCommandItems}
+					label={t("Insert block")}
+				/>
+			) : null}
 		</div>
 	);
 }

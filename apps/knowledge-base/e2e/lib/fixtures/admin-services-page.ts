@@ -63,8 +63,8 @@ export class AdminServicesPage {
 			.locator('[data-slot="control"]')
 			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: label }) });
 
-		// The "Add" trigger button (a DialogTrigger) carries `aria-expanded`; its aria-label extracts
-		// as "ui" (i18n build bug in packages/ui), so target it by `aria-expanded` instead.
+		// The control renders several buttons; the "Add" DialogTrigger is the one carrying
+		// `aria-expanded`.
 		await control.locator("button[aria-expanded]:not([slot])").click();
 		await this.page.getByRole("searchbox").fill(name);
 		await this.page.keyboard.press("Enter");
@@ -120,8 +120,8 @@ export class AdminServicesPage {
 		label: "Service owners" | "Service providers",
 	): Promise<void> {
 		// Selected items render as rows in a grid list (aria-label === the control label); each row has
-		// a single Remove button (its aria-label extracts as "ui" in the e2e build, so target by row).
-		// The Remove button sits outside the popover trigger, so removing does not open the popover.
+		// a single Remove button, which sits outside the popover trigger, so removing does not open the
+		// popover.
 		const list = this.page.getByRole("grid", { name: label });
 		const removeButtons = list.getByRole("row").getByRole("button");
 		while ((await removeButtons.count()) > 0) {

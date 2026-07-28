@@ -73,7 +73,7 @@ export class AdminUsersPage {
 			.locator('[data-slot="control"]')
 			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: label }) });
 
-		// Trigger has aria-label="ui" (i18n build bug); target by aria-expanded instead.
+		// The control renders several buttons; the popover trigger is the one carrying aria-expanded.
 		await control.locator("button[aria-expanded]:not([slot])").click();
 		await this.page.getByRole("searchbox").fill(name);
 		await this.page.keyboard.press("Enter");

@@ -148,8 +148,8 @@ export class AdminProjectsPage {
 
 	async removeAllSelectedInControl(label: string): Promise<void> {
 		// Selected items render as rows in an orderable grid list (aria-label === the control label);
-		// each row has a drag handle (slot="drag") plus a Remove button whose aria-label extracts as
-		// "ui" in the e2e build, so target the non-drag button.
+		// each row has a drag handle (slot="drag") alongside its Remove button, so target the non-drag
+		// button.
 		const list = this.page.getByRole("grid", { name: label });
 		const removeButtons = list.getByRole("row").locator('button:not([slot="drag"])');
 		while ((await removeButtons.count()) > 0) {
@@ -159,8 +159,7 @@ export class AdminProjectsPage {
 
 	async removeSelectedInControlByName(label: string, name: string): Promise<void> {
 		// Remove a single selected row identified by its visible name. Each row has a drag handle
-		// (slot="drag") plus a Remove button (its aria-label extracts as "ui" in the e2e build), so
-		// target the row's non-drag button.
+		// (slot="drag") alongside its Remove button, so target the row's non-drag button.
 		const list = this.page.getByRole("grid", { name: label });
 		const row = list.getByRole("row").filter({ hasText: name });
 		await row.locator('button:not([slot="drag"])').click();
