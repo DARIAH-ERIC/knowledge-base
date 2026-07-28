@@ -6,9 +6,11 @@ import type { ReactNode } from "react";
 import { OpportunityDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details";
 import { discardOpportunityDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/discard-opportunity-draft.action";
 import { publishOpportunityAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/publish-opportunity.action";
+import { imageGridOptions } from "@/config/assets.config";
 import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
+import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteOpportunitiesDetailsPageProps extends PageProps<"/[locale]/dashboard/website/opportunities/[slug]/details"> {}
@@ -113,12 +115,23 @@ export default async function DashboardWebsiteOpportunitiesDetailsPage(
 					source: true,
 				},
 			},
+			image: {
+				columns: {
+					key: true,
+					label: true,
+				},
+			},
 		},
 	});
 
 	if (opportunity == null) {
 		notFound();
 	}
+
+	const image = images.generateSignedImageUrl({
+		key: opportunity.image.key,
+		options: imageGridOptions,
+	});
 
 	const contentBlocks = await getResolvedEntityContentBlocks(opportunity.id, "content");
 
@@ -129,7 +142,7 @@ export default async function DashboardWebsiteOpportunitiesDetailsPage(
 			documentId={doc.id}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
-			opportunity={{ ...opportunity }}
+			opportunity={{ ...opportunity, image: { ...opportunity.image, url: image.url } }}
 			publishAction={publishOpportunityAction}
 			selectedVersion={selectedVersion}
 		/>

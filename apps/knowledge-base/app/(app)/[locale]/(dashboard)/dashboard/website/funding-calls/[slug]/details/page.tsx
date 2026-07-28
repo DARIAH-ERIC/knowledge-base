@@ -6,9 +6,11 @@ import type { ReactNode } from "react";
 import { FundingCallDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details";
 import { discardFundingCallDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/discard-funding-call-draft.action";
 import { publishFundingCallAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/publish-funding-call.action";
+import { imageGridOptions } from "@/config/assets.config";
 import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
+import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteFundingCallsDetailsPageProps extends PageProps<"/[locale]/dashboard/website/funding-calls/[slug]/details"> {}
@@ -106,12 +108,23 @@ export default async function DashboardWebsiteFundingCallsDetailsPage(
 					},
 				},
 			},
+			image: {
+				columns: {
+					key: true,
+					label: true,
+				},
+			},
 		},
 	});
 
 	if (fundingCall == null) {
 		notFound();
 	}
+
+	const image = images.generateSignedImageUrl({
+		key: fundingCall.image.key,
+		options: imageGridOptions,
+	});
 
 	const contentBlocks = await getResolvedEntityContentBlocks(fundingCall.id, "content");
 
@@ -120,7 +133,7 @@ export default async function DashboardWebsiteFundingCallsDetailsPage(
 			contentBlocks={contentBlocks}
 			discardDraftAction={discardFundingCallDraftAction}
 			documentId={doc.id}
-			fundingCall={{ ...fundingCall }}
+			fundingCall={{ ...fundingCall, image: { ...fundingCall.image, url: image.url } }}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
 			publishAction={publishFundingCallAction}
