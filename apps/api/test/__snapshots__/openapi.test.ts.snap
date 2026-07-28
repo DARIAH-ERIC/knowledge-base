@@ -5704,6 +5704,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
         "type": "object",
       },
+      "GetSitemapResponse": {
+        "description": "All website urls derived from published content",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SitemapEntryList",
+          },
+          "total": {
+            "description": "Number of urls",
+            "type": "number",
+          },
+          "unresolved": {
+            "description": "Published documents skipped because no website url could be resolved for them. Currently only pages missing from the interim slug→path map; a non-zero value means the sitemap is incomplete.",
+            "type": "number",
+          },
+        },
+        "required": [
+          "data",
+          "total",
+          "unresolved",
+        ],
+        "type": "object",
+      },
       "GetSocialMediaListResponse": {
         "description": "Paginated list of social media",
         "properties": {
@@ -14415,6 +14437,51 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
         "type": "object",
       },
+      "SitemapEntry": {
+        "description": "Sitemap entry",
+        "properties": {
+          "href": {
+            "description": "Root-relative, locale-less website href. Prepend locale and origin, as for entity hrefs.",
+            "type": "string",
+          },
+          "lastModified": {
+            "description": "Most recent publish timestamp among the documents behind this url (\`publishedAt\` elsewhere in this api). Maps to sitemap \`lastmod\`.",
+            "format": "date-time",
+            "type": "string",
+          },
+          "type": {
+            "description": "Entity type this url was derived from",
+            "enum": [
+              "country",
+              "documents_policies",
+              "events",
+              "funding_calls",
+              "impact_case_studies",
+              "news",
+              "opportunities",
+              "pages",
+              "persons",
+              "projects",
+              "spotlight_articles",
+              "working_group",
+            ],
+            "type": "string",
+          },
+        },
+        "required": [
+          "href",
+          "type",
+          "lastModified",
+        ],
+        "type": "object",
+      },
+      "SitemapEntryList": {
+        "description": "List of sitemap entries",
+        "items": {
+          "$ref": "#/components/schemas/SitemapEntry",
+        },
+        "type": "array",
+      },
       "SocialMedia": {
         "description": "Social media",
         "properties": {
@@ -20073,6 +20140,38 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "summary": "Get site metadata",
         "tags": [
           "site-metadata",
+        ],
+      },
+    },
+    "/api/v1/sitemap": {
+      "get": {
+        "description": "Retrieve every website url derived from published content, with the timestamp of its most recent publish. One entry per url, so urls shared by several documents appear once. Listing pages which are not backed by content are not included; consumers add their own static routes.",
+        "operationId": "getSitemap",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSitemapResponse",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+        "summary": "Get sitemap urls",
+        "tags": [
+          "sitemap",
         ],
       },
     },

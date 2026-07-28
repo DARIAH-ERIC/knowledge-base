@@ -25,6 +25,7 @@ import { router as pages } from "@/routes/pages";
 import { router as persons } from "@/routes/persons";
 import { router as projects } from "@/routes/projects";
 import { router as siteMetadata } from "@/routes/site-metadata";
+import { router as sitemap } from "@/routes/sitemap";
 import { router as socialMedia } from "@/routes/social-media";
 import { router as spotlightArticles } from "@/routes/spotlight-articles";
 import { router as statistics } from "@/routes/statistics";
@@ -55,6 +56,7 @@ const api = createRouter()
 	.route("/persons", persons)
 	.route("/projects", projects)
 	.route("/site-metadata", siteMetadata)
+	.route("/sitemap", sitemap)
 	.route("/social-media", socialMedia)
 	.route("/spotlight-articles", spotlightArticles)
 	.route("/statistics", statistics)
