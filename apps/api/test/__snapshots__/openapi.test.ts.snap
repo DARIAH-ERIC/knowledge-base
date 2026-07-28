@@ -38,6 +38,15 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "type": "string",
         },
       },
+      "GetDocumentOrPolicyDocumentParams": {
+        "description": "Document or policy version id, or the published entity slug",
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+        },
+      },
       "GetEventByIdParams": {
         "in": "path",
         "name": "id",
@@ -17320,11 +17329,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
     },
     "/api/v1/documents-policies/{id}/document": {
       "get": {
-        "description": "Stream the S3-stored file for a document or policy",
+        "description": "Stream the S3-stored file for a document or policy by id or slug",
         "operationId": "getDocumentOrPolicyFile",
         "parameters": [
           {
-            "$ref": "#/components/parameters/GetDocumentOrPolicyByIdParams",
+            "$ref": "#/components/parameters/GetDocumentOrPolicyDocumentParams",
           },
         ],
         "responses": {
