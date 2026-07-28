@@ -62,7 +62,7 @@ async function findCandidates(): Promise<Array<Candidate>> {
 			JOIN "entities" AS "e" ON "e"."id" = "ev"."entity_id"
 			JOIN "entity_types" AS "et" ON "et"."id" = "e"."type_id"
 			WHERE "et"."type" = 'news'
-				AND "n"."title" LIKE ${`${titlePrefix}%`}
+				AND "n"."title" ILIKE ${`${titlePrefix}%`}
 		)
 		SELECT
 			"e"."id"::text AS "document_id",
@@ -104,7 +104,7 @@ async function findSlugConflicts(): Promise<Array<SlugConflict>> {
 			JOIN "entities" AS "e" ON "e"."id" = "ev"."entity_id"
 			JOIN "entity_types" AS "et" ON "et"."id" = "e"."type_id"
 			WHERE "et"."type" = 'news'
-				AND "n"."title" LIKE ${`${titlePrefix}%`}
+				AND "n"."title" ILIKE ${`${titlePrefix}%`}
 		)
 		SELECT
 			"target"."id"::text AS "document_id",
@@ -193,7 +193,7 @@ async function moveCandidates(): Promise<{
 				JOIN "entities" AS "e" ON "e"."id" = "ev"."entity_id"
 				JOIN "entity_types" AS "et" ON "et"."id" = "e"."type_id"
 				WHERE "et"."type" = 'news'
-					AND "n"."title" LIKE ${`${titlePrefix}%`}
+					AND "n"."title" ILIKE ${`${titlePrefix}%`}
 			),
 			"target_news" AS (
 				SELECT
