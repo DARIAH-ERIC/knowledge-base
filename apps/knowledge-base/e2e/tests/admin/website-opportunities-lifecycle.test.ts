@@ -36,6 +36,7 @@ test.describe("website opportunities lifecycle", () => {
 		await opportunitiesPage.fillDatePicker("End date", 2025, 7, 1);
 		await opportunitiesPage.fillWebsite(website);
 		await opportunitiesPage.addContentBlock(content);
+		await opportunitiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await opportunitiesPage.submitForm();
 
 		let opportunity = await db.getOpportunityByTitle(title);
@@ -144,6 +145,7 @@ test.describe("website opportunities lifecycle", () => {
 		await opportunitiesPage.fillSummary("Original E2E opportunity summary");
 		await opportunitiesPage.fillDatePicker("Start date", 2025, 6, 1);
 		await opportunitiesPage.addContentBlock(originalContent);
+		await opportunitiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await opportunitiesPage.submitForm();
 
 		await opportunitiesPage.searchByTitle(originalTitle);
@@ -209,6 +211,7 @@ test.describe("website opportunities lifecycle", () => {
 		await opportunitiesPage.fillDatePicker("End date", 2025, 7, 1);
 		await opportunitiesPage.fillWebsite("https://example.com/opportunity-clear");
 		await opportunitiesPage.addContentBlock("Optional opportunity content");
+		await opportunitiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await opportunitiesPage.submitForm();
 
 		await opportunitiesPage.searchByTitle(title);
@@ -219,14 +222,13 @@ test.describe("website opportunities lifecycle", () => {
 			page.getByRole("menuitem", { name: "Edit" }).click(),
 		]);
 
-		await opportunitiesPage.fillSummary("");
+		// Summary and image are required, so the website, end date and content remain optional.
 		await opportunitiesPage.fillWebsite("");
 		await opportunitiesPage.clearDatePicker("End date");
 		await opportunitiesPage.removeFirstContentBlock();
 		await opportunitiesPage.submitForm();
 
 		const updated = await db.getOpportunityByTitle(title);
-		expect(updated?.summary).toBeNull();
 		expect(updated?.website).toBeNull();
 		expect(updated?.duration.end).toBeUndefined();
 		expect(await db.getOpportunityContentBlocksByTitle(title)).toHaveLength(0);

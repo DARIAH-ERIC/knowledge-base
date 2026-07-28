@@ -15,6 +15,7 @@ interface OpportunityEditFormProps {
 	contentBlocks: Array<ContentBlock>;
 	documentId: string;
 	hasDraftChanges: boolean;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	isPublished: boolean;
 	opportunity: Pick<
 		schema.Opportunity,
@@ -25,12 +26,20 @@ interface OpportunityEditFormProps {
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 		source: Pick<schema.OpportunitySource, "id" | "source">;
-	};
+	} & { image: { key: string; label: string; url: string } };
 	sources: Array<Pick<schema.OpportunitySource, "id" | "source">>;
 }
 
 export function OpportunityEditForm(props: Readonly<OpportunityEditFormProps>): ReactNode {
-	const { contentBlocks, documentId, hasDraftChanges, isPublished, opportunity, sources } = props;
+	const {
+		contentBlocks,
+		documentId,
+		hasDraftChanges,
+		initialAssets,
+		isPublished,
+		opportunity,
+		sources,
+	} = props;
 
 	const t = useExtracted();
 
@@ -49,6 +58,7 @@ export function OpportunityEditForm(props: Readonly<OpportunityEditFormProps>): 
 
 			<OpportunityForm
 				contentBlocks={contentBlocks}
+				initialAssets={initialAssets}
 				isPublished={isPublished}
 				formAction={updateOpportunityAction}
 				opportunity={opportunity}

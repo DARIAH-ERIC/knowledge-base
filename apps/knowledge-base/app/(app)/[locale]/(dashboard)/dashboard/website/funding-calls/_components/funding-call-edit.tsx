@@ -15,17 +15,19 @@ interface FundingCallEditFormProps {
 	contentBlocks: Array<ContentBlock>;
 	documentId: string;
 	hasDraftChanges: boolean;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	isPublished: boolean;
 	fundingCall: Pick<schema.FundingCall, "id" | "duration" | "title" | "summary"> & {
 		entityVersion: {
 			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
-	};
+	} & { image: { key: string; label: string; url: string } };
 }
 
 export function FundingCallEditForm(props: Readonly<FundingCallEditFormProps>): ReactNode {
-	const { contentBlocks, documentId, hasDraftChanges, isPublished, fundingCall } = props;
+	const { contentBlocks, documentId, hasDraftChanges, initialAssets, isPublished, fundingCall } =
+		props;
 
 	const t = useExtracted();
 
@@ -44,6 +46,7 @@ export function FundingCallEditForm(props: Readonly<FundingCallEditFormProps>): 
 
 			<FundingCallForm
 				contentBlocks={contentBlocks}
+				initialAssets={initialAssets}
 				isPublished={isPublished}
 				formAction={updateFundingCallAction}
 				fundingCall={fundingCall}

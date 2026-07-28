@@ -7,14 +7,20 @@ import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_co
 import { FundingCallForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form";
 import { createFundingCallAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/create-funding-call.action";
 
-export function FundingCallCreateForm(): ReactNode {
+interface FundingCallCreateFormProps {
+	initialAssets: Array<{ key: string; label: string; url: string }>;
+}
+
+export function FundingCallCreateForm(props: Readonly<FundingCallCreateFormProps>): ReactNode {
+	const { initialAssets } = props;
+
 	const t = useExtracted();
 
 	return (
 		<Fragment>
 			<EntityFormHeader title={t("New funding call")} />
 
-			<FundingCallForm formAction={createFundingCallAction} />
+			<FundingCallForm formAction={createFundingCallAction} initialAssets={initialAssets} />
 		</Fragment>
 	);
 }

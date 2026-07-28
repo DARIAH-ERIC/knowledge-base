@@ -8,7 +8,7 @@ export const UpdateOpportunityActionInputSchema = v.object({
 	slug: EntitySlugInputSchema,
 	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(OpportunityUpdateSchema, ["title", "summary", "sourceId", "website"]).entries,
-	summary: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
+	imageKey: v.pipe(v.string(), v.nonEmpty()),
 	duration: v.object({
 		start: v.pipe(v.string(), v.isoDate(), v.toDate()),
 		end: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),

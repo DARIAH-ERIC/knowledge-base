@@ -12,7 +12,7 @@ import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
 import { CalendarDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState } from "react";
+import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import {
 	type ContentBlock,
@@ -24,17 +24,19 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { ImageSelectField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface OpportunityFormProps {
 	contentBlocks?: Array<ContentBlock>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	opportunity?: Pick<schema.Opportunity, "id" | "duration" | "title" | "summary" | "website"> & {
 		entityVersion: {
 			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 		source: Pick<schema.OpportunitySource, "id" | "source">;
-	};
+	} & { image: { key: string; label: string; url: string } };
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
 	formAction: ServerAction;
@@ -42,11 +44,15 @@ interface OpportunityFormProps {
 }
 
 export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNode {
-	const { contentBlocks, formAction, opportunity, sources, isPublished } = props;
+	const { initialAssets, contentBlocks, formAction, opportunity, sources, isPublished } = props;
 
 	const t = useExtracted();
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
+
+	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
+		opportunity?.image ?? null,
+	);
 
 	return (
 		<FormLayout>
@@ -75,7 +81,11 @@ export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNod
 						</SelectContent>
 					</Select>
 
-					<TextField defaultValue={opportunity?.summary ?? undefined} name="summary">
+					<TextField
+						defaultValue={opportunity?.summary ?? undefined}
+						isRequired={true}
+						name="summary"
+					>
 						<Label>{t("Summary")}</Label>
 						<TextArea rows={5} />
 						<FieldError />
@@ -123,6 +133,23 @@ export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNod
 					<EntitySlugField
 						isPublished={isPublished}
 						slug={opportunity?.entityVersion.entity.slug}
+					/>
+				</FormSection>
+
+				<Separator className="my-6" />
+
+				<FormSection
+					description={t("Select or upload an image.")}
+					isRequired={true}
+					title={t("Image")}
+				>
+					<ImageSelectField
+						defaultPrefix="images"
+						initialAssets={initialAssets}
+						isRequired={true}
+						onChange={setSelectedImage}
+						prefixes={["avatars", "images", "logos"]}
+						selectedImage={selectedImage}
 					/>
 				</FormSection>
 

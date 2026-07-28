@@ -287,6 +287,27 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       },
     },
     "schemas": {
+      "Announcement": {
+        "description": "Announcement: a news item, opportunity or funding call",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/NewsAnnouncement",
+          },
+          {
+            "$ref": "#/components/schemas/OpportunityAnnouncement",
+          },
+          {
+            "$ref": "#/components/schemas/FundingCallAnnouncement",
+          },
+        ],
+      },
+      "AnnouncementList": {
+        "description": "List of announcements",
+        "items": {
+          "$ref": "#/components/schemas/Announcement",
+        },
+        "type": "array",
+      },
       "BadRequestResponse": {
         "description": "Bad request response",
         "properties": {
@@ -4545,6 +4566,60 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "format": "uuid",
             "type": "string",
           },
+          "image": {
+            "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {},
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "url": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "url",
+              "alt",
+              "caption",
+              "license",
+            ],
+            "type": "object",
+          },
           "publishedAt": {
             "format": "date-time",
             "type": "string",
@@ -4605,14 +4680,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "type": "array",
           },
           "summary": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "null",
-              },
-            ],
+            "type": "string",
           },
           "title": {
             "type": "string",
@@ -4625,6 +4693,121 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "duration",
           "entity",
           "publishedAt",
+          "image",
+        ],
+        "type": "object",
+      },
+      "FundingCallAnnouncement": {
+        "description": "Funding call in the announcements feed",
+        "properties": {
+          "duration": {
+            "properties": {
+              "end": {
+                "format": "date-time",
+                "type": "string",
+              },
+              "start": {
+                "format": "date-time",
+                "type": "string",
+              },
+            },
+            "required": [
+              "start",
+            ],
+            "type": "object",
+          },
+          "entity": {
+            "properties": {
+              "slug": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "slug",
+            ],
+            "type": "object",
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string",
+          },
+          "image": {
+            "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {},
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "url": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "url",
+              "alt",
+              "caption",
+              "license",
+            ],
+            "type": "object",
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string",
+          },
+          "summary": {
+            "type": "string",
+          },
+          "title": {
+            "type": "string",
+          },
+          "type": {
+            "const": "funding_calls",
+          },
+        },
+        "required": [
+          "id",
+          "title",
+          "summary",
+          "image",
+          "entity",
+          "publishedAt",
+          "type",
+          "duration",
         ],
         "type": "object",
       },
@@ -4662,19 +4845,66 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "format": "uuid",
             "type": "string",
           },
+          "image": {
+            "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {},
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "url": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "url",
+              "alt",
+              "caption",
+              "license",
+            ],
+            "type": "object",
+          },
           "publishedAt": {
             "format": "date-time",
             "type": "string",
           },
           "summary": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "null",
-              },
-            ],
+            "type": "string",
           },
           "title": {
             "type": "string",
@@ -4687,6 +4917,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "duration",
           "entity",
           "publishedAt",
+          "image",
         ],
         "type": "object",
       },
@@ -4728,6 +4959,30 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "$ref": "#/components/schemas/FundingCallSlug",
         },
         "type": "array",
+      },
+      "GetAnnouncementsResponse": {
+        "description": "Paginated list of announcements",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AnnouncementList",
+          },
+          "limit": {
+            "type": "number",
+          },
+          "offset": {
+            "type": "number",
+          },
+          "total": {
+            "type": "number",
+          },
+        },
+        "required": [
+          "limit",
+          "offset",
+          "total",
+          "data",
+        ],
+        "type": "object",
       },
       "GetDariahProjectSlugsResponse": {
         "description": "Paginated list of DARIAH project slugs",
@@ -9422,6 +9677,103 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         },
         "type": "array",
       },
+      "NewsAnnouncement": {
+        "description": "News item in the announcements feed",
+        "properties": {
+          "entity": {
+            "properties": {
+              "slug": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "slug",
+            ],
+            "type": "object",
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string",
+          },
+          "image": {
+            "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {},
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "url": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "url",
+              "alt",
+              "caption",
+              "license",
+            ],
+            "type": "object",
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string",
+          },
+          "summary": {
+            "type": "string",
+          },
+          "title": {
+            "type": "string",
+          },
+          "type": {
+            "const": "news",
+          },
+        },
+        "required": [
+          "id",
+          "title",
+          "summary",
+          "image",
+          "entity",
+          "publishedAt",
+          "type",
+        ],
+        "type": "object",
+      },
       "NewsItem": {
         "description": "News item",
         "properties": {
@@ -10679,6 +11031,60 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "format": "uuid",
             "type": "string",
           },
+          "image": {
+            "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {},
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "url": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "url",
+              "alt",
+              "caption",
+              "license",
+            ],
+            "type": "object",
+          },
           "publishedAt": {
             "format": "date-time",
             "type": "string",
@@ -10759,14 +11165,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "type": "object",
           },
           "summary": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "null",
-              },
-            ],
+            "type": "string",
           },
           "title": {
             "type": "string",
@@ -10791,6 +11190,140 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "duration",
           "entity",
           "publishedAt",
+          "image",
+        ],
+        "type": "object",
+      },
+      "OpportunityAnnouncement": {
+        "description": "Opportunity in the announcements feed",
+        "properties": {
+          "duration": {
+            "properties": {
+              "end": {
+                "format": "date-time",
+                "type": "string",
+              },
+              "start": {
+                "format": "date-time",
+                "type": "string",
+              },
+            },
+            "required": [
+              "start",
+            ],
+            "type": "object",
+          },
+          "entity": {
+            "properties": {
+              "slug": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "slug",
+            ],
+            "type": "object",
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string",
+          },
+          "image": {
+            "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {},
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "url": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "url",
+              "alt",
+              "caption",
+              "license",
+            ],
+            "type": "object",
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string",
+          },
+          "source": {
+            "enum": [
+              "dariah",
+              "external",
+            ],
+            "type": "string",
+          },
+          "summary": {
+            "type": "string",
+          },
+          "title": {
+            "type": "string",
+          },
+          "type": {
+            "const": "opportunities",
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+        },
+        "required": [
+          "id",
+          "title",
+          "summary",
+          "image",
+          "entity",
+          "publishedAt",
+          "type",
+          "duration",
+          "source",
+          "website",
         ],
         "type": "object",
       },
@@ -10828,6 +11361,60 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "format": "uuid",
             "type": "string",
           },
+          "image": {
+            "properties": {
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "caption": {
+                "anyOf": [
+                  {},
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "license": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                      },
+                      "url": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "name",
+                      "url",
+                    ],
+                    "type": "object",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "url": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "url",
+              "alt",
+              "caption",
+              "license",
+            ],
+            "type": "object",
+          },
           "publishedAt": {
             "format": "date-time",
             "type": "string",
@@ -10853,14 +11440,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "type": "object",
           },
           "summary": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "null",
-              },
-            ],
+            "type": "string",
           },
           "title": {
             "type": "string",
@@ -10885,6 +11465,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "duration",
           "entity",
           "publishedAt",
+          "image",
         ],
         "type": "object",
       },
@@ -16093,6 +16674,77 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/announcements": {
+      "get": {
+        "description": "Retrieve a paginated, reverse-chronological list of news, opportunities and funding calls. Each item is tagged with its \`type\`; fetch the full record from the endpoint for that type.",
+        "operationId": "getAnnouncements",
+        "parameters": [
+          {
+            "description": "Maximum number of items in paginated list",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": "10",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+            },
+          },
+          {
+            "description": "Offset in paginated list",
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": "0",
+              "minimum": 0,
+              "type": "integer",
+            },
+          },
+          {
+            "description": "Filter by announcement type. Can be provided multiple times, e.g. \`?type=news&type=opportunities\`. Defaults to all types.",
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "items": {
+                "enum": [
+                  "news",
+                  "opportunities",
+                  "funding_calls",
+                ],
+                "type": "string",
+              },
+              "type": "array",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAnnouncementsResponse",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+        "summary": "Get announcements",
+        "tags": [
+          "announcements",
+        ],
+      },
+    },
     "/api/v1/assets/{prefix}/{name}/download": {
       "get": {
         "description": "Stream the S3-stored file for an asset, by storage key",
