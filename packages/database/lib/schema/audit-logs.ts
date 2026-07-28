@@ -29,10 +29,9 @@ export const auditLogs = p.snakeCase.table(
 		subjectType: p.text("subject_type").notNull(),
 		subjectId: p.text("subject_id").notNull(),
 		/**
-		 * Snapshot of the subject's human-readable label at the time the event was recorded. Populated
-		 * for events whose subject won't be resolvable at read time — notably deletes, where the live
-		 * row is gone. Null for events whose label is resolved live from the current version (so
-		 * renames stay reflected). See `resolveAuditSubjectLabel`.
+		 * Snapshot of the subject's human-readable label at the time the event was recorded. Used first
+		 * by the audit-log UI so rows stay readable even when the subject is later renamed or deleted.
+		 * Null is still allowed for legacy/manual events whose subject could not be resolved.
 		 */
 		subjectLabel: p.text("subject_label"),
 		summary: p.jsonb("summary").notNull().default({}),

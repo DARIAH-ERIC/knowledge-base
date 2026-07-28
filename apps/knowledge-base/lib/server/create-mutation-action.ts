@@ -15,6 +15,7 @@ import {
 	getAuditSummaryFromFormData,
 	recordAuditEvent,
 } from "@/lib/audit/audit-log";
+import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
 import { type Transaction, db } from "@/lib/db";
 import { type IntlLocale, getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -29,10 +30,9 @@ import { type ServerAction, createServerAction } from "@/lib/server/create-serve
 export interface MutationResult<TSuccessData = unknown> {
 	subjectId: string;
 	/**
-	 * Snapshot of the subject's label for the audit row. Set this when the subject won't be
-	 * resolvable at read time — above all for deletes, where `mutate` must resolve the label (e.g.
-	 * via `resolveAuditSubjectLabel`) _before_ removing the row. Omit it for create/update so the log
-	 * resolves the label live from the current version.
+	 * Snapshot of the subject's label for the audit row. When omitted, the wrapper resolves it from
+	 * the active transaction before writing the audit event. Set it explicitly when `mutate` already
+	 * has the better event-time label, especially before deleting a row.
 	 */
 	subjectLabel?: string | null;
 	/**
@@ -194,12 +194,16 @@ export function createMutationAction<TSchema extends v.GenericSchema, TSuccessDa
 
 			const result = await db.transaction(async (tx) => {
 				const mutationResult = await opts.mutate(tx, input, ctx);
+				const subjectLabel =
+					mutationResult.subjectLabel !== undefined
+						? mutationResult.subjectLabel
+						: await resolveAuditSubjectLabel(opts.audit.subjectType, mutationResult.subjectId, tx);
 				await recordAuditEvent(tx, {
 					actorUserId: user?.id,
 					action: opts.audit.action,
 					subjectType: opts.audit.subjectType,
 					subjectId: mutationResult.subjectId,
-					subjectLabel: mutationResult.subjectLabel,
+					subjectLabel,
 					summary: {
 						...getAuditSummaryFromFormData(formData),
 						...mutationResult.auditSummary,

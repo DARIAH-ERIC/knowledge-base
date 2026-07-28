@@ -3,6 +3,7 @@
 import { Readable } from "node:stream";
 import type { ReadableStream } from "node:stream/web";
 
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import sharp from "sharp";
 
@@ -186,18 +187,23 @@ export async function uploadAsset(params: UploadAssetParams) {
 
 	const { key } = (await s3.upload({ input, prefix, metadata, size })).unwrap();
 
-	await db.insert(schema.assets).values({
-		key,
-		licenseId,
-		mimeType: metadata["content-type"],
-		filename: file.name,
-		size,
-		label: label ?? file.name,
-		alt,
-		caption,
-	});
+	const [asset] = await db
+		.insert(schema.assets)
+		.values({
+			key,
+			licenseId,
+			mimeType: metadata["content-type"],
+			filename: file.name,
+			size,
+			label: label ?? file.name,
+			alt,
+			caption,
+		})
+		.returning({ id: schema.assets.id });
+	assert(asset);
 
 	return {
+		id: asset.id,
 		key,
 	};
 }

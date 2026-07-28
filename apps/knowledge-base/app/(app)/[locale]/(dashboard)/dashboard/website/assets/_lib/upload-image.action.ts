@@ -46,14 +46,15 @@ export const uploadImageAction = createServerAction<
 
 		const { file, licenseId, prefix, label, alt, caption } = validation.output;
 
-		const { key } = await uploadAsset({ file, licenseId, prefix, label, alt, caption });
+		const { id, key } = await uploadAsset({ file, licenseId, prefix, label, alt, caption });
 		const { url } = images.generateSignedImageUrl({ key, options: imageGridOptions });
 
 		await recordAuditEvent(db, {
 			actorUserId: user?.id,
 			action: "create",
 			subjectType: "assets",
-			subjectId: key,
+			subjectId: id,
+			subjectLabel: label ?? file.name,
 			summary: getAuditSummaryFromFormData(formData),
 		});
 

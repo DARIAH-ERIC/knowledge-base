@@ -13,11 +13,9 @@ export interface RecordAuditEventInput {
 	subjectType: string;
 	subjectId: string;
 	/**
-	 * Optional snapshot of the subject's human-readable label. Pass this for events whose subject
-	 * won't be resolvable at read time — above all deletes, where the live row is gone by the time
-	 * the log is displayed. Omit it for events whose label should be resolved live
-	 * (create/update/publish), so renames stay reflected. Resolve it with `resolveAuditSubjectLabel`
-	 * before the row is removed.
+	 * Optional snapshot of the subject's human-readable label. Action wrappers populate this from the
+	 * active transaction when possible, so audit rows stay readable even if the subject is later
+	 * renamed or deleted. Manual callers should pass it when they already have the event-time label.
 	 */
 	subjectLabel?: string | null;
 	summary?: Record<string, unknown>;

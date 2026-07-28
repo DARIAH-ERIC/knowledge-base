@@ -15,6 +15,7 @@ import { after } from "next/server";
 
 import { type AuditLogAction, recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin, assertAuthenticated } from "@/lib/auth/session";
+import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
 import { type Transaction, db } from "@/lib/db";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -98,12 +99,16 @@ export function createCommandAction<
 
 			const result = await db.transaction(async (tx) => {
 				const r = await opts.mutate(tx, args, ctx);
+				const subjectLabel =
+					r.subjectLabel !== undefined
+						? r.subjectLabel
+						: await resolveAuditSubjectLabel(opts.audit.subjectType, r.subjectId, tx);
 				await recordAuditEvent(tx, {
 					actorUserId: user?.id,
 					action: opts.audit.action,
 					subjectType: opts.audit.subjectType,
 					subjectId: r.subjectId,
-					subjectLabel: r.subjectLabel,
+					subjectLabel,
 					summary: r.auditSummary ?? {},
 				});
 				return r;
