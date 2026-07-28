@@ -224,10 +224,18 @@ async function getJsonColumns(): Promise<Array<CatalogColumn>> {
 		column_name: string;
 		data_type: string;
 	}>(sql`
-		select table_schema, table_name, column_name, data_type
-		from information_schema.columns
-		where table_schema not in ('pg_catalog', 'information_schema')
-			and data_type in ('jsonb', 'json')
+		select
+			columns.table_schema,
+			columns.table_name,
+			columns.column_name,
+			columns.data_type
+		from information_schema.columns as columns
+		join pg_namespace as namespace on namespace.nspname = columns.table_schema
+		join pg_class as relation on relation.relnamespace = namespace.oid
+			and relation.relname = columns.table_name
+		where columns.table_schema not in ('pg_catalog', 'information_schema')
+			and columns.data_type in ('jsonb', 'json')
+			and relation.relkind = 'r'
 	`);
 
 	return result.rows.map((row) => {
