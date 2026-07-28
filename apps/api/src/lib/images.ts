@@ -59,6 +59,14 @@ interface FeaturedImageCaption {
  * shared by every placement, so an entity either inherits it, replaces it for its own page, or
  * suppresses it. Consumers only ever see the resolved caption, exactly as for image content
  * blocks.
+ *
+ * **Every serializer of an image whose table carries `image_caption`/`image_caption_mode` must go
+ * through here** — `news`, `events`, `funding_calls`, `impact_case_studies`, `opportunities`,
+ * `spotlight_articles` and `persons`. A query that selects the asset's `caption` but not those two
+ * columns compiles and returns a plausible-looking response that ignores the editor's choice, which
+ * is how `/featured-entities` once served asset captions while `/news` served the right ones.
+ * Tables without those columns (projects, pages, organisational units, logos) pass their image
+ * straight to {@link generateImageUrl}.
  */
 export function withResolvedCaption(image: ImageAsset, entity: FeaturedImageCaption): ImageAsset;
 export function withResolvedCaption(

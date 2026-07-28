@@ -2,7 +2,7 @@
 
 import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, withResolvedCaption } from "@/lib/images";
 import type { Database, Transaction } from "@/middlewares/db";
 import { imageWidth } from "~/config/api.config";
 
@@ -44,6 +44,8 @@ async function getFeaturedNews(db: Database | Transaction, ids: Array<string>) {
 			id: true,
 			title: true,
 			summary: true,
+			imageCaption: true,
+			imageCaptionMode: true,
 		},
 		with: {
 			entityVersion: {
@@ -78,7 +80,7 @@ async function getFeaturedNews(db: Database | Transaction, ids: Array<string>) {
 		.map((id) => itemsById.get(id))
 		.filter((item): item is NonNullable<typeof item> => item != null)
 		.map((item) => {
-			const image = generateImageUrl(item.image, imageWidth.preview);
+			const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview);
 
 			return { ...flattenEntityVersion(item), image };
 		});
@@ -107,6 +109,8 @@ async function getFeaturedEvents(db: Database | Transaction, ids: Array<string>)
 			location: true,
 			isFullDay: true,
 			duration: true,
+			imageCaption: true,
+			imageCaptionMode: true,
 		},
 		with: {
 			entityVersion: {
@@ -141,7 +145,7 @@ async function getFeaturedEvents(db: Database | Transaction, ids: Array<string>)
 		.map((id) => itemsById.get(id))
 		.filter((item): item is NonNullable<typeof item> => item != null)
 		.map((item) => {
-			const image = generateImageUrl(item.image, imageWidth.preview);
+			const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview);
 			const duration = serializeDateRange(item.duration);
 
 			return { ...flattenEntityVersion(item), image, duration };
