@@ -246,6 +246,7 @@ describe("documents-policies", () => {
 
 				const item = items.at(1)!;
 				const id = item.version.id;
+				const slug = item.entity.slug;
 				const title = item.documentOrPolicy.title;
 
 				const response = await client["documents-policies"][":id"].$get({
@@ -258,7 +259,7 @@ describe("documents-policies", () => {
 
 				assert("description" in data);
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				expect(data).toMatchObject({ title, document: { url: expect.stringContaining(id) } });
+				expect(data).toMatchObject({ title, document: { url: expect.stringContaining(slug) } });
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});
@@ -402,7 +403,7 @@ describe("documents-policies", () => {
 				documentId: assetId,
 			});
 
-			return { id: versionId };
+			return { id: versionId, slug: `doc-${versionId}` };
 		}
 
 		it("should stream file with correct headers for existing record", async () => {
@@ -414,6 +415,27 @@ describe("documents-policies", () => {
 
 				const response = await client["documents-policies"][":id"].document.$get({
 					param: { id },
+				});
+
+				expect(response.status).toBe(200);
+				expect(response.headers.get("Content-Type")).toBe("application/pdf");
+				expect(response.headers.get("Content-Disposition")).toBe(
+					`inline; filename="policy-2024.pdf"; filename*=UTF-8''policy-2024.pdf`,
+				);
+				const body = await response.text();
+				expect(body).toBe(content);
+			});
+		});
+
+		it("should stream file by slug with correct headers for existing record", async () => {
+			await withTransaction(async (db) => {
+				const content = "test file content";
+				const key = "documents/019b7605-b88f-7893-84af-22aaf476e41f";
+				const { slug } = await seedDocument(db, key);
+				const client = createTestClient(db, createMockStorage(content));
+
+				const response = await client["documents-policies"][":id"].document.$get({
+					param: { id: slug },
 				});
 
 				expect(response.status).toBe(200);
@@ -476,7 +498,7 @@ describe("documents-policies", () => {
 			});
 		});
 
-		it("should return 400 for non-UUID id", async () => {
+		it("should return 404 for non-existing slug", async () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db, createMockStorage());
 
@@ -484,7 +506,7 @@ describe("documents-policies", () => {
 					param: { id: "no-uuid" },
 				});
 
-				expect(response.status).toBe(400);
+				expect(response.status).toBe(404);
 			});
 		});
 	});

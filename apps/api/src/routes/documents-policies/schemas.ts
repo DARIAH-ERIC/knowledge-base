@@ -124,6 +124,19 @@ export const GetDocumentOrPolicyById = {
 	ResponseSchema: DocumentOrPolicySchema,
 };
 
+export const GetDocumentOrPolicyDocument = {
+	ParamsSchema: v.pipe(
+		v.object({
+			id: v.pipe(
+				v.string(),
+				v.description("Document or policy version id, or the published entity slug"),
+			),
+		}),
+		v.description("Get document or policy file params"),
+		v.metadata({ ref: "GetDocumentOrPolicyDocumentParams" }),
+	),
+};
+
 export const GetDocumentOrPolicySlugs = {
 	QuerySchema: PaginationQuerySchema,
 	ResponseSchema: v.pipe(

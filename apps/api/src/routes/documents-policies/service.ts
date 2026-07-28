@@ -7,6 +7,12 @@ import { flattenEntityVersion } from "@/lib/entity-version";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
 
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
+
+export function isUuid(value: string): boolean {
+	return uuidPattern.test(value);
+}
+
 interface GetDocumentsPoliciesParams {
 	/** @default 10 */
 	limit?: number;
@@ -303,6 +309,45 @@ export async function getDocumentOrPolicyDocument(
 			entityVersion: {
 				status: {
 					type: "published",
+				},
+			},
+		},
+		columns: {
+			id: true,
+		},
+		with: {
+			document: {
+				columns: {
+					filename: true,
+					key: true,
+					label: true,
+					mimeType: true,
+				},
+			},
+		},
+	});
+
+	return item ?? null;
+}
+
+interface GetDocumentOrPolicyDocumentBySlugParams {
+	slug: schema.Entity["slug"];
+}
+
+export async function getDocumentOrPolicyDocumentBySlug(
+	db: Database | Transaction,
+	params: GetDocumentOrPolicyDocumentBySlugParams,
+) {
+	const { slug } = params;
+
+	const item = await db.query.documentsPolicies.findFirst({
+		where: {
+			entityVersion: {
+				status: {
+					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 		},

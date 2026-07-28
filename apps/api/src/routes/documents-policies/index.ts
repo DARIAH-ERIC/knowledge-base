@@ -11,6 +11,7 @@ import { validate, validator } from "@/lib/openapi/validator";
 import {
 	GetDocumentOrPolicyById,
 	GetDocumentOrPolicyBySlug,
+	GetDocumentOrPolicyDocument,
 	GetDocumentOrPolicySlugs,
 	GetDocumentsPolicies,
 	GetDocumentsPoliciesTree,
@@ -19,14 +20,16 @@ import {
 	getDocumentOrPolicyById,
 	getDocumentOrPolicyBySlug,
 	getDocumentOrPolicyDocument,
+	getDocumentOrPolicyDocumentBySlug,
 	getDocumentOrPolicySlugs,
 	getDocumentsPolicies,
 	getDocumentsPoliciesTree,
+	isUuid,
 } from "@/routes/documents-policies/service";
 import { env } from "~/config/env.config";
 
-function documentUrl(id: string) {
-	return new URL(`/api/v1/documents-policies/${id}/document`, env.API_BASE_URL).href;
+function documentUrl(reference: string) {
+	return new URL(`/api/v1/documents-policies/${reference}/document`, env.API_BASE_URL).href;
 }
 
 export const router = createRouter()
@@ -62,7 +65,7 @@ export const router = createRouter()
 			const data = {
 				...result,
 				data: result.data.map((item) => {
-					return { ...item, document: { url: documentUrl(item.id) } };
+					return { ...item, document: { url: documentUrl(item.entity.slug) } };
 				}),
 			};
 
@@ -99,13 +102,13 @@ export const router = createRouter()
 			const data = {
 				data: result.data.map((node) => {
 					if (node.type === "item") {
-						return { ...node, document: { url: documentUrl(node.id) } };
+						return { ...node, document: { url: documentUrl(node.entity.slug) } };
 					}
 
 					return {
 						...node,
 						items: node.items.map((item) => {
-							return { ...item, document: { url: documentUrl(item.id) } };
+							return { ...item, document: { url: documentUrl(item.entity.slug) } };
 						}),
 					};
 				}),
@@ -186,7 +189,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const data = { ...result, document: { url: documentUrl(result.id) } };
+			const data = { ...result, document: { url: documentUrl(result.entity.slug) } };
 
 			const payload = await validate(GetDocumentOrPolicyById.ResponseSchema, data, 500);
 
@@ -200,7 +203,7 @@ export const router = createRouter()
 		describeRoute({
 			tags: ["documents-policies"],
 			summary: "Download document or policy file",
-			description: "Stream the S3-stored file for a document or policy",
+			description: "Stream the S3-stored file for a document or policy by id or slug",
 			operationId: "getDocumentOrPolicyFile",
 			responses: {
 				200: {
@@ -213,14 +216,16 @@ export const router = createRouter()
 				...NOT_FOUND,
 			},
 		}),
-		validator("param", GetDocumentOrPolicyById.ParamsSchema),
+		validator("param", GetDocumentOrPolicyDocument.ParamsSchema),
 		async (c) => {
-			const { id } = c.req.valid("param");
+			const idOrSlug = c.req.valid("param").id;
 
 			const db = c.get("db");
 			assert(db, "Database must be provided via middleware.");
 
-			const item = await getDocumentOrPolicyDocument(db, { id });
+			const item = isUuid(idOrSlug)
+				? await getDocumentOrPolicyDocument(db, { id: idOrSlug })
+				: await getDocumentOrPolicyDocumentBySlug(db, { slug: idOrSlug });
 
 			if (item == null) {
 				return c.notFound();
@@ -275,7 +280,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const data = { ...result, document: { url: documentUrl(result.id) } };
+			const data = { ...result, document: { url: documentUrl(result.entity.slug) } };
 
 			const payload = await validate(GetDocumentOrPolicyBySlug.ResponseSchema, data, 500);
 
