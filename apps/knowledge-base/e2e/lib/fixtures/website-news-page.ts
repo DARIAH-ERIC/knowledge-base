@@ -648,7 +648,10 @@ export class WebsiteNewsPage {
 		await dialog.getByRole("button", { name: "Select" }).click();
 		await dialog.waitFor({ state: "hidden" });
 
-		await panel.getByRole("textbox", { name: "Caption" }).fill(options.caption);
+		/* Gallery items follow the shared caption model, so a caption of their own means overriding
+		   the asset's. */
+		await panel.getByRole("radio", { name: "Custom caption", exact: true }).click();
+		await panel.getByRole("textbox", { name: "Custom caption" }).fill(options.caption);
 	}
 
 	async addDataBlock(options: { dataType: string; limit: number }): Promise<void> {

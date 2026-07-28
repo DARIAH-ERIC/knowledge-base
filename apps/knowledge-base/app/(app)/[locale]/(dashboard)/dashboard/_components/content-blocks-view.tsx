@@ -2,7 +2,7 @@
 
 "use client";
 
-import { resolveImageCaption } from "@dariah-eric/database/image-captions";
+import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
 import { Note } from "@dariah-eric/ui/note";
@@ -106,6 +106,19 @@ const richTextRenderOptions = {
 	markMapping: { link: renderLinkMark },
 	nodeMapping: { buttonLink: renderButtonLinkNode },
 };
+
+/** Gallery items follow the same caption model as image blocks: inherit, override, or hide. */
+function resolveGalleryItemCaption(item: {
+	asset?: { caption?: JSONContent | null } | undefined;
+	caption?: JSONContent | null;
+	captionMode?: ImageCaptionMode;
+}) {
+	return resolveImageCaption({
+		assetCaption: item.asset?.caption,
+		blockCaption: item.caption,
+		captionMode: item.captionMode ?? (item.caption != null ? "override" : "inherit"),
+	});
+}
 
 /** Renders a richtext caption inside a `figcaption`, or nothing when the caption is empty. */
 function CaptionFigcaption({
@@ -286,14 +299,16 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 								return null;
 							}
 
+							const { caption } = resolveGalleryItemCaption(item);
+
 							return (
 								<figure key={idx} className="inline-[min(20rem,80vw)] shrink-0 snap-start">
 									<img
-										alt={toPlainText(item.caption)}
+										alt={toPlainText(caption)}
 										className="aspect-4/3 inline-full rounded-lg object-cover"
 										src={item.imageUrl}
 									/>
-									<CaptionFigcaption caption={item.caption} />
+									<CaptionFigcaption caption={caption} />
 								</figure>
 							);
 						})}
@@ -308,14 +323,16 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							return null;
 						}
 
+						const { caption } = resolveGalleryItemCaption(item);
+
 						return (
 							<figure key={idx}>
 								<img
-									alt={toPlainText(item.caption)}
+									alt={toPlainText(caption)}
 									className="aspect-4/3 inline-full rounded-lg object-cover"
 									src={item.imageUrl}
 								/>
-								<CaptionFigcaption caption={item.caption} />
+								<CaptionFigcaption caption={caption} />
 							</figure>
 						);
 					})}
@@ -333,6 +350,14 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 				return null;
 			}
 
+			const { caption } = resolveImageCaption({
+				assetCaption: contentBlock.content?.asset?.caption,
+				blockCaption: contentBlock.content?.caption,
+				captionMode:
+					contentBlock.content?.captionMode ??
+					(contentBlock.content?.caption != null ? "override" : "inherit"),
+			});
+
 			return (
 				<div className="flex flex-col gap-y-4">
 					{eyebrow != null && (
@@ -340,7 +365,10 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 					)}
 					<h2 className="text-2xl font-bold">{title}</h2>
 					{imageUrl != null && (
-						<img alt="" className="inline-full rounded-lg object-cover" src={imageUrl} />
+						<figure>
+							<img alt="" className="inline-full rounded-lg object-cover" src={imageUrl} />
+							<CaptionFigcaption caption={caption} />
+						</figure>
 					)}
 					{ctas != null && ctas.length > 0 && (
 						<div className="flex flex-wrap gap-2">

@@ -19,7 +19,7 @@ import { getAssetDownloadUrl, getDownloadFilename } from "@/lib/asset-download";
 import { getEmbedUrl } from "@/lib/embed-url";
 import { generateImageUrl, toImageAsset } from "@/lib/images";
 import { getEntityRefsByDocumentId } from "@/lib/relations";
-import { ImageSchema, LicenseSchema } from "@/lib/schemas";
+import { LicenseSchema } from "@/lib/schemas";
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, eq } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -67,7 +67,15 @@ export const HeroContentBlockSchema = v.object({
 	type: v.literal("hero"),
 	title: v.string(),
 	eyebrow: v.nullable(v.string()),
-	image: v.nullable(ImageSchema),
+	image: v.nullable(
+		v.object({
+			url: v.string(),
+			alt: v.nullable(v.string()),
+			license: v.nullable(LicenseSchema),
+		}),
+	),
+	caption: v.nullable(v.any()),
+	captionSource: v.nullable(v.picklist(["asset", "block"])),
 	ctas: v.nullable(v.array(v.object({ label: v.string(), url: v.string() }))),
 });
 
@@ -138,6 +146,8 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			heroImageCaption: heroAssets.caption,
 			heroLicenseName: heroLicenses.name,
 			heroLicenseUrl: heroLicenses.url,
+			heroCaption: schema.heroContentBlocks.caption,
+			heroCaptionMode: schema.heroContentBlocks.captionMode,
 			heroCtas: schema.heroContentBlocks.ctas,
 			accordionItems: schema.accordionContentBlocks.items,
 			mediaTextSide: schema.mediaTextContentBlocks.side,
@@ -303,6 +313,8 @@ function normalizeRow(row: {
 	heroImageKey: string | null;
 	heroImageAlt: string | null;
 	heroImageCaption: JSONContent | null;
+	heroCaption: JSONContent | null;
+	heroCaptionMode: ImageCaptionMode | null;
 	heroLicenseName: string | null;
 	heroLicenseUrl: string | null;
 	heroCtas: unknown;
@@ -377,20 +389,34 @@ function normalizeRow(row: {
 			};
 		}
 		case "hero": {
+			const assetImage = generateImageUrl(
+				toImageAsset({
+					key: row.heroImageKey,
+					alt: row.heroImageAlt,
+					caption: row.heroImageCaption,
+					licenseName: row.heroLicenseName,
+					licenseUrl: row.heroLicenseUrl,
+				}),
+				imageWidth.featured,
+			);
+			/* The caption is resolved for the placement, so it is reported once next to the block
+			   rather than a second time inside the image. */
+			const image =
+				assetImage != null ? (({ caption: _assetCaption, ...rest }) => rest)(assetImage) : null;
+			const captionMode = row.heroCaptionMode ?? (row.heroCaption != null ? "override" : "inherit");
+			const { caption, source: captionSource } = resolveImageCaption({
+				assetCaption: row.heroImageCaption,
+				blockCaption: row.heroCaption,
+				captionMode,
+			});
+
 			return {
 				type: "hero",
 				title: row.heroTitle!,
 				eyebrow: row.heroEyebrow,
-				image: generateImageUrl(
-					toImageAsset({
-						key: row.heroImageKey,
-						alt: row.heroImageAlt,
-						caption: row.heroImageCaption,
-						licenseName: row.heroLicenseName,
-						licenseUrl: row.heroLicenseUrl,
-					}),
-					imageWidth.featured,
-				),
+				image,
+				caption,
+				captionSource,
 				ctas: row.heroCtas as Array<{ label: string; url: string }> | null,
 			};
 		}

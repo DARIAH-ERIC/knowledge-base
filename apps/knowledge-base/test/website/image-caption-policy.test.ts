@@ -1,4 +1,4 @@
-import { resolveImageCaption } from "@dariah-eric/database/image-captions";
+import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 import type { JSONContent } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 
@@ -120,5 +120,48 @@ describe("callout content-block document conversion", () => {
 		});
 
 		expect(blocks[0]?.content).toMatchObject({ intent: "neutral" });
+	});
+});
+
+/**
+ * Hero blocks and gallery items joined the caption model after rows already existed, so both carry
+ * a fallback for rows written before `caption_mode`: what the fallback must produce differs, and
+ * getting it backwards silently rewrites published captions.
+ */
+describe("caption mode of rows written before the column existed", () => {
+	function fallbackCaptionMode(caption: JSONContent | null): ImageCaptionMode {
+		return caption != null ? "override" : "inherit";
+	}
+
+	it("keeps showing a gallery item's own caption", () => {
+		/* Gallery items always rendered their caption verbatim, so an authored caption stays visible
+		   rather than being replaced by the asset's. */
+		expect(
+			resolveImageCaption({
+				assetCaption,
+				blockCaption,
+				captionMode: fallbackCaptionMode(blockCaption),
+			}),
+		).toStrictEqual({ caption: blockCaption, source: "block" });
+	});
+
+	it("surfaces the asset caption for a gallery item that never had one", () => {
+		expect(
+			resolveImageCaption({
+				assetCaption,
+				blockCaption: null,
+				captionMode: fallbackCaptionMode(null),
+			}),
+		).toStrictEqual({ caption: assetCaption, source: "asset" });
+	});
+
+	it("keeps serving the asset caption for a hero, which never had a caption of its own", () => {
+		expect(
+			resolveImageCaption({
+				assetCaption,
+				blockCaption: null,
+				captionMode: fallbackCaptionMode(null),
+			}),
+		).toStrictEqual({ caption: assetCaption, source: "asset" });
 	});
 });

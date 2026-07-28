@@ -1,3 +1,4 @@
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import {
 	annotatePlaceholderValues,
 	collectPlaceholderValueKinds,
@@ -8,6 +9,7 @@ import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import type { SelectedImage } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
 import { imageGridOptions } from "@/config/assets.config";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { type Transaction, db } from "@/lib/db";
@@ -23,10 +25,54 @@ async function getAssetIdByKey(tx: Transaction, key: string): Promise<string | n
 	return asset?.id ?? null;
 }
 
+/**
+ * The picked asset as the dashboard's image cards want it, assembled from a content-block row's
+ * joined asset columns. Read-only context: only `imageKey` is persisted, the rest identifies the
+ * asset for the editor.
+ */
+function toBlockAsset(
+	row: {
+		imageId: string | null;
+		imageKey: string | null;
+		imageLabel: string | null;
+		imageAlt: string | null;
+		imageAssetCaption: JSONContent | null;
+		imageLicenseId: string | null;
+		imageLicenseCode: string | null;
+		imageLicenseName: string | null;
+		imageMimeType: string | null;
+	},
+	url: string,
+): SelectedImage | undefined {
+	if (row.imageKey == null) {
+		return undefined;
+	}
+
+	return {
+		id: row.imageId,
+		key: row.imageKey,
+		url,
+		label: row.imageLabel,
+		alt: row.imageAlt,
+		caption: row.imageAssetCaption,
+		license:
+			row.imageLicenseCode != null && row.imageLicenseName != null
+				? { code: row.imageLicenseCode, name: row.imageLicenseName }
+				: null,
+		licenseId: row.imageLicenseId,
+		mimeType: row.imageMimeType,
+	};
+}
+
 async function createGalleryItems(
 	tx: Transaction,
 	blockId: string,
-	items: Array<{ imageKey?: string; imageUrl?: string; caption?: JSONContent | null }> = [],
+	items: Array<{
+		imageKey?: string;
+		imageUrl?: string;
+		caption?: JSONContent | null;
+		captionMode?: ImageCaptionMode;
+	}> = [],
 ): Promise<Array<schema.GalleryContentBlockItemInput>> {
 	const galleryItems = await Promise.all(
 		items.map(async (item, position) => {
@@ -45,6 +91,7 @@ async function createGalleryItems(
 				imageId,
 				position,
 				caption: item.caption ?? null,
+				captionMode: item.captionMode ?? (item.caption != null ? "override" : "inherit"),
 			};
 
 			return galleryItem;
@@ -230,6 +277,9 @@ export async function upsertTypedContentBlock(
 			const heroImageId = heroImageKey != null ? await getAssetIdByKey(tx, heroImageKey) : null;
 			const eyebrow = block.content?.eyebrow ?? null;
 			const ctas = block.content?.ctas ?? null;
+			const heroCaption = block.content?.caption ?? null;
+			const heroCaptionMode =
+				block.content?.captionMode ?? (heroCaption != null ? "override" : "inherit");
 
 			if (isNew) {
 				await tx.insert(schema.heroContentBlocks).values({
@@ -237,12 +287,21 @@ export async function upsertTypedContentBlock(
 					title: heroTitle,
 					eyebrow,
 					imageId: heroImageId,
+					caption: heroCaption,
+					captionMode: heroCaptionMode,
 					ctas,
 				});
 			} else {
 				await tx
 					.update(schema.heroContentBlocks)
-					.set({ title: heroTitle, eyebrow, imageId: heroImageId, ctas })
+					.set({
+						title: heroTitle,
+						eyebrow,
+						imageId: heroImageId,
+						caption: heroCaption,
+						captionMode: heroCaptionMode,
+						ctas,
+					})
 					.where(eq(schema.heroContentBlocks.id, blockId));
 			}
 			break;
@@ -426,7 +485,16 @@ export async function getEntityContentBlocks(
 				position: schema.contentBlocks.position,
 				layout: schema.galleryContentBlocks.layout,
 				imageKey: schema.assets.key,
+				imageId: schema.assets.id,
+				imageLabel: schema.assets.label,
+				imageAlt: schema.assets.alt,
+				imageAssetCaption: schema.assets.caption,
+				imageLicenseId: schema.assets.licenseId,
+				imageLicenseCode: schema.licenses.code,
+				imageLicenseName: schema.licenses.name,
+				imageMimeType: schema.assets.mimeType,
 				itemCaption: schema.galleryContentBlockItems.caption,
+				itemCaptionMode: schema.galleryContentBlockItems.captionMode,
 			})
 			.from(schema.galleryContentBlocks)
 			.innerJoin(schema.contentBlocks, eq(schema.galleryContentBlocks.id, schema.contentBlocks.id))
@@ -440,6 +508,7 @@ export async function getEntityContentBlocks(
 				eq(schema.galleryContentBlocks.id, schema.galleryContentBlockItems.galleryContentBlockId),
 			)
 			.leftJoin(schema.assets, eq(schema.galleryContentBlockItems.imageId, schema.assets.id))
+			.leftJoin(schema.licenses, eq(schema.assets.licenseId, schema.licenses.id))
 			.where(contentBlocksWhere)
 			.orderBy(schema.contentBlocks.position, schema.galleryContentBlockItems.position),
 		db
@@ -449,6 +518,16 @@ export async function getEntityContentBlocks(
 				title: schema.heroContentBlocks.title,
 				eyebrow: schema.heroContentBlocks.eyebrow,
 				imageKey: schema.assets.key,
+				imageId: schema.assets.id,
+				imageLabel: schema.assets.label,
+				imageAlt: schema.assets.alt,
+				imageAssetCaption: schema.assets.caption,
+				imageLicenseId: schema.assets.licenseId,
+				imageLicenseCode: schema.licenses.code,
+				imageLicenseName: schema.licenses.name,
+				imageMimeType: schema.assets.mimeType,
+				caption: schema.heroContentBlocks.caption,
+				captionMode: schema.heroContentBlocks.captionMode,
 				ctas: schema.heroContentBlocks.ctas,
 			})
 			.from(schema.heroContentBlocks)
@@ -459,6 +538,7 @@ export async function getEntityContentBlocks(
 				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
 			)
 			.leftJoin(schema.assets, eq(schema.heroContentBlocks.imageId, schema.assets.id))
+			.leftJoin(schema.licenses, eq(schema.assets.licenseId, schema.licenses.id))
 			.where(contentBlocksWhere)
 			.orderBy(schema.contentBlocks.position),
 		db
@@ -589,7 +669,9 @@ export async function getEntityContentBlocks(
 					map.get(row.id)!.content!.items!.push({
 						imageKey: row.imageKey,
 						imageUrl,
+						asset: toBlockAsset(row, imageUrl),
 						caption: row.itemCaption ?? undefined,
+						captionMode: row.itemCaptionMode ?? undefined,
 					});
 				}
 
@@ -613,6 +695,9 @@ export async function getEntityContentBlocks(
 				eyebrow: row.eyebrow ?? undefined,
 				imageKey: row.imageKey ?? undefined,
 				imageUrl,
+				asset: imageUrl != null ? toBlockAsset(row, imageUrl) : undefined,
+				caption: row.caption,
+				captionMode: row.captionMode,
 				ctas: (row.ctas as Array<{ label: string; url: string }> | undefined) ?? undefined,
 			},
 		};

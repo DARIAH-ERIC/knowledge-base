@@ -210,6 +210,8 @@ async function cloneTypedContentBlock(
 					title: schema.heroContentBlocks.title,
 					eyebrow: schema.heroContentBlocks.eyebrow,
 					imageId: schema.heroContentBlocks.imageId,
+					caption: schema.heroContentBlocks.caption,
+					captionMode: schema.heroContentBlocks.captionMode,
 					ctas: schema.heroContentBlocks.ctas,
 				})
 				.from(schema.heroContentBlocks)
@@ -251,6 +253,7 @@ async function cloneTypedContentBlock(
 					imageId: schema.galleryContentBlockItems.imageId,
 					position: schema.galleryContentBlockItems.position,
 					caption: schema.galleryContentBlockItems.caption,
+					captionMode: schema.galleryContentBlockItems.captionMode,
 				})
 				.from(schema.galleryContentBlockItems)
 				.where(eq(schema.galleryContentBlockItems.galleryContentBlockId, sourceBlockId))

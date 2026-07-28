@@ -4,8 +4,7 @@ import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import type { ContentBlockTypes } from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
-import { Label, labelStyles } from "@dariah-eric/ui/field";
-import { InlineRichTextEditor } from "@dariah-eric/ui/inline-rich-text-editor";
+import { Label } from "@dariah-eric/ui/field";
 import { Input } from "@dariah-eric/ui/input";
 import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
 import {
@@ -18,7 +17,6 @@ import {
 	ModalTitle,
 } from "@dariah-eric/ui/modal";
 import { NumberField, NumberInput } from "@dariah-eric/ui/number-field";
-import { isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
 import { RichTextEditor, RichTextEditorToolbarButton } from "@dariah-eric/ui/rich-text-editor";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
@@ -61,9 +59,14 @@ import {
 import { twMerge } from "tailwind-merge";
 
 import { EntityLinkDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog";
+import { ImageCaptionModeField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-caption-mode-field";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
 import { PlaceholderValueInsertMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/placeholder-value-insert-menu";
+import {
+	type SelectedImage,
+	SelectedImageCard,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
 import {
 	type MergeableBlock,
 	mergeBlocksToDocument,
@@ -137,6 +140,10 @@ interface HeroContentBlockItem {
 		eyebrow?: string;
 		imageKey?: string;
 		imageUrl?: string;
+		/** The picked asset, for the editor's image card. Only `imageKey` is persisted. */
+		asset?: SelectedImage;
+		caption?: JSONContent | null;
+		captionMode?: ImageCaptionMode;
 		ctas?: Array<{ label: string; url: string }>;
 	};
 }
@@ -147,7 +154,14 @@ interface GalleryContentBlockItem {
 	position?: number;
 	content?: {
 		layout?: "carousel" | "grid";
-		items?: Array<{ imageKey?: string; imageUrl?: string; caption?: JSONContent | null }>;
+		items?: Array<{
+			imageKey?: string;
+			imageUrl?: string;
+			/** The picked asset, for the editor's image card. Only `imageKey` is persisted. */
+			asset?: SelectedImage;
+			caption?: JSONContent | null;
+			captionMode?: ImageCaptionMode;
+		}>;
 	};
 }
 
@@ -723,6 +737,61 @@ interface ContentBlockEntry {
 	title: string;
 }
 
+type GalleryItem = NonNullable<NonNullable<GalleryContentBlockItem["content"]>["items"]>[number];
+
+interface GalleryItemImageFieldsProps {
+	galleryItem: GalleryItem;
+	initialAssets?: Array<MediaLibraryAsset>;
+	onChange: (changes: Partial<GalleryItem>) => void;
+}
+
+/** The image of one gallery item: which asset it is, and which caption it shows. */
+function GalleryItemImageFields({
+	galleryItem,
+	initialAssets,
+	onChange,
+}: Readonly<GalleryItemImageFieldsProps>): ReactNode {
+	const t = useExtracted();
+
+	const picker = (
+		<MediaLibraryDialog
+			defaultPrefix="images"
+			initialAssets={initialAssets ?? []}
+			onSelect={(imageKey, imageUrl, selected) => {
+				onChange({ imageKey, imageUrl, asset: { ...selected, key: imageKey, url: imageUrl } });
+			}}
+			prefixes={["avatars", "images", "logos"]}
+			triggerLabel={galleryItem.imageUrl != null ? t("Change image") : undefined}
+		/>
+	);
+
+	return (
+		<Fragment>
+			{galleryItem.asset != null ? (
+				<SelectedImageCard
+					image={galleryItem.asset}
+					onMetadataChange={(asset) => {
+						onChange({ asset });
+					}}
+				>
+					{picker}
+				</SelectedImageCard>
+			) : (
+				picker
+			)}
+
+			{galleryItem.imageUrl != null ? (
+				<ImageCaptionModeField
+					assetCaption={galleryItem.asset?.caption}
+					caption={galleryItem.caption ?? null}
+					captionMode={galleryItem.captionMode ?? "inherit"}
+					onChange={onChange}
+				/>
+			) : null}
+		</Fragment>
+	);
+}
+
 interface GalleryContentBlockPanelProps {
 	initialAssets?: Array<MediaLibraryAsset>;
 	item: GalleryContentBlockItem;
@@ -814,55 +883,19 @@ function GalleryContentBlockPanel({
 							</div>
 						</div>
 
-						<div className="flex items-start gap-x-4">
-							{galleryItem.imageUrl != null && (
-								<img
-									alt={
-										galleryItem.caption != null
-											? toPlainText(galleryItem.caption)
-											: t("Selected image")
-									}
-									className="block-24 inline-auto max-inline-full shrink-0 rounded-lg object-cover"
-									src={galleryItem.imageUrl}
-								/>
-							)}
-							<MediaLibraryDialog
-								defaultPrefix="images"
-								initialAssets={initialAssets ?? []}
-								onSelect={(imageKey, imageUrl) => {
-									onChange({
-										...item.content,
-										layout,
-										items: items.map((existingItem, itemIndex) =>
-											itemIndex === idx ? { ...existingItem, imageKey, imageUrl } : existingItem,
-										),
-									});
-								}}
-								prefixes={["avatars", "images", "logos"]}
-							/>
-						</div>
-
-						<div className="flex flex-col gap-y-1">
-							<span className={labelStyles()}>{t("Caption")}</span>
-							<InlineRichTextEditor
-								aria-label={t("Caption")}
-								content={galleryItem.caption ?? undefined}
-								onChange={(value) => {
-									onChange({
-										...item.content,
-										layout,
-										items: items.map((existingItem, itemIndex) =>
-											itemIndex === idx
-												? {
-														...existingItem,
-														caption: isEmptyRichTextDocument(value) ? null : value,
-													}
-												: existingItem,
-										),
-									});
-								}}
-							/>
-						</div>
+						<GalleryItemImageFields
+							galleryItem={galleryItem}
+							initialAssets={initialAssets}
+							onChange={(changes) => {
+								onChange({
+									...item.content,
+									layout,
+									items: items.map((existingItem, itemIndex) =>
+										itemIndex === idx ? { ...existingItem, ...changes } : existingItem,
+									),
+								});
+							}}
+						/>
 					</div>
 				))}
 			</div>
@@ -1058,7 +1091,25 @@ function HeroContentBlockPanel({
 	const eyebrow = item.content?.eyebrow;
 	const imageKey = item.content?.imageKey;
 	const imageUrl = item.content?.imageUrl;
+	const asset = item.content?.asset;
 	const ctas = item.content?.ctas ?? [];
+
+	const picker = (
+		<MediaLibraryDialog
+			defaultPrefix="images"
+			initialAssets={initialAssets ?? []}
+			onSelect={(key, url, selected) => {
+				onChange({
+					...item.content,
+					imageKey: key,
+					imageUrl: url,
+					asset: { ...selected, key, url },
+				});
+			}}
+			prefixes={["avatars", "images", "logos"]}
+			triggerLabel={imageUrl != null ? t("Change image") : undefined}
+		/>
+	);
 
 	return (
 		<div className="flex flex-col gap-y-4">
@@ -1081,28 +1132,33 @@ function HeroContentBlockPanel({
 				<Label>{t("Eyebrow")}</Label>
 				<Input />
 			</TextField>
-			<div className="flex flex-col gap-y-2">
+			<div className="flex flex-col gap-y-3">
 				<Label>{t("Image")}</Label>
-				<div className="flex items-center gap-x-4">
-					{imageUrl != null && (
-						<img
-							alt={t("Selected image")}
-							className="block-24 inline-auto max-inline-full rounded-lg object-cover shrink-0"
-							src={imageUrl}
-						/>
-					)}
-					<MediaLibraryDialog
-						defaultPrefix="images"
-						initialAssets={initialAssets ?? []}
-						onSelect={(key, url) => {
-							onChange({ ...item.content, imageKey: key, imageUrl: url });
+				{asset != null ? (
+					<SelectedImageCard
+						image={asset}
+						onMetadataChange={(next) => {
+							onChange({ ...item.content, asset: next });
 						}}
-						prefixes={["avatars", "images", "logos"]}
+					>
+						{picker}
+					</SelectedImageCard>
+				) : (
+					picker
+				)}
+				{imageUrl != null ? (
+					<ImageCaptionModeField
+						assetCaption={asset?.caption}
+						caption={item.content?.caption ?? null}
+						captionMode={item.content?.captionMode ?? "inherit"}
+						onChange={(value) => {
+							onChange({ ...item.content, ...value });
+						}}
 					/>
-					{imageKey != null && (
-						<input name="heroContentBlock.imageKey" type="hidden" value={imageKey} />
-					)}
-				</div>
+				) : null}
+				{imageKey != null && (
+					<input name="heroContentBlock.imageKey" type="hidden" value={imageKey} />
+				)}
 			</div>
 			<div className="flex flex-col gap-y-3">
 				<Label>{t("CTAs")}</Label>
