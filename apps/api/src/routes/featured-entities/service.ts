@@ -4,7 +4,33 @@ import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl, withResolvedCaption } from "@/lib/images";
 import type { Database, Transaction } from "@/middlewares/db";
+import type { Announcement } from "@/routes/announcements/schemas";
 import { imageWidth } from "~/config/api.config";
+
+const imageColumns = {
+	columns: {
+		key: true,
+		alt: true,
+		caption: true,
+	},
+	with: {
+		license: {
+			columns: {
+				name: true,
+				url: true,
+			},
+		},
+	},
+} as const;
+
+const entityVersionColumns = {
+	columns: { updatedAt: true },
+	with: {
+		entity: {
+			columns: { slug: true },
+		},
+	},
+} as const;
 
 export async function getFeaturedEntities(db: Database | Transaction) {
 	const metadata = await db.query.siteMetadata.findFirst({
@@ -17,73 +43,141 @@ export async function getFeaturedEntities(db: Database | Transaction) {
 	const featuredEventIds = metadata?.featuredItemIds?.events ?? [];
 
 	const [news, events] = await Promise.all([
-		getFeaturedNews(db, featuredNewsIds),
+		getFeaturedAnnouncements(db, featuredNewsIds),
 		getFeaturedEvents(db, featuredEventIds),
 	]);
 
 	return { data: { news, events } };
 }
 
-async function getFeaturedNews(db: Database | Transaction, ids: Array<string>) {
+async function getFeaturedAnnouncements(db: Database | Transaction, ids: Array<string>) {
 	if (ids.length === 0) {
 		return [];
 	}
 
-	const items = await db.query.news.findMany({
-		where: {
-			id: {
-				in: ids,
-			},
-			entityVersion: {
-				status: {
-					type: "published",
+	const [news, opportunities, fundingCalls] = await Promise.all([
+		db.query.news.findMany({
+			where: {
+				id: {
+					in: ids,
 				},
-			},
-		},
-		columns: {
-			id: true,
-			title: true,
-			summary: true,
-			imageCaption: true,
-			imageCaptionMode: true,
-		},
-		with: {
-			entityVersion: {
-				columns: { updatedAt: true },
-				with: {
-					entity: {
-						columns: { slug: true },
+				entityVersion: {
+					status: {
+						type: "published",
 					},
 				},
 			},
-			image: {
-				columns: {
-					key: true,
-					alt: true,
-					caption: true,
+			columns: {
+				id: true,
+				title: true,
+				summary: true,
+				publicationDate: true,
+				imageCaption: true,
+				imageCaptionMode: true,
+			},
+			with: {
+				entityVersion: entityVersionColumns,
+				image: imageColumns,
+			},
+		}),
+		db.query.opportunities.findMany({
+			where: {
+				id: {
+					in: ids,
 				},
-				with: {
-					license: {
-						columns: {
-							name: true,
-							url: true,
-						},
+				entityVersion: {
+					status: {
+						type: "published",
 					},
 				},
 			},
-		},
-	});
+			columns: {
+				id: true,
+				title: true,
+				summary: true,
+				duration: true,
+				website: true,
+				imageCaption: true,
+				imageCaptionMode: true,
+			},
+			with: {
+				entityVersion: entityVersionColumns,
+				image: imageColumns,
+				source: { columns: { source: true } },
+			},
+		}),
+		db.query.fundingCalls.findMany({
+			where: {
+				id: {
+					in: ids,
+				},
+				entityVersion: {
+					status: {
+						type: "published",
+					},
+				},
+			},
+			columns: {
+				id: true,
+				title: true,
+				summary: true,
+				duration: true,
+				imageCaption: true,
+				imageCaptionMode: true,
+			},
+			with: {
+				entityVersion: entityVersionColumns,
+				image: imageColumns,
+			},
+		}),
+	]);
 
-	const itemsById = new Map(items.map((item) => [item.id, item]));
+	const announcementsById = new Map<string, Announcement>();
 
-	return ids
-		.map((id) => itemsById.get(id))
-		.filter((item): item is NonNullable<typeof item> => item != null)
-		.map((item) => {
-			const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview);
-
-			return { ...flattenEntityVersion(item), image };
+	for (const item of news) {
+		announcementsById.set(item.id, {
+			type: "news",
+			id: item.id,
+			title: item.title,
+			summary: item.summary,
+			image: generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview),
+			entity: item.entityVersion.entity,
+			publishedAt: item.publicationDate.toISOString(),
 		});
+	}
+
+	for (const item of opportunities) {
+		announcementsById.set(item.id, {
+			type: "opportunities",
+			id: item.id,
+			title: item.title,
+			summary: item.summary,
+			image: generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview),
+			entity: item.entityVersion.entity,
+			publishedAt: item.duration.start.toISOString(),
+			duration: serializeDateRange(item.duration),
+			source: item.source.source,
+			website: item.website,
+		});
+	}
+
+	for (const item of fundingCalls) {
+		announcementsById.set(item.id, {
+			type: "funding_calls",
+			id: item.id,
+			title: item.title,
+			summary: item.summary,
+			image: generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview),
+			entity: item.entityVersion.entity,
+			publishedAt: item.duration.start.toISOString(),
+			duration: serializeDateRange(item.duration),
+		});
+	}
+
+	return ids.flatMap((id) => {
+		const item = announcementsById.get(id);
+		return item != null ? [item] : [];
+	});
 }
 
 async function getFeaturedEvents(db: Database | Transaction, ids: Array<string>) {
@@ -148,6 +242,6 @@ async function getFeaturedEvents(db: Database | Transaction, ids: Array<string>)
 			const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview);
 			const duration = serializeDateRange(item.duration);
 
-			return { ...flattenEntityVersion(item), image, duration };
+			return { type: "events" as const, ...flattenEntityVersion(item), image, duration };
 		});
 }

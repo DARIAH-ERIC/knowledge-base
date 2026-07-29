@@ -9,8 +9,8 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { FeaturedItemsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/featured/_components/featured-items-form";
+import { getAnnouncementOptions, getAnnouncementOptionsByIds } from "@/lib/data/announcements";
 import { getEventOptions, getEventOptionsByIds } from "@/lib/data/events";
-import { getNewsItemOptions, getNewsItemOptionsByIds } from "@/lib/data/news";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -49,8 +49,8 @@ export default async function DashboardWebsiteFeaturedPage(
 		initialFeaturedEventOptions,
 		selectedFeaturedEvents,
 	] = await Promise.all([
-		getNewsItemOptions(),
-		getNewsItemOptionsByIds(featuredNewsIds),
+		getAnnouncementOptions(),
+		getAnnouncementOptionsByIds(featuredNewsIds),
 		getEventOptions(),
 		getEventOptionsByIds(featuredEventIds),
 	]);

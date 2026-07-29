@@ -14,14 +14,14 @@ import {
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { updateFeaturedItemsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/featured/_lib/update-featured-items.action";
+import type { AnnouncementOption } from "@/lib/data/announcements";
 import type { EventOption } from "@/lib/data/events";
-import type { NewsItemOption } from "@/lib/data/news";
 
 const MAX_ALLOWED_FEATURED_ITEMS = 3;
 
-type Option = NewsItemOption | EventOption;
+type Option = AnnouncementOption | EventOption;
 
-/** Builds a page fetcher for one of the featured-options endpoints (news / events). */
+/** Builds a page fetcher for one of the featured-options endpoints (announcements / events). */
 function createFetchOptionsPage(endpoint: string) {
 	return async function fetchOptionsPage(
 		params: Readonly<AsyncOptionsFetchPageParams>,
@@ -47,14 +47,14 @@ function createFetchOptionsPage(endpoint: string) {
 	};
 }
 
-const fetchNewsItemsPage = createFetchOptionsPage("/api/news/options");
+const fetchAnnouncementsPage = createFetchOptionsPage("/api/announcements/options");
 const fetchEventsPage = createFetchOptionsPage("/api/events/options");
 
 interface FeaturedItemsFormProps {
-	initialFeaturedNewsOptions: { items: Array<NewsItemOption>; total: number };
+	initialFeaturedNewsOptions: { items: Array<AnnouncementOption>; total: number };
 	initialFeaturedEventOptions: { items: Array<EventOption>; total: number };
-	/** The currently-featured news items, resolved by id and ordered, for labelling the selection. */
-	selectedFeaturedNews: Array<NewsItemOption>;
+	/** The currently-featured announcements, resolved by id and ordered, for labelling the selection. */
+	selectedFeaturedNews: Array<AnnouncementOption>;
 	/** The currently-featured events, resolved by id and ordered, for labelling the selection. */
 	selectedFeaturedEvents: Array<EventOption>;
 	featuredNewsIds: Array<string>;
@@ -94,7 +94,7 @@ export function FeaturedItemsForm(props: Readonly<FeaturedItemsFormProps>): Reac
 						addLabel={t("Add news item")}
 						aria-label={t("Featured news items")}
 						emptySelectionMessage={t("No featured items yet.")}
-						fetchPage={fetchNewsItemsPage}
+						fetchPage={fetchAnnouncementsPage}
 						initialItems={initialFeaturedNewsOptions.items}
 						initialTotal={initialFeaturedNewsOptions.total}
 						isOrderable={true}

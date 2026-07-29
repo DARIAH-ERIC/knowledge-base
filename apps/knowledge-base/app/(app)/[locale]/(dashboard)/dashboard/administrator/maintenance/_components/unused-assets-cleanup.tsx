@@ -59,30 +59,32 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 		setSelected(isSelected ? new Set(visibleAssets.map((asset) => asset.id)) : new Set());
 	}
 
+	async function deleteSelectedAssets(ids: Array<string>) {
+		try {
+			const deleteResult = await deleteUnusedAssetsAction(ids);
+			const deletedIds = ids.filter(
+				(id) => !deleteResult.skippedIds.includes(id) && !deleteResult.failedIds.includes(id),
+			);
+			setRemovedIds((current) => new Set([...current, ...deletedIds]));
+			setResult(deleteResult);
+			setSelected(new Set());
+			setIsConfirmOpen(false);
+			startRefreshTransition(() => {
+				router.refresh();
+			});
+		} catch {
+			setError(t("Could not delete the selected assets. Please try again."));
+		} finally {
+			setIsDeleting(false);
+		}
+	}
+
 	function confirmDelete() {
 		const ids = Array.from(selectedIds, String);
 		setError(null);
 		setIsDeleting(true);
 
-		void (async () => {
-			try {
-				const deleteResult = await deleteUnusedAssetsAction(ids);
-				const deletedIds = ids.filter(
-					(id) => !deleteResult.skippedIds.includes(id) && !deleteResult.failedIds.includes(id),
-				);
-				setRemovedIds((current) => new Set([...current, ...deletedIds]));
-				setResult(deleteResult);
-				setSelected(new Set());
-				setIsConfirmOpen(false);
-				startRefreshTransition(() => {
-					router.refresh();
-				});
-			} catch {
-				setError(t("Could not delete the selected assets. Please try again."));
-			} finally {
-				setIsDeleting(false);
-			}
-		})();
+		void deleteSelectedAssets(ids);
 	}
 
 	if (visibleAssets.length === 0) {
