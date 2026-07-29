@@ -8,6 +8,7 @@ import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
+import { getEntityTypeLabel } from "@/lib/entity-type-label";
 import { images } from "@/lib/images";
 
 export type EventsSort = "duration" | "title";
@@ -143,6 +144,7 @@ export async function getEventById(params: GetEventByIdParams) {
 }
 
 export interface EventOption {
+	description: string;
 	id: string;
 	name: string;
 }
@@ -161,7 +163,7 @@ export async function getEventOptions(
 	const searchWhere = matchesAllTerms(query, schema.events.title);
 	const where = and(publishedEntityVersionWhere(), searchWhere);
 
-	const [items, aggregate] = await Promise.all([
+	const [rows, aggregate] = await Promise.all([
 		db
 			.select({ id: schema.events.id, name: schema.events.title })
 			.from(schema.events)
@@ -178,6 +180,11 @@ export async function getEventOptions(
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where),
 	]);
+
+	const description = getEntityTypeLabel({ entityType: "events" });
+	const items = rows.map((item) => {
+		return { ...item, description };
+	});
 
 	return { items, total: aggregate.at(0)?.total ?? 0 };
 }
@@ -196,10 +203,11 @@ export async function getEventOptionsByIds(ids: ReadonlyArray<string>) {
 		.orderBy(schema.events.title);
 
 	const itemById = new Map(rows.map((row) => [row.id, row] as const));
+	const description = getEntityTypeLabel({ entityType: "events" });
 
 	return ids.flatMap((id) => {
 		const item = itemById.get(id);
-		return item != null ? [item] : [];
+		return item != null ? [{ ...item, description }] : [];
 	});
 }
 
