@@ -202,12 +202,22 @@ describe("resolveLegacyDariahHref", () => {
 		});
 	});
 
-	it("does not overmatch exact-only website redirects", () => {
+	it("rewrites old DARIAH Theme detail links to funding-call detail pages", () => {
 		expect(
 			resolveLegacyDariahHref("https://www.dariah.eu/activities/dariah-theme/dariah-theme-2018/"),
 		).toStrictEqual({
-			action: "review",
-			reason: "internal_dariah_url_unmapped",
+			action: "rewrite",
+			href: "/get-involved/funding-calls/dariah-theme-2018-sustainability",
+			reason: "legacy_dariah_url",
+		});
+		expect(
+			resolveLegacyDariahHref(
+				"https://www.dariah.eu/activities/dariah-theme/dariah-theme-2024-mistakes/",
+			),
+		).toStrictEqual({
+			action: "rewrite",
+			href: "/get-involved/funding-calls/dariah-theme-2024-mistakes",
+			reason: "legacy_dariah_url",
 		});
 	});
 
@@ -219,15 +229,19 @@ describe("resolveLegacyDariahHref", () => {
 		});
 	});
 
-	it("rewrites DB-backed old news, event and project URL shapes when the slug exists", () => {
+	it("rewrites DB-backed old news, event, funding-call and project URL shapes when the slug exists", () => {
 		const content = cleanRichTextLinksInDocument(
 			doc(
 				paragraphWithLink("https://www.dariah.eu/2020/12/10/example-news/"),
 				paragraphWithLink("https://www.dariah.eu/event/example-event/"),
+				paragraphWithLink(
+					"https://www.dariah.eu/activities/dariah-theme/dariah-theme-2024-mistakes/",
+				),
 				paragraphWithLink("https://www.dariah.eu/activities/projects-and-affiliations/desir/"),
 			),
 			{
 				eventSlugs: new Set(["example-event"]),
+				fundingCallSlugs: new Set(["dariah-theme-2024-mistakes"]),
 				newsSlugs: new Set(["example-news"]),
 				projectSlugs: new Set(["desir"]),
 			},
@@ -237,9 +251,28 @@ describe("resolveLegacyDariahHref", () => {
 			doc(
 				paragraphWithLink("/news/example-news"),
 				paragraphWithLink("/events/example-event"),
+				paragraphWithLink("/get-involved/funding-calls/dariah-theme-2024-mistakes"),
 				paragraphWithLink("/projects/desir"),
 			),
 		);
+	});
+
+	it("keeps old DARIAH Theme URLs for review when the target funding-call slug is unknown", () => {
+		const content = cleanRichTextLinksInDocument(
+			doc(paragraphWithLink("https://www.dariah.eu/activities/dariah-theme/unknown-theme/")),
+			{
+				fundingCallSlugs: new Set(["dariah-theme-2018-sustainability"]),
+			},
+		);
+
+		expect(content.rewrites).toHaveLength(0);
+		expect(content.reviews).toStrictEqual([
+			{
+				location: "$.content[0].content[0].marks[0].attrs.href",
+				originalHref: "https://www.dariah.eu/activities/dariah-theme/unknown-theme/",
+				reason: "internal_dariah_url_unmapped",
+			},
+		]);
 	});
 
 	it("keeps old dated news URLs for review when the slug is unknown", () => {

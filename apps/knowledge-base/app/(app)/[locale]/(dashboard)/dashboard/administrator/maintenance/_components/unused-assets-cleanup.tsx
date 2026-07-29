@@ -35,7 +35,8 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 
 	const [selected, setSelected] = useState<Selection>(() => new Set());
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-	const [isPending, startTransition] = useTransition();
+	const [isDeleting, setIsDeleting] = useState(false);
+	const [isRefreshing, startRefreshTransition] = useTransition();
 	const [result, setResult] = useState<DeleteUnusedAssetsResult | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
@@ -61,8 +62,9 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 	function confirmDelete() {
 		const ids = Array.from(selectedIds, String);
 		setError(null);
+		setIsDeleting(true);
 
-		startTransition(async () => {
+		void (async () => {
 			try {
 				const deleteResult = await deleteUnusedAssetsAction(ids);
 				const deletedIds = ids.filter(
@@ -72,11 +74,15 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 				setResult(deleteResult);
 				setSelected(new Set());
 				setIsConfirmOpen(false);
-				router.refresh();
+				startRefreshTransition(() => {
+					router.refresh();
+				});
 			} catch {
 				setError(t("Could not delete the selected assets. Please try again."));
+			} finally {
+				setIsDeleting(false);
 			}
-		});
+		})();
 	}
 
 	if (visibleAssets.length === 0) {
@@ -104,17 +110,25 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 
 				<Button
 					intent="danger"
-					isDisabled={selectedIds.size === 0 || isPending}
+					isDisabled={selectedIds.size === 0 || isDeleting || isRefreshing}
+					isPending={isRefreshing}
 					onPress={() => {
 						setIsConfirmOpen(true);
 					}}
 				>
-					{selectedIds.size > 0
-						? t("Delete selected ({count}) · {size}", {
-								count: String(selectedIds.size),
-								size: formatFileSize(selectedSize),
-							})
-						: t("Delete selected")}
+					{isRefreshing ? (
+						<Fragment>
+							<ProgressCircle aria-label={t("Updating...")} isIndeterminate={true} />
+							<span aria-hidden={true}>{t("Updating...")}</span>
+						</Fragment>
+					) : selectedIds.size > 0 ? (
+						t("Delete selected ({count}) · {size}", {
+							count: String(selectedIds.size),
+							size: formatFileSize(selectedSize),
+						})
+					) : (
+						t("Delete selected")
+					)}
 				</Button>
 			</div>
 
@@ -223,7 +237,7 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 			<ModalContent
 				isOpen={isConfirmOpen}
 				onOpenChange={(open) => {
-					if (!open && !isPending) {
+					if (!open && !isDeleting) {
 						setIsConfirmOpen(false);
 					}
 				}}
@@ -247,9 +261,9 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 					</div>
 				) : null}
 				<ModalFooter>
-					<ModalClose isDisabled={isPending}>{t("Cancel")}</ModalClose>
-					<Button intent="danger" isPending={isPending} onPress={confirmDelete}>
-						{isPending ? (
+					<ModalClose isDisabled={isDeleting}>{t("Cancel")}</ModalClose>
+					<Button intent="danger" isPending={isDeleting} onPress={confirmDelete}>
+						{isDeleting ? (
 							<Fragment>
 								<ProgressCircle aria-label={t("Deleting...")} isIndeterminate={true} />
 								<span aria-hidden={true}>{t("Deleting...")}</span>
