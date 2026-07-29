@@ -6,6 +6,7 @@ import { v7 as uuidv7 } from "uuid";
 import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
+import { sql } from "@/services/db/sql";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { withTransaction } from "~/test/lib/with-transaction";
 
@@ -165,6 +166,60 @@ describe("announcements", () => {
 				expect(titles).not.toContain(newsItem.title);
 
 				expect(data.data.every((item) => item.type !== "news")).toBe(true);
+			});
+		});
+
+		it("should put featured announcements first in configured order without duplicates", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const { newsItem, opportunity, fundingCall } = await seed(db);
+
+				await db
+					.insert(schema.siteMetadata)
+					.values({
+						id: 1,
+						title: "Announcements test",
+						description: "Announcements test",
+						featuredItemIds: {
+							news: [
+								newsItem.versionId,
+								fundingCall.versionId,
+								newsItem.versionId,
+								opportunity.versionId,
+							],
+							events: [],
+						},
+					})
+					.onConflictDoUpdate({
+						target: schema.siteMetadata.id,
+						set: {
+							featuredItemIds: {
+								news: [
+									newsItem.versionId,
+									fundingCall.versionId,
+									newsItem.versionId,
+									opportunity.versionId,
+								],
+								events: [],
+							},
+							updatedAt: sql`NOW()`,
+						},
+					});
+
+				const response = await client.announcements.$get({
+					query: { limit: "3", offset: "0" },
+				});
+
+				expect(response.status).toBe(200);
+
+				const data = await response.json();
+
+				expect(data.data.map((item) => item.id)).toEqual([
+					newsItem.versionId,
+					fundingCall.versionId,
+					opportunity.versionId,
+				]);
+				expect(new Set(data.data.map((item) => item.id)).size).toBe(3);
 			});
 		});
 
