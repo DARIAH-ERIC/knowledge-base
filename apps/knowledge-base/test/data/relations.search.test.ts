@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { newsLifecycleAdapter } from "@/lib/data/news.lifecycle-adapter";
+import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
 import { getEntityRelationOptions } from "@/lib/data/relations";
 import type { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -36,6 +37,33 @@ async function seedPublishedEntity(tx: Tx, slug: string, label: string): Promise
 	});
 	await tx.update(schema.entities).set({ label }).where(eq(schema.entities.id, documentId));
 	await publishVersion(tx, documentId, newsLifecycleAdapter);
+
+	return documentId;
+}
+
+async function seedPublishedProject(
+	tx: Tx,
+	slug: string,
+	name: string,
+	acronym: string,
+): Promise<string> {
+	const type = await tx.query.entityTypes.findFirst({
+		where: { type: "projects" },
+		columns: { id: true },
+	});
+	assert(type, "projects entity type not found in database");
+	const scope = await tx.query.projectScopes.findFirst({ columns: { id: true } });
+	assert(scope, "project scope not found in database");
+
+	const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
+	await tx.insert(schema.projects).values({
+		acronym,
+		duration: { start: new Date("2026-01-01T00:00:00.000Z") },
+		id: versionId,
+		name,
+		scopeId: scope.id,
+	});
+	await publishVersion(tx, documentId, projectsLifecycleAdapter);
 
 	return documentId;
 }
@@ -112,6 +140,20 @@ describe("getEntityRelationOptions search", () => {
 			const { items } = await getEntityRelationOptions({ q: `R and D ${suffix}` }, tx);
 
 			expect(items.map((item) => item.id)).toContain(documentId);
+		});
+	});
+
+	it("finds and displays a project by the acronym in its denormalized label", async () => {
+		await withTransaction(async (tx) => {
+			const acronym = `ACR${f.string.alpha(6).toUpperCase()}`;
+			const name = `Acronym Search Project ${suffix}`;
+			const documentId = await seedPublishedProject(tx, `acronym-project-${suffix}`, name, acronym);
+
+			const { items } = await getEntityRelationOptions({ q: acronym }, tx);
+
+			expect(items).toContainEqual(
+				expect.objectContaining({ id: documentId, name: `${name} (${acronym})` }),
+			);
 		});
 	});
 });

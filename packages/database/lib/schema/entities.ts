@@ -72,9 +72,10 @@ export const entities = p.snakeCase.table(
 		slug: p.text("slug").notNull(),
 		/**
 		 * Denormalized human-readable title/name of the document's _published_ version, kept in sync by
-		 * database triggers on the subtype tables (see the `add_entity_label` migration). Lets pickers
-		 * and lists search/display a document by name without joining the per-type subtype tables. Null
-		 * until the document has a published version.
+		 * database triggers on the subtype tables (see the `add_entity_label` migration). Project and
+		 * organisational-unit labels include their acronym in parentheses when present. Lets pickers
+		 * and lists search/display a document by name or acronym without joining the per-type subtype
+		 * tables. Null until the document has a published version.
 		 */
 		label: p.text("label"),
 		...f.timestamps(),
