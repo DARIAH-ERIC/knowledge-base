@@ -20,8 +20,9 @@ export const pages = p.snakeCase.table(
 		publicationDate: f.timestamp("publication_date").notNull(),
 		imageId: p.uuid("image_id").references(() => assets.id),
 		/**
-		 * Caption for the featured image at this placement, resolved exactly as for image content blocks
-		 * (see `imageCaptionModesEnum`): inherit the asset's caption, replace it here, or show none.
+		 * Caption for the featured image at this placement, resolved exactly as for image content
+		 * blocks (see `imageCaptionModesEnum`): inherit the asset's caption, replace it here, or show
+		 * none.
 		 */
 		imageCaption: p.jsonb("image_caption").$type<JSONContent>(),
 		imageCaptionMode: imageCaptionModeColumn("image_caption_mode"),
