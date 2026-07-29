@@ -6,8 +6,9 @@ import * as f from "../fields";
 import { assets } from "./assets";
 
 /**
- * Shape of the `featured_item_ids` jsonb column: ordered document ids of the entities featured on
- * the public landing page, grouped by entity type. Each list is capped in the dashboard UI.
+ * Shape of the `featured_item_ids` jsonb column: ordered entity-version ids featured on the public
+ * landing page, grouped by landing-page section. The `news` section renders announcement items
+ * (news, opportunities, funding calls). Each list is capped in the dashboard UI.
  */
 export interface FeaturedItems {
 	news: Array<string>;
