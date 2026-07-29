@@ -130,7 +130,7 @@ export async function getAnnouncements(db: Database | Transaction, params: GetAn
 					featuredIds.map((id, index) => sql`WHEN ${id} THEN ${index}::integer`),
 					sql` `,
 				)} ELSE ${featuredIds.length}::integer END`
-			: sql`0`;
+			: sql`0::integer`;
 
 	const [result, aggregates] = await Promise.all([
 		// Formatted to ISO here because `execute` returns raw driver values rather than mapped
