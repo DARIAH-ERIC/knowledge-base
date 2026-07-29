@@ -75,6 +75,77 @@ describe("newsletters", () => {
 				total: 1,
 			});
 		});
+
+		it("should filter newsletter campaigns by send year", async () => {
+			mailchimp.get.mockResolvedValue(
+				Result.ok({
+					data: {
+						campaigns: [
+							{
+								id: "campaign-id",
+								archive_url: "https://example.com/newsletter",
+								send_time: "2024-05-10T12:00:00+00:00",
+								settings: {
+									subject_line: "Newsletter subject",
+									title: "Newsletter title",
+								},
+								status: "sent",
+							},
+						],
+						total_items: 1,
+					},
+					headers: new Headers(),
+				}),
+			);
+
+			const client = createTestClient(undefined as never);
+
+			const response = await client.newsletters.$get({
+				query: {
+					limit: "10",
+					offset: "0",
+					year: "2024",
+				},
+			});
+
+			expect(response.status).toBe(200);
+			expect(mailchimp.get).toHaveBeenCalledWith({
+				count: 10,
+				offset: 0,
+				status: "sent",
+				sinceSendTime: "2024-01-01T00:00:00+00:00",
+				beforeSendTime: "2025-01-01T00:00:00+00:00",
+			});
+			await expect(response.json()).resolves.toEqual({
+				data: [
+					{
+						id: "campaign-id",
+						subject_line: "Newsletter subject",
+						send_time: "2024-05-10T12:00:00+00:00",
+						archive_url: "https://example.com/newsletter",
+						status: "sent",
+					},
+				],
+				limit: 10,
+				offset: 0,
+				total: 1,
+			});
+		});
+
+		it("should reject invalid newsletter year filters", async () => {
+			const client = createTestClient(undefined as never);
+
+			const response = await client.newsletters.$get({
+				query: {
+					limit: "10",
+					offset: "0",
+					year: "1899",
+				},
+			});
+
+			expect(response.status).toBe(400);
+			expect(mailchimp.get).not.toHaveBeenCalled();
+		});
 	});
 
 	describe("POST /api/newsletters/subscribe", () => {

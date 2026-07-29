@@ -19432,6 +19432,15 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "type": "integer",
             },
           },
+          {
+            "description": "Filter newsletters by send year",
+            "in": "query",
+            "name": "year",
+            "schema": {
+              "minimum": 1900,
+              "type": "integer",
+            },
+          },
         ],
         "responses": {
           "200": {

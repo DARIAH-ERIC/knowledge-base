@@ -21,13 +21,24 @@ interface GetNewslettersParams {
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
+	year?: number;
+}
+
+function getYearSendTimeRange(year: number): { beforeSendTime: string; sinceSendTime: string } {
+	return {
+		sinceSendTime: `${year}-01-01T00:00:00+00:00`,
+		beforeSendTime: `${year + 1}-01-01T00:00:00+00:00`,
+	};
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getNewsletters(params: GetNewslettersParams) {
-	const { limit = 10, offset = 0 } = params;
+	const { limit = 10, offset = 0, year } = params;
+	const sendTimeRange = year != null ? getYearSendTimeRange(year) : {};
 
-	const result = (await mailchimp.get({ count: limit, offset, status: "sent" })).unwrap().data;
+	const result = (
+		await mailchimp.get({ count: limit, offset, status: "sent", ...sendTimeRange })
+	).unwrap().data;
 
 	const total = result.total_items;
 	const data = result.campaigns.map((campaign) => {

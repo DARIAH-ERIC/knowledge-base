@@ -41,9 +41,9 @@ export const router = createRouter()
 		}),
 		validator("query", GetNewsletters.QuerySchema),
 		async (c) => {
-			const { limit, offset } = c.req.valid("query");
+			const { limit, offset, year } = c.req.valid("query");
 
-			const data = await getNewsletters({ limit, offset });
+			const data = await getNewsletters({ limit, offset, year });
 
 			const payload = await validate(GetNewsletters.ResponseSchema, data, 500);
 

@@ -52,6 +52,16 @@ const exactLegacyPathMappings = new Map<string, string>([
 	["/tools-services/tools-and-services", "/resources/resource-catalogue"],
 ]);
 
+const legacyDariahThemeSlugMappings = new Map<string, string>([
+	["dariah-theme-2015", "dariah-theme-2015-open-humanities"],
+	["dariah-theme-2016", "dariah-theme-2016-public-humanities"],
+	["dariah-theme-2017", "dariah-theme-2017-cultural-heritage-and-humanities-research"],
+	["dariah-theme-2018", "dariah-theme-2018-sustainability"],
+	["dariah-theme-2020", "dariah-theme-2020-arts-exchanges-and-arts-humanities-and-covid-19"],
+	["dariah-theme-2022", "dariah-theme-2022-workflows"],
+	["dariah-theme-2024", "dariah-theme-2024-mistakes"],
+]);
+
 const prefixLegacyPathMappings = new Map<string, string>([
 	["/activities/impact-case-studies", getEntityListHref("impact-case-study")],
 	["/activities/projects", getEntityListHref("project")],
@@ -144,6 +154,7 @@ interface LinkCleanupDocument {
 
 export interface RichTextLinkCleanupContext {
 	eventSlugs?: ReadonlySet<string>;
+	fundingCallSlugs?: ReadonlySet<string>;
 	newsSlugs?: ReadonlySet<string>;
 	projectSlugs?: ReadonlySet<string>;
 }
@@ -239,6 +250,14 @@ function mapLegacyPathname(
 	const eventSlug = getSinglePathSegmentAfter(normalized, "/event");
 	if (eventSlug != null && context.eventSlugs?.has(eventSlug) === true) {
 		return `/events/${eventSlug}`;
+	}
+
+	const dariahThemeSlug = getSinglePathSegmentAfter(normalized, "/activities/dariah-theme");
+	if (dariahThemeSlug != null) {
+		const mappedSlug = legacyDariahThemeSlugMappings.get(dariahThemeSlug) ?? dariahThemeSlug;
+		if (context.fundingCallSlugs == null || context.fundingCallSlugs.has(mappedSlug)) {
+			return `/get-involved/funding-calls/${mappedSlug}`;
+		}
 	}
 
 	const projectSlug = getSinglePathSegmentAfter(
@@ -450,9 +469,12 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 		})
 		.from(schema.entities)
 		.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
-		.where(inArray(schema.entityTypes.type, ["events", "news", "projects"]));
+		.where(inArray(schema.entityTypes.type, ["events", "funding_calls", "news", "projects"]));
 	const context: RichTextLinkCleanupContext = {
 		eventSlugs: new Set(slugRows.filter((row) => row.type === "events").map((row) => row.slug)),
+		fundingCallSlugs: new Set(
+			slugRows.filter((row) => row.type === "funding_calls").map((row) => row.slug),
+		),
 		newsSlugs: new Set(slugRows.filter((row) => row.type === "news").map((row) => row.slug)),
 		projectSlugs: new Set(slugRows.filter((row) => row.type === "projects").map((row) => row.slug)),
 	};
