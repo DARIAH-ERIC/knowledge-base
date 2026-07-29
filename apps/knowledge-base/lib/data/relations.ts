@@ -16,7 +16,7 @@ import { search } from "@/lib/search";
 
 export interface RelationOptionItem {
 	id: string;
-	/** Display label: the published title/name, falling back to the slug. */
+	/** Display label: the published title/name (including an acronym), falling back to the slug. */
 	name: string;
 	/** Human-readable type label (e.g. "Event", "Working group"). */
 	description?: string;
@@ -40,10 +40,11 @@ export async function getEntityRelationOptions(
 ): Promise<{ items: Array<RelationOptionItem>; total: number }> {
 	const { limit = relationOptionsPageSize, offset = 0, q } = params;
 	const query = q?.trim();
-	// Search the document slug and its denormalized published title/name (`entities.label`), plus the
-	// human-readable type labels: typing "working group" or "event" is reverse-mapped to the matching
-	// `entity_types` / `organisational_unit_types` tokens so it matches what the list actually shows,
-	// not just the raw stored token.
+	// Search the document slug and its denormalized published title/name (`entities.label`, including
+	// a project or organisational-unit acronym when present), plus the human-readable type labels:
+	// typing "working group" or "event" is reverse-mapped to the matching `entity_types` /
+	// `organisational_unit_types` tokens so it matches what the list actually shows, not just the raw
+	// stored token.
 	const { entityTypes: matchedEntityTypes, unitTypes: matchedUnitTypes } =
 		getEntityTypeTokensMatchingLabel(query ?? "");
 	// Require every query term to match the slug or label (AND across terms, OR across the two
