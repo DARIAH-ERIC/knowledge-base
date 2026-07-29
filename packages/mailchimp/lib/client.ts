@@ -11,6 +11,14 @@ export interface CreateMailchimpClientParams {
 	};
 }
 
+export interface ListCampaignsParams {
+	count?: number;
+	offset?: number;
+	status?: string;
+	beforeSendTime?: string;
+	sinceSendTime?: string;
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createMailchimpClient(params: CreateMailchimpClientParams) {
 	const { config } = params;
@@ -24,7 +32,7 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 	};
 
 	const client = {
-		async get(params?: { count?: number; offset?: number; status?: string }) {
+		async get(params?: ListCampaignsParams) {
 			const url = createUrl({
 				baseUrl,
 				pathname: "/3.0/campaigns",
@@ -42,6 +50,8 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 					 */
 					sort_field: "create_time",
 					status: params?.status,
+					before_send_time: params?.beforeSendTime,
+					since_send_time: params?.sinceSendTime,
 				}),
 			});
 
