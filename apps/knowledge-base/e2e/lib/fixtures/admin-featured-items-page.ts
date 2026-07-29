@@ -46,8 +46,11 @@ class FeaturedSection {
 
 	/** Names of the currently-selected featured items, in display order. */
 	async getFeaturedNames(): Promise<Array<string>> {
-		const texts = await this.featuredRows().allInnerTexts();
-		return texts.map((text) => text.trim()).filter((text) => text !== "");
+		const names = await this.featuredRows().evaluateAll((rows) =>
+			rows.map((row) => row.getAttribute("aria-label")),
+		);
+
+		return names.filter((name): name is string => name != null && name !== "");
 	}
 
 	private async openOptions(): Promise<Locator> {
