@@ -25,7 +25,13 @@ export const NewsletterListSchema = v.pipe(
 export type NewsletterList = v.InferOutput<typeof NewsletterListSchema>;
 
 export const GetNewsletters = {
-	QuerySchema: PaginationQuerySchema,
+	QuerySchema: v.object({
+		...PaginationQuerySchema.entries,
+		year: v.pipe(
+			v.optional(v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1900))),
+			v.description("Filter newsletters by send year"),
+		),
+	}),
 	ResponseSchema: v.pipe(
 		v.object({
 			...PaginatedResponseSchema.entries,
