@@ -20,6 +20,7 @@ import {
 	EntityListHeader,
 	EntityListPagination,
 	EntityListSearchField,
+	EntityListTitle,
 	NewLink,
 	RowActionsMenu,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
@@ -98,7 +99,6 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 					<TableColumn allowsSorting={true} id="title" isRowHeader={true}>
 						{t("Title")}
 					</TableColumn>
-					<TableColumn>{t("Summary")}</TableColumn>
 					<TableColumn allowsSorting={true} id="publicationDate">
 						{t("Publication date")}
 					</TableColumn>
@@ -109,10 +109,7 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 					{(item) => (
 						<TableRow href={`/dashboard/website/impact-case-studies/${item.entity.slug}/details`}>
 							<TableCell>
-								<div className="max-inline-96 truncate">{item.title}</div>
-							</TableCell>
-							<TableCell>
-								<div className="max-inline-xs truncate">{item.summary}</div>
+								<EntityListTitle title={item.title} />
 							</TableCell>
 							<TableCell>
 								{format.dateTime(item.publicationDate, { dateStyle: "short", timeZone: "UTC" })}
