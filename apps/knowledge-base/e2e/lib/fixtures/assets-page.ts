@@ -6,7 +6,7 @@ const ASSETS_PATH = "/en/dashboard/website/assets";
 
 /**
  * The media library dialog is not a standalone page — it is embedded in admin forms. We open it
- * from the persons create form, which exposes a "Select image" trigger.
+ * from the persons create form, which exposes the image picker trigger.
  */
 const MEDIA_LIBRARY_HOST_PATH = "/en/dashboard/administrator/persons/create";
 
