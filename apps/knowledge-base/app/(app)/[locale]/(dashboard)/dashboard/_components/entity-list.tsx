@@ -20,6 +20,24 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 
 // ---------------------------------------------------------------------------
+// EntityListTitle — consistent truncation for overview table title columns
+// ---------------------------------------------------------------------------
+
+interface EntityListTitleProps {
+	title: string;
+}
+
+export function EntityListTitle(props: Readonly<EntityListTitleProps>): ReactNode {
+	const { title } = props;
+
+	return (
+		<div className="max-inline-96 truncate" title={title}>
+			{title}
+		</div>
+	);
+}
+
+// ---------------------------------------------------------------------------
 // EntityListHeader
 // ---------------------------------------------------------------------------
 

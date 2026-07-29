@@ -20,6 +20,7 @@ import {
 	EntityListHeader,
 	EntityListPagination,
 	EntityListSearchField,
+	EntityListTitle,
 	NewLink,
 	RowActionsMenu,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
@@ -104,7 +105,7 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 					{(item) => (
 						<TableRow href={`/dashboard/website/events/${item.entity.slug}/details`}>
 							<TableCell>
-								<div className="max-inline-96 truncate">{item.title}</div>
+								<EntityListTitle title={item.title} />
 							</TableCell>
 							<TableCell>
 								{item.duration.end != null
