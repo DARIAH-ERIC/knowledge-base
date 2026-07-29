@@ -6,7 +6,7 @@ import { toPlainText } from "@dariah-eric/ui/rich-text";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
 import {
@@ -44,8 +44,8 @@ interface SelectedImageCardProps {
 
 /**
  * Identifies a picked asset: what it is called, what it already says, and how to correct that. The
- * same card backs every image field in the dashboard, so an image reads the same wherever it is
- * chosen.
+ * same card backs every asset field in the dashboard - featured images, logos, portraits, and the
+ * document pickers - so an asset reads the same wherever it is chosen.
  */
 export function SelectedImageCard(props: Readonly<SelectedImageCardProps>): ReactNode {
 	const { children, image, onMetadataChange } = props;
@@ -53,6 +53,12 @@ export function SelectedImageCard(props: Readonly<SelectedImageCardProps>): Reac
 	const t = useExtracted();
 
 	const hasCaption = image.caption != null && toPlainText(image.caption) !== "";
+	/**
+	 * Alt text and captions describe a picture. A document (a PDF policy, say) carries the columns
+	 * too, but they are never rendered for it, so showing them here would only invite filling in
+	 * something nobody reads.
+	 */
+	const isImage = image.mimeType == null || image.mimeType.startsWith("image/");
 
 	function handleSaved(saved: SavedAssetMetadata) {
 		onMetadataChange?.({ ...image, ...saved });
@@ -76,15 +82,19 @@ export function SelectedImageCard(props: Readonly<SelectedImageCardProps>): Reac
 				<div className="flex min-inline-0 flex-1 flex-col gap-y-1.5">
 					<span className="truncate font-medium text-sm/tight">{image.label ?? image.key}</span>
 
-					<span className="line-clamp-2 text-muted-fg text-xs">
-						<span className="font-medium">{t("Alt text")}:</span>{" "}
-						{image.alt != null && image.alt !== "" ? image.alt : "—"}
-					</span>
+					{isImage ? (
+						<Fragment>
+							<span className="line-clamp-2 text-muted-fg text-xs">
+								<span className="font-medium">{t("Alt text")}:</span>{" "}
+								{image.alt != null && image.alt !== "" ? image.alt : "—"}
+							</span>
 
-					<span className="line-clamp-2 text-muted-fg text-xs">
-						<span className="font-medium">{t("Caption")}:</span>{" "}
-						{hasCaption ? toPlainText(image.caption) : "—"}
-					</span>
+							<span className="line-clamp-2 text-muted-fg text-xs">
+								<span className="font-medium">{t("Caption")}:</span>{" "}
+								{hasCaption ? toPlainText(image.caption) : "—"}
+							</span>
+						</Fragment>
+					) : null}
 
 					<div className="flex flex-row flex-wrap items-center gap-x-1.5 text-muted-fg text-xs">
 						{image.license != null ? <span>{image.license.code}</span> : null}

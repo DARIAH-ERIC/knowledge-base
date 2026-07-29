@@ -184,6 +184,8 @@ const cases: Array<RoundtripCase> = [
 				summary: f.lorem.paragraph(),
 				publicationDate,
 				imageId: refs.assetId,
+				imageCaption,
+				imageCaptionMode: "override" as const,
 			};
 			await tx.insert(schema.pages).values({ id: versionId, ...values });
 			return values;

@@ -11,8 +11,12 @@ import {
 import { SiteMetadataForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteMetadataPageProps extends PageProps<"/[locale]/dashboard/website/metadata"> {}
@@ -46,10 +50,8 @@ export default async function DashboardWebsiteMetadataPage(
 			},
 			with: {
 				ogImage: {
-					columns: {
-						key: true,
-						label: true,
-					},
+					columns: selectedImageColumns,
+					with: selectedImageWith,
 				},
 			},
 		}),
@@ -57,14 +59,7 @@ export default async function DashboardWebsiteMetadataPage(
 
 	const ogImage =
 		siteMetadataRow?.ogImage != null
-			? {
-					key: siteMetadataRow.ogImage.key,
-					label: siteMetadataRow.ogImage.label,
-					url: images.generateSignedImageUrl({
-						key: siteMetadataRow.ogImage.key,
-						options: imageGridOptions,
-					}).url,
-				}
+			? toSelectedImage(siteMetadataRow.ogImage, imageGridOptions)
 			: null;
 
 	const siteMetadata =

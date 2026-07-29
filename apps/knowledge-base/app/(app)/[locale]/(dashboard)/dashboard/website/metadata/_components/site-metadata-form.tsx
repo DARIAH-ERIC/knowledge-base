@@ -17,14 +17,17 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import {
+	ImageSelectField,
+	type SelectedImage,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import { updateSiteMetadataAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_lib/update-site-metadata.action";
 
 interface SiteMetadataFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	siteMetadata:
 		| (Pick<schema.SiteMetadata, "title" | "description" | "ogTitle" | "ogDescription"> & {
-				ogImage: { key: string; label: string; url: string } | null;
+				ogImage: SelectedImage | null;
 		  })
 		| null;
 }
@@ -39,7 +42,7 @@ export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactN
 		createActionStateInitial(),
 	);
 
-	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
+	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
 		siteMetadata?.ogImage ?? null,
 	);
 
@@ -97,38 +100,13 @@ export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactN
 					description={t("Image used when the website is shared on social media.")}
 					title={t("Open Graph image")}
 				>
-					{selectedImage != null && (
-						<img
-							alt={t("Selected OG image")}
-							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
-							src={selectedImage.url}
-						/>
-					)}
-					<MediaLibraryDialog
+					<ImageSelectField
+						allowRemove={true}
 						defaultPrefix="images"
 						initialAssets={initialAssets}
-						onSelect={(key, url) => {
-							setSelectedImage({ key, url });
-						}}
+						onChange={setSelectedImage}
 						prefixes={["avatars", "images", "logos"]}
-					/>
-					{selectedImage != null ? (
-						<Button
-							intent="outline"
-							onPress={() => {
-								setSelectedImage(null);
-							}}
-						>
-							{t("Remove image")}
-						</Button>
-					) : null}
-					<input
-						aria-hidden={true}
-						className="sr-only"
-						name="imageKey"
-						readOnly={true}
-						tabIndex={-1}
-						value={selectedImage?.key ?? ""}
+						selectedImage={selectedImage}
 					/>
 				</FormSection>
 

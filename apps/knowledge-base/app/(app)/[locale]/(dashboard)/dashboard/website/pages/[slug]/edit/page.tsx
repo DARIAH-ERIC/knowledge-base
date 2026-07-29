@@ -16,8 +16,12 @@ import {
 	getResourceRelationOptions,
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteEditPageItemPageProps extends PageProps<"/[locale]/dashboard/website/pages/[slug]/edit"> {}
@@ -75,6 +79,8 @@ export default async function DashboardWebsiteEditPageItemPage(
 					publicationDate: true,
 					title: true,
 					summary: true,
+					imageCaption: true,
+					imageCaptionMode: true,
 				},
 				with: {
 					entityVersion: {
@@ -95,10 +101,8 @@ export default async function DashboardWebsiteEditPageItemPage(
 						},
 					},
 					image: {
-						columns: {
-							key: true,
-							label: true,
-						},
+						columns: selectedImageColumns,
+						with: selectedImageWith,
 					},
 				},
 			}),
@@ -117,12 +121,7 @@ export default async function DashboardWebsiteEditPageItemPage(
 		getResourceRelationOptionsByIds(relatedResourceIds),
 	]);
 
-	const image = pageItem.image
-		? images.generateSignedImageUrl({
-				key: pageItem.image.key,
-				options: imageGridOptions,
-			})
-		: null;
+	const image = pageItem.image != null ? toSelectedImage(pageItem.image, imageGridOptions) : null;
 
 	const contentBlocks = await getEntityContentBlocks(pageItem.id, "content");
 
@@ -139,10 +138,7 @@ export default async function DashboardWebsiteEditPageItemPage(
 			initialRelatedResourceItems={initialRelatedResources.items}
 			initialRelatedResourceTotal={initialRelatedResources.total}
 			isPublished={publishedId != null}
-			pageItem={{
-				...pageItem,
-				image: pageItem.image ? { ...pageItem.image, url: image!.url } : null,
-			}}
+			pageItem={{ ...pageItem, image }}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
 		/>

@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, withResolvedCaption } from "@/lib/images";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
@@ -30,6 +30,8 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				publicationDate: true,
 				title: true,
@@ -79,7 +81,7 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = generateImageUrl(item.image, imageWidth.preview);
+		const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview);
 		const { publicationDate, ...data } = flattenEntityVersion(item);
 
 		return { ...data, image, publishedAt: publicationDate.toISOString() };
@@ -108,6 +110,8 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				publicationDate: true,
 				title: true,
@@ -151,7 +155,7 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 		getRelatedResources(db, id),
 	]);
 
-	const image = generateImageUrl(item.image, imageWidth.featured);
+	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 	const { publicationDate, ...data } = flattenEntityVersion(item);
 
 	return {
@@ -186,6 +190,8 @@ export async function getPageSlugs(db: Database | Transaction, params: GetPageSl
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				publicationDate: true,
 			},
@@ -260,6 +266,8 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 			},
 		},
 		columns: {
+			imageCaption: true,
+			imageCaptionMode: true,
 			id: true,
 			publicationDate: true,
 			title: true,
@@ -296,7 +304,7 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 		return null;
 	}
 
-	const image = generateImageUrl(item.image, imageWidth.featured);
+	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 
 	const [fields, relatedEntities, relatedResources] = await Promise.all([
 		getContentBlocks(db, item.id),

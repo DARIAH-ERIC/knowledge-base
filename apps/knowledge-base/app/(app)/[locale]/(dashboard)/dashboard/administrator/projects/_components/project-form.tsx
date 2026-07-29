@@ -6,7 +6,7 @@ import { type ActionState, createActionStateInitial } from "@dariah-eric/next-li
 import { AsyncListSelect } from "@dariah-eric/ui/async-list-select";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
-import { Description, FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
+import { Description, FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
@@ -37,7 +37,10 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import {
+	ImageSelectField,
+	type SelectedImage,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import { RichTextContentBlocksField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-content-blocks-field";
 import {
 	type CreatedSocialMedia,
@@ -80,7 +83,7 @@ interface ProjectFormProps {
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 		scope: Pick<schema.ProjectScope, "id" | "scope">;
-	} & { image: { key: string; label: string; url: string } | null };
+	} & { image: SelectedImage | null };
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
 	formAction: ServerAction;
@@ -124,10 +127,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
-		project?.image ?? null,
-	);
-	const [imageKeyError, setImageKeyError] = useState(false);
+	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(project?.image ?? null);
 
 	const [selectedSocialMediaIds, setSelectedSocialMediaIds] = useState<Array<string>>(
 		initialSocialMediaIds ?? [],
@@ -266,50 +266,14 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				<Separator className="my-6" />
 
 				<FormSection description={t("Select or upload an image.")} title={t("Image")}>
-					{selectedImage != null && (
-						<img
-							alt={t("Selected image")}
-							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
-							src={selectedImage.url}
-						/>
-					)}
-					<MediaLibraryDialog
+					<ImageSelectField
+						allowRemove={true}
 						defaultPrefix="logos"
 						initialAssets={initialAssets}
-						onSelect={(key, url) => {
-							setSelectedImage({ key, url });
-							setImageKeyError(false);
-						}}
+						onChange={setSelectedImage}
 						prefixes={["logos"]}
+						selectedImage={selectedImage}
 					/>
-					{selectedImage != null ? (
-						<Button
-							intent="outline"
-							onPress={() => {
-								setSelectedImage(null);
-								setImageKeyError(false);
-							}}
-						>
-							{t("Remove image")}
-						</Button>
-					) : null}
-
-					<input
-						aria-hidden={true}
-						className="sr-only"
-						name="imageKey"
-						onInvalid={(e) => {
-							e.preventDefault();
-							setImageKeyError(true);
-						}}
-						readOnly={true}
-						// required={true}
-						tabIndex={-1}
-						value={selectedImage?.key ?? ""}
-					/>
-					{imageKeyError ? (
-						<div className={fieldErrorStyles()}>{t("Please select an image.")}</div>
-					) : null}
 				</FormSection>
 
 				<Separator className="my-6" />
