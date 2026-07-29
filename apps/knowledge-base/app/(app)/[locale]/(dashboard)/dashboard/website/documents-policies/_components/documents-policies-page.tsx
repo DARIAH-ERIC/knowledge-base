@@ -70,9 +70,6 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 			<div className="min-inline-0 flex flex-1 items-center gap-x-2">
 				<EntityLifecycleStatusBadge hasDraft={item.hasDraft} isPublished={item.isPublished} />
 				<span className="text-sm font-medium">{item.title}</span>
-				{item.summary ? (
-					<span className="text-muted-fg ms-2 truncate text-xs">{item.summary}</span>
-				) : null}
 			</div>
 
 			<div className="flex shrink-0 items-center gap-x-1">

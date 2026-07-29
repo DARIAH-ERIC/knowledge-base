@@ -21,6 +21,7 @@ import {
 	EntityListHeader,
 	EntityListPagination,
 	EntityListSearchField,
+	EntityListTitle,
 	NewLink,
 	RowActionsMenu,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
@@ -111,7 +112,7 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 					{(item) => (
 						<TableRow href={`/dashboard/website/opportunities/${item.entity.slug}/details`}>
 							<TableCell>
-								<div className="max-inline-64 truncate">{item.title}</div>
+								<EntityListTitle title={item.title} />
 							</TableCell>
 							<TableCell>
 								<Badge intent={item.source.source === "dariah" ? "danger" : "info"}>
