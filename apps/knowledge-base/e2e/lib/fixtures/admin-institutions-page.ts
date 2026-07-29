@@ -4,6 +4,7 @@ import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { E2E_TEST_ASSET_KEY } from "@/e2e/lib/fixtures/database-service";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
+import { createSocialMediaInForm } from "@/e2e/lib/fixtures/social-media-form";
 
 const BASE_PATH = "/en/dashboard/administrator/institutions";
 
@@ -68,6 +69,10 @@ export class AdminInstitutionsPage {
 		const editor = this.page.getByRole("textbox", { name: "Description" });
 		await editor.click();
 		await this.page.keyboard.type(text);
+	}
+
+	async createSocialMediaInForm(name: string, url: string): Promise<void> {
+		await createSocialMediaInForm(this.page, name, url);
 	}
 
 	async submitForm(): Promise<void> {

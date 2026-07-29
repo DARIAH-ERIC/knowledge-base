@@ -397,6 +397,27 @@ export class DatabaseService {
 		return this.getOrganisationalUnitDescriptionByVersionId(institution.id);
 	}
 
+	async getInstitutionSocialMediaIdsByName(name: string): Promise<Array<string> | null> {
+		const institution = await this.getInstitutionByName(name);
+		if (institution == null) {
+			return null;
+		}
+
+		return this.getOrganisationalUnitSocialMediaIds(institution.id);
+	}
+
+	async getOrganisationalUnitSocialMediaIds(versionId: string): Promise<Array<string>> {
+		const socialMedia = await this.db
+			.select({
+				socialMediaId: schema.organisationalUnitsToSocialMedia.socialMediaId,
+			})
+			.from(schema.organisationalUnitsToSocialMedia)
+			.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, versionId))
+			.orderBy(schema.organisationalUnitsToSocialMedia.position);
+
+		return socialMedia.map((item) => item.socialMediaId);
+	}
+
 	async getCountryByName(name: string): Promise<{
 		acronym: string | null;
 		documentId: string;
@@ -2732,6 +2753,9 @@ export class DatabaseService {
 			const { documentId } = ids;
 
 			await tx
+				.delete(schema.organisationalUnitsToSocialMedia)
+				.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, versionId));
+			await tx
 				.delete(schema.organisationalUnitsRelations)
 				.where(
 					or(
@@ -2844,6 +2868,9 @@ export class DatabaseService {
 			}
 			const { documentId } = ids;
 
+			await tx
+				.delete(schema.organisationalUnitsToSocialMedia)
+				.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, versionId));
 			await tx
 				.delete(schema.organisationalUnitsRelations)
 				.where(
@@ -3016,6 +3043,9 @@ export class DatabaseService {
 			}
 			const { documentId } = ids;
 
+			await tx
+				.delete(schema.organisationalUnitsToSocialMedia)
+				.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, versionId));
 			await tx
 				.delete(schema.organisationalUnitsRelations)
 				.where(

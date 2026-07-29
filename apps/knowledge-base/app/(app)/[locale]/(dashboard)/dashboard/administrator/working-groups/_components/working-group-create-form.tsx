@@ -14,6 +14,8 @@ interface WorkingGroupCreateFormProps {
 	initialRelatedEntityTotal: number;
 	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
 	initialRelatedResourceTotal: number;
+	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
+	initialSocialMediaTotal: number;
 }
 
 export function WorkingGroupCreateForm(props: Readonly<WorkingGroupCreateFormProps>): ReactNode {
@@ -23,6 +25,8 @@ export function WorkingGroupCreateForm(props: Readonly<WorkingGroupCreateFormPro
 		initialRelatedEntityTotal,
 		initialRelatedResourceItems,
 		initialRelatedResourceTotal,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
 	} = props;
 
 	const t = useExtracted();
@@ -31,7 +35,12 @@ export function WorkingGroupCreateForm(props: Readonly<WorkingGroupCreateFormPro
 		<Fragment>
 			<EntityFormHeader title={t("New working group")} />
 
-			<WorkingGroupForm formAction={createWorkingGroupAction} initialAssets={initialAssets}>
+			<WorkingGroupForm
+				formAction={createWorkingGroupAction}
+				initialAssets={initialAssets}
+				initialSocialMediaItems={initialSocialMediaItems}
+				initialSocialMediaTotal={initialSocialMediaTotal}
+			>
 				<EntityRelationsFields
 					initialRelatedEntityItems={initialRelatedEntityItems}
 					initialRelatedEntityTotal={initialRelatedEntityTotal}

@@ -31,6 +31,8 @@ test.describe("projects admin", () => {
 		const call = "E2E project call";
 		const summary = "E2E test project summary";
 		const description = "E2E test project description.";
+		const socialMediaName = `${adminProjectsPage.workerPrefix} Project Social ${randomUUID()}`;
+		const socialMediaUrl = "https://example.com/project-social";
 		await adminProjectsPage.gotoCreate();
 
 		await adminProjectsPage.fillName(projectName);
@@ -46,6 +48,7 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await adminProjectsPage.fillDescription(description);
+		await adminProjectsPage.createSocialMediaInForm(socialMediaName, socialMediaUrl);
 
 		await adminProjectsPage.submitForm();
 
@@ -68,6 +71,11 @@ test.describe("projects admin", () => {
 		expect(JSON.stringify(await db.getProjectDescriptionByName(projectName))).toContain(
 			description,
 		);
+		const socialMedia = await db.getSocialMediaByName(socialMediaName);
+		expect(socialMedia).toMatchObject({ name: socialMediaName, url: socialMediaUrl });
+		expect((await db.getProjectRelationsByName(projectName))?.socialMediaIds).toStrictEqual([
+			socialMedia!.id,
+		]);
 	});
 
 	test("should store images inserted in project rich-text descriptions as image content blocks", async ({
@@ -292,8 +300,7 @@ test.describe("projects admin", () => {
 		const socialB = `${adminProjectsPage.workerPrefix} Social B ${randomUUID()}`;
 		const socialC = `${adminProjectsPage.workerPrefix} Social C ${randomUUID()}`;
 
-		// The create action does not persist social media relations (only the update action does), so
-		// link the three entries via the edit form, matching the other relation tests in this file.
+		// Create the project first, then link three entries via edit to exercise repeated removals.
 		await adminProjectsPage.gotoCreate();
 		await adminProjectsPage.fillName(projectName);
 		await adminProjectsPage.selectFirstScope();
@@ -404,8 +411,7 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await adminProjectsPage.submitForm();
 
-		// Social media relations are only persisted by the update action, so link them via the edit
-		// form (matching the other social media tests in this file).
+		// Link the entries via edit so this test exercises reordering an existing selection.
 		await adminProjectsPage.searchByName(projectName);
 		await adminProjectsPage
 			.projectRowByName(projectName)

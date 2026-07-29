@@ -14,6 +14,8 @@ interface NationalConsortiumCreateFormProps {
 	initialRelatedEntityTotal: number;
 	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
 	initialRelatedResourceTotal: number;
+	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
+	initialSocialMediaTotal: number;
 }
 
 export function NationalConsortiumCreateForm(
@@ -25,6 +27,8 @@ export function NationalConsortiumCreateForm(
 		initialRelatedEntityTotal,
 		initialRelatedResourceItems,
 		initialRelatedResourceTotal,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
 	} = props;
 
 	const t = useExtracted();
@@ -36,6 +40,8 @@ export function NationalConsortiumCreateForm(
 			<NationalConsortiumForm
 				formAction={createNationalConsortiumAction}
 				initialAssets={initialAssets}
+				initialSocialMediaItems={initialSocialMediaItems}
+				initialSocialMediaTotal={initialSocialMediaTotal}
 				showSaveAndPublish={true}
 			>
 				<EntityRelationsFields

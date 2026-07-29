@@ -11,6 +11,7 @@ test.describe("countries admin", () => {
 
 	test.afterAll(async ({ db }, testInfo) => {
 		await db.cleanupWorkerCountries(testInfo.workerIndex);
+		await db.cleanupWorkerSocialMedia(testInfo.workerIndex);
 	});
 
 	test("should create a country", async ({ createAdminCountriesPage, db }) => {
@@ -21,6 +22,8 @@ test.describe("countries admin", () => {
 		const acronym = "E2EC";
 		const summary = "E2E test country summary.";
 		const description = "E2E test country description.";
+		const socialMediaName = `${countriesPage.workerPrefix} Country Social ${randomUUID()}`;
+		const socialMediaUrl = "https://example.com/country-social";
 		const testAsset = await db.getTestAsset();
 
 		await countriesPage.gotoCreate();
@@ -30,6 +33,7 @@ test.describe("countries admin", () => {
 		await countriesPage.fillSummary(summary);
 		await countriesPage.selectTestImage();
 		await countriesPage.fillDescription(description);
+		await countriesPage.createSocialMediaInForm(socialMediaName, socialMediaUrl);
 
 		await countriesPage.submitForm();
 
@@ -40,6 +44,11 @@ test.describe("countries admin", () => {
 		expect(created).not.toBeNull();
 		expect(created).toMatchObject({ acronym, imageId: testAsset.id, name, summary });
 		expect(JSON.stringify(await db.getCountryDescriptionByName(name))).toContain(description);
+		const socialMedia = await db.getSocialMediaByName(socialMediaName);
+		expect(socialMedia).toMatchObject({ name: socialMediaName, url: socialMediaUrl });
+		expect(await db.getOrganisationalUnitSocialMediaIds(created!.id)).toStrictEqual([
+			socialMedia!.id,
+		]);
 	});
 
 	test("should edit all country form fields", async ({ page, createAdminCountriesPage, db }) => {

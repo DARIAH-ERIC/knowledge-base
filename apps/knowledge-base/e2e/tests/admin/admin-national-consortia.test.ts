@@ -11,6 +11,7 @@ test.describe("national consortia admin", () => {
 
 	test.afterAll(async ({ db }, testInfo) => {
 		await db.cleanupWorkerNationalConsortiа(testInfo.workerIndex);
+		await db.cleanupWorkerSocialMedia(testInfo.workerIndex);
 	});
 
 	test("should create a national consortium", async ({ createAdminNationalConsortiaPage, db }) => {
@@ -23,6 +24,8 @@ test.describe("national consortia admin", () => {
 		const sshocMarketplaceActorId = 234561;
 		const summary = "E2E test national consortium summary.";
 		const description = "E2E test national consortium description.";
+		const socialMediaName = `${nationalConsortiaPage.workerPrefix} Consortium Social ${randomUUID()}`;
+		const socialMediaUrl = "https://example.com/consortium-social";
 		const testAsset = await db.getTestAsset();
 
 		await nationalConsortiaPage.gotoCreate();
@@ -34,6 +37,7 @@ test.describe("national consortia admin", () => {
 		await nationalConsortiaPage.fillSummary(summary);
 		await nationalConsortiaPage.selectTestImage();
 		await nationalConsortiaPage.fillDescription(description);
+		await nationalConsortiaPage.createSocialMediaInForm(socialMediaName, socialMediaUrl);
 
 		await nationalConsortiaPage.submitForm();
 
@@ -53,6 +57,11 @@ test.describe("national consortia admin", () => {
 		expect(JSON.stringify(await db.getNationalConsortiumDescriptionByName(name))).toContain(
 			description,
 		);
+		const socialMedia = await db.getSocialMediaByName(socialMediaName);
+		expect(socialMedia).toMatchObject({ name: socialMediaName, url: socialMediaUrl });
+		expect(await db.getOrganisationalUnitSocialMediaIds(created!.id)).toStrictEqual([
+			socialMedia!.id,
+		]);
 	});
 
 	test("should edit all national consortium form fields", async ({

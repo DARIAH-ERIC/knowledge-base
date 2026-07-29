@@ -11,6 +11,7 @@ test.describe("institutions admin", () => {
 
 	test.afterAll(async ({ db }, testInfo) => {
 		await db.cleanupWorkerInstitutions(testInfo.workerIndex);
+		await db.cleanupWorkerSocialMedia(testInfo.workerIndex);
 	});
 
 	test("should create an institution", async ({ createAdminInstitutionsPage, db }) => {
@@ -23,6 +24,8 @@ test.describe("institutions admin", () => {
 		const sshocMarketplaceActorId = 345671;
 		const summary = "E2E test institution summary.";
 		const description = "E2E test institution description.";
+		const socialMediaName = `${institutionsPage.workerPrefix} Institution Social ${randomUUID()}`;
+		const socialMediaUrl = "https://example.com/institution-social";
 		const testAsset = await db.getTestAsset();
 
 		await institutionsPage.gotoCreate();
@@ -34,6 +37,7 @@ test.describe("institutions admin", () => {
 		await institutionsPage.fillSummary(summary);
 		await institutionsPage.selectTestImage();
 		await institutionsPage.fillDescription(description);
+		await institutionsPage.createSocialMediaInForm(socialMediaName, socialMediaUrl);
 
 		await institutionsPage.submitForm();
 
@@ -51,6 +55,9 @@ test.describe("institutions admin", () => {
 			summary,
 		});
 		expect(JSON.stringify(await db.getInstitutionDescriptionByName(name))).toContain(description);
+		const socialMedia = await db.getSocialMediaByName(socialMediaName);
+		expect(socialMedia).toMatchObject({ name: socialMediaName, url: socialMediaUrl });
+		expect(await db.getInstitutionSocialMediaIdsByName(name)).toStrictEqual([socialMedia!.id]);
 	});
 
 	test("should edit all institution form fields", async ({
