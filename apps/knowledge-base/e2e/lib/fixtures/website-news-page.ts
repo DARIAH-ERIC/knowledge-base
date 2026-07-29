@@ -559,7 +559,15 @@ export class WebsiteNewsPage {
 		await editor.press("Shift+Home");
 		await this.insertDocumentLink(options.documentLabel);
 
-		await editor.press("Control+End");
+		/**
+		 * The media dialog restores the editor selection after it closes. Wait until the link command
+		 * has updated the document, then collapse that selection at its end. Pressing Control+End while
+		 * the dialog is still restoring focus can make Chromium delete the selected paragraph.
+		 */
+		await expect(editor.locator('a[data-target-kind="asset"]')).toHaveText(
+			options.documentLinkText,
+		);
+		await editor.press("ArrowRight");
 		await editor.press("Enter");
 		await this.insertEntityLink(options.entityName);
 
