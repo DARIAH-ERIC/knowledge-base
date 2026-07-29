@@ -2753,6 +2753,9 @@ export class DatabaseService {
 			const { documentId } = ids;
 
 			await tx
+				.delete(schema.organisationalUnitsToSocialMedia)
+				.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, versionId));
+			await tx
 				.delete(schema.organisationalUnitsRelations)
 				.where(
 					or(
@@ -2865,6 +2868,9 @@ export class DatabaseService {
 			}
 			const { documentId } = ids;
 
+			await tx
+				.delete(schema.organisationalUnitsToSocialMedia)
+				.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, versionId));
 			await tx
 				.delete(schema.organisationalUnitsRelations)
 				.where(
@@ -3037,6 +3043,9 @@ export class DatabaseService {
 			}
 			const { documentId } = ids;
 
+			await tx
+				.delete(schema.organisationalUnitsToSocialMedia)
+				.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, versionId));
 			await tx
 				.delete(schema.organisationalUnitsRelations)
 				.where(
