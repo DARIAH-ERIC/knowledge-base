@@ -403,12 +403,16 @@ export class DatabaseService {
 			return null;
 		}
 
+		return this.getOrganisationalUnitSocialMediaIds(institution.id);
+	}
+
+	async getOrganisationalUnitSocialMediaIds(versionId: string): Promise<Array<string>> {
 		const socialMedia = await this.db
 			.select({
 				socialMediaId: schema.organisationalUnitsToSocialMedia.socialMediaId,
 			})
 			.from(schema.organisationalUnitsToSocialMedia)
-			.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, institution.id))
+			.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, versionId))
 			.orderBy(schema.organisationalUnitsToSocialMedia.position);
 
 		return socialMedia.map((item) => item.socialMediaId);

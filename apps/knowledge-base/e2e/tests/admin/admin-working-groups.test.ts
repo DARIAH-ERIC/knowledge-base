@@ -11,6 +11,7 @@ test.describe("working groups admin", () => {
 
 	test.afterAll(async ({ db }, testInfo) => {
 		await db.cleanupWorkerWorkingGroups(testInfo.workerIndex);
+		await db.cleanupWorkerSocialMedia(testInfo.workerIndex);
 	});
 
 	test("should create a working group", async ({ createAdminWorkingGroupsPage, db }) => {
@@ -24,6 +25,8 @@ test.describe("working groups admin", () => {
 		const description = "E2E test working group description.";
 		const email = "wg@e2e.example.org";
 		const mailingList = "https://lists.e2e.example.org/wg";
+		const socialMediaName = `${workingGroupsPage.workerPrefix} Working Group Social ${randomUUID()}`;
+		const socialMediaUrl = "https://example.com/working-group-social";
 		const testAsset = await db.getTestAsset();
 
 		await workingGroupsPage.gotoCreate();
@@ -36,6 +39,7 @@ test.describe("working groups admin", () => {
 		await workingGroupsPage.fillEmail(email);
 		await workingGroupsPage.fillMailingList(mailingList);
 		await workingGroupsPage.fillDescription(description);
+		await workingGroupsPage.createSocialMediaInForm(socialMediaName, socialMediaUrl);
 
 		await workingGroupsPage.submitForm();
 
@@ -54,6 +58,11 @@ test.describe("working groups admin", () => {
 			summary,
 		});
 		expect(JSON.stringify(await db.getWorkingGroupDescriptionByName(name))).toContain(description);
+		const socialMedia = await db.getSocialMediaByName(socialMediaName);
+		expect(socialMedia).toMatchObject({ name: socialMediaName, url: socialMediaUrl });
+		expect(await db.getOrganisationalUnitSocialMediaIds(created!.id)).toStrictEqual([
+			socialMedia!.id,
+		]);
 	});
 
 	test("should edit all working group form fields", async ({

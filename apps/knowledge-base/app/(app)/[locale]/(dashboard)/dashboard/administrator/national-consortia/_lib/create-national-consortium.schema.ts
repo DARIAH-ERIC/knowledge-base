@@ -20,4 +20,5 @@ export const CreateNationalConsortiumActionInputSchema = v.object({
 	),
 	relatedEntityIds: v.optional(v.array(v.pipe(v.string(), v.uuid())), []),
 	relatedResourceIds: v.optional(v.array(v.pipe(v.string(), v.nonEmpty())), []),
+	socialMediaIds: v.optional(v.array(v.pipe(v.string(), v.uuid())), []),
 });

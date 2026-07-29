@@ -8,6 +8,7 @@ import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-l
 import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { filterToPublishedDocumentIds } from "@/lib/data/relations";
+import { syncOrganisationalUnitSocialMedia } from "@/lib/data/social-media-relations";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -77,6 +78,8 @@ export const createCountryAction = createMutationAction({
 				}),
 			);
 		}
+
+		await syncOrganisationalUnitSocialMedia(tx, versionId, input.socialMediaIds);
 
 		await replaceEntityVersionFieldContentBlocks(
 			tx,

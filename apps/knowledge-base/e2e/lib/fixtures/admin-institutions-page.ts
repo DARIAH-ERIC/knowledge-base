@@ -1,9 +1,10 @@
-import { type Locator, type Page, expect } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { E2E_TEST_ASSET_KEY } from "@/e2e/lib/fixtures/database-service";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
+import { createSocialMediaInForm } from "@/e2e/lib/fixtures/social-media-form";
 
 const BASE_PATH = "/en/dashboard/administrator/institutions";
 
@@ -71,18 +72,7 @@ export class AdminInstitutionsPage {
 	}
 
 	async createSocialMediaInForm(name: string, url: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Create social media" }).click();
-		const dialog = this.page.getByRole("dialog", { name: "Create social media" });
-		await dialog.getByLabel("Name", { exact: true }).fill(name);
-		await dialog.getByLabel("URL").fill(url);
-		const typeControl = dialog
-			.locator('[data-slot="control"]')
-			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Type" }) });
-		await typeControl.locator("button[aria-expanded]:not([slot])").click();
-		await this.page.getByRole("option").first().click();
-		await dialog.getByRole("button", { name: "Create" }).click();
-		await dialog.waitFor({ state: "hidden" });
-		await expect(this.page.getByText(name, { exact: true })).toBeVisible();
+		await createSocialMediaInForm(this.page, name, url);
 	}
 
 	async submitForm(): Promise<void> {

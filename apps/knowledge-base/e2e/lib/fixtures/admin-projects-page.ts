@@ -5,6 +5,7 @@ import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
 import { dragGridRowDownByName } from "@/e2e/lib/fixtures/reorder";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
+import { createSocialMediaInForm } from "@/e2e/lib/fixtures/social-media-form";
 
 const BASE_PATH = "/en/dashboard/administrator/projects";
 
@@ -250,18 +251,7 @@ export class AdminProjectsPage {
 	}
 
 	async createSocialMediaInForm(name: string, url: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Create social media" }).click();
-		const dialog = this.page.getByRole("dialog", { name: "Create social media" });
-		await dialog.getByLabel("Name", { exact: true }).fill(name);
-		await dialog.getByLabel("URL").fill(url);
-		const typeControl = dialog
-			.locator('[data-slot="control"]')
-			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Type" }) });
-		await typeControl.locator("button[aria-expanded]:not([slot])").click();
-		await this.page.getByRole("option").first().click();
-		await dialog.getByRole("button", { name: "Create" }).click();
-		await dialog.waitFor({ state: "hidden" });
-		await expect(this.page.getByText(name, { exact: true })).toBeVisible();
+		await createSocialMediaInForm(this.page, name, url);
 	}
 
 	async goToProjectPartnersTab(): Promise<void> {
