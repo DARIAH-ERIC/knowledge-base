@@ -13,6 +13,8 @@ interface InstitutionCreateFormProps {
 	initialRelatedEntityTotal: number;
 	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
 	initialRelatedResourceTotal: number;
+	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
+	initialSocialMediaTotal: number;
 }
 
 export function InstitutionCreateForm(props: Readonly<InstitutionCreateFormProps>): ReactNode {
@@ -22,6 +24,8 @@ export function InstitutionCreateForm(props: Readonly<InstitutionCreateFormProps
 		initialRelatedEntityTotal,
 		initialRelatedResourceItems,
 		initialRelatedResourceTotal,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
 	} = props;
 
 	const t = useExtracted();
@@ -37,6 +41,8 @@ export function InstitutionCreateForm(props: Readonly<InstitutionCreateFormProps
 				initialRelatedEntityTotal={initialRelatedEntityTotal}
 				initialRelatedResourceItems={initialRelatedResourceItems}
 				initialRelatedResourceTotal={initialRelatedResourceTotal}
+				initialSocialMediaItems={initialSocialMediaItems}
+				initialSocialMediaTotal={initialSocialMediaTotal}
 			/>
 		</Fragment>
 	);
