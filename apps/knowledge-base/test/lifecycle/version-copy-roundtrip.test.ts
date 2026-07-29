@@ -103,6 +103,15 @@ const duration = {
 };
 const publicationDate = new Date("2026-03-15T00:00:00.000Z");
 
+/**
+ * A featured image's caption choice, seeded to non-default values so the copy assertions actually
+ * exercise both columns: `override` is the one mode that also gives `imageCaption` meaning.
+ */
+const imageCaption = {
+	type: "doc",
+	content: [{ type: "paragraph", content: [{ type: "text", text: "Photo: Jane Doe" }] }],
+};
+
 const cases: Array<RoundtripCase> = [
 	{
 		entityType: "documentation_pages",
@@ -150,6 +159,8 @@ const cases: Array<RoundtripCase> = [
 				summary: f.lorem.paragraph(),
 				publicationDate,
 				imageId: refs.assetId,
+				imageCaption,
+				imageCaptionMode: "override" as const,
 			};
 			await tx.insert(schema.news).values({ id: versionId, ...values });
 			return values;
@@ -173,6 +184,8 @@ const cases: Array<RoundtripCase> = [
 				summary: f.lorem.paragraph(),
 				publicationDate,
 				imageId: refs.assetId,
+				imageCaption,
+				imageCaptionMode: "override" as const,
 			};
 			await tx.insert(schema.pages).values({ id: versionId, ...values });
 			return values;
@@ -196,6 +209,8 @@ const cases: Array<RoundtripCase> = [
 				summary: f.lorem.paragraph(),
 				publicationDate,
 				imageId: refs.assetId,
+				imageCaption,
+				imageCaptionMode: "override" as const,
 			};
 			await tx.insert(schema.spotlightArticles).values({ id: versionId, ...values });
 			return values;
@@ -219,6 +234,8 @@ const cases: Array<RoundtripCase> = [
 				summary: f.lorem.paragraph(),
 				publicationDate,
 				imageId: refs.assetId,
+				imageCaption,
+				imageCaptionMode: "override" as const,
 			};
 			await tx.insert(schema.impactCaseStudies).values({ id: versionId, ...values });
 			return values;
@@ -242,6 +259,8 @@ const cases: Array<RoundtripCase> = [
 				summary: f.lorem.paragraph(),
 				duration,
 				imageId: refs.assetId,
+				imageCaption,
+				imageCaptionMode: "override" as const,
 			};
 			await tx.insert(schema.fundingCalls).values({ id: versionId, ...values });
 			return values;
@@ -264,6 +283,8 @@ const cases: Array<RoundtripCase> = [
 				title: f.lorem.sentence(),
 				summary: f.lorem.paragraph(),
 				imageId: refs.assetId,
+				imageCaption,
+				imageCaptionMode: "override" as const,
 				location: f.location.city(),
 				duration,
 				isFullDay: true,
@@ -293,6 +314,8 @@ const cases: Array<RoundtripCase> = [
 				sourceId: refs.opportunitySourceId,
 				website: f.internet.url(),
 				imageId: refs.assetId,
+				imageCaption,
+				imageCaptionMode: "override" as const,
 			};
 			await tx.insert(schema.opportunities).values({ id: versionId, ...values });
 			return values;
@@ -342,6 +365,8 @@ const cases: Array<RoundtripCase> = [
 				email: f.internet.email(),
 				orcid: "0000-0002-1825-0097",
 				imageId: refs.assetId,
+				imageCaption,
+				imageCaptionMode: "override" as const,
 			};
 			await tx.insert(schema.persons).values({ id: versionId, ...values });
 			return values;

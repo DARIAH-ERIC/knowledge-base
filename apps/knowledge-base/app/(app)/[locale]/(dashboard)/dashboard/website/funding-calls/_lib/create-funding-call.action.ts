@@ -45,6 +45,8 @@ export const createFundingCallAction = createMutationAction({
 			title: input.title,
 			summary: input.summary,
 			imageId: asset.id,
+			imageCaption: input.imageCaption,
+			imageCaptionMode: input.imageCaptionMode,
 		});
 
 		const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({

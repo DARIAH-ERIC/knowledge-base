@@ -20,6 +20,10 @@ import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { EntitySlugField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field";
 import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import {
+	type SelectedImage,
+	SelectedImageCard,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface DocumentOrPolicyFormProps {
@@ -30,7 +34,7 @@ interface DocumentOrPolicyFormProps {
 		"id" | "title" | "summary" | "url" | "groupId"
 	> & {
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { document: { key: string; label: string; url: string } };
+	} & { document: SelectedImage };
 	groups: Array<Pick<schema.DocumentPolicyGroup, "id" | "label">>;
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
@@ -44,15 +48,26 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const [selectedDocument, setSelectedDocument] = useState<{ key: string; label: string } | null>(
-		documentOrPolicy?.document
-			? { key: documentOrPolicy.document.key, label: documentOrPolicy.document.label }
-			: null,
+	const [selectedDocument, setSelectedDocument] = useState<SelectedImage | null>(
+		documentOrPolicy?.document ?? null,
 	);
 
 	const [selectedGroupId, setSelectedGroupId] = useState<string>(documentOrPolicy?.groupId ?? "");
 
 	const [documentKeyError, setDocumentKeyError] = useState(false);
+
+	const picker = (
+		<MediaLibraryDialog
+			defaultPrefix="documents"
+			initialAssets={initialAssets}
+			onSelect={(key, url, asset) => {
+				setSelectedDocument({ ...asset, key, url });
+				setDocumentKeyError(false);
+			}}
+			prefixes={["documents"]}
+			triggerLabel={selectedDocument != null ? t("Change document") : t("Select document")}
+		/>
+	);
 
 	return (
 		<Form action={action} className="flex flex-col gap-y-6" state={state}>
@@ -104,19 +119,13 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 			<Separator className="my-6" />
 
 			<FormSection description={t("Select or upload a document.")} title={t("Document")}>
-				{selectedDocument != null && (
-					<p className="text-sm text-muted-fg">{selectedDocument.label}</p>
+				{selectedDocument != null ? (
+					<SelectedImageCard image={selectedDocument} onMetadataChange={setSelectedDocument}>
+						{picker}
+					</SelectedImageCard>
+				) : (
+					picker
 				)}
-				<MediaLibraryDialog
-					defaultPrefix="documents"
-					initialAssets={initialAssets}
-					onSelect={(key, _url) => {
-						const asset = initialAssets.find((a) => a.key === key);
-						setSelectedDocument({ key, label: asset?.label ?? key });
-					}}
-					prefixes={["documents"]}
-					triggerLabel={t("Select document")}
-				/>
 
 				<input
 					aria-hidden={true}

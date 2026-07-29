@@ -47,6 +47,8 @@ export const createOpportunityAction = createMutationAction({
 			summary: input.summary,
 			website: input.website,
 			imageId: asset.id,
+			imageCaption: input.imageCaption,
+			imageCaptionMode: input.imageCaptionMode,
 		});
 
 		const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({

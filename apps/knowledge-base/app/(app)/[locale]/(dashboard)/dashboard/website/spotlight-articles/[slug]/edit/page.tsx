@@ -17,9 +17,13 @@ import {
 	getResourceRelationOptions,
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { spotlightArticlesLifecycleAdapter } from "@/lib/data/spotlight-articles.lifecycle-adapter";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteEditSpotlightArticlePageProps extends PageProps<"/[locale]/dashboard/website/spotlight-articles/[slug]/edit"> {}
@@ -83,6 +87,8 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 			where: { id: draftVersionId },
 			columns: {
 				id: true,
+				imageCaption: true,
+				imageCaptionMode: true,
 				publicationDate: true,
 				title: true,
 				summary: true,
@@ -106,10 +112,8 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 					},
 				},
 				image: {
-					columns: {
-						key: true,
-						label: true,
-					},
+					columns: selectedImageColumns,
+					with: selectedImageWith,
 				},
 			},
 		}),
@@ -122,10 +126,7 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 		notFound();
 	}
 
-	const image = images.generateSignedImageUrl({
-		key: spotlightArticle.image.key,
-		options: imageGridOptions,
-	});
+	const image = toSelectedImage(spotlightArticle.image, imageGridOptions);
 	const [{ relatedEntityIds, relatedResourceIds }, contributors, contentBlocks] = await Promise.all(
 		[
 			getEntityRelations(documentId),
@@ -159,7 +160,7 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 			selectedRelatedResources={selectedRelatedResources}
 			spotlightArticle={{
 				...spotlightArticle,
-				image: { ...spotlightArticle.image, url: image.url },
+				image,
 			}}
 		/>
 	);

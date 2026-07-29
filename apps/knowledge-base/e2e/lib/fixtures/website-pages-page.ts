@@ -60,7 +60,7 @@ export class WebsitePagesPage {
 	}
 
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Select image" }).click();
+		await this.page.getByRole("button", { name: /^(Select|Change) image$/ }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
 		const asset = dialog.getByRole("gridcell", { name: assetLabel });

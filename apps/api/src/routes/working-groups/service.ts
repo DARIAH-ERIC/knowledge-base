@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl, toImageAsset } from "@/lib/images";
+import { generateImageUrl, toImageAsset, withResolvedCaption } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
@@ -221,6 +221,8 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 			imageKey: schema.assets.key,
 			imageAlt: schema.assets.alt,
 			imageCaption: schema.assets.caption,
+			personImageCaption: schema.persons.imageCaption,
+			personImageCaptionMode: schema.persons.imageCaptionMode,
 			licenseName: schema.licenses.name,
 			licenseUrl: schema.licenses.url,
 			roleType: schema.personRoleTypes.type,
@@ -258,19 +260,32 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 	);
 
 	return rows.map(
-		({ imageKey, imageAlt, imageCaption, licenseName, licenseUrl, roleType, ...row }) => {
+		({
+			imageKey,
+			imageAlt,
+			imageCaption,
+			personImageCaption,
+			personImageCaptionMode,
+			licenseName,
+			licenseUrl,
+			roleType,
+			...row
+		}) => {
 			return {
 				...row,
 				positions: positions.get(row.id) ?? null,
 				role: roleType,
 				image: generateImageUrl(
-					toImageAsset({
-						key: imageKey,
-						alt: imageAlt,
-						caption: imageCaption,
-						licenseName,
-						licenseUrl,
-					}),
+					withResolvedCaption(
+						toImageAsset({
+							key: imageKey,
+							alt: imageAlt,
+							caption: imageCaption,
+							licenseName,
+							licenseUrl,
+						}),
+						{ imageCaption: personImageCaption, imageCaptionMode: personImageCaptionMode },
+					),
 					imageWidth.avatar,
 				),
 			};

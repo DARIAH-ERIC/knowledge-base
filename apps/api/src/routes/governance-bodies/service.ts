@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl, toImageAsset } from "@/lib/images";
+import { generateImageUrl, toImageAsset, withResolvedCaption } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
@@ -80,6 +81,8 @@ function mapGovernanceBodyPerson(
 		imageKey: string | null;
 		imageAlt: string | null;
 		imageCaption: JSONContent | null;
+		personImageCaption: JSONContent | null;
+		personImageCaptionMode: ImageCaptionMode;
 		licenseName: string | null;
 		licenseUrl: string | null;
 		role: (typeof schema.personRoleTypesEnum)[number];
@@ -96,13 +99,16 @@ function mapGovernanceBodyPerson(
 		orcid: row.orcid,
 		positions: positions.get(row.id) ?? null,
 		image: generateImageUrl(
-			toImageAsset({
-				key: row.imageKey,
-				alt: row.imageAlt,
-				caption: row.imageCaption,
-				licenseName: row.licenseName,
-				licenseUrl: row.licenseUrl,
-			}),
+			withResolvedCaption(
+				toImageAsset({
+					key: row.imageKey,
+					alt: row.imageAlt,
+					caption: row.imageCaption,
+					licenseName: row.licenseName,
+					licenseUrl: row.licenseUrl,
+				}),
+				{ imageCaption: row.personImageCaption, imageCaptionMode: row.personImageCaptionMode },
+			),
 			imageWidth.avatar,
 		),
 		slug: row.slug,
@@ -133,6 +139,8 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			imageKey: schema.assets.key,
 			imageAlt: schema.assets.alt,
 			imageCaption: schema.assets.caption,
+			personImageCaption: schema.persons.imageCaption,
+			personImageCaptionMode: schema.persons.imageCaptionMode,
 			licenseName: schema.licenses.name,
 			licenseUrl: schema.licenses.url,
 			role: schema.personRoleTypes.type,
@@ -256,6 +264,8 @@ async function getActiveGovernanceBodyPersons(
 			imageKey: schema.assets.key,
 			imageAlt: schema.assets.alt,
 			imageCaption: schema.assets.caption,
+			personImageCaption: schema.persons.imageCaption,
+			personImageCaptionMode: schema.persons.imageCaptionMode,
 			licenseName: schema.licenses.name,
 			licenseUrl: schema.licenses.url,
 			role: schema.personRoleTypes.type,

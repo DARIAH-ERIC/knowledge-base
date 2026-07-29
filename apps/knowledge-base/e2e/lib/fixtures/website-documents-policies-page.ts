@@ -82,7 +82,7 @@ export class WebsiteDocumentsPoliciesPage {
 	}
 
 	async selectDocumentFromMediaLibrary(assetLabel: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Select document" }).click();
+		await this.page.getByRole("button", { name: /^(Select|Change) document$/ }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
 		const asset = dialog.getByRole("gridcell", { name: assetLabel });

@@ -53,6 +53,8 @@ export const updatePageItemAction = createMutationAction({
 			.update(schema.pages)
 			.set({
 				imageId,
+				imageCaption: input.imageCaption,
+				imageCaptionMode: input.imageCaptionMode,
 				publicationDate: input.publicationDate,
 				title: input.title,
 				summary: input.summary,

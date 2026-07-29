@@ -7,6 +7,7 @@ import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { assets } from "./assets";
 import { fields } from "./entities";
+import { imageCaptionModeColumn, imageCaptionModesEnum } from "./image-captions";
 
 export const contentBlockTypesEnum = [
 	"accordion",
@@ -174,20 +175,30 @@ export const GalleryContentBlockSelectSchema = createSelectSchema(galleryContent
 export const GalleryContentBlockInsertSchema = createInsertSchema(galleryContentBlocks);
 export const GalleryContentBlockUpdateSchema = createUpdateSchema(galleryContentBlocks);
 
-export const galleryContentBlockItems = p.snakeCase.table("content_blocks_type_gallery_items", {
-	id: p.uuid("id").primaryKey().default(uuidv7()),
-	galleryContentBlockId: p
-		.uuid("gallery_content_block_id")
-		.notNull()
-		.references(() => galleryContentBlocks.id, { onDelete: "cascade" }),
-	imageId: p
-		.uuid("image_id")
-		.notNull()
-		.references(() => assets.id),
-	position: p.integer("position").notNull(),
-	caption: p.jsonb("caption").$type<JSONContent>(),
-	...f.timestamps(),
-});
+export const galleryContentBlockItems = p.snakeCase.table(
+	"content_blocks_type_gallery_items",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		galleryContentBlockId: p
+			.uuid("gallery_content_block_id")
+			.notNull()
+			.references(() => galleryContentBlocks.id, { onDelete: "cascade" }),
+		imageId: p
+			.uuid("image_id")
+			.notNull()
+			.references(() => assets.id),
+		position: p.integer("position").notNull(),
+		caption: p.jsonb("caption").$type<JSONContent>(),
+		captionMode: imageCaptionModeColumn("caption_mode"),
+		...f.timestamps(),
+	},
+	(t) => [
+		p.check(
+			"content_blocks_type_gallery_items_caption_mode_enum_check",
+			inArray(t.captionMode, imageCaptionModesEnum),
+		),
+	],
+);
 
 export type GalleryContentBlockItem = typeof galleryContentBlockItems.$inferSelect;
 export type GalleryContentBlockItemInput = typeof galleryContentBlockItems.$inferInsert;
@@ -195,8 +206,6 @@ export type GalleryContentBlockItemInput = typeof galleryContentBlockItems.$infe
 export const GalleryContentBlockItemSelectSchema = createSelectSchema(galleryContentBlockItems);
 export const GalleryContentBlockItemInsertSchema = createInsertSchema(galleryContentBlockItems);
 export const GalleryContentBlockItemUpdateSchema = createUpdateSchema(galleryContentBlockItems);
-
-export const imageCaptionModesEnum = ["hidden", "inherit", "override"] as const;
 
 /**
  * How an `image` block sits in the content column. A deliberately closed vocabulary — not free-form
@@ -223,10 +232,7 @@ export const imageContentBlocks = p.snakeCase.table(
 			.notNull()
 			.references(() => assets.id),
 		caption: p.jsonb("caption").$type<JSONContent>(),
-		captionMode: p
-			.text("caption_mode", { enum: imageCaptionModesEnum })
-			.notNull()
-			.default("inherit"),
+		captionMode: imageCaptionModeColumn("caption_mode"),
 		layout: p.text("layout", { enum: imageLayoutEnum }).notNull().default("default"),
 		...f.timestamps(),
 	},
@@ -275,10 +281,7 @@ export const mediaTextContentBlocks = p.snakeCase.table(
 		side: p.text("side", { enum: mediaTextSideEnum }).notNull().default("start"),
 		content: p.jsonb("content").$type<JSONContent>().notNull(),
 		caption: p.jsonb("caption").$type<JSONContent>(),
-		captionMode: p
-			.text("caption_mode", { enum: imageCaptionModesEnum })
-			.notNull()
-			.default("inherit"),
+		captionMode: imageCaptionModeColumn("caption_mode"),
 		...f.timestamps(),
 	},
 	(t) => [
@@ -297,17 +300,28 @@ export const MediaTextContentBlockSelectSchema = createSelectSchema(mediaTextCon
 export const MediaTextContentBlockInsertSchema = createInsertSchema(mediaTextContentBlocks);
 export const MediaTextContentBlockUpdateSchema = createUpdateSchema(mediaTextContentBlocks);
 
-export const heroContentBlocks = p.snakeCase.table("content_blocks_type_hero", {
-	id: p
-		.uuid("id")
-		.primaryKey()
-		.references(() => contentBlocks.id, { onDelete: "cascade" }),
-	title: p.text("title").notNull(),
-	eyebrow: p.text("eyebrow"),
-	imageId: p.uuid("image_id").references(() => assets.id),
-	ctas: p.jsonb("ctas"),
-	...f.timestamps(),
-});
+export const heroContentBlocks = p.snakeCase.table(
+	"content_blocks_type_hero",
+	{
+		id: p
+			.uuid("id")
+			.primaryKey()
+			.references(() => contentBlocks.id, { onDelete: "cascade" }),
+		title: p.text("title").notNull(),
+		eyebrow: p.text("eyebrow"),
+		imageId: p.uuid("image_id").references(() => assets.id),
+		caption: p.jsonb("caption").$type<JSONContent>(),
+		captionMode: imageCaptionModeColumn("caption_mode"),
+		ctas: p.jsonb("ctas"),
+		...f.timestamps(),
+	},
+	(t) => [
+		p.check(
+			"content_blocks_type_hero_caption_mode_enum_check",
+			inArray(t.captionMode, imageCaptionModesEnum),
+		),
+	],
+);
 
 export type HeroContentBlock = typeof heroContentBlocks.$inferSelect;
 export type HeroContentBlockInput = typeof heroContentBlocks.$inferInsert;

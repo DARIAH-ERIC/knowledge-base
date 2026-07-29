@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { getContentBlocks } from "@/lib/content-blocks";
 import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl, toImageAsset } from "@/lib/images";
+import { generateImageUrl, toImageAsset, withResolvedCaption } from "@/lib/images";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { EventOrder } from "@/routes/events/schemas";
@@ -88,6 +88,8 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 					licenseName: schema.licenses.name,
 					licenseUrl: schema.licenses.url,
 				},
+				imageCaption: schema.events.imageCaption,
+				imageCaptionMode: schema.events.imageCaptionMode,
 			})
 			.from(schema.events)
 			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
@@ -116,10 +118,20 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = generateImageUrl(toImageAsset(item.image), imageWidth.preview);
+		const image = generateImageUrl(
+			withResolvedCaption(toImageAsset(item.image), item),
+			imageWidth.preview,
+		);
 		const duration = serializeDateRange(item.duration);
 
-		const { entityVersion, ...rest } = item;
+		/* `imageCaption`/`imageCaptionMode` are consumed by `withResolvedCaption` above and are not
+		   part of the response. */
+		const {
+			entityVersion,
+			imageCaption: _imageCaption,
+			imageCaptionMode: _imageCaptionMode,
+			...rest
+		} = item;
 		return { ...rest, duration, image, publishedAt: entityVersion.updatedAt.toISOString() };
 	});
 
@@ -234,6 +246,8 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				title: true,
 				summary: true,
@@ -275,7 +289,7 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 		return null;
 	}
 
-	const image = generateImageUrl(item.image, imageWidth.featured);
+	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 	const duration = serializeDateRange(item.duration);
 
 	const [links, relatedEntities, relatedResources] = await Promise.all([
@@ -317,6 +331,8 @@ export async function getEventSlugs(db: Database | Transaction, params: GetEvent
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 			},
 			with: {
@@ -390,6 +406,8 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 			},
 		},
 		columns: {
+			imageCaption: true,
+			imageCaptionMode: true,
 			id: true,
 			title: true,
 			summary: true,
@@ -429,7 +447,7 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 		return null;
 	}
 
-	const image = generateImageUrl(item.image, imageWidth.featured);
+	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 	const duration = serializeDateRange(item.duration);
 
 	const [fields, links, relatedEntities, relatedResources] = await Promise.all([

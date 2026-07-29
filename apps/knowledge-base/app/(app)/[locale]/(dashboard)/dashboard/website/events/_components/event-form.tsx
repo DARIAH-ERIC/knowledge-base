@@ -1,5 +1,6 @@
 "use client";
 
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
@@ -17,6 +18,7 @@ import {
 	toCalendarDate,
 	toCalendarDateTime,
 } from "@internationalized/date";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -31,7 +33,10 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { ImageSelectField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
+import {
+	ImageSelectField,
+	type SelectedImage,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface EventFormProps {
@@ -42,7 +47,11 @@ interface EventFormProps {
 		"id" | "duration" | "isFullDay" | "location" | "title" | "summary" | "website"
 	> & {
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } };
+	} & {
+		image: SelectedImage;
+		imageCaption?: JSONContent | null;
+		imageCaptionMode?: ImageCaptionMode;
+	};
 	formId?: string;
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
@@ -98,9 +107,7 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
-		event?.image ?? null,
-	);
+	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(event?.image ?? null);
 
 	// New events default to full-day — the large majority of events are all-day, so this saves the
 	// common case a toggle (and the time pickers for a timed event are one click away).
@@ -198,6 +205,9 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 					title={t("Image")}
 				>
 					<ImageSelectField
+						captionName="imageCaption"
+						defaultCaption={event?.imageCaption}
+						defaultCaptionMode={event?.imageCaptionMode}
 						defaultPrefix="images"
 						initialAssets={initialAssets}
 						isRequired={true}

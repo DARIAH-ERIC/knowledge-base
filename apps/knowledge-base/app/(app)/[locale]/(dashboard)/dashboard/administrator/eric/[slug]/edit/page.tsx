@@ -12,9 +12,9 @@ import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity
 import { getEricReverseRelationGroups } from "@/lib/data/eric";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
+import { toSelectedImage } from "@/lib/data/selected-image";
 import { getSocialMediaOptions } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorEditEricPageProps extends PageProps<"/[locale]/dashboard/administrator/eric/[slug]/edit"> {}
@@ -101,16 +101,7 @@ export default async function DashboardAdministratorEditEricPage(
 		unit: eric,
 	} = ericData;
 
-	const image =
-		eric.image != null
-			? {
-					...eric.image,
-					url: images.generateSignedImageUrl({
-						key: eric.image.key,
-						options: imageGridOptions,
-					}).url,
-				}
-			: null;
+	const image = eric.image != null ? toSelectedImage(eric.image, imageGridOptions) : null;
 
 	return (
 		<EricEditForm

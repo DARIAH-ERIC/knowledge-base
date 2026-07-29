@@ -707,6 +707,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -756,14 +778,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -793,7 +807,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -815,6 +828,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -1479,6 +1494,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -1528,14 +1565,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -1565,7 +1594,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -1587,6 +1615,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -2514,6 +2544,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -2563,14 +2615,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -2600,7 +2644,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -2622,6 +2665,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -3422,6 +3467,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -3471,14 +3538,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -3508,7 +3567,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -3530,6 +3588,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -4440,6 +4500,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -4489,14 +4571,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -4526,7 +4600,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -4548,6 +4621,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -6235,6 +6310,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -6284,14 +6381,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -6321,7 +6410,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -6343,6 +6431,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -7624,6 +7714,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -7673,14 +7785,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -7710,7 +7814,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -7732,6 +7835,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -8685,6 +8790,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -8734,14 +8861,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -8771,7 +8890,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -8793,6 +8911,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -10147,6 +10267,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -10196,14 +10338,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -10233,7 +10367,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -10255,6 +10388,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -10927,6 +11062,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -10976,14 +11133,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -11013,7 +11162,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -11035,6 +11183,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -11881,6 +12031,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -11930,14 +12102,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -11967,7 +12131,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -11989,6 +12152,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -12662,6 +12827,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -12711,14 +12898,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -12748,7 +12927,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -12770,6 +12948,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -13609,6 +13789,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -13658,14 +13860,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -13695,7 +13889,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -13717,6 +13910,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -14944,6 +15139,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -14993,14 +15210,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -15030,7 +15239,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -15052,6 +15260,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",
@@ -16023,6 +16233,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 },
                 {
                   "properties": {
+                    "caption": {
+                      "anyOf": [
+                        {},
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "captionSource": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "asset",
+                            "block",
+                          ],
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
                     "ctas": {
                       "anyOf": [
                         {
@@ -16072,14 +16304,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                                 },
                               ],
                             },
-                            "caption": {
-                              "anyOf": [
-                                {},
-                                {
-                                  "type": "null",
-                                },
-                              ],
-                            },
                             "license": {
                               "anyOf": [
                                 {
@@ -16109,7 +16333,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "required": [
                             "url",
                             "alt",
-                            "caption",
                             "license",
                           ],
                           "type": "object",
@@ -16131,6 +16354,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "title",
                     "eyebrow",
                     "image",
+                    "caption",
+                    "captionSource",
                     "ctas",
                   ],
                   "type": "object",

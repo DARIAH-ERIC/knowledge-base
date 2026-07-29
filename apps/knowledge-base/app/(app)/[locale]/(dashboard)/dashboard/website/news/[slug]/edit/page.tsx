@@ -16,8 +16,12 @@ import {
 	getResourceRelationOptions,
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteEditNewsItemPageProps extends PageProps<"/[locale]/dashboard/website/news/[slug]/edit"> {}
@@ -73,6 +77,8 @@ export default async function DashboardWebsiteEditNewsItemPage(
 				where: { id: draftVersionId },
 				columns: {
 					id: true,
+					imageCaption: true,
+					imageCaptionMode: true,
 					publicationDate: true,
 					title: true,
 					summary: true,
@@ -96,10 +102,8 @@ export default async function DashboardWebsiteEditNewsItemPage(
 						},
 					},
 					image: {
-						columns: {
-							key: true,
-							label: true,
-						},
+						columns: selectedImageColumns,
+						with: selectedImageWith,
 					},
 				},
 			}),
@@ -111,10 +115,7 @@ export default async function DashboardWebsiteEditNewsItemPage(
 		notFound();
 	}
 
-	const image = images.generateSignedImageUrl({
-		key: newsItem.image.key,
-		options: imageGridOptions,
-	});
+	const image = toSelectedImage(newsItem.image, imageGridOptions);
 	const contentBlocks = await getEntityContentBlocks(newsItem.id, "content");
 
 	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(documentId);
@@ -137,7 +138,7 @@ export default async function DashboardWebsiteEditNewsItemPage(
 			initialRelatedResourceItems={initialRelatedResources.items}
 			initialRelatedResourceTotal={initialRelatedResources.total}
 			isPublished={publishedId != null}
-			newsItem={{ ...newsItem, image: { ...newsItem.image, url: image.url } }}
+			newsItem={{ ...newsItem, image }}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
 		/>

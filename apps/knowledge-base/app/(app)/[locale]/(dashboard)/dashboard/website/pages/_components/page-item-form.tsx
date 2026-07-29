@@ -1,16 +1,17 @@
 "use client";
 
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
-import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
+import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { Input } from "@dariah-eric/ui/input";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
 import { CalendarDate } from "@internationalized/date";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -25,7 +26,10 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import {
+	ImageSelectField,
+	type SelectedImage,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface PageItemFormProps {
@@ -33,7 +37,11 @@ interface PageItemFormProps {
 	contentBlocks?: Array<ContentBlock>;
 	pageItem?: Pick<schema.Page, "id" | "publicationDate" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } | null };
+	} & {
+		image: SelectedImage | null;
+		imageCaption?: JSONContent | null;
+		imageCaptionMode?: ImageCaptionMode;
+	};
 	formId?: string;
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
@@ -72,11 +80,7 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
-		pageItem?.image ?? null,
-	);
-
-	const [imageKeyError, setImageKeyError] = useState(false);
+	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(pageItem?.image ?? null);
 	const now = new Date();
 
 	return (
@@ -119,50 +123,17 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 				<Separator className="my-6" />
 
 				<FormSection description={t("Select or upload an image.")} title={t("Image")}>
-					{selectedImage != null && (
-						<img
-							alt={t("Selected image")}
-							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
-							src={selectedImage.url}
-						/>
-					)}
-					<MediaLibraryDialog
+					<ImageSelectField
+						allowRemove={true}
+						captionName="imageCaption"
+						defaultCaption={pageItem?.imageCaption}
+						defaultCaptionMode={pageItem?.imageCaptionMode}
 						defaultPrefix="images"
 						initialAssets={initialAssets}
-						onSelect={(key, url) => {
-							setSelectedImage({ key, url });
-							setImageKeyError(false);
-						}}
+						onChange={setSelectedImage}
 						prefixes={["avatars", "images", "logos"]}
+						selectedImage={selectedImage}
 					/>
-					{selectedImage != null ? (
-						<Button
-							intent="outline"
-							onPress={() => {
-								setSelectedImage(null);
-								setImageKeyError(false);
-							}}
-						>
-							{t("Remove image")}
-						</Button>
-					) : null}
-
-					<input
-						aria-hidden={true}
-						className="sr-only"
-						name="imageKey"
-						onInvalid={(e) => {
-							e.preventDefault();
-							setImageKeyError(true);
-						}}
-						readOnly={true}
-						// required={true}
-						tabIndex={-1}
-						value={selectedImage?.key ?? ""}
-					/>
-					{imageKeyError ? (
-						<div className={fieldErrorStyles()}>{t("Please select an image.")}</div>
-					) : null}
 				</FormSection>
 
 				<Separator className="my-6" />

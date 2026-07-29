@@ -19,11 +19,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/u
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import { CaptionField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field";
+import type { UploadedAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
 import { imageSizeLimit } from "@/config/assets.config";
 import { formatFileSize } from "@/lib/format-file-size";
@@ -43,15 +43,7 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 	const [fileError, setFileError] = useState<string | null>(null);
 
 	const [state, formAction, isPending] = useActionState(
-		async (
-			prevState: ActionState<{
-				key: string;
-				url: string;
-				alt: string | null;
-				caption: JSONContent | null;
-			}>,
-			formData: FormData,
-		) => {
+		async (prevState: ActionState<UploadedAsset>, formData: FormData) => {
 			const result = await uploadImageAction(prevState, formData);
 			if (result.status === "success") {
 				setIsOpen(false);

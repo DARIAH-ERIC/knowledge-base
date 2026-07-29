@@ -13,6 +13,7 @@ import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { getPersonRelationRoleOptions, getPersonRelations } from "@/lib/data/person-relations";
 import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
+import { toSelectedImage } from "@/lib/data/selected-image";
 import { getSocialMediaOptions } from "@/lib/data/social-media";
 import {
 	getDariahEricDocumentId,
@@ -20,7 +21,6 @@ import {
 	getReverseUnitRelationStatusOptions,
 } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorEditCountryPageProps extends PageProps<"/[locale]/dashboard/administrator/countries/[slug]/edit"> {}
@@ -135,16 +135,7 @@ export default async function DashboardAdministratorEditCountryPage(
 		unitRelationStatusOptions,
 	} = countryData;
 
-	const image =
-		country.image != null
-			? {
-					...country.image,
-					url: images.generateSignedImageUrl({
-						key: country.image.key,
-						options: imageGridOptions,
-					}).url,
-				}
-			: null;
+	const image = country.image != null ? toSelectedImage(country.image, imageGridOptions) : null;
 
 	return (
 		<CountryEditForm

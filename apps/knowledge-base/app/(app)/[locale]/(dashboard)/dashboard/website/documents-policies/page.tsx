@@ -7,6 +7,7 @@ import { DocumentsPoliciesPage } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { latestEditableEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { toSelectedImage } from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
 import { asc, eq, sql } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -84,7 +85,15 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 					WHERE "published_versions"."entity_id" = ${schema.entities.id}
 					AND "published_status"."type" = 'published'
 				)`,
-				document: { key: schema.assets.key, label: schema.assets.label },
+				document: {
+					id: schema.assets.id,
+					key: schema.assets.key,
+					label: schema.assets.label,
+					alt: schema.assets.alt,
+					caption: schema.assets.caption,
+					licenseId: schema.assets.licenseId,
+					mimeType: schema.assets.mimeType,
+				},
 			})
 			.from(schema.documentsPolicies)
 			.innerJoin(schema.entityVersions, eq(schema.documentsPolicies.id, schema.entityVersions.id))
@@ -96,8 +105,12 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "documents" }),
 	]);
 
-	const documentsShaped = documents.map(({ slug, entityId, ...rest }) => {
-		return { ...rest, entityVersion: { entity: { id: entityId, slug } } };
+	const documentsShaped = documents.map(({ slug, entityId, document, ...rest }) => {
+		return {
+			...rest,
+			document: toSelectedImage(document, imageGridOptions),
+			entityVersion: { entity: { id: entityId, slug } },
+		};
 	});
 	const groupsWithDocuments = groups.map((group) => {
 		return {

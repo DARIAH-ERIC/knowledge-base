@@ -18,10 +18,14 @@ import {
 	getResourceRelationOptions,
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
 import { alias, eq } from "@/lib/db/sql";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorEditProjectPageProps extends PageProps<"/[locale]/dashboard/administrator/projects/[slug]/edit"> {}
@@ -104,10 +108,8 @@ export default async function DashboardAdministratorEditProjectPage(
 					},
 				},
 				image: {
-					columns: {
-						key: true,
-						label: true,
-					},
+					columns: selectedImageColumns,
+					with: selectedImageWith,
 				},
 				scope: {
 					columns: {
@@ -201,16 +203,7 @@ export default async function DashboardAdministratorEditProjectPage(
 
 	const selectedSocialMediaItems = await getSocialMediaOptionsByIds(initialSocialMediaIds);
 
-	const image =
-		project.image != null
-			? {
-					...project.image,
-					url: images.generateSignedImageUrl({
-						key: project.image.key,
-						options: imageGridOptions,
-					}).url,
-				}
-			: null;
+	const image = project.image != null ? toSelectedImage(project.image, imageGridOptions) : null;
 
 	return (
 		<ProjectEditForm

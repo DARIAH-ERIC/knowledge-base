@@ -47,6 +47,8 @@ export const createPageItemAction = createMutationAction({
 		await tx.insert(schema.pages).values({
 			id: versionId,
 			imageId,
+			imageCaption: input.imageCaption,
+			imageCaptionMode: input.imageCaptionMode,
 			publicationDate: input.publicationDate,
 			title: input.title,
 			summary: input.summary,

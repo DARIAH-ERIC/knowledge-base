@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
 import { type ContentBlock, getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl, toImageAsset } from "@/lib/images";
+import { generateImageUrl, toImageAsset, withResolvedCaption } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
 import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
@@ -132,6 +133,8 @@ function mapPersonContributors(
 		imageKey: string | null;
 		imageAlt: string | null;
 		imageCaption: JSONContent | null;
+		personImageCaption: JSONContent | null;
+		personImageCaptionMode: ImageCaptionMode;
 		licenseName: string | null;
 		licenseUrl: string | null;
 		role: string;
@@ -139,24 +142,39 @@ function mapPersonContributors(
 	}>,
 	positions: Awaited<ReturnType<typeof getPersonPositions>>,
 ) {
-	return rows.map(({ imageKey, imageAlt, imageCaption, licenseName, licenseUrl, role, ...row }) => {
-		return {
-			...row,
-			positions: positions.get(row.id) ?? null,
+	return rows.map(
+		({
+			imageKey,
+			imageAlt,
+			imageCaption,
+			personImageCaption,
+			personImageCaptionMode,
+			licenseName,
+			licenseUrl,
 			role,
-			slug: row.slug,
-			image: generateImageUrl(
-				toImageAsset({
-					key: imageKey,
-					alt: imageAlt,
-					caption: imageCaption,
-					licenseName,
-					licenseUrl,
-				}),
-				imageWidth.avatar,
-			),
-		};
-	});
+			...row
+		}) => {
+			return {
+				...row,
+				positions: positions.get(row.id) ?? null,
+				role,
+				slug: row.slug,
+				image: generateImageUrl(
+					withResolvedCaption(
+						toImageAsset({
+							key: imageKey,
+							alt: imageAlt,
+							caption: imageCaption,
+							licenseName,
+							licenseUrl,
+						}),
+						{ imageCaption: personImageCaption, imageCaptionMode: personImageCaptionMode },
+					),
+					imageWidth.avatar,
+				),
+			};
+		},
+	);
 }
 
 function hasContent(block: ContentBlock): boolean {
@@ -563,6 +581,8 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 			imageKey: schema.assets.key,
 			imageAlt: schema.assets.alt,
 			imageCaption: schema.assets.caption,
+			personImageCaption: schema.persons.imageCaption,
+			personImageCaptionMode: schema.persons.imageCaptionMode,
 			licenseName: schema.licenses.name,
 			licenseUrl: schema.licenses.url,
 			role: schema.personRoleTypes.type,

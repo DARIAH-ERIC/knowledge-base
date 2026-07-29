@@ -20,6 +20,7 @@ import {
 	EntityDeleteModal,
 	EntityListHeader,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
+import type { SelectedImage } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
 import {
 	type DocumentOrPolicyDialogItem,
 	DocumentOrPolicyFormDialog,
@@ -38,7 +39,7 @@ type DocumentItem = Pick<
 	entityVersion: { entity: Pick<schema.Entity, "id" | "slug"> };
 	hasDraft: boolean;
 	isPublished: boolean;
-	document: Pick<schema.Asset, "key" | "label">;
+	document: SelectedImage;
 };
 
 interface GroupWithDocuments extends Pick<schema.DocumentPolicyGroup, "id" | "label" | "position"> {

@@ -46,6 +46,8 @@ export const createEventAction = createMutationAction({
 			duration: normalizeEventDuration(input.duration, input.isFullDay),
 			location: input.location,
 			imageId: asset.id,
+			imageCaption: input.imageCaption,
+			imageCaptionMode: input.imageCaptionMode,
 			isFullDay: input.isFullDay,
 			title: input.title,
 			summary: input.summary,

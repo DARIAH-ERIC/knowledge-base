@@ -50,6 +50,8 @@ export const updatePersonAction = createMutationAction({
 			.set({
 				email: input.email,
 				imageId: asset?.id ?? null,
+				imageCaption: input.imageCaption,
+				imageCaptionMode: input.imageCaptionMode,
 				name: input.name,
 				orcid: input.orcid,
 				sortName: input.sortName,

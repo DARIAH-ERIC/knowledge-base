@@ -3,6 +3,7 @@ import * as v from "valibot";
 
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
 import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
+import { FeaturedImageInputSchema } from "@/lib/featured-image-input";
 
 export const UpdateImpactCaseStudyActionInputSchema = v.object({
 	slug: EntitySlugInputSchema,
@@ -10,7 +11,7 @@ export const UpdateImpactCaseStudyActionInputSchema = v.object({
 	...v.pick(ImpactCaseStudyUpdateSchema, ["title"]).entries,
 	...v.pick(ImpactCaseStudyUpdateSchema, ["summary"]).entries,
 	publicationDate: v.pipe(v.string(), v.isoDate(), v.toDate()),
-	imageKey: v.pipe(v.string(), v.nonEmpty()),
+	...FeaturedImageInputSchema,
 	contentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
 		[],

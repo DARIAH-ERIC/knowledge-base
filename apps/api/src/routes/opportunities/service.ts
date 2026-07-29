@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { getContentBlocks } from "@/lib/content-blocks";
 import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, withResolvedCaption } from "@/lib/images";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { OpportunitySource, OpportunityStatus } from "@/routes/opportunities/schemas";
@@ -80,6 +80,8 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 						: undefined,
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				title: true,
 				summary: true,
@@ -143,7 +145,7 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 	const data = items.map((item) => {
 		const duration = serializeDateRange(item.duration);
 
-		const image = generateImageUrl(item.image, imageWidth.preview);
+		const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview);
 
 		return { ...flattenEntityVersion(item), duration, image };
 	});
@@ -174,6 +176,8 @@ export async function getOpportunityById(
 				},
 			},
 			columns: {
+				imageCaption: true,
+				imageCaptionMode: true,
 				id: true,
 				title: true,
 				summary: true,
@@ -225,7 +229,7 @@ export async function getOpportunityById(
 	]);
 
 	const duration = serializeDateRange(item.duration);
-	const image = generateImageUrl(item.image, imageWidth.featured);
+	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 
 	return {
 		...flattenEntityVersion(item),
@@ -323,6 +327,8 @@ export async function getOpportunityBySlug(
 			},
 		},
 		columns: {
+			imageCaption: true,
+			imageCaptionMode: true,
 			id: true,
 			title: true,
 			summary: true,
@@ -373,7 +379,7 @@ export async function getOpportunityBySlug(
 	]);
 
 	const duration = serializeDateRange(item.duration);
-	const image = generateImageUrl(item.image, imageWidth.featured);
+	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 
 	return {
 		...flattenEntityVersion(item),

@@ -6,7 +6,7 @@ const ASSETS_PATH = "/en/dashboard/website/assets";
 
 /**
  * The media library dialog is not a standalone page — it is embedded in admin forms. We open it
- * from the persons create form, which exposes a "Select image" trigger.
+ * from the persons create form, which exposes the image picker trigger.
  */
 const MEDIA_LIBRARY_HOST_PATH = "/en/dashboard/administrator/persons/create";
 
@@ -41,7 +41,7 @@ export class AssetsPage {
 
 	async openMediaLibraryDialog(): Promise<Locator> {
 		await this.page.goto(MEDIA_LIBRARY_HOST_PATH);
-		await this.page.getByRole("button", { name: "Select image" }).click();
+		await this.page.getByRole("button", { name: /^(Select|Change) image$/ }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
 		return dialog;

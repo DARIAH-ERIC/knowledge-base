@@ -1,7 +1,8 @@
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
-import { type Image, generateImageUrl, toImageAsset } from "@/lib/images";
+import { type Image, generateImageUrl, toImageAsset, withResolvedCaption } from "@/lib/images";
 import { resolveDocumentId } from "@/lib/relations";
 import type { EntityRef, PublicRelatedEntityType } from "@/lib/schemas";
 import {
@@ -181,6 +182,9 @@ interface ArticleRow {
 	imageKey: string;
 	imageAlt: string | null;
 	imageCaption: JSONContent | null;
+	/** The article's own caption choice for its featured image (see `withResolvedCaption`). */
+	entityImageCaption: JSONContent | null;
+	entityImageCaptionMode: ImageCaptionMode;
 	licenseName: string | null;
 	licenseUrl: string | null;
 	role: schema.ArticleContributorRole;
@@ -198,6 +202,8 @@ function toArticle(type: PersonArticleType, row: ArticleRow): PersonArticle {
 		imageKey,
 		imageAlt,
 		imageCaption,
+		entityImageCaption,
+		entityImageCaptionMode,
 		licenseName,
 		licenseUrl,
 		publicationDate,
@@ -211,13 +217,16 @@ function toArticle(type: PersonArticleType, row: ArticleRow): PersonArticle {
 		type,
 		...rest,
 		image: generateImageUrl(
-			toImageAsset({
-				key: imageKey,
-				alt: imageAlt,
-				caption: imageCaption,
-				licenseName,
-				licenseUrl,
-			}),
+			withResolvedCaption(
+				toImageAsset({
+					key: imageKey,
+					alt: imageAlt,
+					caption: imageCaption,
+					licenseName,
+					licenseUrl,
+				}),
+				{ imageCaption: entityImageCaption, imageCaptionMode: entityImageCaptionMode },
+			),
 			imageWidth.preview,
 		),
 		entity: {
@@ -269,6 +278,8 @@ export async function getPersonArticles(
 				imageKey: spotlightArticleAssets.key,
 				imageAlt: spotlightArticleAssets.alt,
 				imageCaption: spotlightArticleAssets.caption,
+				entityImageCaption: schema.spotlightArticles.imageCaption,
+				entityImageCaptionMode: schema.spotlightArticles.imageCaptionMode,
 				licenseName: spotlightArticleLicenses.name,
 				licenseUrl: spotlightArticleLicenses.url,
 				role: schema.spotlightArticlesToPersons.role,
@@ -309,6 +320,8 @@ export async function getPersonArticles(
 				imageKey: impactCaseStudyAssets.key,
 				imageAlt: impactCaseStudyAssets.alt,
 				imageCaption: impactCaseStudyAssets.caption,
+				entityImageCaption: schema.impactCaseStudies.imageCaption,
+				entityImageCaptionMode: schema.impactCaseStudies.imageCaptionMode,
 				licenseName: impactCaseStudyLicenses.name,
 				licenseUrl: impactCaseStudyLicenses.url,
 				role: schema.impactCaseStudiesToPersons.role,

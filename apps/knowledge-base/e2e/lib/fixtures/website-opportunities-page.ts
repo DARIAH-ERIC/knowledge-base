@@ -96,7 +96,7 @@ export class WebsiteOpportunitiesPage {
 	}
 
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Select image" }).click();
+		await this.page.getByRole("button", { name: /^(Select|Change) image$/ }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
 		const asset = dialog.getByRole("gridcell", { name: assetLabel });
@@ -107,7 +107,7 @@ export class WebsiteOpportunitiesPage {
 	}
 
 	async uploadImageFromMediaLibrary(filePath: string, label: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Select image" }).click();
+		await this.page.getByRole("button", { name: /^(Select|Change) image$/ }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
 		await dialog.getByRole("tab", { name: "Upload" }).click();

@@ -2,7 +2,7 @@
 
 import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl } from "@/lib/images";
+import { generateImageUrl, withResolvedCaption } from "@/lib/images";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { Announcement } from "@/routes/announcements/schemas";
 import { imageWidth } from "~/config/api.config";
@@ -72,6 +72,8 @@ async function getFeaturedAnnouncements(db: Database | Transaction, ids: Array<s
 				title: true,
 				summary: true,
 				publicationDate: true,
+				imageCaption: true,
+				imageCaptionMode: true,
 			},
 			with: {
 				entityVersion: entityVersionColumns,
@@ -95,6 +97,8 @@ async function getFeaturedAnnouncements(db: Database | Transaction, ids: Array<s
 				summary: true,
 				duration: true,
 				website: true,
+				imageCaption: true,
+				imageCaptionMode: true,
 			},
 			with: {
 				entityVersion: entityVersionColumns,
@@ -118,6 +122,8 @@ async function getFeaturedAnnouncements(db: Database | Transaction, ids: Array<s
 				title: true,
 				summary: true,
 				duration: true,
+				imageCaption: true,
+				imageCaptionMode: true,
 			},
 			with: {
 				entityVersion: entityVersionColumns,
@@ -134,7 +140,7 @@ async function getFeaturedAnnouncements(db: Database | Transaction, ids: Array<s
 			id: item.id,
 			title: item.title,
 			summary: item.summary,
-			image: generateImageUrl(item.image, imageWidth.preview),
+			image: generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview),
 			entity: item.entityVersion.entity,
 			publishedAt: item.publicationDate.toISOString(),
 		});
@@ -146,7 +152,7 @@ async function getFeaturedAnnouncements(db: Database | Transaction, ids: Array<s
 			id: item.id,
 			title: item.title,
 			summary: item.summary,
-			image: generateImageUrl(item.image, imageWidth.preview),
+			image: generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview),
 			entity: item.entityVersion.entity,
 			publishedAt: item.duration.start.toISOString(),
 			duration: serializeDateRange(item.duration),
@@ -161,7 +167,7 @@ async function getFeaturedAnnouncements(db: Database | Transaction, ids: Array<s
 			id: item.id,
 			title: item.title,
 			summary: item.summary,
-			image: generateImageUrl(item.image, imageWidth.preview),
+			image: generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview),
 			entity: item.entityVersion.entity,
 			publishedAt: item.duration.start.toISOString(),
 			duration: serializeDateRange(item.duration),
@@ -197,6 +203,8 @@ async function getFeaturedEvents(db: Database | Transaction, ids: Array<string>)
 			location: true,
 			isFullDay: true,
 			duration: true,
+			imageCaption: true,
+			imageCaptionMode: true,
 		},
 		with: {
 			entityVersion: {
@@ -231,7 +239,7 @@ async function getFeaturedEvents(db: Database | Transaction, ids: Array<string>)
 		.map((id) => itemsById.get(id))
 		.filter((item): item is NonNullable<typeof item> => item != null)
 		.map((item) => {
-			const image = generateImageUrl(item.image, imageWidth.preview);
+			const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.preview);
 			const duration = serializeDateRange(item.duration);
 
 			return { type: "events" as const, ...flattenEntityVersion(item), image, duration };
