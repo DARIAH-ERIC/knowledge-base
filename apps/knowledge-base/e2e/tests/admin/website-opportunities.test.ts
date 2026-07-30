@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 
+import { expectDetailsTermsInOrder } from "@/e2e/lib/fixtures/details-order";
 import { expect, test } from "@/e2e/lib/test";
 
 test.describe("website opportunities admin", () => {
@@ -53,8 +54,20 @@ test.describe("website opportunities admin", () => {
 		const website = "https://example.com/opportunity";
 		const content = `E2E opportunity content ${randomUUID()}`;
 		const testAsset = await db.getTestAsset();
+		const relatedEntities = await db.getTestEntities(2);
+		const relatedResources = await db.getTestResources(2);
+		const relatedEntity = relatedEntities[0]!;
+		const replacementEntity = relatedEntities[1]!;
+		const relatedResource = relatedResources[0]!;
+		const replacementResource = relatedResources[1]!;
 
 		await opportunitiesPage.gotoCreate();
+		await expect(
+			opportunitiesPage.page.getByRole("heading", { name: "Related entities" }),
+		).toBeVisible();
+		await expect(
+			opportunitiesPage.page.getByRole("heading", { name: "Related resources" }),
+		).toBeVisible();
 		await opportunitiesPage.fillTitle(title);
 		await opportunitiesPage.selectFirstSource();
 		await opportunitiesPage.fillSummary(summary);
@@ -62,6 +75,8 @@ test.describe("website opportunities admin", () => {
 		await opportunitiesPage.fillDatePicker("Start date", 2025, 6, 1);
 		await opportunitiesPage.fillDatePicker("End date", 2025, 6, 30);
 		await opportunitiesPage.addContentBlock(content);
+		await opportunitiesPage.selectRelatedEntity(relatedEntity.name);
+		await opportunitiesPage.selectRelatedResource(relatedResource.name);
 		await opportunitiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await opportunitiesPage.submitForm();
 
@@ -73,9 +88,55 @@ test.describe("website opportunities admin", () => {
 		expect(created?.sourceId).toBeTruthy();
 		expect(created?.duration.start).toStrictEqual(new Date("2025-06-01T00:00:00.000Z"));
 		expect(created?.duration.end).toStrictEqual(new Date("2025-06-30T00:00:00.000Z"));
+		expect(created).not.toBeNull();
+		const relations = await db.getEntityRelations(created!.documentId);
+		expect(relations.relatedEntityIds).toStrictEqual([relatedEntity.id]);
+		expect(relations.relatedResourceIds).toStrictEqual([relatedResource.id]);
 		const contentBlocks = await db.getOpportunityContentBlocksByTitle(title);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
+
+		await opportunitiesPage.gotoDetailsFromList(title);
+		await expect(opportunitiesPage.detailsRelatedEntity(relatedEntity.name)).toBeVisible();
+		await expect(opportunitiesPage.detailsRelatedResource(relatedResource.name)).toBeVisible();
+		await expectDetailsTermsInOrder(opportunitiesPage.page, [
+			"Image",
+			"Content",
+			"Related entities",
+			"Related resources",
+		]);
+
+		await opportunitiesPage.gotoEditFromDetails();
+		await expect(
+			opportunitiesPage.page.getByRole("heading", { name: "Related entities" }),
+		).toBeVisible();
+		await expect(
+			opportunitiesPage.page.getByRole("heading", { name: "Related resources" }),
+		).toBeVisible();
+		await expect(
+			opportunitiesPage.page.getByRole("row", { name: relatedEntity.name }),
+		).toBeVisible();
+		await expect(
+			opportunitiesPage.page.getByRole("row", { name: relatedResource.name }),
+		).toBeVisible();
+
+		await opportunitiesPage.removeRelatedEntity(relatedEntity.name);
+		await opportunitiesPage.removeRelatedResource(relatedResource.name);
+		await opportunitiesPage.selectRelatedEntity(replacementEntity.name);
+		await opportunitiesPage.selectRelatedResource(replacementResource.name);
+		await opportunitiesPage.submitForm();
+
+		const replacedRelations = await db.getEntityRelations(created!.documentId);
+		expect(replacedRelations.relatedEntityIds).toStrictEqual([replacementEntity.id]);
+		expect(replacedRelations.relatedResourceIds).toStrictEqual([replacementResource.id]);
+
+		await opportunitiesPage.gotoEditFromList(title);
+		await opportunitiesPage.removeRelatedEntity(replacementEntity.name);
+		await opportunitiesPage.removeRelatedResource(replacementResource.name);
+		await opportunitiesPage.submitForm();
+
+		const clearedRelations = await db.getEntityRelations(created!.documentId);
+		expect(clearedRelations).toStrictEqual({ relatedEntityIds: [], relatedResourceIds: [] });
 	});
 
 	test("should edit all opportunity fields", async ({

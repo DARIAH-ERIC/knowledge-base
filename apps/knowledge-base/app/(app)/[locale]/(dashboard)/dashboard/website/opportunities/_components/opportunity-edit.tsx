@@ -19,6 +19,12 @@ interface OpportunityEditFormProps {
 	documentId: string;
 	hasDraftChanges: boolean;
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	initialRelatedEntityIds: Array<string>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
+	initialRelatedResourceIds: Array<string>;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
 	isPublished: boolean;
 	opportunity: Pick<
 		schema.Opportunity,
@@ -34,6 +40,8 @@ interface OpportunityEditFormProps {
 		imageCaption: JSONContent | null;
 		imageCaptionMode: ImageCaptionMode;
 	};
+	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	sources: Array<Pick<schema.OpportunitySource, "id" | "source">>;
 }
 
@@ -43,8 +51,16 @@ export function OpportunityEditForm(props: Readonly<OpportunityEditFormProps>): 
 		documentId,
 		hasDraftChanges,
 		initialAssets,
+		initialRelatedEntityIds,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
+		initialRelatedResourceIds,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
 		isPublished,
 		opportunity,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 		sources,
 	} = props;
 
@@ -66,9 +82,17 @@ export function OpportunityEditForm(props: Readonly<OpportunityEditFormProps>): 
 			<OpportunityForm
 				contentBlocks={contentBlocks}
 				initialAssets={initialAssets}
+				initialRelatedEntityIds={initialRelatedEntityIds}
+				initialRelatedEntityItems={initialRelatedEntityItems}
+				initialRelatedEntityTotal={initialRelatedEntityTotal}
+				initialRelatedResourceIds={initialRelatedResourceIds}
+				initialRelatedResourceItems={initialRelatedResourceItems}
+				initialRelatedResourceTotal={initialRelatedResourceTotal}
 				isPublished={isPublished}
 				formAction={updateOpportunityAction}
 				opportunity={opportunity}
+				selectedRelatedEntities={selectedRelatedEntities}
+				selectedRelatedResources={selectedRelatedResources}
 				sources={sources}
 			/>
 		</Fragment>

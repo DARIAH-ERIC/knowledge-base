@@ -10,6 +10,11 @@ import { imageGridOptions } from "@/config/assets.config";
 import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import {
+	getEntityRelationOptionsByIds,
+	getEntityRelations,
+	getResourceRelationOptionsByIds,
+} from "@/lib/data/relations";
+import {
 	selectedImageColumns,
 	selectedImageWith,
 	toSelectedImage,
@@ -129,6 +134,13 @@ export default async function DashboardWebsiteFundingCallsDetailsPage(
 
 	const contentBlocks = await getResolvedEntityContentBlocks(fundingCall.id, "content");
 
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(doc.id);
+
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
+
 	return (
 		<FundingCallDetails
 			contentBlocks={contentBlocks}
@@ -138,6 +150,8 @@ export default async function DashboardWebsiteFundingCallsDetailsPage(
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
 			publishAction={publishFundingCallAction}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 			selectedVersion={selectedVersion}
 		/>
 	);

@@ -111,11 +111,6 @@ export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {
 				<DescriptionTerm>{t("Website")}</DescriptionTerm>
 				<DescriptionDetails>{event.website}</DescriptionDetails>
 
-				<DescriptionTerm>{t("Content")}</DescriptionTerm>
-				<DescriptionDetails>
-					<ContentBlocksView contentBlocks={contentBlocks} />
-				</DescriptionDetails>
-
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
 					<FeaturedImageDetails
@@ -123,6 +118,11 @@ export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {
 						imageCaption={event.imageCaption}
 						imageCaptionMode={event.imageCaptionMode}
 					/>
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Content")}</DescriptionTerm>
+				<DescriptionDetails>
+					<ContentBlocksView contentBlocks={contentBlocks} />
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Related entities")}</DescriptionTerm>

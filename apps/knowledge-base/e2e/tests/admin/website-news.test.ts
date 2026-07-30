@@ -656,11 +656,11 @@ test.describe("website news admin", () => {
 		await newsPage.submitForm();
 
 		/** Captions in stored item order — the assertion the `position` column has to earn. */
-		const captionsInOrder = (items: unknown) => {
-			return (items as Array<{ caption: unknown }>).map((item) => {
+		const captionsInOrder = (items: unknown) => 
+			(items as Array<{ caption: unknown }>).map((item) => {
 				return JSON.stringify(item.caption);
-			});
-		};
+			})
+		;
 
 		let contentBlocks = await db.getNewsContentBlocksByTitle(title);
 		expect(contentBlocks.map(({ type }) => type)).toStrictEqual([

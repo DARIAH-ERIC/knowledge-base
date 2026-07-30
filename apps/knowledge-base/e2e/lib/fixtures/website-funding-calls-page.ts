@@ -106,6 +106,94 @@ export class WebsiteFundingCallsPage {
 		await dialog.waitFor({ state: "hidden" });
 	}
 
+	private relatedEntitiesSection(): Locator {
+		return this.page
+			.locator("section")
+			.filter({ has: this.page.getByRole("heading", { name: "Related entities", level: 2 }) });
+	}
+
+	private relatedResourcesSection(): Locator {
+		return this.page
+			.locator("section")
+			.filter({ has: this.page.getByRole("heading", { name: "Related resources", level: 2 }) });
+	}
+
+	private relatedEntitiesDialog(): Locator {
+		return this.page
+			.getByRole("dialog")
+			.filter({ has: this.page.getByRole("listbox", { name: "Related entities" }) });
+	}
+
+	private relatedResourcesDialog(): Locator {
+		return this.page
+			.getByRole("dialog")
+			.filter({ has: this.page.getByRole("listbox", { name: "Related resources" }) });
+	}
+
+	private relatedEntitiesControl(): Locator {
+		return this.relatedEntitiesSection().getByRole("button", { name: "Add related entity" });
+	}
+
+	private relatedResourcesControl(): Locator {
+		return this.relatedResourcesSection().getByRole("button", { name: "Add related resource" });
+	}
+
+	private async closeRelatedEntitiesDialog(dialog: Locator): Promise<void> {
+		await this.page.mouse.click(1, 1);
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	private async closeRelatedResourcesDialog(dialog: Locator): Promise<void> {
+		await this.page.mouse.click(1, 1);
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	async selectRelatedEntity(entityName: string): Promise<void> {
+		const trigger = this.relatedEntitiesControl();
+		const dialog = this.relatedEntitiesDialog();
+
+		await trigger.click();
+		await dialog.waitFor({ state: "visible" });
+
+		const searchbox = dialog.getByRole("searchbox");
+		await searchbox.fill(entityName);
+
+		const option = dialog.getByRole("option", { name: entityName, exact: true });
+		await option.waitFor({ state: "visible" });
+		await option.click();
+		await this.closeRelatedEntitiesDialog(dialog);
+	}
+
+	async selectRelatedResource(resourceName: string): Promise<void> {
+		const trigger = this.relatedResourcesControl();
+		const dialog = this.relatedResourcesDialog();
+
+		await trigger.click();
+		await dialog.waitFor({ state: "visible" });
+
+		const searchbox = dialog.getByRole("searchbox");
+		await searchbox.fill(resourceName);
+
+		const option = dialog.getByRole("option", { name: resourceName, exact: true });
+		await option.waitFor({ state: "visible" });
+		await option.click();
+		await this.closeRelatedResourcesDialog(dialog);
+	}
+
+	async removeRelatedEntity(entityName: string): Promise<void> {
+		const row = this.relatedEntitiesSection().getByRole("row", { name: entityName });
+		await row.waitFor({ state: "visible" });
+		await row.locator('button:not([slot="drag"])').click();
+		await row.waitFor({ state: "hidden" });
+	}
+
+	async removeRelatedResource(resourceName: string): Promise<void> {
+		const row = this.relatedResourcesSection().getByRole("row", { name: resourceName });
+		await row.waitFor({ state: "visible" });
+		await row.locator('button:not([slot="drag"])').click();
+		await row.waitFor({ state: "hidden" });
+	}
+
 	async submitForm(): Promise<void> {
 		const isCreate = new URL(this.page.url()).pathname === `${BASE_PATH}/create`;
 		await waitForActionRedirect({
@@ -194,6 +282,18 @@ export class WebsiteFundingCallsPage {
 
 	detailsImage(): Locator {
 		return this.page.locator('dt:has-text("Image") + dd img');
+	}
+
+	detailsRelatedEntity(name: string): Locator {
+		return this.page.locator('dt:has-text("Related entities") + dd').getByText(name, {
+			exact: true,
+		});
+	}
+
+	detailsRelatedResource(name: string): Locator {
+		return this.page.locator('dt:has-text("Related resources") + dd').getByText(name, {
+			exact: true,
+		});
 	}
 
 	// ---------------------------------------------------------------------------

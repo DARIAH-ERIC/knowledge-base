@@ -19,6 +19,12 @@ interface FundingCallEditFormProps {
 	documentId: string;
 	hasDraftChanges: boolean;
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	initialRelatedEntityIds: Array<string>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
+	initialRelatedResourceIds: Array<string>;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
 	isPublished: boolean;
 	fundingCall: Pick<schema.FundingCall, "id" | "duration" | "title" | "summary"> & {
 		entityVersion: {
@@ -30,11 +36,27 @@ interface FundingCallEditFormProps {
 		imageCaption: JSONContent | null;
 		imageCaptionMode: ImageCaptionMode;
 	};
+	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 }
 
 export function FundingCallEditForm(props: Readonly<FundingCallEditFormProps>): ReactNode {
-	const { contentBlocks, documentId, hasDraftChanges, initialAssets, isPublished, fundingCall } =
-		props;
+	const {
+		contentBlocks,
+		documentId,
+		hasDraftChanges,
+		initialAssets,
+		initialRelatedEntityIds,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
+		initialRelatedResourceIds,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+		isPublished,
+		fundingCall,
+		selectedRelatedEntities,
+		selectedRelatedResources,
+	} = props;
 
 	const t = useExtracted();
 
@@ -54,9 +76,17 @@ export function FundingCallEditForm(props: Readonly<FundingCallEditFormProps>): 
 			<FundingCallForm
 				contentBlocks={contentBlocks}
 				initialAssets={initialAssets}
+				initialRelatedEntityIds={initialRelatedEntityIds}
+				initialRelatedEntityItems={initialRelatedEntityItems}
+				initialRelatedEntityTotal={initialRelatedEntityTotal}
+				initialRelatedResourceIds={initialRelatedResourceIds}
+				initialRelatedResourceItems={initialRelatedResourceItems}
+				initialRelatedResourceTotal={initialRelatedResourceTotal}
 				isPublished={isPublished}
 				formAction={updateFundingCallAction}
 				fundingCall={fundingCall}
+				selectedRelatedEntities={selectedRelatedEntities}
+				selectedRelatedResources={selectedRelatedResources}
 			/>
 		</Fragment>
 	);

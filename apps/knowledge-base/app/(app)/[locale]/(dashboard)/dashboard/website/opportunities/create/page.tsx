@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { OpportunityCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-create-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteCreateOpportunityPageProps extends PageProps<"/[locale]/dashboard/website/opportunities/create"> {}
@@ -26,18 +27,30 @@ export async function generateMetadata(
 export default async function DashboardWebsiteCreateOpportunityPage(
 	_props: Readonly<DashboardWebsiteCreateOpportunityPageProps>,
 ): Promise<ReactNode> {
-	const [{ items: initialAssets }, sources] = await Promise.all([
-		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
-		db.query.opportunitySources.findMany({
-			orderBy: {
-				source: "asc",
-			},
-			columns: {
-				id: true,
-				source: true,
-			},
-		}),
-	]);
+	const [{ items: initialAssets }, sources, initialRelatedEntities, initialRelatedResources] =
+		await Promise.all([
+			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
+			db.query.opportunitySources.findMany({
+				orderBy: {
+					source: "asc",
+				},
+				columns: {
+					id: true,
+					source: true,
+				},
+			}),
+			getEntityRelationOptions(),
+			getResourceRelationOptions(),
+		]);
 
-	return <OpportunityCreateForm initialAssets={initialAssets} sources={sources} />;
+	return (
+		<OpportunityCreateForm
+			initialAssets={initialAssets}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
+			sources={sources}
+		/>
+	);
 }

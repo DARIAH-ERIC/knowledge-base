@@ -10,11 +10,22 @@ import { createOpportunityAction } from "@/app/(app)/[locale]/(dashboard)/dashbo
 
 interface OpportunityCreateFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
 	sources: Array<Pick<schema.OpportunitySource, "id" | "source">>;
 }
 
 export function OpportunityCreateForm(props: Readonly<OpportunityCreateFormProps>): ReactNode {
-	const { initialAssets, sources } = props;
+	const {
+		initialAssets,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+		sources,
+	} = props;
 
 	const t = useExtracted();
 
@@ -24,6 +35,10 @@ export function OpportunityCreateForm(props: Readonly<OpportunityCreateFormProps
 
 			<OpportunityForm
 				initialAssets={initialAssets}
+				initialRelatedEntityItems={initialRelatedEntityItems}
+				initialRelatedEntityTotal={initialRelatedEntityTotal}
+				initialRelatedResourceItems={initialRelatedResourceItems}
+				initialRelatedResourceTotal={initialRelatedResourceTotal}
 				formAction={createOpportunityAction}
 				sources={sources}
 			/>

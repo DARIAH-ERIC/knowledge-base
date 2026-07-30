@@ -21,6 +21,7 @@ import {
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
+import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import { EntitySlugField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field";
 import {
 	FormLayout,
@@ -35,6 +36,12 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface OpportunityFormProps {
 	contentBlocks?: Array<ContentBlock>;
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	initialRelatedEntityIds?: Array<string>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
+	initialRelatedResourceIds?: Array<string>;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
 	opportunity?: Pick<schema.Opportunity, "id" | "duration" | "title" | "summary" | "website"> & {
 		entityVersion: {
 			entity: Pick<schema.Entity, "id" | "slug">;
@@ -49,11 +56,28 @@ interface OpportunityFormProps {
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
 	formAction: ServerAction;
+	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
 	sources: Array<Pick<schema.OpportunitySource, "id" | "source">>;
 }
 
 export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNode {
-	const { initialAssets, contentBlocks, formAction, opportunity, sources, isPublished } = props;
+	const {
+		initialAssets,
+		contentBlocks,
+		formAction,
+		initialRelatedEntityIds,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
+		initialRelatedResourceIds,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+		opportunity,
+		selectedRelatedEntities,
+		selectedRelatedResources,
+		sources,
+		isPublished,
+	} = props;
 
 	const t = useExtracted();
 
@@ -170,6 +194,19 @@ export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNod
 				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
 					<ContentBlocks items={contentBlocks ?? []} />
 				</FormSection>
+
+				<Separator className="my-6" />
+
+				<EntityRelationsFields
+					initialRelatedEntityIds={initialRelatedEntityIds}
+					initialRelatedEntityItems={initialRelatedEntityItems}
+					initialRelatedEntityTotal={initialRelatedEntityTotal}
+					initialRelatedResourceIds={initialRelatedResourceIds}
+					initialRelatedResourceItems={initialRelatedResourceItems}
+					initialRelatedResourceTotal={initialRelatedResourceTotal}
+					selectedRelatedEntities={selectedRelatedEntities}
+					selectedRelatedResources={selectedRelatedResources}
+				/>
 
 				{opportunity != null ? (
 					<Fragment>

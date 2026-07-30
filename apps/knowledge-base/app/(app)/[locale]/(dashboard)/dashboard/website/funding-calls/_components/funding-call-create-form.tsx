@@ -9,10 +9,20 @@ import { createFundingCallAction } from "@/app/(app)/[locale]/(dashboard)/dashbo
 
 interface FundingCallCreateFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
 }
 
 export function FundingCallCreateForm(props: Readonly<FundingCallCreateFormProps>): ReactNode {
-	const { initialAssets } = props;
+	const {
+		initialAssets,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+	} = props;
 
 	const t = useExtracted();
 
@@ -20,7 +30,14 @@ export function FundingCallCreateForm(props: Readonly<FundingCallCreateFormProps
 		<Fragment>
 			<EntityFormHeader title={t("New funding call")} />
 
-			<FundingCallForm formAction={createFundingCallAction} initialAssets={initialAssets} />
+			<FundingCallForm
+				formAction={createFundingCallAction}
+				initialAssets={initialAssets}
+				initialRelatedEntityItems={initialRelatedEntityItems}
+				initialRelatedEntityTotal={initialRelatedEntityTotal}
+				initialRelatedResourceItems={initialRelatedResourceItems}
+				initialRelatedResourceTotal={initialRelatedResourceTotal}
+			/>
 		</Fragment>
 	);
 }

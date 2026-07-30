@@ -13,6 +13,7 @@ import {
 } from "@/lib/data/entity-lifecycle";
 import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
 import { opportunitiesLifecycleAdapter } from "@/lib/data/opportunities.lifecycle-adapter";
+import { syncEntityRelations } from "@/lib/data/relations";
 import { db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
@@ -95,6 +96,12 @@ export const updateOpportunityAction = createMutationAction({
 			}),
 		);
 
+		await syncEntityRelations(
+			tx,
+			input.documentId,
+			input.relatedEntityIds,
+			input.relatedResourceIds,
+		);
 		await touchVersion(tx, draftVersionId);
 
 		if (shouldSaveAndPublish(formData)) {

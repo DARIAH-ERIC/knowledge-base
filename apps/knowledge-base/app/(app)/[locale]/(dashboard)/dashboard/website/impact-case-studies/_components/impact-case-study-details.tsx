@@ -105,6 +105,11 @@ export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsPro
 					/>
 				</DescriptionDetails>
 
+				<DescriptionTerm>{t("Content")}</DescriptionTerm>
+				<DescriptionDetails>
+					<ContentBlocksView contentBlocks={contentBlocks} />
+				</DescriptionDetails>
+
 				<DescriptionTerm>{t("Related entities")}</DescriptionTerm>
 				<DescriptionDetails>
 					{selectedRelatedEntities.length > 0 ? (
@@ -148,11 +153,6 @@ export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsPro
 							))}
 						</ul>
 					) : null}
-				</DescriptionDetails>
-
-				<DescriptionTerm>{t("Content")}</DescriptionTerm>
-				<DescriptionDetails>
-					<ContentBlocksView contentBlocks={contentBlocks} />
 				</DescriptionDetails>
 			</DescriptionList>
 		</Fragment>

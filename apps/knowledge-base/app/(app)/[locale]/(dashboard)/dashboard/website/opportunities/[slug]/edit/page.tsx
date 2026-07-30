@@ -11,6 +11,13 @@ import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { opportunitiesLifecycleAdapter } from "@/lib/data/opportunities.lifecycle-adapter";
 import {
+	getEntityRelationOptions,
+	getEntityRelationOptionsByIds,
+	getEntityRelations,
+	getResourceRelationOptions,
+	getResourceRelationOptionsByIds,
+} from "@/lib/data/relations";
+import {
 	selectedImageColumns,
 	selectedImageWith,
 	toSelectedImage,
@@ -111,13 +118,28 @@ export default async function DashboardWebsiteEditOpportunityPage(
 
 	const image = toSelectedImage(opportunity.image, imageGridOptions);
 
-	const [contentBlocks, sources, { items: initialAssets }] = await Promise.all([
+	const [
+		contentBlocks,
+		sources,
+		{ items: initialAssets },
+		initialRelatedEntities,
+		initialRelatedResources,
+	] = await Promise.all([
 		getEntityContentBlocks(opportunity.id, "content"),
 		db.query.opportunitySources.findMany({
 			orderBy: { source: "asc" },
 			columns: { id: true, source: true },
 		}),
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
+		getEntityRelationOptions(),
+		getResourceRelationOptions(),
+	]);
+
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(documentId);
+
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
 	]);
 
 	return (
@@ -126,8 +148,16 @@ export default async function DashboardWebsiteEditOpportunityPage(
 			documentId={documentId}
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
+			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
+			initialRelatedResourceIds={relatedResourceIds}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
 			isPublished={publishedId != null}
 			opportunity={{ ...opportunity, image }}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 			sources={sources}
 		/>
 	);
