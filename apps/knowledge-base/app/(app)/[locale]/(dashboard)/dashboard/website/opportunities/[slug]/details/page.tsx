@@ -85,6 +85,8 @@ export default async function DashboardWebsiteOpportunitiesDetailsPage(
 	const opportunity = await db.query.opportunities.findFirst({
 		where: { id: versionId },
 		columns: {
+			imageCaption: true,
+			imageCaptionMode: true,
 			id: true,
 			duration: true,
 			title: true,
@@ -119,6 +121,8 @@ export default async function DashboardWebsiteOpportunitiesDetailsPage(
 				columns: {
 					key: true,
 					label: true,
+					alt: true,
+					caption: true,
 				},
 			},
 		},

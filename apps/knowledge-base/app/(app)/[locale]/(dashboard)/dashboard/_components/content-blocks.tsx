@@ -216,6 +216,7 @@ const UNIFIED_BLOCK_TYPES = new Set<ContentBlock["type"]>([
 	"embed",
 	"callout",
 	"media_text",
+	"gallery",
 ]);
 const DATA_CONTENT_BLOCK_TYPES = [
 	"events",
@@ -607,6 +608,7 @@ function ContentBlockPanel({
 		// `ContentBlock`: that is the shape the server hands us before merging.
 		case "callout":
 		case "embed":
+		case "gallery":
 		case "image":
 		case "media_text": {
 			return null;
@@ -614,12 +616,6 @@ function ContentBlockPanel({
 
 		case "data": {
 			return <DataContentBlockPanel item={item} onChange={onChange} />;
-		}
-
-		case "gallery": {
-			return (
-				<GalleryContentBlockPanel initialAssets={initialAssets} item={item} onChange={onChange} />
-			);
 		}
 
 		case "hero": {
@@ -657,6 +653,13 @@ function ContentBlockPanel({
 							aria-label="Insert media with text"
 							icon={ViewColumnsIcon}
 							onClick={insertMediaText}
+						/>
+					)}
+					renderGalleryInsert={(insertGallery) => (
+						<RichTextEditorToolbarButton
+							aria-label="Insert gallery"
+							icon={Squares2X2Icon}
+							onClick={insertGallery}
 						/>
 					)}
 					renderButtonLinkInsert={(insertButtonLink) => (
@@ -739,187 +742,6 @@ function ContentBlockPanel({
 interface ContentBlockEntry {
 	id: string;
 	title: string;
-}
-
-type GalleryItem = NonNullable<NonNullable<GalleryContentBlockItem["content"]>["items"]>[number];
-
-interface GalleryItemImageFieldsProps {
-	galleryItem: GalleryItem;
-	initialAssets?: Array<MediaLibraryAsset>;
-	onChange: (changes: Partial<GalleryItem>) => void;
-}
-
-/** The image of one gallery item: which asset it is, and which caption it shows. */
-function GalleryItemImageFields({
-	galleryItem,
-	initialAssets,
-	onChange,
-}: Readonly<GalleryItemImageFieldsProps>): ReactNode {
-	const t = useExtracted();
-
-	const picker = (
-		<MediaLibraryDialog
-			defaultPrefix="images"
-			initialAssets={initialAssets ?? []}
-			onSelect={(imageKey, imageUrl, selected) => {
-				onChange({ imageKey, imageUrl, asset: { ...selected, key: imageKey, url: imageUrl } });
-			}}
-			prefixes={["avatars", "images", "logos"]}
-			triggerLabel={galleryItem.imageUrl != null ? t("Change image") : undefined}
-		/>
-	);
-
-	return (
-		<Fragment>
-			{galleryItem.asset != null ? (
-				<SelectedImageCard
-					image={galleryItem.asset}
-					onMetadataChange={(asset) => {
-						onChange({ asset });
-					}}
-				>
-					{picker}
-				</SelectedImageCard>
-			) : (
-				picker
-			)}
-
-			{galleryItem.imageUrl != null ? (
-				<ImageCaptionModeField
-					assetCaption={galleryItem.asset?.caption}
-					caption={galleryItem.caption ?? null}
-					captionMode={galleryItem.captionMode ?? "inherit"}
-					onChange={onChange}
-				/>
-			) : null}
-		</Fragment>
-	);
-}
-
-interface GalleryContentBlockPanelProps {
-	initialAssets?: Array<MediaLibraryAsset>;
-	item: GalleryContentBlockItem;
-	onChange: (content: NonNullable<GalleryContentBlockItem["content"]>) => void;
-}
-
-function GalleryContentBlockPanel({
-	initialAssets,
-	item,
-	onChange,
-}: Readonly<GalleryContentBlockPanelProps>): ReactNode {
-	const t = useExtracted();
-
-	const layout = item.content?.layout ?? "grid";
-	const items = item.content?.items ?? [];
-
-	function moveItem(index: number, direction: -1 | 1) {
-		const nextIndex = index + direction;
-		if (nextIndex < 0 || nextIndex >= items.length) {
-			return;
-		}
-
-		const next = [...items];
-		const [moved] = next.splice(index, 1);
-		if (moved == null) {
-			return;
-		}
-		next.splice(nextIndex, 0, moved);
-		onChange({ ...item.content, layout, items: next });
-	}
-
-	return (
-		<div className="flex flex-col gap-y-4">
-			<ToggleGroup
-				aria-label={t("Gallery layout")}
-				disallowEmptySelection={true}
-				onSelectionChange={(keys) => {
-					const [selectedLayout] = [...keys] as Array<"carousel" | "grid">;
-					onChange({ ...item.content, layout: selectedLayout ?? "grid", items });
-				}}
-				selectedKeys={new Set([layout])}
-				selectionMode="single"
-			>
-				<ToggleGroupItem id="grid">{t("Grid")}</ToggleGroupItem>
-				<ToggleGroupItem id="carousel">{t("Carousel")}</ToggleGroupItem>
-			</ToggleGroup>
-
-			<div className="flex flex-col gap-y-3">
-				{items.map((galleryItem, idx) => (
-					<div key={idx} className="flex flex-col gap-y-3 rounded-lg border border-border p-3">
-						<div className="flex items-center justify-between">
-							<span className="text-sm font-medium">
-								{t("Image")} {idx + 1}
-							</span>
-							<div className="flex items-center gap-x-2">
-								<Button
-									intent="outline"
-									isDisabled={idx === 0}
-									onPress={() => {
-										moveItem(idx, -1);
-									}}
-									size="sm"
-								>
-									{t("Up")}
-								</Button>
-								<Button
-									intent="outline"
-									isDisabled={idx === items.length - 1}
-									onPress={() => {
-										moveItem(idx, 1);
-									}}
-									size="sm"
-								>
-									{t("Down")}
-								</Button>
-								<Button
-									intent="outline"
-									onPress={() => {
-										onChange({
-											...item.content,
-											layout,
-											items: items.filter((_, itemIndex) => itemIndex !== idx),
-										});
-									}}
-									size="sm"
-								>
-									<TrashIcon className="block-4 inline-4" />
-								</Button>
-							</div>
-						</div>
-
-						<GalleryItemImageFields
-							galleryItem={galleryItem}
-							initialAssets={initialAssets}
-							onChange={(changes) => {
-								onChange({
-									...item.content,
-									layout,
-									items: items.map((existingItem, itemIndex) =>
-										itemIndex === idx ? { ...existingItem, ...changes } : existingItem,
-									),
-								});
-							}}
-						/>
-					</div>
-				))}
-			</div>
-
-			<Button
-				intent="secondary"
-				onPress={() => {
-					onChange({
-						...item.content,
-						layout,
-						items: [...items, { imageKey: undefined, imageUrl: undefined, caption: undefined }],
-					});
-				}}
-				size="sm"
-			>
-				<PlusIcon className="block-4 inline-4" />
-				{t("Add image")}
-			</Button>
-		</div>
-	);
 }
 
 interface DataContentBlockPanelProps {
@@ -1140,6 +962,16 @@ function HeroContentBlockPanel({
 				<Label>{t("Image")}</Label>
 				{asset != null ? (
 					<SelectedImageCard
+						footer={
+							<ImageCaptionModeField
+								assetCaption={asset.caption}
+								caption={item.content?.caption ?? null}
+								captionMode={item.content?.captionMode ?? "inherit"}
+								onChange={(value) => {
+									onChange({ ...item.content, ...value });
+								}}
+							/>
+						}
 						image={asset}
 						onMetadataChange={(next) => {
 							onChange({ ...item.content, asset: next });
@@ -1150,16 +982,6 @@ function HeroContentBlockPanel({
 				) : (
 					picker
 				)}
-				{imageUrl != null ? (
-					<ImageCaptionModeField
-						assetCaption={asset?.caption}
-						caption={item.content?.caption ?? null}
-						captionMode={item.content?.captionMode ?? "inherit"}
-						onChange={(value) => {
-							onChange({ ...item.content, ...value });
-						}}
-					/>
-				) : null}
 				{imageKey != null && (
 					<input name="heroContentBlock.imageKey" type="hidden" value={imageKey} />
 				)}
@@ -1330,7 +1152,6 @@ const MENU_BLOCK_TYPES: Array<{
 	icon: ReactNode;
 }> = [
 	{ type: "unified_content", icon: <PencilSquareIcon /> },
-	{ type: "gallery", icon: <Squares2X2Icon /> },
 	{ type: "data", icon: <Square3Stack3DIcon /> },
 	{ type: "hero", icon: <RectangleGroupIcon /> },
 	{ type: "accordion", icon: <ListBulletIcon /> },

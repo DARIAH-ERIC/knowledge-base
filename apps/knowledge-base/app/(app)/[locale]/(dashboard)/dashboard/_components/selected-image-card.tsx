@@ -40,6 +40,12 @@ interface SelectedImageCardProps {
 	onMetadataChange?: (image: SelectedImage) => void;
 	/** Picker, remove button, and anything else specific to the surrounding field. */
 	children?: ReactNode;
+	/**
+	 * Settings that belong to this placement of the asset rather than to the asset itself - the
+	 * caption controls. Rendered inside the card, below a divider, so they read as part of the image
+	 * field instead of competing with the form's own actions.
+	 */
+	footer?: ReactNode;
 }
 
 /**
@@ -48,7 +54,7 @@ interface SelectedImageCardProps {
  * document pickers - so an asset reads the same wherever it is chosen.
  */
 export function SelectedImageCard(props: Readonly<SelectedImageCardProps>): ReactNode {
-	const { children, image, onMetadataChange } = props;
+	const { children, footer, image, onMetadataChange } = props;
 
 	const t = useExtracted();
 
@@ -150,6 +156,8 @@ export function SelectedImageCard(props: Readonly<SelectedImageCardProps>): Reac
 					{t("Download original")}
 				</a>
 			</div>
+
+			{footer != null ? <div className="border-border border-bs pbs-4">{footer}</div> : null}
 		</div>
 	);
 }

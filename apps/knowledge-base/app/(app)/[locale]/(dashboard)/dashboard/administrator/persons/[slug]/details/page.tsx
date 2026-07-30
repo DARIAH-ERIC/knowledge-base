@@ -68,6 +68,8 @@ export default async function DashboardAdministratorPersonDetailsPage(
 	const person = await db.query.persons.findFirst({
 		where: { id: versionId },
 		columns: {
+			imageCaption: true,
+			imageCaptionMode: true,
 			id: true,
 			email: true,
 			name: true,
@@ -96,6 +98,8 @@ export default async function DashboardAdministratorPersonDetailsPage(
 				columns: {
 					key: true,
 					label: true,
+					alt: true,
+					caption: true,
 				},
 			},
 		},

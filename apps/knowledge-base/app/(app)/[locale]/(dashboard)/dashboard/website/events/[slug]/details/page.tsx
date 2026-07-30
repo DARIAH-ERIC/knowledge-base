@@ -90,6 +90,8 @@ export default async function DashboardWebsiteEventDetailsPage(
 	const event = await db.query.events.findFirst({
 		where: { id: versionId },
 		columns: {
+			imageCaption: true,
+			imageCaptionMode: true,
 			id: true,
 			duration: true,
 			isFullDay: true,
@@ -120,6 +122,8 @@ export default async function DashboardWebsiteEventDetailsPage(
 				columns: {
 					key: true,
 					label: true,
+					alt: true,
+					caption: true,
 				},
 			},
 		},

@@ -6,12 +6,14 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { FeaturedImageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/featured-image-details";
 import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { PersonArticle } from "@/lib/data/article-contributors";
@@ -26,10 +28,21 @@ interface PersonDetailsProps {
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
-	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
+	person: Pick<
+		schema.Person,
+		"email" | "id" | "name" | "orcid" | "sortName" | "imageCaption" | "imageCaptionMode"
+	> & {
 		biographyContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } | null };
+	} & {
+		image: {
+			key: string;
+			label: string;
+			url: string;
+			alt?: string | null;
+			caption?: JSONContent | null;
+		} | null;
+	};
 	contributions: Array<PersonContribution>;
 	/** Read-only lens: the edge is owned by the article, so it is not editable from here. */
 	articles: Array<PersonArticle>;
@@ -100,10 +113,10 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
 					{person.image != null ? (
-						<img
-							alt=""
-							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
-							src={person.image.url}
+						<FeaturedImageDetails
+							image={person.image}
+							imageCaption={person.imageCaption}
+							imageCaptionMode={person.imageCaptionMode}
 						/>
 					) : null}
 				</DescriptionDetails>

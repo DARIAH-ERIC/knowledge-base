@@ -46,8 +46,12 @@ export function ImageCaptionModeField(props: Readonly<ImageCaptionModeFieldProps
 		<div className="flex flex-col gap-y-2">
 			<span className={labelStyles()}>{t("Caption behavior")}</span>
 
+			{/* The group paints its selection with `primary` by default, which would give this setting
+			    the same weight as the form's submit button. It is a choice among three, not a call to
+			    action, so the selected segment is a neutral chip and hover stays quieter still. */}
 			<ToggleGroup
 				aria-label={t("Caption behavior")}
+				className="[--toggle-focused-bg:var(--color-muted)] [--toggle-hover-bg:var(--color-muted)] [--toggle-selected-bg:var(--color-secondary)] [--toggle-selected-fg:var(--color-secondary-fg)] self-start"
 				disallowEmptySelection={true}
 				onSelectionChange={(keys) => {
 					const [mode] = [...keys] as Array<ImageCaptionMode>;
@@ -57,7 +61,7 @@ export function ImageCaptionModeField(props: Readonly<ImageCaptionModeFieldProps
 				}}
 				selectedKeys={new Set([captionMode])}
 				selectionMode="single"
-				size="sm"
+				size="xs"
 			>
 				<ToggleGroupItem id="inherit">{t("Use asset caption")}</ToggleGroupItem>
 				<ToggleGroupItem id="override">{t("Custom caption")}</ToggleGroupItem>

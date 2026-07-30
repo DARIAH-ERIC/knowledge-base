@@ -6,12 +6,14 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { FeaturedImageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/featured-image-details";
 import { RelationTypeSuffix } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-type-suffix";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 
@@ -23,10 +25,18 @@ interface SpotlightArticleDetailsProps {
 	selectedVersion: "draft" | "published";
 	spotlightArticle: Pick<
 		schema.SpotlightArticle,
-		"id" | "publicationDate" | "title" | "summary"
+		"id" | "publicationDate" | "title" | "summary" | "imageCaption" | "imageCaptionMode"
 	> & {
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } };
+	} & {
+		image: {
+			key: string;
+			label: string;
+			url: string;
+			alt?: string | null;
+			caption?: JSONContent | null;
+		};
+	};
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	publishAction: (documentId: string) => Promise<unknown>;
@@ -89,10 +99,10 @@ export function SpotlightArticleDetails(props: Readonly<SpotlightArticleDetailsP
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
-					<img
-						alt=""
-						className="block-24 inline-auto max-inline-full rounded-lg object-contain"
-						src={spotlightArticle.image.url}
+					<FeaturedImageDetails
+						image={spotlightArticle.image}
+						imageCaption={spotlightArticle.imageCaption}
+						imageCaptionMode={spotlightArticle.imageCaptionMode}
 					/>
 				</DescriptionDetails>
 

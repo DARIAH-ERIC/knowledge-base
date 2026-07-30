@@ -85,6 +85,8 @@ export default async function DashboardWebsiteFundingCallsDetailsPage(
 	const fundingCall = await db.query.fundingCalls.findFirst({
 		where: { id: versionId },
 		columns: {
+			imageCaption: true,
+			imageCaptionMode: true,
 			id: true,
 			duration: true,
 			title: true,
@@ -112,6 +114,8 @@ export default async function DashboardWebsiteFundingCallsDetailsPage(
 				columns: {
 					key: true,
 					label: true,
+					alt: true,
+					caption: true,
 				},
 			},
 		},

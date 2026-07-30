@@ -66,6 +66,26 @@ const blocks = {
 			content: { type: "doc", content: [paragraph("Ada chairs the working group.")] },
 		},
 	},
+	gallery: {
+		type: "gallery",
+		content: {
+			layout: "carousel",
+			items: [
+				{
+					imageKey: "images/one.jpg",
+					imageUrl: "https://example.com/one.jpg",
+					caption: caption("First."),
+					captionMode: "override",
+				},
+				{
+					imageKey: "images/two.jpg",
+					imageUrl: "https://example.com/two.jpg",
+					caption: caption("Second."),
+					captionMode: "hidden",
+				},
+			],
+		},
+	},
 } satisfies Record<string, MergeableBlock>;
 
 describe("merge/split round trip", () => {
@@ -114,6 +134,76 @@ describe("image layout", () => {
 		};
 
 		expect(splitDocumentToBlocks(doc)[0]?.content).toMatchObject({ layout: "default" });
+	});
+});
+
+describe("gallery items", () => {
+	it("keeps item order across a round trip", () => {
+		const [result] = splitDocumentToBlocks(mergeBlocksToDocument([blocks.gallery]));
+
+		expect(
+			(result as Extract<typeof result, { type: "gallery" }>).content?.items?.map(
+				(item) => item.imageKey,
+			),
+		).toEqual(["images/one.jpg", "images/two.jpg"]);
+	});
+
+	// Items have no `alt` / `assetCaption` columns: the node carries a copy of the asset's metadata so
+	// it can render the thumbnail and resolve an `inherit` caption without refetching.
+	it("copies asset metadata into the node without writing it back as item content", () => {
+		const stored: MergeableBlock = {
+			type: "gallery",
+			content: {
+				items: [
+					{
+						imageKey: "images/one.jpg",
+						asset: { alt: "A workshop", caption: caption("Asset caption.") },
+						captionMode: "inherit",
+					},
+				],
+			},
+		};
+
+		const doc = mergeBlocksToDocument([stored]);
+
+		expect(doc.content![0]!.attrs).toMatchObject({
+			layout: "grid",
+			items: [
+				expect.objectContaining({
+					imageKey: "images/one.jpg",
+					alt: "A workshop",
+					assetCaption: caption("Asset caption."),
+				}),
+			],
+		});
+
+		const [result] = splitDocumentToBlocks(doc);
+
+		expect(result?.content).toEqual({
+			layout: "grid",
+			items: [
+				{
+					imageKey: "images/one.jpg",
+					imageUrl: undefined,
+					caption: undefined,
+					captionMode: "inherit",
+				},
+			],
+		});
+	});
+
+	it("falls back to the grid layout for an unknown stored value", () => {
+		const doc: JSONContent = {
+			type: "doc",
+			content: [
+				{
+					type: "galleryBlock",
+					attrs: { layout: "masonry", items: [{ imageKey: "images/one.jpg" }] },
+				},
+			],
+		};
+
+		expect(splitDocumentToBlocks(doc)[0]?.content).toMatchObject({ layout: "grid" });
 	});
 });
 
@@ -203,6 +293,44 @@ describe("blocks that cannot be stored", () => {
 		expect(blocks[0]!.content).toEqual({
 			type: "doc",
 			content: [paragraph("Before."), paragraph("Orphaned bio."), paragraph("After.")],
+		});
+	});
+
+	// `createGalleryItems` keeps only items it can resolve to an asset, so a gallery whose items are
+	// all unresolvable would persist as an empty block no author can see or delete. There is no prose
+	// to rescue, unlike a media block, so the node goes with it.
+	it("drops a gallery whose items have no image", () => {
+		const doc: JSONContent = {
+			type: "doc",
+			content: [
+				paragraph("Before."),
+				{ type: "galleryBlock", attrs: { layout: "grid", items: [{ imageKey: null }] } },
+				paragraph("After."),
+			],
+		};
+
+		const blocks = splitDocumentToBlocks(doc);
+
+		expect(blocks).toHaveLength(1);
+		expect(blocks[0]!.content).toEqual({
+			type: "doc",
+			content: [paragraph("Before."), paragraph("After.")],
+		});
+	});
+
+	it("keeps the storable items of a partly unresolvable gallery", () => {
+		const doc: JSONContent = {
+			type: "doc",
+			content: [
+				{
+					type: "galleryBlock",
+					attrs: { layout: "grid", items: [{ imageKey: null }, { imageKey: "images/one.jpg" }] },
+				},
+			],
+		};
+
+		expect(splitDocumentToBlocks(doc)[0]?.content).toMatchObject({
+			items: [{ imageKey: "images/one.jpg" }],
 		});
 	});
 

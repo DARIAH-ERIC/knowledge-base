@@ -90,6 +90,8 @@ export default async function DashboardWebsitePageItemDetailsPage(
 	const pageItem = await db.query.pages.findFirst({
 		where: { id: versionId },
 		columns: {
+			imageCaption: true,
+			imageCaptionMode: true,
 			id: true,
 			publicationDate: true,
 			title: true,
@@ -111,6 +113,8 @@ export default async function DashboardWebsitePageItemDetailsPage(
 				columns: {
 					key: true,
 					label: true,
+					alt: true,
+					caption: true,
 				},
 			},
 		},

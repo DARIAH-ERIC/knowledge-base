@@ -12,6 +12,24 @@ function normalizeImageLayout(value: unknown): ImageLayout {
 	return imageLayouts.has(value as ImageLayout) ? (value as ImageLayout) : "default";
 }
 
+/** Mirrors `galleryLayoutEnum` in `@dariah-eric/database`. */
+type GalleryLayout = "carousel" | "grid";
+
+function normalizeGalleryLayout(value: unknown): GalleryLayout {
+	return value === "carousel" ? "carousel" : "grid";
+}
+
+/** A stored block predating `captionMode` is read as whichever mode its caption implies. */
+function normalizeCaptionMode(
+	value: unknown,
+	caption: JSONContent | null | undefined,
+): ImageCaptionMode {
+	if (value === "hidden" || value === "inherit" || value === "override") {
+		return value;
+	}
+	return caption != null ? "override" : "inherit";
+}
+
 interface RichTextBlock {
 	type: "rich_text";
 	content?: JSONContent;
@@ -58,12 +76,32 @@ interface MediaTextBlock {
 	};
 }
 
+interface GalleryBlock {
+	type: "gallery";
+	content?: {
+		layout?: GalleryLayout;
+		items?: Array<{
+			imageKey?: string;
+			imageUrl?: string;
+			/**
+			 * The joined asset row, as the read path assembles it. Gallery items have no `alt` /
+			 * `assetCaption` columns of their own — those live on the asset, and the node carries a copy
+			 * so it can render the image and resolve an `inherit` caption without a fetch.
+			 */
+			asset?: { alt?: string | null; caption?: JSONContent | null };
+			caption?: JSONContent | null;
+			captionMode?: ImageCaptionMode;
+		}>;
+	};
+}
+
 export type MergeableBlock =
 	| RichTextBlock
 	| ImageBlock
 	| EmbedBlock
 	| CalloutBlock
-	| MediaTextBlock;
+	| MediaTextBlock
+	| GalleryBlock;
 
 /**
  * Merges an ordered sequence of inline content blocks into a single Tiptap document. Typed blocks
@@ -78,8 +116,7 @@ export function mergeBlocksToDocument(blocks: Array<MergeableBlock>): JSONConten
 			const children = block.content?.content ?? [];
 			nodes.push(...children);
 		} else if (block.type === "image") {
-			const captionMode =
-				block.content?.captionMode ?? (block.content?.caption != null ? "override" : "inherit");
+			const captionMode = normalizeCaptionMode(block.content?.captionMode, block.content?.caption);
 			nodes.push({
 				type: "assetImage",
 				attrs: {
@@ -92,9 +129,25 @@ export function mergeBlocksToDocument(blocks: Array<MergeableBlock>): JSONConten
 					layout: normalizeImageLayout(block.content?.layout),
 				},
 			});
+		} else if (block.type === "gallery") {
+			nodes.push({
+				type: "galleryBlock",
+				attrs: {
+					layout: normalizeGalleryLayout(block.content?.layout),
+					items: (block.content?.items ?? []).map((item) => {
+						return {
+							imageKey: item.imageKey ?? null,
+							imageUrl: item.imageUrl ?? null,
+							alt: item.asset?.alt ?? null,
+							assetCaption: item.asset?.caption ?? null,
+							caption: item.caption ?? null,
+							captionMode: normalizeCaptionMode(item.captionMode, item.caption),
+						};
+					}),
+				},
+			});
 		} else if (block.type === "media_text") {
-			const captionMode =
-				block.content?.captionMode ?? (block.content?.caption != null ? "override" : "inherit");
+			const captionMode = normalizeCaptionMode(block.content?.captionMode, block.content?.caption);
 			// The stored body is a document; the node holds its children as real nested content.
 			const body = block.content?.content?.content ?? [];
 			nodes.push({
@@ -176,6 +229,36 @@ export function splitDocumentToBlocks(doc: JSONContent): Array<ContentBlockInput
 					captionMode:
 						(node.attrs?.captionMode as ImageCaptionMode | null | undefined) ?? "inherit",
 					layout: normalizeImageLayout(node.attrs?.layout),
+				},
+			});
+		} else if (node.type === "galleryBlock") {
+			// Items are only ever storable by key, and `createGalleryItems` drops the rest. A gallery
+			// that keeps none of them would persist as an empty block the author cannot see or delete,
+			// so the node goes too. Unlike a media block there is no prose at stake.
+			const storedItems = node.attrs?.items as Array<Record<string, unknown>> | null | undefined;
+			const items = (Array.isArray(storedItems) ? storedItems : []).filter(
+				(item) => typeof item.imageKey === "string" && item.imageKey !== "",
+			);
+
+			if (items.length === 0) {
+				continue;
+			}
+
+			flushRichText();
+			blocks.push({
+				id: crypto.randomUUID(),
+				type: "gallery",
+				content: {
+					layout: normalizeGalleryLayout(node.attrs?.layout),
+					items: items.map((item) => {
+						const caption = (item.caption as JSONContent | null | undefined) ?? undefined;
+						return {
+							imageKey: item.imageKey as string,
+							imageUrl: (item.imageUrl as string | null | undefined) ?? undefined,
+							caption,
+							captionMode: normalizeCaptionMode(item.captionMode, caption),
+						};
+					}),
 				},
 			});
 		} else if (node.type === "mediaTextBlock") {
