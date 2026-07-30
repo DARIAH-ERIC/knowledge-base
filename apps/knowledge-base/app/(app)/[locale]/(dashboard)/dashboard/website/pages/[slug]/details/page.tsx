@@ -14,8 +14,12 @@ import {
 	getEntityRelations,
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsitePageItemDetailsPageProps extends PageProps<"/[locale]/dashboard/website/pages/[slug]/details"> {}
@@ -110,12 +114,8 @@ export default async function DashboardWebsitePageItemDetailsPage(
 				},
 			},
 			image: {
-				columns: {
-					key: true,
-					label: true,
-					alt: true,
-					caption: true,
-				},
+				columns: selectedImageColumns,
+				with: selectedImageWith,
 			},
 		},
 	});
@@ -124,12 +124,7 @@ export default async function DashboardWebsitePageItemDetailsPage(
 		notFound();
 	}
 
-	const image = pageItem.image
-		? images.generateSignedImageUrl({
-				key: pageItem.image.key,
-				options: imageGridOptions,
-			})
-		: null;
+	const image = pageItem.image != null ? toSelectedImage(pageItem.image, imageGridOptions) : null;
 
 	const contentBlocks = await getResolvedEntityContentBlocks(pageItem.id, "content");
 
@@ -149,10 +144,7 @@ export default async function DashboardWebsitePageItemDetailsPage(
 			documentId={doc.id}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
-			pageItem={{
-				...pageItem,
-				image: pageItem.image ? { ...pageItem.image, url: image!.url } : null,
-			}}
+			pageItem={{ ...pageItem, image }}
 			publishAction={publishPageItemAction}
 			selectedVersion={selectedVersion}
 		/>

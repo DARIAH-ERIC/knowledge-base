@@ -623,8 +623,10 @@ test.describe("website news admin", () => {
 	});
 
 	/**
-	 * A gallery is a node in the unified document, so it splits out as its own block behind the prose
-	 * that precedes it — and its layout, item and caption survive a re-save that never touches it.
+	 * A gallery is a node in the unified document, so it splits out as its own block between the two
+	 * runs of prose around it, and its layout, item order and captions survive a re-save that never
+	 * touches it. Item order is the part worth driving through the form: positions live in the items
+	 * table, and the reorder buttons only mutate panel state until Apply commits the list.
 	 */
 	test("should save an inline gallery as a gallery block", async ({
 		createWebsiteNewsPage,
@@ -633,7 +635,9 @@ test.describe("website news admin", () => {
 		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
 		const title = `${newsPage.workerPrefix} Inline Gallery ${randomUUID()}`;
 		const above = `Above the gallery ${randomUUID()}`;
-		const galleryCaption = `Gallery caption ${randomUUID()}`;
+		const below = `Below the gallery ${randomUUID()}`;
+		const firstCaption = `First gallery caption ${randomUUID()}`;
+		const secondCaption = `Second gallery caption ${randomUUID()}`;
 
 		await newsPage.gotoCreate();
 		await newsPage.fillTitle(title);
@@ -642,16 +646,30 @@ test.describe("website news admin", () => {
 
 		await newsPage.addContentWithGallery({
 			above,
+			below,
 			layout: "Carousel",
 			assetLabel: "E2E Test Asset",
-			caption: galleryCaption,
+			captions: [firstCaption, secondCaption],
+			/** Promote the second item, so stored order differs from the order it was picked in. */
+			moveEarlier: 2,
 		});
 		await newsPage.submitForm();
 
+		/** Captions in stored item order — the assertion the `position` column has to earn. */
+		const captionsInOrder = (items: unknown) =>
+			(items as Array<{ caption: unknown }>).map((item) => JSON.stringify(item.caption));
+
 		let contentBlocks = await db.getNewsContentBlocksByTitle(title);
-		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text", "gallery"]);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual([
+			"rich_text",
+			"gallery",
+			"rich_text",
+		]);
 		expect(contentBlocks[1]).toMatchObject({ galleryLayout: "carousel" });
-		expect(JSON.stringify(contentBlocks[1]!.galleryItems)).toContain(galleryCaption);
+		expect(captionsInOrder(contentBlocks[1]!.galleryItems)).toStrictEqual([
+			expect.stringContaining(secondCaption),
+			expect.stringContaining(firstCaption),
+		]);
 
 		await newsPage.searchByTitle(title);
 		await newsPage.gotoDetailsFromList(title);
@@ -659,9 +677,16 @@ test.describe("website news admin", () => {
 		await newsPage.submitForm();
 
 		contentBlocks = await db.getNewsContentBlocksByTitle(title);
-		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text", "gallery"]);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual([
+			"rich_text",
+			"gallery",
+			"rich_text",
+		]);
 		expect(contentBlocks[1]).toMatchObject({ galleryLayout: "carousel" });
-		expect(JSON.stringify(contentBlocks[1]!.galleryItems)).toContain(galleryCaption);
+		expect(captionsInOrder(contentBlocks[1]!.galleryItems)).toStrictEqual([
+			expect.stringContaining(secondCaption),
+			expect.stringContaining(firstCaption),
+		]);
 	});
 
 	test("should save standalone and inline button links in a content block", async ({

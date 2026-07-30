@@ -15,8 +15,12 @@ import {
 	getEntityRelations,
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteImpactCaseStudyDetailsPageProps extends PageProps<"/[locale]/dashboard/website/impact-case-studies/[slug]/details"> {}
@@ -111,12 +115,8 @@ export default async function DashboardWebsiteImpactCaseStudyDetailsPage(
 				},
 			},
 			image: {
-				columns: {
-					key: true,
-					label: true,
-					alt: true,
-					caption: true,
-				},
+				columns: selectedImageColumns,
+				with: selectedImageWith,
 			},
 		},
 	});
@@ -125,10 +125,7 @@ export default async function DashboardWebsiteImpactCaseStudyDetailsPage(
 		notFound();
 	}
 
-	const image = images.generateSignedImageUrl({
-		key: impactCaseStudy.image.key,
-		options: imageGridOptions,
-	});
+	const image = toSelectedImage(impactCaseStudy.image, imageGridOptions);
 
 	const contentBlocks = await getResolvedEntityContentBlocks(impactCaseStudy.id, "content");
 
@@ -152,7 +149,7 @@ export default async function DashboardWebsiteImpactCaseStudyDetailsPage(
 			hasDraft={hasDraftChanges}
 			impactCaseStudy={{
 				...impactCaseStudy,
-				image: { ...impactCaseStudy.image, url: image.url },
+				image,
 			}}
 			isPublished={publishedId != null}
 			publishAction={publishImpactCaseStudyAction}

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 
+import { expectDetailsTermsInOrder } from "@/e2e/lib/fixtures/details-order";
 import { expect, test } from "@/e2e/lib/test";
 
 test.describe("website funding calls admin", () => {
@@ -46,13 +47,27 @@ test.describe("website funding calls admin", () => {
 		const summary = "E2E test funding call summary";
 		const content = `E2E funding call content ${randomUUID()}`;
 		const testAsset = await db.getTestAsset();
+		const relatedEntities = await db.getTestEntities(2);
+		const relatedResources = await db.getTestResources(2);
+		const relatedEntity = relatedEntities[0]!;
+		const replacementEntity = relatedEntities[1]!;
+		const relatedResource = relatedResources[0]!;
+		const replacementResource = relatedResources[1]!;
 
 		await fundingCallsPage.gotoCreate();
+		await expect(
+			fundingCallsPage.page.getByRole("heading", { name: "Related entities" }),
+		).toBeVisible();
+		await expect(
+			fundingCallsPage.page.getByRole("heading", { name: "Related resources" }),
+		).toBeVisible();
 		await fundingCallsPage.fillTitle(title);
 		await fundingCallsPage.fillSummary(summary);
 		await fundingCallsPage.fillDatePicker("Start date", 2025, 6, 1);
 		await fundingCallsPage.fillDatePicker("End date", 2025, 6, 30);
 		await fundingCallsPage.addContentBlock(content);
+		await fundingCallsPage.selectRelatedEntity(relatedEntity.name);
+		await fundingCallsPage.selectRelatedResource(relatedResource.name);
 		await fundingCallsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await fundingCallsPage.submitForm();
 
@@ -63,9 +78,55 @@ test.describe("website funding calls admin", () => {
 		expect(created).toMatchObject({ summary, imageId: testAsset.id });
 		expect(created?.duration.start).toStrictEqual(new Date("2025-06-01T00:00:00.000Z"));
 		expect(created?.duration.end).toStrictEqual(new Date("2025-06-30T00:00:00.000Z"));
+		expect(created).not.toBeNull();
+		const relations = await db.getEntityRelations(created!.documentId);
+		expect(relations.relatedEntityIds).toStrictEqual([relatedEntity.id]);
+		expect(relations.relatedResourceIds).toStrictEqual([relatedResource.id]);
 		const contentBlocks = await db.getFundingCallContentBlocksByTitle(title);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
+
+		await fundingCallsPage.gotoDetailsFromList(title);
+		await expect(fundingCallsPage.detailsRelatedEntity(relatedEntity.name)).toBeVisible();
+		await expect(fundingCallsPage.detailsRelatedResource(relatedResource.name)).toBeVisible();
+		await expectDetailsTermsInOrder(fundingCallsPage.page, [
+			"Image",
+			"Content",
+			"Related entities",
+			"Related resources",
+		]);
+
+		await fundingCallsPage.gotoEditFromDetails();
+		await expect(
+			fundingCallsPage.page.getByRole("heading", { name: "Related entities" }),
+		).toBeVisible();
+		await expect(
+			fundingCallsPage.page.getByRole("heading", { name: "Related resources" }),
+		).toBeVisible();
+		await expect(
+			fundingCallsPage.page.getByRole("row", { name: relatedEntity.name }),
+		).toBeVisible();
+		await expect(
+			fundingCallsPage.page.getByRole("row", { name: relatedResource.name }),
+		).toBeVisible();
+
+		await fundingCallsPage.removeRelatedEntity(relatedEntity.name);
+		await fundingCallsPage.removeRelatedResource(relatedResource.name);
+		await fundingCallsPage.selectRelatedEntity(replacementEntity.name);
+		await fundingCallsPage.selectRelatedResource(replacementResource.name);
+		await fundingCallsPage.submitForm();
+
+		const replacedRelations = await db.getEntityRelations(created!.documentId);
+		expect(replacedRelations.relatedEntityIds).toStrictEqual([replacementEntity.id]);
+		expect(replacedRelations.relatedResourceIds).toStrictEqual([replacementResource.id]);
+
+		await fundingCallsPage.gotoEditFromList(title);
+		await fundingCallsPage.removeRelatedEntity(replacementEntity.name);
+		await fundingCallsPage.removeRelatedResource(replacementResource.name);
+		await fundingCallsPage.submitForm();
+
+		const clearedRelations = await db.getEntityRelations(created!.documentId);
+		expect(clearedRelations).toStrictEqual({ relatedEntityIds: [], relatedResourceIds: [] });
 	});
 
 	test("should edit all funding call fields", async ({

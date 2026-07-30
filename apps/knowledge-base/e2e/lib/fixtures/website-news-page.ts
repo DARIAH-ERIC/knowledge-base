@@ -417,6 +417,7 @@ export class WebsiteNewsPage {
 		await block.getByRole("textbox", { name: "Title" }).fill(options.title);
 		await block.getByRole("textbox", { name: "Caption" }).fill(options.caption);
 		await block.getByRole("button", { name: "Apply" }).click();
+		await expect(block.getByRole("button", { name: "Apply" })).toBeHidden();
 	}
 
 	private mediaTextBlock(): Locator {
@@ -643,13 +644,18 @@ export class WebsiteNewsPage {
 	}
 
 	/**
-	 * Insert a gallery node at the cursor and give it one image. The whole item list is a form
-	 * committed on Apply, so the caption is filled before applying rather than after.
+	 * Insert a gallery node at the cursor and give it one item per caption. Item order is what this
+	 * drives: the same asset twice is a legitimate gallery, so the captions are what tell the items
+	 * apart, and `moveEarlier` promotes one of them before the list is committed.
+	 *
+	 * The whole item list is a form committed on Apply, so everything is filled before applying.
 	 */
 	async insertGallery(options: {
 		layout: string;
 		assetLabel: string;
-		caption: string;
+		captions: Array<string>;
+		/** 1-based index of the item to move one place earlier, as the panel labels them. */
+		moveEarlier?: number;
 	}): Promise<void> {
 		await this.page.getByRole("button", { name: "Insert gallery" }).click();
 
@@ -659,27 +665,46 @@ export class WebsiteNewsPage {
 
 		/** `renderImagePicker` is the toolbar-shaped picker, so the trigger reads "Insert image". */
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
-		await block.getByRole("button", { name: "Insert image" }).click();
-		await dialog.waitFor({ state: "visible" });
-		const asset = dialog.getByRole("gridcell", { name: options.assetLabel });
-		await expect(asset).toHaveCount(1);
-		await asset.click();
-		await dialog.getByRole("button", { name: "Select" }).click();
-		await dialog.waitFor({ state: "hidden" });
 
-		/* Gallery items follow the shared caption model, so a caption of their own means overriding
-		   the asset's. */
-		await block.getByRole("radio", { name: "Custom caption", exact: true }).click();
-		await block.getByRole("textbox", { name: /^Custom caption for image/ }).fill(options.caption);
+		for (const [index, caption] of options.captions.entries()) {
+			await block.getByRole("button", { name: "Insert image" }).click();
+			await dialog.waitFor({ state: "visible" });
+			const asset = dialog.getByRole("gridcell", { name: options.assetLabel });
+			await expect(asset).toHaveCount(1);
+			await asset.click();
+			await dialog.getByRole("button", { name: "Select" }).click();
+			await dialog.waitFor({ state: "hidden" });
+
+			/* Gallery items follow the shared caption model, so a caption of their own means overriding
+			   the asset's. Every item repeats those controls, so they are addressed through the group
+			   naming the item rather than by label alone. */
+			const position = index + 1;
+			await block
+				.getByRole("radiogroup", { name: `Caption behavior for image ${String(position)}` })
+				.getByRole("radio", { name: "Custom caption", exact: true })
+				.click();
+			await block
+				.getByRole("textbox", { name: `Custom caption for image ${String(position)}` })
+				.fill(caption);
+		}
+
+		if (options.moveEarlier != null) {
+			await block
+				.getByRole("button", { name: `Move image ${String(options.moveEarlier)} earlier` })
+				.click();
+		}
+
 		await block.getByRole("button", { name: "Apply" }).click();
 	}
 
-	/** Build one content block with a paragraph followed by an inline gallery node. */
+	/** Build one content block with an inline gallery between two paragraphs. */
 	async addContentWithGallery(options: {
 		above: string;
+		below: string;
 		layout: string;
 		assetLabel: string;
-		caption: string;
+		captions: Array<string>;
+		moveEarlier?: number;
 	}): Promise<void> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
 		await this.page.getByRole("menuitem", { name: "Content" }).click();
@@ -694,8 +719,17 @@ export class WebsiteNewsPage {
 		await this.insertGallery({
 			layout: options.layout,
 			assetLabel: options.assetLabel,
-			caption: options.caption,
+			captions: options.captions,
+			moveEarlier: options.moveEarlier,
 		});
+
+		/**
+		 * The gallery is an atom at the end of the document, so leaving it needs a gap cursor: put the
+		 * caret past the node, then open a paragraph to type the trailing prose into.
+		 */
+		await editor.press("Control+End");
+		await editor.press("Enter");
+		await editor.pressSequentially(options.below);
 	}
 
 	async addDataBlock(options: { dataType: string; limit: number }): Promise<void> {

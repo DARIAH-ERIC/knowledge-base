@@ -4,32 +4,19 @@ import { Button } from "@dariah-eric/ui/button";
 import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import { toPlainText } from "@dariah-eric/ui/rich-text";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
-import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
+import {
+	AssetSummary,
+	type SelectedImage,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary";
 import {
 	EditAssetMetadataDialog,
 	type SavedAssetMetadata,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog";
 
-/**
- * A picked asset as an editing screen knows it. Only `key` and `url` are needed to submit and
- * preview the selection; the rest is metadata the card surfaces so authors can see - and correct -
- * what they picked without leaving the form.
- */
-export interface SelectedImage {
-	key: string;
-	url: string;
-	id?: string | null;
-	label?: string | null;
-	alt?: string | null;
-	caption?: JSONContent | null;
-	license?: { code: string; name: string } | null;
-	licenseId?: string | null;
-	mimeType?: string | null;
-}
+export type { SelectedImage };
 
 interface SelectedImageCardProps {
 	image: SelectedImage;
@@ -59,12 +46,6 @@ export function SelectedImageCard(props: Readonly<SelectedImageCardProps>): Reac
 	const t = useExtracted();
 
 	const hasCaption = image.caption != null && toPlainText(image.caption) !== "";
-	/**
-	 * Alt text and captions describe a picture. A document (a PDF policy, say) carries the columns
-	 * too, but they are never rendered for it, so showing them here would only invite filling in
-	 * something nobody reads.
-	 */
-	const isImage = image.mimeType == null || image.mimeType.startsWith("image/");
 
 	function handleSaved(saved: SavedAssetMetadata) {
 		/**
@@ -82,45 +63,7 @@ export function SelectedImageCard(props: Readonly<SelectedImageCardProps>): Reac
 
 	return (
 		<div className="flex flex-col gap-y-4 rounded-lg border border-border p-3">
-			<div className="flex flex-row flex-wrap items-start gap-x-4 gap-y-3">
-				<div className="block-24 inline-32 shrink-0 overflow-hidden rounded-md bg-muted">
-					<AssetPreview
-						alt={image.alt ?? image.label ?? t("Selected image")}
-						className="block-full inline-full"
-						imageClassName="object-contain"
-						kindLabelClassName="bg-background/90 text-xs"
-						mimeType={image.mimeType ?? undefined}
-						src={image.url}
-						storageKey={image.key}
-					/>
-				</div>
-
-				<div className="flex min-inline-0 flex-1 flex-col gap-y-1.5">
-					<span className="truncate font-medium text-sm/tight">{image.label ?? image.key}</span>
-
-					{isImage ? (
-						<Fragment>
-							<span className="line-clamp-2 text-muted-fg text-xs">
-								<span className="font-medium">{t("Alt text")}:</span>{" "}
-								{image.alt != null && image.alt !== "" ? image.alt : "—"}
-							</span>
-
-							<span className="line-clamp-2 text-muted-fg text-xs">
-								<span className="font-medium">{t("Caption")}:</span>{" "}
-								{hasCaption ? toPlainText(image.caption) : "—"}
-							</span>
-						</Fragment>
-					) : null}
-
-					<div className="flex flex-row flex-wrap items-center gap-x-1.5 text-muted-fg text-xs">
-						{image.license != null ? <span>{image.license.code}</span> : null}
-						{image.license != null && image.mimeType != null ? (
-							<span aria-hidden={true}>{"·"}</span>
-						) : null}
-						{image.mimeType != null ? <span>{image.mimeType}</span> : null}
-					</div>
-				</div>
-			</div>
+			<AssetSummary caption={hasCaption ? toPlainText(image.caption) : undefined} image={image} />
 
 			<div className="flex flex-row flex-wrap items-center gap-2">
 				{children}

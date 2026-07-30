@@ -16,6 +16,7 @@ export const selectedImageColumns = {
 	caption: true,
 	licenseId: true,
 	mimeType: true,
+	size: true,
 } as const;
 
 /** Companion to {@link selectedImageColumns}, for labelling the license in the same card. */
@@ -36,6 +37,7 @@ interface SelectedImageRow {
 	caption: JSONContent | null;
 	licenseId: string | null;
 	mimeType: string;
+	size: number | null;
 	license?: { code: string; name: string } | null;
 }
 
@@ -54,6 +56,7 @@ export function toSelectedImage(
 		license: asset.license ?? null,
 		licenseId: asset.licenseId,
 		mimeType: asset.mimeType,
+		size: asset.size,
 		url,
 	};
 }

@@ -7,6 +7,7 @@ import { CreateFundingCallActionInputSchema } from "@/app/(app)/[locale]/(dashbo
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-lifecycle";
 import { fundingCallsLifecycleAdapter } from "@/lib/data/funding-calls.lifecycle-adapter";
+import { filterToPublishedDocumentIds } from "@/lib/data/relations";
 import { db } from "@/lib/db";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
@@ -48,6 +49,26 @@ export const createFundingCallAction = createMutationAction({
 			imageCaption: input.imageCaption,
 			imageCaptionMode: input.imageCaptionMode,
 		});
+
+		const publishedRelatedEntityIds = await filterToPublishedDocumentIds(
+			tx,
+			input.relatedEntityIds,
+		);
+		if (publishedRelatedEntityIds.length > 0) {
+			await tx.insert(schema.entitiesToEntities).values(
+				publishedRelatedEntityIds.map((relatedEntityId, position) => {
+					return { entityId: documentId, position, relatedEntityId };
+				}),
+			);
+		}
+
+		if (input.relatedResourceIds.length > 0) {
+			await tx.insert(schema.entitiesToResources).values(
+				input.relatedResourceIds.map((resourceId, position) => {
+					return { entityId: documentId, position, resourceId };
+				}),
+			);
+		}
 
 		const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({
 			where: { entityTypeId: type.id, fieldName: "content" },

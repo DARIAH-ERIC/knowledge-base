@@ -6,14 +6,15 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { SelectedImage } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary";
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { FeaturedImageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/featured-image-details";
+import { RelationTypeSuffix } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-type-suffix";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 
 interface OpportunityDetailsProps {
@@ -29,15 +30,11 @@ interface OpportunityDetailsProps {
 		entityVersion: { entity: { id: string; slug: string } };
 		source: { id: string; source: string };
 	} & {
-		image: {
-			key: string;
-			label: string;
-			url: string;
-			alt?: string | null;
-			caption?: JSONContent | null;
-		};
+		image: SelectedImage;
 	};
 	publishAction: (documentId: string) => Promise<unknown>;
+	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
 
@@ -50,6 +47,8 @@ export function OpportunityDetails(props: Readonly<OpportunityDetailsProps>): Re
 		opportunity,
 		publishAction,
 		discardDraftAction,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 		selectedVersion,
 	} = props;
 
@@ -112,6 +111,34 @@ export function OpportunityDetails(props: Readonly<OpportunityDetailsProps>): Re
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>
 				<DescriptionDetails>
 					<ContentBlocksView contentBlocks={contentBlocks} />
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Related entities")}</DescriptionTerm>
+				<DescriptionDetails>
+					{selectedRelatedEntities.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{selectedRelatedEntities.map((relatedEntity) => (
+								<li key={relatedEntity.id} className="text-sm">
+									<span className="font-medium">{relatedEntity.name}</span>
+									<RelationTypeSuffix type={relatedEntity.description} />
+								</li>
+							))}
+						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Related resources")}</DescriptionTerm>
+				<DescriptionDetails>
+					{selectedRelatedResources.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{selectedRelatedResources.map((relatedResource) => (
+								<li key={relatedResource.id} className="text-sm">
+									<span className="font-medium">{relatedResource.name}</span>
+									<RelationTypeSuffix type={relatedResource.description} />
+								</li>
+							))}
+						</ul>
+					) : null}
 				</DescriptionDetails>
 			</DescriptionList>
 		</Fragment>

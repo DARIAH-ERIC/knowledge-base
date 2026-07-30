@@ -6,10 +6,10 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { SelectedImage } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary";
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
@@ -37,13 +37,7 @@ interface EventDetailsProps {
 	> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & {
-		image: {
-			key: string;
-			label: string;
-			url: string;
-			alt?: string | null;
-			caption?: JSONContent | null;
-		};
+		image: SelectedImage;
 	};
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
@@ -117,11 +111,6 @@ export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {
 				<DescriptionTerm>{t("Website")}</DescriptionTerm>
 				<DescriptionDetails>{event.website}</DescriptionDetails>
 
-				<DescriptionTerm>{t("Content")}</DescriptionTerm>
-				<DescriptionDetails>
-					<ContentBlocksView contentBlocks={contentBlocks} />
-				</DescriptionDetails>
-
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
 					<FeaturedImageDetails
@@ -129,6 +118,11 @@ export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {
 						imageCaption={event.imageCaption}
 						imageCaptionMode={event.imageCaptionMode}
 					/>
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Content")}</DescriptionTerm>
+				<DescriptionDetails>
+					<ContentBlocksView contentBlocks={contentBlocks} />
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Related entities")}</DescriptionTerm>

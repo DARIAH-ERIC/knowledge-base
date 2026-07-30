@@ -14,8 +14,12 @@ import {
 	getEntityRelations,
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteEventDetailsPageProps extends PageProps<"/[locale]/dashboard/website/events/[slug]/details"> {}
@@ -119,12 +123,8 @@ export default async function DashboardWebsiteEventDetailsPage(
 				},
 			},
 			image: {
-				columns: {
-					key: true,
-					label: true,
-					alt: true,
-					caption: true,
-				},
+				columns: selectedImageColumns,
+				with: selectedImageWith,
 			},
 		},
 	});
@@ -133,10 +133,7 @@ export default async function DashboardWebsiteEventDetailsPage(
 		notFound();
 	}
 
-	const image = images.generateSignedImageUrl({
-		key: event.image.key,
-		options: imageGridOptions,
-	});
+	const image = toSelectedImage(event.image, imageGridOptions);
 
 	const contentBlocks = await getResolvedEntityContentBlocks(event.id, "content");
 
@@ -154,7 +151,7 @@ export default async function DashboardWebsiteEventDetailsPage(
 			contentBlocks={contentBlocks}
 			discardDraftAction={discardEventDraftAction}
 			documentId={doc.id}
-			event={{ ...event, image: { ...event.image, url: image.url } }}
+			event={{ ...event, image }}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
 			publishAction={publishEventAction}

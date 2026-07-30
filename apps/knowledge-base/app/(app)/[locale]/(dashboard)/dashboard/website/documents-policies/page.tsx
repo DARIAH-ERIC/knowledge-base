@@ -93,6 +93,7 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 					caption: schema.assets.caption,
 					licenseId: schema.assets.licenseId,
 					mimeType: schema.assets.mimeType,
+					size: schema.assets.size,
 				},
 			})
 			.from(schema.documentsPolicies)

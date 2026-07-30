@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { expectDetailsTermsInOrder } from "@/e2e/lib/fixtures/details-order";
 import { expect, test } from "@/e2e/lib/test";
 
 test.describe("website impact case studies admin", () => {
@@ -49,6 +50,14 @@ test.describe("website impact case studies admin", () => {
 		const contentBlocks = await db.getImpactCaseStudyContentBlocksByTitle(title);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
+
+		await impactCaseStudiesPage.gotoDetailsFromList(title);
+		await expectDetailsTermsInOrder(impactCaseStudiesPage.page, [
+			"Image",
+			"Content",
+			"Related entities",
+			"Related resources",
+		]);
 	});
 
 	test("should edit an impact case study title", async ({

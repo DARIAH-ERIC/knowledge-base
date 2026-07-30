@@ -56,7 +56,6 @@ test.describe("website opportunities lifecycle", () => {
 		await opportunitiesPage.gotoDetailsFromList(title);
 		await expect(opportunitiesPage.detailsDraftBadge()).toBeVisible();
 		await expect(opportunitiesPage.detailsImage()).toBeVisible();
-		await expect(opportunitiesPage.detailsImage()).toHaveAttribute("src", /.+/);
 		await expect(page.getByRole("button", { name: "Publish" })).toBeVisible();
 		await expect(page.getByRole("button", { name: "Discard draft" })).toBeHidden();
 

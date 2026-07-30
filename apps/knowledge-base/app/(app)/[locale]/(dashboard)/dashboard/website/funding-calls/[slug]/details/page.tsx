@@ -9,8 +9,17 @@ import { publishFundingCallAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { imageGridOptions } from "@/config/assets.config";
 import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
+import {
+	getEntityRelationOptionsByIds,
+	getEntityRelations,
+	getResourceRelationOptionsByIds,
+} from "@/lib/data/relations";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteFundingCallsDetailsPageProps extends PageProps<"/[locale]/dashboard/website/funding-calls/[slug]/details"> {}
@@ -111,12 +120,8 @@ export default async function DashboardWebsiteFundingCallsDetailsPage(
 				},
 			},
 			image: {
-				columns: {
-					key: true,
-					label: true,
-					alt: true,
-					caption: true,
-				},
+				columns: selectedImageColumns,
+				with: selectedImageWith,
 			},
 		},
 	});
@@ -125,22 +130,28 @@ export default async function DashboardWebsiteFundingCallsDetailsPage(
 		notFound();
 	}
 
-	const image = images.generateSignedImageUrl({
-		key: fundingCall.image.key,
-		options: imageGridOptions,
-	});
+	const image = toSelectedImage(fundingCall.image, imageGridOptions);
 
 	const contentBlocks = await getResolvedEntityContentBlocks(fundingCall.id, "content");
+
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(doc.id);
+
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
 
 	return (
 		<FundingCallDetails
 			contentBlocks={contentBlocks}
 			discardDraftAction={discardFundingCallDraftAction}
 			documentId={doc.id}
-			fundingCall={{ ...fundingCall, image: { ...fundingCall.image, url: image.url } }}
+			fundingCall={{ ...fundingCall, image }}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
 			publishAction={publishFundingCallAction}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 			selectedVersion={selectedVersion}
 		/>
 	);

@@ -20,6 +20,7 @@ import {
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
+import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import { EntitySlugField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field";
 import {
 	FormLayout,
@@ -34,6 +35,12 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface FundingCallFormProps {
 	contentBlocks?: Array<ContentBlock>;
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	initialRelatedEntityIds?: Array<string>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
+	initialRelatedResourceIds?: Array<string>;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
 	fundingCall?: Pick<schema.FundingCall, "id" | "duration" | "title" | "summary"> & {
 		entityVersion: {
 			entity: Pick<schema.Entity, "id" | "slug">;
@@ -47,10 +54,26 @@ interface FundingCallFormProps {
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
 	formAction: ServerAction;
+	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
 }
 
 export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNode {
-	const { initialAssets, contentBlocks, formAction, fundingCall, isPublished } = props;
+	const {
+		initialAssets,
+		contentBlocks,
+		formAction,
+		fundingCall,
+		initialRelatedEntityIds,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
+		initialRelatedResourceIds,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+		isPublished,
+		selectedRelatedEntities,
+		selectedRelatedResources,
+	} = props;
 
 	const t = useExtracted();
 
@@ -144,6 +167,19 @@ export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNod
 				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
 					<ContentBlocks items={contentBlocks ?? []} />
 				</FormSection>
+
+				<Separator className="my-6" />
+
+				<EntityRelationsFields
+					initialRelatedEntityIds={initialRelatedEntityIds}
+					initialRelatedEntityItems={initialRelatedEntityItems}
+					initialRelatedEntityTotal={initialRelatedEntityTotal}
+					initialRelatedResourceIds={initialRelatedResourceIds}
+					initialRelatedResourceItems={initialRelatedResourceItems}
+					initialRelatedResourceTotal={initialRelatedResourceTotal}
+					selectedRelatedEntities={selectedRelatedEntities}
+					selectedRelatedResources={selectedRelatedResources}
+				/>
 
 				{fundingCall != null ? (
 					<Fragment>

@@ -96,6 +96,30 @@ export class DatabaseService {
 		});
 	}
 
+	async getTestResources(count: number): Promise<Array<{ id: string; name: string }>> {
+		const { search } = await import("../../../lib/search");
+		const result = await search.collections.resources.search({
+			query: "*",
+			queryBy: ["label"],
+			sortBy: [{ field: "label", direction: "asc" }],
+			perPage: count,
+		});
+
+		if (result.isErr()) {
+			throw result.error;
+		}
+
+		const resources = result.value.items.map((hit) => {
+			return { id: hit.document.id, name: hit.document.label };
+		});
+
+		if (resources.length < count) {
+			throw new Error("Not enough resources found in search index — required for relation tests.");
+		}
+
+		return resources;
+	}
+
 	/**
 	 * Returns published news items (id = published version id, matching what the featured-items
 	 * picker uses) ordered by title, the same order as the picker's first page.

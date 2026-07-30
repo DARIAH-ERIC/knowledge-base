@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { FundingCallCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-create-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteCreateFundingCallPageProps extends PageProps<"/[locale]/dashboard/website/funding-calls/create"> {}
@@ -25,10 +26,23 @@ export async function generateMetadata(
 export default async function DashboardWebsiteCreateFundingCallPage(
 	_props: Readonly<DashboardWebsiteCreateFundingCallPageProps>,
 ): Promise<ReactNode> {
-	const { items: initialAssets } = await getMediaLibraryAssets({
-		imageUrlOptions: imageGridOptions,
-		prefix: "images",
-	});
+	const [{ items: initialAssets }, initialRelatedEntities, initialRelatedResources] =
+		await Promise.all([
+			getMediaLibraryAssets({
+				imageUrlOptions: imageGridOptions,
+				prefix: "images",
+			}),
+			getEntityRelationOptions(),
+			getResourceRelationOptions(),
+		]);
 
-	return <FundingCallCreateForm initialAssets={initialAssets} />;
+	return (
+		<FundingCallCreateForm
+			initialAssets={initialAssets}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
+		/>
+	);
 }

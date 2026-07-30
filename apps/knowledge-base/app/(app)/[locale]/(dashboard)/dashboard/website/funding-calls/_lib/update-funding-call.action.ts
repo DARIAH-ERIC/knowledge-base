@@ -13,6 +13,7 @@ import {
 } from "@/lib/data/entity-lifecycle";
 import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
 import { fundingCallsLifecycleAdapter } from "@/lib/data/funding-calls.lifecycle-adapter";
+import { syncEntityRelations } from "@/lib/data/relations";
 import { db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
@@ -93,6 +94,12 @@ export const updateFundingCallAction = createMutationAction({
 			}),
 		);
 
+		await syncEntityRelations(
+			tx,
+			input.documentId,
+			input.relatedEntityIds,
+			input.relatedResourceIds,
+		);
 		await touchVersion(tx, draftVersionId);
 
 		if (shouldSaveAndPublish(formData)) {
