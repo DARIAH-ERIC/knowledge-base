@@ -812,7 +812,7 @@ msgstr "Forgot password?"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:79
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:99
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx:340
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:73
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:91
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-menu-create-dialog.tsx:52
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:41
 msgid "HAlOn1"
@@ -1028,19 +1028,19 @@ msgstr "Hero"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:268
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx:119
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:118
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:107
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:125
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:205
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:83
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:127
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:92
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:136
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:84
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:97
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:128
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:90
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:103
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:153
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:86
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:99
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:125
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:90
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:100
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form.tsx:139
 msgid "+0zv6g"
 msgstr "Image"
@@ -1068,19 +1068,19 @@ msgstr "Rich text"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:120
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:124
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:126
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:102
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:120
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:240
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:92
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:144
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:146
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:159
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:171
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:93
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:106
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:163
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:112
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:170
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:97
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:159
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:109
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form.tsx:174
 msgid "Jq3FDz"
 msgstr "Content"
@@ -1272,23 +1272,23 @@ msgstr "Change image"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:139
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:95
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:65
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:78
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:68
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:100
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:75
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:88
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:57
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:70
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:83
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:91
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:100
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:66
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:79
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:71
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:70
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:83
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:91
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:93
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:73
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:83
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form.tsx:95
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:100
 msgid "9a9+ww"
@@ -1973,9 +1973,9 @@ msgstr "Documentation pages"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:206
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-social-media-amounts-form.tsx:44
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:117
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:192
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:87
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:100
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:137
 msgid "JkLHGw"
 msgstr "Website"
@@ -2226,11 +2226,11 @@ msgstr "Link related entities to display on the website."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-details.tsx:172
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:190
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx:197
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:116
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:101
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:98
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:102
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:104
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:134
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:114
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:111
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:115
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:114
 msgid "RivADq"
 msgstr "Related entities"
 
@@ -2259,11 +2259,11 @@ msgstr "Link related resources to display on the website."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-details.tsx:199
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:204
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx:224
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:130
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:115
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:112
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:116
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:118
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:148
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:128
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:125
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:129
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:128
 msgid "k24S36"
 msgstr "Related resources"
 
@@ -2292,13 +2292,13 @@ msgstr "No related resources"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx:107
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:67
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:76
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:68
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:78
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:73
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:69
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:73
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:76
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:94
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:81
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:91
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:86
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:82
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:86
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:86
 msgid "IoDlcd"
 msgstr "Slug"
 
@@ -2703,19 +2703,19 @@ msgstr "ROR"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:82
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:97
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:145
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:71
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:84
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:77
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:81
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:94
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:102
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:76
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:89
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:97
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:75
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:88
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:98
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:76
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:89
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:97
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:89
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form.tsx:105
 msgid "RrCui3"
 msgstr "Summary"
@@ -4851,7 +4851,7 @@ msgstr "Record"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/web-addresses-check.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:103
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:72
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:85
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:81
 msgid "aH4De2"
 msgstr "Source"
@@ -5066,12 +5066,12 @@ msgstr "New project"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:102
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:89
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:82
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:100
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:98
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:74
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:87
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:101
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:106
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:78
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:91
 msgid "IuFETn"
 msgstr "Duration"
 
@@ -5533,7 +5533,7 @@ msgstr "Compare report volumes, workflow status, and aggregate activity by campa
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-step-nav.tsx:28
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx:90
 #: app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section.tsx:121
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:129
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:142
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-edit.tsx:84
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-edit.tsx:89
 msgid "ZLmyG9"
@@ -6985,7 +6985,7 @@ msgstr "Website dashboard - Documents and policies"
 msgid "C+Npdp"
 msgstr "New event"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:96
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:114
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:187
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:100
 msgid "rvirM2"
@@ -7146,15 +7146,15 @@ msgid "W+LEBA"
 msgstr "Manage all impact case studies in the DARIAH knowledge base."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:103
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:84
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:97
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:121
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:96
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:96
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:82
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form.tsx:124
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:103
 msgid "6ruzVm"
