@@ -11,7 +11,6 @@ import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
-import { hardcodedWorkingGroupsGovernanceBody } from "@/routes/governance-bodies/hardcoded-working-groups";
 import { alias, and, count, eq, inArray, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
@@ -211,24 +210,6 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 		});
 }
 
-async function getHardcodedWorkingGroupsGovernanceBody(db: Database | Transaction) {
-	const { description: _description, ...governanceBody } = hardcodedWorkingGroupsGovernanceBody;
-
-	return {
-		...governanceBody,
-		persons: await getActiveWorkingGroupChairs(db),
-	};
-}
-
-async function getHardcodedWorkingGroupsGovernanceBodyDetails(db: Database | Transaction) {
-	return {
-		...(await getHardcodedWorkingGroupsGovernanceBody(db)),
-		description: hardcodedWorkingGroupsGovernanceBody.description,
-		relatedEntities: [],
-		relatedResources: [],
-	};
-}
-
 async function getActiveGovernanceBodyPersons(
 	db: Database | Transaction,
 	governanceBodyIds: Array<string>,
@@ -341,6 +322,33 @@ async function getActiveGovernanceBodyPersons(
 	return personsByGovernanceBody;
 }
 
+/**
+ * The people of a governance body, keyed by published version id.
+ *
+ * The working groups governance body stands for all working groups, so it has no person relations
+ * of its own: its people are the chairs of every working group, derived here.
+ */
+async function getGovernanceBodyPersons(
+	db: Database | Transaction,
+	items: Array<{ id: string; slug: string }>,
+) {
+	const workingGroups = items.find((item) => item.slug === schema.workingGroupsGovernanceBodySlug);
+
+	const [personsByGovernanceBody, workingGroupChairs] = await Promise.all([
+		getActiveGovernanceBodyPersons(
+			db,
+			items.map((item) => item.id),
+		),
+		workingGroups != null ? getActiveWorkingGroupChairs(db) : null,
+	]);
+
+	if (workingGroups != null && workingGroupChairs != null) {
+		personsByGovernanceBody.set(workingGroups.id, workingGroupChairs);
+	}
+
+	return personsByGovernanceBody;
+}
+
 export async function getGovernanceBodies(
 	db: Database | Transaction,
 	params: GetGovernanceBodiesParams,
@@ -429,9 +437,11 @@ export async function getGovernanceBodies(
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
-	const personsByGovernanceBody = await getActiveGovernanceBodyPersons(
+	const personsByGovernanceBody = await getGovernanceBodyPersons(
 		db,
-		items.map((item) => item.id),
+		items.map((item) => {
+			return { id: item.id, slug: item.entityVersion.entity.slug };
+		}),
 	);
 
 	const data = items.map((item) => {
@@ -445,11 +455,7 @@ export async function getGovernanceBodies(
 		};
 	});
 
-	if (offset <= total && offset + limit > total) {
-		data.push(await getHardcodedWorkingGroupsGovernanceBody(db));
-	}
-
-	return { data, limit, offset, total: total + 1 };
+	return { data, limit, offset, total };
 }
 
 interface GetGovernanceBodyByIdParams {
@@ -462,82 +468,78 @@ export async function getGovernanceBodyById(
 ) {
 	const { id } = params;
 
-	if (id === hardcodedWorkingGroupsGovernanceBody.id) {
-		return getHardcodedWorkingGroupsGovernanceBodyDetails(db);
-	}
-
-	const [item, fields, relatedEntities, relatedResources, personsByGovernanceBody] =
-		await Promise.all([
-			db.query.organisationalUnits.findFirst({
-				where: {
-					id,
-					entityVersion: {
-						status: {
-							type: "published",
-						},
-					},
-					type: {
-						type: "governance_body",
+	const item = await db.query.organisationalUnits.findFirst({
+		where: {
+			id,
+			entityVersion: {
+				status: {
+					type: "published",
+				},
+			},
+			type: {
+				type: "governance_body",
+			},
+		},
+		columns: {
+			id: true,
+			name: true,
+			acronym: true,
+			summary: true,
+			metadata: true,
+		},
+		with: {
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
 					},
 				},
+			},
+			image: {
+				columns: {
+					key: true,
+					alt: true,
+					caption: true,
+				},
+				with: {
+					license: {
+						columns: {
+							name: true,
+							url: true,
+						},
+					},
+				},
+			},
+			socialMedia: {
+				...socialMediaByPosition,
 				columns: {
 					id: true,
 					name: true,
-					acronym: true,
-					summary: true,
-					metadata: true,
+					url: true,
+					duration: true,
 				},
 				with: {
-					entityVersion: {
-						columns: { updatedAt: true },
-						with: {
-							entity: {
-								columns: { slug: true },
-							},
-						},
-					},
-					image: {
+					type: {
 						columns: {
-							key: true,
-							alt: true,
-							caption: true,
-						},
-						with: {
-							license: {
-								columns: {
-									name: true,
-									url: true,
-								},
-							},
-						},
-					},
-					socialMedia: {
-						...socialMediaByPosition,
-						columns: {
-							id: true,
-							name: true,
-							url: true,
-							duration: true,
-						},
-						with: {
-							type: {
-								columns: {
-									type: true,
-								},
-							},
+							type: true,
 						},
 					},
 				},
-			}),
-			getContentBlocks(db, id),
-			getRelatedEntities(db, id),
-			getRelatedResources(db, id),
-			getActiveGovernanceBodyPersons(db, [id]),
-		]);
+			},
+		},
+	});
 
 	if (item == null) {
 		return null;
 	}
+
+	const [fields, relatedEntities, relatedResources, personsByGovernanceBody] = await Promise.all([
+		getContentBlocks(db, id),
+		getRelatedEntities(db, id),
+		getRelatedResources(db, id),
+		getGovernanceBodyPersons(db, [{ id, slug: item.entityVersion.entity.slug }]),
+	]);
 
 	const image = generateImageUrl(item.image, imageWidth.featured);
 
@@ -617,14 +619,7 @@ export async function getGovernanceBodySlugs(
 		return { id, entity: { slug: entityVersion.entity.slug } };
 	});
 
-	if (offset <= total && offset + limit > total) {
-		data.push({
-			id: hardcodedWorkingGroupsGovernanceBody.id,
-			entity: hardcodedWorkingGroupsGovernanceBody.entity,
-		});
-	}
-
-	return { data, limit, offset, total: total + 1 };
+	return { data, limit, offset, total };
 }
 
 interface GetGovernanceBodyBySlugParams {
@@ -636,10 +631,6 @@ export async function getGovernanceBodyBySlug(
 	params: GetGovernanceBodyBySlugParams,
 ) {
 	const { slug } = params;
-
-	if (slug === hardcodedWorkingGroupsGovernanceBody.entity.slug) {
-		return getHardcodedWorkingGroupsGovernanceBodyDetails(db);
-	}
 
 	const item = await db.query.organisationalUnits.findFirst({
 		where: {
@@ -713,7 +704,7 @@ export async function getGovernanceBodyBySlug(
 		getContentBlocks(db, item.id),
 		getRelatedEntities(db, item.id),
 		getRelatedResources(db, item.id),
-		getActiveGovernanceBodyPersons(db, [item.id]),
+		getGovernanceBodyPersons(db, [{ id: item.id, slug: item.entityVersion.entity.slug }]),
 	]);
 
 	const image = generateImageUrl(item.image, imageWidth.featured);

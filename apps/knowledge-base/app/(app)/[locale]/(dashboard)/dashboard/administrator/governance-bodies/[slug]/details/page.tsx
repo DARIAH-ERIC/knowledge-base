@@ -1,3 +1,4 @@
+import { workingGroupsGovernanceBodySlug } from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -145,6 +146,7 @@ export default async function DashboardAdministratorGovernanceBodyDetailsPage(
 		<GovernanceBodyDetails
 			documentId={documentId}
 			governanceBody={{ ...governanceBody, descriptionContentBlocks, image }}
+			hasDerivedPeople={slug === workingGroupsGovernanceBodySlug}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
 			personRelations={personRelations}

@@ -228,6 +228,14 @@ export const membersAndPartners = p.snakeCase
 
 export const workingGroupUnitType = "working_group";
 
+/**
+ * The governance body that stands for all working groups. Unlike every other governance body its
+ * people are not maintained as relations: the api lists the chairs of all working groups instead
+ * (see the `seed_working_groups_governance_body` migration). Deleting or renaming it would silently
+ * empty that list, so the dashboard guards both.
+ */
+export const workingGroupsGovernanceBodySlug = "working-groups";
+
 export const workingGroups = p.snakeCase
 	.view("working_groups", {
 		id: p.uuid("id").notNull(),

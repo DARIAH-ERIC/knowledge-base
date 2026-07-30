@@ -12,6 +12,7 @@ import {
 	getWebsiteDocumentDescriptorByEntityId,
 } from "@/lib/search/website-index";
 import { createCommandAction } from "@/lib/server/create-command-action";
+import { UserFacingError } from "@/lib/user-facing-error";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const deleteGovernanceBodyAction = createCommandAction({
@@ -22,9 +23,13 @@ export const deleteGovernanceBodyAction = createCommandAction({
 	async mutate(tx, [documentId]: [string]) {
 		const entity = await tx.query.entities.findFirst({
 			where: { id: documentId },
-			columns: { id: true },
+			columns: { id: true, slug: true },
 		});
 		assert(entity, "Document not found.");
+		// The api looks this one up by slug and fills it with the chairs of all working groups.
+		if (entity.slug === schema.workingGroupsGovernanceBodySlug) {
+			throw new UserFacingError("working-groups-governance-body-locked");
+		}
 
 		// Snapshot the label before deletion so the audit log doesn't fall back to the uuid.
 		const subjectLabel = await resolveEntityDocumentLabel(tx, documentId);

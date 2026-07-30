@@ -27,6 +27,12 @@ import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-rel
 interface GovernanceBodyEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	documentId: string;
+	/**
+	 * Whether this governance body's people are derived instead of maintained as relations — true for
+	 * the working groups governance body, whose people are the chairs of all working groups. The
+	 * people tab is hidden for it: any relation added there would be ignored by the api.
+	 */
+	hasDerivedPeople?: boolean;
 	hasDraftChanges: boolean;
 	isPublished: boolean;
 	governanceBody: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
@@ -57,6 +63,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 	const {
 		initialAssets,
 		documentId,
+		hasDerivedPeople = false,
 		hasDraftChanges,
 		isPublished,
 		governanceBody,
@@ -90,7 +97,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 			<EntityEditTabs defaultTab="details">
 				<TabList aria-label={t("Edit governance body")}>
 					<EntityEditTab id="details">{t("Details")}</EntityEditTab>
-					<EntityEditTab id="people">{t("People")}</EntityEditTab>
+					{hasDerivedPeople ? null : <EntityEditTab id="people">{t("People")}</EntityEditTab>}
 					<EntityEditTab id="relations">{t("Relations")}</EntityEditTab>
 				</TabList>
 
@@ -130,16 +137,18 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 					/>
 				</TabPanel>
 
-				<TabPanel id="people" shouldPreserveState={true}>
-					<PersonRelationsSection
-						actions={personRelationActions}
-						initialPersonItems={initialPersonItems}
-						initialPersonTotal={initialPersonTotal}
-						relations={personRelations}
-						roleOptions={personRelationRoleOptions}
-						organisationalUnitDocumentId={documentId}
-					/>
-				</TabPanel>
+				{hasDerivedPeople ? null : (
+					<TabPanel id="people" shouldPreserveState={true}>
+						<PersonRelationsSection
+							actions={personRelationActions}
+							initialPersonItems={initialPersonItems}
+							initialPersonTotal={initialPersonTotal}
+							relations={personRelations}
+							roleOptions={personRelationRoleOptions}
+							organisationalUnitDocumentId={documentId}
+						/>
+					</TabPanel>
+				)}
 
 				<TabPanel id="relations" shouldPreserveState={true}>
 					<UnitRelationsSection

@@ -123,6 +123,9 @@ export function createServerAction<
 				socialMediaKpiConflict: t(
 					"Both accounts have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge.",
 				),
+				workingGroupsGovernanceBodyLocked: t(
+					"The working groups governance body stands for all working groups, so it cannot be deleted, renamed or merged.",
+				),
 				invalidData: t("The submitted data violates a data rule."),
 				missingData: t("The submitted data is incomplete."),
 			});
