@@ -121,6 +121,16 @@ interface RichTextEditorProps {
 		) => void,
 	) => ReactNode;
 	/**
+	 * Card identifying the asset a block points at - what it is called, what it already says, and how
+	 * to correct that. Blocks store only a storage key, so the app resolves it: this package cannot
+	 * read the media library itself. `onMetadataChange` reports edits back so the block can refresh
+	 * the asset data it keeps beside the key.
+	 */
+	renderAssetMetadata?: (args: {
+		imageKey: string;
+		onMetadataChange: (metadata: { alt: string | null; caption: JSONContent | null }) => void;
+	}) => ReactNode;
+	/**
 	 * Picker for linking selected text to a stored document. Lives in the toolbar rather than in the
 	 * link popover: the picker is a modal dialog, and opening one from inside a popover dismisses the
 	 * popover it was opened from.
@@ -143,6 +153,7 @@ function normalizeInitialContent(content: JSONContent | undefined): JSONContent 
 }
 
 type ImagePickerRenderer = NonNullable<RichTextEditorProps["renderImagePicker"]>;
+type AssetMetadataRenderer = NonNullable<RichTextEditorProps["renderAssetMetadata"]>;
 type ImageCaptionMode = "hidden" | "inherit" | "override";
 
 /** Mirrors `imageLayoutEnum` in `@dariah-eric/database` — the stored column is a closed set. */
@@ -1078,6 +1089,7 @@ export const PlaceholderValueNode = Node.create({
 
 interface AssetImageNodeViewProps extends NodeViewProps {
 	renderImagePicker?: ImagePickerRenderer;
+	renderAssetMetadata?: AssetMetadataRenderer;
 }
 
 function AssetImageNodeView({
@@ -1088,6 +1100,7 @@ function AssetImageNodeView({
 	updateAttributes,
 	deleteNode,
 	renderImagePicker,
+	renderAssetMetadata,
 }: Readonly<AssetImageNodeViewProps>): ReactNode {
 	const imageKey = node.attrs.imageKey as string | null;
 	const imageUrl = node.attrs.imageUrl as string | null;
@@ -1160,6 +1173,17 @@ function AssetImageNodeView({
 				   had dragged across it. The panel is a form, not document text, so nothing in its
 				   chrome is selectable; the fields inside it opt back in. */
 				<div className="flex select-none flex-col gap-y-3 p-4 **:[[contenteditable]]:select-text [&_input]:select-text">
+					{renderAssetMetadata != null && imageKey != null
+						? renderAssetMetadata({
+								imageKey,
+								/* The block keeps a copy of the asset's alt text and caption beside the key, for
+								   rendering and for the `inherit` caption. Editing the asset from here would
+								   otherwise leave those copies describing the old metadata. */
+								onMetadataChange: (metadata) => {
+									updateAttributes({ alt: metadata.alt, assetCaption: metadata.caption });
+								},
+							})
+						: null}
 					{renderImagePicker != null ? (
 						<div className="flex flex-col gap-y-2">
 							<div className="text-sm/6 font-medium">{"Pick image"}</div>
@@ -1338,7 +1362,10 @@ function AssetImageNodeView({
 	);
 }
 
-function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
+function createAssetImageNode(
+	renderImagePicker?: ImagePickerRenderer,
+	renderAssetMetadata?: AssetMetadataRenderer,
+): Node {
 	return Node.create({
 		name: "assetImage",
 		group: "block",
@@ -1406,7 +1433,11 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 
 		addNodeView() {
 			return ReactNodeViewRenderer((props) => (
-				<AssetImageNodeView {...props} renderImagePicker={renderImagePicker} />
+				<AssetImageNodeView
+					{...props}
+					renderAssetMetadata={renderAssetMetadata}
+					renderImagePicker={renderImagePicker}
+				/>
 			));
 		},
 	});
@@ -1420,6 +1451,7 @@ function normalizeMediaTextSide(value: unknown): MediaTextSide {
 
 interface MediaTextNodeViewProps extends NodeViewProps {
 	renderImagePicker?: ImagePickerRenderer;
+	renderAssetMetadata?: AssetMetadataRenderer;
 }
 
 /**
@@ -1436,6 +1468,7 @@ function MediaTextNodeView({
 	updateAttributes,
 	deleteNode,
 	renderImagePicker,
+	renderAssetMetadata,
 }: Readonly<MediaTextNodeViewProps>): ReactNode {
 	const imageKey = node.attrs.imageKey as string | null;
 	const imageUrl = node.attrs.imageUrl as string | null;
@@ -1471,6 +1504,14 @@ function MediaTextNodeView({
 					className="flex flex-col gap-y-3 border-be border-border bg-muted p-4 select-none **:[[contenteditable]]:select-text [&_input]:select-text"
 					contentEditable={false}
 				>
+					{renderAssetMetadata != null && imageKey != null
+						? renderAssetMetadata({
+								imageKey,
+								onMetadataChange: (metadata) => {
+									updateAttributes({ alt: metadata.alt, assetCaption: metadata.caption });
+								},
+							})
+						: null}
 					{renderImagePicker != null ? (
 						<div className="flex flex-col gap-y-2">
 							<span className="text-sm/6 font-medium">{"Pick image"}</span>
@@ -1631,7 +1672,10 @@ function MediaTextNodeView({
 	);
 }
 
-function createMediaTextNode(renderImagePicker?: ImagePickerRenderer): Node {
+function createMediaTextNode(
+	renderImagePicker?: ImagePickerRenderer,
+	renderAssetMetadata?: AssetMetadataRenderer,
+): Node {
 	return Node.create({
 		name: "mediaTextBlock",
 		group: "block",
@@ -1706,7 +1750,11 @@ function createMediaTextNode(renderImagePicker?: ImagePickerRenderer): Node {
 
 		addNodeView() {
 			return ReactNodeViewRenderer((props) => (
-				<MediaTextNodeView {...props} renderImagePicker={renderImagePicker} />
+				<MediaTextNodeView
+					{...props}
+					renderAssetMetadata={renderAssetMetadata}
+					renderImagePicker={renderImagePicker}
+				/>
 			));
 		},
 	});
@@ -1778,6 +1826,7 @@ const LinkWithTargets = Link.extend({
 
 interface CreateRichTextExtensionsOptions {
 	renderImagePicker?: ImagePickerRenderer;
+	renderAssetMetadata?: AssetMetadataRenderer;
 	/**
 	 * Enables the slash command menu. Left out by the read-only renderer, which has no caret to
 	 * trigger it from.
@@ -1830,8 +1879,8 @@ export function createRichTextExtensions(
 		TableKit.configure({ table: { resizable: false } }),
 		LinkWithTargets,
 		Image,
-		createAssetImageNode(options?.renderImagePicker),
-		createMediaTextNode(options?.renderImagePicker),
+		createAssetImageNode(options?.renderImagePicker, options?.renderAssetMetadata),
+		createMediaTextNode(options?.renderImagePicker, options?.renderAssetMetadata),
 		EmbedNode,
 		CalloutNode,
 		ButtonLinkNode,
@@ -1857,6 +1906,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		renderButtonLinkInsert,
 		renderPlaceholderValueInsert,
 		renderImagePicker,
+		renderAssetMetadata,
 		renderDocumentPicker,
 		renderEntityPicker,
 	} = props;
@@ -1871,9 +1921,10 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		() =>
 			createRichTextExtensions({
 				renderImagePicker,
+				renderAssetMetadata,
 				slashCommandHandlersRef: isEditable ? slashCommandHandlersRef : undefined,
 			}),
-		[renderImagePicker, isEditable],
+		[renderImagePicker, renderAssetMetadata, isEditable],
 	);
 
 	const editor = useEditor({
