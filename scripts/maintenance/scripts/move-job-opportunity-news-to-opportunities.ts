@@ -21,8 +21,8 @@ import { env } from "../config/env.config";
  */
 
 /**
- * Matches e.g. "Job opportunity", "Job-opportunity", "Job opportunities", "job  opportunities",
- * "Job opening", "Job-openings".
+ * Matches e.g. "Job opportunity", "Job-opportunity", "Job opportunities", "job opportunities", "Job
+ * opening", "Job-openings".
  */
 const titlePattern = "^\\s*job[\\s-]+(opportunit(y|ies)|openings?)";
 
