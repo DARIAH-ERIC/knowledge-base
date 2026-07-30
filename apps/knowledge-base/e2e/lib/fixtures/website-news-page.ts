@@ -626,7 +626,7 @@ export class WebsiteNewsPage {
 	}
 
 	/**
-	 * Add a top-level block from the "Add block" menu and return its disclosure panel. These four
+	 * Add a top-level block from the "Add block" menu and return its disclosure panel. These three
 	 * types are not inlined into the unified document — they stay as their own collapsible items.
 	 */
 	private async addBlock(type: string): Promise<Locator> {
@@ -638,17 +638,28 @@ export class WebsiteNewsPage {
 		return panel;
 	}
 
-	async addGalleryBlock(options: {
+	private galleryBlock(): Locator {
+		return this.page.getByLabel("Gallery block", { exact: true });
+	}
+
+	/**
+	 * Insert a gallery node at the cursor and give it one image. The whole item list is a form
+	 * committed on Apply, so the caption is filled before applying rather than after.
+	 */
+	async insertGallery(options: {
 		layout: string;
 		assetLabel: string;
 		caption: string;
 	}): Promise<void> {
-		const panel = await this.addBlock("Gallery");
-		await panel.getByRole("radio", { name: options.layout, exact: true }).click();
-		await panel.getByRole("button", { name: "Add image" }).click();
+		await this.page.getByRole("button", { name: "Insert gallery" }).click();
 
+		const block = this.galleryBlock();
+		await expect(block).toBeVisible();
+		await block.getByRole("radio", { name: options.layout, exact: true }).click();
+
+		/** `renderImagePicker` is the toolbar-shaped picker, so the trigger reads "Insert image". */
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
-		await panel.getByRole("button", { name: /^(Select|Change) image$/ }).click();
+		await block.getByRole("button", { name: "Insert image" }).click();
 		await dialog.waitFor({ state: "visible" });
 		const asset = dialog.getByRole("gridcell", { name: options.assetLabel });
 		await expect(asset).toHaveCount(1);
@@ -658,8 +669,33 @@ export class WebsiteNewsPage {
 
 		/* Gallery items follow the shared caption model, so a caption of their own means overriding
 		   the asset's. */
-		await panel.getByRole("radio", { name: "Custom caption", exact: true }).click();
-		await panel.getByRole("textbox", { name: "Custom caption" }).fill(options.caption);
+		await block.getByRole("radio", { name: "Custom caption", exact: true }).click();
+		await block.getByRole("textbox", { name: /^Custom caption for image/ }).fill(options.caption);
+		await block.getByRole("button", { name: "Apply" }).click();
+	}
+
+	/** Build one content block with a paragraph followed by an inline gallery node. */
+	async addContentWithGallery(options: {
+		above: string;
+		layout: string;
+		assetLabel: string;
+		caption: string;
+	}): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.waitForMenuToClose();
+
+		const editor = this.contentBlockEditor();
+		await editor.click();
+		await editor.pressSequentially(options.above);
+		await editor.press("Control+End");
+		await editor.press("Enter");
+
+		await this.insertGallery({
+			layout: options.layout,
+			assetLabel: options.assetLabel,
+			caption: options.caption,
+		});
 	}
 
 	async addDataBlock(options: { dataType: string; limit: number }): Promise<void> {

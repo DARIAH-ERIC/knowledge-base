@@ -19,9 +19,12 @@ import {
 import { StarterKit } from "@tiptap/starter-kit";
 import cn from "clsx/lite";
 import {
+	ArrowDownIcon,
+	ArrowUpIcon,
 	BoldIcon,
 	CodeIcon,
 	Columns2Icon,
+	GalleryHorizontalEndIcon,
 	Heading2Icon,
 	Heading3Icon,
 	Heading4Icon,
@@ -109,6 +112,7 @@ interface RichTextEditorProps {
 	renderEmbedInsert?: (insertEmbed: () => void) => ReactNode;
 	renderCalloutInsert?: (insertCallout: () => void) => ReactNode;
 	renderMediaTextInsert?: (insertMediaText: () => void) => ReactNode;
+	renderGalleryInsert?: (insertGallery: () => void) => ReactNode;
 	renderButtonLinkInsert?: (insertButtonLink: () => void) => ReactNode;
 	renderPlaceholderValueInsert?: (
 		insertPlaceholderValue: (value: { kind: string; label: string }) => void,
@@ -163,6 +167,72 @@ const imageLayouts = new Set<ImageLayout>(["default", "wide", "full", "float-sta
 
 function normalizeImageLayout(value: unknown): ImageLayout {
 	return imageLayouts.has(value as ImageLayout) ? (value as ImageLayout) : "default";
+}
+
+/** Mirrors `galleryLayoutEnum` in `@dariah-eric/database` — the stored column is a closed set. */
+type GalleryLayout = "carousel" | "grid";
+
+function normalizeGalleryLayout(value: unknown): GalleryLayout {
+	return value === "carousel" ? "carousel" : "grid";
+}
+
+/**
+ * One image of a gallery node. `alt` and `assetCaption` are copies of the asset's own metadata,
+ * kept beside the key for rendering and for an `inherit` caption; only the key is persisted.
+ */
+interface GalleryItemAttrs {
+	imageKey: string | null;
+	imageUrl: string | null;
+	alt: string | null;
+	assetCaption: JSONContent | null;
+	caption: JSONContent | null;
+	captionMode: ImageCaptionMode;
+}
+
+function toGalleryItem(value: unknown): GalleryItemAttrs | null {
+	if (typeof value !== "object" || value == null) {
+		return null;
+	}
+
+	const item = value as Record<string, unknown>;
+	const captionMode = item.captionMode;
+
+	return {
+		imageKey: typeof item.imageKey === "string" ? item.imageKey : null,
+		imageUrl: typeof item.imageUrl === "string" ? item.imageUrl : null,
+		alt: typeof item.alt === "string" ? item.alt : null,
+		assetCaption: (item.assetCaption as JSONContent | null) ?? null,
+		caption: (item.caption as JSONContent | null) ?? null,
+		captionMode:
+			captionMode === "hidden" || captionMode === "override" || captionMode === "inherit"
+				? captionMode
+				: "inherit",
+	};
+}
+
+function normalizeGalleryItems(value: unknown): Array<GalleryItemAttrs> {
+	if (!Array.isArray(value)) {
+		return [];
+	}
+	return value
+		.map((item) => toGalleryItem(item))
+		.filter((item): item is GalleryItemAttrs => item?.imageKey != null);
+}
+
+/** Gallery items survive a round trip through HTML (copy/paste, import) as one JSON attribute. */
+function serializeGalleryItemsAttr(items: Array<GalleryItemAttrs>): string {
+	return JSON.stringify(items);
+}
+
+function parseGalleryItemsAttr(value: string | null | undefined): Array<GalleryItemAttrs> {
+	if (value == null || value === "") {
+		return [];
+	}
+	try {
+		return normalizeGalleryItems(JSON.parse(value));
+	} catch {
+		return [];
+	}
 }
 
 function resolveImageCaption(
@@ -1237,6 +1307,7 @@ function AssetImageNodeView({
 						<span className="text-sm/6 font-medium">{"Layout"}</span>
 						<ToggleGroup
 							aria-label="Layout"
+							className="[--toggle-focused-bg:var(--color-muted)] [--toggle-hover-bg:var(--color-muted)] [--toggle-selected-bg:var(--color-secondary)] [--toggle-selected-fg:var(--color-secondary-fg)]"
 							disallowEmptySelection={true}
 							onSelectionChange={(keys) => {
 								const nextLayout = [...keys][0] as ImageLayout | undefined;
@@ -1258,6 +1329,7 @@ function AssetImageNodeView({
 						<span className="text-sm/6 font-medium">{"Caption behavior"}</span>
 						<ToggleGroup
 							aria-label="Caption behavior"
+							className="[--toggle-focused-bg:var(--color-muted)] [--toggle-hover-bg:var(--color-muted)] [--toggle-selected-bg:var(--color-secondary)] [--toggle-selected-fg:var(--color-secondary-fg)]"
 							disallowEmptySelection={true}
 							onSelectionChange={(keys) => {
 								const mode = [...keys][0] as ImageCaptionMode | undefined;
@@ -1529,6 +1601,7 @@ function MediaTextNodeView({
 						<span className="text-sm/6 font-medium">{"Image placement"}</span>
 						<ToggleGroup
 							aria-label="Image placement"
+							className="[--toggle-focused-bg:var(--color-muted)] [--toggle-hover-bg:var(--color-muted)] [--toggle-selected-bg:var(--color-secondary)] [--toggle-selected-fg:var(--color-secondary-fg)]"
 							disallowEmptySelection={true}
 							onSelectionChange={(keys) => {
 								const nextSide = [...keys][0] as MediaTextSide | undefined;
@@ -1547,6 +1620,7 @@ function MediaTextNodeView({
 						<span className="text-sm/6 font-medium">{"Caption behavior"}</span>
 						<ToggleGroup
 							aria-label="Caption behavior"
+							className="[--toggle-focused-bg:var(--color-muted)] [--toggle-hover-bg:var(--color-muted)] [--toggle-selected-bg:var(--color-secondary)] [--toggle-selected-fg:var(--color-secondary-fg)]"
 							disallowEmptySelection={true}
 							onSelectionChange={(keys) => {
 								const mode = [...keys][0] as ImageCaptionMode | undefined;
@@ -1760,6 +1834,401 @@ function createMediaTextNode(
 	});
 }
 
+interface GalleryNodeViewProps extends NodeViewProps {
+	renderImagePicker?: ImagePickerRenderer;
+	renderAssetMetadata?: AssetMetadataRenderer;
+}
+
+/**
+ * A gallery is an atom: it holds a list of images rather than prose, so — unlike `mediaTextBlock` —
+ * nothing about it is document content. The whole list is one form committed on Apply, for the same
+ * reason media settings are: a per-item `InlineRichTextEditor` writing straight to
+ * `updateAttributes` would dispatch a transaction into the outer editor on every keystroke of every
+ * caption.
+ */
+function GalleryNodeView({
+	editor,
+	getPos,
+	node,
+	selected,
+	updateAttributes,
+	deleteNode,
+	renderImagePicker,
+	renderAssetMetadata,
+}: Readonly<GalleryNodeViewProps>): ReactNode {
+	const layout = normalizeGalleryLayout(node.attrs.layout);
+	const items = useMemo(() => normalizeGalleryItems(node.attrs.items), [node.attrs.items]);
+
+	const [isEditing, setIsEditing] = useState(items.length === 0 && editor.isEditable);
+	const [layoutInput, setLayoutInput] = useState<GalleryLayout>(layout);
+	const [itemsInput, setItemsInput] = useState<Array<GalleryItemAttrs>>(items);
+
+	function resetInputs() {
+		setLayoutInput(layout);
+		setItemsInput(items);
+	}
+
+	function selectNode() {
+		const pos = getPos();
+		if (typeof pos !== "number") {
+			return;
+		}
+		editor.commands.setNodeSelection(pos);
+	}
+
+	function updateItem(index: number, changes: Partial<GalleryItemAttrs>) {
+		setItemsInput((current) =>
+			current.map((item, itemIndex) => (itemIndex === index ? { ...item, ...changes } : item)),
+		);
+	}
+
+	function moveItem(index: number, direction: -1 | 1) {
+		setItemsInput((current) => {
+			const nextIndex = index + direction;
+			if (nextIndex < 0 || nextIndex >= current.length) {
+				return current;
+			}
+			const next = [...current];
+			const [moved] = next.splice(index, 1);
+			if (moved == null) {
+				return current;
+			}
+			next.splice(nextIndex, 0, moved);
+			return next;
+		});
+	}
+
+	function handleApply() {
+		const nextItems = itemsInput
+			.filter((item) => item.imageKey != null)
+			.map((item) => {
+				return {
+					...item,
+					caption: isEmptyRichTextDocument(item.caption) ? null : item.caption,
+				};
+			});
+
+		if (nextItems.length === 0) {
+			return;
+		}
+
+		updateAttributes({ layout: layoutInput, items: nextItems });
+		setIsEditing(false);
+	}
+
+	return (
+		<BlockNodeSurface
+			isEditable={editor.isEditable}
+			isEditing={isEditing}
+			isSelected={selected}
+			label="Gallery block"
+			onDoubleClick={() => {
+				selectNode();
+				resetInputs();
+				setIsEditing(true);
+			}}
+		>
+			{isEditing ? (
+				<div className="flex select-none flex-col gap-y-3 p-4 **:[[contenteditable]]:select-text [&_input]:select-text">
+					<div className="flex flex-col gap-y-1">
+						<span className="text-sm/6 font-medium">{"Layout"}</span>
+						<ToggleGroup
+							aria-label="Layout"
+							className="[--toggle-focused-bg:var(--color-muted)] [--toggle-hover-bg:var(--color-muted)] [--toggle-selected-bg:var(--color-secondary)] [--toggle-selected-fg:var(--color-secondary-fg)]"
+							disallowEmptySelection={true}
+							onSelectionChange={(keys) => {
+								const nextLayout = [...keys][0] as GalleryLayout | undefined;
+								if (nextLayout != null) {
+									setLayoutInput(nextLayout);
+								}
+							}}
+							selectedKeys={[layoutInput]}
+							size="sm"
+						>
+							<ToggleGroupItem id="grid">{"Grid"}</ToggleGroupItem>
+							<ToggleGroupItem id="carousel">{"Carousel"}</ToggleGroupItem>
+						</ToggleGroup>
+					</div>
+					{itemsInput.map((item, index) => (
+						<div
+							// Items carry no id of their own, and two placements of the same asset are a
+							// legitimate gallery, so position is the only thing that identifies a row.
+							key={index}
+							className="flex flex-col gap-y-3 rounded-lg border border-border p-3"
+						>
+							<div className="flex items-center justify-between gap-x-2">
+								<span className="text-sm/6 font-medium">{`Image ${String(index + 1)}`}</span>
+								<div className="flex shrink-0 items-center gap-x-1">
+									<Button
+										aria-label={`Move image ${String(index + 1)} earlier`}
+										intent="outline"
+										isDisabled={index === 0}
+										onPress={() => {
+											moveItem(index, -1);
+										}}
+										size="sm"
+										type="button"
+									>
+										<ArrowUpIcon className="block-3.5 inline-3.5" />
+									</Button>
+									<Button
+										aria-label={`Move image ${String(index + 1)} later`}
+										intent="outline"
+										isDisabled={index === itemsInput.length - 1}
+										onPress={() => {
+											moveItem(index, 1);
+										}}
+										size="sm"
+										type="button"
+									>
+										<ArrowDownIcon className="block-3.5 inline-3.5" />
+									</Button>
+									<Button
+										aria-label={`Remove image ${String(index + 1)}`}
+										intent="outline"
+										onPress={() => {
+											setItemsInput((current) =>
+												current.filter((_, itemIndex) => itemIndex !== index),
+											);
+										}}
+										size="sm"
+										type="button"
+									>
+										<Trash2Icon className="block-3.5 inline-3.5" />
+									</Button>
+								</div>
+							</div>
+							{item.imageUrl != null ? (
+								<img
+									alt={item.alt ?? ""}
+									className="block max-block-40 inline-full object-contain"
+									draggable={false}
+									src={item.imageUrl}
+								/>
+							) : null}
+							{renderAssetMetadata != null && item.imageKey != null
+								? renderAssetMetadata({
+										imageKey: item.imageKey,
+										onMetadataChange: (metadata) => {
+											updateItem(index, { alt: metadata.alt, assetCaption: metadata.caption });
+										},
+									})
+								: null}
+							<div className="flex flex-col gap-y-1">
+								<span className="text-sm/6 font-medium">{"Caption behavior"}</span>
+								<ToggleGroup
+									aria-label={`Caption behavior for image ${String(index + 1)}`}
+									className="[--toggle-focused-bg:var(--color-muted)] [--toggle-hover-bg:var(--color-muted)] [--toggle-selected-bg:var(--color-secondary)] [--toggle-selected-fg:var(--color-secondary-fg)]"
+									disallowEmptySelection={true}
+									onSelectionChange={(keys) => {
+										const mode = [...keys][0] as ImageCaptionMode | undefined;
+										if (mode != null) {
+											updateItem(index, { captionMode: mode });
+										}
+									}}
+									selectedKeys={[item.captionMode]}
+									size="sm"
+								>
+									<ToggleGroupItem id="inherit">{"Use asset caption"}</ToggleGroupItem>
+									<ToggleGroupItem id="override">{"Custom caption"}</ToggleGroupItem>
+									<ToggleGroupItem id="hidden">{"No caption"}</ToggleGroupItem>
+								</ToggleGroup>
+								{item.captionMode === "override" ? (
+									<InlineRichTextEditor
+										aria-label={`Custom caption for image ${String(index + 1)}`}
+										content={item.caption ?? undefined}
+										onChange={(caption) => {
+											updateItem(index, { caption });
+										}}
+									/>
+								) : null}
+								{item.captionMode === "inherit" && !isEmptyRichTextDocument(item.assetCaption) ? (
+									<InlineRichTextRenderer
+										className="rounded-lg border border-border px-3 py-2 text-muted-fg"
+										content={item.assetCaption!}
+									/>
+								) : null}
+							</div>
+						</div>
+					))}
+					{renderImagePicker != null ? (
+						<div className="flex flex-col gap-y-2">
+							<span className="text-sm/6 font-medium">{"Add image"}</span>
+							{/* One asset per trip through the picker: the media library dialog is
+							    single-select, so a gallery is built up by picking repeatedly. */}
+							{renderImagePicker((imageKey, imageUrl, asset) => {
+								setItemsInput((current) => [
+									...current,
+									{
+										imageKey,
+										imageUrl,
+										alt: asset?.alt ?? null,
+										assetCaption: asset?.caption ?? null,
+										caption: null,
+										captionMode: "inherit",
+									},
+								]);
+							})}
+						</div>
+					) : null}
+					{itemsInput.length === 0 ? (
+						<Note intent="info">{"Pick at least one image to keep this gallery."}</Note>
+					) : null}
+					<div className={blockPanelFooterClassName}>
+						<Button
+							intent="primary"
+							isDisabled={itemsInput.length === 0}
+							onPress={handleApply}
+							size="sm"
+							type="button"
+						>
+							{"Apply"}
+						</Button>
+						{items.length > 0 ? (
+							<Button
+								intent="outline"
+								onPress={() => {
+									resetInputs();
+									setIsEditing(false);
+								}}
+								size="sm"
+								type="button"
+							>
+								{"Cancel"}
+							</Button>
+						) : null}
+						{editor.isEditable ? (
+							<Button intent="outline" onPress={deleteNode} size="sm" type="button">
+								{"Remove"}
+							</Button>
+						) : null}
+					</div>
+				</div>
+			) : (
+				<div className="group">
+					<div className="relative">
+						<ul
+							className={cn(
+								"grid list-none gap-2 p-2",
+								layout === "carousel"
+									? "grid-flow-col auto-cols-[minmax(8rem,1fr)] overflow-x-auto"
+									: "grid-cols-2 sm:grid-cols-3",
+							)}
+						>
+							{items.map((item, index) => {
+								const resolvedCaption = resolveImageCaption(
+									item.captionMode,
+									item.caption,
+									item.assetCaption,
+								);
+
+								return (
+									<li key={index} className="flex flex-col gap-y-1">
+										<img
+											alt={item.alt ?? ""}
+											className="block aspect-video inline-full rounded-sm object-cover"
+											draggable={false}
+											src={item.imageUrl ?? ""}
+										/>
+										{!isEmptyRichTextDocument(resolvedCaption) ? (
+											<InlineRichTextRenderer
+												className="text-xs text-muted-fg"
+												content={resolvedCaption!}
+											/>
+										) : null}
+									</li>
+								);
+							})}
+						</ul>
+						{editor.isEditable ? (
+							<div className="absolute inset-x-0 inset-bs-0 flex justify-end gap-x-1 p-2 opacity-0 transition-opacity group-hover:opacity-100">
+								<button
+									aria-label="Edit gallery"
+									className="rounded-sm bg-bg/90 p-1 text-muted-fg shadow-sm hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+									onClick={() => {
+										selectNode();
+										resetInputs();
+										setIsEditing(true);
+									}}
+									type="button"
+								>
+									<PencilIcon className="block-3.5 inline-3.5" />
+								</button>
+								<button
+									aria-label="Remove gallery"
+									className="rounded-sm bg-bg/90 p-1 text-muted-fg shadow-sm hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+									onClick={deleteNode}
+									type="button"
+								>
+									<Trash2Icon className="block-3.5 inline-3.5" />
+								</button>
+							</div>
+						) : null}
+					</div>
+					<div className="border-bs border-border px-4 py-2 text-xs text-muted-fg">
+						{`${layout === "carousel" ? "Carousel" : "Grid"} · ${String(items.length)} ${items.length === 1 ? "image" : "images"}`}
+					</div>
+				</div>
+			)}
+		</BlockNodeSurface>
+	);
+}
+
+function createGalleryNode(
+	renderImagePicker?: ImagePickerRenderer,
+	renderAssetMetadata?: AssetMetadataRenderer,
+): Node {
+	return Node.create({
+		name: "galleryBlock",
+		group: "block",
+		atom: true,
+		draggable: true,
+		selectable: true,
+
+		addAttributes() {
+			return {
+				layout: { default: "grid" },
+				items: { default: [] },
+			};
+		},
+
+		parseHTML() {
+			return [
+				{
+					tag: "div[data-gallery-block]",
+					getAttrs(dom) {
+						return {
+							layout: normalizeGalleryLayout(dom.dataset.layout),
+							items: parseGalleryItemsAttr(dom.dataset.items),
+						};
+					},
+				},
+			];
+		},
+
+		renderHTML({ node }) {
+			return [
+				"div",
+				mergeAttributes({
+					"data-gallery-block": "",
+					"data-layout": normalizeGalleryLayout(node.attrs.layout),
+					"data-items": serializeGalleryItemsAttr(normalizeGalleryItems(node.attrs.items)),
+				}),
+			];
+		},
+
+		addNodeView() {
+			return ReactNodeViewRenderer((props) => (
+				<GalleryNodeView
+					{...props}
+					renderAssetMetadata={renderAssetMetadata}
+					renderImagePicker={renderImagePicker}
+				/>
+			));
+		},
+	});
+}
+
 /**
  * The built-in `link` mark, widened so a link can point at one of our own assets instead of a typed
  * url — see `link-targets.ts` in `@dariah-eric/database` for the model and the read-time
@@ -1881,6 +2350,7 @@ export function createRichTextExtensions(
 		Image,
 		createAssetImageNode(options?.renderImagePicker, options?.renderAssetMetadata),
 		createMediaTextNode(options?.renderImagePicker, options?.renderAssetMetadata),
+		createGalleryNode(options?.renderImagePicker, options?.renderAssetMetadata),
 		EmbedNode,
 		CalloutNode,
 		ButtonLinkNode,
@@ -1903,6 +2373,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		renderEmbedInsert,
 		renderCalloutInsert,
 		renderMediaTextInsert,
+		renderGalleryInsert,
 		renderButtonLinkInsert,
 		renderPlaceholderValueInsert,
 		renderImagePicker,
@@ -2085,6 +2556,19 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				// The content expression requires at least one child; an empty node would be rejected.
 				content: [{ type: "paragraph" }],
 			})
+			.run();
+	}, [editor]);
+
+	const insertGallery = useCallback(() => {
+		if (!editor) {
+			return;
+		}
+		editor
+			.chain()
+			.focus()
+			// Inserted empty, like a media and text block: the node view opens its own panel — and so
+			// the host's image picker — as soon as it mounts without images.
+			.insertContent({ type: "galleryBlock", attrs: { layout: "grid", items: [] } })
 			.run();
 	}, [editor]);
 
@@ -2351,6 +2835,19 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			});
 		}
 
+		if (renderGalleryInsert != null && renderImagePicker != null) {
+			items.push({
+				id: "gallery",
+				label: t("Gallery"),
+				keywords: ["images", "slideshow", "carousel", "grid"],
+				icon: GalleryHorizontalEndIcon,
+				isAvailable() {
+					return canInsertBlock(editor, "galleryBlock");
+				},
+				run: insertGallery,
+			});
+		}
+
 		if (renderButtonLinkInsert != null) {
 			items.push({
 				id: "button-link",
@@ -2369,10 +2866,12 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		renderEmbedInsert,
 		renderCalloutInsert,
 		renderMediaTextInsert,
+		renderGalleryInsert,
 		renderButtonLinkInsert,
 		insertEmbed,
 		insertCallout,
 		insertMediaText,
+		insertGallery,
 		insertButtonLink,
 	]);
 
@@ -2622,6 +3121,11 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					) : null}
 					{renderCalloutInsert != null ? renderCalloutInsert(insertCallout) : null}
 					{renderMediaTextInsert != null ? renderMediaTextInsert(insertMediaText) : null}
+					{/* A gallery is built out of picked assets, so it is only insertable where the host
+					    supplies a picker. */}
+					{renderGalleryInsert != null && renderImagePicker != null
+						? renderGalleryInsert(insertGallery)
+						: null}
 					{renderButtonLinkInsert != null ? renderButtonLinkInsert(insertButtonLink) : null}
 					{renderPlaceholderValueInsert != null
 						? renderPlaceholderValueInsert(insertPlaceholderValue)

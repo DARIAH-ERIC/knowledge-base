@@ -6,12 +6,14 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { FeaturedImageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/featured-image-details";
 import { RelationTypeSuffix } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-type-suffix";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 
@@ -21,9 +23,20 @@ interface NewsItemDetailsProps {
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
-	newsItem: Pick<schema.NewsItem, "id" | "publicationDate" | "title" | "summary"> & {
+	newsItem: Pick<
+		schema.NewsItem,
+		"id" | "publicationDate" | "title" | "summary" | "imageCaption" | "imageCaptionMode"
+	> & {
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } };
+	} & {
+		image: {
+			key: string;
+			label: string;
+			url: string;
+			alt?: string | null;
+			caption?: JSONContent | null;
+		};
+	};
 	publishAction: (documentId: string) => Promise<unknown>;
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
@@ -83,10 +96,10 @@ export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNod
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
-					<img
-						alt=""
-						className="block-24 inline-auto max-inline-full rounded-lg object-contain"
-						src={newsItem.image.url}
+					<FeaturedImageDetails
+						image={newsItem.image}
+						imageCaption={newsItem.imageCaption}
+						imageCaptionMode={newsItem.imageCaptionMode}
 					/>
 				</DescriptionDetails>
 

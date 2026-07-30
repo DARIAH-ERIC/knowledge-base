@@ -580,7 +580,7 @@ test.describe("website news admin", () => {
 	});
 
 	/**
-	 * The four block types that stay out of the unified document. They had no e2e coverage at all,
+	 * The three block types that stay out of the unified document. They had no e2e coverage at all,
 	 * because "Content" was the only entry ever chosen from the Add block menu — so nothing verified
 	 * that adding, saving or re-loading them works.
 	 */
@@ -593,7 +593,6 @@ test.describe("website news admin", () => {
 		const heroTitle = `Hero title ${randomUUID()}`;
 		const heroEyebrow = `Hero eyebrow ${randomUUID()}`;
 		const cta = { label: `Apply now ${randomUUID()}`, url: "https://example.com/apply" };
-		const galleryCaption = `Gallery caption ${randomUUID()}`;
 		const accordionTitle = `Accordion item ${randomUUID()}`;
 		const accordionBody = `Accordion body ${randomUUID()}`;
 
@@ -602,11 +601,6 @@ test.describe("website news admin", () => {
 		await newsPage.fillSummary("E2E test news item with standalone content blocks");
 		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
 
-		await newsPage.addGalleryBlock({
-			layout: "Carousel",
-			assetLabel: "E2E Test Asset",
-			caption: galleryCaption,
-		});
 		await newsPage.addDataBlock({ dataType: "Events", limit: 3 });
 		await newsPage.addHeroBlock({
 			title: heroTitle,
@@ -618,20 +612,56 @@ test.describe("website news admin", () => {
 		await newsPage.submitForm();
 
 		const contentBlocks = await db.getNewsContentBlocksByTitle(title);
-		expect(contentBlocks.map(({ type }) => type)).toStrictEqual([
-			"gallery",
-			"data",
-			"hero",
-			"accordion",
-		]);
-		expect(contentBlocks.map(({ position }) => position)).toStrictEqual([0, 1, 2, 3]);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["data", "hero", "accordion"]);
+		expect(contentBlocks.map(({ position }) => position)).toStrictEqual([0, 1, 2]);
 
-		expect(contentBlocks[0]).toMatchObject({ galleryLayout: "carousel" });
-		expect(contentBlocks[1]).toMatchObject({ dataLimit: 3 });
-		expect(contentBlocks[2]).toMatchObject({ heroTitle, heroEyebrow });
-		expect(JSON.stringify(contentBlocks[2]!.heroCtas)).toContain(cta.url);
-		expect(JSON.stringify(contentBlocks[3]!.accordionItems)).toContain(accordionTitle);
-		expect(JSON.stringify(contentBlocks[3]!.accordionItems)).toContain(accordionBody);
+		expect(contentBlocks[0]).toMatchObject({ dataLimit: 3 });
+		expect(contentBlocks[1]).toMatchObject({ heroTitle, heroEyebrow });
+		expect(JSON.stringify(contentBlocks[1]!.heroCtas)).toContain(cta.url);
+		expect(JSON.stringify(contentBlocks[2]!.accordionItems)).toContain(accordionTitle);
+		expect(JSON.stringify(contentBlocks[2]!.accordionItems)).toContain(accordionBody);
+	});
+
+	/**
+	 * A gallery is a node in the unified document, so it splits out as its own block behind the prose
+	 * that precedes it — and its layout, item and caption survive a re-save that never touches it.
+	 */
+	test("should save an inline gallery as a gallery block", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Inline Gallery ${randomUUID()}`;
+		const above = `Above the gallery ${randomUUID()}`;
+		const galleryCaption = `Gallery caption ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item with an inline gallery");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+
+		await newsPage.addContentWithGallery({
+			above,
+			layout: "Carousel",
+			assetLabel: "E2E Test Asset",
+			caption: galleryCaption,
+		});
+		await newsPage.submitForm();
+
+		let contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text", "gallery"]);
+		expect(contentBlocks[1]).toMatchObject({ galleryLayout: "carousel" });
+		expect(JSON.stringify(contentBlocks[1]!.galleryItems)).toContain(galleryCaption);
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoDetailsFromList(title);
+		await newsPage.gotoEditFromDetails();
+		await newsPage.submitForm();
+
+		contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text", "gallery"]);
+		expect(contentBlocks[1]).toMatchObject({ galleryLayout: "carousel" });
+		expect(JSON.stringify(contentBlocks[1]!.galleryItems)).toContain(galleryCaption);
 	});
 
 	test("should save standalone and inline button links in a content block", async ({

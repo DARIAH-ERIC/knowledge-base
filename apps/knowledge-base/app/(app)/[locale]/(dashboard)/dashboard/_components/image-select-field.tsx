@@ -82,32 +82,34 @@ export function ImageSelectField<T extends AssetPrefix>(
 	return (
 		<>
 			{selectedImage != null ? (
-				<div className="flex flex-col gap-y-4">
-					<SelectedImageCard image={selectedImage} onMetadataChange={handleChange}>
-						{picker}
+				<SelectedImageCard
+					footer={
+						captionName != null ? (
+							<ImageCaptionModeField
+								assetCaption={selectedImage.caption}
+								caption={caption.caption}
+								captionMode={caption.captionMode}
+								name={captionName}
+								onChange={setCaption}
+							/>
+						) : null
+					}
+					image={selectedImage}
+					onMetadataChange={handleChange}
+				>
+					{picker}
 
-						{allowRemove ? (
-							<Button
-								intent="outline"
-								onPress={() => {
-									handleChange(null);
-								}}
-							>
-								{t("Remove image")}
-							</Button>
-						) : null}
-					</SelectedImageCard>
-
-					{captionName != null ? (
-						<ImageCaptionModeField
-							assetCaption={selectedImage.caption}
-							caption={caption.caption}
-							captionMode={caption.captionMode}
-							name={captionName}
-							onChange={setCaption}
-						/>
+					{allowRemove ? (
+						<Button
+							intent="outline"
+							onPress={() => {
+								handleChange(null);
+							}}
+						>
+							{t("Remove image")}
+						</Button>
 					) : null}
-				</div>
+				</SelectedImageCard>
 			) : (
 				picker
 			)}

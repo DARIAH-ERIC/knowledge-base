@@ -6,12 +6,14 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { FeaturedImageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/featured-image-details";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 
 interface FundingCallDetailsProps {
@@ -20,9 +22,20 @@ interface FundingCallDetailsProps {
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
-	fundingCall: Pick<schema.FundingCall, "id" | "duration" | "title" | "summary"> & {
+	fundingCall: Pick<
+		schema.FundingCall,
+		"id" | "duration" | "title" | "summary" | "imageCaption" | "imageCaptionMode"
+	> & {
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } };
+	} & {
+		image: {
+			key: string;
+			label: string;
+			url: string;
+			alt?: string | null;
+			caption?: JSONContent | null;
+		};
+	};
 	publishAction: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
@@ -82,10 +95,10 @@ export function FundingCallDetails(props: Readonly<FundingCallDetailsProps>): Re
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
-					<img
-						alt=""
-						className="block-24 inline-auto max-inline-full rounded-lg object-contain"
-						src={fundingCall.image.url}
+					<FeaturedImageDetails
+						image={fundingCall.image}
+						imageCaption={fundingCall.imageCaption}
+						imageCaptionMode={fundingCall.imageCaptionMode}
 					/>
 				</DescriptionDetails>
 

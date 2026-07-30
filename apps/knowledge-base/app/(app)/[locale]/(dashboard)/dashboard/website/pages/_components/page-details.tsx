@@ -6,12 +6,14 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { FeaturedImageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/featured-image-details";
 import { RelationTypeSuffix } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-type-suffix";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 
@@ -21,9 +23,20 @@ interface PageItemDetailsProps {
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
-	pageItem: Pick<schema.Page, "id" | "publicationDate" | "title" | "summary"> & {
+	pageItem: Pick<
+		schema.Page,
+		"id" | "publicationDate" | "title" | "summary" | "imageCaption" | "imageCaptionMode"
+	> & {
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } | null };
+	} & {
+		image: {
+			key: string;
+			label: string;
+			url: string;
+			alt?: string | null;
+			caption?: JSONContent | null;
+		} | null;
+	};
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	publishAction: (documentId: string) => Promise<unknown>;
@@ -85,10 +98,10 @@ export function PageItemDetails(props: Readonly<PageItemDetailsProps>): ReactNod
 					<Fragment>
 						<DescriptionTerm>{t("Image")}</DescriptionTerm>
 						<DescriptionDetails>
-							<img
-								alt=""
-								className="block-24 inline-auto max-inline-full rounded-lg object-contain"
-								src={pageItem.image.url}
+							<FeaturedImageDetails
+								image={pageItem.image}
+								imageCaption={pageItem.imageCaption}
+								imageCaptionMode={pageItem.imageCaptionMode}
 							/>
 						</DescriptionDetails>
 					</Fragment>

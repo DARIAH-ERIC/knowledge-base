@@ -90,6 +90,8 @@ export default async function DashboardWebsiteNewsItemDetailsPage(
 	const newsItem = await db.query.news.findFirst({
 		where: { id: versionId },
 		columns: {
+			imageCaption: true,
+			imageCaptionMode: true,
 			id: true,
 			publicationDate: true,
 			title: true,
@@ -117,6 +119,8 @@ export default async function DashboardWebsiteNewsItemDetailsPage(
 				columns: {
 					key: true,
 					label: true,
+					alt: true,
+					caption: true,
 				},
 			},
 		},

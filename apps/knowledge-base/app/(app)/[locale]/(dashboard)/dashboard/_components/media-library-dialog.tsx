@@ -446,56 +446,58 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 												const license =
 													asset.licenseId != null ? licensesById.get(asset.licenseId) : undefined;
 												return (
-													<GridListItem
-														className="flex flex-row items-start gap-3 p-2.5"
-														id={asset.key}
-														textValue={asset.label}
-													>
-														<div className="block-16 inline-24 shrink-0 overflow-hidden rounded-md bg-muted">
-															<AssetPreview
-																alt={asset.alt ?? asset.label}
-																className="block-full inline-full"
-																imageClassName="object-contain"
-																kindLabelClassName="bg-background/90 text-xs"
-																mimeType={asset.mimeType}
-																src={asset.url}
-																storageKey={asset.key}
-															/>
-														</div>
-														<div className="flex min-inline-0 flex-1 flex-col gap-y-1">
-															<div className="flex flex-row items-baseline gap-x-2">
-																<span className="truncate text-sm/tight font-medium">
-																	{asset.label}
-																</span>
-																{prefix !== "" ? (
-																	<span className="shrink-0 text-xs text-muted-fg">{prefix}</span>
-																) : null}
+													<GridListItem className="p-2.5" id={asset.key} textValue={asset.label}>
+														{/* React Aria wraps a row's children in one grid cell, so the columns are
+														    laid out inside that cell: flexing the row itself only arranges the
+														    single cell and leaves thumbnail and metadata stacked. */}
+														<div className="flex inline-full flex-row items-start gap-3">
+															<div className="block-16 inline-24 shrink-0 overflow-hidden rounded-md bg-muted">
+																<AssetPreview
+																	alt={asset.alt ?? asset.label}
+																	className="block-full inline-full"
+																	imageClassName="object-contain"
+																	kindLabelClassName="bg-background/90 text-xs"
+																	mimeType={asset.mimeType}
+																	src={asset.url}
+																	storageKey={asset.key}
+																/>
 															</div>
-															{asset.alt != null && asset.alt !== "" ? (
-																<span className="line-clamp-1 text-xs text-muted-fg">
-																	<span className="font-medium">{t("Alt text")}:</span> {asset.alt}
-																</span>
-															) : null}
-															{asset.caption != null && toPlainText(asset.caption) !== "" ? (
-																<span className="line-clamp-2 text-xs text-muted-fg">
-																	<span className="font-medium">{t("Caption")}:</span>{" "}
-																	{toPlainText(asset.caption)}
-																</span>
-															) : null}
-															<div className="flex flex-row flex-wrap items-center gap-x-1.5 text-xs text-muted-fg">
-																{license != null ? (
-																	<Fragment>
-																		<span>{license.code}</span>
-																		<span aria-hidden={true}>{"·"}</span>
-																	</Fragment>
+															<div className="flex min-inline-0 flex-1 flex-col gap-y-1">
+																<div className="flex flex-row items-baseline gap-x-2">
+																	<span className="truncate text-sm/tight font-medium">
+																		{asset.label}
+																	</span>
+																	{prefix !== "" ? (
+																		<span className="shrink-0 text-xs text-muted-fg">{prefix}</span>
+																	) : null}
+																</div>
+																{asset.alt != null && asset.alt !== "" ? (
+																	<span className="line-clamp-1 text-xs text-muted-fg">
+																		<span className="font-medium">{t("Alt text")}:</span>{" "}
+																		{asset.alt}
+																	</span>
 																) : null}
-																{asset.mimeType != null ? <span>{asset.mimeType}</span> : null}
-																{asset.size != null ? (
-																	<Fragment>
-																		<span aria-hidden={true}>{"·"}</span>
-																		<span>{formatFileSize(asset.size)}</span>
-																	</Fragment>
+																{asset.caption != null && toPlainText(asset.caption) !== "" ? (
+																	<span className="line-clamp-2 text-xs text-muted-fg">
+																		<span className="font-medium">{t("Caption")}:</span>{" "}
+																		{toPlainText(asset.caption)}
+																	</span>
 																) : null}
+																<div className="flex flex-row flex-wrap items-center gap-x-1.5 text-xs text-muted-fg">
+																	{license != null ? (
+																		<Fragment>
+																			<span>{license.code}</span>
+																			<span aria-hidden={true}>{"·"}</span>
+																		</Fragment>
+																	) : null}
+																	{asset.mimeType != null ? <span>{asset.mimeType}</span> : null}
+																	{asset.size != null ? (
+																		<Fragment>
+																			<span aria-hidden={true}>{"·"}</span>
+																			<span>{formatFileSize(asset.size)}</span>
+																		</Fragment>
+																	) : null}
+																</div>
 															</div>
 														</div>
 													</GridListItem>

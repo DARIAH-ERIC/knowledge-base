@@ -90,6 +90,8 @@ export default async function DashboardWebsiteSpotlightArticleDetailsPage(
 	const spotlightArticle = await db.query.spotlightArticles.findFirst({
 		where: { id: versionId },
 		columns: {
+			imageCaption: true,
+			imageCaptionMode: true,
 			id: true,
 			publicationDate: true,
 			title: true,
@@ -111,6 +113,8 @@ export default async function DashboardWebsiteSpotlightArticleDetailsPage(
 				columns: {
 					key: true,
 					label: true,
+					alt: true,
+					caption: true,
 				},
 			},
 		},

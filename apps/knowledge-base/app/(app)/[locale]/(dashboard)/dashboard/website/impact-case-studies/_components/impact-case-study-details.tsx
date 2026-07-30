@@ -6,12 +6,14 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { FeaturedImageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/featured-image-details";
 import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
 import { RelationTypeSuffix } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-type-suffix";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
@@ -25,9 +27,20 @@ interface ImpactCaseStudyDetailsProps {
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
-	impactCaseStudy: Pick<schema.ImpactCaseStudy, "id" | "publicationDate" | "title" | "summary"> & {
+	impactCaseStudy: Pick<
+		schema.ImpactCaseStudy,
+		"id" | "publicationDate" | "title" | "summary" | "imageCaption" | "imageCaptionMode"
+	> & {
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { image: { key: string; label: string; url: string } };
+	} & {
+		image: {
+			key: string;
+			label: string;
+			url: string;
+			alt?: string | null;
+			caption?: JSONContent | null;
+		};
+	};
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	publishAction: (documentId: string) => Promise<unknown>;
@@ -91,10 +104,10 @@ export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsPro
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
-					<img
-						alt=""
-						className="block-24 inline-auto max-inline-full rounded-lg object-contain"
-						src={impactCaseStudy.image.url}
+					<FeaturedImageDetails
+						image={impactCaseStudy.image}
+						imageCaption={impactCaseStudy.imageCaption}
+						imageCaptionMode={impactCaseStudy.imageCaptionMode}
 					/>
 				</DescriptionDetails>
 

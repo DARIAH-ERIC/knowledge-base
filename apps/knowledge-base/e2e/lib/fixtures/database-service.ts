@@ -269,6 +269,7 @@ export class DatabaseService {
 			dataLimit: number | null;
 			embedTitle: string | null;
 			embedUrl: string | null;
+			galleryItems: unknown;
 			galleryLayout: string | null;
 			heroCtas: unknown;
 			heroEyebrow: string | null;
@@ -299,6 +300,24 @@ export class DatabaseService {
 				dataLimit: schema.dataContentBlocks.limit,
 				embedTitle: schema.embedContentBlocks.title,
 				embedUrl: schema.embedContentBlocks.url,
+				/**
+				 * Items live in their own table, one row per image. Aggregated here rather than joined so a
+				 * gallery stays one row like every other block type.
+				 */
+				galleryItems: sql<unknown>`(
+					select coalesce(
+						json_agg(
+							json_build_object(
+								'caption', ${schema.galleryContentBlockItems.caption},
+								'captionMode', ${schema.galleryContentBlockItems.captionMode}
+							)
+							order by ${schema.galleryContentBlockItems.position}
+						),
+						'[]'::json
+					)
+					from ${schema.galleryContentBlockItems}
+					where ${schema.galleryContentBlockItems.galleryContentBlockId} = ${schema.contentBlocks.id}
+				)`,
 				galleryLayout: schema.galleryContentBlocks.layout,
 				heroCtas: schema.heroContentBlocks.ctas,
 				heroEyebrow: schema.heroContentBlocks.eyebrow,
