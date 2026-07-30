@@ -7,7 +7,13 @@ import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import sharp from "sharp";
 
+import type { SelectedImage } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import { imageMaxResolution } from "@/config/assets.config";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, desc, eq, like } from "@/lib/db/sql";
@@ -130,6 +136,29 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 	});
 
 	return { items, total: aggregate.at(0)?.total ?? 0 };
+}
+
+interface GetAssetByKeyParams {
+	imageUrlOptions: ImageUrlOptions;
+	key: string;
+}
+
+/**
+ * Looks up one asset by its storage key, in the shape the dashboard's asset cards render. Editors
+ * reach for this where a placement stores only the key - richtext image and media_text blocks keep
+ * the key in the document, not a copy of the asset's metadata, so the card reads the asset itself
+ * and never shows a stale label or caption.
+ */
+export async function getAssetByKey(params: GetAssetByKeyParams): Promise<SelectedImage | null> {
+	const { imageUrlOptions, key } = params;
+
+	const asset = await db.query.assets.findFirst({
+		where: { key },
+		columns: selectedImageColumns,
+		with: selectedImageWith,
+	});
+
+	return asset != null ? toSelectedImage(asset, imageUrlOptions) : null;
 }
 
 /** Vector images have no raster resolution, so imgproxy's source-resolution limit does not apply. */

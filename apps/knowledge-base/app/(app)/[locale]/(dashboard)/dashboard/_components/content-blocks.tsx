@@ -58,6 +58,7 @@ import {
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
+import { BlockAssetMetadata } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/block-asset-metadata";
 import { EntityLinkDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog";
 import { ImageCaptionModeField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-caption-mode-field";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
@@ -668,6 +669,9 @@ function ContentBlockPanel({
 					renderPlaceholderValueInsert={(insertPlaceholderValue) => (
 						<PlaceholderValueInsertMenu onInsert={insertPlaceholderValue} />
 					)}
+					renderAssetMetadata={({ imageKey, onMetadataChange }) => (
+						<BlockAssetMetadata assetKey={imageKey} onMetadataChange={onMetadataChange} />
+					)}
 					renderImagePicker={
 						initialAssets != null
 							? (insert) => (
@@ -1272,6 +1276,9 @@ function AccordionContentBlockPanel({
 								const next = items.map((it, i) => (i === idx ? { ...it, content } : it));
 								onChange({ ...item.content, items: next });
 							}}
+							renderAssetMetadata={({ imageKey, onMetadataChange }) => (
+								<BlockAssetMetadata assetKey={imageKey} onMetadataChange={onMetadataChange} />
+							)}
 							renderImagePicker={
 								initialAssets != null
 									? (insert) => (

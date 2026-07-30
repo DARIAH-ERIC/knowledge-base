@@ -61,7 +61,17 @@ export function SelectedImageCard(props: Readonly<SelectedImageCardProps>): Reac
 	const isImage = image.mimeType == null || image.mimeType.startsWith("image/");
 
 	function handleSaved(saved: SavedAssetMetadata) {
-		onMetadataChange?.({ ...image, ...saved });
+		/**
+		 * The dialog can only name a license once its option list has loaded, and it loads that list
+		 * lazily - saving before it arrives reports the id without the label. An unchanged id means the
+		 * label already on screen still describes it, so keep it rather than blanking the line.
+		 */
+		const license =
+			saved.licenseId === image.licenseId
+				? (saved.license ?? image.license ?? null)
+				: saved.license;
+
+		onMetadataChange?.({ ...image, ...saved, license });
 	}
 
 	return (
