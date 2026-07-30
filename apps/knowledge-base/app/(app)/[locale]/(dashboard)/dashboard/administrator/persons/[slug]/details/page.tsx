@@ -12,8 +12,12 @@ import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getPersonArticles } from "@/lib/data/article-contributors";
 import { getPersonContributions } from "@/lib/data/contributions";
 import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorPersonDetailsPageProps extends PageProps<"/[locale]/dashboard/administrator/persons/[slug]/details"> {}
@@ -95,12 +99,8 @@ export default async function DashboardAdministratorPersonDetailsPage(
 				},
 			},
 			image: {
-				columns: {
-					key: true,
-					label: true,
-					alt: true,
-					caption: true,
-				},
+				columns: selectedImageColumns,
+				with: selectedImageWith,
 			},
 		},
 	});
@@ -115,16 +115,7 @@ export default async function DashboardAdministratorPersonDetailsPage(
 		getResolvedEntityContentBlocks(versionId, "biography"),
 	]);
 
-	const image =
-		person.image != null
-			? {
-					...person.image,
-					url: images.generateSignedImageUrl({
-						key: person.image.key,
-						options: imageGridOptions,
-					}).url,
-				}
-			: null;
+	const image = person.image != null ? toSelectedImage(person.image, imageGridOptions) : null;
 
 	return (
 		<PersonDetails

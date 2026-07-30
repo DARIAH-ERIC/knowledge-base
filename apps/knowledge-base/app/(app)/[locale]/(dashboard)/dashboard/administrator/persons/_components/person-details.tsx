@@ -6,10 +6,10 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import type { SelectedImage } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary";
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
@@ -35,13 +35,7 @@ interface PersonDetailsProps {
 		biographyContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & {
-		image: {
-			key: string;
-			label: string;
-			url: string;
-			alt?: string | null;
-			caption?: JSONContent | null;
-		} | null;
+		image: SelectedImage | null;
 	};
 	contributions: Array<PersonContribution>;
 	/** Read-only lens: the edge is owned by the article, so it is not editable from here. */

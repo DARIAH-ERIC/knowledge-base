@@ -9,8 +9,12 @@ import { publishOpportunityAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { imageGridOptions } from "@/config/assets.config";
 import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
+import {
+	selectedImageColumns,
+	selectedImageWith,
+	toSelectedImage,
+} from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
-import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteOpportunitiesDetailsPageProps extends PageProps<"/[locale]/dashboard/website/opportunities/[slug]/details"> {}
@@ -118,12 +122,8 @@ export default async function DashboardWebsiteOpportunitiesDetailsPage(
 				},
 			},
 			image: {
-				columns: {
-					key: true,
-					label: true,
-					alt: true,
-					caption: true,
-				},
+				columns: selectedImageColumns,
+				with: selectedImageWith,
 			},
 		},
 	});
@@ -132,10 +132,7 @@ export default async function DashboardWebsiteOpportunitiesDetailsPage(
 		notFound();
 	}
 
-	const image = images.generateSignedImageUrl({
-		key: opportunity.image.key,
-		options: imageGridOptions,
-	});
+	const image = toSelectedImage(opportunity.image, imageGridOptions);
 
 	const contentBlocks = await getResolvedEntityContentBlocks(opportunity.id, "content");
 
@@ -146,7 +143,7 @@ export default async function DashboardWebsiteOpportunitiesDetailsPage(
 			documentId={doc.id}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
-			opportunity={{ ...opportunity, image: { ...opportunity.image, url: image.url } }}
+			opportunity={{ ...opportunity, image }}
 			publishAction={publishOpportunityAction}
 			selectedVersion={selectedVersion}
 		/>
