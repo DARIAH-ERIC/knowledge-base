@@ -156,15 +156,18 @@ export const EmbedContentBlockSelectSchema = createSelectSchema(embedContentBloc
 export const EmbedContentBlockInsertSchema = createInsertSchema(embedContentBlocks);
 export const EmbedContentBlockUpdateSchema = createUpdateSchema(embedContentBlocks);
 
+/**
+ * How a gallery arranges its items. A column count is deliberately not modelled: the renderer picks
+ * one from the item count and the viewport, so an author chooses an arrangement, not a geometry.
+ */
+export const galleryLayoutEnum = ["carousel", "grid"] as const;
+
 export const galleryContentBlocks = p.snakeCase.table("content_blocks_type_gallery", {
 	id: p
 		.uuid("id")
 		.primaryKey()
 		.references(() => contentBlocks.id, { onDelete: "cascade" }),
-	layout: p
-		.text("layout", { enum: ["carousel", "grid"] })
-		.notNull()
-		.default("grid"),
+	layout: p.text("layout", { enum: galleryLayoutEnum }).notNull().default("grid"),
 	...f.timestamps(),
 });
 

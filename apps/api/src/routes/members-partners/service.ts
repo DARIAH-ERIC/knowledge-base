@@ -188,7 +188,8 @@ function hasContent(block: ContentBlock): boolean {
 		case "media_text": {
 			return hasRichTextContent(block.content);
 		}
-		case "accordion": {
+		case "accordion":
+		case "gallery": {
 			return block.items.length > 0;
 		}
 		case "hero": {

@@ -21,7 +21,7 @@ import { generateImageUrl, toImageAsset } from "@/lib/images";
 import { getEntityRefsByDocumentId } from "@/lib/relations";
 import { LicenseSchema } from "@/lib/schemas";
 import type { Database, Transaction } from "@/middlewares/db";
-import { alias, eq } from "@/services/db/sql";
+import { alias, eq, inArray } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 export const RichTextContentBlockSchema = v.object({
@@ -97,6 +97,22 @@ export const MediaTextContentBlockSchema = v.object({
 	captionSource: v.nullable(v.picklist(["asset", "block"])),
 });
 
+export const GalleryContentBlockSchema = v.object({
+	type: v.literal("gallery"),
+	layout: v.picklist(schema.galleryLayoutEnum),
+	items: v.array(
+		v.object({
+			image: v.object({
+				url: v.string(),
+				alt: v.nullable(v.string()),
+				license: v.nullable(LicenseSchema),
+			}),
+			caption: v.nullable(v.any()),
+			captionSource: v.nullable(v.picklist(["asset", "block"])),
+		}),
+	),
+});
+
 export const ContentBlockSchema = v.union([
 	RichTextContentBlockSchema,
 	CalloutContentBlockSchema,
@@ -106,14 +122,20 @@ export const ContentBlockSchema = v.union([
 	HeroContentBlockSchema,
 	AccordionContentBlockSchema,
 	MediaTextContentBlockSchema,
+	GalleryContentBlockSchema,
 ]);
 
 export type ContentBlock = v.InferOutput<typeof ContentBlockSchema>;
+
+type GalleryContentBlock = Extract<ContentBlock, { type: "gallery" }>;
+type GalleryItem = GalleryContentBlock["items"][number];
 
 const heroAssets = alias(schema.assets, "hero_assets");
 const heroLicenses = alias(schema.licenses, "hero_licenses");
 const mediaTextAssets = alias(schema.assets, "media_text_assets");
 const mediaTextLicenses = alias(schema.licenses, "media_text_licenses");
+const galleryAssets = alias(schema.assets, "gallery_assets");
+const galleryLicenses = alias(schema.licenses, "gallery_licenses");
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getContentBlocks(db: Database | Transaction, entityId: string) {
@@ -159,6 +181,7 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			mediaTextImageCaption: mediaTextAssets.caption,
 			mediaTextLicenseName: mediaTextLicenses.name,
 			mediaTextLicenseUrl: mediaTextLicenses.url,
+			galleryLayout: schema.galleryContentBlocks.layout,
 		})
 		.from(schema.fields)
 		.innerJoin(
@@ -200,18 +223,39 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 		)
 		.leftJoin(mediaTextAssets, eq(mediaTextAssets.id, schema.mediaTextContentBlocks.imageId))
 		.leftJoin(mediaTextLicenses, eq(mediaTextLicenses.id, mediaTextAssets.licenseId))
+		// Only the gallery's own row joins here. Its items are one-to-many, so joining them would
+		// multiply every other block's row; they are fetched in one follow-up query below instead.
+		.leftJoin(
+			schema.galleryContentBlocks,
+			eq(schema.galleryContentBlocks.id, schema.contentBlocks.id),
+		)
 		.where(eq(schema.fields.entityVersionId, entityId))
 		.orderBy(schema.contentBlocks.position);
 
 	// Group rows by field, preserving position order (already sorted by ORDER BY)
 	const fieldMap = new Map<string, { name: string; blocks: Array<ContentBlock> }>();
+	const galleryBlocks = new Map<string, GalleryContentBlock>();
 
 	for (const row of rows) {
 		if (!fieldMap.has(row.fieldId)) {
 			fieldMap.set(row.fieldId, { name: row.fieldName, blocks: [] });
 		}
 
-		fieldMap.get(row.fieldId)!.blocks.push(normalizeRow(row));
+		const block = normalizeRow(row);
+		if (block.type === "gallery") {
+			galleryBlocks.set(row.blockId, block);
+		}
+
+		fieldMap.get(row.fieldId)!.blocks.push(block);
+	}
+
+	// Filled in before the annotation passes below, so an item's caption gets the same link and
+	// placeholder resolution as any other rich text.
+	if (galleryBlocks.size > 0) {
+		const itemsByBlock = await getGalleryItems(db, [...galleryBlocks.keys()]);
+		for (const [blockId, block] of galleryBlocks) {
+			block.items = itemsByBlock.get(blockId) ?? [];
+		}
 	}
 
 	const fields = Object.fromEntries(
@@ -236,6 +280,66 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 	// Entity-targeted links store only a document id; attach the page it currently lives at, so a
 	// renamed slug moves every link to it.
 	return annotateEntityLinks(db, withAssetLinks);
+}
+
+/**
+ * Every gallery's items, in item order, keyed by gallery block id.
+ *
+ * Items are rendered side by side rather than across the content column, so they are signed at
+ * `preview` width like a floated image — not the `featured` width a standalone image gets.
+ */
+async function getGalleryItems(
+	db: Database | Transaction,
+	blockIds: Array<string>,
+): Promise<Map<string, Array<GalleryItem>>> {
+	const rows = await db
+		.select({
+			blockId: schema.galleryContentBlockItems.galleryContentBlockId,
+			caption: schema.galleryContentBlockItems.caption,
+			captionMode: schema.galleryContentBlockItems.captionMode,
+			imageKey: galleryAssets.key,
+			imageAlt: galleryAssets.alt,
+			imageAssetCaption: galleryAssets.caption,
+			licenseName: galleryLicenses.name,
+			licenseUrl: galleryLicenses.url,
+		})
+		.from(schema.galleryContentBlockItems)
+		.innerJoin(galleryAssets, eq(galleryAssets.id, schema.galleryContentBlockItems.imageId))
+		.leftJoin(galleryLicenses, eq(galleryLicenses.id, galleryAssets.licenseId))
+		.where(inArray(schema.galleryContentBlockItems.galleryContentBlockId, blockIds))
+		.orderBy(
+			schema.galleryContentBlockItems.galleryContentBlockId,
+			schema.galleryContentBlockItems.position,
+		);
+
+	const itemsByBlock = new Map<string, Array<GalleryItem>>();
+
+	for (const row of rows) {
+		const assetImage = generateImageUrl(
+			toImageAsset({
+				key: row.imageKey,
+				alt: row.imageAlt,
+				caption: row.imageAssetCaption,
+				licenseName: row.licenseName,
+				licenseUrl: row.licenseUrl,
+			}),
+			imageWidth.preview,
+		);
+		// The caption is resolved for the placement, so it is reported once next to the item rather
+		// than a second time inside the image — matching how `image` and `hero` report theirs.
+		const { caption: _assetCaption, ...image } = assetImage;
+		const { caption, source: captionSource } = resolveImageCaption({
+			assetCaption: row.imageAssetCaption,
+			blockCaption: row.caption,
+			captionMode: row.captionMode,
+		});
+
+		const items = itemsByBlock.get(row.blockId) ?? [];
+		items.push({ image, caption, captionSource });
+		itemsByBlock.set(row.blockId, items);
+	}
+
+	return itemsByBlock;
 }
 
 /**
@@ -328,6 +432,7 @@ function normalizeRow(row: {
 	mediaTextImageCaption: JSONContent | null;
 	mediaTextLicenseName: string | null;
 	mediaTextLicenseUrl: string | null;
+	galleryLayout: (typeof schema.galleryLayoutEnum)[number] | null;
 }): ContentBlock {
 	switch (row.blockType) {
 		case "callout": {
@@ -454,6 +559,11 @@ function normalizeRow(row: {
 				caption,
 				captionSource,
 			};
+		}
+		case "gallery": {
+			// Items are attached by `getGalleryItems` once every block is known, so one query serves the
+			// whole entity rather than one per gallery.
+			return { type: "gallery", layout: row.galleryLayout ?? "grid", items: [] };
 		}
 		default: {
 			throw new Error(`Unknown content block type: ${row.blockType}`);
