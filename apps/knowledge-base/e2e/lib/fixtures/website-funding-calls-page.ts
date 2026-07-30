@@ -281,7 +281,7 @@ export class WebsiteFundingCallsPage {
 	}
 
 	detailsImage(): Locator {
-		return this.page.locator('dt:has-text("Image") + dd img');
+		return this.page.getByRole("img", { exact: true, name: "E2E Test Asset" });
 	}
 
 	detailsRelatedEntity(name: string): Locator {

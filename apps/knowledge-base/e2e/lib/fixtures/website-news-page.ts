@@ -417,6 +417,7 @@ export class WebsiteNewsPage {
 		await block.getByRole("textbox", { name: "Title" }).fill(options.title);
 		await block.getByRole("textbox", { name: "Caption" }).fill(options.caption);
 		await block.getByRole("button", { name: "Apply" }).click();
+		await expect(block.getByRole("button", { name: "Apply" })).toBeHidden();
 	}
 
 	private mediaTextBlock(): Locator {

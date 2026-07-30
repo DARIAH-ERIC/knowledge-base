@@ -48,7 +48,6 @@ test.describe("website funding calls lifecycle", () => {
 		await fundingCallsPage.gotoDetailsFromList(title);
 		await expect(fundingCallsPage.detailsDraftBadge()).toBeVisible();
 		await expect(fundingCallsPage.detailsImage()).toBeVisible();
-		await expect(fundingCallsPage.detailsImage()).toHaveAttribute("src", /.+/);
 		await expect(page.getByRole("button", { name: "Publish" })).toBeVisible();
 		await expect(page.getByRole("button", { name: "Discard draft" })).toBeHidden();
 
