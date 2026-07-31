@@ -148,6 +148,19 @@ export function createCommandAction<
 					"This entity is published, so its address can only be changed by an administrator on the Maintenance page.",
 				),
 				recordConflict: t("This record conflicts with an existing record."),
+				missingDariahEric: t(
+					"The DARIAH-EU organisational unit could not be found, so this relation cannot be recorded.",
+				),
+				missingPairedRelationUnit: t(
+					"The governance body this role must also be recorded against could not be found.",
+				),
+				relationEndBeforeStart: t("The end date must fall after the relation started."),
+				relationNotEndable: t(
+					"This relation is not one this form can end, or it has already been ended. Refresh the page and try again.",
+				),
+				relationPeriodOverlap: t(
+					"This relation already exists during an overlapping period. Adjust the dates and try again.",
+				),
 				serviceKpiConflict: t(
 					"Both services have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge.",
 				),

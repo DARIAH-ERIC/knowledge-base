@@ -4,10 +4,15 @@ import { findUserFacingError } from "@/lib/user-facing-error";
 interface ErrorMessages {
 	entitySlugConflict: string;
 	invalidData: string;
+	missingDariahEric: string;
 	missingData: string;
+	missingPairedRelationUnit: string;
 	missingRelatedRecord: string;
 	publishedSlugRename: string;
 	recordConflict: string;
+	relationEndBeforeStart: string;
+	relationNotEndable: string;
+	relationPeriodOverlap: string;
 	serviceKpiConflict: string;
 	socialMediaKpiConflict: string;
 	uniqueConflict: string;
@@ -20,8 +25,23 @@ export function getUserFacingErrorMessage(error: unknown, messages: ErrorMessage
 	const appError = findUserFacingError(error);
 	if (appError != null) {
 		switch (appError.kind) {
+			case "missing-dariah-eric": {
+				return messages.missingDariahEric;
+			}
+			case "missing-paired-relation-unit": {
+				return messages.missingPairedRelationUnit;
+			}
 			case "published-slug-rename": {
 				return messages.publishedSlugRename;
+			}
+			case "relation-end-before-start": {
+				return messages.relationEndBeforeStart;
+			}
+			case "relation-not-endable": {
+				return messages.relationNotEndable;
+			}
+			case "relation-period-overlap": {
+				return messages.relationPeriodOverlap;
 			}
 			case "service-kpi-conflict": {
 				return messages.serviceKpiConflict;

@@ -87,8 +87,8 @@ export function FeaturedItemsForm(props: Readonly<FeaturedItemsFormProps>): Reac
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
 				<FormSection
-					description={t("Featured News Items on the landing page. Drag to reorder.")}
-					title={t("Featured News Items")}
+					description={t("Featured news items on the landing page. Drag to reorder.")}
+					title={t("Featured news items")}
 				>
 					<AsyncListSelect
 						addLabel={t("Add news item")}

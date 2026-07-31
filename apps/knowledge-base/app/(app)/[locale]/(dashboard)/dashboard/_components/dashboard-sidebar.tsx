@@ -68,6 +68,12 @@ export function useSidebarMenu(
 				icon: <ListBulletIcon />,
 			},
 			{
+				href: "/dashboard/administrator/guided-forms",
+				tooltip: t("Guided forms"),
+				label: t("Guided forms"),
+				icon: <ListBulletIcon />,
+			},
+			{
 				href: "/dashboard/administrator/newsletters",
 				tooltip: t("Newsletters"),
 				label: t("Newsletters"),
@@ -159,14 +165,14 @@ export function useSidebarMenu(
 			},
 			{
 				href: "/dashboard/administrator/internal-services",
-				tooltip: t("Internal Services"),
-				label: t("Internal Services"),
+				tooltip: t("Internal services"),
+				label: t("Internal services"),
 				icon: <ListBulletIcon />,
 			},
 			{
 				href: "/dashboard/administrator/sshoc-services",
-				tooltip: t("SSHOC Services"),
-				label: t("SSHOC Services"),
+				tooltip: t("SSHOC services"),
+				label: t("SSHOC services"),
 				icon: <ListBulletIcon />,
 			},
 			{
@@ -237,8 +243,8 @@ export function useSidebarMenu(
 			},
 			{
 				href: "/dashboard/website/funding-calls",
-				tooltip: t("Funding Calls"),
-				label: t("Funding Calls"),
+				tooltip: t("Funding calls"),
+				label: t("Funding calls"),
 				icon: <ListBulletIcon />,
 			},
 			{

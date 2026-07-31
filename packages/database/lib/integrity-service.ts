@@ -102,7 +102,7 @@ export const pairedRelationRules: Array<PairedRelationRule> = [
 const mergeGapMs = 24 * 60 * 60 * 1000;
 
 /** Timestamps in epoch ms; an open-ended (ongoing) relation has `end: Infinity`. */
-interface Interval {
+export interface Interval {
 	start: number;
 	end: number;
 }
@@ -127,7 +127,7 @@ function mergeIntervals(intervals: Array<Interval>, gapMs: number): Array<Interv
 }
 
 /** Timestamps for a set of durations exactly as recorded, i.e. without merging near-adjacent ones. */
-function toRawIntervals(durations: Array<{ start: Date; end?: Date }>): Array<Interval> {
+export function toRawIntervals(durations: Array<{ start: Date; end?: Date }>): Array<Interval> {
 	return durations.map((duration) => {
 		return { start: duration.start.getTime(), end: duration.end?.getTime() ?? Infinity };
 	});
@@ -141,7 +141,7 @@ function toIntervals(durations: Array<{ start: Date; end?: Date }>): Array<Inter
  * The periods covered by both sets, merged. Intervals which merely touch at an endpoint do not
  * intersect: the result is a non-empty span, never a single instant.
  */
-function intersectIntervals(a: Array<Interval>, b: Array<Interval>): Array<Interval> {
+export function intersectIntervals(a: Array<Interval>, b: Array<Interval>): Array<Interval> {
 	const intersections: Array<Interval> = [];
 
 	for (const x of a) {
@@ -159,7 +159,7 @@ function intersectIntervals(a: Array<Interval>, b: Array<Interval>): Array<Inter
 }
 
 /** The parts of `a` which no interval in `b` covers, merged; empty when `b` covers all of `a`. */
-function subtractIntervals(a: Array<Interval>, b: Array<Interval>): Array<Interval> {
+export function subtractIntervals(a: Array<Interval>, b: Array<Interval>): Array<Interval> {
 	let remaining = mergeIntervals(a, 0);
 
 	for (const cut of mergeIntervals(b, 0)) {
@@ -201,7 +201,7 @@ export interface RelationInterval {
 	end: string | null;
 }
 
-function toSerializableIntervals(intervals: Array<Interval>): Array<RelationInterval> {
+export function toSerializableIntervals(intervals: Array<Interval>): Array<RelationInterval> {
 	return intervals.map((interval) => {
 		return {
 			start: new Date(interval.start).toISOString(),

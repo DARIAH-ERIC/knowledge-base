@@ -77,7 +77,7 @@ export function FundingCallsPage(props: Readonly<FundingCallsPageProps>): ReactN
 	return (
 		<Fragment>
 			<EntityListHeader
-				title={t("Funding Calls")}
+				title={t("Funding calls")}
 				description={t("Manage all funding calls in the DARIAH knowledge base.")}
 				action={
 					<>

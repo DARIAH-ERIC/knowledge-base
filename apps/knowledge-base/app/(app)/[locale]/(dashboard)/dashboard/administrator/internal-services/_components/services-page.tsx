@@ -87,7 +87,7 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 	return (
 		<Fragment>
 			<EntityListHeader
-				title={t("Internal Services")}
+				title={t("Internal services")}
 				description={t("Manage all internal services in the DARIAH knowledge base.")}
 				action={
 					<>
