@@ -21,6 +21,9 @@ test.describe("non-admin admin access", () => {
 		"/en/dashboard/administrator/maintenance",
 		// Lists unpublished content.
 		"/en/dashboard/administrator/drafts",
+		// Write relations across several entities in one submit.
+		"/en/dashboard/administrator/guided-forms",
+		"/en/dashboard/administrator/guided-forms/partner-institution",
 	];
 
 	for (const route of adminRoutes) {

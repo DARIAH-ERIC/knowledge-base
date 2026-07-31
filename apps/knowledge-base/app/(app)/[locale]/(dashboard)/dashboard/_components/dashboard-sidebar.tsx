@@ -62,15 +62,15 @@ export function useSidebarMenu(
 				icon: <ListBulletIcon />,
 			},
 			{
-				href: "/dashboard/administrator/maintenance",
-				tooltip: t("Maintenance"),
-				label: t("Maintenance"),
-				icon: <ListBulletIcon />,
-			},
-			{
 				href: "/dashboard/administrator/guided-forms",
 				tooltip: t("Guided forms"),
 				label: t("Guided forms"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/maintenance",
+				tooltip: t("Maintenance"),
+				label: t("Maintenance"),
 				icon: <ListBulletIcon />,
 			},
 			{

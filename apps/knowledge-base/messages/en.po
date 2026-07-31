@@ -1847,7 +1847,7 @@ msgstr "Maintenance"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:72
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:73
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:47
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:40
 msgid "UUfKZg"
 msgstr "Guided forms"
 
@@ -3901,7 +3901,7 @@ msgstr "Everything has been saved."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:279
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:306
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:65
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:60
 msgid "4SxIG2"
 msgstr "National coordinator or representative"
 
@@ -4042,7 +4042,7 @@ msgstr "Status towards {eric}"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:200
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:227
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:57
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:52
 msgid "K6pd6C"
 msgstr "Partner institution of DARIAH-EU"
 
@@ -4102,7 +4102,7 @@ msgstr "Unit"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:140
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:157
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:73
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:66
 msgid "H0Qun8"
 msgstr "Retire a unit"
 
@@ -4234,32 +4234,32 @@ msgstr "{count} relations have been ended."
 msgid "gh+MXs"
 msgstr "Guided forms - National coordinator or representative"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:28
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:21
 msgid "SGpfWo"
 msgstr "Administrator dashboard - Guided forms"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:44
-msgid "V012rE"
-msgstr "Step-by-step forms for the cases which need several relations to be recorded together. Each one shows exactly what it will create before anything is saved, and writes it all at once. The regular screens remain available for editing relations individually."
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:37
+msgid "fF/qQw"
+msgstr "For tasks that need several relations recorded together. Each form shows what it will save before anything is written."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:52
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:60
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:68
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:47
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:63
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:169
 msgid "mOFG3K"
 msgstr "Start"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:53
-msgid "jz2z2k"
-msgstr "Record an institution's partnership with DARIAH-EU. Creates or selects the institution, the country it is located in, and its status towards DARIAH-EU — the country is the step most often forgotten."
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:48
+msgid "i4aSAD"
+msgstr "Records the institution, the country it is located in, and its status towards DARIAH-EU."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:61
-msgid "OgyGtW"
-msgstr "Appoint a national coordinator, national representative, or their deputy. Records both the role in the country and the matching membership of the National Coordinator Committee or General Assembly, for the same period."
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:56
+msgid "xUQisD"
+msgstr "Records the role in the country and the matching seat on the National Coordinator Committee or General Assembly, for the same period."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:69
-msgid "ozRZlb"
-msgstr "Close a working group or end a country's membership. Lists every person relation and unit relation that is still open on it, so they can all be ended with the same date."
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:64
+msgid "IFq96O"
+msgstr "Ends everything still open on a working group or country, on one date."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/partner-institution/page.tsx:22
 msgid "u1fYhR"
