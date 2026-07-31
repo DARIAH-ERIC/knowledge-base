@@ -54,16 +54,24 @@ async function selectAsyncOption(
 	await option.click();
 }
 
-/** Runs the partner-institution wizard up to, but not including, its submit. */
+/**
+ * Runs the partner-institution wizard up to, but not including, its submit. Pass `existing: true`
+ * to pick an institution that is already in the database rather than describing a new one.
+ */
 async function fillPartnerInstitutionWizard(
 	page: Page,
-	params: { name: string; countryName: string; status: string },
+	params: { name: string; countryName: string; status: string; existing?: boolean },
 ): Promise<void> {
 	await page.goto(`${BASE_PATH}/partner-institution`);
 
-	// Step 1 — a new institution, described by its core fields only.
-	await page.getByRole("radio", { name: "Create a new institution" }).click();
-	await page.getByLabel("Name", { exact: true }).fill(params.name);
+	// Step 1 — a new institution described by its core fields, or one that already exists.
+	if (params.existing === true) {
+		await page.getByRole("radio", { name: "Select an existing institution" }).click();
+		await selectAsyncOption(page, "No institution selected", params.name);
+	} else {
+		await page.getByRole("radio", { name: "Create a new institution" }).click();
+		await page.getByLabel("Name", { exact: true }).fill(params.name);
+	}
 	await page.getByRole("button", { name: "Continue" }).click();
 
 	// Step 2 — the country. This is the relation the wizard exists to make unmissable.
@@ -195,5 +203,76 @@ test.describe("guided forms", () => {
 
 		// The warning is advisory, not a block — but nothing is written while it is on screen.
 		expect(await db.getInstitutionByName(name)).toBeNull();
+	});
+
+	/**
+	 * Publishing is a separate branch of the submit — it clones the draft into a published version
+	 * and fans out to the search index and the members-partners webhook. Only the draft path is
+	 * covered above, so the institution would otherwise never be published by a test.
+	 */
+	test("publishes the institution when asked to save and publish", async ({ db, page }) => {
+		const name = `${workerPrefix()} Wizard Published ${randomUUID()}`;
+
+		await fillPartnerInstitutionWizard(page, {
+			name,
+			countryName: memberCountry.name,
+			status: "is partner institution of",
+		});
+
+		await page.getByRole("button", { name: "Save and publish institution" }).click();
+		await expect(
+			page.getByText("The partner institution and its relations have been saved."),
+		).toBeVisible();
+
+		const institution = await db.getInstitutionByName(name);
+		expect(institution).not.toBeNull();
+		expect(await db.getPublishedVersionId(institution!.documentId)).not.toBeNull();
+	});
+
+	/**
+	 * The review step promises "Already recorded" for a relation that exists; the submit must then
+	 * leave it alone. Inserting it again would hit the duration-overlap exclusion constraint, so a
+	 * regression here surfaces as a failed save rather than a duplicate — either way the wizard would
+	 * stop being safe to re-run.
+	 */
+	test("does not duplicate a country relation the institution already has", async ({
+		db,
+		page,
+	}) => {
+		const name = `${workerPrefix()} Wizard Existing ${randomUUID()}`;
+
+		const institution = await db.createPublishedInstitution({
+			name,
+			slug: `e2e-wizard-existing-${randomUUID()}`,
+		});
+		await db.addUnitRelation({
+			unitDocumentId: institution.documentId,
+			relatedUnitDocumentId: memberCountry.documentId,
+			statusType: "is_located_in",
+			start: new Date("2020-01-01T00:00:00.000Z"),
+		});
+
+		await fillPartnerInstitutionWizard(page, {
+			name,
+			countryName: memberCountry.name,
+			status: "is partner institution of",
+			existing: true,
+		});
+
+		await expect(page.getByText("Already recorded")).toBeVisible();
+
+		await page.getByRole("button", { name: "Save", exact: true }).click();
+		await expect(
+			page.getByText("The partner institution and its relations have been saved."),
+		).toBeVisible();
+
+		const relations = await db.getUnitRelationsBySourceDocumentId(institution.documentId);
+		const locatedIn = relations.filter((relation) => relation.statusType === "is_located_in");
+
+		expect(locatedIn).toHaveLength(1);
+		expect(relations.map((relation) => relation.statusType).toSorted()).toStrictEqual([
+			"is_located_in",
+			"is_partner_institution_of",
+		]);
 	});
 });

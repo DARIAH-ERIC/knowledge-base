@@ -903,6 +903,280 @@ export class DatabaseService {
 		return created?.id ?? null;
 	}
 
+	async getEntityDocumentIdBySlug(slug: string): Promise<string | null> {
+		const [row] = await this.db
+			.select({ id: schema.entities.id })
+			.from(schema.entities)
+			.where(eq(schema.entities.slug, slug))
+			.limit(1);
+
+		return row?.id ?? null;
+	}
+
+	async getFirstPublishedPerson(): Promise<{ documentId: string; name: string } | null> {
+		const [row] = await this.db
+			.select({ documentId: schema.entityVersions.entityId, name: schema.persons.name })
+			.from(schema.persons)
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+			.where(eq(schema.entityStatus.type, "published"))
+			.orderBy(schema.persons.sortName)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	/**
+	 * A published working group the retire-unit test can close without touching seeded data.
+	 *
+	 * Retiring a unit ends every relation hanging off it, so the test must own the unit outright —
+	 * ending relations on a seeded working group would break the wgchair suite, which depends on its
+	 * chair relations still being open.
+	 */
+	async createPublishedOrganisationalUnit(params: {
+		name: string;
+		slug: string;
+		unitType: (typeof schema.organisationalUnitTypesEnum)[number];
+	}): Promise<{ documentId: string; versionId: string }> {
+		return this.db.transaction(async (tx) => {
+			const [entityType, status, unitType] = await Promise.all([
+				tx.query.entityTypes.findFirst({
+					where: { type: "organisational_units" },
+					columns: { id: true },
+				}),
+				tx.query.entityStatus.findFirst({ where: { type: "published" }, columns: { id: true } }),
+				tx.query.organisationalUnitTypes.findFirst({
+					where: { type: params.unitType },
+					columns: { id: true },
+				}),
+			]);
+
+			if (entityType == null || status == null || unitType == null) {
+				throw new Error(`Missing lookup rows for a "${params.unitType}".`);
+			}
+
+			const [document] = await tx
+				.insert(schema.entities)
+				.values({ slug: params.slug, typeId: entityType.id })
+				.returning({ id: schema.entities.id });
+			if (document == null) {
+				throw new Error("Failed to insert organisational-unit document.");
+			}
+
+			const [version] = await tx
+				.insert(schema.entityVersions)
+				.values({ entityId: document.id, statusId: status.id })
+				.returning({ id: schema.entityVersions.id });
+			if (version == null) {
+				throw new Error("Failed to insert organisational-unit version.");
+			}
+
+			await tx
+				.insert(schema.organisationalUnits)
+				.values({ id: version.id, name: params.name, typeId: unitType.id });
+
+			return { documentId: document.id, versionId: version.id };
+		});
+	}
+
+	async createPublishedWorkingGroup(params: {
+		name: string;
+		slug: string;
+	}): Promise<{ documentId: string; versionId: string }> {
+		return this.createPublishedOrganisationalUnit({ ...params, unitType: "working_group" });
+	}
+
+	async createPublishedInstitution(params: {
+		name: string;
+		slug: string;
+	}): Promise<{ documentId: string; versionId: string }> {
+		return this.createPublishedOrganisationalUnit({ ...params, unitType: "institution" });
+	}
+
+	/**
+	 * A person the country-role tests own outright.
+	 *
+	 * The seed has only two published persons and global setup gives them committee relations, so a
+	 * test reusing one would land on the wizard's "already recorded" path instead of the one it means
+	 * to exercise. Cleaned up by `cleanupWorkerPersons`, which also clears their relations.
+	 */
+	async createPublishedPerson(params: {
+		name: string;
+		sortName: string;
+		slug: string;
+	}): Promise<{ documentId: string; versionId: string }> {
+		return this.db.transaction(async (tx) => {
+			const [entityType, status] = await Promise.all([
+				tx.query.entityTypes.findFirst({ where: { type: "persons" }, columns: { id: true } }),
+				tx.query.entityStatus.findFirst({ where: { type: "published" }, columns: { id: true } }),
+			]);
+
+			if (entityType == null || status == null) {
+				throw new Error("Missing lookup rows for a person.");
+			}
+
+			const [document] = await tx
+				.insert(schema.entities)
+				.values({ slug: params.slug, typeId: entityType.id })
+				.returning({ id: schema.entities.id });
+			if (document == null) {
+				throw new Error("Failed to insert person document.");
+			}
+
+			const [version] = await tx
+				.insert(schema.entityVersions)
+				.values({ entityId: document.id, statusId: status.id })
+				.returning({ id: schema.entityVersions.id });
+			if (version == null) {
+				throw new Error("Failed to insert person version.");
+			}
+
+			await tx
+				.insert(schema.persons)
+				.values({ id: version.id, name: params.name, sortName: params.sortName });
+
+			return { documentId: document.id, versionId: version.id };
+		});
+	}
+
+	/** Every relation a person holds, with the unit resolved — the shape the assertions need. */
+	async getPersonRelations(personDocumentId: string): Promise<
+		Array<{
+			id: string;
+			roleType: string;
+			unitDocumentId: string;
+			unitSlug: string;
+			start: Date;
+			end: Date | null;
+		}>
+	> {
+		const rows = await this.db
+			.select({
+				id: schema.personsToOrganisationalUnits.id,
+				roleType: schema.personRoleTypes.type,
+				unitDocumentId: schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+				unitSlug: schema.entities.slug,
+				duration: schema.personsToOrganisationalUnits.duration,
+			})
+			.from(schema.personsToOrganisationalUnits)
+			.innerJoin(
+				schema.personRoleTypes,
+				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+			)
+			.innerJoin(
+				schema.entities,
+				eq(schema.entities.id, schema.personsToOrganisationalUnits.organisationalUnitDocumentId),
+			)
+			.where(eq(schema.personsToOrganisationalUnits.personDocumentId, personDocumentId));
+
+		return rows.map((row) => {
+			return {
+				id: row.id,
+				roleType: row.roleType,
+				unitDocumentId: row.unitDocumentId,
+				unitSlug: row.unitSlug,
+				start: row.duration.start,
+				end: row.duration.end ?? null,
+			};
+		});
+	}
+
+	async addUnitRelation(params: {
+		unitDocumentId: string;
+		relatedUnitDocumentId: string;
+		statusType: (typeof schema.organisationalUnitStatusEnum)[number];
+		start: Date;
+	}): Promise<string> {
+		const [status] = await this.db
+			.select({ id: schema.organisationalUnitStatus.id })
+			.from(schema.organisationalUnitStatus)
+			.where(eq(schema.organisationalUnitStatus.status, params.statusType))
+			.limit(1);
+
+		if (status == null) {
+			throw new Error(`Missing organisational unit status "${params.statusType}".`);
+		}
+
+		const [row] = await this.db
+			.insert(schema.organisationalUnitsRelations)
+			.values({
+				unitDocumentId: params.unitDocumentId,
+				relatedUnitDocumentId: params.relatedUnitDocumentId,
+				status: status.id,
+				duration: { start: params.start },
+			})
+			.returning({ id: schema.organisationalUnitsRelations.id });
+
+		if (row == null) {
+			throw new Error("Failed to insert unit relation.");
+		}
+
+		return row.id;
+	}
+
+	async addPersonRelation(params: {
+		personDocumentId: string;
+		organisationalUnitDocumentId: string;
+		roleType: (typeof schema.personRoleTypesEnum)[number];
+		start: Date;
+	}): Promise<string> {
+		const [roleType] = await this.db
+			.select({ id: schema.personRoleTypes.id })
+			.from(schema.personRoleTypes)
+			.where(eq(schema.personRoleTypes.type, params.roleType))
+			.limit(1);
+
+		if (roleType == null) {
+			throw new Error(`Missing person role type "${params.roleType}".`);
+		}
+
+		const [row] = await this.db
+			.insert(schema.personsToOrganisationalUnits)
+			.values({
+				personDocumentId: params.personDocumentId,
+				organisationalUnitDocumentId: params.organisationalUnitDocumentId,
+				roleTypeId: roleType.id,
+				duration: { start: params.start },
+			})
+			.returning({ id: schema.personsToOrganisationalUnits.id });
+
+		if (row == null) {
+			throw new Error("Failed to insert person relation.");
+		}
+
+		return row.id;
+	}
+
+	async getUnitRelationEndById(id: string): Promise<Date | null | undefined> {
+		const [row] = await this.db
+			.select({ duration: schema.organisationalUnitsRelations.duration })
+			.from(schema.organisationalUnitsRelations)
+			.where(eq(schema.organisationalUnitsRelations.id, id))
+			.limit(1);
+
+		return row == null ? undefined : (row.duration.end ?? null);
+	}
+
+	async getPersonRelationEndById(id: string): Promise<Date | null | undefined> {
+		const [row] = await this.db
+			.select({ duration: schema.personsToOrganisationalUnits.duration })
+			.from(schema.personsToOrganisationalUnits)
+			.where(eq(schema.personsToOrganisationalUnits.id, id))
+			.limit(1);
+
+		return row == null ? undefined : (row.duration.end ?? null);
+	}
+
+	/**
+	 * Person relations are not removed by `deleteWorkingGroup`, so a test that attaches one must
+	 * clear it before the unit goes, or the delete trips the foreign key.
+	 */
+	async deletePersonRelationById(id: string): Promise<void> {
+		await this.db
+			.delete(schema.personsToOrganisationalUnits)
+			.where(eq(schema.personsToOrganisationalUnits.id, id));
+	}
+
 	/** The first published country, whatever its relation to DARIAH-EU. */
 	async getFirstPublishedCountry(): Promise<{ documentId: string; name: string } | null> {
 		const [row] = await this.db
