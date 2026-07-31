@@ -1,6 +1,11 @@
 /** The disallowed operations a mutation can reject with a message that is safe to show the user. */
 export type UserFacingErrorKind =
+	| "missing-dariah-eric"
+	| "missing-paired-relation-unit"
 	| "published-slug-rename"
+	| "relation-end-before-start"
+	| "relation-not-endable"
+	| "relation-period-overlap"
 	| "service-kpi-conflict"
 	| "social-media-kpi-conflict";
 

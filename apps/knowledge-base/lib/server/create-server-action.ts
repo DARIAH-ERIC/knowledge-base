@@ -110,6 +110,19 @@ export function createServerAction<
 			const message = getUserFacingErrorMessage(error, {
 				entitySlugConflict: t("An entity with this slug already exists."),
 				uniqueConflict: t("A record with these values already exists."),
+				missingDariahEric: t(
+					"The DARIAH-EU organisational unit could not be found, so this relation cannot be recorded.",
+				),
+				missingPairedRelationUnit: t(
+					"The governance body this role must also be recorded against could not be found.",
+				),
+				relationPeriodOverlap: t(
+					"This relation already exists during an overlapping period. Adjust the dates and try again.",
+				),
+				relationEndBeforeStart: t("The end date must fall after the relation started."),
+				relationNotEndable: t(
+					"This relation is not one this form can end, or it has already been ended. Refresh the page and try again.",
+				),
 				missingRelatedRecord: t(
 					"A related record no longer exists. Refresh the page and try again.",
 				),

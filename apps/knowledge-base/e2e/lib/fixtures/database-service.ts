@@ -1,6 +1,6 @@
 import { type Transaction, createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
-import { and, eq, inArray, or, sql } from "@dariah-eric/database/sql";
+import { and, eq, exists, inArray, notExists, or, sql } from "@dariah-eric/database/sql";
 import type { InferOk } from "better-result";
 
 import { env } from "../../../config/env.config";
@@ -785,6 +785,154 @@ export class DatabaseService {
 				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 			)
 			.where(eq(schema.organisationalUnitsRelations.unitDocumentId, documentId));
+	}
+
+	/**
+	 * A published country which is (or is not) a member or observer of DARIAH-EU.
+	 *
+	 * The guided-form tests need both: `countryMembershipRules` requires a partner institution's
+	 * country to be a member, so the same wizard run must succeed quietly for one and raise a warning
+	 * for the other. Resolved from the data rather than hardcoded, so the tests do not depend on
+	 * which countries a given seed happens to contain.
+	 */
+	async getCountryByDariahMembership(isMember: boolean): Promise<{
+		documentId: string;
+		name: string;
+	} | null> {
+		const membership = this.db
+			.select({ one: sql`1` })
+			.from(schema.organisationalUnitsRelations)
+			.innerJoin(
+				schema.organisationalUnitStatus,
+				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+			)
+			.innerJoin(
+				schema.entities,
+				eq(schema.entities.id, schema.organisationalUnitsRelations.relatedUnitDocumentId),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnitsRelations.unitDocumentId, schema.entityVersions.entityId),
+					inArray(schema.organisationalUnitStatus.status, ["is_member_of", "is_observer_of"]),
+					eq(schema.entities.slug, "dariah-eu"),
+				),
+			);
+
+		const [row] = await this.db
+			.select({
+				documentId: schema.entityVersions.entityId,
+				name: schema.organisationalUnits.name,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnitTypes.type, "country"),
+					eq(schema.entityStatus.type, "published"),
+					isMember ? exists(membership) : notExists(membership),
+				),
+			)
+			.orderBy(schema.organisationalUnits.name)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	/**
+	 * Ensures a country is recorded as a member of DARIAH-EU, and reports whether it had to create
+	 * that relation.
+	 *
+	 * The kitchen-sink seed hangs its fixtures off a separate `kitchen-sink-eric` unit, so a seeded
+	 * database has no country related to `dariah-eu` at all — and every integrity rule is pinned to
+	 * that slug. Tests that need the rules to have something to judge therefore establish the
+	 * membership themselves and remove it again, rather than depending on seed data that does not
+	 * describe DARIAH-EU.
+	 */
+	async ensureDariahEricMembership(countryDocumentId: string): Promise<string | null> {
+		const [eric] = await this.db
+			.select({ id: schema.entities.id })
+			.from(schema.entities)
+			.where(eq(schema.entities.slug, "dariah-eu"))
+			.limit(1);
+
+		if (eric == null) {
+			return null;
+		}
+
+		const [status] = await this.db
+			.select({ id: schema.organisationalUnitStatus.id })
+			.from(schema.organisationalUnitStatus)
+			.where(eq(schema.organisationalUnitStatus.status, "is_member_of"))
+			.limit(1);
+
+		if (status == null) {
+			return null;
+		}
+
+		const [existing] = await this.db
+			.select({ id: schema.organisationalUnitsRelations.id })
+			.from(schema.organisationalUnitsRelations)
+			.where(
+				and(
+					eq(schema.organisationalUnitsRelations.unitDocumentId, countryDocumentId),
+					eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, eric.id),
+					eq(schema.organisationalUnitsRelations.status, status.id),
+				),
+			)
+			.limit(1);
+
+		if (existing != null) {
+			return null;
+		}
+
+		const [created] = await this.db
+			.insert(schema.organisationalUnitsRelations)
+			.values({
+				unitDocumentId: countryDocumentId,
+				relatedUnitDocumentId: eric.id,
+				status: status.id,
+				duration: { start: new Date("2000-01-01T00:00:00.000Z") },
+			})
+			.returning({ id: schema.organisationalUnitsRelations.id });
+
+		return created?.id ?? null;
+	}
+
+	/** The first published country, whatever its relation to DARIAH-EU. */
+	async getFirstPublishedCountry(): Promise<{ documentId: string; name: string } | null> {
+		const [row] = await this.db
+			.select({
+				documentId: schema.entityVersions.entityId,
+				name: schema.organisationalUnits.name,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnitTypes.type, "country"),
+					eq(schema.entityStatus.type, "published"),
+				),
+			)
+			.orderBy(schema.organisationalUnits.name)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async deleteUnitRelationById(id: string): Promise<void> {
+		await this.db
+			.delete(schema.organisationalUnitsRelations)
+			.where(eq(schema.organisationalUnitsRelations.id, id));
 	}
 
 	async getPublishedVersionId(documentId: string): Promise<string | null> {
