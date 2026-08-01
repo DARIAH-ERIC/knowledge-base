@@ -3,9 +3,9 @@
  *
  * CMS `page` entities carry only a single-segment slug: the WordPress import
  * (`normalizeWordPressSlug`) dropped the section prefix, so a page's real nested pathname
- * (`/about/strategy`) cannot be derived from CMS data — and slugs deliberately differ from the path
- * leaf (`dariah-in-nutshell` → `/about/dariah-in-a-nutshell`, `working-groups-list` → …), so a
- * hardcoded map is required.
+ * (`/about/strategy`) cannot be derived from CMS data — and a slug may deliberately differ from the
+ * path leaf (`transformations-a-dariah-journal` → `/resources/transformations`), so a hardcoded map
+ * is required.
  *
  * Authoritative source: DARIAH-ERIC/knowledge-base issue #703 ("Map page slugs to website paths"),
  * the hand-curated mapping. This is also the backfill source for the eventual `pages.path` column.
@@ -20,22 +20,22 @@
  */
 export const interimPagePathBySlug: Readonly<Record<string, string>> = {
 	// About
-	"dariah-in-nutshell": "/about/dariah-in-a-nutshell",
+	"dariah-in-a-nutshell": "/about/dariah-in-a-nutshell",
 	strategy: "/about/strategy",
 	"organisation-and-governance": "/about/organisation-and-governance",
 	"impact-case-studies": "/about/impact-case-studies",
 	// Network
 	"members-and-partners": "/network/members-and-partners",
 	"regional-hubs": "/network/regional-hubs",
-	"working-groups-list": "/network/working-groups",
+	"working-groups": "/network/working-groups",
 	// Resources
 	"resource-catalogue": "/resources/resource-catalogue",
 	"dariah-campus": "/resources/dariah-campus",
-	"transformation-a-dariah-journal": "/resources/transformations",
+	"transformations-a-dariah-journal": "/resources/transformations",
 	"ssh-open-marketplace": "/resources/ssh-open-marketplace",
 	// Projects / news / events / spotlights
-	"projects-list": "/projects",
-	spotlights: "/spotlight",
+	projects: "/projects",
+	spotlight: "/spotlight",
 	newsletters: "/newsletters",
 	// Get involved
 	"join-dariah": "/get-involved/join-dariah",

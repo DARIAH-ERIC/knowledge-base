@@ -8,9 +8,12 @@ describe("resolveInterimPagePath", () => {
 		expect(resolveInterimPagePath("strategy")).toBe("/about/strategy");
 		expect(resolveInterimPagePath("join-dariah")).toBe("/get-involved/join-dariah");
 		expect(resolveInterimPagePath("regional-hubs")).toBe("/network/regional-hubs");
-		// Slugs that deliberately differ from the path leaf — the reason a hardcoded map is needed.
-		expect(resolveInterimPagePath("dariah-in-nutshell")).toBe("/about/dariah-in-a-nutshell");
-		expect(resolveInterimPagePath("working-groups-list")).toBe("/network/working-groups");
+		// A slug that deliberately differs from the path leaf — the reason a hardcoded map is needed.
+		expect(resolveInterimPagePath("transformations-a-dariah-journal")).toBe(
+			"/resources/transformations",
+		);
+		// A nested pathname that cannot be derived from the single-segment slug.
+		expect(resolveInterimPagePath("working-groups")).toBe("/network/working-groups");
 		// Footer legal pages are CMS `page` entities.
 		expect(resolveInterimPagePath("legal-notice")).toBe("/privacy-and-legal/legal-notice");
 	});
