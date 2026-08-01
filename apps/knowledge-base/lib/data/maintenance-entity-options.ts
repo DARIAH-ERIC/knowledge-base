@@ -58,6 +58,18 @@ const currentLabel = sql<string | null>`COALESCE(
 )`;
 
 /**
+ * Acronym of the current version, for the two subtypes that have one. Searched alongside
+ * {@link currentLabel} rather than folded into it: the label is what the picker displays, and
+ * documents are looked up by acronym far more often than they should be shown by it.
+ * `entities.label` does carry the acronym, but is null for never-published documents — which are
+ * exactly the ones this query exists to surface.
+ */
+const currentAcronym = sql<string | null>`COALESCE(
+	${schema.projects.acronym},
+	${schema.organisationalUnits.acronym}
+)`;
+
+/**
  * Entity options for the admin maintenance tools, including never-published drafts.
  *
  * Deliberately separate from `getEntityRelationOptions`: that query powers the relation pickers,
@@ -78,12 +90,17 @@ export async function getMaintenanceEntityOptions(
 	const { limit = relationOptionsPageSize, offset = 0, q } = params;
 	const query = q?.trim();
 
-	// Mirrors `getEntityRelationOptions`: every query term must match the slug or the resolved label
-	// (AND across terms, OR across the two), with the whole query also reverse-mapped to type labels
-	// so "working group" or "event" resolves to the matching type tokens.
+	// Mirrors `getEntityRelationOptions`: every query term must match the slug, the resolved label or
+	// the acronym (AND across terms, OR across the three), with the whole query also reverse-mapped to
+	// type labels so "working group" or "event" resolves to the matching type tokens.
 	const { entityTypes: matchedEntityTypes, unitTypes: matchedUnitTypes } =
 		getEntityTypeTokensMatchingLabel(query ?? "");
-	const allTermsMatchSlugOrLabel = matchesAllTerms(query, schema.entities.slug, currentLabel);
+	const allTermsMatchSlugOrLabel = matchesAllTerms(
+		query,
+		schema.entities.slug,
+		currentLabel,
+		currentAcronym,
+	);
 	const matchesType = or(
 		matchedEntityTypes.length > 0
 			? inArray(

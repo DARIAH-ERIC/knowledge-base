@@ -134,7 +134,13 @@ export async function getCountryReportsForAdmin(
 							schema.entityVersions,
 							eq(schema.entityVersions.id, schema.organisationalUnits.id),
 						)
-						.where(matchesAllTerms(query, schema.organisationalUnits.name)),
+						.where(
+							matchesAllTerms(
+								query,
+								schema.organisationalUnits.name,
+								schema.organisationalUnits.acronym,
+							),
+						),
 				)
 			: undefined;
 	const primaryOrderBy =
@@ -257,7 +263,13 @@ export async function getWorkingGroupReportsForAdmin(
 							schema.entityVersions,
 							eq(schema.entityVersions.id, schema.organisationalUnits.id),
 						)
-						.where(matchesAllTerms(query, schema.organisationalUnits.name)),
+						.where(
+							matchesAllTerms(
+								query,
+								schema.organisationalUnits.name,
+								schema.organisationalUnits.acronym,
+							),
+						),
 				)
 			: undefined;
 	const primaryOrderBy =

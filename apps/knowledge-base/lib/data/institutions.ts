@@ -402,7 +402,11 @@ export async function getInstitutions(
 							schema.organisationalUnitTypes.type,
 							"country" as typeof schema.organisationalUnitTypes.$inferSelect.type,
 						),
-						matchesAllTerms(query, schema.organisationalUnits.name),
+						matchesAllTerms(
+							query,
+							schema.organisationalUnits.name,
+							schema.organisationalUnits.acronym,
+						),
 						sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
 					),
 				),

@@ -76,7 +76,11 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 		query != null && query !== ""
 			? and(
 					eq(schema.organisationalUnitTypes.type, countryType),
-					matchesAllTerms(query, schema.organisationalUnits.name),
+					matchesAllTerms(
+						query,
+						schema.organisationalUnits.name,
+						schema.organisationalUnits.acronym,
+					),
 				)
 			: eq(schema.organisationalUnitTypes.type, countryType);
 	const nameOrderBy =

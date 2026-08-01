@@ -65,6 +65,7 @@ export async function getProjectPartners(
 		schema.projects.acronym,
 		schema.projectRoles.role,
 		schema.organisationalUnits.name,
+		schema.organisationalUnits.acronym,
 		schema.organisationalUnitTypes.type,
 	);
 	const where = searchWhere;

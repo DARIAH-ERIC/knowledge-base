@@ -180,7 +180,7 @@ async function searchCountryReportsForAdmin(
 		.innerJoin(schema.organisationalUnits, sql`${schema.organisationalUnits.id} = ${pickedVersion}`)
 		.where(
 			or(
-				matchesAllTerms(query, schema.organisationalUnits.name),
+				matchesAllTerms(query, schema.organisationalUnits.name, schema.organisationalUnits.acronym),
 				sql<boolean>`${schema.reportingCampaigns.year}::text ilike ${`%${query}%`}`,
 			),
 		)
@@ -226,7 +226,7 @@ async function searchWorkingGroupReportsForAdmin(
 		.innerJoin(schema.organisationalUnits, sql`${schema.organisationalUnits.id} = ${pickedVersion}`)
 		.where(
 			or(
-				matchesAllTerms(query, schema.organisationalUnits.name),
+				matchesAllTerms(query, schema.organisationalUnits.name, schema.organisationalUnits.acronym),
 				sql<boolean>`${schema.reportingCampaigns.year}::text ilike ${`%${query}%`}`,
 			),
 		)

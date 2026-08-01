@@ -81,8 +81,10 @@ export async function getInstitutionRelations(
 					matchesAllTerms(
 						query,
 						schema.organisationalUnits.name,
+						schema.organisationalUnits.acronym,
 						schema.organisationalUnitStatus.status,
 						relatedOrganisationalUnits.name,
+						relatedOrganisationalUnits.acronym,
 						relatedOrganisationalUnitTypes.type,
 					),
 				)
