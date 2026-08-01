@@ -35,7 +35,7 @@ import {
 } from "@/lib/organisational-unit-options";
 
 /**
- * Guided form for retiring a working group or ending a country's membership.
+ * Guided form for ending a working group or a country's membership.
  *
  * `inactiveUnitRelationRules` flags a unit whose own membership has ended while its chairs,
  * members, coordinators, or contacts are still recorded as current — the state you get when the
@@ -124,7 +124,7 @@ export function RetireUnitWizard(props: Readonly<RetireUnitWizardProps>): ReactN
 	}
 
 	const steps = [
-		{ id: "unit", label: t("Unit") },
+		{ id: "unit", label: t("Working group or country") },
 		{ id: "review", label: t("Review") },
 	];
 
@@ -137,7 +137,7 @@ export function RetireUnitWizard(props: Readonly<RetireUnitWizardProps>): ReactN
 				currentStepIndex={steps.length}
 				description={t("Everything has been saved.")}
 				steps={steps}
-				title={t("Retire a unit")}
+				title={t("End a working group or a country's membership")}
 			>
 				<Note intent="success">{state.message ?? t("Saved.")}</Note>
 				<ButtonLink href="/dashboard/administrator/guided-forms" intent="outline">
@@ -151,18 +151,18 @@ export function RetireUnitWizard(props: Readonly<RetireUnitWizardProps>): ReactN
 		<WizardShell
 			currentStepIndex={stepIndex}
 			description={t(
-				"Ends a unit's relations and every person relation that depends on it, all on the same date.",
+				"Ends the working group's or country's own membership, and every chair, member, coordinator, or contact still recorded in it, all on the same date.",
 			)}
 			steps={steps}
-			title={t("Retire a unit")}
+			title={t("End a working group or a country's membership")}
 		>
 			{stepIndex === 0 ? (
 				<Fragment>
 					<FormSection
 						description={t(
-							"Pick the unit being retired and the date its relations end. The next step lists everything that will be closed.",
+							"Pick the working group or country and the date its membership ends. The next step lists everything that will be closed.",
 						)}
-						title={t("Unit")}
+						title={t("Working group or country")}
 						variant="stacked"
 					>
 						<Select
@@ -186,17 +186,17 @@ export function RetireUnitWizard(props: Readonly<RetireUnitWizardProps>): ReactN
 						</Select>
 
 						<AsyncSelect
-							aria-label={t("Unit")}
+							aria-label={t("Working group or country")}
 							cacheKey={unitType}
-							emptyMessage={t("No units found.")}
+							emptyMessage={t("No working groups or countries found.")}
 							fetchPage={(params) => fetchUnitOptionsPage(unitType, params)}
 							initialItems={initialUnitItems}
 							initialTotal={initialUnitTotal}
 							isRequired={true}
-							label={t("Unit")}
+							label={t("Working group or country")}
 							loadOnMount={true}
 							onSelect={setUnit}
-							placeholder={t("No unit selected")}
+							placeholder={t("No working group or country selected")}
 							selectedItem={unit}
 						/>
 
@@ -251,7 +251,9 @@ export function RetireUnitWizard(props: Readonly<RetireUnitWizardProps>): ReactN
 						</div>
 					) : preflight.relations.length === 0 ? (
 						<Note intent="info">
-							{t("Nothing is still open on this unit, so there is nothing to end.")}
+							{t(
+								"Nothing is still open on this working group or country, so there is nothing to end.",
+							)}
 						</Note>
 					) : (
 						<Fragment>

@@ -35,7 +35,7 @@ export function WizardShell(props: Readonly<WizardShellProps>): ReactNode {
 		<Fragment>
 			<EntityListHeader description={description} title={title} />
 
-			<nav aria-label={t("Steps")} className="my-(--layout-gutter)">
+			<nav aria-label={t("Steps")} className="mbs-(--layout-padding)">
 				<ol className="flex flex-wrap items-center gap-x-2 gap-y-3">
 					{steps.map((step, index) => {
 						const isCurrent = index === currentStepIndex;

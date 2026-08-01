@@ -42,28 +42,30 @@ export default async function DashboardAdministratorWizardsPage(
 
 			{/* Stacked, and held to the same width as the forms themselves, so the hub and the wizard it
 			    opens read as one column rather than the page reflowing on the way in. */}
-			<div className="my-(--layout-gutter) flex max-inline-3xl flex-col gap-y-4">
+			<div className="mbs-(--layout-padding) flex max-inline-3xl flex-col gap-y-4">
 				<WizardCard
 					actionLabel={t("Start")}
 					description={t(
-						"Records the institution, the country it is located in, and its status towards DARIAH-EU.",
+						"Records an institution as partner institution, national coordinating or representative institution, or cooperating partner, together with the country it is located in, which decides which of those statuses it may hold.",
 					)}
 					href={wizardHref("partner-institution")}
-					title={t("Partner institution of DARIAH-EU")}
+					title={t("Record an institution's status towards DARIAH-EU")}
 				/>
 				<WizardCard
 					actionLabel={t("Start")}
 					description={t(
-						"Records the role in the country and the matching seat on the National Coordinator Committee or General Assembly, for the same period.",
+						"Appoints a person as national coordinator or representative (or deputy), or ends the appointment, together with the matching seat on the National Coordinator Committee or General Assembly.",
 					)}
 					href={wizardHref("country-role")}
-					title={t("National coordinator or representative")}
+					title={t("Start or end a national coordinator or representative appointment")}
 				/>
 				<WizardCard
 					actionLabel={t("Start")}
-					description={t("Ends everything still open on a working group or country, on one date.")}
+					description={t(
+						"Ends the working group's or country's own membership together with every chair, member, coordinator, and contact still recorded as current, on one date.",
+					)}
 					href={wizardHref("retire-unit")}
-					title={t("Retire a unit")}
+					title={t("End a working group or a country's membership")}
 				/>
 			</div>
 		</Fragment>

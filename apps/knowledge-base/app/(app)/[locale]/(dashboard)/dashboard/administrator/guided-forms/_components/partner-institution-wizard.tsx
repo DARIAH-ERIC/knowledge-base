@@ -197,7 +197,7 @@ export function PartnerInstitutionWizard(
 				currentStepIndex={steps.length}
 				description={t("Everything has been saved.")}
 				steps={steps}
-				title={t("Partner institution of DARIAH-EU")}
+				title={t("Record an institution's status towards {eric}", { eric: ericName })}
 			>
 				<Note intent="success">{state.message ?? t("Saved.")}</Note>
 				<div className="flex flex-wrap gap-2">
@@ -221,10 +221,11 @@ export function PartnerInstitutionWizard(
 		<WizardShell
 			currentStepIndex={stepIndex}
 			description={t(
-				"Records an institution's partnership with DARIAH-EU together with the country it is located in, so the two can never be entered apart.",
+				"Records an institution as partner institution, national coordinating or representative institution, or cooperating partner of {eric}, together with the country it is located in, so the two can never be entered apart.",
+				{ eric: ericName },
 			)}
 			steps={steps}
-			title={t("Partner institution of DARIAH-EU")}
+			title={t("Record an institution's status towards {eric}", { eric: ericName })}
 		>
 			{stepIndex === 0 ? (
 				<Fragment>

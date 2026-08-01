@@ -19,7 +19,7 @@ export async function generateMetadata(
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Guided forms - Partner institution"),
+		title: t("Guided forms - Record an institution's status towards DARIAH-EU"),
 	});
 
 	return metadata;

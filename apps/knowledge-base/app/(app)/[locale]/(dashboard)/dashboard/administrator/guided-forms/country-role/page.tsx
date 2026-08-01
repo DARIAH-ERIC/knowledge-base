@@ -20,7 +20,7 @@ export async function generateMetadata(
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Guided forms - National coordinator or representative"),
+		title: t("Guided forms - Start or end a national coordinator or representative appointment"),
 	});
 
 	return metadata;
