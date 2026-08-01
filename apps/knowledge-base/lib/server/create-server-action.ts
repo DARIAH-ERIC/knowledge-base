@@ -133,6 +133,7 @@ export function createServerAction<
 				serviceKpiConflict: t(
 					"Both services have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge.",
 				),
+				slugTooLong: t("This slug is too long to be used as a web address. Please shorten it."),
 				socialMediaKpiConflict: t(
 					"Both accounts have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge.",
 				),

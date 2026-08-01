@@ -17,6 +17,7 @@ import {
 import { renderEntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option-item";
 import { updateEntitySlugAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/update-entity-slug.action";
 import { useRouter } from "@/lib/navigation/navigation";
+import { maxSlugLength } from "@/lib/slug";
 
 export function SlugEditor(): ReactNode {
 	const t = useExtracted();
@@ -74,6 +75,7 @@ export function SlugEditor(): ReactNode {
 
 			<TextField
 				isDisabled={selected == null || isPending}
+				maxLength={maxSlugLength}
 				onChange={(value) => {
 					setSlug(value);
 					setError(null);

@@ -6,6 +6,8 @@ import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
+import { maxSlugLength } from "@/lib/slug";
+
 interface EntitySlugFieldProps {
 	/** The document's current slug. Omit when creating — there is none yet. */
 	slug?: string;
@@ -47,7 +49,12 @@ export function EntitySlugField(props: Readonly<EntitySlugFieldProps>): ReactNod
 	}
 
 	return (
-		<TextField defaultValue={slug} name="slug">
+		// A coarse cap, not the rule: `maxLength` counts UTF-16 code units of what is typed, while the
+		// limit applies to the bytes of the slug that gets stored — and slugifying moves in both
+		// directions, dropping punctuation but expanding transliterations ("ä" → "ae"). It keeps a
+		// pasted article title from silently overrunning the field; `EntitySlugInputSchema` is what
+		// actually decides, by measuring the slugified value.
+		<TextField defaultValue={slug} maxLength={maxSlugLength} name="slug">
 			<Label>{t("Slug")}</Label>
 			<Input placeholder={slug == null ? t("Generated from the title") : undefined} />
 			<Description>

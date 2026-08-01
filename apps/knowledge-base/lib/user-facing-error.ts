@@ -7,6 +7,7 @@ export type UserFacingErrorKind =
 	| "relation-not-endable"
 	| "relation-period-overlap"
 	| "service-kpi-conflict"
+	| "slug-too-long"
 	| "social-media-kpi-conflict";
 
 /**

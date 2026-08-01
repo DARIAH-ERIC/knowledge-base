@@ -14,6 +14,7 @@ interface ErrorMessages {
 	relationNotEndable: string;
 	relationPeriodOverlap: string;
 	serviceKpiConflict: string;
+	slugTooLong: string;
 	socialMediaKpiConflict: string;
 	uniqueConflict: string;
 }
@@ -45,6 +46,9 @@ export function getUserFacingErrorMessage(error: unknown, messages: ErrorMessage
 			}
 			case "service-kpi-conflict": {
 				return messages.serviceKpiConflict;
+			}
+			case "slug-too-long": {
+				return messages.slugTooLong;
 			}
 			case "social-media-kpi-conflict": {
 				return messages.socialMediaKpiConflict;

@@ -10,6 +10,7 @@ import {
 } from "@/lib/data/lifecycle-adapters";
 import type { Transaction } from "@/lib/db";
 import { eq, inArray, sql } from "@/lib/db/sql";
+import { assertSlugWithinMaxLength } from "@/lib/slug";
 
 export interface EntityIdentity {
 	id: string;
@@ -58,6 +59,9 @@ export async function updateEntitySlug(
 
 	const slug = slugify(rawSlug);
 	assert(slug.length > 0, "Slug must not be empty.");
+	// This editor has no form schema in front of it, so the length limit is applied here — as a typed
+	// error, since pasting a whole title in is an ordinary mistake and deserves a real message.
+	assertSlugWithinMaxLength(slug);
 
 	if (slug !== entity.slug) {
 		await tx.update(schema.entities).set({ slug }).where(eq(schema.entities.id, documentId));

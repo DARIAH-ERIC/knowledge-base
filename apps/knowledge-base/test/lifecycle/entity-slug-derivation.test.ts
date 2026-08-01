@@ -14,6 +14,7 @@ import {
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import type { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import { maxSlugLength } from "@/lib/slug";
 import { UserFacingError } from "@/lib/user-facing-error";
 import { withTransaction } from "@/test/lib/with-transaction";
 
@@ -107,6 +108,38 @@ describe("createDraftDocumentFromTitle", () => {
 		});
 	});
 
+	/**
+	 * The slug ends up in a filename when the website prerenders the page, so an overlong one breaks
+	 * a build rather than the create. Truncating is the right trade here: nobody chose this slug, and
+	 * the title it came from stays intact.
+	 */
+	it("cuts a slug derived from a very long title down to the limit", async () => {
+		await withTransaction(async (tx) => {
+			const typeId = await getEntityTypeId(tx, "news");
+			const title = `${uniqueTitle()} ${"long word ".repeat(60)}`;
+
+			const created = await createDraftDocumentFromTitle(tx, typeId, title);
+
+			expect(created.slug.length).toBeLessThanOrEqual(maxSlugLength);
+			// A prefix of the untruncated slug, and still a well-formed one.
+			expect(slugify(title).startsWith(created.slug)).toBe(true);
+			expect(created.slug.endsWith("-")).toBe(false);
+		});
+	});
+
+	it("keeps the dedup suffix of a truncated slug inside the limit", async () => {
+		await withTransaction(async (tx) => {
+			const typeId = await getEntityTypeId(tx, "news");
+			const title = `${uniqueTitle()} ${"long word ".repeat(60)}`;
+
+			const first = await createDraftDocumentFromTitle(tx, typeId, title);
+			const second = await createDraftDocumentFromTitle(tx, typeId, title);
+
+			expect(second.slug).toBe(`${first.slug}-2`);
+			expect(second.slug.length).toBeLessThanOrEqual(maxSlugLength);
+		});
+	});
+
 	it("does not suffix a slug that is only taken under another entity type", async () => {
 		await withTransaction(async (tx) => {
 			const title = uniqueTitle();
@@ -134,6 +167,20 @@ describe("createDraftDocument", () => {
 			// An explicit slug is the caller's choice, so a collision must surface as an error — the
 			// "entity slug already exists" message — instead of quietly becoming `-2`.
 			await expect(createDraftDocument(tx, typeId, slug)).rejects.toThrow();
+		});
+	});
+
+	/**
+	 * A slug this long only reaches the data layer past the form schema, but it must not reach the
+	 * database: the website turns it into a filename when it prerenders the page.
+	 */
+	it("refuses a slug longer than a URL segment may be", async () => {
+		await withTransaction(async (tx) => {
+			const typeId = await getEntityTypeId(tx, "news");
+
+			await expect(
+				createDraftDocument(tx, typeId, "a".repeat(maxSlugLength + 1)),
+			).rejects.toBeInstanceOf(UserFacingError);
 		});
 	});
 });
