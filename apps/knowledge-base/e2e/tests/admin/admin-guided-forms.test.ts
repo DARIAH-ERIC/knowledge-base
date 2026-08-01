@@ -131,9 +131,11 @@ test.describe("guided forms", () => {
 		await page.goto(BASE_PATH);
 
 		await expect(page.getByRole("heading", { name: "Guided forms" })).toBeVisible();
-		await expect(page.getByText("Partner institution of DARIAH-EU")).toBeVisible();
-		await expect(page.getByText("National coordinator or representative")).toBeVisible();
-		await expect(page.getByText("Retire a unit")).toBeVisible();
+		await expect(page.getByText("Record an institution's status towards DARIAH-EU")).toBeVisible();
+		await expect(
+			page.getByText("Start or end a national coordinator or representative appointment"),
+		).toBeVisible();
+		await expect(page.getByText("End a working group or a country's membership")).toBeVisible();
 	});
 
 	test("creates an institution together with its country and DARIAH-EU status", async ({

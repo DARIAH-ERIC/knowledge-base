@@ -787,7 +787,7 @@ msgstr "Forgot password?"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-details.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:90
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:394
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:270
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:271
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:303
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-details.tsx:104
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:93
@@ -877,8 +877,8 @@ msgstr "Verify the code from the app"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-edit-form.tsx:88
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:665
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:672
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:440
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:447
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:441
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:448
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:511
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:245
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx:464
@@ -1443,7 +1443,7 @@ msgstr "Organisation"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:325
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:107
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:556
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:384
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:385
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:306
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx:282
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:225
@@ -1459,7 +1459,7 @@ msgstr "From"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:328
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:108
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:562
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:390
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:391
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:309
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx:285
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:228
@@ -1655,7 +1655,7 @@ msgstr "Description"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-edit-form.tsx:84
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-edit-form.tsx:85
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:609
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:290
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:292
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/wizard-shell.tsx:136
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/wizard-shell.tsx:137
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:507
@@ -2322,8 +2322,8 @@ msgstr "No related resources found."
 msgid "DBl0j9"
 msgstr "No related resources"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field.tsx:38
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field.tsx:51
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field.tsx:40
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field.tsx:58
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-details.tsx:109
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-details.tsx:69
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx:110
@@ -2345,19 +2345,19 @@ msgstr "No related resources"
 msgid "IoDlcd"
 msgstr "Slug"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field.tsx:41
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field.tsx:43
 msgid "Dn0pIx"
 msgstr "This entity is published, so its web address is public. Changing it can break existing links, so it is done by an administrator on the Maintenance page."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field.tsx:52
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field.tsx:59
 msgid "8p9LB2"
 msgstr "Generated from the title"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field.tsx:62
 msgid "RklOHB"
 msgstr "Used to build this entity's public web address once it is published — a short name like history-of-dariah. Leave empty to generate it from the title."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field.tsx:58
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field.tsx:65
 msgid "Mm9SyV"
 msgstr "Used to build this entity's public web address once it is published — a short name like history-of-dariah. It isn't public yet, so you can still change it freely."
 
@@ -2696,7 +2696,7 @@ msgstr "Create a new entry, then select it above."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:100
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-details.tsx:99
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:96
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:275
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:276
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-details.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:99
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:101
@@ -2715,7 +2715,7 @@ msgstr "Acronym"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section.tsx:902
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-form.tsx:99
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:280
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:281
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-details.tsx:113
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:102
@@ -2732,7 +2732,7 @@ msgstr "ROR"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-form.tsx:119
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-details.tsx:102
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:102
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:285
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:286
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-details.tsx:127
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:125
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:162
@@ -2903,7 +2903,7 @@ msgstr "Relations"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/drafts/_components/drafts-list.tsx:129
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-page.tsx:47
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:102
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:366
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:367
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:104
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-pages-page.tsx:80
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:66
@@ -3409,10 +3409,10 @@ msgstr "Details"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-edit-form.tsx:167
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-edit-form.tsx:146
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:186
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:235
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:239
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:255
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:261
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:236
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:240
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:256
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:262
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/wizard-review.tsx:82
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:294
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:395
@@ -3486,8 +3486,8 @@ msgstr "Link social media accounts to this country."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:497
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:503
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:187
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:312
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:318
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:313
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:319
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/country-membership-check.tsx:88
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:101
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx:165
@@ -3886,7 +3886,7 @@ msgstr "Appointment"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:476
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:576
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:189
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:404
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:405
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:128
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:212
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/wizard-review.tsx:39
@@ -3902,8 +3902,8 @@ msgstr "Everything has been saved."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:279
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:306
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:60
-msgid "4SxIG2"
-msgstr "National coordinator or representative"
+msgid "SKteTc"
+msgstr "Start or end a national coordinator or representative appointment"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:281
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:202
@@ -3935,8 +3935,8 @@ msgid "/Y6sk6"
 msgstr "Back to guided forms"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:302
-msgid "LJHdDE"
-msgstr "Records a country role together with the governance-body membership that comes with it, over one and the same period."
+msgid "Lszslj"
+msgstr "Records a person's appointment as national coordinator or representative (or deputy), or ends it, together with the governance-body seat that comes with it, over one and the same period."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:311
 msgid "gYDSwE"
@@ -3995,13 +3995,13 @@ msgid "KkUChG"
 msgstr "The role and the country it applies to. The matching governance-body membership is derived from the role and shown on the next step."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:498
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:313
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:314
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:196
 msgid "42tceO"
 msgstr "No countries found."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:506
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:321
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:322
 msgid "sBZD5S"
 msgstr "No country selected"
 
@@ -4011,14 +4011,14 @@ msgstr "Role on the governance body"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:588
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:655
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:430
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:431
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:249
 msgid "1SvspN"
 msgstr "Checking..."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:589
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:656
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:431
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:432
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:250
 msgid "fnzDRu"
 msgstr "Checking against the data-integrity rules..."
@@ -4036,59 +4036,58 @@ msgid "lH953Q"
 msgstr "Save and publish person"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:188
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:356
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:357
 msgid "Pxx+Fp"
 msgstr "Status towards {eric}"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:200
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:227
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:52
-msgid "K6pd6C"
-msgstr "Partner institution of DARIAH-EU"
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:228
+msgid "BJA8a6"
+msgstr "Record an institution's status towards {eric}"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:223
-msgid "RPOIDJ"
-msgstr "Records an institution's partnership with DARIAH-EU together with the country it is located in, so the two can never be entered apart."
+msgid "YtcqtM"
+msgstr "Records an institution as partner institution, national coordinating or representative institution, or cooperating partner of {eric}, together with the country it is located in, so the two can never be entered apart."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:232
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:233
 msgid "nl6oW7"
 msgstr "Pick an institution that already exists, or describe a new one. A new institution is created as a draft with these core fields; everything else can be added afterwards."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:249
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:250
 msgid "y/Eqbb"
 msgstr "Create a new institution"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:250
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:251
 msgid "RulCpL"
 msgstr "Select an existing institution"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:256
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:257
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:396
 msgid "bZ7L94"
 msgstr "No institutions found."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:264
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:265
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:407
 msgid "/2syl4"
 msgstr "No institution selected"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:305
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:306
 msgid "5AyzCc"
 msgstr "Every institution that relates to DARIAH-EU must record which country it is located in. This is the step most often missed when the relations are entered separately."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:308
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:309
 msgid "+Qy1xW"
 msgstr "Located in"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:331
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:332
 msgid "cEXSJX"
 msgstr "Located there from"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:352
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:353
 msgid "eNw5OS"
 msgstr "How the institution relates to {eric}. Leave the end date empty while the relation is ongoing."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:446
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:447
 msgid "gKmSCS"
 msgstr "Save and publish institution"
 
@@ -4096,41 +4095,40 @@ msgstr "Save and publish institution"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:165
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:189
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:196
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx:176
-msgid "xkB+8Z"
-msgstr "Unit"
+msgid "UWS/PN"
+msgstr "Working group or country"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:140
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:157
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:66
-msgid "H0Qun8"
-msgstr "Retire a unit"
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:68
+msgid "iieWI+"
+msgstr "End a working group or a country's membership"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:153
-msgid "HGwnKh"
-msgstr "Ends a unit's relations and every person relation that depends on it, all on the same date."
+msgid "233GDX"
+msgstr "Ends the working group's or country's own membership, and every chair, member, coordinator, or contact still recorded in it, all on the same date."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:162
-msgid "UdZmyz"
-msgstr "Pick the unit being retired and the date its relations end. The next step lists everything that will be closed."
+msgid "InAaqN"
+msgstr "Pick the working group or country and the date its membership ends. The next step lists everything that will be closed."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:191
-msgid "xM3pI6"
-msgstr "No units found."
+msgid "r4yNEZ"
+msgstr "No working groups or countries found."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:199
-msgid "sgHDAy"
-msgstr "No unit selected"
+msgid "fHZnSM"
+msgstr "No working group or country selected"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:254
-msgid "eBSxQt"
-msgstr "Nothing is still open on this unit, so there is nothing to end."
+msgid "0MMeG+"
+msgstr "Nothing is still open on this working group or country, so there is nothing to end."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:258
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:260
 msgid "x/RVua"
 msgstr "Relations to end"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:290
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx:292
 msgid "v4Llu+"
 msgstr "End the selected relations"
 
@@ -4231,8 +4229,8 @@ msgid "zHXRRm"
 msgstr "{count} relations have been ended."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/country-role/page.tsx:23
-msgid "gh+MXs"
-msgstr "Guided forms - National coordinator or representative"
+msgid "Nl1iK0"
+msgstr "Guided forms - Start or end a national coordinator or representative appointment"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:21
 msgid "SGpfWo"
@@ -4250,28 +4248,32 @@ msgid "mOFG3K"
 msgstr "Start"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:48
-msgid "i4aSAD"
-msgstr "Records the institution, the country it is located in, and its status towards DARIAH-EU."
+msgid "e1q7gO"
+msgstr "Records an institution as partner institution, national coordinating or representative institution, or cooperating partner, together with the country it is located in, which decides which of those statuses it may hold."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:52
+msgid "WvRPsU"
+msgstr "Record an institution's status towards DARIAH-EU"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:56
-msgid "xUQisD"
-msgstr "Records the role in the country and the matching seat on the National Coordinator Committee or General Assembly, for the same period."
+msgid "llJuAg"
+msgstr "Appoints a person as national coordinator or representative (or deputy), or ends the appointment, together with the matching seat on the National Coordinator Committee or General Assembly."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:64
-msgid "IFq96O"
-msgstr "Ends everything still open on a working group or country, on one date."
+msgid "555B0Y"
+msgstr "Ends the working group's or country's own membership together with every chair, member, coordinator, and contact still recorded as current, on one date."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/partner-institution/page.tsx:22
-msgid "u1fYhR"
-msgstr "Guided forms - Partner institution"
+msgid "nhri+g"
+msgstr "Guided forms - Record an institution's status towards DARIAH-EU"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/partner-institution/page.tsx:46
 msgid "IWrkCD"
 msgstr "DARIAH-EU"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/retire-unit/page.tsx:24
-msgid "jrUWC2"
-msgstr "Guided forms - Retire a unit"
+msgid "1s+14D"
+msgstr "Guided forms - End a working group or a country's membership"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:265
 msgid "eBy/Lk"
@@ -4720,8 +4722,8 @@ msgstr "Empty content blocks"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/empty-content-blocks-cleanup.tsx:143
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/heading-hierarchy-check.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx:138
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:63
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:67
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:64
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:68
 msgid "UfO190"
 msgstr "Entity"
 
@@ -5161,36 +5163,36 @@ msgstr "Normalising..."
 msgid "yN9OFd"
 msgstr "Normalise"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:49
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:50
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:56
 msgid "SeszzW"
 msgstr "Could not update the slug. Please try again."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:52
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:53
 msgid "xPWgF1"
 msgstr "Slug updated."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:70
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:71
 msgid "BnYxuz"
 msgstr "Search for an entity…"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:84
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:86
 msgid "Qlfpsz"
 msgstr "New slug"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:85
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:87
 msgid "Qm2W75"
 msgstr "new-slug"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:90
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:92
 msgid "mVYIF9"
 msgstr "This entity has never been published, so it has no public URL yet and renaming it breaks nothing. Slugs are normalised (lowercased, spaces and accents removed)."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:96
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:98
 msgid "htD2j+"
 msgstr "Changing a slug changes the entity's public URL. Any existing links or bookmarks to the old URL will stop working (404). Slugs are normalised (lowercased, spaces and accents removed)."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:121
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor.tsx:123
 msgid "FX4hV4"
 msgstr "Update slug"
 
@@ -6882,6 +6884,10 @@ msgstr "Bucket"
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx:172
 msgid "qVGRIE"
 msgstr "Quantity"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx:176
+msgid "xkB+8Z"
+msgstr "Unit"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx:186
 msgid "pLtaxl"

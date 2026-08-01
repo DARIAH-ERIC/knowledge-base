@@ -276,7 +276,7 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 				currentStepIndex={steps.length}
 				description={t("Everything has been saved.")}
 				steps={steps}
-				title={t("National coordinator or representative")}
+				title={t("Start or end a national coordinator or representative appointment")}
 			>
 				<Note intent="success">{state.message ?? t("Saved.")}</Note>
 				<div className="flex flex-wrap gap-2">
@@ -300,10 +300,10 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 		<WizardShell
 			currentStepIndex={stepIndex}
 			description={t(
-				"Records a country role together with the governance-body membership that comes with it, over one and the same period.",
+				"Records a person's appointment as national coordinator or representative (or deputy), or ends it, together with the governance-body seat that comes with it, over one and the same period.",
 			)}
 			steps={steps}
-			title={t("National coordinator or representative")}
+			title={t("Start or end a national coordinator or representative appointment")}
 		>
 			{stepIndex === 0 ? (
 				<Fragment>

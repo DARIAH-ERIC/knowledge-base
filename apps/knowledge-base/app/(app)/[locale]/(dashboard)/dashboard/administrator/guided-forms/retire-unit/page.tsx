@@ -21,7 +21,7 @@ export async function generateMetadata(
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Guided forms - Retire a unit"),
+		title: t("Guided forms - End a working group or a country's membership"),
 	});
 
 	return metadata;

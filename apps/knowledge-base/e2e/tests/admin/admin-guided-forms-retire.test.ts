@@ -44,8 +44,10 @@ async function openReviewFor(page: Page, workingGroupName: string): Promise<void
 	await page.getByRole("button", { name: "Type" }).click();
 	await page.getByRole("option", { name: "working group", exact: true }).click();
 
-	await page.getByRole("button", { name: "No unit selected" }).click();
-	const search = page.getByRole("dialog", { name: "No unit selected" }).getByRole("searchbox");
+	await page.getByRole("button", { name: "No working group or country selected" }).click();
+	const search = page
+		.getByRole("dialog", { name: "No working group or country selected" })
+		.getByRole("searchbox");
 	await search.fill(workingGroupName);
 	await search.press("Enter");
 	const option = page.getByRole("option").first();
