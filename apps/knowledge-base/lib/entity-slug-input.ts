@@ -1,14 +1,19 @@
 import slugify from "@sindresorhus/slugify";
 import * as v from "valibot";
 
+import { getSlugLength, maxSlugLength } from "@/lib/slug";
+
 /**
  * A slug as typed into an entity form. Always optional: leaving it empty on create means "derive
  * one from the title", and the field is not offered at all once a document is published.
  *
  * Normalised with the same slugifier that derives slugs from titles, so the field accepts what a
  * user naturally types ("My Page") and stores what a URL needs ("my-page") rather than rejecting
- * it. Only input that survives slugification as nothing at all is refused, since that cannot
- * address a page.
+ * it. Input that survives slugification as nothing at all is refused, since that cannot address a
+ * page, and so is input too long to survive as a URL segment.
+ *
+ * Both checks run on the slugified value rather than what was typed, because that is what gets
+ * stored: "My Page" and "my-page" must be judged identically.
  */
 export const EntitySlugInputSchema = v.optional(
 	v.pipe(
@@ -17,6 +22,10 @@ export const EntitySlugInputSchema = v.optional(
 		v.check(
 			(value) => value === "" || slugify(value) !== "",
 			"The slug must contain letters or numbers that can be used in a URL.",
+		),
+		v.check(
+			(value) => getSlugLength(slugify(value)) <= maxSlugLength,
+			`The slug must be no longer than ${String(maxSlugLength)} characters.`,
 		),
 	),
 );

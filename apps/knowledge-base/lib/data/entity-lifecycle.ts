@@ -7,6 +7,7 @@ import slugify from "@sindresorhus/slugify";
 import type { Transaction } from "@/lib/db";
 import { isUniqueViolation } from "@/lib/db/errors";
 import { asc, eq, inArray, or } from "@/lib/db/sql";
+import { assertSlugWithinMaxLength, maxSlugLength, truncateSlug } from "@/lib/slug";
 import { UserFacingError } from "@/lib/user-facing-error";
 
 export interface DocumentVersion {
@@ -373,6 +374,8 @@ export async function createPublishedDocument(
 	typeId: string,
 	slug: string,
 ): Promise<CreatedDocument> {
+	assertSlugWithinMaxLength(slug);
+
 	const [document] = await tx
 		.insert(schema.entities)
 		.values({ slug, typeId })
@@ -385,6 +388,13 @@ export async function createPublishedDocument(
 }
 
 const maxSlugAttempts = 50;
+
+/**
+ * The longest suffix `insertDocumentWithFreeSlug` can append (`-50`, for `maxSlugAttempts`).
+ * Derived base slugs hold this many bytes back, so deduplicating one that was truncated to the
+ * limit cannot push it past the limit again.
+ */
+const maxSlugSuffixLength = `-${String(maxSlugAttempts)}`.length;
 
 /**
  * Insert an `entities` row under `baseSlug`, falling back to `<baseSlug>-2`, `-3`, … while the type
@@ -449,13 +459,16 @@ async function createFallbackSlug(tx: Transaction, typeId: string): Promise<stri
  * clash must not fail the create, because the user cannot see the slug field and so has no way to
  * act on the error beyond rewording an otherwise valid title. A slug the user _did_ choose keeps
  * the opposite handling — see `createDraftDocument`.
+ *
+ * A very long title is treated the same way: the derived slug is cut to `maxSlugLength` rather than
+ * refused, since the length of a URL segment is not something the title's author is asked about.
  */
 export async function createDraftDocumentFromTitle(
 	tx: Transaction,
 	typeId: string,
 	title: string,
 ): Promise<CreatedDocument> {
-	const derivedSlug = slugify(title);
+	const derivedSlug = truncateSlug(slugify(title), maxSlugLength - maxSlugSuffixLength);
 	const baseSlug = derivedSlug === "" ? await createFallbackSlug(tx, typeId) : derivedSlug;
 
 	const document = await insertDocumentWithFreeSlug(tx, typeId, baseSlug);
@@ -478,6 +491,8 @@ export async function createDraftDocument(
 	typeId: string,
 	slug: string,
 ): Promise<CreatedDocument> {
+	assertSlugWithinMaxLength(slug);
+
 	const [document] = await tx
 		.insert(schema.entities)
 		.values({ slug, typeId })
@@ -556,6 +571,10 @@ export async function updateDraftDocumentSlug(
 	if (document.slug === slug) {
 		return;
 	}
+
+	// Checked only for an actual rename, so re-saving a document that already holds an over-long slug
+	// is not blocked by a value it is not changing.
+	assertSlugWithinMaxLength(slug);
 
 	const { publishedId } = await getDocumentVersions(tx, documentId);
 	if (publishedId != null) {

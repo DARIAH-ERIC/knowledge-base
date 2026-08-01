@@ -1840,16 +1840,16 @@ msgstr "Drafts"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:66
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:67
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:40
+msgid "UUfKZg"
+msgstr "Guided forms"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:72
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:50
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx:55
 msgid "dudqv/"
 msgstr "Maintenance"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:72
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:73
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/page.tsx:40
-msgid "UUfKZg"
-msgstr "Guided forms"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:78
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:79
@@ -8153,20 +8153,25 @@ msgstr "Both services have a value for the same KPI in the same country report. 
 
 #: lib/server/create-command-action.ts:167
 #: lib/server/create-server-action.ts:136
+msgid "paaApZ"
+msgstr "This slug is too long to be used as a web address. Please shorten it."
+
+#: lib/server/create-command-action.ts:168
+#: lib/server/create-server-action.ts:137
 msgid "Jl3xT+"
 msgstr "Both accounts have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge."
 
-#: lib/server/create-command-action.ts:170
-#: lib/server/create-server-action.ts:139
+#: lib/server/create-command-action.ts:171
+#: lib/server/create-server-action.ts:140
 msgid "qDy0wr"
 msgstr "The submitted data violates a data rule."
 
-#: lib/server/create-command-action.ts:171
-#: lib/server/create-server-action.ts:140
+#: lib/server/create-command-action.ts:172
+#: lib/server/create-server-action.ts:141
 msgid "Bosjdo"
 msgstr "The submitted data is incomplete."
 
-#: lib/server/create-command-action.ts:174
-#: lib/server/create-server-action.ts:145
+#: lib/server/create-command-action.ts:175
+#: lib/server/create-server-action.ts:146
 msgid "lkI8/e"
 msgstr "Internal server error."
