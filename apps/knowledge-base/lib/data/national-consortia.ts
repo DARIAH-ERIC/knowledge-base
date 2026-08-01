@@ -261,7 +261,11 @@ export async function getNationalConsortia(
 			.where(
 				and(
 					eq(schema.organisationalUnitTypes.type, consortiumType),
-					matchesAllTerms(query, schema.organisationalUnits.name),
+					matchesAllTerms(
+						query,
+						schema.organisationalUnits.name,
+						schema.organisationalUnits.acronym,
+					),
 				),
 			),
 		db
@@ -297,7 +301,11 @@ export async function getNationalConsortia(
 						schema.organisationalUnitTypes.type,
 						"country" as typeof schema.organisationalUnitTypes.$inferSelect.type,
 					),
-					matchesAllTerms(query, schema.organisationalUnits.name),
+					matchesAllTerms(
+						query,
+						schema.organisationalUnits.name,
+						schema.organisationalUnits.acronym,
+					),
 				),
 			),
 	]);

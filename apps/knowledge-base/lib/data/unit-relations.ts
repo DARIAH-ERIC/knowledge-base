@@ -163,7 +163,7 @@ export async function getUnitRelationRelatedUnitOptions(
 	const where = and(
 		publishedEntityVersionWhere(),
 		inArray(schema.organisationalUnits.typeId, relatedUnitTypeIds),
-		matchesAllTerms(query, schema.organisationalUnits.name),
+		matchesAllTerms(query, schema.organisationalUnits.name, schema.organisationalUnits.acronym),
 	);
 
 	const [items, aggregate] = await Promise.all([

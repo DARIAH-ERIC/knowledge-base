@@ -75,6 +75,7 @@ export async function getContributions(
 		schema.persons.name,
 		schema.persons.sortName,
 		schema.organisationalUnits.name,
+		schema.organisationalUnits.acronym,
 		schema.organisationalUnitTypes.type,
 		schema.personRoleTypes.type,
 	);
@@ -398,7 +399,7 @@ export async function getContributionOrganisationalUnitOptions(
 	const where = and(
 		publishedEntityVersionWhere(),
 		eq(schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId, roleTypeId),
-		matchesAllTerms(query, schema.organisationalUnits.name),
+		matchesAllTerms(query, schema.organisationalUnits.name, schema.organisationalUnits.acronym),
 	);
 
 	const [items, aggregate] = await Promise.all([
@@ -525,7 +526,7 @@ export async function getCountryOptions(params: GetContributionOptionsParams = {
 	const where = and(
 		publishedEntityVersionWhere(),
 		eq(schema.organisationalUnitTypes.type, "country"),
-		matchesAllTerms(query, schema.organisationalUnits.name),
+		matchesAllTerms(query, schema.organisationalUnits.name, schema.organisationalUnits.acronym),
 	);
 
 	const [items, aggregate] = await Promise.all([
