@@ -36,7 +36,7 @@ export default async function SignUpPage(_props: Readonly<SignUpPageProps>): Pro
 		return t("Too many requests.");
 	}
 
-	const { session, user } = await getCurrentSession();
+	const { realUser: user, session } = await getCurrentSession();
 
 	if (session != null) {
 		if (!user.isEmailVerified) {

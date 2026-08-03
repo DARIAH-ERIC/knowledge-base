@@ -59,13 +59,18 @@ export function getCreatedSlug(result: MutationResult): string {
 }
 
 export interface MutationContext {
+	/** The effective user: whom the mutation is made _as_. */
 	user: User | null;
+	/** The authenticated account behind `user`; differs only while impersonating. */
+	realUser: User | null;
+	isImpersonating: boolean;
 	formData: FormData;
 	locale: IntlLocale;
 }
 
 export interface AuthenticatedMutationContext extends MutationContext {
 	user: User;
+	realUser: User;
 }
 
 interface BaseCreateMutationActionOptions<
@@ -76,6 +81,12 @@ interface BaseCreateMutationActionOptions<
 	schema: TSchema;
 	requireAdmin?: boolean;
 	requireAuth?: boolean;
+	/**
+	 * Refuses the action while impersonating. For anything that mutates the credential behind the
+	 * session, which must never be applied to the impersonated user's account. Implies
+	 * `requireAuth`.
+	 */
+	requireNoImpersonation?: boolean;
 	audit: {
 		action: AuditLogAction;
 		subjectType: string;
@@ -165,8 +176,12 @@ export function createMutationAction<TSchema extends v.GenericSchema, TSuccessDa
 	opts: AnyCreateMutationActionOptions<TSchema, TSuccessData>,
 ): ServerAction {
 	return createServerAction(
-		{ requireAdmin: opts.requireAdmin, requireAuth: opts.requireAuth },
-		async (state, formData, { user }) => {
+		{
+			requireAdmin: opts.requireAdmin,
+			requireAuth: opts.requireAuth,
+			requireNoImpersonation: opts.requireNoImpersonation,
+		},
+		async (state, formData, { user, realUser, isImpersonating }) => {
 			const locale = await getLocale();
 			const t = await getExtracted();
 
@@ -183,7 +198,13 @@ export function createMutationAction<TSchema extends v.GenericSchema, TSuccessDa
 			}
 
 			const input = parsed.output;
-			const ctx = { user, formData, locale } as MutationContext & AuthenticatedMutationContext;
+			const ctx = {
+				user,
+				realUser,
+				isImpersonating,
+				formData,
+				locale,
+			} as MutationContext & AuthenticatedMutationContext;
 
 			if (opts.preCheck != null) {
 				const preCheckResult = await opts.preCheck({ input, ctx });
@@ -200,6 +221,7 @@ export function createMutationAction<TSchema extends v.GenericSchema, TSuccessDa
 						: await resolveAuditSubjectLabel(opts.audit.subjectType, mutationResult.subjectId, tx);
 				await recordAuditEvent(tx, {
 					actorUserId: user?.id,
+					impersonatedByUserId: isImpersonating ? realUser?.id : null,
 					action: opts.audit.action,
 					subjectType: opts.audit.subjectType,
 					subjectId: mutationResult.subjectId,

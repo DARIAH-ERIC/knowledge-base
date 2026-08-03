@@ -40,7 +40,7 @@ export default async function TwoFactorSetupPage(
 		return t("Too many requests.");
 	}
 
-	const { session, user } = await getCurrentSession();
+	const { realUser: user, session } = await getCurrentSession();
 
 	if (session == null) {
 		redirect({ href: "/auth/sign-in", locale });

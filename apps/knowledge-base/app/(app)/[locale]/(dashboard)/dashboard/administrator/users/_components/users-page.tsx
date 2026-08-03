@@ -9,7 +9,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon, TrashIcon, UserIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
@@ -23,6 +23,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteUserAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/delete-user.action";
+import { startImpersonationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/start-impersonation.action";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
@@ -68,6 +69,7 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 		sort: initialSort,
 	});
 	const [isDeletePending, startDeleteTransition] = useTransition();
+	const [, startImpersonationTransition] = useTransition();
 
 	return (
 		<Fragment>
@@ -123,6 +125,22 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 									>
 										{t("Edit")}
 									</RowActionsMenu.Link>
+									<RowActionsMenu.Separator />
+									<RowActionsMenu.Action
+										icon={<UserIcon className="me-2 block-4 inline-4" />}
+										/**
+										 * Admin accounts are excluded by the auth service too; disabling here only
+										 * saves the round trip.
+										 */
+										isDisabled={item.id === currentUserId || item.role === "admin"}
+										onAction={() => {
+											startImpersonationTransition(async () => {
+												await startImpersonationAction(item.id);
+											});
+										}}
+									>
+										{t("Sign in as this user")}
+									</RowActionsMenu.Action>
 									<RowActionsMenu.Separator />
 									<RowActionsMenu.Action
 										danger={true}
