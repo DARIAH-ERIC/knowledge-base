@@ -1,11 +1,12 @@
 import * as path from "node:path";
 
 import { assert, createUrl, createUrlSearchParams, log } from "@acdh-oeaw/lib";
+import slugify from "@sindresorhus/slugify";
+import type { JSONContent } from "@tiptap/core";
+
 import { type Transaction, createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { and, eq, inArray } from "@dariah-eric/database/sql";
-import slugify from "@sindresorhus/slugify";
-import type { JSONContent } from "@tiptap/core";
 
 import { env } from "../config/env.config";
 import { type EntityStatusType, groupByEntityVersion } from "../lib/entity-versions";

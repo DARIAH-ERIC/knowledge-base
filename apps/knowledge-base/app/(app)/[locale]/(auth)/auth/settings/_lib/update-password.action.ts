@@ -1,8 +1,6 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
@@ -11,6 +9,8 @@ import { auth } from "@/lib/auth";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
+import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 
 export const updatePasswordAction = createServerAction(
 	async function updatePasswordAction(state, formData) {

@@ -1,7 +1,7 @@
-import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { EntityRefSchema } from "@/lib/schemas";
+import * as schema from "@dariah-eric/database/schema";
 
 const NavigationItemBaseSchema = v.object({
 	...v.pick(schema.NavigationItemSelectSchema, ["id", "label", "href", "isExternal", "position"])

@@ -1,10 +1,9 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { UpdateCountryReportActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/update-country-report.schema";
 import { eq } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
 
 export const updateCountryReportAction = createMutationAction({
 	schema: UpdateCountryReportActionInputSchema,

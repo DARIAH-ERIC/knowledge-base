@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@dariah-eric/ui/badge";
 import { useExtracted, useFormatter } from "next-intl";
 import type { ReactNode } from "react";
 
@@ -9,6 +8,7 @@ import type {
 	WizardPlanItem,
 	WizardPlanItemStatus,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_lib/wizard-plan";
+import { Badge } from "@dariah-eric/ui/badge";
 
 /**
  * The "here is exactly what will be written" step every guided form ends on. Nothing is saved until

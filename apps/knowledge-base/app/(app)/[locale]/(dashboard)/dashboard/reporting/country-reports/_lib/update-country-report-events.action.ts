@@ -1,6 +1,5 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
 import { getExtracted } from "next-intl/server";
 
 import { UpdateCountryReportEventsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/update-country-report-events.schema";
@@ -8,6 +7,7 @@ import { assertCan, assertReportEditable } from "@/lib/auth/permissions";
 import { countryReportRevalidatePaths } from "@/lib/data/reporting-urls";
 import { eq } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
 
 export const updateCountryReportEventsAction = createMutationAction({
 	schema: UpdateCountryReportEventsActionInputSchema,

@@ -1,15 +1,5 @@
 "use client";
 
-import { Badge } from "@dariah-eric/ui/badge";
-import { Link } from "@dariah-eric/ui/link";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableColumn,
-	TableHeader,
-	TableRow,
-} from "@dariah-eric/ui/table";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -20,6 +10,16 @@ import type {
 	HeadingHierarchyFindingKind,
 } from "@/lib/data/data-integrity";
 import { getEntityDetailHref } from "@/lib/entity-detail-href";
+import { Badge } from "@dariah-eric/ui/badge";
+import { Link } from "@dariah-eric/ui/link";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
+} from "@dariah-eric/ui/table";
 
 interface HeadingHierarchyCheckProps {
 	result: HeadingHierarchyCheckResult;

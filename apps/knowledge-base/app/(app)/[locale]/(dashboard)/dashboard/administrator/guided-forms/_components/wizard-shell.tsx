@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@dariah-eric/ui/button";
-import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 import { twJoin } from "tailwind-merge";
 
 import { EntityListHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
+import { Button } from "@dariah-eric/ui/button";
+import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 
 export interface WizardStepDescriptor {
 	id: string;

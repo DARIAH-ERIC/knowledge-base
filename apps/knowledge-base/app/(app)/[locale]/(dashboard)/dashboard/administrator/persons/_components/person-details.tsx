@@ -1,11 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import {
-	DescriptionDetails,
-	DescriptionList,
-	DescriptionTerm,
-} from "@dariah-eric/ui/description-list";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -22,6 +16,12 @@ import { getEntityDetailHref, getOrganisationalUnitDetailHref } from "@/lib/enti
 import { getEntityTypeLabel } from "@/lib/entity-type-label";
 import { getOrcidUrl } from "@/lib/external-identifier-url";
 import { formatRoleType } from "@/lib/format-role-type";
+import type * as schema from "@dariah-eric/database/schema";
+import {
+	DescriptionDetails,
+	DescriptionList,
+	DescriptionTerm,
+} from "@dariah-eric/ui/description-list";
 
 interface PersonDetailsProps {
 	documentId: string;

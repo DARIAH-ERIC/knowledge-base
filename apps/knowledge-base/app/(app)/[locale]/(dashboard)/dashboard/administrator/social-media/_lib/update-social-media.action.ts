@@ -1,11 +1,11 @@
 "use server";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import { UpdateSocialMediaActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_lib/update-social-media.schema";
 import { eq } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
 
 export const updateSocialMediaAction = createMutationAction({
 	schema: UpdateSocialMediaActionInputSchema,

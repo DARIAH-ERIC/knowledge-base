@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { db } from "@/lib/db";
 import { alias, and, eq, sql } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 /**
  * `unitDocumentId` is the working group's `entities.id`. Each chair person is resolved to its

@@ -1,7 +1,7 @@
-import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 import type { JSONContent } from "@tiptap/core";
 
 import { images } from "@/services/images";
+import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 
 export interface ImageAsset {
 	key: string;

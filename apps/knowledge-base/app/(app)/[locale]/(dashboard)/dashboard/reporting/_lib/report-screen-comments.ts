@@ -1,8 +1,8 @@
-import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 export type ReportScreenCommentType = (typeof schema.reportScreenCommentTypeEnum)[number];
 export type ReportScreenCommentKey = (typeof schema.reportScreenCommentKeyEnum)[number];

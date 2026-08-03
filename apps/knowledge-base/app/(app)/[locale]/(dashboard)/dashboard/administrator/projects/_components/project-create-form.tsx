@@ -1,12 +1,12 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { ProjectForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form";
 import { createProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-project.action";
+import type * as schema from "@dariah-eric/database/schema";
 
 interface ProjectCreateFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

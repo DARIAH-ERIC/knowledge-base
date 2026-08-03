@@ -1,7 +1,6 @@
 "use server";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import { CreateWorkingGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group.schema";
 import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-lifecycle";
@@ -15,6 +14,7 @@ import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createMutationAction, getCreatedSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import * as schema from "@dariah-eric/database/schema";
 
 export const createWorkingGroupAction = createMutationAction({
 	schema: CreateWorkingGroupActionInputSchema,

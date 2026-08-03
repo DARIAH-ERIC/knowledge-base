@@ -1,10 +1,10 @@
-import type { User } from "@dariah-eric/auth";
-import * as schema from "@dariah-eric/database/schema";
 import { cache } from "react";
 
 import { can } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 import { and, eq, inArray, or, sql } from "@/lib/db/sql";
+import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 
 export interface UserCountryScope {
 	documentId: string;

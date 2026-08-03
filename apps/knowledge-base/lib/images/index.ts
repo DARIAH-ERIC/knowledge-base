@@ -1,6 +1,5 @@
-import { type ImageUrlOptions, createImagesService } from "@dariah-eric/images";
-
 import { env } from "@/config/env.config";
+import { type ImageUrlOptions, createImagesService } from "@dariah-eric/images";
 
 export const images = createImagesService({
 	config: {

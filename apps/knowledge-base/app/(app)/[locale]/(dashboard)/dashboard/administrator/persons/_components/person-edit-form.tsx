@@ -1,8 +1,5 @@
 "use client";
 
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
-import type * as schema from "@dariah-eric/database/schema";
-import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
@@ -21,6 +18,9 @@ import { discardPersonDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { publishPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/publish-person.action";
 import { updatePersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.action";
 import type { ContributionRoleOption, PersonContribution } from "@/lib/data/contributions";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
+import type * as schema from "@dariah-eric/database/schema";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 
 interface PersonEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import type { User } from "@dariah-eric/auth";
-import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { count, desc, eq, inArray } from "@/lib/db/sql";
 import { getSocialMediaTypeLabel } from "@/lib/social-media-type-label";
+import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 
 export interface SocialMediaOption {
 	id: string;

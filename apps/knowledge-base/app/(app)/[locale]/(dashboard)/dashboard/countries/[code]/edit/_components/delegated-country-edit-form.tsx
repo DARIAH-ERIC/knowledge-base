@@ -1,6 +1,5 @@
 "use client";
 
-import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { type ComponentProps, Fragment, type ReactNode } from "react";
 
@@ -24,6 +23,7 @@ import { updateDelegatedNationalConsortiumAction } from "@/app/(app)/[locale]/(d
 import type { ContributionPersonOption } from "@/lib/data/contributions";
 import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
 import type { ReverseUnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 
 interface DelegatedCountryEditFormProps {
 	initialAssets: ComponentProps<typeof NationalConsortiumForm>["initialAssets"];

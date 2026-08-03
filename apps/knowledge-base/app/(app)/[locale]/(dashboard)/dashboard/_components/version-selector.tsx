@@ -1,9 +1,10 @@
 "use client";
 
-import { buttonStyles } from "@dariah-eric/ui/button-styles";
-import { Link } from "@dariah-eric/ui/link";
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
+
+import { buttonStyles } from "@dariah-eric/ui/button-styles";
+import { Link } from "@dariah-eric/ui/link";
 
 interface VersionSelectorProps {
 	hasDraft: boolean;

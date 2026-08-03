@@ -1,5 +1,4 @@
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import {
 	cloneVersionContent,
@@ -14,6 +13,7 @@ import {
 import type { Transaction } from "@/lib/db";
 import { and, eq, ne } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
+import * as schema from "@dariah-eric/database/schema";
 
 interface DuplicableEntity {
 	id: string;

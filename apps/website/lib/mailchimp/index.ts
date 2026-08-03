@@ -1,11 +1,11 @@
 import { assert } from "@acdh-oeaw/lib";
+
+import { env } from "@/config/env.config";
 import {
 	type CreateListMemberResponse,
 	type GetCampaignsResponse,
 	createMailchimpClient,
 } from "@dariah-eric/mailchimp";
-
-import { env } from "@/config/env.config";
 
 assert(env.MAILCHIMP_API_KEY, "Missing environment variable `MAILCHIMP_API_KEY`.");
 assert(env.MAILCHIMP_API_BASE_URL, "Missing environment variable `MAILCHIMP_API_BASE_URL`.");

@@ -1,7 +1,6 @@
-import type { StorageService } from "@dariah-eric/storage";
-
 import { createMiddleware } from "@/lib/factory";
 import { storage as client } from "@/services/storage";
+import type { StorageService } from "@dariah-eric/storage";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function storage(service: StorageService = client) {

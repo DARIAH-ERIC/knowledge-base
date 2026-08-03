@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import { describe, expect, it } from "vitest";
 
 import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
@@ -9,6 +8,7 @@ import { mergeEntities } from "@/lib/data/entity-merge";
 import type { Transaction } from "@/lib/db";
 import { eq, sql } from "@/lib/db/sql";
 import { withTransaction } from "@/test/lib/with-transaction";
+import * as schema from "@dariah-eric/database/schema";
 
 type Tx = Transaction;
 

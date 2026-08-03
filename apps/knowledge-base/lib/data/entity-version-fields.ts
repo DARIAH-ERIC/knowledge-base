@@ -1,11 +1,11 @@
 import { assert } from "@acdh-oeaw/lib";
-import { isEmptyRichTextDocument, withoutBlankParagraphs } from "@dariah-eric/database/rich-text";
-import * as schema from "@dariah-eric/database/schema";
 
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import type { Transaction } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
+import { isEmptyRichTextDocument, withoutBlankParagraphs } from "@dariah-eric/database/rich-text";
+import * as schema from "@dariah-eric/database/schema";
 
 export async function ensureEntityVersionField(
 	tx: Transaction,

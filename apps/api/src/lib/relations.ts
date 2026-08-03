@@ -1,5 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
-
 import type { EntityRef, PublicRelatedEntityType } from "@/lib/schemas";
 import {
 	getCountrySlugsByOrganisationalUnitDocumentId,
@@ -8,6 +6,7 @@ import {
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, asc, eq, inArray, notInArray, sql } from "@/services/db/sql";
 import { search } from "@/services/search";
+import * as schema from "@dariah-eric/database/schema";
 
 /**
  * Resolve a (published/draft) entity version id to its owning document id (`entities.id`). Returns

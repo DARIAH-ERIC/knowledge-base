@@ -1,10 +1,10 @@
-import type { User } from "@dariah-eric/auth";
-import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { alias, count, desc, eq, sql } from "@/lib/db/sql";
+import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 
 export type ProjectPartnersSort =
 	| "projectName"

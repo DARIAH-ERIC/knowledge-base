@@ -1,14 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableColumn,
-	TableHeader,
-	TableRow,
-} from "@dariah-eric/ui/table";
 import { EyeIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
@@ -22,6 +13,15 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { dashboardPageSize } from "@/config/pagination.config";
+import type * as schema from "@dariah-eric/database/schema";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
+} from "@dariah-eric/ui/table";
 
 interface InternalPagesPageProps {
 	dir: "asc" | "desc";

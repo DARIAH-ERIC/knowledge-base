@@ -1,6 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -10,6 +9,7 @@ import { InternalPageForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/adm
 import { discardInternalPageDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_lib/discard-internal-page-draft.action";
 import { publishInternalPageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_lib/publish-internal-page.action";
 import { updateInternalPageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_lib/update-internal-page.action";
+import type * as schema from "@dariah-eric/database/schema";
 
 interface InternalPageEditFormProps {
 	contentBlocks: Array<ContentBlock>;

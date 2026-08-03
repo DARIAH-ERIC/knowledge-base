@@ -1,12 +1,12 @@
 "use client";
 
-import { FormStatus } from "@dariah-eric/ui/form-status";
-import { Separator } from "@dariah-eric/ui/separator";
 import { useExtracted } from "next-intl";
 import type { ComponentProps, ReactNode } from "react";
 
 import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
 import { FormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { FormStatus } from "@dariah-eric/ui/form-status";
+import { Separator } from "@dariah-eric/ui/separator";
 
 interface EntityFormActionsProps {
 	entityName: string;

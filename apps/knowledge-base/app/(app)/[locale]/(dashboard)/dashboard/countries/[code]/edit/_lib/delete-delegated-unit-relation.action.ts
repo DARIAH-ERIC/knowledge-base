@@ -1,6 +1,5 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
 import { assertCanManageCountryInstitutionRelation } from "@/app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/authorize-country-institution-relation";
@@ -9,6 +8,7 @@ import { assertAuthenticated } from "@/lib/auth/session";
 import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 /** Delegated counterpart of `deleteUnitRelationAction` for country partner-institution relations. */
 export async function deleteDelegatedUnitRelationAction(id: string): Promise<void> {

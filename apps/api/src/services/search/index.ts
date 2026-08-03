@@ -1,6 +1,6 @@
 import { assert } from "@acdh-oeaw/lib";
-import { createSearchService } from "@dariah-eric/search";
 
+import { createSearchService } from "@dariah-eric/search";
 import { env } from "~/config/env.config";
 import { config } from "~/config/search.config";
 

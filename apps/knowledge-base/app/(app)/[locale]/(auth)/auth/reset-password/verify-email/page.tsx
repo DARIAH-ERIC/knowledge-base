@@ -1,7 +1,3 @@
-import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { Avatar } from "@dariah-eric/ui/avatar";
-import { Link } from "@dariah-eric/ui/link";
-import { Text } from "@dariah-eric/ui/text";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted, getLocale } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -11,6 +7,10 @@ import { Main } from "@/components/main";
 import { auth } from "@/lib/auth";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
+import { Avatar } from "@dariah-eric/ui/avatar";
+import { Link } from "@dariah-eric/ui/link";
+import { Text } from "@dariah-eric/ui/text";
 
 interface PasswordResetVerifyEmailPageProps extends PageProps<"/[locale]/auth/reset-password/verify-email"> {}
 

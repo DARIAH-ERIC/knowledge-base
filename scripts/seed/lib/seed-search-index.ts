@@ -1,6 +1,7 @@
+import { faker as f } from "@faker-js/faker";
+
 import { type ResourceDocument, resourceServiceKinds, resourceTypes } from "@dariah-eric/search";
 import type { SearchAdminService as Client } from "@dariah-eric/search/admin";
-import { faker as f } from "@faker-js/faker";
 
 export interface SeedConfig {
 	/** @default "2025-01-01" */

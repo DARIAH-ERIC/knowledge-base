@@ -1,10 +1,10 @@
 import { log } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
-import { request } from "@dariah-eric/request";
 
 import { env } from "@/config/env.config";
 import { db } from "@/lib/db";
 import { eq, or, sql } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
+import { request } from "@dariah-eric/request";
 
 export type WebhookEntityType =
 	| "dariah-projects"

@@ -1,4 +1,6 @@
 import { log } from "@acdh-oeaw/lib";
+import { Result } from "better-result";
+
 import type { DariahCampusClient } from "@dariah-eric/client-campus";
 import type { EpisciencesClient, EpisciencesSearchDocument } from "@dariah-eric/client-episciences";
 import type { SshocClient } from "@dariah-eric/client-sshoc";
@@ -11,7 +13,6 @@ import {
 	resourceSources,
 } from "@dariah-eric/search";
 import type { SearchAdminService } from "@dariah-eric/search/admin";
-import { Result } from "better-result";
 
 import {
 	type EpisciencesPaperEntry,

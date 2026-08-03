@@ -1,5 +1,4 @@
 import { ensureArray } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
@@ -10,6 +9,7 @@ import {
 	RelatedEntitiesSchema,
 	RelatedResourcesSchema,
 } from "@/lib/schemas";
+import * as schema from "@dariah-eric/database/schema";
 
 const fundingCallBaseObject = v.object({
 	...v.pick(schema.FundingCallSelectSchema, ["id", "title", "summary"]).entries,

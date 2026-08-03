@@ -1,5 +1,3 @@
-import type * as schema from "@dariah-eric/database/schema";
-
 import { documentationPagesLifecycleAdapter } from "@/lib/data/documentation-pages.lifecycle-adapter";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
 import type { EntityLifecycleAdapter } from "@/lib/data/entity-lifecycle";
@@ -14,6 +12,7 @@ import { pagesLifecycleAdapter } from "@/lib/data/pages.lifecycle-adapter";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
 import { spotlightArticlesLifecycleAdapter } from "@/lib/data/spotlight-articles.lifecycle-adapter";
+import type * as schema from "@dariah-eric/database/schema";
 
 export type EntityType = schema.EntityType["type"];
 

@@ -1,7 +1,5 @@
 "use client";
 
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
-import type * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
@@ -13,6 +11,8 @@ import { EventForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/ev
 import { discardEventDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/discard-event-draft.action";
 import { publishEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/publish-event.action";
 import { updateEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/update-event.action";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
+import type * as schema from "@dariah-eric/database/schema";
 
 interface EventEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

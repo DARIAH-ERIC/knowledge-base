@@ -1,5 +1,6 @@
-import { RefillingTokenBucket } from "@dariah-eric/rate-limiter";
 import { headers } from "next/headers";
+
+import { RefillingTokenBucket } from "@dariah-eric/rate-limiter";
 
 export const globalBucket = new RefillingTokenBucket<string>(100, 1);
 

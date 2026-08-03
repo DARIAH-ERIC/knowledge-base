@@ -1,5 +1,3 @@
-import type { User } from "@dariah-eric/auth";
-import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { contributionOptionsPageSize } from "@/lib/constants/contributions";
@@ -10,6 +8,8 @@ import {
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { alias, and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
+import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 
 export type ContributionsSort =
 	| "personName"

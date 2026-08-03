@@ -1,5 +1,3 @@
-import type { User } from "@dariah-eric/auth";
-import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import {
@@ -14,6 +12,8 @@ import {
 } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 
 export interface EricReverseRelationGroup {
 	relations: Array<ReverseUnitRelation>;

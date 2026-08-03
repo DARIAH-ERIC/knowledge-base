@@ -1,7 +1,5 @@
 "use client";
 
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
-import type * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
@@ -13,6 +11,8 @@ import { FundingCallForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/webs
 import { discardFundingCallDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/discard-funding-call-draft.action";
 import { publishFundingCallAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/publish-funding-call.action";
 import { updateFundingCallAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/update-funding-call.action";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
+import type * as schema from "@dariah-eric/database/schema";
 
 interface FundingCallEditFormProps {
 	contentBlocks: Array<ContentBlock>;

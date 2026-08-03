@@ -1,7 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -18,6 +16,8 @@ import { ProjectPartnersSection } from "@/app/(app)/[locale]/(dashboard)/dashboa
 import { discardProjectDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/discard-project-draft.action";
 import { publishProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/publish-project.action";
 import { updateProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/update-project.action";
+import type * as schema from "@dariah-eric/database/schema";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 
 interface ProjectEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

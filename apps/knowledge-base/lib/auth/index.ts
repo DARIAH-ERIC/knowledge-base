@@ -1,4 +1,3 @@
-import { createAuthService } from "@dariah-eric/auth";
 import { cookies } from "next/headers";
 
 import {
@@ -10,6 +9,7 @@ import {
 import { env } from "@/config/env.config";
 import { db } from "@/lib/db";
 import { email } from "@/lib/email";
+import { createAuthService } from "@dariah-eric/auth";
 
 export const auth = createAuthService({
 	config: {

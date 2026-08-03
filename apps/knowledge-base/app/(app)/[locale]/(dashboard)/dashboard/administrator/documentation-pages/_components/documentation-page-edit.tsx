@@ -1,6 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -10,6 +9,7 @@ import { DocumentationPageForm } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { discardDocumentationPageDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/discard-documentation-page-draft.action";
 import { publishDocumentationPageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/publish-documentation-page.action";
 import { updateDocumentationPageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/update-documentation-page.action";
+import type * as schema from "@dariah-eric/database/schema";
 
 interface DocumentationPageEditFormProps {
 	contentBlocks: Array<ContentBlock>;

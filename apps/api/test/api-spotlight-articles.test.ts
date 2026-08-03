@@ -1,5 +1,4 @@
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
 import { v7 as uuidv7 } from "uuid";
@@ -7,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
 import type { SpotlightArticle } from "@/routes/spotlight-articles/schemas";
+import * as schema from "@dariah-eric/database/schema";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";

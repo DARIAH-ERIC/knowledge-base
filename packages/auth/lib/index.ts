@@ -8,6 +8,10 @@ import {
 } from "node:crypto";
 
 import { createUrl } from "@acdh-oeaw/lib";
+import { hash, verify } from "@node-rs/argon2";
+import { decodeBase64, encodeBase32UpperCaseNoPadding, encodeBase64 } from "@oslojs/encoding";
+import { createTOTPKeyURI, verifyTOTP } from "@oslojs/otp";
+
 import type { Database } from "@dariah-eric/database";
 import { DatabaseError } from "@dariah-eric/database/errors";
 import * as schema from "@dariah-eric/database/schema";
@@ -15,9 +19,6 @@ import { and, eq, sql } from "@dariah-eric/database/sql";
 import type { EmailService } from "@dariah-eric/email";
 import { ExpiringTokenBucket, RefillingTokenBucket, Throttler } from "@dariah-eric/rate-limiter";
 import { request } from "@dariah-eric/request";
-import { hash, verify } from "@node-rs/argon2";
-import { decodeBase64, encodeBase32UpperCaseNoPadding, encodeBase64 } from "@oslojs/encoding";
-import { createTOTPKeyURI, verifyTOTP } from "@oslojs/otp";
 
 import { InvalidUserIdError } from "./errors";
 

@@ -1,5 +1,3 @@
-import type { User } from "@dariah-eric/auth";
-import * as schema from "@dariah-eric/database/schema";
 import { getLocale } from "next-intl/server";
 
 import { can } from "@/lib/auth/permissions";
@@ -7,6 +5,8 @@ import { getDariahEricDocumentId } from "@/lib/data/unit-relations";
 import { type Database, type Transaction, db } from "@/lib/db";
 import { and, eq, sql } from "@/lib/db/sql";
 import { redirect } from "@/lib/navigation/navigation";
+import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 
 /**
  * Authorize a delegated edit of a "partner institution" relation surfaced on a country dashboard.

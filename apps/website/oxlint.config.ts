@@ -1,5 +1,7 @@
 import * as path from "node:path";
 
+import { defineConfig } from "oxlint";
+
 import base from "@dariah-eric/configs/oxlint/base";
 import nextjs from "@dariah-eric/configs/oxlint/nextjs";
 import playwright from "@dariah-eric/configs/oxlint/playwright";
@@ -7,7 +9,6 @@ import react from "@dariah-eric/configs/oxlint/react";
 import regexp from "@dariah-eric/configs/oxlint/regexp";
 import tailwindcss from "@dariah-eric/configs/oxlint/tailwindcss";
 import turbo from "@dariah-eric/configs/oxlint/turbo";
-import { defineConfig } from "oxlint";
 
 const configs = [base, nextjs, playwright, react, regexp, turbo];
 

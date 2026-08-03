@@ -1,12 +1,12 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { ServiceForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form";
 import { updateServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/update-service.action";
+import type * as schema from "@dariah-eric/database/schema";
+import { Heading } from "@dariah-eric/ui/heading";
 
 interface ServiceEditFormProps {
 	service: Pick<

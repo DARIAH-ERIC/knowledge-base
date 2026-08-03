@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -11,6 +10,7 @@ import { assertAuthenticated } from "@/lib/auth/session";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 interface CountryReportProjectsScreenProps {
 	reportId: string;

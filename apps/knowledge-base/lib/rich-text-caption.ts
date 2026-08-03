@@ -1,6 +1,7 @@
-import { isEmptyRichTextDocument } from "@dariah-eric/ui/rich-text";
 import type { JSONContent } from "@tiptap/core";
 import * as v from "valibot";
+
+import { isEmptyRichTextDocument } from "@dariah-eric/ui/rich-text";
 
 /**
  * Parses a richtext caption submitted as a JSON string (from a form's hidden input) into Tiptap

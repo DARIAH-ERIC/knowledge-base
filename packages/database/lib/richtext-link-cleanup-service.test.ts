@@ -1,11 +1,12 @@
+import type { JSONContent } from "@tiptap/core";
+import { describe, expect, it } from "vitest";
+
 import {
 	getEntityHref,
 	getEntityListHref,
 	interimPagePathBySlug,
 	listableEntityTypes,
 } from "@dariah-eric/website-routes";
-import type { JSONContent } from "@tiptap/core";
-import { describe, expect, it } from "vitest";
 
 import {
 	cleanRichTextLinksInDocument,

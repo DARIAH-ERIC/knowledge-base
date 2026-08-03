@@ -1,5 +1,13 @@
 "use client";
 
+import { useExtracted, useFormatter } from "next-intl";
+import { Fragment, type ReactNode, useMemo, useState } from "react";
+
+import { EntityListHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
+import type { DraftDocument } from "@/lib/data/draft-documents";
+import { getEntityDetailHref } from "@/lib/entity-detail-href";
 import { Badge } from "@dariah-eric/ui/badge";
 import { EmptyState } from "@dariah-eric/ui/empty-state";
 import { Link } from "@dariah-eric/ui/link";
@@ -12,14 +20,6 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, useMemo, useState } from "react";
-
-import { EntityListHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
-import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
-import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
-import type { DraftDocument } from "@/lib/data/draft-documents";
-import { getEntityDetailHref } from "@/lib/entity-detail-href";
 
 interface DraftsListProps {
 	drafts: Array<DraftDocument>;

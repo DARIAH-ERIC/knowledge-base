@@ -1,6 +1,5 @@
-import { createEmailService } from "@dariah-eric/email";
-
 import { env } from "@/config/env.config";
+import { createEmailService } from "@dariah-eric/email";
 
 export const email = createEmailService({
 	config: {

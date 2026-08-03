@@ -1,9 +1,9 @@
-import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 export interface SelectedDetailVersion {
 	hasDraftChanges: boolean;

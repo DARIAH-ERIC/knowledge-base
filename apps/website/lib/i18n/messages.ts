@@ -1,9 +1,8 @@
-import type ui from "@dariah-eric/ui/i18n/en";
-
 import type metadata from "@/content/en/metadata/index.json";
 import { type IntlLocale, getIntlLanguage } from "@/lib/i18n/locales";
 import type { SocialMediaKind } from "@/lib/social-media/social-media.config";
 import type messages from "@/messages/en.json";
+import type ui from "@dariah-eric/ui/i18n/en";
 
 type Messages = typeof messages;
 type Metadata = typeof metadata;

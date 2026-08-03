@@ -1,7 +1,6 @@
-import * as schema from "@dariah-eric/database/schema";
-
 import type { Transaction } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 interface ExistingSocialMediaRow {
 	id: string;

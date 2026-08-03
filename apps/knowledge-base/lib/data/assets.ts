@@ -4,7 +4,6 @@ import { Readable } from "node:stream";
 import type { ReadableStream } from "node:stream/web";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import sharp from "sharp";
 
 import type { SelectedImage } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
@@ -19,6 +18,7 @@ import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, desc, eq, like } from "@/lib/db/sql";
 import { type ImageUrlOptions, images } from "@/lib/images";
 import { type AssetPrefix, assetPrefixes, storage as s3 } from "@/lib/storage";
+import * as schema from "@dariah-eric/database/schema";
 
 export { assetPrefixes };
 export type { AssetPrefix };

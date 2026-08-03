@@ -1,5 +1,12 @@
 "use client";
 
+import { useExtracted, useFormatter } from "next-intl";
+import { Fragment, type ReactNode } from "react";
+
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useClientPagination } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/use-client-pagination";
+import type { InactiveUnitRelationCheckResult } from "@/lib/data/data-integrity";
+import { getEntityDetailHref } from "@/lib/entity-detail-href";
 import { Badge } from "@dariah-eric/ui/badge";
 import { Link } from "@dariah-eric/ui/link";
 import {
@@ -10,13 +17,6 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode } from "react";
-
-import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
-import { useClientPagination } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/use-client-pagination";
-import type { InactiveUnitRelationCheckResult } from "@/lib/data/data-integrity";
-import { getEntityDetailHref } from "@/lib/entity-detail-href";
 
 interface InactiveUnitRelationsCheckProps {
 	result: InactiveUnitRelationCheckResult;

@@ -1,5 +1,4 @@
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
 import { describe, expect, it } from "vitest";
 
@@ -7,6 +6,7 @@ import { createDraftDocument } from "@/lib/data/entity-lifecycle";
 import { getMaintenanceEntityOptions } from "@/lib/data/maintenance-entity-options";
 import type { db } from "@/lib/db";
 import { withTransaction } from "@/test/lib/with-transaction";
+import * as schema from "@dariah-eric/database/schema";
 
 type Tx = Awaited<Parameters<Parameters<typeof db.transaction>[0]>[0]>;
 

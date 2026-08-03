@@ -1,5 +1,6 @@
-import { workingGroupEventRoleEnum } from "@dariah-eric/database/schema";
 import * as v from "valibot";
+
+import { workingGroupEventRoleEnum } from "@dariah-eric/database/schema";
 
 export const CreateWorkingGroupReportEventActionInputSchema = v.object({
 	workingGroupReportId: v.pipe(v.string(), v.uuid()),

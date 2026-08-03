@@ -1,6 +1,3 @@
-import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
-import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
-import { isEmptyRichTextDocument } from "@dariah-eric/ui/rich-text";
 import type { JSONContent } from "@tiptap/core";
 import type { ReactNode } from "react";
 
@@ -8,6 +5,9 @@ import {
 	AssetSummary,
 	type SelectedImage,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary";
+import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
+import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
+import { isEmptyRichTextDocument } from "@dariah-eric/ui/rich-text";
 
 interface FeaturedImageDetailsProps {
 	image: SelectedImage;

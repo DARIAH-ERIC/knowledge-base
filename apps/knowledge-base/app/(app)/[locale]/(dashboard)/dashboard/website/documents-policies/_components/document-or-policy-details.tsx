@@ -1,11 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import {
-	DescriptionDetails,
-	DescriptionList,
-	DescriptionTerm,
-} from "@dariah-eric/ui/description-list";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -13,6 +7,12 @@ import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import type * as schema from "@dariah-eric/database/schema";
+import {
+	DescriptionDetails,
+	DescriptionList,
+	DescriptionTerm,
+} from "@dariah-eric/ui/description-list";
 
 interface DocumentOrPolicyDetailsProps {
 	contentBlocks: Array<ContentBlock>;

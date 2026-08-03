@@ -1,6 +1,7 @@
+import { faker as f } from "@faker-js/faker";
+
 import type { StorageService } from "@dariah-eric/storage";
 import { stream } from "@dariah-eric/storage/lib";
-import { faker as f } from "@faker-js/faker";
 
 export interface SeedConfig {
 	/** @default "2025-01-01" */

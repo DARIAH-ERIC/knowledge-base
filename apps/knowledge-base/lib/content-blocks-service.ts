@@ -1,11 +1,3 @@
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
-import {
-	annotatePlaceholderValues,
-	collectPlaceholderValueKinds,
-} from "@dariah-eric/database/placeholder-values";
-import { getPlaceholderValues } from "@dariah-eric/database/placeholder-values-service";
-import { isEmptyRichTextDocument, withoutBlankParagraphs } from "@dariah-eric/database/rich-text";
-import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
@@ -15,6 +7,14 @@ import type { ContentBlockInput } from "@/lib/content-block-input";
 import { type Transaction, db } from "@/lib/db";
 import { and, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
+import {
+	annotatePlaceholderValues,
+	collectPlaceholderValueKinds,
+} from "@dariah-eric/database/placeholder-values";
+import { getPlaceholderValues } from "@dariah-eric/database/placeholder-values-service";
+import { isEmptyRichTextDocument, withoutBlankParagraphs } from "@dariah-eric/database/rich-text";
+import * as schema from "@dariah-eric/database/schema";
 
 async function getAssetIdByKey(tx: Transaction, key: string): Promise<string | null> {
 	const asset = await tx.query.assets.findFirst({

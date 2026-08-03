@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import type { User } from "@dariah-eric/auth";
-import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { alias, and, count, desc, eq, sql } from "@/lib/db/sql";
+import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 
 export type ProjectsSort = "name" | "acronym" | "funding" | "scope";
 

@@ -1,9 +1,9 @@
-import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
 import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
 import type { SiteMetadata } from "@/routes/site-metadata/schemas";
+import * as schema from "@dariah-eric/database/schema";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { withTransaction } from "~/test/lib/with-transaction";
 

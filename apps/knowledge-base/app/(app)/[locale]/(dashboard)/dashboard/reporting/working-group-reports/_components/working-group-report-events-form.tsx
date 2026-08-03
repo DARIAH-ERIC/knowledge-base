@@ -1,5 +1,9 @@
 "use client";
 
+import { useExtracted, useFormatter } from "next-intl";
+import { Fragment, type ReactNode, useActionState } from "react";
+
+import type { ServerAction } from "@/lib/server/create-server-action";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
@@ -10,10 +14,6 @@ import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
-import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, useActionState } from "react";
-
-import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface ReportEvent {
 	id: string;

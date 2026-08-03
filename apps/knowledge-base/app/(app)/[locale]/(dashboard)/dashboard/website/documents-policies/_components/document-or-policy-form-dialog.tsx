@@ -1,5 +1,16 @@
 "use client";
 
+import { useExtracted } from "next-intl";
+import { type ReactNode, useActionState, useState } from "react";
+
+import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
+import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import {
+	type SelectedImage,
+	SelectedImageCard,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
+import { createDocumentOrPolicyFromDialogAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy-from-dialog.action";
+import { updateDocumentOrPolicyDetailsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.action";
 import type * as schema from "@dariah-eric/database/schema";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
@@ -15,17 +26,6 @@ import {
 } from "@dariah-eric/ui/modal";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
-import { useExtracted } from "next-intl";
-import { type ReactNode, useActionState, useState } from "react";
-
-import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
-import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
-import {
-	type SelectedImage,
-	SelectedImageCard,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
-import { createDocumentOrPolicyFromDialogAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy-from-dialog.action";
-import { updateDocumentOrPolicyDetailsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.action";
 
 export interface DocumentOrPolicyDialogItem {
 	id: string;

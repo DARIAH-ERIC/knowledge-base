@@ -1,9 +1,9 @@
 "use client";
 
-import { Link, type LinkProps } from "@dariah-eric/ui/link";
 import type { ReactNode } from "react";
 
 import { useNavLink } from "@/lib/navigation/use-nav-link";
+import { Link, type LinkProps } from "@dariah-eric/ui/link";
 
 export interface NavLinkProps extends LinkProps {
 	href: string | undefined;

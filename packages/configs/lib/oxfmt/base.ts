@@ -13,6 +13,7 @@ const config = defineConfig({
 			["internal", "subpath"],
 			["unknown"],
 		],
+		internalPattern: ["~/", "@/", "#", "@dariah-eric/"],
 	},
 	sortPackageJson: {
 		sortScripts: true,

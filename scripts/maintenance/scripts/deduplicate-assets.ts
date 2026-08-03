@@ -3,10 +3,11 @@ import * as path from "node:path";
 import type { Readable } from "node:stream";
 
 import { log } from "@acdh-oeaw/lib";
+import sharp from "sharp";
+
 import { createDatabaseService } from "@dariah-eric/database";
 import { sql } from "@dariah-eric/database/sql";
 import { createStorageService } from "@dariah-eric/storage";
-import sharp from "sharp";
 
 import { env } from "../config/env.config";
 import { writeTsvReport } from "../lib/tsv-report";

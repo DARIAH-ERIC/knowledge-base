@@ -1,5 +1,4 @@
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -10,6 +9,7 @@ import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle
 import { newsLifecycleAdapter } from "@/lib/data/news.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 const { afterCallbacks, mockSyncWebsiteDocumentForEntity, mockDispatchWebhook } = vi.hoisted(() => {
 	const afterCallbacks: Array<() => Promise<void>> = [];

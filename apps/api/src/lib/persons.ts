@@ -1,5 +1,3 @@
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
-import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
 import { type Image, generateImageUrl, toImageAsset, withResolvedCaption } from "@/lib/images";
@@ -12,6 +10,8 @@ import {
 } from "@/lib/website-routes";
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, eq, inArray, sql } from "@/services/db/sql";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
+import * as schema from "@dariah-eric/database/schema";
 import { imageWidth } from "~/config/api.config";
 
 export interface PersonPosition {

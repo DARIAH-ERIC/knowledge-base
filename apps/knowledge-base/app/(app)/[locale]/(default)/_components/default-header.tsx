@@ -1,4 +1,3 @@
-import { Link } from "@dariah-eric/ui/link";
 import cn from "clsx/lite";
 import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
@@ -10,6 +9,7 @@ import { UserMenu } from "@/app/(app)/[locale]/(default)/_components/user-menu";
 import { getCurrentSession } from "@/lib/auth/session";
 import { createHref } from "@/lib/navigation/create-href";
 import type { NavigationConfig } from "@/lib/navigation/navigation";
+import { Link } from "@dariah-eric/ui/link";
 
 interface DefaultHeaderProps extends ComponentProps<"header"> {}
 

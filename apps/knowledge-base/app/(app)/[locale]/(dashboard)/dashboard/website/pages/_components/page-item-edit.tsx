@@ -1,7 +1,5 @@
 "use client";
 
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
-import type * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
@@ -13,6 +11,8 @@ import { PageItemForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website
 import { discardPageItemDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/discard-page-item-draft.action";
 import { publishPageItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/publish-page-item.action";
 import { updatePageItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/update-page-item.action";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
+import type * as schema from "@dariah-eric/database/schema";
 
 interface PageItemEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

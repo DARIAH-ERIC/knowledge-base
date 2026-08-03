@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import slugify from "@sindresorhus/slugify";
 
 import type { Transaction } from "@/lib/db";
@@ -9,6 +8,7 @@ import { isUniqueViolation } from "@/lib/db/errors";
 import { asc, eq, inArray, or } from "@/lib/db/sql";
 import { assertSlugWithinMaxLength, maxSlugLength, truncateSlug } from "@/lib/slug";
 import { UserFacingError } from "@/lib/user-facing-error";
+import * as schema from "@dariah-eric/database/schema";
 
 export interface DocumentVersion {
 	documentId: string;

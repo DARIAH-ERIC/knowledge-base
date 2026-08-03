@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import type { User } from "@dariah-eric/auth";
-import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import {
@@ -16,6 +14,8 @@ import {
 	toOrganisationalUnitDocumentOptionsPage,
 } from "@/lib/organisational-unit-options";
 import { getServiceStatusLabel } from "@/lib/service-status-label";
+import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 
 export type ServicesSort = "name" | "type" | "status" | "sshocMarketplaceId";
 

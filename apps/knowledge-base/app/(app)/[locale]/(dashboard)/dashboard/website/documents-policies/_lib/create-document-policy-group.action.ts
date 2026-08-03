@@ -1,11 +1,11 @@
 "use server";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import { CreateDocumentPolicyGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-policy-group.schema";
 import { eq, sql } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
 
 export const createDocumentPolicyGroupAction = createMutationAction({
 	schema: CreateDocumentPolicyGroupActionInputSchema,

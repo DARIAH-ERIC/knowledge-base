@@ -1,6 +1,5 @@
 "use client";
 
-import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { type ComponentProps, Fragment, type ReactNode } from "react";
 
@@ -18,6 +17,7 @@ import { WorkingGroupForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/adm
 import { updateDelegatedWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/edit/_lib/update-working-group.action";
 import type { ContributionPersonOption } from "@/lib/data/contributions";
 import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 
 interface DelegatedWorkingGroupEditFormProps {
 	initialAssets: ComponentProps<typeof WorkingGroupForm>["initialAssets"];

@@ -1,6 +1,5 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
@@ -9,6 +8,7 @@ import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { and, eq, isNull } from "@/lib/db/sql";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import * as schema from "@dariah-eric/database/schema";
 
 export async function moveDocumentOrPolicyAction(
 	id: string,

@@ -1,6 +1,16 @@
 "use client";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import type { JSONContent } from "@tiptap/core";
+import { useExtracted } from "next-intl";
+import { type ComponentType, Fragment, type ReactNode, useActionState, useState } from "react";
+import * as v from "valibot";
+
+import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
+import { CaptionField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field";
+import { updateAssetMetadataAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/update-asset-metadata.action";
+import { UpdateAssetMetadataInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/update-asset-metadata.schema";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label, labelStyles } from "@dariah-eric/ui/field";
@@ -17,16 +27,6 @@ import {
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
-import { PencilSquareIcon } from "@heroicons/react/24/outline";
-import type { JSONContent } from "@tiptap/core";
-import { useExtracted } from "next-intl";
-import { type ComponentType, Fragment, type ReactNode, useActionState, useState } from "react";
-import * as v from "valibot";
-
-import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
-import { CaptionField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field";
-import { updateAssetMetadataAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/update-asset-metadata.action";
-import { UpdateAssetMetadataInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/update-asset-metadata.schema";
 
 interface AssetMetadataItem {
 	id: string;

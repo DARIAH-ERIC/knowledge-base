@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth/session";
@@ -7,6 +6,7 @@ import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { type SQL, and, count, eq, inArray } from "@/lib/db/sql";
 import { enforceApiGetRateLimit } from "@/lib/server/api-rate-limit";
+import * as schema from "@dariah-eric/database/schema";
 
 const defaultLimit = 20;
 const allowedTypes = [

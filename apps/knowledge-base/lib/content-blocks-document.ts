@@ -1,7 +1,7 @@
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import type { JSONContent } from "@tiptap/core";
 
 import type { ContentBlockInput } from "@/lib/content-block-input";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 
 /** Mirrors `imageLayoutEnum` in `@dariah-eric/database`. */
 type ImageLayout = "default" | "wide" | "full" | "float-start" | "float-end";

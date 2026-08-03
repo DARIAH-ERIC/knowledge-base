@@ -1,14 +1,15 @@
 "use client";
 
+import type { JSONContent } from "@tiptap/core";
+import { useExtracted } from "next-intl";
+import { type ReactNode, useRef } from "react";
+
 import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import { labelStyles } from "@dariah-eric/ui/field";
 import { InlineRichTextEditor } from "@dariah-eric/ui/inline-rich-text-editor";
 import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
 import { isEmptyRichTextDocument } from "@dariah-eric/ui/rich-text";
 import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
-import type { JSONContent } from "@tiptap/core";
-import { useExtracted } from "next-intl";
-import { type ReactNode, useRef } from "react";
 
 interface ImageCaptionModeFieldProps {
 	/** The caption stored on the asset, previewed while inheriting. */

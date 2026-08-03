@@ -1,8 +1,5 @@
 "use client";
 
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
-import type * as schema from "@dariah-eric/database/schema";
-import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
@@ -23,6 +20,9 @@ import { discardSpotlightArticleDraftAction } from "@/app/(app)/[locale]/(dashbo
 import { publishSpotlightArticleAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/publish-spotlight-article.action";
 import { updateSpotlightArticleAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/update-spotlight-article.action";
 import type { AvailablePerson, SpotlightArticleContributor } from "@/lib/data/article-contributors";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
+import type * as schema from "@dariah-eric/database/schema";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 
 interface SpotlightArticleEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

@@ -1,5 +1,4 @@
 import { ensureArray } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import {
@@ -8,6 +7,7 @@ import {
 	PaginationQuerySchema,
 	type publicRelatedEntityTypesEnum,
 } from "@/lib/schemas";
+import * as schema from "@dariah-eric/database/schema";
 
 export const announcementTypeValues = [
 	"news",

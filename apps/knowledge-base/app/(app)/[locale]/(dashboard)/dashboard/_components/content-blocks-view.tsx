@@ -2,12 +2,6 @@
 
 "use client";
 
-import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
-import { ButtonLink } from "@dariah-eric/ui/button-link";
-import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
-import { Note } from "@dariah-eric/ui/note";
-import { isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
-import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 import { renderToReactElement } from "@tiptap/static-renderer/pm/react";
 import type { ReactNode } from "react";
@@ -15,6 +9,12 @@ import { twMerge } from "tailwind-merge";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { getEmbedUrl } from "@/lib/embed-url";
+import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
+import { ButtonLink } from "@dariah-eric/ui/button-link";
+import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
+import { Note } from "@dariah-eric/ui/note";
+import { isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
+import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 
 const richTextExtensions = createRichTextExtensions();
 

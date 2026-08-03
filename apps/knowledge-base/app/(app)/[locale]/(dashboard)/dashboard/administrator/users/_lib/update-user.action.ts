@@ -1,7 +1,5 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 
 import {
@@ -14,6 +12,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
+import { createActionStateError } from "@dariah-eric/next-lib/actions";
 
 export const updateUserAction = createMutationAction({
 	schema: UpdateUserActionInputSchema,

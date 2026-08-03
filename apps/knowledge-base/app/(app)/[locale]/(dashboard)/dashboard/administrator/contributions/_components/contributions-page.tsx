@@ -1,5 +1,25 @@
 "use client";
 
+import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import type { CalendarDate } from "@internationalized/date";
+import { useExtracted, useFormatter } from "next-intl";
+import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
+
+import {
+	EntityDeleteModal,
+	EntityListHeader,
+	EntityListPagination,
+	EntityListSearchField,
+	RowActionsMenu,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
+import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
+import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
+import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
+import { dashboardPageSize } from "@/config/pagination.config";
+import type { ContributionRoleOption, ContributionsResult } from "@/lib/data/contributions";
+import { dateToCalendarDate } from "@/lib/date";
+import { useRouter } from "@/lib/navigation/navigation";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Badge } from "@dariah-eric/ui/badge";
@@ -28,26 +48,6 @@ import {
 } from "@dariah-eric/ui/table";
 import { TextField } from "@dariah-eric/ui/text-field";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
-import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import type { CalendarDate } from "@internationalized/date";
-import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
-
-import {
-	EntityDeleteModal,
-	EntityListHeader,
-	EntityListPagination,
-	EntityListSearchField,
-	RowActionsMenu,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
-import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
-import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
-import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
-import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
-import { dashboardPageSize } from "@/config/pagination.config";
-import type { ContributionRoleOption, ContributionsResult } from "@/lib/data/contributions";
-import { dateToCalendarDate } from "@/lib/date";
-import { useRouter } from "@/lib/navigation/navigation";
 
 interface ContributionsPageProps {
 	contributions: ContributionsResult;

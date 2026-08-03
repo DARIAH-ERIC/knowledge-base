@@ -1,7 +1,6 @@
-import * as schema from "@dariah-eric/database/schema";
-
 import { db } from "@/lib/db";
 import { alias, and, eq, sql } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 /**
  * `organisationalUnitDocumentId` is the org's `entities.id`. Each related person is resolved to its

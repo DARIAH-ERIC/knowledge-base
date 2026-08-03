@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth/session";
@@ -7,6 +6,7 @@ import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { alias, and, desc, eq, or, sql } from "@/lib/db/sql";
 import { enforceApiGetRateLimit } from "@/lib/server/api-rate-limit";
+import * as schema from "@dariah-eric/database/schema";
 
 interface DashboardSearchResult {
 	id: string;

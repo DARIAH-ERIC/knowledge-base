@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -8,6 +7,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { db } from "@dariah-eric/database/client";
 
 interface DashboardWebsiteCreateOpportunityPageProps extends PageProps<"/[locale]/dashboard/website/opportunities/create"> {}
 

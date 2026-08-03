@@ -1,11 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import {
-	DescriptionDetails,
-	DescriptionList,
-	DescriptionTerm,
-} from "@dariah-eric/ui/description-list";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -16,6 +10,12 @@ import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import { FeaturedImageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/featured-image-details";
 import { RelationTypeSuffix } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-type-suffix";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import type * as schema from "@dariah-eric/database/schema";
+import {
+	DescriptionDetails,
+	DescriptionList,
+	DescriptionTerm,
+} from "@dariah-eric/ui/description-list";
 
 interface OpportunityDetailsProps {
 	contentBlocks: Array<ContentBlock>;

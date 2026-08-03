@@ -1,4 +1,3 @@
-import { ButtonLink } from "@dariah-eric/ui/button-link";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -11,6 +10,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { assertAdminPageAccess } from "@/lib/auth/session";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { ButtonLink } from "@dariah-eric/ui/button-link";
 
 interface DashboardReportingAdministratorPageProps extends PageProps<"/[locale]/dashboard/reporting/administrator"> {}
 

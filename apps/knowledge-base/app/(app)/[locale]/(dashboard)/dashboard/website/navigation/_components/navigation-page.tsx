@@ -1,9 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { Button } from "@dariah-eric/ui/button";
-import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
-import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import {
 	ChevronDownIcon,
 	ChevronRightIcon,
@@ -27,6 +23,10 @@ import { NavigationMenuCreateDialog } from "@/app/(app)/[locale]/(dashboard)/das
 import { deleteNavigationItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/delete-navigation-item.action";
 import { deleteNavigationMenuAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/delete-navigation-menu.action";
 import { moveNavigationItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/move-navigation-item.action";
+import type * as schema from "@dariah-eric/database/schema";
+import { Button } from "@dariah-eric/ui/button";
+import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
+import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 
 export type NavigationItemWithChildren = Pick<
 	schema.NavigationItem,

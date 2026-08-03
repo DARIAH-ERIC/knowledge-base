@@ -1,7 +1,6 @@
-import * as schema from "@dariah-eric/database/schema";
-
 import { db } from "@/lib/db";
 import { desc, eq, inArray, sql } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 export interface DraftDocument {
 	documentId: string;

@@ -1,5 +1,6 @@
-import { define } from "@dariah-eric/env";
 import * as v from "valibot";
+
+import { define } from "@dariah-eric/env";
 
 const validate = define({
 	envVars: v.object({

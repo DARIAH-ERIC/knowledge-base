@@ -1,7 +1,6 @@
 "use server";
 
 import { assert, keyBy } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import { UpdatePageItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/update-page-item.schema";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
@@ -21,6 +20,7 @@ import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import * as schema from "@dariah-eric/database/schema";
 
 export const updatePageItemAction = createMutationAction({
 	schema: UpdatePageItemActionInputSchema,

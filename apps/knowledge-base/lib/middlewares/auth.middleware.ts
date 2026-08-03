@@ -1,6 +1,5 @@
-import type { Middleware } from "@dariah-eric/next-lib/middlewares";
-
 import { sessions } from "@/config/auth.config";
+import type { Middleware } from "@dariah-eric/next-lib/middlewares";
 
 /**
  * Since we can't extend set cookies insides server components, we continuously extend the cookie

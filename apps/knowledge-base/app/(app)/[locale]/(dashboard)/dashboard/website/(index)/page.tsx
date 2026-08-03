@@ -1,4 +1,3 @@
-import { Heading } from "@dariah-eric/ui/heading";
 import type { Metadata, ResolvingMetadata } from "next";
 import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
@@ -11,6 +10,7 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { Heading } from "@dariah-eric/ui/heading";
 
 interface DashboardWebsitePageProps extends PageProps<"/[locale]/dashboard/website"> {}
 

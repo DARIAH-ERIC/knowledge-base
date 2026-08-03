@@ -1,10 +1,10 @@
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
-import type { ResourceDocument, ResourceItem, SearchResourcesParams } from "@dariah-eric/search";
 
 import { type Transaction, db } from "@/lib/db";
 import { and, eq, sql } from "@/lib/db/sql";
 import { search } from "@/lib/search";
+import * as schema from "@dariah-eric/database/schema";
+import type { ResourceDocument, ResourceItem, SearchResourcesParams } from "@dariah-eric/search";
 
 export const countryExternalResourceSnapshotSections = [
 	"country_sshoc_resources",

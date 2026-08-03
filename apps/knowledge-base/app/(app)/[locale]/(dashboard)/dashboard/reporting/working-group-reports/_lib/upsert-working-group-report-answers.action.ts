@@ -1,7 +1,6 @@
 "use server";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 import { getExtracted } from "next-intl/server";
 import * as v from "valibot";
@@ -10,6 +9,7 @@ import { assertCan, assertReportEditable } from "@/lib/auth/permissions";
 import { workingGroupReportRevalidatePaths } from "@/lib/data/reporting-urls";
 import { sql } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
 
 const UpsertWorkingGroupReportAnswersSchema = v.object({
 	id: v.pipe(v.string(), v.uuid()),

@@ -1,10 +1,3 @@
-import {
-	countryMembershipRules,
-	inactiveUnitRelationRules,
-	mutuallyExclusiveUnitRelationRules,
-	pairedRelationRules,
-	unitRelationRequirementRules,
-} from "@dariah-eric/database/integrity-service";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -14,6 +7,13 @@ import {
 	wizardDefinitions,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_lib/wizard-registry";
 import { getCountryRoleCounterpartOptions } from "@/lib/data/wizard-preflight";
+import {
+	countryMembershipRules,
+	inactiveUnitRelationRules,
+	mutuallyExclusiveUnitRelationRules,
+	pairedRelationRules,
+	unitRelationRequirementRules,
+} from "@dariah-eric/database/integrity-service";
 
 /**
  * The guided forms exist to prevent the very violations the maintenance dashboard reports after the

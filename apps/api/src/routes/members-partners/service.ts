@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
-import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
 import { type ContentBlock, getContentBlocks } from "@/lib/content-blocks";
@@ -12,6 +10,8 @@ import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/li
 import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { type SQLWrapper, alias, and, count, eq, exists, inArray, sql } from "@/services/db/sql";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
+import * as schema from "@dariah-eric/database/schema";
 import { imageWidth } from "~/config/api.config";
 
 interface GetMembersAndPartnersParams {

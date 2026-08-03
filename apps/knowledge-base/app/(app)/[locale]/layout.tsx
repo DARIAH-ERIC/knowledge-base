@@ -1,5 +1,4 @@
 import { createUrl } from "@acdh-oeaw/lib";
-import { ToastRegion } from "@dariah-eric/ui/toast";
 import type { Metadata } from "next";
 import { getLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -15,6 +14,7 @@ import { AnalyticsScript } from "@/lib/analytics/analytics-script";
 import { isValidLocale } from "@/lib/i18n/locales";
 import { getMetadata } from "@/lib/i18n/metadata";
 import { routing } from "@/lib/i18n/routing";
+import { ToastRegion } from "@dariah-eric/ui/toast";
 
 export { viewport } from "@/app/_lib/viewport.config";
 

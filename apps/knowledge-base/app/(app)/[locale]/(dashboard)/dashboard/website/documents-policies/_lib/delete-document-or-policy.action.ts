@@ -1,7 +1,6 @@
 "use server";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
@@ -17,6 +16,7 @@ import {
 	getWebsiteDocumentDescriptorByEntityId,
 } from "@/lib/search/website-index";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import * as schema from "@dariah-eric/database/schema";
 
 export async function deleteDocumentOrPolicyAction(documentId: string): Promise<void> {
 	const auditSession = await assertAdmin();

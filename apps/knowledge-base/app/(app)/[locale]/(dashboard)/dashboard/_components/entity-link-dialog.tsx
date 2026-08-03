@@ -1,8 +1,5 @@
 "use client";
 
-import { AsyncSelect } from "@dariah-eric/ui/async-select";
-import { Button } from "@dariah-eric/ui/button";
-import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
 import { useExtracted } from "next-intl";
 import { type ComponentType, type ReactNode, useState } from "react";
 
@@ -11,6 +8,9 @@ import {
 	fetchEntityOptionsPage,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option";
 import { renderEntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option-item";
+import { AsyncSelect } from "@dariah-eric/ui/async-select";
+import { Button } from "@dariah-eric/ui/button";
+import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
 
 interface EntityLinkDialogProps {
 	/** Receives the entity's document id and its label, to use as the link text. */

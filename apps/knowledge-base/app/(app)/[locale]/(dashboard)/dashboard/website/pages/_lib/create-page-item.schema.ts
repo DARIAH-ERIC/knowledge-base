@@ -1,9 +1,9 @@
-import { PageInsertSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
 import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
 import { FeaturedImageCaptionInputSchema } from "@/lib/featured-image-input";
+import { PageInsertSchema } from "@dariah-eric/database/schema";
 
 export const CreatePageItemActionInputSchema = v.object({
 	slug: EntitySlugInputSchema,

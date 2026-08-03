@@ -1,9 +1,9 @@
 "use client";
 
-import { Tab, TabList, Tabs } from "@dariah-eric/ui/tabs";
 import type { ReactNode } from "react";
 
 import { usePathname } from "@/lib/navigation/navigation";
+import { Tab, TabList, Tabs } from "@dariah-eric/ui/tabs";
 
 export interface ReportStep {
 	href: string;

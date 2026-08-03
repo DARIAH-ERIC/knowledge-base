@@ -1,4 +1,3 @@
-import { organisationalUnitTypesEnum } from "@dariah-eric/database/schema";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth/session";
@@ -8,6 +7,7 @@ import {
 } from "@/lib/data/organisational-units";
 import { getUserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
 import { enforceApiGetRateLimit } from "@/lib/server/api-rate-limit";
+import { organisationalUnitTypesEnum } from "@dariah-eric/database/schema";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
 	const rateLimitResponse = await enforceApiGetRateLimit();

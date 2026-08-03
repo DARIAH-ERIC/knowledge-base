@@ -4,11 +4,6 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 import { assert, isNonEmptyString, log, unreachable } from "@acdh-oeaw/lib";
-import { type Database, type Transaction, plainTextToRichText } from "@dariah-eric/database";
-import * as schema from "@dariah-eric/database/schema";
-import type { StorageService } from "@dariah-eric/storage";
-import type { AssetPrefix } from "@dariah-eric/storage/config";
-import { buffer } from "@dariah-eric/storage/lib";
 import slugify from "@sindresorhus/slugify";
 import type { JSONContent } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
@@ -18,6 +13,12 @@ import { StarterKit } from "@tiptap/starter-kit";
 import { toText } from "hast-util-to-text";
 import fromHtml from "rehype-parse";
 import { unified } from "unified";
+
+import { type Database, type Transaction, plainTextToRichText } from "@dariah-eric/database";
+import * as schema from "@dariah-eric/database/schema";
+import type { StorageService } from "@dariah-eric/storage";
+import type { AssetPrefix } from "@dariah-eric/storage/config";
+import { buffer } from "@dariah-eric/storage/lib";
 
 import { assetsCacheFilePath, assetsCacheFolderPath } from "../../config/data-migration.config";
 import { cleanTiptapDoc } from "./clean-tiptap-content";

@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { desc, eq, inArray, sql } from "@/lib/db/sql";
 import { getEntityTypeLabel } from "@/lib/entity-type-label";
+import * as schema from "@dariah-eric/database/schema";
 
 export interface AnnouncementOption extends Record<string, unknown> {
 	description: string;

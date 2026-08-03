@@ -1,7 +1,6 @@
 "use server";
 
 import { assert, keyBy } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import { CreateImpactCaseStudyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study.schema";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
@@ -14,6 +13,7 @@ import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createMutationAction, getCreatedSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import * as schema from "@dariah-eric/database/schema";
 
 export const createImpactCaseStudyAction = createMutationAction({
 	schema: CreateImpactCaseStudyActionInputSchema,

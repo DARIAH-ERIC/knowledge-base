@@ -1,7 +1,8 @@
 "use client";
 
-import { Link } from "@dariah-eric/ui/link";
 import type { ReactNode } from "react";
+
+import { Link } from "@dariah-eric/ui/link";
 
 interface RelationLinkProps {
 	/** Detail-page href, or `null` when the related entity has no detail page. */

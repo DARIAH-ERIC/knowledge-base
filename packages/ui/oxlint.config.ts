@@ -1,12 +1,13 @@
 import * as path from "node:path";
 
+import { defineConfig } from "oxlint";
+
 import base from "@dariah-eric/configs/oxlint/base";
 import react from "@dariah-eric/configs/oxlint/react";
 import storybook from "@dariah-eric/configs/oxlint/storybook";
 import tailwindcss from "@dariah-eric/configs/oxlint/tailwindcss";
 import turbo from "@dariah-eric/configs/oxlint/turbo";
 import vitest from "@dariah-eric/configs/oxlint/vitest";
-import { defineConfig } from "oxlint";
 
 const configs = [base, react, storybook, turbo, vitest];
 

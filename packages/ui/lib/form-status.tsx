@@ -1,15 +1,15 @@
 "use client";
 
-import {
-	type ActionState,
-	isActionStateError,
-	isActionStateSuccess,
-} from "@dariah-eric/next-lib/actions";
 import { AlertTriangleIcon, CheckCircle2Icon } from "lucide-react";
 import { Fragment, type ReactNode } from "react";
 
 import { FormErrorMessage } from "@/lib/form-error-message";
 import { FormSuccessMessage } from "@/lib/form-success-message";
+import {
+	type ActionState,
+	isActionStateError,
+	isActionStateSuccess,
+} from "@dariah-eric/next-lib/actions";
 
 export interface FormStatusProps {
 	className?: string;

@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { getContentBlocks } from "@/lib/content-blocks";
 import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
@@ -10,6 +8,7 @@ import { getPublishedProjectPartners } from "@/lib/project-partners";
 import { socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq, not, sql } from "@/services/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 import { imageWidth } from "~/config/api.config";
 
 interface GetProjectsParams {

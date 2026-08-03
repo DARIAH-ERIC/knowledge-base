@@ -1,10 +1,11 @@
 "use client";
 
-import { Button } from "@dariah-eric/ui/button";
-import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
 import { AlertTriangleIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
+
+import { Button } from "@dariah-eric/ui/button";
+import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
 
 interface DeleteModalProps {
 	/**

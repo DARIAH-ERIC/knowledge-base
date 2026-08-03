@@ -1,5 +1,6 @@
-import { normalizeRichTextDocument } from "@dariah-eric/database/rich-text-normalize";
 import type { JSONContent } from "@tiptap/core";
+
+import { normalizeRichTextDocument } from "@dariah-eric/database/rich-text-normalize";
 
 /**
  * WordPress-specific rich-text helpers for the post-migration cleanup. The generic TipTap

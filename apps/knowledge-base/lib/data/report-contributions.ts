@@ -1,7 +1,6 @@
-import * as schema from "@dariah-eric/database/schema";
-
 import { db } from "@/lib/db";
 import { alias, and, eq, inArray, or, sql } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 /** A compensated contribution role (`reportingCampaignContributionAmounts` keys € amounts by these). */
 export type CompensationRole = (typeof schema.reportingCampaignContributionRoleEnum)[number];

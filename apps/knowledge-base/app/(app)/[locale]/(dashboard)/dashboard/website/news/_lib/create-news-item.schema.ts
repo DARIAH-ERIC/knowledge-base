@@ -1,9 +1,9 @@
-import { NewsItemInsertSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
 import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
 import { FeaturedImageInputSchema } from "@/lib/featured-image-input";
+import { NewsItemInsertSchema } from "@dariah-eric/database/schema";
 
 export const CreateNewsItemActionInputSchema = v.object({
 	slug: EntitySlugInputSchema,

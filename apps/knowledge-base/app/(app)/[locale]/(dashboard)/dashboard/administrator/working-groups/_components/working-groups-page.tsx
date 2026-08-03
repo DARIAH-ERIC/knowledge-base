@@ -1,15 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { isActionStateError } from "@dariah-eric/next-lib/actions";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableColumn,
-	TableHeader,
-	TableRow,
-} from "@dariah-eric/ui/table";
 import { EyeIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
@@ -27,6 +17,16 @@ import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { deleteWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/delete-working-group.action";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
+import type * as schema from "@dariah-eric/database/schema";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
+} from "@dariah-eric/ui/table";
 
 interface WorkingGroupsPageProps {
 	dir: "asc" | "desc";

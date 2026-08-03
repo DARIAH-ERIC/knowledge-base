@@ -1,5 +1,15 @@
 "use client";
 
+import { ListBulletIcon, MagnifyingGlassIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+import cn from "clsx/lite";
+import { useExtracted } from "next-intl";
+import { Fragment, type ReactNode, useEffect } from "react";
+
+import { useDashboardCommandPalette } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-command-palette-context";
+import { Logo } from "@/components/logo";
+import type { UserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
+import { useMetadata } from "@/lib/i18n/metadata";
+import { usePathname } from "@/lib/navigation/navigation";
 import { Button } from "@dariah-eric/ui/button";
 import { Keyboard } from "@dariah-eric/ui/keyboard";
 import { Link } from "@dariah-eric/ui/link";
@@ -17,16 +27,6 @@ import {
 	SidebarSectionGroup,
 	useSidebar,
 } from "@dariah-eric/ui/sidebar";
-import { ListBulletIcon, MagnifyingGlassIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
-import cn from "clsx/lite";
-import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useEffect } from "react";
-
-import { useDashboardCommandPalette } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-command-palette-context";
-import { Logo } from "@/components/logo";
-import type { UserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
-import { useMetadata } from "@/lib/i18n/metadata";
-import { usePathname } from "@/lib/navigation/navigation";
 
 interface SidebarMenuItem {
 	href: string;

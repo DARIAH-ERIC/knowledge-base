@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
@@ -11,6 +10,7 @@ import {
 	RelatedEntitiesSchema,
 	RelatedResourcesSchema,
 } from "@/lib/schemas";
+import * as schema from "@dariah-eric/database/schema";
 
 export const MemberOrPartnerBaseSchema = v.pipe(
 	v.object({

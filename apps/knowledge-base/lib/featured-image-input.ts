@@ -1,7 +1,7 @@
-import { imageCaptionModesEnum } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { RichTextCaptionColumnSchema } from "@/lib/rich-text-caption";
+import { imageCaptionModesEnum } from "@dariah-eric/database/schema";
 
 export const ImageCaptionModeSchema = v.picklist(imageCaptionModesEnum);
 

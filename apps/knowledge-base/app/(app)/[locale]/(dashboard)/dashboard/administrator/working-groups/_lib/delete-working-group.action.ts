@@ -1,7 +1,6 @@
 "use server";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import { resolveEntityDocumentLabel } from "@/lib/data/audit-log";
 import { deleteDocumentRelations, getDocumentVersions } from "@/lib/data/entity-lifecycle";
@@ -13,6 +12,7 @@ import {
 } from "@/lib/search/website-index";
 import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import * as schema from "@dariah-eric/database/schema";
 
 export const deleteWorkingGroupAction = createCommandAction({
 	requireAdmin: true,

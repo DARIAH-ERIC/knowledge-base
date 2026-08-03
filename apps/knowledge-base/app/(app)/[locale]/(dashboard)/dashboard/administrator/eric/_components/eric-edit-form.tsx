@@ -1,7 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -20,6 +18,8 @@ import { discardEricDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboa
 import { publishEricAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_lib/publish-eric.action";
 import { updateEricAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_lib/update-eric.action";
 import type { EricReverseRelationGroups } from "@/lib/data/eric";
+import type * as schema from "@dariah-eric/database/schema";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 
 interface EricEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

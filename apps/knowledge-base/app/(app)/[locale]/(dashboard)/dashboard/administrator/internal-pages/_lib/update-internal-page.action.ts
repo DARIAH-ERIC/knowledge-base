@@ -1,7 +1,6 @@
 "use server";
 
 import { assert, keyBy } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import { UpdateInternalPageActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_lib/update-internal-page.schema";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
@@ -12,6 +11,7 @@ import { db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
 
 export const updateInternalPageAction = createMutationAction({
 	schema: UpdateInternalPageActionInputSchema,

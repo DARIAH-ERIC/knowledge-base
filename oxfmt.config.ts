@@ -1,5 +1,6 @@
-import base from "@dariah-eric/configs/oxfmt/base";
 import { defineConfig } from "oxfmt";
+
+import base from "@dariah-eric/configs/oxfmt/base";
 
 const config = defineConfig({
 	...base,

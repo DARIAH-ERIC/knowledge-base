@@ -1,12 +1,12 @@
 import { assert } from "@acdh-oeaw/lib";
+
+import { env } from "@/config/env.config";
+import { db } from "@/lib/db";
 import { createSshocClient } from "@dariah-eric/client-sshoc";
 import {
 	type IngestSshocServicesResult,
 	ingestSshocServices as ingestSshocServicesWithDependencies,
 } from "@dariah-eric/sshoc-services";
-
-import { env } from "@/config/env.config";
-import { db } from "@/lib/db";
 
 export async function ingestSshocServices(): Promise<IngestSshocServicesResult> {
 	assert(

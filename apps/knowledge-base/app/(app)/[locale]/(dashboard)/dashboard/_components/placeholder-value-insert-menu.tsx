@@ -1,14 +1,15 @@
 "use client";
 
+import { VariableIcon } from "@heroicons/react/24/outline";
+import type { ReactNode } from "react";
+import { Button as AriaButton } from "react-aria-components";
+
 import {
 	placeholderValueKindLabels,
 	placeholderValueKindsEnum,
 } from "@dariah-eric/database/placeholder-values";
 import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
 import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
-import { VariableIcon } from "@heroicons/react/24/outline";
-import type { ReactNode } from "react";
-import { Button as AriaButton } from "react-aria-components";
 
 interface PlaceholderValueInsertMenuProps {
 	onInsert: (value: { kind: string; label: string }) => void;

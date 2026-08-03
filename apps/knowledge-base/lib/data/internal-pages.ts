@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, desc, eq, sql } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 export type InternalPagesSort = "title" | "updatedAt";
 

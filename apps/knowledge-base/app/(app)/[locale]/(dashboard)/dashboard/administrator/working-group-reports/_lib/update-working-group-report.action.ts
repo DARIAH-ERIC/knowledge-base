@@ -1,10 +1,9 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { UpdateWorkingGroupReportActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_lib/update-working-group-report.schema";
 import { eq } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
 
 export const updateWorkingGroupReportAction = createMutationAction({
 	schema: UpdateWorkingGroupReportActionInputSchema,

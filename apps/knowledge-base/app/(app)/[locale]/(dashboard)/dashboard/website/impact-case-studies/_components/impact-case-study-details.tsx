@@ -1,11 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import {
-	DescriptionDetails,
-	DescriptionList,
-	DescriptionTerm,
-} from "@dariah-eric/ui/description-list";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -19,6 +13,12 @@ import { RelationTypeSuffix } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { ImpactCaseStudyContributor } from "@/lib/data/article-contributors";
 import { formatRoleType } from "@/lib/format-role-type";
+import type * as schema from "@dariah-eric/database/schema";
+import {
+	DescriptionDetails,
+	DescriptionList,
+	DescriptionTerm,
+} from "@dariah-eric/ui/description-list";
 
 interface ImpactCaseStudyDetailsProps {
 	contentBlocks: Array<ContentBlock>;

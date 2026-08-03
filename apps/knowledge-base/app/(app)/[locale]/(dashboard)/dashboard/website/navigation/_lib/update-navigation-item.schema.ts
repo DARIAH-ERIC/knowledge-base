@@ -1,5 +1,6 @@
-import { NavigationItemSelectSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
+
+import { NavigationItemSelectSchema } from "@dariah-eric/database/schema";
 
 export const UpdateNavigationItemActionInputSchema = v.pipe(
 	v.object({

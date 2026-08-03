@@ -1,7 +1,6 @@
-import * as schema from "@dariah-eric/database/schema";
-
 import { type Database, type Transaction, db } from "@/lib/db";
 import { and, eq, notInArray, sql } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 export type ServiceKpiCategory = (typeof schema.serviceKpiCategoryEnum)[number];
 

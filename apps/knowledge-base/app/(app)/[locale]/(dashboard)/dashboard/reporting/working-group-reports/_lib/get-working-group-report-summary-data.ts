@@ -1,10 +1,10 @@
 import { assert } from "@acdh-oeaw/lib";
-import type { User } from "@dariah-eric/auth";
 
 import type { WorkingGroupReportSummaryData } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
 import { type Action, can } from "@/lib/auth/permissions";
 import { getWorkingGroupReportChairs } from "@/lib/data/working-group-report-chairs";
 import { db } from "@/lib/db";
+import type { User } from "@dariah-eric/auth";
 
 export interface WorkingGroupReportData {
 	id: string;

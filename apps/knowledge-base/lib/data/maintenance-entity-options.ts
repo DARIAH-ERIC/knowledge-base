@@ -1,10 +1,9 @@
-import * as schema from "@dariah-eric/database/schema";
-
 import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { type Database, type Transaction, db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { eq, inArray, or, sql } from "@/lib/db/sql";
 import { getEntityTypeLabel, getEntityTypeTokensMatchingLabel } from "@/lib/entity-type-label";
+import * as schema from "@dariah-eric/database/schema";
 
 /** `document_lifecycle.state`: whether the document is published, and whether a draft is pending. */
 export type MaintenanceEntityState = "draft" | "published" | "published_with_changes";

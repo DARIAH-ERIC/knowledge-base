@@ -1,10 +1,5 @@
 "use client";
 
-import { Button } from "@dariah-eric/ui/button";
-import { buttonStyles } from "@dariah-eric/ui/button-styles";
-import { Link } from "@dariah-eric/ui/link";
-import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
-import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import { EllipsisHorizontalIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
@@ -18,6 +13,11 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { Button } from "@dariah-eric/ui/button";
+import { buttonStyles } from "@dariah-eric/ui/button-styles";
+import { Link } from "@dariah-eric/ui/link";
+import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
+import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 
 // ---------------------------------------------------------------------------
 // EntityListTitle — consistent truncation for overview table title columns

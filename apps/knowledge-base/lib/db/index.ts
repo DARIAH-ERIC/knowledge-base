@@ -1,11 +1,10 @@
+import { env } from "@/config/env.config";
 import {
 	type Database,
 	type Transaction,
 	createDatabaseService,
 	schema,
 } from "@dariah-eric/database";
-
-import { env } from "@/config/env.config";
 
 export const db = createDatabaseService({
 	connection: {

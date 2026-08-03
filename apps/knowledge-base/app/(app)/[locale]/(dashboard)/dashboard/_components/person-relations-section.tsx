@@ -1,5 +1,22 @@
 "use client";
 
+import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import type { CalendarDate } from "@internationalized/date";
+import { useExtracted, useFormatter } from "next-intl";
+import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
+
+import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
+import {
+	FormLayout,
+	FormSection,
+	FormSectionTitle,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
+import type { ContributionPersonOption } from "@/lib/data/contributions";
+import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
+import { dateToCalendarDate } from "@/lib/date";
+import type { ServerAction } from "@/lib/server/create-server-action";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Badge } from "@dariah-eric/ui/badge";
@@ -28,23 +45,6 @@ import {
 } from "@dariah-eric/ui/table";
 import { TextField } from "@dariah-eric/ui/text-field";
 import type { AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
-import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
-import type { CalendarDate } from "@internationalized/date";
-import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
-
-import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
-import {
-	FormLayout,
-	FormSection,
-	FormSectionTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
-import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
-import type { ContributionPersonOption } from "@/lib/data/contributions";
-import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
-import { dateToCalendarDate } from "@/lib/date";
-import type { ServerAction } from "@/lib/server/create-server-action";
 
 /**
  * The mutations this section performs, injected by the caller so the same UI can be wired to either

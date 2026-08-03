@@ -1,6 +1,5 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
 import { getExtracted } from "next-intl/server";
 
 import { EndCountryRoleActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_lib/end-country-role.schema";
@@ -17,6 +16,7 @@ import { eq } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { UserFacingError } from "@/lib/user-facing-error";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import * as schema from "@dariah-eric/database/schema";
 
 /**
  * Ends a country role and the governance-body seat that came with it, on the same date and in one

@@ -1,7 +1,6 @@
+import { env } from "@/config/env.config";
 import { createStorageService } from "@dariah-eric/storage";
 import { type AssetPrefix, assetPrefixes } from "@dariah-eric/storage/config";
-
-import { env } from "@/config/env.config";
 
 export const storage = createStorageService({
 	config: {

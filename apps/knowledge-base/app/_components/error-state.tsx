@@ -1,11 +1,11 @@
 "use client";
 
-import { Avatar } from "@dariah-eric/ui/avatar";
-import { Button } from "@dariah-eric/ui/button";
-import { ButtonLink } from "@dariah-eric/ui/button-link";
 import type { ReactNode } from "react";
 
 import { Main } from "@/components/main";
+import { Avatar } from "@dariah-eric/ui/avatar";
+import { Button } from "@dariah-eric/ui/button";
+import { ButtonLink } from "@dariah-eric/ui/button-link";
 
 interface ErrorStateProps {
 	description: string;

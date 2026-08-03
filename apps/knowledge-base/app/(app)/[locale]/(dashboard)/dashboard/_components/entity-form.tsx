@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import type { ReactNode } from "react";
 
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { Heading } from "@dariah-eric/ui/heading";
 
 /** Lifecycle command actions wrapped by createCommandAction return an ActionState on completion. */
 type LifecycleAction = (documentId: string) => Promise<unknown>;

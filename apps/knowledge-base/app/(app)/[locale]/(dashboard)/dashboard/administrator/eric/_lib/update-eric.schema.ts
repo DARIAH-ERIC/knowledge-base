@@ -1,10 +1,10 @@
+import * as v from "valibot";
+
+import { ContentBlockInputSchema } from "@/lib/content-block-input";
 import {
 	OrganisationalUnitSelectSchema,
 	OrganisationalUnitUpdateSchema,
 } from "@dariah-eric/database/schema";
-import * as v from "valibot";
-
-import { ContentBlockInputSchema } from "@/lib/content-block-input";
 
 export const UpdateEricActionInputSchema = v.object({
 	...v.pick(OrganisationalUnitSelectSchema, ["id"]).entries,

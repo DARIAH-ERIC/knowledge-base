@@ -1,7 +1,7 @@
-import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ImageSchema, PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
+import * as schema from "@dariah-eric/database/schema";
 
 /**
  * The two organisational-unit relation statuses an institution can hold towards the DARIAH-EU ERIC,

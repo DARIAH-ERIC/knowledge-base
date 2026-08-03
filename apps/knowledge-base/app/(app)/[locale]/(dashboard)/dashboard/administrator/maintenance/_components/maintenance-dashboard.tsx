@@ -1,6 +1,5 @@
 "use client";
 
-import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useState } from "react";
 import type { Key } from "react-aria-components";
@@ -11,6 +10,7 @@ import { MergeEntities } from "@/app/(app)/[locale]/(dashboard)/dashboard/admini
 import { MergeServices } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-services";
 import { MergeSocialMedia } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-social-media";
 import { SlugEditor } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/slug-editor";
+import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
 
 interface MaintenanceDashboardProps {
 	countryMembership: ReactNode;

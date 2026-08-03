@@ -1,5 +1,4 @@
 import { createStorageService } from "@dariah-eric/storage";
-
 import { env } from "~/config/env.config";
 
 export const storage = createStorageService({

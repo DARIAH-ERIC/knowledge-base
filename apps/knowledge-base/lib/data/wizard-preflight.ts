@@ -1,16 +1,3 @@
-import {
-	type Interval,
-	countryMembershipRules,
-	inactiveUnitRelationRules,
-	intersectIntervals,
-	mutuallyExclusiveUnitRelationRules,
-	pairedRelationRules,
-	subtractIntervals,
-	toRawIntervals,
-	toSerializableIntervals,
-} from "@dariah-eric/database/integrity-service";
-import * as schema from "@dariah-eric/database/schema";
-
 import type {
 	WizardPlanItem,
 	WizardPreflight,
@@ -23,6 +10,18 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_lib/wizard-registry";
 import { type Database, type Transaction, db } from "@/lib/db";
 import { and, eq, inArray, sql } from "@/lib/db/sql";
+import {
+	type Interval,
+	countryMembershipRules,
+	inactiveUnitRelationRules,
+	intersectIntervals,
+	mutuallyExclusiveUnitRelationRules,
+	pairedRelationRules,
+	subtractIntervals,
+	toRawIntervals,
+	toSerializableIntervals,
+} from "@dariah-eric/database/integrity-service";
+import * as schema from "@dariah-eric/database/schema";
 
 /**
  * Evaluates the data-integrity rules against the choices made in a guided form, _before_ anything

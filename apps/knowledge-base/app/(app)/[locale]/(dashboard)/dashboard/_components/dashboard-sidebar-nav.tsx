@@ -1,20 +1,5 @@
 "use client";
 
-import type { User } from "@dariah-eric/auth";
-import { Avatar } from "@dariah-eric/ui/avatar";
-import { Button } from "@dariah-eric/ui/button";
-import {
-	Menu,
-	MenuContent,
-	MenuHeader,
-	MenuItem,
-	MenuLabel,
-	MenuSection,
-	MenuSeparator,
-	MenuTrigger,
-} from "@dariah-eric/ui/menu";
-import { Separator } from "@dariah-eric/ui/separator";
-import { SidebarNav, SidebarTrigger, useSidebar } from "@dariah-eric/ui/sidebar";
 import {
 	CommandLineIcon as IconCommandRegular,
 	Squares2X2Icon as IconDashboard,
@@ -31,6 +16,21 @@ import { useDashboardCommandPalette } from "@/app/(app)/[locale]/(dashboard)/das
 import { ColorSchemeToggle } from "@/app/(app)/[locale]/_components/color-scheme-toggle.client";
 import { signOutAction } from "@/lib/auth/sign-out.action";
 import { useColorScheme } from "@/lib/color-scheme/use-color-scheme";
+import type { User } from "@dariah-eric/auth";
+import { Avatar } from "@dariah-eric/ui/avatar";
+import { Button } from "@dariah-eric/ui/button";
+import {
+	Menu,
+	MenuContent,
+	MenuHeader,
+	MenuItem,
+	MenuLabel,
+	MenuSection,
+	MenuSeparator,
+	MenuTrigger,
+} from "@dariah-eric/ui/menu";
+import { Separator } from "@dariah-eric/ui/separator";
+import { SidebarNav, SidebarTrigger, useSidebar } from "@dariah-eric/ui/sidebar";
 
 interface DashboardSidebarNavProps {
 	breadcrumbs: ReactNode;

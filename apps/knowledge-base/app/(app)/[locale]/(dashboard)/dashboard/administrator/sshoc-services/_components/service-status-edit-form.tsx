@@ -1,5 +1,11 @@
 "use client";
 
+import { useExtracted } from "next-intl";
+import { Fragment, type ReactNode, useActionState, useState } from "react";
+
+import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { updateServiceStatusAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_lib/update-service-status.action";
+import { getServiceStatusLabel } from "@/lib/service-status-label";
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
@@ -9,12 +15,6 @@ import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Heading } from "@dariah-eric/ui/heading";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
-import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState, useState } from "react";
-
-import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { updateServiceStatusAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_lib/update-service-status.action";
-import { getServiceStatusLabel } from "@/lib/service-status-label";
 
 interface ServiceStatusEditFormProps {
 	service: Pick<schema.Service, "id" | "name" | "statusId">;

@@ -1,11 +1,5 @@
 "use client";
 
-import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { AsyncListSelect } from "@dariah-eric/ui/async-list-select";
-import { Button } from "@dariah-eric/ui/button";
-import { Form } from "@dariah-eric/ui/form";
-import { FormStatus } from "@dariah-eric/ui/form-status";
-import type { AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useActionState, useState } from "react";
 
@@ -16,6 +10,12 @@ import {
 import { updateFeaturedItemsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/featured/_lib/update-featured-items.action";
 import type { AnnouncementOption } from "@/lib/data/announcements";
 import type { EventOption } from "@/lib/data/events";
+import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { AsyncListSelect } from "@dariah-eric/ui/async-list-select";
+import { Button } from "@dariah-eric/ui/button";
+import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
+import type { AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 
 const MAX_ALLOWED_FEATURED_ITEMS = 3;
 

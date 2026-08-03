@@ -1,7 +1,7 @@
 import { isNonEmptyString } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import type { Database, Transaction } from "@/lib/db";
+import * as schema from "@dariah-eric/database/schema";
 
 type AuditLogClient = Database | Transaction;
 

@@ -1,8 +1,5 @@
 "use client";
 
-import { Button } from "@dariah-eric/ui/button";
-import { buttonStyles } from "@dariah-eric/ui/button-styles";
-import { toPlainText } from "@dariah-eric/ui/rich-text";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
@@ -15,6 +12,9 @@ import {
 	EditAssetMetadataDialog,
 	type SavedAssetMetadata,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog";
+import { Button } from "@dariah-eric/ui/button";
+import { buttonStyles } from "@dariah-eric/ui/button-styles";
+import { toPlainText } from "@dariah-eric/ui/rich-text";
 
 export type { SelectedImage };
 

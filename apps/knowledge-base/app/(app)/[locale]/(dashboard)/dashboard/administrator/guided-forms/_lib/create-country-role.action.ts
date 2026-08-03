@@ -1,7 +1,6 @@
 "use server";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import { getExtracted } from "next-intl/server";
 
 import { CreateCountryRoleActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_lib/create-country-role.schema";
@@ -22,6 +21,7 @@ import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { UserFacingError } from "@/lib/user-facing-error";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import * as schema from "@dariah-eric/database/schema";
 
 /**
  * Appoints a national coordinator, national representative, or deputy — which means two relations,
