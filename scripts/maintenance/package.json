@@ -7,6 +7,7 @@
 	"scripts": {
 		"data:backfill:accordions": "tsx ./scripts/backfill-accordions.ts",
 		"data:backfill:cta-button-links": "tsx ./scripts/backfill-cta-button-links.ts",
+		"data:backfill:footnotes-from-references": "tsx ./scripts/backfill-footnotes-from-references.ts",
 		"data:backfill:full-resolution-images": "tsx ./scripts/backfill-full-resolution-images.ts",
 		"data:backfill:galleries-from-wordpress": "tsx ./scripts/backfill-galleries-from-wordpress.ts",
 		"data:backfill:image-alignment": "tsx ./scripts/backfill-image-alignment.ts",
@@ -29,6 +30,7 @@
 		"format:fix": "oxfmt --write",
 		"lint:check": "oxlint --report-unused-disable-directives --type-aware --type-check",
 		"lint:fix": "oxlint --fix --report-unused-disable-directives --type-aware --type-check",
+		"test": "vitest run",
 		"types:check": "tsc --noEmit"
 	},
 	"devDependencies": {
@@ -50,7 +52,8 @@
 		"sharp": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:",
-		"valibot": "catalog:"
+		"valibot": "catalog:",
+		"vitest": "catalog:"
 	},
 	"engines": {
 		"node": "24.x"
