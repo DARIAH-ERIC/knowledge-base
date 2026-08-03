@@ -1,5 +1,6 @@
-import { DocumentOrPolicyInsertSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
+
+import { DocumentOrPolicyInsertSchema } from "@dariah-eric/database/schema";
 
 export const CreateDocumentOrPolicyFromDialogActionInputSchema = v.object({
 	...v.pick(DocumentOrPolicyInsertSchema, ["title"]).entries,

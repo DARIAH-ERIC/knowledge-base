@@ -1,12 +1,5 @@
 "use client";
 
-import { isActionStateError } from "@dariah-eric/next-lib/actions";
-import { AsyncSelect } from "@dariah-eric/ui/async-select";
-import { Button } from "@dariah-eric/ui/button";
-import { Label } from "@dariah-eric/ui/field";
-import { Input } from "@dariah-eric/ui/input";
-import { Note } from "@dariah-eric/ui/note";
-import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState, useTransition } from "react";
 
@@ -18,6 +11,13 @@ import { renderEntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/a
 import { updateEntitySlugAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/update-entity-slug.action";
 import { useRouter } from "@/lib/navigation/navigation";
 import { maxSlugLength } from "@/lib/slug";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
+import { AsyncSelect } from "@dariah-eric/ui/async-select";
+import { Button } from "@dariah-eric/ui/button";
+import { Label } from "@dariah-eric/ui/field";
+import { Input } from "@dariah-eric/ui/input";
+import { Note } from "@dariah-eric/ui/note";
+import { TextField } from "@dariah-eric/ui/text-field";
 
 export function SlugEditor(): ReactNode {
 	const t = useExtracted();

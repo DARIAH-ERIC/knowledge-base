@@ -1,16 +1,5 @@
 "use client";
 
-import { auditLogActionEnum } from "@dariah-eric/database/schema";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableColumn,
-	TableHeader,
-	TableRow,
-} from "@dariah-eric/ui/table";
-import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useState } from "react";
 import type { Key } from "react-aria-components";
@@ -23,6 +12,17 @@ import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { dashboardPageSize } from "@/config/pagination.config";
 import type { AuditLogAction, AuditLogResult } from "@/lib/data/audit-log";
 import type { ExpensiveStatementsResult } from "@/lib/data/pg-stat-statements";
+import { auditLogActionEnum } from "@dariah-eric/database/schema";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
+} from "@dariah-eric/ui/table";
+import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
 
 interface InternalDashboardProps {
 	action: AuditLogAction | undefined;

@@ -1,8 +1,9 @@
 "use client";
 
-import { Badge } from "@dariah-eric/ui/badge";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
+
+import { Badge } from "@dariah-eric/ui/badge";
 
 interface EntityLifecycleStatusBadgeProps {
 	hasDraft: boolean;

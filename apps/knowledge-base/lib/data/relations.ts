@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { type Database, type Transaction, db } from "@/lib/db";
@@ -13,6 +11,7 @@ import {
 	getResourceTypeLabel,
 } from "@/lib/entity-type-label";
 import { search } from "@/lib/search";
+import * as schema from "@dariah-eric/database/schema";
 
 export interface RelationOptionItem {
 	id: string;

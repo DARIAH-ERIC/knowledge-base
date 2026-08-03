@@ -1,7 +1,7 @@
-import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ImageSchema } from "@/lib/schemas";
+import * as schema from "@dariah-eric/database/schema";
 
 export const SiteMetadataSchema = v.pipe(
 	v.object({

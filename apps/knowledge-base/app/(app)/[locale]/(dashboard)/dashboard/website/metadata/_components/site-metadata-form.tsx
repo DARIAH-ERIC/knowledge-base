@@ -1,15 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { Button } from "@dariah-eric/ui/button";
-import { FieldError, Label } from "@dariah-eric/ui/field";
-import { Form } from "@dariah-eric/ui/form";
-import { FormStatus } from "@dariah-eric/ui/form-status";
-import { Input } from "@dariah-eric/ui/input";
-import { Separator } from "@dariah-eric/ui/separator";
-import { TextField } from "@dariah-eric/ui/text-field";
-import { TextArea } from "@dariah-eric/ui/textarea";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useActionState, useState } from "react";
 
@@ -22,6 +12,16 @@ import {
 	type SelectedImage,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import { updateSiteMetadataAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_lib/update-site-metadata.action";
+import type * as schema from "@dariah-eric/database/schema";
+import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { Button } from "@dariah-eric/ui/button";
+import { FieldError, Label } from "@dariah-eric/ui/field";
+import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
+import { Input } from "@dariah-eric/ui/input";
+import { Separator } from "@dariah-eric/ui/separator";
+import { TextField } from "@dariah-eric/ui/text-field";
+import { TextArea } from "@dariah-eric/ui/textarea";
 
 interface SiteMetadataFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

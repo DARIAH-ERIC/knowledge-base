@@ -1,6 +1,7 @@
-import { CardDescription, CardHeader } from "@dariah-eric/ui/card";
 import type { ComponentProps, ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
+
+import { CardDescription, CardHeader } from "@dariah-eric/ui/card";
 
 export function Header({ className, ...props }: Readonly<ComponentProps<"div">>): ReactNode {
 	return (

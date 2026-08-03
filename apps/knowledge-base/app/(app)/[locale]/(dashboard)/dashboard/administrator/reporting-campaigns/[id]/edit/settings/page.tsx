@@ -1,4 +1,3 @@
-import { Button } from "@dariah-eric/ui/button";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -10,6 +9,7 @@ import { launchReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getReportingCampaignSettingsForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { Button } from "@dariah-eric/ui/button";
 
 interface DashboardAdministratorCampaignSettingsPageProps extends PageProps<"/[locale]/dashboard/administrator/reporting-campaigns/[id]/edit/settings"> {}
 

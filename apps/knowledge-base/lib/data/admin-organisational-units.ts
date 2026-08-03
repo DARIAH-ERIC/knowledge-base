@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import type { User } from "@dariah-eric/auth";
 import { forbidden } from "next/navigation";
 
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
@@ -12,6 +10,8 @@ import { selectedImageColumns, selectedImageWith } from "@/lib/data/selected-ima
 import { getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import type { User } from "@dariah-eric/auth";
 
 type ManagedOrganisationalUnitType =
 	| "country"

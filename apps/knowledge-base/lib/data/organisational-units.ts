@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { imageAssetWidth } from "@/config/assets.config";
 import {
 	latestEditableEntityVersionWhere,
@@ -12,6 +10,7 @@ import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, eq, exists, inArray, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import type { OrganisationalUnitOption } from "@/lib/organisational-unit-options";
+import * as schema from "@dariah-eric/database/schema";
 
 /** The literal union of organisational-unit types (e.g. "institution", "national_consortium"). */
 export type OrganisationalUnitType = typeof schema.organisationalUnitTypes.$inferSelect.type;

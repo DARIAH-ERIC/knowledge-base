@@ -1,12 +1,12 @@
 "use client";
 
-import { Description, FieldError, Label } from "@dariah-eric/ui/field";
-import { Input } from "@dariah-eric/ui/input";
-import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
 import { maxSlugLength } from "@/lib/slug";
+import { Description, FieldError, Label } from "@dariah-eric/ui/field";
+import { Input } from "@dariah-eric/ui/input";
+import { TextField } from "@dariah-eric/ui/text-field";
 
 interface EntitySlugFieldProps {
 	/** The document's current slug. Omit when creating — there is none yet. */

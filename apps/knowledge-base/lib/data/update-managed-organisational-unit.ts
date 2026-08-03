@@ -1,5 +1,4 @@
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { ensureDraftVersion, touchVersion } from "@/lib/data/entity-lifecycle";
@@ -8,6 +7,7 @@ import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-u
 import { syncOrganisationalUnitSocialMedia } from "@/lib/data/social-media-relations";
 import type { Transaction } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 interface ManagedOrganisationalUnitUpdate {
 	documentId: string;

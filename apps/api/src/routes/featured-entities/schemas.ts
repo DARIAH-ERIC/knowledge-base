@@ -1,8 +1,8 @@
-import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ImageSchema } from "@/lib/schemas";
 import { AnnouncementSchema } from "@/routes/announcements/schemas";
+import * as schema from "@dariah-eric/database/schema";
 
 const FeaturedEventDateTimeSchema = v.pipe(v.string(), v.isoTimestamp());
 

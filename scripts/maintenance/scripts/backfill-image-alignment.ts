@@ -1,10 +1,11 @@
 import * as path from "node:path";
 
 import { createUrl, createUrlSearchParams, log } from "@acdh-oeaw/lib";
+import slugify from "@sindresorhus/slugify";
+
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { and, eq } from "@dariah-eric/database/sql";
-import slugify from "@sindresorhus/slugify";
 
 import { env } from "../config/env.config";
 import { type EntityStatusType, groupByEntityVersion } from "../lib/entity-versions";

@@ -1,4 +1,3 @@
-import type * as schema from "@dariah-eric/database/schema";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -6,6 +5,7 @@ import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { db } from "@/lib/db";
+import type * as schema from "@dariah-eric/database/schema";
 
 export async function getPublishedInternalPage(
 	slug: string,

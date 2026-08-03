@@ -3,10 +3,11 @@
 import { join } from "node:path";
 
 import { log } from "@acdh-oeaw/lib";
+import { config as dotenv } from "@dotenvx/dotenvx";
+
 import type { Database } from "@dariah-eric/database";
 import type * as SchemaModule from "@dariah-eric/database/schema";
 import type { sql as SqlFn } from "@dariah-eric/database/sql";
-import { config as dotenv } from "@dotenvx/dotenvx";
 
 dotenv({
 	path: [".env.test.local", ".env.local", ".env.test", ".env"].map((filePath) =>

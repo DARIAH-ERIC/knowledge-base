@@ -1,8 +1,7 @@
-import type { User } from "@dariah-eric/auth";
-import * as schema from "@dariah-eric/database/schema";
-
 import { db } from "@/lib/db";
 import { and, desc, eq, inArray, sql } from "@/lib/db/sql";
+import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 
 const chairRoles = ["is_chair_of", "is_vice_chair_of"] as const;
 const coordinatorRoles = ["national_coordinator", "national_coordinator_deputy"] as const;

@@ -1,7 +1,8 @@
-import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 import { renderToHTMLString } from "@tiptap/static-renderer";
 import { describe, expect, it } from "vitest";
+
+import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 
 const extensions = createRichTextExtensions();
 

@@ -1,4 +1,3 @@
-import type ui from "@dariah-eric/ui/i18n/en";
 import type { Page } from "@playwright/test";
 import { createFormatter, createTranslator } from "next-intl";
 
@@ -7,6 +6,7 @@ import { type IntlLocale, defaultLocale, getIntlLanguage } from "@/lib/i18n/loca
 import type { IntlMessages } from "@/lib/i18n/messages";
 import type { SocialMediaKind } from "@/lib/social-media/social-media.config";
 import type messages from "@/messages/en.json";
+import type ui from "@dariah-eric/ui/i18n/en";
 
 export interface I18n {
 	t: ReturnType<typeof createTranslator<IntlMessages>>;

@@ -1,5 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
-
 import { relationOptionsPageSize } from "@/lib/constants/relations";
 import {
 	type CountryReportInstitutionRepresentation,
@@ -11,6 +9,7 @@ import type { OrganisationalUnitType } from "@/lib/data/organisational-units";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { alias, and, count, eq, inArray, sql } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 /**
  * `unitDocumentId` is the owner unit's `entities.id`. Unit↔unit relations are document-level, so

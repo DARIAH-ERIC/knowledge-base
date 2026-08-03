@@ -1,6 +1,5 @@
 "use client";
 
-import { RichTextEditor, RichTextEditorToolbarButton } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 import { ImageIcon, InfoIcon, MousePointerClickIcon } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
@@ -11,6 +10,7 @@ import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboa
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
 import { PlaceholderValueInsertMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/placeholder-value-insert-menu";
 import { mergeBlocksToDocument, splitDocumentToBlocks } from "@/lib/content-blocks-document";
+import { RichTextEditor, RichTextEditorToolbarButton } from "@dariah-eric/ui/rich-text-editor";
 
 type MergeableContentBlock = Extract<
 	ContentBlock,

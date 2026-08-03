@@ -1,6 +1,5 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
 import { recordAuditEvent } from "@/lib/audit/audit-log";
@@ -10,6 +9,7 @@ import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import * as schema from "@dariah-eric/database/schema";
 
 export async function deleteContributionAction(id: string): Promise<void> {
 	const { user } = await assertAuthenticated();

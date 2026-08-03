@@ -1,6 +1,6 @@
-import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+import * as schema from "@dariah-eric/database/schema";
 import { maxLimit } from "~/config/api.config";
 
 export const publicRelatedEntityTypesEnum = [

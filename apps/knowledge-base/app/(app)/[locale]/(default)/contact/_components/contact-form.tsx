@@ -1,5 +1,9 @@
 "use client";
 
+import { useExtracted } from "next-intl";
+import { type ReactNode, useActionState } from "react";
+
+import { sendContactFormEmailAction } from "@/app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
@@ -8,10 +12,6 @@ import { Input } from "@dariah-eric/ui/input";
 import { SubmitButton } from "@dariah-eric/ui/submit-button";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
-import { useExtracted } from "next-intl";
-import { type ReactNode, useActionState } from "react";
-
-import { sendContactFormEmailAction } from "@/app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action";
 
 export function ContactForm(): ReactNode {
 	const t = useExtracted();

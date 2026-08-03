@@ -1,10 +1,11 @@
 "use client";
 
-import { labelStyles } from "@dariah-eric/ui/field";
-import { InlineRichTextEditor } from "@dariah-eric/ui/inline-rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
+
+import { labelStyles } from "@dariah-eric/ui/field";
+import { InlineRichTextEditor } from "@dariah-eric/ui/inline-rich-text-editor";
 
 interface CaptionFieldProps {
 	/** Name of the hidden input that carries the serialized richtext JSON. */

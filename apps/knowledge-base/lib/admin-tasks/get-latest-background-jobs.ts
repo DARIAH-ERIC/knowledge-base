@@ -1,11 +1,10 @@
-import * as schema from "@dariah-eric/database/schema";
-
 import {
 	type BackgroundJobError,
 	coerceBackgroundJobError,
 } from "@/lib/admin-tasks/background-job-error";
 import { db } from "@/lib/db";
 import { desc, eq } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 export interface LatestBackgroundJob {
 	id: string;

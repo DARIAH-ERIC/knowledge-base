@@ -1,3 +1,13 @@
+import type { JSONContent } from "@tiptap/core";
+import * as v from "valibot";
+
+import { getAssetDownloadUrl, getDownloadFilename } from "@/lib/asset-download";
+import { getEmbedUrl } from "@/lib/embed-url";
+import { generateImageUrl, toImageAsset } from "@/lib/images";
+import { getEntityRefsByDocumentId } from "@/lib/relations";
+import { LicenseSchema } from "@/lib/schemas";
+import type { Database, Transaction } from "@/middlewares/db";
+import { alias, eq, inArray } from "@/services/db/sql";
 import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 import {
 	annotateEntityLinkTargets,
@@ -12,16 +22,6 @@ import {
 } from "@dariah-eric/database/placeholder-values";
 import { getPlaceholderValues } from "@dariah-eric/database/placeholder-values-service";
 import * as schema from "@dariah-eric/database/schema";
-import type { JSONContent } from "@tiptap/core";
-import * as v from "valibot";
-
-import { getAssetDownloadUrl, getDownloadFilename } from "@/lib/asset-download";
-import { getEmbedUrl } from "@/lib/embed-url";
-import { generateImageUrl, toImageAsset } from "@/lib/images";
-import { getEntityRefsByDocumentId } from "@/lib/relations";
-import { LicenseSchema } from "@/lib/schemas";
-import type { Database, Transaction } from "@/middlewares/db";
-import { alias, eq, inArray } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 export const RichTextContentBlockSchema = v.object({

@@ -1,8 +1,6 @@
 import { Readable } from "node:stream";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
-import type { StorageService } from "@dariah-eric/storage";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
 import { Result } from "better-result";
@@ -11,6 +9,8 @@ import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
 import { eq } from "@/services/db/sql";
+import * as schema from "@dariah-eric/database/schema";
+import type { StorageService } from "@dariah-eric/storage";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";

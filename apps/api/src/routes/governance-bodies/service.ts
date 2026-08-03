@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
-import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
 import { getContentBlocks } from "@/lib/content-blocks";
@@ -13,6 +11,8 @@ import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { hardcodedWorkingGroupsGovernanceBody } from "@/routes/governance-bodies/hardcoded-working-groups";
 import { alias, and, count, eq, inArray, sql } from "@/services/db/sql";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
+import * as schema from "@dariah-eric/database/schema";
 import { imageWidth } from "~/config/api.config";
 
 interface GetGovernanceBodiesParams {

@@ -1,5 +1,11 @@
 "use client";
 
+import { useExtracted } from "next-intl";
+import { type ReactNode, useEffect, useState } from "react";
+
+import { useSidebarMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar";
+import type { UserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
+import { useRouter } from "@/lib/navigation/navigation";
 import {
 	CommandMenu,
 	CommandMenuDescription,
@@ -9,12 +15,6 @@ import {
 	CommandMenuSearch,
 	CommandMenuSection,
 } from "@dariah-eric/ui/command-menu";
-import { useExtracted } from "next-intl";
-import { type ReactNode, useEffect, useState } from "react";
-
-import { useSidebarMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar";
-import type { UserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
-import { useRouter } from "@/lib/navigation/navigation";
 
 interface CommandPaletteProps {
 	isAdmin: boolean;

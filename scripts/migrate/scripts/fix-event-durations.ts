@@ -1,7 +1,8 @@
 import { log } from "@acdh-oeaw/lib";
+import { eq } from "drizzle-orm";
+
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
-import { eq } from "drizzle-orm";
 
 import { apiBaseUrl } from "../config/data-migration.config";
 import { env } from "../config/env.config";

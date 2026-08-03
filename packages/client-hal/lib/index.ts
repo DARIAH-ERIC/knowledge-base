@@ -1,7 +1,8 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
+import { Result } from "better-result";
+
 import { type RequestResult, request } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
-import { Result } from "better-result";
 
 export interface HalResponseHeader {
 	status?: number;

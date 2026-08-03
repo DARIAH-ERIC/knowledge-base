@@ -1,5 +1,3 @@
-import { ButtonLink } from "@dariah-eric/ui/button-link";
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@dariah-eric/ui/card";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
@@ -8,6 +6,8 @@ import { EntityListHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_co
 import { wizardHref } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_lib/wizard-registry";
 import { assertAdminPageAccess } from "@/lib/auth/session";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { ButtonLink } from "@dariah-eric/ui/button-link";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@dariah-eric/ui/card";
 
 interface DashboardAdministratorWizardsPageProps extends PageProps<"/[locale]/dashboard/administrator/guided-forms"> {}
 

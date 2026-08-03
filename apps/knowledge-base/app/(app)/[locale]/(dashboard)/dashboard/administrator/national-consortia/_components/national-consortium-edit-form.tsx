@@ -1,8 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { Link } from "@dariah-eric/ui/link";
-import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -27,6 +24,9 @@ import type {
 	UnitRelation,
 	UnitRelationStatusOption,
 } from "@/lib/data/unit-relations";
+import type * as schema from "@dariah-eric/database/schema";
+import { Link } from "@dariah-eric/ui/link";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 
 interface NationalConsortiumEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

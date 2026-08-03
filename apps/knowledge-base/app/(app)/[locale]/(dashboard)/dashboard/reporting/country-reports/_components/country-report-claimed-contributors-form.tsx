@@ -1,5 +1,11 @@
 "use client";
 
+import { useExtracted } from "next-intl";
+import { Fragment, type ReactNode, useActionState, useState } from "react";
+
+import { getCompensationRoleLabel } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels";
+import type { CompensationRole } from "@/lib/data/report-contributions";
+import type { ServerAction } from "@/lib/server/create-server-action";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
@@ -13,12 +19,6 @@ import {
 	SearchableSelectInput,
 	SearchableSelectItem,
 } from "@dariah-eric/ui/searchable-select";
-import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState, useState } from "react";
-
-import { getCompensationRoleLabel } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels";
-import type { CompensationRole } from "@/lib/data/report-contributions";
-import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface AvailableContribution {
 	personToOrgUnitId: string;

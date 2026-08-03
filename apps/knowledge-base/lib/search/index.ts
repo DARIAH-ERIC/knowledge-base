@@ -1,8 +1,8 @@
 import { assert } from "@acdh-oeaw/lib";
-import { createSearchService } from "@dariah-eric/search";
 
 import { env } from "@/config/env.config";
 import { config } from "@/config/search.config";
+import { createSearchService } from "@dariah-eric/search";
 
 assert(
 	env.NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY,

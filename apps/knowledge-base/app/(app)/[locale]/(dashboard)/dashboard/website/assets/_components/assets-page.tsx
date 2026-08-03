@@ -1,10 +1,5 @@
 "use client";
 
-import { assetPrefixes } from "@dariah-eric/storage/config";
-import { buttonStyles } from "@dariah-eric/ui/button-styles";
-import { toPlainText } from "@dariah-eric/ui/rich-text";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
 import { ArrowDownTrayIcon, ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
@@ -22,6 +17,11 @@ import { UploadImageDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/we
 import { dashboardPageSize } from "@/config/pagination.config";
 import { formatFileSize } from "@/lib/format-file-size";
 import { useRouter } from "@/lib/navigation/navigation";
+import { assetPrefixes } from "@dariah-eric/storage/config";
+import { buttonStyles } from "@dariah-eric/ui/button-styles";
+import { toPlainText } from "@dariah-eric/ui/rich-text";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
 
 interface AssetItem {
 	id: string;

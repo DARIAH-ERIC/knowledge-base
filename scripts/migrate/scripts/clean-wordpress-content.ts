@@ -2,10 +2,11 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 import { log } from "@acdh-oeaw/lib";
-import { createDatabaseService } from "@dariah-eric/database";
-import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 import { eq } from "drizzle-orm";
+
+import { createDatabaseService } from "@dariah-eric/database";
+import * as schema from "@dariah-eric/database/schema";
 
 import { cacheFolderPath } from "../config/data-migration.config";
 import { env } from "../config/env.config";

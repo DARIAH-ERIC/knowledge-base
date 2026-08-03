@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import { describe, expect, it } from "vitest";
 
 import { mergeServices } from "@/lib/data/service-merge";
 import type { Transaction } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { withTransaction } from "@/test/lib/with-transaction";
+import * as schema from "@dariah-eric/database/schema";
 
 type Tx = Transaction;
 

@@ -1,7 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -27,6 +25,8 @@ import { updateInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashbo
 import type { ContributionPersonOption } from "@/lib/data/contributions";
 import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
 import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
+import type * as schema from "@dariah-eric/database/schema";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 
 interface InstitutionEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

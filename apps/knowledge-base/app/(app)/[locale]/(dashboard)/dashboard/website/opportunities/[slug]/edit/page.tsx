@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -23,6 +22,7 @@ import {
 	toSelectedImage,
 } from "@/lib/data/selected-image";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { db } from "@dariah-eric/database/client";
 
 interface DashboardWebsiteEditOpportunityPageProps extends PageProps<"/[locale]/dashboard/website/opportunities/[slug]/edit"> {}
 

@@ -1,4 +1,3 @@
-import { socialMediaKpiCategoryEnum } from "@dariah-eric/database/schema";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -16,6 +15,7 @@ import {
 	getSocialMediaTypes,
 } from "@/lib/data/report-social-media";
 import { db } from "@/lib/db";
+import { socialMediaKpiCategoryEnum } from "@dariah-eric/database/schema";
 
 interface CountryReportSocialMediaScreenProps {
 	reportId: string;

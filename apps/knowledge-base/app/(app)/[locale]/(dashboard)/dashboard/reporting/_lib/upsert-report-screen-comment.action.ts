@@ -1,6 +1,5 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 import { getExtracted } from "next-intl/server";
 import * as v from "valibot";
@@ -10,6 +9,7 @@ import { assertCan } from "@/lib/auth/permissions";
 import { and, eq } from "@/lib/db/sql";
 import { sendReportCommentNotification } from "@/lib/email/send-report-comment-notification";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
 
 const UpsertReportScreenCommentActionInputSchema = v.object({
 	reportId: v.pipe(v.string(), v.uuid()),

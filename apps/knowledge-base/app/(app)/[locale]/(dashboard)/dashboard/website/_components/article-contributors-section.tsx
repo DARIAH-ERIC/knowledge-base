@@ -1,5 +1,16 @@
 "use client";
 
+import { TrashIcon } from "@heroicons/react/24/outline";
+import { useExtracted } from "next-intl";
+import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
+
+import {
+	FormLayout,
+	FormSection,
+	FormSectionTitle,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import type { AvailablePerson } from "@/lib/data/article-contributors";
+import type { ServerAction } from "@/lib/server/create-server-action";
 import { articleContributorRolesEnum } from "@dariah-eric/database/schema";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
@@ -18,17 +29,6 @@ import {
 	TableRow,
 } from "@dariah-eric/ui/table";
 import type { AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
-import { TrashIcon } from "@heroicons/react/24/outline";
-import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
-
-import {
-	FormLayout,
-	FormSection,
-	FormSectionTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import type { AvailablePerson } from "@/lib/data/article-contributors";
-import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface Contributor {
 	personId: string;

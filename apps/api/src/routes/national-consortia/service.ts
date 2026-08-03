@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
 import { generateImageUrl, toImageAsset } from "@/lib/images";
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, count, desc, eq, sql } from "@/services/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 import { imageWidth } from "~/config/api.config";
 
 interface GetNationalConsortiaParams {

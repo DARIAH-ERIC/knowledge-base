@@ -1,11 +1,5 @@
 "use client";
 
-import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { Button } from "@dariah-eric/ui/button";
-import { Form } from "@dariah-eric/ui/form";
-import { FormStatus } from "@dariah-eric/ui/form-status";
-import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
@@ -15,6 +9,12 @@ import type {
 	ReportScreenCommentType,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_lib/report-screen-comments";
 import { upsertReportScreenCommentAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_lib/upsert-report-screen-comment.action";
+import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { Button } from "@dariah-eric/ui/button";
+import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
+import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
 
 interface ReportScreenCommentFormProps {
 	comment: JSONContent | null;

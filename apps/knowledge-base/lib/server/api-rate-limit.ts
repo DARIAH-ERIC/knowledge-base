@@ -1,5 +1,6 @@
-import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { NextResponse } from "next/server";
+
+import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 
 export async function enforceApiGetRateLimit(): Promise<NextResponse | null> {
 	if (await globalGetRequestRateLimit()) {

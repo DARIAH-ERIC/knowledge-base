@@ -1,7 +1,6 @@
 "use server";
 
 import { assert, keyBy } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import { UpdateDocumentationPageActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/update-documentation-page.schema";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
@@ -18,6 +17,7 @@ import { eq, inArray } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
 
 export const updateDocumentationPageAction = createMutationAction({
 	schema: UpdateDocumentationPageActionInputSchema,

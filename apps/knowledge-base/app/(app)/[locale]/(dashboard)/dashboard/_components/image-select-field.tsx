@@ -1,9 +1,5 @@
 "use client";
 
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
-import type { AssetPrefix } from "@dariah-eric/storage/config";
-import { Button } from "@dariah-eric/ui/button";
-import { fieldErrorStyles } from "@dariah-eric/ui/field";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState } from "react";
@@ -15,6 +11,10 @@ import {
 	type SelectedImage,
 	SelectedImageCard,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
+import type { AssetPrefix } from "@dariah-eric/storage/config";
+import { Button } from "@dariah-eric/ui/button";
+import { fieldErrorStyles } from "@dariah-eric/ui/field";
 
 export type { SelectedImage };
 

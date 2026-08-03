@@ -1,6 +1,5 @@
 import { STATUS_CODES } from "node:http";
 
-import type { StorageService } from "@dariah-eric/storage";
 import * as Sentry from "@sentry/node";
 import type { TypedResponse } from "hono";
 import { rateLimiter } from "hono-rate-limiter";
@@ -11,6 +10,7 @@ import { requestId } from "hono/request-id";
 
 import type { Database, Transaction } from "@/middlewares/db";
 import { type Logger, logger } from "@/middlewares/logger";
+import type { StorageService } from "@dariah-eric/storage";
 import { config as corsConfig } from "~/config/cors.config";
 import { config as rateLimiterConfig } from "~/config/rate-limiter.config";
 

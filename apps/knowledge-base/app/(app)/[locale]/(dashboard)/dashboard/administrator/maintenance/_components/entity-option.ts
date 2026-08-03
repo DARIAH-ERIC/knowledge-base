@@ -1,6 +1,5 @@
-import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
-
 import type { MaintenanceEntityState } from "@/lib/data/maintenance-entity-options";
+import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 
 /** An entity relation option enriched with its raw type tokens (for same-type merge validation). */
 export interface EntityOption extends AsyncOption {

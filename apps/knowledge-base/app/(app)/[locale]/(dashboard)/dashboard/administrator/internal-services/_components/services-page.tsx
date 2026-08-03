@@ -1,15 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { Badge } from "@dariah-eric/ui/badge";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableColumn,
-	TableHeader,
-	TableRow,
-} from "@dariah-eric/ui/table";
 import { EyeIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
@@ -27,6 +17,16 @@ import { deleteServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 import { getServiceStatusLabel } from "@/lib/service-status-label";
+import type * as schema from "@dariah-eric/database/schema";
+import { Badge } from "@dariah-eric/ui/badge";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
+} from "@dariah-eric/ui/table";
 
 interface ServicesPageProps {
 	dir: "asc" | "desc";

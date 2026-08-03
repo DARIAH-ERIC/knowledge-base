@@ -1,3 +1,4 @@
+import { db } from "@/lib/db";
 import {
 	type DeleteEmptyContentBlocksResult,
 	type EmptyContentBlock,
@@ -5,8 +6,6 @@ import {
 	deleteEmptyContentBlocks as deleteEmptyContentBlocksShared,
 	findEmptyContentBlocks,
 } from "@dariah-eric/database/content-block-cleanup-service";
-
-import { db } from "@/lib/db";
 
 export type { DeleteEmptyContentBlocksResult, EmptyContentBlock, EmptyContentBlocksResult };
 

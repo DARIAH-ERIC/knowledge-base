@@ -1,3 +1,6 @@
+import type { JSONContent } from "@tiptap/core";
+import { describe, expect, it } from "vitest";
+
 import {
 	type PlaceholderValueKind,
 	type ResolvedPlaceholderValues,
@@ -6,8 +9,6 @@ import {
 	placeholderValueKindLabels,
 } from "@dariah-eric/database/placeholder-values";
 import { formatPlaceholderValue, toPlainText } from "@dariah-eric/ui/rich-text";
-import type { JSONContent } from "@tiptap/core";
-import { describe, expect, it } from "vitest";
 
 function placeholderValue(kind: string, label?: string): JSONContent {
 	return { type: "placeholderValue", attrs: { kind, label: label ?? null } };

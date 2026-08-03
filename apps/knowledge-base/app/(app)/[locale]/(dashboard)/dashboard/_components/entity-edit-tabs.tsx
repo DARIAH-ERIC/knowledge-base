@@ -1,10 +1,10 @@
 "use client";
 
-import { Tab, type TabProps, Tabs } from "@dariah-eric/ui/tabs";
 import type { ReactNode } from "react";
 import type { Key } from "react-aria-components";
 
 import { useSearchParams } from "@/lib/navigation/navigation";
+import { Tab, type TabProps, Tabs } from "@dariah-eric/ui/tabs";
 
 interface EntityEditTabsProps {
 	/** Tab id selected when no `?tab=` search param is present. */

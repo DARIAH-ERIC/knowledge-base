@@ -1,7 +1,8 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
+import { Result } from "better-result";
+
 import { type RequestOptions, type RequestResult, request } from "@dariah-eric/request";
 import { HttpError, type RequestError } from "@dariah-eric/request/errors";
-import { Result } from "better-result";
 
 /**
  * Retry transient failures (network errors, timeouts, 5xx and 429). The SSH Open Marketplace API is

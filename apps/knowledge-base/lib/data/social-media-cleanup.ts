@@ -1,3 +1,4 @@
+import { db } from "@/lib/db";
 import {
 	type DeleteUnusedSocialMediaResult,
 	type UnusedSocialMedia,
@@ -5,8 +6,6 @@ import {
 	deleteUnusedSocialMedia as deleteUnusedSocialMediaShared,
 	findUnusedSocialMedia,
 } from "@dariah-eric/database/social-media-cleanup-service";
-
-import { db } from "@/lib/db";
 
 export type { DeleteUnusedSocialMediaResult, UnusedSocialMedia, UnusedSocialMediaResult };
 

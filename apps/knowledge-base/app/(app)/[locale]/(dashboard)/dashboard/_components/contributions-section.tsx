@@ -1,5 +1,24 @@
 "use client";
 
+import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import type { CalendarDate } from "@internationalized/date";
+import { useExtracted, useFormatter } from "next-intl";
+import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
+
+import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
+import {
+	FormLayout,
+	FormSection,
+	FormSectionTitle,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
+import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
+import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
+import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
+import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
+import type { ContributionRoleOption, PersonContribution } from "@/lib/data/contributions";
+import { dateToCalendarDate } from "@/lib/date";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Badge } from "@dariah-eric/ui/badge";
@@ -28,25 +47,6 @@ import {
 } from "@dariah-eric/ui/table";
 import { TextField } from "@dariah-eric/ui/text-field";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
-import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
-import type { CalendarDate } from "@internationalized/date";
-import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
-
-import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
-import {
-	FormLayout,
-	FormSection,
-	FormSectionTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
-import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
-import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
-import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
-import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
-import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
-import type { ContributionRoleOption, PersonContribution } from "@/lib/data/contributions";
-import { dateToCalendarDate } from "@/lib/date";
 
 interface ContributionsSectionProps {
 	personDocumentId: string;

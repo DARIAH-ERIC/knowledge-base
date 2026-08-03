@@ -1,5 +1,28 @@
 "use client";
 
+import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import type { CalendarDate } from "@internationalized/date";
+import { useExtracted, useFormatter } from "next-intl";
+import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
+
+import {
+	EntityDeleteModal,
+	EntityListHeader,
+	EntityListPagination,
+	EntityListSearchField,
+	RowActionsMenu,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
+import { deleteProjectPartnerAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/delete-project-partner.action";
+import { upsertProjectPartnerAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/upsert-project-partner.action";
+import { dashboardPageSize } from "@/config/pagination.config";
+import type { ProjectPartnersResult } from "@/lib/data/project-partners";
+import { dateToCalendarDate } from "@/lib/date";
+import { useRouter } from "@/lib/navigation/navigation";
+import {
+	type OrganisationalUnitOption,
+	toOrganisationalUnitDocumentOptionsPage,
+} from "@/lib/organisational-unit-options";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Badge } from "@dariah-eric/ui/badge";
@@ -26,29 +49,6 @@ import {
 	TableRow,
 } from "@dariah-eric/ui/table";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
-import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import type { CalendarDate } from "@internationalized/date";
-import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
-
-import {
-	EntityDeleteModal,
-	EntityListHeader,
-	EntityListPagination,
-	EntityListSearchField,
-	RowActionsMenu,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
-import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
-import { deleteProjectPartnerAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/delete-project-partner.action";
-import { upsertProjectPartnerAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/upsert-project-partner.action";
-import { dashboardPageSize } from "@/config/pagination.config";
-import type { ProjectPartnersResult } from "@/lib/data/project-partners";
-import { dateToCalendarDate } from "@/lib/date";
-import { useRouter } from "@/lib/navigation/navigation";
-import {
-	type OrganisationalUnitOption,
-	toOrganisationalUnitDocumentOptionsPage,
-} from "@/lib/organisational-unit-options";
 
 interface ProjectPartnersPageProps {
 	projectPartners: ProjectPartnersResult;

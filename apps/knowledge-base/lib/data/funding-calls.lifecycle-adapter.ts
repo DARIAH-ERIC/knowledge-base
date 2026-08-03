@@ -1,7 +1,6 @@
-import * as schema from "@dariah-eric/database/schema";
-
 import { type EntityLifecycleAdapter, subtypePayload } from "@/lib/data/entity-lifecycle";
 import { eq } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 export const fundingCallsLifecycleAdapter: EntityLifecycleAdapter = {
 	async cloneSubtype(tx, sourceVersionId, targetVersionId) {

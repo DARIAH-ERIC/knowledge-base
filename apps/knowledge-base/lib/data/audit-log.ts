@@ -1,8 +1,8 @@
 import { unique } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import { type Database, type Transaction, db } from "@/lib/db";
 import { alias, count, desc, eq, inArray, sql } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 /** A db handle usable for reads — the global pool, or an open transaction (for write-time reads). */
 type AuditLogClient = Database | Transaction;

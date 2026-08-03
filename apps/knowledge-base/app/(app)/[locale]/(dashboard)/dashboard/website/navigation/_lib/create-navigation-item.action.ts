@@ -1,11 +1,10 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { CreateNavigationItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/create-navigation-item.schema";
 import { and, eq, isNull } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import * as schema from "@dariah-eric/database/schema";
 
 export const createNavigationItemAction = createMutationAction({
 	schema: CreateNavigationItemActionInputSchema,

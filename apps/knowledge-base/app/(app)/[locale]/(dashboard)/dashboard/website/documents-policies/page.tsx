@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -11,6 +10,7 @@ import { toSelectedImage } from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
 import { asc, eq, sql } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
+import * as schema from "@dariah-eric/database/schema";
 
 interface DashboardWebsiteDocumentsPoliciesPageProps extends PageProps<"/[locale]/dashboard/website/documents-policies"> {}
 

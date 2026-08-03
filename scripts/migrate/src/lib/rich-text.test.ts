@@ -1,5 +1,6 @@
-import { isEmptyRichTextDocument } from "@dariah-eric/database/rich-text";
 import { describe, expect, it } from "vitest";
+
+import { isEmptyRichTextDocument } from "@dariah-eric/database/rich-text";
 
 describe("isEmptyRichTextDocument", () => {
 	it.each([

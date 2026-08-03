@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { imageAssetWidth } from "@/config/assets.config";
 import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
@@ -9,6 +7,7 @@ import { type Database, type Transaction, db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images/";
+import * as schema from "@dariah-eric/database/schema";
 
 export type NewsSort = "publicationDate" | "title";
 

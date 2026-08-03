@@ -1,5 +1,6 @@
-import type { Middleware } from "@dariah-eric/next-lib/middlewares";
 import { NextResponse } from "next/server";
+
+import type { Middleware } from "@dariah-eric/next-lib/middlewares";
 
 /**
  * While next.js provides built-in csrf protection for server actions, regular route handlers are

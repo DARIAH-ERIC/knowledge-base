@@ -1,8 +1,9 @@
 "use client";
 
-import { Button } from "@dariah-eric/ui/button";
 import { type ErrorInfo, unstable_catchError } from "next/error";
 import type { ReactNode } from "react";
+
+import { Button } from "@dariah-eric/ui/button";
 
 interface LiveReportResourcesErrorBoundaryProps {
 	description: string;

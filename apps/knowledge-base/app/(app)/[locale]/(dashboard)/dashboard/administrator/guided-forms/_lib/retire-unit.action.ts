@@ -1,6 +1,5 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
 import { getExtracted } from "next-intl/server";
 
 import { RetireUnitActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_lib/retire-unit.schema";
@@ -8,6 +7,7 @@ import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { inArray } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import * as schema from "@dariah-eric/database/schema";
 
 /**
  * Closes a unit and everything that depends on it, on one date and in one transaction.

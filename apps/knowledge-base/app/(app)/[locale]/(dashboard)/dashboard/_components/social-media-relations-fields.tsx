@@ -1,5 +1,17 @@
 "use client";
 
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/16/solid";
+import { PlusIcon } from "@heroicons/react/20/solid";
+import { useExtracted } from "next-intl";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
+
+import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import {
+	type CreatedSocialMedia,
+	createSocialMediaAction,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.action";
+import { LocaleLink } from "@/lib/navigation/navigation";
+import { getSocialMediaTypeLabel } from "@/lib/social-media-type-label";
 import { socialMediaTypesEnum } from "@dariah-eric/database/schema";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { AsyncListSelect } from "@dariah-eric/ui/async-list-select";
@@ -21,18 +33,6 @@ import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/16/solid";
-import { PlusIcon } from "@heroicons/react/20/solid";
-import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useState, useTransition } from "react";
-
-import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import {
-	type CreatedSocialMedia,
-	createSocialMediaAction,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.action";
-import { LocaleLink } from "@/lib/navigation/navigation";
-import { getSocialMediaTypeLabel } from "@/lib/social-media-type-label";
 
 /** Social media options carry a human-readable `type` label, shown as the tag suffix. */
 interface SocialMediaOption extends AsyncOption {

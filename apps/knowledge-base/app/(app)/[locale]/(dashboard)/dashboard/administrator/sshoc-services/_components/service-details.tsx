@@ -1,13 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { buttonStyles } from "@dariah-eric/ui/button-styles";
-import {
-	DescriptionDetails,
-	DescriptionList,
-	DescriptionTerm,
-} from "@dariah-eric/ui/description-list";
-import { Link } from "@dariah-eric/ui/link";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
@@ -16,6 +8,14 @@ import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_compon
 import { getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
 import { getSshocMarketplaceServiceUrl } from "@/lib/external-identifier-url";
 import { getServiceStatusLabel } from "@/lib/service-status-label";
+import type * as schema from "@dariah-eric/database/schema";
+import { buttonStyles } from "@dariah-eric/ui/button-styles";
+import {
+	DescriptionDetails,
+	DescriptionList,
+	DescriptionTerm,
+} from "@dariah-eric/ui/description-list";
+import { Link } from "@dariah-eric/ui/link";
 
 interface ServiceDetailsProps {
 	service: Pick<

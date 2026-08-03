@@ -1,10 +1,11 @@
 import { parseArgs } from "node:util";
 
 import { log } from "@acdh-oeaw/lib";
+import * as v from "valibot";
+
 import { createDatabaseService } from "@dariah-eric/database";
 import { createSearchAdminService } from "@dariah-eric/search/admin";
 import { createStorageService } from "@dariah-eric/storage";
-import * as v from "valibot";
 
 import { env } from "../config/env.config";
 import { seed as seedDatabase } from "../lib/seed-database";

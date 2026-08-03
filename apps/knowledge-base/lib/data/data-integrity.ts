@@ -1,3 +1,4 @@
+import { db } from "@/lib/db";
 import {
 	type CountryMembershipCheckResult,
 	type CountryMembershipFinding,
@@ -29,8 +30,6 @@ import {
 	checkUnitRelationRequirements,
 	checkWebAddresses,
 } from "@dariah-eric/database/integrity-service";
-
-import { db } from "@/lib/db";
 
 export type {
 	CountryMembershipCheckResult,

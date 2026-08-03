@@ -1,18 +1,5 @@
 "use client";
 
-import { Button } from "@dariah-eric/ui/button";
-import { Checkbox } from "@dariah-eric/ui/checkbox";
-import { Link } from "@dariah-eric/ui/link";
-import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
-import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableColumn,
-	TableHeader,
-	TableRow,
-} from "@dariah-eric/ui/table";
 import { AlertTriangleIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useState, useTransition } from "react";
@@ -27,6 +14,19 @@ import type {
 } from "@/lib/data/content-block-cleanup";
 import { getEntityDetailHref } from "@/lib/entity-detail-href";
 import { useRouter } from "@/lib/navigation/navigation";
+import { Button } from "@dariah-eric/ui/button";
+import { Checkbox } from "@dariah-eric/ui/checkbox";
+import { Link } from "@dariah-eric/ui/link";
+import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
+import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
+} from "@dariah-eric/ui/table";
 
 interface EmptyContentBlocksCleanupProps {
 	blocks: Array<EmptyContentBlock>;

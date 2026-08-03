@@ -1,8 +1,7 @@
-import * as schema from "@dariah-eric/database/schema";
-
 import type { DownloadableAsset } from "@/lib/asset-download";
 import type { Database, Transaction } from "@/middlewares/db";
 import { eq } from "@/services/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 /** The asset stored under `key`, or `null` when no asset row claims it. */
 export async function getAssetByKey(

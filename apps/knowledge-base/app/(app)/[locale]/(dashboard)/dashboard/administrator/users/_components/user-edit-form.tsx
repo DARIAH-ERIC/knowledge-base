@@ -1,12 +1,12 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { UserForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form";
 import { updateUserAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.action";
+import type * as schema from "@dariah-eric/database/schema";
+import { Heading } from "@dariah-eric/ui/heading";
 
 interface UserEditFormProps {
 	canCurrentUserManageAdmins: boolean;

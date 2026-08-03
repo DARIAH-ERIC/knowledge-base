@@ -1,7 +1,6 @@
 "use server";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import { UpdateDocumentOrPolicyDetailsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.schema";
 import { getDocumentIdForVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
@@ -9,6 +8,7 @@ import { eq, isNull } from "@/lib/db/sql";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
+import * as schema from "@dariah-eric/database/schema";
 
 export const updateDocumentOrPolicyDetailsAction = createMutationAction<
 	typeof UpdateDocumentOrPolicyDetailsActionInputSchema,

@@ -1,5 +1,10 @@
 "use client";
 
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { useExtracted } from "next-intl";
+import { Fragment, type ReactNode, useActionState, useState } from "react";
+
+import { createDocumentPolicyGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-policy-group.action";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -15,11 +20,6 @@ import {
 } from "@dariah-eric/ui/modal";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { TextField } from "@dariah-eric/ui/text-field";
-import { PlusIcon } from "@heroicons/react/24/outline";
-import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState, useState } from "react";
-
-import { createDocumentPolicyGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-policy-group.action";
 
 function DocumentPolicyGroupForm(props: Readonly<{ onSuccess: () => void }>): ReactNode {
 	const { onSuccess } = props;

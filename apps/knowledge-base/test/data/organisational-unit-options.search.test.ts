@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
 import { describe, expect, it } from "vitest";
 
 import { getOrganisationalUnitOptions } from "@/lib/data/organisational-units";
 import type { db } from "@/lib/db";
 import { withTransaction } from "@/test/lib/with-transaction";
+import * as schema from "@dariah-eric/database/schema";
 
 type Tx = Awaited<Parameters<Parameters<typeof db.transaction>[0]>[0]>;
 

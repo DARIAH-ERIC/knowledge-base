@@ -1,5 +1,4 @@
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
 import { v7 as uuidv7 } from "uuid";
@@ -7,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
 import { getStatistics } from "@/routes/statistics/service";
+import * as schema from "@dariah-eric/database/schema";
 import { withTransaction } from "~/test/lib/with-transaction";
 
 function createOrganisationalUnit(statusId: string, entityTypeId: string) {

@@ -1,6 +1,5 @@
-import type * as schema from "@dariah-eric/database/schema";
-
 import type { asc, sql } from "@/services/db/sql";
+import type * as schema from "@dariah-eric/database/schema";
 
 /** Order a many-to-many social-media relation by its junction row. */
 export const socialMediaByPosition = {

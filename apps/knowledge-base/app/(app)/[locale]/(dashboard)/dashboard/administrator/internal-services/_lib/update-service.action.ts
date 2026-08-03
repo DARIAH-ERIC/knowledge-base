@@ -1,7 +1,5 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 
 import { UpdateServiceActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/update-service.schema";
@@ -9,6 +7,8 @@ import { arePublishedEntityDocuments } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
+import { createActionStateError } from "@dariah-eric/next-lib/actions";
 
 export const updateServiceAction = createMutationAction({
 	schema: UpdateServiceActionInputSchema,

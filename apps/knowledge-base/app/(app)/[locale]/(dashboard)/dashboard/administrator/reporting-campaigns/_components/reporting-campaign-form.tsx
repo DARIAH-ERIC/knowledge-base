@@ -1,5 +1,13 @@
 "use client";
 
+import { useExtracted } from "next-intl";
+import { Fragment, type ReactNode, useActionState, useState } from "react";
+
+import {
+	FormLayout,
+	FormSection,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import type { ServerAction } from "@/lib/server/create-server-action";
 import type * as schema from "@dariah-eric/database/schema";
 import { reportingCampaignStatusEnum } from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
@@ -11,14 +19,6 @@ import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
-import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState, useState } from "react";
-
-import {
-	FormLayout,
-	FormSection,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface ReportingCampaignFormProps {
 	campaign?: Pick<schema.ReportingCampaign, "id" | "year" | "status">;

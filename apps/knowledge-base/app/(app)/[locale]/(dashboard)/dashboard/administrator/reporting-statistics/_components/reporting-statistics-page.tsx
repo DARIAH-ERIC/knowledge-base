@@ -1,16 +1,5 @@
 "use client";
 
-import { Button } from "@dariah-eric/ui/button";
-import { Label } from "@dariah-eric/ui/field";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableColumn,
-	TableHeader,
-	TableRow,
-} from "@dariah-eric/ui/table";
 import { useExtracted, useFormatter } from "next-intl";
 import { type ReactNode, useOptimistic, useTransition } from "react";
 import type { Key } from "react-aria-components";
@@ -23,6 +12,17 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import type { ReportingStatisticsData } from "@/lib/data/admin-reporting";
 import { usePathname, useRouter, useSearchParams } from "@/lib/navigation/navigation";
+import { Button } from "@dariah-eric/ui/button";
+import { Label } from "@dariah-eric/ui/field";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
+} from "@dariah-eric/ui/table";
 
 interface Filters {
 	campaignYear: string;

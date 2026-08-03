@@ -1,10 +1,10 @@
-import { plainTextToRichText } from "@dariah-eric/database";
-import { isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
 import type { JSONContent } from "@tiptap/core";
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 
 import { RichTextCaptionFormSchema } from "@/lib/rich-text-caption";
+import { plainTextToRichText } from "@dariah-eric/database";
+import { isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
 
 function doc(...text: Array<JSONContent>): JSONContent {
 	return { type: "doc", content: [{ type: "paragraph", content: text }] };

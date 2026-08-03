@@ -1,8 +1,8 @@
-import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
+import * as schema from "@dariah-eric/database/schema";
 
 const DocumentPolicyGroupSchema = v.nullable(
 	v.object({

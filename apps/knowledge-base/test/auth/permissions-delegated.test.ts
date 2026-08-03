@@ -1,12 +1,12 @@
 import { randomUUID } from "node:crypto";
 
 import { assert } from "@acdh-oeaw/lib";
-import type { User } from "@dariah-eric/auth";
-import * as schema from "@dariah-eric/database/schema";
 import { describe, expect, it, vi } from "vitest";
 
 import type { Transaction } from "@/lib/db";
 import { withTransaction } from "@/test/lib/with-transaction";
+import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 
 // The delegated edit guards redirect (next navigation) + read the locale on the deny path. Replace both
 // with minimal stubs: a denied check throws a recognizable error, and the locale lookup resolves — both

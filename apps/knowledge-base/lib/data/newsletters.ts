@@ -1,7 +1,7 @@
-import type { User } from "@dariah-eric/auth";
 import { forbidden } from "next/navigation";
 
 import { type GetCampaignsResponse, mailchimp } from "@/lib/mailchimp";
+import type { User } from "@dariah-eric/auth";
 
 export type Newsletter = GetCampaignsResponse["campaigns"][number];
 

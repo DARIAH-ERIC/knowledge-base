@@ -1,9 +1,9 @@
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 
 import type { Transaction } from "@/lib/db";
 import { eq, sql } from "@/lib/db/sql";
 import { UserFacingError } from "@/lib/user-facing-error";
+import * as schema from "@dariah-eric/database/schema";
 
 export interface ServiceIdentity {
 	id: string;

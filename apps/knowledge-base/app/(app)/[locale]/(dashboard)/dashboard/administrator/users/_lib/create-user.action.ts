@@ -1,7 +1,5 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 
 import { canManageAdminAccounts } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/admin-management";
@@ -9,6 +7,8 @@ import { CreateUserActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/da
 import { auth } from "@/lib/auth";
 import { eq } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
+import { createActionStateError } from "@dariah-eric/next-lib/actions";
 
 export const createUserAction = createMutationAction({
 	schema: CreateUserActionInputSchema,

@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { getWebsiteHref } from "@/lib/website-routes";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { SitemapEntityType } from "@/routes/sitemap/schemas";
 import { and, eq, inArray, isNotNull } from "@/services/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 /**
  * Sitemap types that live in their own subtype table and are found generically via the entity type,

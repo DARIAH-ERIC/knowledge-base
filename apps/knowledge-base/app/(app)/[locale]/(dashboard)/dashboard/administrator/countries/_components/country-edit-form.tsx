@@ -1,7 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -31,6 +29,8 @@ import type {
 	UnitRelation,
 	UnitRelationStatusOption,
 } from "@/lib/data/unit-relations";
+import type * as schema from "@dariah-eric/database/schema";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 
 interface CountryEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

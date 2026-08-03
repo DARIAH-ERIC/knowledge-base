@@ -1,8 +1,8 @@
 import { includes, removeTrailingSlash } from "@acdh-oeaw/lib";
-import type { Middleware } from "@dariah-eric/next-lib/middlewares";
 import createI18nMiddleware from "next-intl/middleware";
 
 import { localePrefix, routing } from "@/lib/i18n/routing";
+import type { Middleware } from "@dariah-eric/next-lib/middlewares";
 
 const intlMiddleware = createI18nMiddleware(routing);
 

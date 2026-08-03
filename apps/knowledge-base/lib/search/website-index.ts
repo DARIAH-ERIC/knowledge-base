@@ -1,3 +1,6 @@
+import { env } from "@/config/env.config";
+import { db } from "@/lib/db";
+import { search } from "@/lib/search/admin";
 import { createSearchService } from "@dariah-eric/search";
 import {
 	type SupportedWebsiteEntityType,
@@ -6,10 +9,6 @@ import {
 	createWebsiteSearchIndexService,
 	supportedWebsiteEntityTypes,
 } from "@dariah-eric/search-website";
-
-import { env } from "@/config/env.config";
-import { db } from "@/lib/db";
-import { search } from "@/lib/search/admin";
 
 const searchService = createSearchService({
 	apiKey: env.TYPESENSE_ADMIN_API_KEY,

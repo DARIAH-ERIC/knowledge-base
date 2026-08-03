@@ -1,9 +1,8 @@
-import * as schema from "@dariah-eric/database/schema";
-import { getEntityHref, resolveInterimPagePath } from "@dariah-eric/website-routes";
-
 import type { PublicRelatedEntityType } from "@/lib/schemas";
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, eq, inArray, sql } from "@/services/db/sql";
+import * as schema from "@dariah-eric/database/schema";
+import { getEntityHref, resolveInterimPagePath } from "@dariah-eric/website-routes";
 
 type OrganisationalUnitType = (typeof schema.organisationalUnitTypesEnum)[number];
 

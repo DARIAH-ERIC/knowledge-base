@@ -1,4 +1,8 @@
 import { assert } from "@acdh-oeaw/lib";
+
+import { env } from "@/config/env.config";
+import { db } from "@/lib/db";
+import { search } from "@/lib/search/admin";
 import { createDariahCampusClient } from "@dariah-eric/client-campus";
 import { createEpisciencesClient } from "@dariah-eric/client-episciences";
 import { createSshocClient } from "@dariah-eric/client-sshoc";
@@ -10,10 +14,6 @@ import {
 	createSearchResourcesService,
 	loadOrgUnitLookups,
 } from "@dariah-eric/search-resources";
-
-import { env } from "@/config/env.config";
-import { db } from "@/lib/db";
-import { search } from "@/lib/search/admin";
 
 /** Aliased rather than re-declared, so the admin task cannot drift from what the service returns. */
 export type SyncResourcesSearchIndexResult = SyncSearchResourcesResult;

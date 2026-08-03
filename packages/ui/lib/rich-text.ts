@@ -1,5 +1,6 @@
-import { formatPlaceholderValue } from "@dariah-eric/database/placeholder-values";
 import type { JSONContent } from "@tiptap/core";
+
+import { formatPlaceholderValue } from "@dariah-eric/database/placeholder-values";
 
 export { formatPlaceholderValue };
 

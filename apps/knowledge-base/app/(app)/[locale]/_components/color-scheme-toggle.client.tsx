@@ -1,9 +1,9 @@
 "use client";
 
-import { Switch, type SwitchProps } from "@dariah-eric/ui/switch";
 import type { ReactNode } from "react";
 
 import { useColorScheme } from "@/lib/color-scheme/use-color-scheme";
+import { Switch, type SwitchProps } from "@dariah-eric/ui/switch";
 
 interface ColorSchemeToggleProps extends Pick<SwitchProps, "className"> {
 	label: string;

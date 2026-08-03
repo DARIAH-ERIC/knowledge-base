@@ -1,4 +1,3 @@
-import { SidebarInset, SidebarProvider } from "@dariah-eric/ui/sidebar";
 import { getExtracted } from "next-intl/server";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
@@ -11,6 +10,7 @@ import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/dashboard/_compo
 import { SkipLink } from "@/components/skip-link";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getUserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
+import { SidebarInset, SidebarProvider } from "@dariah-eric/ui/sidebar";
 
 interface DashbardLayoutProps extends LayoutProps<"/[locale]/dashboard"> {
 	breadcrumbs: ReactNode;

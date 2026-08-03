@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -27,6 +26,7 @@ import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/so
 import { db } from "@/lib/db";
 import { alias, eq } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
+import * as schema from "@dariah-eric/database/schema";
 
 interface DashboardAdministratorEditProjectPageProps extends PageProps<"/[locale]/dashboard/administrator/projects/[slug]/edit"> {}
 

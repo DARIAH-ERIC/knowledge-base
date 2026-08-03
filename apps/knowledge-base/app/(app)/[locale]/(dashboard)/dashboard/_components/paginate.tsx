@@ -1,5 +1,9 @@
 "use client";
 
+import { useExtracted } from "next-intl";
+import type { ReactNode } from "react";
+
+import { dashboardPageSize } from "@/config/pagination.config";
 import {
 	Pagination,
 	PaginationFirst,
@@ -14,10 +18,6 @@ import {
 	PaginationSection,
 	PaginationSpacer,
 } from "@dariah-eric/ui/pagination";
-import { useExtracted } from "next-intl";
-import type { ReactNode } from "react";
-
-import { dashboardPageSize } from "@/config/pagination.config";
 
 function getPaginationRange(current: number, total: number, delta = 2) {
 	const range: Array<number> = [];

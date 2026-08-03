@@ -1,10 +1,10 @@
 "use client";
 
-import { Breadcrumbs, BreadcrumbsItem } from "@dariah-eric/ui/breadcrumbs";
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
 import { usePathname } from "@/lib/navigation/navigation";
+import { Breadcrumbs, BreadcrumbsItem } from "@dariah-eric/ui/breadcrumbs";
 
 // Dynamic param segments (e.g. slugs/ids) never have their own page — they
 // only serve as parents for "edit" or "details" sub-routes.

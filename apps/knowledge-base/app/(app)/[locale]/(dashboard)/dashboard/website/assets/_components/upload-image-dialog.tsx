@@ -1,5 +1,14 @@
 "use client";
 
+import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
+import { useExtracted } from "next-intl";
+import { Fragment, type ReactNode, useActionState, useState } from "react";
+
+import { CaptionField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field";
+import type { UploadedAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
+import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
+import { imageSizeLimit } from "@/config/assets.config";
+import { formatFileSize } from "@/lib/format-file-size";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { assetPrefixes } from "@dariah-eric/storage/config";
 import { Button } from "@dariah-eric/ui/button";
@@ -18,15 +27,6 @@ import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
-import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
-import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState, useState } from "react";
-
-import { CaptionField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field";
-import type { UploadedAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
-import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
-import { imageSizeLimit } from "@/config/assets.config";
-import { formatFileSize } from "@/lib/format-file-size";
 
 interface UploadImageDialogProps {
 	licenses: Array<{ id: string; code: string; name: string }>;

@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { type EntityRef, isPublicRelatedEntityType } from "@/lib/schemas";
 import {
 	getCountrySlugsByOrganisationalUnitDocumentId,
@@ -9,6 +7,7 @@ import {
 } from "@/lib/website-routes";
 import type { Database, Transaction } from "@/middlewares/db";
 import { and, asc, eq, isNotNull, isNull, or, sql } from "@/services/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 interface NavigationItem {
 	id: string;

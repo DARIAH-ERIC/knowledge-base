@@ -1,4 +1,5 @@
 import { createUrl, isNonEmptyString } from "@acdh-oeaw/lib";
+
 import type {
 	DariahCampusCurriculum,
 	DariahCampusResource,

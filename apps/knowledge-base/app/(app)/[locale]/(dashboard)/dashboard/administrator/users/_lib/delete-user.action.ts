@@ -1,6 +1,5 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
 import {
@@ -11,6 +10,7 @@ import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 export async function deleteUserAction(id: string): Promise<void> {
 	const { user: currentUser } = await assertAdmin();

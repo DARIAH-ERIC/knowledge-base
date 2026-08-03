@@ -1,4 +1,3 @@
-import { Heading } from "@dariah-eric/ui/heading";
 import { getExtracted } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
 
@@ -9,6 +8,7 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { Heading } from "@dariah-eric/ui/heading";
 
 export default async function DashboardPage(): Promise<ReactNode> {
 	const { user } = await assertAuthenticated();

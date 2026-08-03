@@ -1,7 +1,6 @@
-import * as schema from "@dariah-eric/database/schema";
-
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 type AdminManagementActor = Pick<schema.User, "canManageAdmins" | "role">;
 

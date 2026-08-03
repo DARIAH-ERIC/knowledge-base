@@ -1,10 +1,10 @@
-import { EventInsertSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { EventDurationInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/event-duration";
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
 import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
 import { FeaturedImageInputSchema } from "@/lib/featured-image-input";
+import { EventInsertSchema } from "@dariah-eric/database/schema";
 
 export const CreateEventActionInputSchema = v.object({
 	slug: EntitySlugInputSchema,

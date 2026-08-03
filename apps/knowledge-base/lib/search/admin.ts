@@ -1,7 +1,7 @@
 import { assert } from "@acdh-oeaw/lib";
-import { createSearchAdminService } from "@dariah-eric/search/admin";
 
 import { env } from "@/config/env.config";
+import { createSearchAdminService } from "@dariah-eric/search/admin";
 
 assert(env.TYPESENSE_ADMIN_API_KEY, "Missing environment variable: `TYPESENSE_ADMIN_API_KEY`.");
 

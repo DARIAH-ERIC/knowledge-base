@@ -1,11 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import {
-	DescriptionDetails,
-	DescriptionList,
-	DescriptionTerm,
-} from "@dariah-eric/ui/description-list";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -19,6 +13,12 @@ import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_com
 import type { UnitRelation } from "@/lib/data/unit-relations";
 import { getEntityDetailHref, getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
 import { formatRoleType } from "@/lib/format-role-type";
+import type * as schema from "@dariah-eric/database/schema";
+import {
+	DescriptionDetails,
+	DescriptionList,
+	DescriptionTerm,
+} from "@dariah-eric/ui/description-list";
 
 interface NationalConsortiumDetailsProps {
 	documentId: string;

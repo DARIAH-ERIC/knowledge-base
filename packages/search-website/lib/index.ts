@@ -1,4 +1,5 @@
 import { log } from "@acdh-oeaw/lib";
+
 import type { Database } from "@dariah-eric/database";
 import {
 	annotatePlaceholderValues,

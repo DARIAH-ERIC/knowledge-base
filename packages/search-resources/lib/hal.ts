@@ -1,4 +1,5 @@
 import { isNonEmptyString } from "@acdh-oeaw/lib";
+
 import type { HalDocument } from "@dariah-eric/client-hal";
 import type { ResourceDocument } from "@dariah-eric/search";
 

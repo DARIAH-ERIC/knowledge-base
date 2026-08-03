@@ -1,6 +1,7 @@
 import { addTrailingSlash, removeTrailingSlash } from "@acdh-oeaw/lib";
-import { define } from "@dariah-eric/env";
 import * as v from "valibot";
+
+import { define } from "@dariah-eric/env";
 
 const validate = define({
 	buildArgsPrefix: "NEXT_PUBLIC_",

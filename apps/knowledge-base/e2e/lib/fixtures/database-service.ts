@@ -1,7 +1,8 @@
+import type { InferOk } from "better-result";
+
 import { type Transaction, createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { and, eq, exists, inArray, notExists, or, sql } from "@dariah-eric/database/sql";
-import type { InferOk } from "better-result";
 
 import { env } from "../../../config/env.config";
 

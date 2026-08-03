@@ -1,6 +1,5 @@
 "use client";
 
-import { Link } from "@dariah-eric/ui/link";
 import { useExtracted, useFormatter } from "next-intl";
 import type { ReactNode } from "react";
 
@@ -11,6 +10,7 @@ import type {
 	SyncSearchIndexJobResult,
 	UnmappedActorRef,
 } from "@/lib/admin-tasks/background-job-result";
+import { Link } from "@dariah-eric/ui/link";
 
 interface AdminTaskResultProps {
 	result: BackgroundJobResult;

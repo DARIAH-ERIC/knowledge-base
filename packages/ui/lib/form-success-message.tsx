@@ -1,6 +1,7 @@
-import { type ActionState, isActionStateSuccess } from "@dariah-eric/next-lib/actions";
 import cn from "clsx/lite";
 import type { ReactNode } from "react";
+
+import { type ActionState, isActionStateSuccess } from "@dariah-eric/next-lib/actions";
 
 export interface FormSuccessMessageProps {
 	children?: ReactNode | ((state: ActionState) => ReactNode);

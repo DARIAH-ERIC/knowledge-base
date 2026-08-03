@@ -1,5 +1,6 @@
-import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
+
+import * as schema from "@dariah-eric/database/schema";
 
 export const CreateSocialMediaActionInputSchema = v.object({
 	name: v.pipe(v.string(), v.nonEmpty()),

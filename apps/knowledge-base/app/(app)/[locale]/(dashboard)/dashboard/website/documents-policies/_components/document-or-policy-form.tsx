@@ -1,14 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
-import { Form } from "@dariah-eric/ui/form";
-import { Input } from "@dariah-eric/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
-import { Separator } from "@dariah-eric/ui/separator";
-import { TextField } from "@dariah-eric/ui/text-field";
-import { TextArea } from "@dariah-eric/ui/textarea";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -25,6 +16,15 @@ import {
 	SelectedImageCard,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
 import type { ServerAction } from "@/lib/server/create-server-action";
+import type * as schema from "@dariah-eric/database/schema";
+import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
+import { Form } from "@dariah-eric/ui/form";
+import { Input } from "@dariah-eric/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import { Separator } from "@dariah-eric/ui/separator";
+import { TextField } from "@dariah-eric/ui/text-field";
+import { TextArea } from "@dariah-eric/ui/textarea";
 
 interface DocumentOrPolicyFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

@@ -1,7 +1,7 @@
-import { InternalPageSelectSchema, InternalPageUpdateSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
+import { InternalPageSelectSchema, InternalPageUpdateSchema } from "@dariah-eric/database/schema";
 
 export const UpdateInternalPageActionInputSchema = v.object({
 	...v.pick(InternalPageSelectSchema, ["id"]).entries,

@@ -1,11 +1,11 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
-import { reportingCampaignContributionRoleEnum } from "@dariah-eric/database/schema";
 import { getExtracted } from "next-intl/server";
 
 import { UpsertCampaignContributionAmountsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-contribution-amounts.schema";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
+import { reportingCampaignContributionRoleEnum } from "@dariah-eric/database/schema";
 
 export const upsertCampaignContributionAmountsAction = createMutationAction({
 	schema: UpsertCampaignContributionAmountsActionInputSchema,

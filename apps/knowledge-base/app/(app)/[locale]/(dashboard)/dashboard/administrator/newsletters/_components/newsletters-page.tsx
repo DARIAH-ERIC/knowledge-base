@@ -1,14 +1,5 @@
 "use client";
 
-import { Badge } from "@dariah-eric/ui/badge";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableColumn,
-	TableHeader,
-	TableRow,
-} from "@dariah-eric/ui/table";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -20,6 +11,15 @@ import {
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { dashboardPageSize } from "@/config/pagination.config";
 import type { NewslettersResult } from "@/lib/data/newsletters";
+import { Badge } from "@dariah-eric/ui/badge";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
+} from "@dariah-eric/ui/table";
 
 interface NewslettersPageProps {
 	newsletters: NewslettersResult;

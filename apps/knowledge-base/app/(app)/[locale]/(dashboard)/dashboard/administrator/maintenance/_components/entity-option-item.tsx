@@ -1,11 +1,11 @@
 "use client";
 
-import { Badge } from "@dariah-eric/ui/badge";
-import { ListBoxDescription, ListBoxLabel } from "@dariah-eric/ui/list-box";
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
 import type { EntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option";
+import { Badge } from "@dariah-eric/ui/badge";
+import { ListBoxDescription, ListBoxLabel } from "@dariah-eric/ui/list-box";
 
 /**
  * Dropdown option for the maintenance entity pickers, surfacing the slug: two entities can share a

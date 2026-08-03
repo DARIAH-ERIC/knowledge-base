@@ -1,13 +1,5 @@
 "use client";
 
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
-import type * as schema from "@dariah-eric/database/schema";
-import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { FieldError, Label } from "@dariah-eric/ui/field";
-import { Form } from "@dariah-eric/ui/form";
-import { Input } from "@dariah-eric/ui/input";
-import { Separator } from "@dariah-eric/ui/separator";
-import { TextField } from "@dariah-eric/ui/text-field";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
@@ -25,6 +17,14 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import { RichTextContentBlocksField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-content-blocks-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
+import type * as schema from "@dariah-eric/database/schema";
+import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { FieldError, Label } from "@dariah-eric/ui/field";
+import { Form } from "@dariah-eric/ui/form";
+import { Input } from "@dariah-eric/ui/input";
+import { Separator } from "@dariah-eric/ui/separator";
+import { TextField } from "@dariah-eric/ui/text-field";
 
 interface PersonFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

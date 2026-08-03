@@ -1,8 +1,8 @@
-import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 import type { JSONContent } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 
 import { mergeBlocksToDocument, splitDocumentToBlocks } from "@/lib/content-blocks-document";
+import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 
 const assetCaption: JSONContent = {
 	type: "doc",

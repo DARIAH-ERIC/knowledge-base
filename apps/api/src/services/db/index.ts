@@ -4,7 +4,6 @@ import {
 	createDatabaseService,
 	schema,
 } from "@dariah-eric/database";
-
 import { env } from "~/config/env.config";
 
 export const db = createDatabaseService({

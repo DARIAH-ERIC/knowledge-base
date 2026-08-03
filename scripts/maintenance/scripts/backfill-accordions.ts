@@ -1,13 +1,14 @@
 import { assert, createUrl, createUrlSearchParams, log } from "@acdh-oeaw/lib";
-import { createDatabaseService } from "@dariah-eric/database";
-import { normalizeRichTextDocument } from "@dariah-eric/database/rich-text-normalize";
-import * as schema from "@dariah-eric/database/schema";
-import { and, eq } from "@dariah-eric/database/sql";
 import slugify from "@sindresorhus/slugify";
 import type { JSONContent } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
+
+import { createDatabaseService } from "@dariah-eric/database";
+import { normalizeRichTextDocument } from "@dariah-eric/database/rich-text-normalize";
+import * as schema from "@dariah-eric/database/schema";
+import { and, eq } from "@dariah-eric/database/sql";
 
 import { env } from "../config/env.config";
 import { type EntityStatusType, groupByEntityVersion } from "../lib/entity-versions";

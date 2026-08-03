@@ -1,10 +1,10 @@
 "use client";
 
-import { Badge } from "@dariah-eric/ui/badge";
 import { useExtracted, useFormatter } from "next-intl";
 import type { ReactNode } from "react";
 
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
+import { Badge } from "@dariah-eric/ui/badge";
 
 interface RelationStatementProps {
 	source: ReactNode;

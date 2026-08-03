@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import { assert } from "@acdh-oeaw/lib";
-import type { User } from "@dariah-eric/auth";
-import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
@@ -10,6 +8,8 @@ import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { and, asc, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 import type { ListSortDirection } from "@/lib/server/list-search-params";
+import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 
 interface GetReportingListParams {
 	limit: number;

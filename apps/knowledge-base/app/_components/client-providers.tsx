@@ -1,6 +1,5 @@
 "use client";
 
-import { type UiContextValue, UiProvider } from "@dariah-eric/ui/ui-provider";
 import type { ReactNode } from "react";
 import {
 	I18nProvider as AriaI18nProvider,
@@ -9,6 +8,7 @@ import {
 
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { LocaleLink, useRouter } from "@/lib/navigation/navigation";
+import { type UiContextValue, UiProvider } from "@dariah-eric/ui/ui-provider";
 
 const ui: UiContextValue = {
 	LinkComponent: LocaleLink,

@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { serializeDateRange } from "@/lib/date-range";
 import { generateImageUrl, withResolvedCaption } from "@/lib/images";
 import type { Database, Transaction } from "@/middlewares/db";
@@ -11,6 +9,7 @@ import {
 	announcementTypeValues,
 } from "@/routes/announcements/schemas";
 import { type SQL, count, eq, sql } from "@/services/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 import { imageWidth } from "~/config/api.config";
 
 interface GetAnnouncementsParams {

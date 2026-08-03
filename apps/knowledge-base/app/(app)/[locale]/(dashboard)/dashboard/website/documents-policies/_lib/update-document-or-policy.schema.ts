@@ -1,8 +1,8 @@
-import { DocumentOrPolicyUpdateSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
 import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
+import { DocumentOrPolicyUpdateSchema } from "@dariah-eric/database/schema";
 
 export const UpdateDocumentOrPolicyActionInputSchema = v.object({
 	slug: EntitySlugInputSchema,

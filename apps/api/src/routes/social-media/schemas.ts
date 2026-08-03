@@ -1,7 +1,7 @@
-import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { CalendarDateSchema, PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
+import * as schema from "@dariah-eric/database/schema";
 
 export const SocialMediaSchema = v.pipe(
 	v.object({

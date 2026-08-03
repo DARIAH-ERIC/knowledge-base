@@ -1,4 +1,3 @@
-import { ButtonLink } from "@dariah-eric/ui/button-link";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -6,6 +5,7 @@ import type { ReactNode } from "react";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { getCurrentSession } from "@/lib/auth/session";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { ButtonLink } from "@dariah-eric/ui/button-link";
 
 interface IndexPageProps extends PageProps<"/[locale]"> {}
 

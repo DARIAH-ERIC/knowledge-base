@@ -1,6 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
@@ -10,6 +9,7 @@ import { DocumentOrPolicyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard
 import { discardDocumentOrPolicyDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/discard-document-or-policy-draft.action";
 import { publishDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/publish-document-or-policy.action";
 import { updateDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy.action";
+import type * as schema from "@dariah-eric/database/schema";
 
 interface DocumentOrPolicyEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;

@@ -1,8 +1,8 @@
-import { HttpError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { subscribeToNewsletter } from "@/routes/newsletters/service";
+import { HttpError } from "@dariah-eric/request/errors";
 import { env } from "~/config/env.config";
 import { createTestClient } from "~/test/lib/create-test-client";
 

@@ -1,5 +1,16 @@
 "use client";
 
+import { useExtracted } from "next-intl";
+import { type ReactNode, useState, useTransition } from "react";
+
+import {
+	type EntityOption,
+	fetchEntityOptionsPage,
+	isSameEntityType,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option";
+import { renderEntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option-item";
+import { mergeEntitiesAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/merge-entities.action";
+import { useRouter } from "@/lib/navigation/navigation";
 import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Button } from "@dariah-eric/ui/button";
@@ -14,17 +25,6 @@ import {
 } from "@dariah-eric/ui/modal";
 import { Note } from "@dariah-eric/ui/note";
 import { TextField } from "@dariah-eric/ui/text-field";
-import { useExtracted } from "next-intl";
-import { type ReactNode, useState, useTransition } from "react";
-
-import {
-	type EntityOption,
-	fetchEntityOptionsPage,
-	isSameEntityType,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option";
-import { renderEntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option-item";
-import { mergeEntitiesAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/merge-entities.action";
-import { useRouter } from "@/lib/navigation/navigation";
 
 const CONFIRM_WORD = "MERGE";
 

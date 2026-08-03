@@ -1,4 +1,3 @@
-import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
@@ -22,6 +21,7 @@ import { getWorkingGroupReportDataForUser } from "@/app/(app)/[locale]/(dashboar
 import { assertAuthenticated } from "@/lib/auth/session";
 import { resolveWorkingGroupReportId } from "@/lib/data/reporting-urls";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { buttonStyles } from "@dariah-eric/ui/button-styles";
 
 interface DashboardReportingWorkingGroupReportPageProps extends PageProps<"/[locale]/dashboard/reporting/working-group-reports/[year]/[slug]"> {}
 

@@ -1,10 +1,9 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { UpdateDocumentPolicyGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-policy-group.schema";
 import { eq } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
+import * as schema from "@dariah-eric/database/schema";
 
 export const updateDocumentPolicyGroupAction = createMutationAction({
 	schema: UpdateDocumentPolicyGroupActionInputSchema,

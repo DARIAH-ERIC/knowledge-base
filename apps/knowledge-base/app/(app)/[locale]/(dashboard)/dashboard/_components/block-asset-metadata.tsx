@@ -1,6 +1,5 @@
 "use client";
 
-import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useEffect, useState } from "react";
@@ -9,6 +8,7 @@ import {
 	type SelectedImage,
 	SelectedImageCard,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
+import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 
 interface BlockAssetMetadataProps {
 	assetKey: string;

@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 
 import { assert, getFormDataValues } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 
@@ -17,6 +16,7 @@ import {
 import type { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { withTransaction } from "@/test/lib/with-transaction";
+import * as schema from "@dariah-eric/database/schema";
 
 type Tx = Awaited<Parameters<Parameters<typeof db.transaction>[0]>[0]>;
 

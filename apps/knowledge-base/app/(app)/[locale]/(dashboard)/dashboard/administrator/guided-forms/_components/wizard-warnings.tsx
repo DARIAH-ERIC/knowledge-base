@@ -1,11 +1,11 @@
 "use client";
 
-import { Note } from "@dariah-eric/ui/note";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { WizardPeriod } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/wizard-review";
 import type { WizardWarning } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_lib/wizard-plan";
+import { Note } from "@dariah-eric/ui/note";
 
 /**
  * Renders what the data-integrity rules say about the choices made so far, before anything is

@@ -1,5 +1,4 @@
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import slugify from "@sindresorhus/slugify";
 
 import { deleteDocumentRelations, getDocumentVersions } from "@/lib/data/entity-lifecycle";
@@ -11,6 +10,7 @@ import {
 import type { Transaction } from "@/lib/db";
 import { eq, inArray, sql } from "@/lib/db/sql";
 import { assertSlugWithinMaxLength } from "@/lib/slug";
+import * as schema from "@dariah-eric/database/schema";
 
 export interface EntityIdentity {
 	id: string;

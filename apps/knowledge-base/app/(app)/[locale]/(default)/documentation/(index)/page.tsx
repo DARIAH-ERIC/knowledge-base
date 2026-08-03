@@ -1,4 +1,3 @@
-import { Link } from "@dariah-eric/ui/link";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -6,6 +5,7 @@ import type { ReactNode } from "react";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { Link } from "@dariah-eric/ui/link";
 
 async function getDocumentationPages() {
 	const pages = await db.query.documentationPages.findMany({

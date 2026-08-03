@@ -1,12 +1,6 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import {
-	type GetValidationErrors,
-	createActionStateError,
-	createActionStateSuccess,
-} from "@dariah-eric/next-lib/actions";
-import { HttpError } from "@dariah-eric/request/errors";
 import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
@@ -14,6 +8,12 @@ import { SubscribeNewsletterInputSchema } from "@/app/(app)/[locale]/(default)/_
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { mailchimp } from "@/lib/mailchimp";
 import { createServerAction } from "@/lib/server/create-server-action";
+import {
+	type GetValidationErrors,
+	createActionStateError,
+	createActionStateSuccess,
+} from "@dariah-eric/next-lib/actions";
+import { HttpError } from "@dariah-eric/request/errors";
 
 export const subscribeNewsletterAction = createServerAction<
 	unknown,

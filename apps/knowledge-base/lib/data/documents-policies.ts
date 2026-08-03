@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { imageGridOptions } from "@/config/assets.config";
 import {
 	selectedImageColumns,
@@ -10,6 +8,7 @@ import {
 } from "@/lib/data/selected-image";
 import { db } from "@/lib/db";
 import { count, eq } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 interface GetDocumentsPoliciesParams {
 	/** @default 10 */

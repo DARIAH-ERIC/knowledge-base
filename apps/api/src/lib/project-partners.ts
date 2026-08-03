@@ -1,7 +1,6 @@
-import * as schema from "@dariah-eric/database/schema";
-
 import type { Database, Transaction } from "@/middlewares/db";
 import { asc, eq, inArray } from "@/services/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 export interface ProjectPartner {
 	unit: {

@@ -1,4 +1,5 @@
 import { assert, log } from "@acdh-oeaw/lib";
+
 import { createUserWithPassword } from "@dariah-eric/auth";
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";

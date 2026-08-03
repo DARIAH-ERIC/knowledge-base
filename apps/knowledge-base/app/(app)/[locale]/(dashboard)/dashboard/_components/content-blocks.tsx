@@ -1,33 +1,5 @@
 "use client";
 
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
-import type { ContentBlockTypes } from "@dariah-eric/database/schema";
-import { Button } from "@dariah-eric/ui/button";
-import { Checkbox } from "@dariah-eric/ui/checkbox";
-import { Label } from "@dariah-eric/ui/field";
-import { Input } from "@dariah-eric/ui/input";
-import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
-import {
-	Modal,
-	ModalBody,
-	ModalClose,
-	ModalContent,
-	ModalFooter,
-	ModalHeader,
-	ModalTitle,
-} from "@dariah-eric/ui/modal";
-import { NumberField, NumberInput } from "@dariah-eric/ui/number-field";
-import { RichTextEditor, RichTextEditorToolbarButton } from "@dariah-eric/ui/rich-text-editor";
-import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectLabel,
-	SelectTrigger,
-} from "@dariah-eric/ui/select";
-import { TextField } from "@dariah-eric/ui/text-field";
-import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
 import {
 	ChevronDownIcon,
 	CodeBracketSquareIcon,
@@ -73,6 +45,34 @@ import {
 	mergeBlocksToDocument,
 	splitDocumentToBlocks,
 } from "@/lib/content-blocks-document";
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
+import type { ContentBlockTypes } from "@dariah-eric/database/schema";
+import { Button } from "@dariah-eric/ui/button";
+import { Checkbox } from "@dariah-eric/ui/checkbox";
+import { Label } from "@dariah-eric/ui/field";
+import { Input } from "@dariah-eric/ui/input";
+import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
+import {
+	Modal,
+	ModalBody,
+	ModalClose,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from "@dariah-eric/ui/modal";
+import { NumberField, NumberInput } from "@dariah-eric/ui/number-field";
+import { RichTextEditor, RichTextEditorToolbarButton } from "@dariah-eric/ui/rich-text-editor";
+import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+} from "@dariah-eric/ui/select";
+import { TextField } from "@dariah-eric/ui/text-field";
+import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
 
 interface RichTextContentBlockItem {
 	id: Key;

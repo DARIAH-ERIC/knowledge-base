@@ -1,7 +1,6 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
@@ -11,6 +10,7 @@ import { getCurrentSession } from "@/lib/auth/session";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { createActionStateError } from "@dariah-eric/next-lib/actions";
 
 export const resetTwoFactorAction = createServerAction(
 	async function resetTwoFactorAction(state, formData) {

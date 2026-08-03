@@ -1,10 +1,5 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
-import { Button } from "@dariah-eric/ui/button";
-import { buttonStyles } from "@dariah-eric/ui/button-styles";
-import { Link } from "@dariah-eric/ui/link";
-import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import {
 	ChevronDownIcon,
 	ChevronUpIcon,
@@ -31,6 +26,11 @@ import { deleteDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/d
 import { deleteDocumentPolicyGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/delete-document-policy-group.action";
 import { moveDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/move-document-or-policy.action";
 import { moveDocumentPolicyGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/move-document-policy-group.action";
+import type * as schema from "@dariah-eric/database/schema";
+import { Button } from "@dariah-eric/ui/button";
+import { buttonStyles } from "@dariah-eric/ui/button-styles";
+import { Link } from "@dariah-eric/ui/link";
+import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 
 type DocumentItem = Pick<
 	schema.DocumentOrPolicy,

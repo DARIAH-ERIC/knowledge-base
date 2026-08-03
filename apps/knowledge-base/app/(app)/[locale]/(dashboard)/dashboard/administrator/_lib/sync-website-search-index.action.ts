@@ -1,6 +1,5 @@
 "use server";
 
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 
@@ -10,6 +9,7 @@ import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
 
 export const syncWebsiteSearchIndexAction = createServerAction(
 	async function syncWebsiteSearchIndexAction() {

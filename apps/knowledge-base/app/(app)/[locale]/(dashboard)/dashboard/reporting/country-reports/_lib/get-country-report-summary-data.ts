@@ -1,6 +1,4 @@
 import { assert } from "@acdh-oeaw/lib";
-import type { User } from "@dariah-eric/auth";
-import * as schema from "@dariah-eric/database/schema";
 
 import {
 	type OperationalCost,
@@ -15,6 +13,8 @@ import {
 import { classifyCompensationRole } from "@/lib/data/report-contributions";
 import { db } from "@/lib/db";
 import { alias, eq, sql } from "@/lib/db/sql";
+import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 
 /**
  * Display order for the contributors section: national coordinators, then their deputies, then

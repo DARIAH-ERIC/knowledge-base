@@ -1,4 +1,5 @@
 import { createUrl, unreachable } from "@acdh-oeaw/lib";
+
 import { type SearchItem, isCoreService, isSoftware } from "@dariah-eric/client-sshoc";
 import type { ResourceDocument } from "@dariah-eric/search";
 

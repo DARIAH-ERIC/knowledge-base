@@ -1,8 +1,9 @@
-import { collectLinkTargetAssetKeys } from "@dariah-eric/database/link-targets";
-import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 import { generateHTML, generateJSON } from "@tiptap/html";
 import { describe, expect, it } from "vitest";
+
+import { collectLinkTargetAssetKeys } from "@dariah-eric/database/link-targets";
+import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 
 /**
  * The editor's half of asset-targeted links: the `link` mark has to carry the target through a

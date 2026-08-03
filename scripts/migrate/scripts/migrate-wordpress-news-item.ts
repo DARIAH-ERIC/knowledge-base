@@ -1,7 +1,4 @@
 import { assert, createUrl, createUrlSearchParams, keyBy, log } from "@acdh-oeaw/lib";
-import { createDatabaseService } from "@dariah-eric/database";
-import * as schema from "@dariah-eric/database/schema";
-import { createStorageService } from "@dariah-eric/storage";
 import { and, eq } from "drizzle-orm";
 import type {
 	WP_REST_API_Attachment,
@@ -9,6 +6,10 @@ import type {
 	WP_REST_API_Post,
 	WP_REST_API_Posts,
 } from "wp-types";
+
+import { createDatabaseService } from "@dariah-eric/database";
+import * as schema from "@dariah-eric/database/schema";
+import { createStorageService } from "@dariah-eric/storage";
 
 import { apiBaseUrl, placeholderImageUrl } from "../config/data-migration.config";
 import { env } from "../config/env.config";

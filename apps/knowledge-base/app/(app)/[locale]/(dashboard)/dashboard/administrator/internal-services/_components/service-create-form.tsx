@@ -1,12 +1,12 @@
 "use client";
 
-import type * as schema from "@dariah-eric/database/schema";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { ServiceForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form";
 import { createServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/create-service.action";
+import type * as schema from "@dariah-eric/database/schema";
 
 interface ServiceCreateFormProps {
 	serviceTypes: Array<Pick<schema.ServiceType, "id" | "type">>;

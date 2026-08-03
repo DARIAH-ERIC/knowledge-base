@@ -1,7 +1,7 @@
-import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ImageSchema, PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
+import * as schema from "@dariah-eric/database/schema";
 
 const NationalConsortiumCountrySchema = v.object({
 	...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name"]).entries,

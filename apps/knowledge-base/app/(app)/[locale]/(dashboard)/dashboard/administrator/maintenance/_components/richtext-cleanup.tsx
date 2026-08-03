@@ -1,5 +1,16 @@
 "use client";
 
+import { AlertTriangleIcon } from "lucide-react";
+import { useExtracted } from "next-intl";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
+import type { Selection } from "react-aria-components";
+
+import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { cleanRichTextAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/clean-richtext.action";
+import { useClientPagination } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/use-client-pagination";
+import type { CleanRichTextResult, RichTextCleanupBlock } from "@/lib/data/richtext-cleanup";
+import { getEntityDetailHref } from "@/lib/entity-detail-href";
+import { useRouter } from "@/lib/navigation/navigation";
 import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { Link } from "@dariah-eric/ui/link";
@@ -13,17 +24,6 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { AlertTriangleIcon } from "lucide-react";
-import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useState, useTransition } from "react";
-import type { Selection } from "react-aria-components";
-
-import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
-import { cleanRichTextAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/clean-richtext.action";
-import { useClientPagination } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/use-client-pagination";
-import type { CleanRichTextResult, RichTextCleanupBlock } from "@/lib/data/richtext-cleanup";
-import { getEntityDetailHref } from "@/lib/entity-detail-href";
-import { useRouter } from "@/lib/navigation/navigation";
 
 interface RichTextCleanupProps {
 	blocks: Array<RichTextCleanupBlock>;

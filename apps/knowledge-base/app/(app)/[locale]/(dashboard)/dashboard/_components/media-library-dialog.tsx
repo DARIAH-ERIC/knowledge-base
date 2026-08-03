@@ -1,26 +1,6 @@
 "use client";
 
 import { isNonEmptyString } from "@acdh-oeaw/lib";
-import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import type { AssetPrefix } from "@dariah-eric/storage/config";
-import { Button } from "@dariah-eric/ui/button";
-import { Label } from "@dariah-eric/ui/field";
-import { GridList, GridListItem } from "@dariah-eric/ui/grid-list";
-import { Input } from "@dariah-eric/ui/input";
-import {
-	ModalBody,
-	ModalClose,
-	ModalContent,
-	ModalFooter,
-	ModalHeader,
-} from "@dariah-eric/ui/modal";
-import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { toPlainText } from "@dariah-eric/ui/rich-text";
-import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
-import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
-import { TextField } from "@dariah-eric/ui/text-field";
-import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
 import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import cn from "clsx/lite";
 import { useExtracted } from "next-intl";
@@ -41,6 +21,26 @@ import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboa
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
 import { imageMimeTypes, imageSizeLimit, mediaLibraryPageSize } from "@/config/assets.config";
 import { formatFileSize } from "@/lib/format-file-size";
+import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import type { AssetPrefix } from "@dariah-eric/storage/config";
+import { Button } from "@dariah-eric/ui/button";
+import { Label } from "@dariah-eric/ui/field";
+import { GridList, GridListItem } from "@dariah-eric/ui/grid-list";
+import { Input } from "@dariah-eric/ui/input";
+import {
+	ModalBody,
+	ModalClose,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+} from "@dariah-eric/ui/modal";
+import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import { toPlainText } from "@dariah-eric/ui/rich-text";
+import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
+import { TextField } from "@dariah-eric/ui/text-field";
+import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
 
 interface MediaLibraryDialogProps<T extends AssetPrefix> {
 	acceptedFileTypes?: ReadonlyArray<string>;

@@ -1,9 +1,9 @@
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 import { v7 as uuidv7 } from "uuid";
 
 import type { Database } from "@/middlewares/db";
+import * as schema from "@dariah-eric/database/schema";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function seedContentBlock(

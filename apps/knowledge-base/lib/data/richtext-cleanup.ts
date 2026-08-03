@@ -1,3 +1,4 @@
+import { db } from "@/lib/db";
 import {
 	type CleanRichTextResult,
 	type RichTextCleanupBlock,
@@ -5,8 +6,6 @@ import {
 	cleanRichText as cleanRichTextShared,
 	findRichTextNeedingCleanup,
 } from "@dariah-eric/database/richtext-cleanup-service";
-
-import { db } from "@/lib/db";
 
 export type { CleanRichTextResult, RichTextCleanupBlock, RichTextCleanupResult };
 

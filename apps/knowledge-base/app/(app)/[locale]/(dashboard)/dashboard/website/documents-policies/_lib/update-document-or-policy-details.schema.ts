@@ -1,8 +1,9 @@
+import * as v from "valibot";
+
 import {
 	DocumentOrPolicySelectSchema,
 	DocumentOrPolicyUpdateSchema,
 } from "@dariah-eric/database/schema";
-import * as v from "valibot";
 
 export const UpdateDocumentOrPolicyDetailsActionInputSchema = v.object({
 	...v.pick(DocumentOrPolicySelectSchema, ["id"]).entries,

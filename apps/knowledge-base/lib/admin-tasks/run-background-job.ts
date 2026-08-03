@@ -1,5 +1,4 @@
 import { log } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import { after } from "next/server";
 
 import {
@@ -8,6 +7,7 @@ import {
 } from "@/lib/admin-tasks/background-job-error";
 import { db } from "@/lib/db";
 import { and, eq, lt, sql } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 export type BackgroundJobKind = schema.BackgroundJobKind;
 

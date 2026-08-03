@@ -1,11 +1,12 @@
 // oxlint-disable oxc/no-map-spread
 
 import { groupBy, keyBy } from "@acdh-oeaw/lib";
+import { faker as f } from "@faker-js/faker";
+import slugify from "@sindresorhus/slugify";
+
 import { type Database, type Transaction, plainTextToRichText } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { eq } from "@dariah-eric/database/sql";
-import { faker as f } from "@faker-js/faker";
-import slugify from "@sindresorhus/slugify";
 
 interface SeedManifest {
 	avatars: Array<{

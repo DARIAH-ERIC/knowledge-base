@@ -1,5 +1,6 @@
-import { assetPrefixes } from "@dariah-eric/storage/config";
 import * as v from "valibot";
+
+import { assetPrefixes } from "@dariah-eric/storage/config";
 
 /**
  * Storage keys are exactly `prefix/name`, so the route takes the two segments separately rather

@@ -1,5 +1,10 @@
 "use client";
 
+import { useExtracted } from "next-intl";
+import { type ReactNode, useState, useTransition } from "react";
+
+import { mergeSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/merge-social-media.action";
+import { useRouter } from "@/lib/navigation/navigation";
 import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Button } from "@dariah-eric/ui/button";
@@ -15,11 +20,6 @@ import {
 import { Note } from "@dariah-eric/ui/note";
 import { TextField } from "@dariah-eric/ui/text-field";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
-import { useExtracted } from "next-intl";
-import { type ReactNode, useState, useTransition } from "react";
-
-import { mergeSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/merge-social-media.action";
-import { useRouter } from "@/lib/navigation/navigation";
 
 const CONFIRM_WORD = "MERGE";
 

@@ -1,4 +1,3 @@
-import { Heading } from "@dariah-eric/ui/heading";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
@@ -10,6 +9,7 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { Heading } from "@dariah-eric/ui/heading";
 
 interface DashboardAdministrationPageProps extends PageProps<"/[locale]/dashboard/administrator/administration"> {}
 

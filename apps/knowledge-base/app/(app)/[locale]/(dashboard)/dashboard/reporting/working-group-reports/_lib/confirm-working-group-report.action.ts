@@ -1,6 +1,5 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
 import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { forbidden } from "next/navigation";
@@ -14,6 +13,7 @@ import {
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { redirect } from "@/lib/navigation/navigation";
+import * as schema from "@dariah-eric/database/schema";
 
 export async function confirmWorkingGroupReportAction(formData: FormData): Promise<void> {
 	const id = formData.get("id");

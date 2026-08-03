@@ -1,5 +1,4 @@
 import { assert } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
 import { describe, expect, it } from "vitest";
@@ -26,6 +25,7 @@ import { spotlightArticlesLifecycleAdapter } from "@/lib/data/spotlight-articles
 import type { Transaction } from "@/lib/db";
 import { type PgTable, eq, getColumns } from "@/lib/db/sql";
 import { withTransaction } from "@/test/lib/with-transaction";
+import * as schema from "@dariah-eric/database/schema";
 
 // ---------------------------------------------------------------------------
 // Foreign-key reference rows shared by the seed payloads

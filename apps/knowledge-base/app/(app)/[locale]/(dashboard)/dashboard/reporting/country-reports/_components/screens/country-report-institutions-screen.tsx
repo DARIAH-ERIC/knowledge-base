@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -14,6 +13,7 @@ import {
 } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
 import { inArray } from "@/lib/db/sql";
+import * as schema from "@dariah-eric/database/schema";
 
 interface CountryReportInstitutionsScreenProps {
 	reportId: string;
