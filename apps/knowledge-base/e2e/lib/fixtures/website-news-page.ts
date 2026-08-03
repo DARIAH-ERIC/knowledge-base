@@ -159,6 +159,16 @@ export class WebsiteNewsPage {
 		return this.page.getByRole("textbox", { name: "Content" });
 	}
 
+	/**
+	 * Pick an entry from the richtext toolbar's insert menu. Every block the editor can insert lives
+	 * there rather than in a button of its own, so each insertion is two steps: open, then choose.
+	 */
+	private async chooseInsert(name: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Insert", exact: true }).click();
+		await this.page.getByRole("menuitem", { name, exact: true }).click();
+		await this.waitForMenuToClose();
+	}
+
 	async addContentBlock(text: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
 		await this.page.getByRole("menuitem", { name: "Content" }).click();
@@ -184,7 +194,7 @@ export class WebsiteNewsPage {
 		/** Insert at the end of the first paragraph, between the two rich-text runs. */
 		await editor.press("Control+Home");
 		await editor.press("End");
-		await this.page.getByRole("button", { name: "Insert callout" }).click();
+		await this.chooseInsert("Callout");
 
 		await this.fillInlineCallout({
 			title: options.title,
@@ -199,7 +209,7 @@ export class WebsiteNewsPage {
 		url: string;
 		variant?: "Primary" | "Secondary" | "Outline";
 	}): Promise<void> {
-		await this.page.getByRole("button", { name: "Insert button link" }).click();
+		await this.chooseInsert("Button");
 
 		/** Scope to the popover's form; the main editor textbox is named "Content", not "Label". */
 		const form = this.page
@@ -284,9 +294,10 @@ export class WebsiteNewsPage {
 		await editor.press("Control+End");
 		await editor.press("Enter");
 
-		await this.page.getByRole("button", { name: "Insert image" }).click();
-		await this.page.waitForSelector('[role="dialog"]');
+		/** The insert menu opens the picker directly; the image lands finished. */
+		await this.chooseInsert("Image");
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
 		const asset = dialog.getByRole("gridcell", { name: options.assetLabel });
 		await expect(asset).toHaveCount(1);
 		await asset.click();
@@ -340,16 +351,13 @@ export class WebsiteNewsPage {
 
 	/** Insert a 3x2 table with a header row at the cursor, then fill the two header cells. */
 	async insertTable(headers: [string, string]): Promise<void> {
-		await this.page.getByRole("button", { name: "Table", exact: true }).click();
-		await this.page.getByRole("button", { name: "Insert table" }).click();
+		await this.chooseInsert("Insert table");
 
 		/**
-		 * Running a table command does not dismiss the popover — it re-renders with the in-table
-		 * commands — and its overlay swallows every click aimed at the document underneath. Close it
-		 * before touching the table it just inserted.
+		 * The row and column commands live behind a Table button that only appears while the cursor is
+		 * inside a table — so its presence is what tells us the table landed.
 		 */
-		await this.page.keyboard.press("Escape");
-		await expect(this.page.getByRole("button", { name: "Insert table" })).toHaveCount(0);
+		await expect(this.page.getByRole("button", { name: "Table", exact: true })).toBeVisible();
 
 		const editor = this.contentBlockEditor();
 		const headerCells = editor.locator("th");
@@ -361,11 +369,61 @@ export class WebsiteNewsPage {
 	}
 
 	/**
+	 * Run commands from the table popover. Opened once for the whole batch: running a command leaves
+	 * the popover open — it re-renders with the in-table commands — and its overlay swallows every
+	 * click aimed at the document underneath, so it is dismissed at the end rather than between.
+	 */
+	async runTableCommands(labels: ReadonlyArray<string>): Promise<void> {
+		await this.page.getByRole("button", { name: "Table", exact: true }).click();
+		for (const label of labels) {
+			await this.page.getByRole("button", { name: label, exact: true }).click();
+		}
+		await this.page.keyboard.press("Escape");
+	}
+
+	/** Put the cursor in the table's first body cell, so row and column commands act from there. */
+	async clickFirstTableBodyCell(): Promise<void> {
+		await this.contentBlockEditor().locator("td").first().click();
+	}
+
+	/** Toggle an inline mark over whatever is selected, from the toolbar. */
+	async toggleMark(name: "Bold" | "Italic" | "Code"): Promise<void> {
+		await this.page.getByRole("button", { name, exact: true }).click();
+	}
+
+	/** The text the given mark renders over, so a failure names the step that lost it. */
+	async expectMarkedText(tag: "strong" | "em" | "code" | "a", text: string): Promise<void> {
+		await expect(this.contentBlockEditor().locator(tag).filter({ hasText: text })).toHaveCount(1);
+	}
+
+	/**
+	 * Link the current selection to an external url through the toolbar's link popover — the plain
+	 * kind that stores an href, as opposed to the document and entity links that store a reference.
+	 */
+	async insertUrlLink(url: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Link", exact: true }).click();
+		const form = this.linkPopoverForm();
+		await form.getByPlaceholder("https://example.com").fill(url);
+		await form.getByRole("button", { name: "Apply" }).click();
+		await expect(form).toHaveCount(0);
+	}
+
+	/**
+	 * A dismissed popover stays mounted for the length of its exit animation, so this is also what
+	 * the callers wait on to know the previous one has gone.
+	 */
+	private linkPopoverForm(): Locator {
+		return this.page
+			.locator("form")
+			.filter({ has: this.page.getByPlaceholder("https://example.com") });
+	}
+
+	/**
 	 * Link the current selection to a stored document. No href is written — the asset key is, and
 	 * read paths resolve it, so the link survives the file being replaced.
 	 */
 	async insertDocumentLink(assetLabel: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Link to document" }).click();
+		await this.chooseInsert("Link to document");
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
 		const asset = dialog.getByRole("gridcell", { name: assetLabel });
@@ -377,7 +435,7 @@ export class WebsiteNewsPage {
 
 	/** Link the current selection to another entity, stored as a document id rather than a path. */
 	async insertEntityLink(entityName: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Link to page" }).click();
+		await this.chooseInsert("Link to page");
 
 		/** Scoped to the modal: the toolbar's own link popover trigger is also named "Link". */
 		const dialog = this.page.getByRole("dialog").filter({ hasText: "Link to a page" });
@@ -399,7 +457,9 @@ export class WebsiteNewsPage {
 
 	/** Insert a placeholder-value chip, which stores a kind reference rather than a rendered value. */
 	async insertPlaceholderValue(label: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Insert placeholder value" }).click();
+		/** A family of nodes rather than one block, so the insert menu offers them as a submenu. */
+		await this.page.getByRole("button", { name: "Insert", exact: true }).click();
+		await this.page.getByRole("menuitem", { name: "Placeholder value", exact: true }).click();
 		await this.page.getByRole("menuitem", { name: label, exact: true }).click();
 		await this.waitForMenuToClose();
 	}
@@ -410,7 +470,7 @@ export class WebsiteNewsPage {
 
 	/** Insert an inline embed node and fill its settings form. */
 	async insertEmbed(options: { url: string; title: string; caption: string }): Promise<void> {
-		await this.page.getByRole("button", { name: "Insert embed" }).click();
+		await this.chooseInsert("Embed");
 
 		const block = this.embedBlock();
 		await block.getByRole("textbox", { name: "URL" }).fill(options.url);
@@ -433,7 +493,7 @@ export class WebsiteNewsPage {
 		text: string;
 		side?: string;
 	}): Promise<void> {
-		await this.page.getByRole("button", { name: "Insert media with text" }).click();
+		await this.chooseInsert("Media and text");
 
 		const block = this.mediaTextBlock();
 		await expect(block).toBeVisible();
@@ -480,6 +540,36 @@ export class WebsiteNewsPage {
 		const editor = this.contentBlockEditor();
 		await editor.press("Shift+Home");
 		await editor.press("Backspace");
+	}
+
+	/** Type at the cursor, leaving whatever the block already holds in place. */
+	async typeInContentBlock(text: string): Promise<void> {
+		await this.contentBlockEditor().pressSequentially(text);
+	}
+
+	/**
+	 * Select a whole paragraph by position, the way a triple click does.
+	 *
+	 * Marks are applied this way rather than by selecting back from the caret, because the caret is
+	 * not reliably where the test left it: focus sits on a toolbar button or a closing popover after
+	 * each one, and a key sent to the editor can land before the selection is handed back. A click
+	 * establishes its own selection and depends on nothing that came before. Editor links do not open
+	 * on click, so this is safe over a linked run too.
+	 */
+	async selectParagraph(index: number): Promise<void> {
+		await this.contentBlockEditor().locator("p").nth(index).click({ clickCount: 3 });
+	}
+
+	/** Put a collapsed caret in a paragraph, for the insertions that place a node at the cursor. */
+	async placeCaretInParagraph(index: number): Promise<void> {
+		await this.contentBlockEditor().locator("p").nth(index).click();
+	}
+
+	/** The table's shape as rendered. Rows count the header row; `headerCells` is the column count. */
+	async expectTableSize(expected: { rows: number; headerCells: number }): Promise<void> {
+		const editor = this.contentBlockEditor();
+		await expect(editor.locator("tr")).toHaveCount(expected.rows);
+		await expect(editor.locator("th")).toHaveCount(expected.headerCells);
 	}
 
 	/** Fill the callout node view that a slash command or the toolbar just inserted. */
@@ -550,35 +640,34 @@ export class WebsiteNewsPage {
 		await this.waitForMenuToClose();
 
 		const editor = this.contentBlockEditor();
-		await editor.click();
-		await editor.pressSequentially(options.intro);
-
-		/** A document link needs a selection to wrap; an entity link inserts its own label text. */
-		await editor.press("Control+End");
-		await editor.press("Enter");
-		await editor.pressSequentially(options.documentLinkText);
-		await editor.press("Shift+Home");
-		await this.insertDocumentLink(options.documentLabel);
 
 		/**
-		 * The media dialog restores the editor selection after it closes. Wait until the link command
-		 * has updated the document, then collapse that selection at its end. Pressing Control+End while
-		 * the dialog is still restoring focus can make Chromium delete the selected paragraph.
+		 * Lay out the paragraphs first, then fill each one in. A document link wraps a selection while
+		 * an entity link and a placeholder insert at the cursor, and both dialogs hand focus back on
+		 * their own schedule — so every one of them is reached by clicking the paragraph it belongs to
+		 * rather than by stepping the caret on from wherever the previous one left it.
 		 */
+		await editor.click();
+		await editor.pressSequentially(options.intro);
+		await editor.press("Enter");
+		await editor.pressSequentially(options.documentLinkText);
+		await editor.press("Enter");
+		await editor.press("Enter");
+
+		await this.selectParagraph(1);
+		await this.insertDocumentLink(options.documentLabel);
 		await expect(editor.locator('a[data-target-kind="asset"]')).toHaveText(
 			options.documentLinkText,
 		);
-		await editor.press("ArrowRight");
-		await editor.press("Enter");
+
+		await this.placeCaretInParagraph(2);
 		await this.insertEntityLink(options.entityName);
 
-		await editor.press("Control+End");
-		await editor.press("Enter");
+		await this.placeCaretInParagraph(3);
 		await this.insertPlaceholderValue(options.placeholderLabel);
 
 		/** The table goes last: the cursor ends inside it, and leaving it needs a gap cursor. */
-		await editor.press("Control+End");
-		await editor.press("Enter");
+		await this.startNewParagraph();
 		await this.insertTable(options.headers);
 	}
 
@@ -657,7 +746,7 @@ export class WebsiteNewsPage {
 		/** 1-based index of the item to move one place earlier, as the panel labels them. */
 		moveEarlier?: number;
 	}): Promise<void> {
-		await this.page.getByRole("button", { name: "Insert gallery" }).click();
+		await this.chooseInsert("Gallery");
 
 		const block = this.galleryBlock();
 		await expect(block).toBeVisible();
@@ -922,6 +1011,28 @@ export class WebsiteNewsPage {
 
 		await this.page.goto(editHref);
 		await this.page.waitForURL(`**${BASE_PATH}/**/edit`);
+		await this.waitForFormHydrated();
+	}
+
+	/**
+	 * Wait until the form is interactive, not merely painted.
+	 *
+	 * The richtext editor renders only on the client, so its textbox appearing is the signal that the
+	 * page bundle has run. Before that the Save button is inert: the click lands and is swallowed, no
+	 * server action is dispatched, and the test fails much later and much less obviously as a missing
+	 * action response. Tests that touch the editor before saving happen to wait for this already;
+	 * ones that re-save untouched would otherwise race it.
+	 *
+	 * A news item without content blocks has no editor to wait for, so its absence is not a failure —
+	 * only its late arrival is worth waiting on.
+	 */
+	private async waitForFormHydrated(): Promise<void> {
+		await this.contentBlockEditor()
+			.first()
+			.waitFor({ state: "visible", timeout: 5_000 })
+			.catch(() => {
+				// No content block on this form; nothing client-only to wait for.
+			});
 	}
 
 	async gotoEditFromList(title: string): Promise<void> {

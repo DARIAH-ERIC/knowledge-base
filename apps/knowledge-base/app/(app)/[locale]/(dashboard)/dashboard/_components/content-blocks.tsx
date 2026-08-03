@@ -31,7 +31,6 @@ import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
 import {
 	ChevronDownIcon,
 	CodeBracketSquareIcon,
-	CursorArrowRaysIcon,
 	InformationCircleIcon,
 	ListBulletIcon,
 	PencilSquareIcon,
@@ -44,7 +43,7 @@ import {
 	ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
 import type { JSONContent } from "@tiptap/core";
-import { ImageIcon, LinkIcon, PaperclipIcon } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { Fragment, type KeyboardEvent, type ReactNode, useRef, useState } from "react";
 import { type Key, useDrag, useDrop } from "react-aria";
@@ -63,7 +62,6 @@ import { EntityLinkDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_co
 import { ImageCaptionModeField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-caption-mode-field";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
-import { PlaceholderValueInsertMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/placeholder-value-insert-menu";
 import {
 	type SelectedImage,
 	SelectedImageCard,
@@ -634,44 +632,7 @@ function ContentBlockPanel({
 					onChange={(content: JSONContent) => {
 						onChange(content);
 					}}
-					renderEmbedInsert={(insertEmbed) => (
-						<RichTextEditorToolbarButton
-							aria-label="Insert embed"
-							icon={CodeBracketSquareIcon}
-							onClick={insertEmbed}
-						/>
-					)}
-					renderCalloutInsert={(insertCallout) => (
-						<RichTextEditorToolbarButton
-							aria-label="Insert callout"
-							icon={InformationCircleIcon}
-							onClick={insertCallout}
-						/>
-					)}
-					renderMediaTextInsert={(insertMediaText) => (
-						<RichTextEditorToolbarButton
-							aria-label="Insert media with text"
-							icon={ViewColumnsIcon}
-							onClick={insertMediaText}
-						/>
-					)}
-					renderGalleryInsert={(insertGallery) => (
-						<RichTextEditorToolbarButton
-							aria-label="Insert gallery"
-							icon={Squares2X2Icon}
-							onClick={insertGallery}
-						/>
-					)}
-					renderButtonLinkInsert={(insertButtonLink) => (
-						<RichTextEditorToolbarButton
-							aria-label="Insert button link"
-							icon={CursorArrowRaysIcon}
-							onClick={insertButtonLink}
-						/>
-					)}
-					renderPlaceholderValueInsert={(insertPlaceholderValue) => (
-						<PlaceholderValueInsertMenu onInsert={insertPlaceholderValue} />
-					)}
+					blocks={["embed", "callout", "mediaText", "gallery", "buttonLink", "placeholderValue"]}
 					renderAssetMetadata={({ imageKey, onMetadataChange }) => (
 						<BlockAssetMetadata assetKey={imageKey} onMetadataChange={onMetadataChange} />
 					)}
@@ -696,38 +657,38 @@ function ContentBlockPanel({
 								)
 							: undefined
 					}
-					renderDocumentPicker={
+					renderImageInsert={
 						initialAssets != null
-							? (link) => (
+							? ({ isOpen, onOpenChange, select }) => (
 									<MediaLibraryDialog
-										defaultPrefix="documents"
+										defaultPrefix="images"
 										initialAssets={initialAssets}
-										onSelect={(key, _url, asset) => {
-											link(key, asset?.label ?? key);
-										}}
-										prefixes={["documents"]}
-										trigger={({ open }) => (
-											<RichTextEditorToolbarButton
-												aria-label="Link to document"
-												icon={PaperclipIcon}
-												onClick={open}
-											/>
-										)}
+										isOpen={isOpen}
+										onOpenChange={onOpenChange}
+										onSelect={select}
+										prefixes={["avatars", "images", "logos"]}
 									/>
 								)
 							: undefined
 					}
-					renderEntityPicker={(link) => (
-						<EntityLinkDialog
-							onSelect={link}
-							trigger={({ open }) => (
-								<RichTextEditorToolbarButton
-									aria-label="Link to page"
-									icon={LinkIcon}
-									onClick={open}
-								/>
-							)}
-						/>
+					renderDocumentPicker={
+						initialAssets != null
+							? ({ isOpen, onOpenChange, select }) => (
+									<MediaLibraryDialog
+										defaultPrefix="documents"
+										initialAssets={initialAssets}
+										isOpen={isOpen}
+										onOpenChange={onOpenChange}
+										onSelect={(key, _url, asset) => {
+											select(key, asset?.label ?? key);
+										}}
+										prefixes={["documents"]}
+									/>
+								)
+							: undefined
+					}
+					renderEntityPicker={({ isOpen, onOpenChange, select }) => (
+						<EntityLinkDialog isOpen={isOpen} onOpenChange={onOpenChange} onSelect={select} />
 					)}
 				/>
 			);

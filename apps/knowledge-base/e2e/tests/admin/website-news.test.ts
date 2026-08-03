@@ -1,9 +1,42 @@
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 
+import type { JSONContent } from "@tiptap/core";
+
 import { imageSizeLimit } from "@/config/assets.config";
 import { expect, test } from "@/e2e/lib/test";
 import { formatFileSize } from "@/lib/format-file-size";
+
+/** The marks on the text run holding `text`, so an assertion names one run rather than the document. */
+function marksOn(doc: JSONContent, text: string): Array<string> {
+	return (markNodesOn(doc, text) ?? []).map((mark) => mark.type);
+}
+
+function markOn(
+	doc: JSONContent,
+	text: string,
+	type: string,
+): { type: string; attrs?: Record<string, unknown> } | undefined {
+	return markNodesOn(doc, text)?.find((mark) => mark.type === type);
+}
+
+function markNodesOn(
+	doc: JSONContent,
+	text: string,
+): Array<{ type: string; attrs?: Record<string, unknown> }> | undefined {
+	if (doc.type === "text" && doc.text?.includes(text) === true) {
+		return doc.marks ?? [];
+	}
+
+	for (const child of doc.content ?? []) {
+		const found = markNodesOn(child, text);
+		if (found != null) {
+			return found;
+		}
+	}
+
+	return undefined;
+}
 
 test.describe("website news admin", () => {
 	/**
@@ -309,6 +342,131 @@ test.describe("website news admin", () => {
 		expect(belowBox).not.toBeNull();
 		expect(calloutBox!.y).toBeLessThan(aboveBox!.y);
 		expect(aboveBox!.y).toBeLessThan(belowBox!.y);
+	});
+
+	test("should save inline marks and a url link with the runs they cover", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Inline Marks ${randomUUID()}`;
+		const boldText = `Bold run ${randomUUID()}`;
+		const italicText = `Italic run ${randomUUID()}`;
+		const codeText = `Code run ${randomUUID()}`;
+		const linkText = `Linked run ${randomUUID()}`;
+		const linkUrl = "https://example.com/e2e-inline-link";
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item exercising inline marks");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+
+		/**
+		 * Every run is typed as plain text first, then marked by selecting its paragraph. Typing and
+		 * marking are kept apart on purpose: a mark left active at the end of a paragraph carries into
+		 * the next one, so interleaving them makes each run depend on the one before it.
+		 */
+		await newsPage.addContentBlock(linkText);
+		await newsPage.startNewParagraph();
+		await newsPage.typeInContentBlock(boldText);
+		await newsPage.startNewParagraph();
+		await newsPage.typeInContentBlock(italicText);
+		await newsPage.startNewParagraph();
+		await newsPage.typeInContentBlock(codeText);
+
+		await newsPage.selectParagraph(0);
+		await newsPage.insertUrlLink(linkUrl);
+		await newsPage.expectMarkedText("a", linkText);
+
+		await newsPage.selectParagraph(1);
+		await newsPage.toggleMark("Bold");
+		await newsPage.expectMarkedText("strong", boldText);
+
+		await newsPage.selectParagraph(2);
+		await newsPage.toggleMark("Italic");
+		await newsPage.expectMarkedText("em", italicText);
+
+		await newsPage.selectParagraph(3);
+		await newsPage.toggleMark("Code");
+		await newsPage.expectMarkedText("code", codeText);
+
+		await newsPage.submitForm();
+
+		const contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text"]);
+
+		const stored = contentBlocks[0]!.content as JSONContent;
+
+		/**
+		 * Read the marks off the run that carries each text rather than searching the whole document: a
+		 * mark left active at the end of one paragraph carries into the next, so "the document mentions
+		 * bold somewhere" can hold even when the bold run itself was lost.
+		 */
+		expect(marksOn(stored, boldText)).toContain("bold");
+		expect(marksOn(stored, italicText)).toContain("italic");
+		expect(marksOn(stored, codeText)).toContain("code");
+		expect(marksOn(stored, linkText)).toContain("link");
+
+		/**
+		 * A plain url link keeps its href and, unlike a document or entity link, carries no
+		 * `targetKind` — the two kinds must not collapse into one another on the way through.
+		 */
+		const linkMark = markOn(stored, linkText, "link");
+		expect(linkMark?.attrs?.href).toBe(linkUrl);
+		expect(linkMark?.attrs?.targetKind ?? null).toBeNull();
+	});
+
+	test("should add and remove table rows and columns from the table popover", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Table Commands ${randomUUID()}`;
+		const headers: [string, string] = [`Term ${randomUUID()}`, `Meaning ${randomUUID()}`];
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item exercising the table commands");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+
+		await newsPage.addContentBlock(`Table intro ${randomUUID()}`);
+		await newsPage.startNewParagraph();
+		await newsPage.insertTable(headers);
+
+		/** A header row plus the two body rows the insert command asks for. */
+		await newsPage.expectTableSize({ rows: 3, headerCells: 2 });
+
+		/** The commands act on the cell holding the cursor, so put it somewhere predictable first. */
+		await newsPage.clickFirstTableBodyCell();
+
+		await newsPage.runTableCommands(["Add row below"]);
+		await newsPage.expectTableSize({ rows: 4, headerCells: 2 });
+
+		await newsPage.runTableCommands(["Add row above"]);
+		await newsPage.expectTableSize({ rows: 5, headerCells: 2 });
+
+		/** Columns are added across every row, the header included. */
+		await newsPage.runTableCommands(["Add column after"]);
+		await newsPage.expectTableSize({ rows: 5, headerCells: 3 });
+
+		await newsPage.runTableCommands(["Add column before"]);
+		await newsPage.expectTableSize({ rows: 5, headerCells: 4 });
+
+		await newsPage.runTableCommands(["Delete row"]);
+		await newsPage.expectTableSize({ rows: 4, headerCells: 4 });
+
+		await newsPage.runTableCommands(["Delete column"]);
+		await newsPage.expectTableSize({ rows: 4, headerCells: 3 });
+
+		await newsPage.submitForm();
+
+		const contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		const doc = JSON.stringify(contentBlocks[0]!.content);
+
+		/** The edited shape is what persisted, not the one the insert command started from. */
+		expect(doc.match(/"type":"tableRow"/g) ?? []).toHaveLength(4);
+		expect(doc.match(/"type":"tableHeader"/g) ?? []).toHaveLength(3);
+		expect(doc).toContain(headers[0]);
 	});
 
 	test("should insert a block mid-document from the slash command menu", async ({

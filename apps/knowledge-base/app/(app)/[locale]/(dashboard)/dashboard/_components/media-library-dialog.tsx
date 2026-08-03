@@ -48,8 +48,15 @@ interface MediaLibraryDialogProps<T extends AssetPrefix> {
 	onSelect: (key: string, url: string, asset?: MediaLibraryAsset) => void;
 	defaultPrefix: T;
 	prefixes: ReadonlyArray<T>;
+	/**
+	 * Renders its own trigger when given one. Callers that open the dialog from a menu pass
+	 * `isOpen`/`onOpenChange` instead: a trigger nested in a menu is unmounted by the menu closing,
+	 * before the dialog it opens ever appears.
+	 */
 	trigger?: ComponentType<{ open: () => void }>;
 	triggerLabel?: string;
+	isOpen?: boolean;
+	onOpenChange?: (isOpen: boolean) => void;
 }
 
 type ActiveTab = "select" | "upload";
@@ -73,11 +80,20 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		prefixes,
 		trigger,
 		triggerLabel,
+		isOpen: controlledIsOpen,
+		onOpenChange,
 	} = props;
 
 	const t = useExtracted();
 
-	const [isOpen, setIsOpen] = useState(false);
+	const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(false);
+	const isOpen = controlledIsOpen ?? uncontrolledIsOpen;
+
+	function setIsOpen(next: boolean) {
+		setUncontrolledIsOpen(next);
+		onOpenChange?.(next);
+	}
+
 	const [activeTab, setActiveTab] = useState<ActiveTab>("select");
 
 	// Select tab state
@@ -137,8 +153,18 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		uploadFormRef.current?.reset();
 	}
 
-	function handleOpen() {
-		setIsOpen(true);
+	/**
+	 * Everything the dialog needs on its way open: a clean selection and a freshly fetched first
+	 * page, rather than the `initialAssets` the last render happened to leave behind.
+	 *
+	 * Driven by an effect rather than by the trigger's click handler, because a controlled caller
+	 * opens the dialog by flipping `isOpen` and never goes through a trigger at all.
+	 */
+	useEffect(() => {
+		if (!isOpen) {
+			return;
+		}
+
 		setActiveTab("select");
 		setSelectedPrefix(defaultPrefix);
 		setOffset(0);
@@ -154,6 +180,11 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 			setDisplayedAssets(items);
 			setLicenseOptions(licenses);
 		});
+		// oxlint-disable-next-line react-hooks/exhaustive-deps -- runs on the transition into open only.
+	}, [isOpen]);
+
+	function handleOpen() {
+		setIsOpen(true);
 	}
 
 	function handleOpenChange(open: boolean) {
@@ -315,13 +346,14 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 
 	return (
 		<Fragment>
-			{Trigger != null ? (
-				<Trigger open={handleOpen} />
-			) : (
+			{Trigger != null ? <Trigger open={handleOpen} /> : null}
+			{/* A controlled caller opens the dialog from somewhere the dialog cannot live — a menu item —
+			    so it wants no trigger of its own, not the default one. */}
+			{Trigger == null && controlledIsOpen == null ? (
 				<Button intent="outline" onPress={handleOpen}>
 					{triggerLabel ?? t("Select image")}
 				</Button>
-			)}
+			) : null}
 
 			<ModalContent isOpen={isOpen} onOpenChange={handleOpenChange} size="3xl">
 				<ModalHeader
