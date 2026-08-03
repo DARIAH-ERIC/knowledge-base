@@ -17,6 +17,7 @@ import {
 	MousePointerClickIcon,
 	PilcrowIcon,
 	QuoteIcon,
+	SuperscriptIcon,
 	TableIcon,
 	VideoIcon,
 } from "lucide-react";
@@ -39,6 +40,7 @@ export type RichTextInsertableBlock =
 	| "buttonLink"
 	| "callout"
 	| "embed"
+	| "footnote"
 	| "gallery"
 	| "mediaText"
 	| "placeholderValue";
@@ -397,6 +399,25 @@ export function useRichTextActions({
 							type: "buttonLink",
 							attrs: { href: null, label: null, variant: "primary" },
 						})
+						.run();
+				},
+			});
+		}
+
+		if (blocks.includes("footnote")) {
+			actions.push({
+				id: "footnote",
+				group: "insert",
+				label: t("Footnote"),
+				keywords: ["note", "reference", "citation", "source", "evidence"],
+				icon: SuperscriptIcon,
+				run() {
+					editor
+						.chain()
+						.focus()
+						// Inserted empty: the node view opens its own note editor as it mounts, and removes the
+						// marker again if it is dismissed without a note.
+						.insertContent({ type: "footnote", attrs: { content: null } })
 						.run();
 				},
 			});

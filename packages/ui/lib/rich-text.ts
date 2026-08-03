@@ -39,6 +39,16 @@ function visit(node: unknown, parts: Array<string>) {
 		return;
 	}
 
+	if (node.type === "footnote" && isRecord(node.attrs)) {
+		// A footnote keeps its note in an attribute, which the content walk below never reaches. Flatten
+		// it in place, padded, so the note is searchable alongside the sentence it belongs to instead of
+		// running into the word before the marker.
+		parts.push(" ");
+		visit(node.attrs.content, parts);
+		parts.push(" ");
+		return;
+	}
+
 	if (node.type === "placeholderValue" && isRecord(node.attrs)) {
 		// Annotated nodes flatten to their resolved value; raw references fall back to the display
 		// label so search/alt text stays meaningful.
@@ -82,6 +92,50 @@ export function toPlainText(input: unknown): string {
 		.replaceAll(/[ \t]+\n/g, "\n")
 		.replaceAll(/\n{3,}/g, "\n\n")
 		.trim();
+}
+
+/**
+ * Every footnote's note in reading order — which is the order the markers are numbered in.
+ *
+ * Accepts arbitrary JSON (one richtext document, the ordered content blocks of a whole article,
+ * ...) and walks every value, like `collectLinkTargetAssetKeys` does, so a caller can hand over
+ * whatever shape it holds. A footnote is never nested inside another (its note is written with the
+ * caption editor, which has no footnote to offer), so walking everything cannot reorder the
+ * result.
+ *
+ * Read paths use this to build the note list; the marker numbers come from the `footnotes` CSS
+ * counter, and both count the same markers in the same order.
+ */
+export function collectFootnotes(input: unknown): Array<JSONContent | null> {
+	const notes: Array<JSONContent | null> = [];
+
+	function visit(node: unknown) {
+		if (Array.isArray(node)) {
+			for (const item of node) {
+				visit(item);
+			}
+			return;
+		}
+
+		if (!isRecord(node)) {
+			return;
+		}
+
+		if (node.type === "footnote") {
+			notes.push(
+				isRecord(node.attrs) ? ((node.attrs.content as JSONContent | null) ?? null) : null,
+			);
+			return;
+		}
+
+		for (const value of Object.values(node)) {
+			visit(value);
+		}
+	}
+
+	visit(input);
+
+	return notes;
 }
 
 /**

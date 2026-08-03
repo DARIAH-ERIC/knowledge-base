@@ -26,7 +26,14 @@ import { imageWidth } from "~/config/api.config";
 
 export const RichTextContentBlockSchema = v.object({
 	type: v.literal("rich_text"),
-	content: v.any(),
+	content: v.pipe(
+		v.any(),
+		// Every other node maps onto one element, so it needs no explanation here. A footnote does not:
+		// rendering it takes assembling something the payload does not spell out.
+		v.description(
+			"Richtext as Tiptap JSON. The inline `footnote` node is a marker carrying its own note in `attrs.content` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+		),
+	),
 });
 
 export const CalloutContentBlockSchema = v.object({

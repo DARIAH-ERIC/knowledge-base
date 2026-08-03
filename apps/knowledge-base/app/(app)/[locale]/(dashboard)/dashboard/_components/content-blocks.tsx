@@ -252,6 +252,13 @@ function mergeInitialItems(items: Array<ContentBlock>): Array<ContentBlockListIt
 }
 
 export interface ContentBlocksProps {
+	/**
+	 * Whether authors of this entity may add footnotes. Off unless a form asks for it: a footnote is
+	 * a citation apparatus, which suits a case study citing its evidence and not, say, a news item —
+	 * and the whole point of the marker is that a reader finds the note at the end of the same page,
+	 * which only holds where that section is part of how the entity is presented.
+	 */
+	hasFootnotes?: boolean;
 	initialAssets?: Array<MediaLibraryAsset>;
 	items: Array<ContentBlock>;
 }
@@ -260,6 +267,7 @@ export interface ContentBlocksProps {
 const DRAG_HANDLE_DESCRIPTION_ID = "content-blocks-drag-handle-description";
 
 export function ContentBlocks({
+	hasFootnotes = false,
 	initialAssets,
 	items: initialItems,
 }: Readonly<ContentBlocksProps>): ReactNode {
@@ -329,6 +337,7 @@ export function ContentBlocks({
 				{list.items.map((item) => (
 					<ContentBlockItem
 						key={String(item.id)}
+						hasFootnotes={hasFootnotes}
 						initialAssets={initialAssets}
 						item={item}
 						onDelete={() => {
@@ -371,6 +380,7 @@ export function ContentBlocks({
 }
 
 interface ContentBlockItemProps {
+	hasFootnotes: boolean;
 	initialAssets?: Array<MediaLibraryAsset>;
 	item: ContentBlockListItem;
 	onDelete: () => void;
@@ -380,6 +390,7 @@ interface ContentBlockItemProps {
 }
 
 function ContentBlockItem({
+	hasFootnotes,
 	initialAssets,
 	item,
 	onDelete,
@@ -571,7 +582,12 @@ function ContentBlockItem({
 					{/* Named so the panel is announced as its own region rather than inheriting the
 					    surrounding form, and so each block's fields can be addressed unambiguously. */}
 					<DisclosurePanel aria-label={contentBlockTypeNames[item.type]} className="px-3 pbe-3">
-						<ContentBlockPanel initialAssets={initialAssets} item={item} onChange={onUpdate} />
+						<ContentBlockPanel
+							hasFootnotes={hasFootnotes}
+							initialAssets={initialAssets}
+							item={item}
+							onChange={onUpdate}
+						/>
 					</DisclosurePanel>
 				</Disclosure>
 			</div>
@@ -583,12 +599,14 @@ function ContentBlockItem({
 }
 
 interface ContentBlockPanelProps {
+	hasFootnotes: boolean;
 	initialAssets?: Array<MediaLibraryAsset>;
 	item: ContentBlockListItem;
 	onChange: (content: NonNullable<ContentBlockListItem["content"]>) => void;
 }
 
 function ContentBlockPanel({
+	hasFootnotes,
 	initialAssets,
 	item,
 	onChange,
@@ -632,7 +650,17 @@ function ContentBlockPanel({
 					onChange={(content: JSONContent) => {
 						onChange(content);
 					}}
-					blocks={["embed", "callout", "mediaText", "gallery", "buttonLink", "placeholderValue"]}
+					blocks={[
+						"embed",
+						"callout",
+						"mediaText",
+						"gallery",
+						"buttonLink",
+						"placeholderValue",
+						// Only where the entity's form asked for them; every other editor also refuses to take
+						// one by paste.
+						...(hasFootnotes ? (["footnote"] as const) : []),
+					]}
 					renderAssetMetadata={({ imageKey, onMetadataChange }) => (
 						<BlockAssetMetadata assetKey={imageKey} onMetadataChange={onMetadataChange} />
 					)}

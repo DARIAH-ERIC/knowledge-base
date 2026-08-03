@@ -68,6 +68,38 @@ const sampleContent: JSONContent = {
 	],
 };
 
+function note(text: string): JSONContent {
+	return { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text }] }] };
+}
+
+const footnoteContent: JSONContent = {
+	type: "doc",
+	content: [
+		{
+			type: "paragraph",
+			content: [
+				{ type: "text", text: "The hackathon has been running yearly since 2015" },
+				{
+					type: "footnote",
+					attrs: {
+						content: note("In the year 2020 the hackathon was not organised due to the pandemic."),
+					},
+				},
+				{ type: "text", text: ", and has been discussed in articles" },
+				{
+					type: "footnote",
+					attrs: {
+						content: note(
+							"Tolonen, Mikko. 2019. Teaching Digital Humanities at the University of Helsinki. EuropeNow.",
+						),
+					},
+				},
+				{ type: "text", text: "." },
+			],
+		},
+	],
+};
+
 const meta = {
 	title: "Components/RichTextEditor",
 	component: RichTextEditor,
@@ -118,6 +150,25 @@ export const WithOptionalBlocks: Story = {
 	args: {
 		content: sampleContent,
 		blocks: ["embed", "callout", "mediaText", "buttonLink"],
+	},
+	render(props) {
+		return (
+			<div className="inline-160">
+				<RichTextEditor {...props} />
+			</div>
+		);
+	},
+};
+
+/**
+ * Footnote markers show only their number — counted from their place in the text, never stored — so
+ * the notes themselves are listed under the editor for proof-reading. Clicking a marker opens its
+ * note.
+ */
+export const WithFootnotes: Story = {
+	args: {
+		content: footnoteContent,
+		blocks: ["footnote"],
 	},
 	render(props) {
 		return (

@@ -6,11 +6,13 @@ import {
 	placeholderValueKindLabels,
 	placeholderValueKindsEnum,
 } from "@dariah-eric/database/placeholder-values";
-import { type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
+import { Extension, type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
 import { TableKit } from "@tiptap/extension-table/kit";
 import { Typography } from "@tiptap/extension-typography";
+import { Fragment, type Node as ProseMirrorNode, Slice } from "@tiptap/pm/model";
+import { Plugin, PluginKey } from "@tiptap/pm/state";
 import {
 	EditorContent,
 	NodeViewContent,
@@ -64,7 +66,12 @@ import {
 } from "@/lib/menu";
 import { Note } from "@/lib/note";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
-import { formatPlaceholderValue, isEmptyRichTextDocument } from "@/lib/rich-text";
+import {
+	collectFootnotes,
+	formatPlaceholderValue,
+	isEmptyRichTextDocument,
+	toPlainText,
+} from "@/lib/rich-text";
 import {
 	type RichTextInsertableBlock,
 	selectRichTextActiveState,
@@ -1077,6 +1084,220 @@ export const PlaceholderValueNode = Node.create({
 
 	addNodeView() {
 		return ReactNodeViewRenderer(PlaceholderValueNodeView);
+	},
+});
+
+/**
+ * Inline footnote: a marker in the prose which carries its own note text.
+ *
+ * The note lives in the marker's `content` attribute rather than in a list node at the end of the
+ * document — the shape the ProseMirror footnote example and most Tiptap extensions use. A document
+ * here is split into content blocks on save (`splitDocumentToBlocks` in the app), so a trailing
+ * list node would land in whichever block happened to be last while its markers stayed behind in
+ * the others. Carrying the note means marker and note are moved, copied and deleted as one: a note
+ * can never be orphaned, and a marker can never point at a note that is gone — which is exactly the
+ * failure the hand-numbered `[1]`/`[2]` references in the migrated WordPress case studies show.
+ *
+ * No number is stored. Markers number themselves from document order through a CSS counter (see the
+ * `footnotes` utility in the stylesheet), so inserting one renumbers the rest for free; read paths
+ * that build their own list (the dashboard preview, the public site) number it the same way, by
+ * walking the document.
+ */
+function FootnoteNodeView({
+	editor,
+	getPos,
+	node,
+	selected,
+	updateAttributes,
+	deleteNode,
+}: Readonly<NodeViewProps>): ReactNode {
+	const content = node.attrs.content as JSONContent | null;
+
+	const [isOpen, setIsOpen] = useState(content == null && editor.isEditable);
+	const [contentInput, setContentInput] = useState<JSONContent | null>(content);
+
+	const text = toPlainText(content);
+
+	if (!editor.isEditable) {
+		return <NodeViewWrapper as="sup" data-footnote="" />;
+	}
+
+	function selectNode() {
+		const pos = getPos();
+		if (typeof pos === "number") {
+			editor.commands.setNodeSelection(pos);
+		}
+	}
+
+	function handleApply() {
+		if (isEmptyRichTextDocument(contentInput)) {
+			return;
+		}
+		updateAttributes({ content: contentInput });
+		setIsOpen(false);
+	}
+
+	function handleOpenChange(open: boolean) {
+		if (open) {
+			selectNode();
+			setContentInput(content);
+			setIsOpen(true);
+			return;
+		}
+		// A marker whose note was never written points at nothing, so dismissing it removes it rather
+		// than leaving an empty number in the text.
+		if (content == null) {
+			deleteNode();
+			return;
+		}
+		setIsOpen(false);
+	}
+
+	return (
+		<NodeViewWrapper as="span" className="inline align-baseline" contentEditable={false}>
+			<Popover isOpen={isOpen} onOpenChange={handleOpenChange}>
+				<Tooltip>
+					<PopoverTrigger
+						/* The number itself is the CSS counter's `::before`, so it sits inside the trigger and
+						   the whole marker — number included — is what opens the note. */
+						aria-label={text !== "" ? `Footnote: ${text}` : "Footnote"}
+						className={twMerge(
+							"cursor-pointer align-super text-[0.75em] font-medium text-primary underline decoration-dotted underline-offset-2",
+							selected && "bg-primary-subtle/50",
+						)}
+						data-footnote=""
+					/>
+					{text !== "" ? <TooltipContent inverse={true}>{text}</TooltipContent> : null}
+				</Tooltip>
+				<PopoverContent className="p-3">
+					<form
+						className="flex inline-72 flex-col gap-2"
+						onSubmit={(e) => {
+							e.preventDefault();
+							handleApply();
+						}}
+					>
+						<div className="flex flex-col gap-y-1">
+							<span className="text-sm/6 font-medium">{"Note"}</span>
+							<InlineRichTextEditor
+								aria-label="Footnote text"
+								content={contentInput ?? undefined}
+								onChange={setContentInput}
+							/>
+						</div>
+						<div className="flex gap-2">
+							<Button
+								className="flex-1"
+								intent="primary"
+								isDisabled={isEmptyRichTextDocument(contentInput)}
+								size="sm"
+								type="submit"
+							>
+								{"Apply"}
+							</Button>
+							<Button intent="outline" onPress={deleteNode} size="sm" type="button">
+								{"Remove"}
+							</Button>
+						</div>
+					</form>
+				</PopoverContent>
+			</Popover>
+		</NodeViewWrapper>
+	);
+}
+
+export const FootnoteNode = Node.create({
+	name: "footnote",
+	group: "inline",
+	inline: true,
+	atom: true,
+	selectable: true,
+	draggable: false,
+
+	addAttributes() {
+		return {
+			/** The note itself, as the constrained `{ doc > paragraph }` richtext captions also use. */
+			content: { default: null },
+		};
+	},
+
+	parseHTML() {
+		return [
+			{
+				tag: "sup[data-footnote]",
+				getAttrs(dom) {
+					return { content: parseCaptionAttr(dom.dataset.content) };
+				},
+			},
+		];
+	},
+
+	renderHTML({ node }) {
+		// The marker has no text of its own: its number comes from the `footnotes` CSS counter, and
+		// whoever renders the note list walks the document rather than reading it back out of here.
+		//
+		// The empty string child is what closes the tag. Serialized without one this is `<sup/>`, and
+		// HTML has no self-closing syntax for `sup`: a parser reads that as an *open* tag and
+		// superscripts the rest of the paragraph.
+		return [
+			"sup",
+			mergeAttributes({
+				"data-footnote": "",
+				"data-content": serializeCaptionAttr(node.attrs.content as JSONContent | null),
+			}),
+			"",
+		];
+	},
+
+	addNodeView() {
+		return ReactNodeViewRenderer(FootnoteNodeView);
+	},
+});
+
+/** A fragment with every footnote marker dropped, at any depth. */
+export function withoutFootnotes(fragment: Fragment): Fragment {
+	const nodes: Array<ProseMirrorNode> = [];
+
+	fragment.forEach((node) => {
+		if (node.type.name === "footnote") {
+			return;
+		}
+		// Text nodes hold a string rather than a fragment, so they are taken as they are; everything
+		// else is rebuilt around its filtered content.
+		nodes.push(node.isText ? node : node.copy(withoutFootnotes(node.content)));
+	});
+
+	return Fragment.fromArray(nodes);
+}
+
+/**
+ * Drops footnotes out of pasted content, for the editors that do not offer them.
+ *
+ * Whether a field takes footnotes is a decision about the kind of text it holds — a case study
+ * cites its evidence, a person's biography does not — and hiding the insert action only covers the
+ * way an author would add one deliberately. Copying a paragraph across from a case study would
+ * otherwise carry its markers into a field whose readers have nowhere to read them.
+ *
+ * A guard rather than a smaller schema: the node stays in every editor's schema, so a document that
+ * already holds footnotes still opens (and still renders them) in a field where the feature was
+ * since turned off, instead of failing on an unknown node type.
+ */
+const FootnotePasteGuard = Extension.create({
+	name: "footnotePasteGuard",
+
+	addProseMirrorPlugins() {
+		return [
+			new Plugin({
+				key: new PluginKey("footnotePasteGuard"),
+				props: {
+					transformPasted(slice) {
+						// Footnotes are inline atoms inside textblocks, so dropping them leaves the block
+						// structure — and with it the slice's open depths — untouched.
+						return new Slice(withoutFootnotes(slice.content), slice.openStart, slice.openEnd);
+					},
+				},
+			}),
+		];
 	},
 });
 
@@ -2272,6 +2493,7 @@ export function createRichTextExtensions(
 		CalloutNode,
 		ButtonLinkNode,
 		PlaceholderValueNode,
+		FootnoteNode,
 		...(options?.slashCommandHandlersRef != null
 			? [createSlashCommandExtension(options.slashCommandHandlersRef)]
 			: []),
@@ -2301,14 +2523,22 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const slashCommandHandlersRef = useRef<SlashCommandHandlers | null>(null);
 
+	/**
+	 * Whether this field takes footnotes at all — the same opt-in that puts the action in the toolbar
+	 * also decides whether one may arrive by other means (see {@link FootnotePasteGuard}).
+	 */
+	const hasFootnotes = blocks.includes("footnote");
+
 	const extensions = useMemo(
-		() =>
-			createRichTextExtensions({
+		() => [
+			...createRichTextExtensions({
 				renderImagePicker,
 				renderAssetMetadata,
 				slashCommandHandlersRef: isEditable ? slashCommandHandlersRef : undefined,
 			}),
-		[renderImagePicker, renderAssetMetadata, isEditable],
+			...(hasFootnotes ? [] : [FootnotePasteGuard]),
+		],
+		[renderImagePicker, renderAssetMetadata, isEditable, hasFootnotes],
 	);
 
 	const editor = useEditor({
@@ -2327,7 +2557,10 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		editorProps: {
 			attributes: {
 				class: twMerge(
-					"richtext max-inline-none px-4 py-3 min-block-37.5 focus:outline-none",
+					// `footnotes` roots the counter that numbers footnote markers: one editor holds one whole
+					// document (the app splits it into content blocks only on save), so numbering here runs
+					// across the article exactly as it will on the page.
+					"richtext footnotes max-inline-none px-4 py-3 min-block-37.5 focus:outline-none",
 					size != null ? richtextSizeClass[size] : undefined,
 				),
 				role: "textbox",
@@ -2391,6 +2624,21 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		blocks.includes("placeholderValue");
 
 	const [editorJson, setEditorJson] = useState<JSONContent | undefined>(initialContent);
+
+	/**
+	 * The document's notes, in the order their markers are numbered in. Shown as a list under the
+	 * editor because that is where a reader meets them — a marker in the prose carries only its
+	 * number, so without this an author would have to open every one to proof-read the references.
+	 *
+	 * Read off the same JSON the form submits (rather than through `useEditorState`, whose first
+	 * snapshot is taken before the editor has its content) so the list is right on the first render,
+	 * and through the same helper the read paths use, so both build the list the same way.
+	 *
+	 * Shown whenever the document holds notes, not only where the feature is enabled: a field that
+	 * has footnotes turned off can still be opened on content that already had them, and hiding the
+	 * notes would hide text the markers in the prose are pointing at.
+	 */
+	const footnotes = useMemo(() => collectFootnotes(editorJson), [editorJson]);
 
 	const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
 	const [linkHrefInput, setLinkHrefInput] = useState("");
@@ -2827,6 +3075,26 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				/>
 			)}
 			<EditorContent editor={editor} />
+			{footnotes.length > 0 ? (
+				<div className="border-bs border-border bg-muted/40 px-4 py-3">
+					<h3 className="text-xs font-medium tracking-wide text-muted-fg uppercase">
+						{t("Footnotes")}
+					</h3>
+					<ol className="mbs-2 list-decimal space-y-1 ps-5 text-sm">
+						{footnotes.map((note, index) => (
+							// Positional keys: a note has no identity of its own — it is the marker at this
+							// position in the document, and the list is rebuilt from the document on every change.
+							<li key={index}>
+								{note != null ? (
+									<InlineRichTextRenderer content={note} />
+								) : (
+									<span className="text-muted-fg italic">{t("Empty note")}</span>
+								)}
+							</li>
+						))}
+					</ol>
+				</div>
+			) : null}
 			{isEditable ? (
 				<SlashCommandMenu
 					editor={editor}
