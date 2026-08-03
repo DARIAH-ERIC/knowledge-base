@@ -16,6 +16,19 @@ export default defineConfig({
 	test: {
 		projects: [
 			{
+				/**
+				 * Plain node tests for the pure helpers behind the components — attribute normalization and
+				 * the JSON serialization that carries block attributes through copy/paste. Nothing here
+				 * renders, so it stays out of the browser project and its playwright dependency.
+				 */
+				extends: true,
+				test: {
+					name: "unit",
+					environment: "node",
+					include: [path.join(import.meta.dirname, "lib/**/*.test.ts")],
+				},
+			},
+			{
 				extends: true,
 				plugins: [
 					storybookTest({

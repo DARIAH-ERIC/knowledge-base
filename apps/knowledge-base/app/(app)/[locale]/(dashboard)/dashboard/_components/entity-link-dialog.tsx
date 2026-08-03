@@ -15,7 +15,14 @@ import { renderEntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/a
 interface EntityLinkDialogProps {
 	/** Receives the entity's document id and its label, to use as the link text. */
 	onSelect: (entityId: string, label: string) => void;
-	trigger: ComponentType<{ open: () => void }>;
+	/**
+	 * Renders its own trigger when given one. Callers that open the dialog from a menu pass
+	 * `isOpen`/`onOpenChange` instead and omit this: a trigger nested in a menu is unmounted by the
+	 * menu closing, before the dialog it opens ever appears.
+	 */
+	trigger?: ComponentType<{ open: () => void }>;
+	isOpen?: boolean;
+	onOpenChange?: (isOpen: boolean) => void;
 }
 
 /**
@@ -31,11 +38,20 @@ interface EntityLinkDialogProps {
 export function EntityLinkDialog({
 	onSelect,
 	trigger: Trigger,
+	isOpen: controlledIsOpen,
+	onOpenChange,
 }: Readonly<EntityLinkDialogProps>): ReactNode {
 	const t = useExtracted();
 
-	const [isOpen, setIsOpen] = useState(false);
+	const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(false);
 	const [selected, setSelected] = useState<EntityOption | null>(null);
+
+	const isOpen = controlledIsOpen ?? uncontrolledIsOpen;
+
+	function setIsOpen(next: boolean) {
+		setUncontrolledIsOpen(next);
+		onOpenChange?.(next);
+	}
 
 	function close() {
 		setIsOpen(false);
@@ -44,11 +60,13 @@ export function EntityLinkDialog({
 
 	return (
 		<>
-			<Trigger
-				open={() => {
-					setIsOpen(true);
-				}}
-			/>
+			{Trigger != null ? (
+				<Trigger
+					open={() => {
+						setIsOpen(true);
+					}}
+				/>
+			) : null}
 			<ModalContent isOpen={isOpen} onOpenChange={setIsOpen} size="lg">
 				<ModalHeader
 					description={t("The link keeps working if the page is later renamed.")}

@@ -15,8 +15,8 @@ msgstr "Could not load options."
 
 #: ../../packages/ui/lib/async-list-select.tsx:235
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:245
-#: ../../packages/ui/lib/rich-text-editor.tsx:3071
-#: ../../packages/ui/lib/rich-text-editor.tsx:3098
+#: ../../packages/ui/lib/rich-text-editor.tsx:2628
+#: ../../packages/ui/lib/rich-text-editor.tsx:2655
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
@@ -165,27 +165,27 @@ msgid "4ZUjCU"
 msgstr "Reorder item"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:192
-#: ../../packages/ui/lib/rich-text-editor.tsx:2889
+#: ../../packages/ui/lib/rich-text-actions.tsx:150
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:200
-#: ../../packages/ui/lib/rich-text-editor.tsx:2897
+#: ../../packages/ui/lib/rich-text-actions.tsx:160
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:211
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:219
-#: ../../packages/ui/lib/rich-text-editor.tsx:3050
-#: ../../packages/ui/lib/rich-text-editor.tsx:3058
+#: ../../packages/ui/lib/rich-text-editor.tsx:2606
+#: ../../packages/ui/lib/rich-text-editor.tsx:2615
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:241
-#: ../../packages/ui/lib/rich-text-editor.tsx:3094
+#: ../../packages/ui/lib/rich-text-editor.tsx:2651
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
@@ -206,145 +206,173 @@ msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2699
-#: ../../packages/ui/lib/rich-text-editor.tsx:2914
-msgctxt "ui"
-msgid "Zqekct"
-msgstr "Heading 2"
-
-#: ../../packages/ui/lib/rich-text-editor.tsx:2708
-#: ../../packages/ui/lib/rich-text-editor.tsx:2922
-msgctxt "ui"
-msgid "BDbgCL"
-msgstr "Heading 3"
-
-#: ../../packages/ui/lib/rich-text-editor.tsx:2717
-#: ../../packages/ui/lib/rich-text-editor.tsx:2930
-msgctxt "ui"
-msgid "BKF2fN"
-msgstr "Heading 4"
-
-#: ../../packages/ui/lib/rich-text-editor.tsx:2726
-#: ../../packages/ui/lib/rich-text-editor.tsx:2939
-msgctxt "ui"
-msgid "6sdKFe"
-msgstr "Bullet List"
-
-#: ../../packages/ui/lib/rich-text-editor.tsx:2735
-#: ../../packages/ui/lib/rich-text-editor.tsx:2947
-msgctxt "ui"
-msgid "rU4xig"
-msgstr "Ordered List"
-
-#: ../../packages/ui/lib/rich-text-editor.tsx:2744
-#: ../../packages/ui/lib/rich-text-editor.tsx:2955
-msgctxt "ui"
-msgid "+RDJVD"
-msgstr "Blockquote"
-
-#: ../../packages/ui/lib/rich-text-editor.tsx:2753
-#: ../../packages/ui/lib/rich-text-editor.tsx:3034
-msgctxt "ui"
-msgid "j9jqNw"
-msgstr "Insert table"
-
-#: ../../packages/ui/lib/rich-text-editor.tsx:2768
-msgctxt "ui"
-msgid "+0zv6g"
-msgstr "Image"
-
-#: ../../packages/ui/lib/rich-text-editor.tsx:2802
-msgctxt "ui"
-msgid "bp3HuS"
-msgstr "Embed"
-
-#: ../../packages/ui/lib/rich-text-editor.tsx:2815
-msgctxt "ui"
-msgid "fErjHU"
-msgstr "Callout"
-
-#: ../../packages/ui/lib/rich-text-editor.tsx:2828
-msgctxt "ui"
-msgid "1EqXlD"
-msgstr "Media and text"
-
-#: ../../packages/ui/lib/rich-text-editor.tsx:2841
-msgctxt "ui"
-msgid "WExVSr"
-msgstr "Gallery"
-
-#: ../../packages/ui/lib/rich-text-editor.tsx:2854
-msgctxt "ui"
-msgid "KP63fg"
-msgstr "Button"
-
-#: ../../packages/ui/lib/rich-text-editor.tsx:2905
+#: ../../packages/ui/lib/rich-text-actions.tsx:170
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2966
-#: ../../packages/ui/lib/rich-text-editor.tsx:2974
+#: ../../packages/ui/lib/rich-text-actions.tsx:180
+#: ../../packages/ui/lib/rich-text-editor.tsx:2565
+#: ../../packages/ui/lib/rich-text-editor.tsx:2568
 msgctxt "ui"
-msgid "IeBejt"
-msgstr "Table"
+msgid "qKqtMC"
+msgstr "Paragraph"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2982
+#: ../../packages/ui/lib/rich-text-actions.tsx:191
 msgctxt "ui"
-msgid "yy68o/"
-msgstr "Toggle header row"
+msgid "Zqekct"
+msgstr "Heading 2"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2988
+#: ../../packages/ui/lib/rich-text-actions.tsx:202
 msgctxt "ui"
-msgid "Lag3AX"
-msgstr "Add row above"
+msgid "BDbgCL"
+msgstr "Heading 3"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2994
+#: ../../packages/ui/lib/rich-text-actions.tsx:213
 msgctxt "ui"
-msgid "+MYMhj"
-msgstr "Add row below"
+msgid "BKF2fN"
+msgstr "Heading 4"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3000
+#: ../../packages/ui/lib/rich-text-actions.tsx:224
 msgctxt "ui"
-msgid "w19eTC"
-msgstr "Delete row"
+msgid "6sdKFe"
+msgstr "Bullet List"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3007
+#: ../../packages/ui/lib/rich-text-actions.tsx:235
 msgctxt "ui"
-msgid "UNGmTw"
-msgstr "Add column before"
+msgid "rU4xig"
+msgstr "Ordered List"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3013
+#: ../../packages/ui/lib/rich-text-actions.tsx:246
 msgctxt "ui"
-msgid "X6kBtc"
-msgstr "Add column after"
+msgid "+RDJVD"
+msgstr "Blockquote"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3019
+#: ../../packages/ui/lib/rich-text-actions.tsx:257
 msgctxt "ui"
-msgid "qfX6ms"
-msgstr "Delete column"
+msgid "j9jqNw"
+msgstr "Insert table"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3026
+#: ../../packages/ui/lib/rich-text-actions.tsx:273
 msgctxt "ui"
-msgid "2CyUQr"
-msgstr "Delete table"
+msgid "+0zv6g"
+msgstr "Image"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3067
+#: ../../packages/ui/lib/rich-text-actions.tsx:287
+msgctxt "ui"
+msgid "bp3HuS"
+msgstr "Embed"
+
+#: ../../packages/ui/lib/rich-text-actions.tsx:307
+msgctxt "ui"
+msgid "fErjHU"
+msgstr "Callout"
+
+#: ../../packages/ui/lib/rich-text-actions.tsx:330
+msgctxt "ui"
+msgid "1EqXlD"
+msgstr "Media and text"
+
+#: ../../packages/ui/lib/rich-text-actions.tsx:367
+msgctxt "ui"
+msgid "WExVSr"
+msgstr "Gallery"
+
+#: ../../packages/ui/lib/rich-text-actions.tsx:389
+msgctxt "ui"
+msgid "KP63fg"
+msgstr "Button"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2565
+#: ../../packages/ui/lib/rich-text-editor.tsx:2571
+msgctxt "ui"
+msgid "hBrEtp"
+msgstr "Text style"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2624
 msgctxt "ui"
 msgid "ZgFjjD"
 msgstr "This link points to a document."
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3068
+#: ../../packages/ui/lib/rich-text-editor.tsx:2625
 msgctxt "ui"
 msgid "TANa98"
 msgstr "This link points to another page."
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3146
+#: ../../packages/ui/lib/rich-text-editor.tsx:2670
+#: ../../packages/ui/lib/rich-text-editor.tsx:2679
+msgctxt "ui"
+msgid "IeBejt"
+msgstr "Table"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2683
+msgctxt "ui"
+msgid "yy68o/"
+msgstr "Toggle header row"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2689
+msgctxt "ui"
+msgid "Lag3AX"
+msgstr "Add row above"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2695
+msgctxt "ui"
+msgid "+MYMhj"
+msgstr "Add row below"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2701
+msgctxt "ui"
+msgid "w19eTC"
+msgstr "Delete row"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2708
+msgctxt "ui"
+msgid "UNGmTw"
+msgstr "Add column before"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2714
+msgctxt "ui"
+msgid "X6kBtc"
+msgstr "Add column after"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2720
+msgctxt "ui"
+msgid "qfX6ms"
+msgstr "Delete column"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2727
+msgctxt "ui"
+msgid "2CyUQr"
+msgstr "Delete table"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2739
+#: ../../packages/ui/lib/rich-text-editor.tsx:2743
+#: ../../packages/ui/lib/rich-text-editor.tsx:2746
+msgctxt "ui"
+msgid "freMIM"
+msgstr "Insert"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2765
+msgctxt "ui"
+msgid "nxS3sg"
+msgstr "Link to document"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2775
+msgctxt "ui"
+msgid "/GpEhj"
+msgstr "Link to page"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2782
+msgctxt "ui"
+msgid "ojUXiU"
+msgstr "Placeholder value"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2833
 msgctxt "ui"
 msgid "VXTh3F"
 msgstr "No matching blocks"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3149
+#: ../../packages/ui/lib/rich-text-editor.tsx:2836
 msgctxt "ui"
 msgid "FeZ3P6"
 msgstr "Insert block"
@@ -952,8 +980,8 @@ msgid "T7w3zq"
 msgstr "Selected image"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary.tsx:82
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:476
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:568
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:508
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:600
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:203
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:174
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:154
@@ -963,7 +991,7 @@ msgstr "Alt text"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary.tsx:88
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field.tsx:24
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:482
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:514
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:208
 msgid "sq1btl"
 msgstr "Caption"
@@ -996,45 +1024,45 @@ msgstr "Entities"
 msgid "/mbrE7"
 msgstr "Too many requests. Please wait a moment and try again."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:321
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:319
 msgid "zJ7SUK"
 msgstr "Press ArrowUp or ArrowDown to reorder"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:450
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1164
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:448
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1125
 msgid "ryK3qR"
 msgstr "Accordion"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:451
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1165
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:449
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1126
 msgid "fErjHU"
 msgstr "Callout"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:452
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1166
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:450
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1127
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-comments-section.tsx:36
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-step-nav.tsx:31
 msgid "XHHR08"
 msgstr "Data"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:453
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1167
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:451
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1128
 msgid "bp3HuS"
 msgstr "Embed"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:454
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1168
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:452
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1129
 msgid "WExVSr"
 msgstr "Gallery"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:455
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1169
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:453
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1130
 msgid "dzcp7T"
 msgstr "Hero"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:456
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:962
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1170
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:454
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:923
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1131
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-details.tsx:118
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:112
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx:125
@@ -1068,20 +1096,20 @@ msgstr "Hero"
 msgid "+0zv6g"
 msgstr "Image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:457
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1171
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:455
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1132
 msgid "Z3BcRD"
 msgstr "Media with text"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:458
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1172
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:456
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1133
 msgid "0tCfi4"
 msgstr "Rich text"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:459
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1090
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1094
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1173
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:457
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1051
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1055
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1134
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-details.tsx:72
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:62
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-page-details.tsx:70
@@ -1108,27 +1136,27 @@ msgstr "Rich text"
 msgid "Jq3FDz"
 msgstr "Content"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:497
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:495
 msgid "aJ/bsX"
 msgstr "Drag to reorder"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:548
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:555
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:546
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:553
 msgid "g8fdXA"
 msgstr "Remove block"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:559
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:557
 msgid "LF5H8N"
 msgstr "Are you sure you want to remove this content block? This action cannot be undone."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:565
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:563
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:486
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:612
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:642
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal.tsx:55
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx:93
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:73
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:593
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:91
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:625
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx:619
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx:737
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx:767
@@ -1168,7 +1196,7 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 msgid "47FYwb"
 msgstr "Cancel"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:567
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:565
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-questions-form.tsx:63
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx:86
@@ -1180,11 +1208,11 @@ msgstr "Cancel"
 msgid "G/yZLu"
 msgstr "Remove"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:791
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:752
 msgid "X6ruKu"
 msgstr "Data type"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:796
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:757
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:234
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:235
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav.tsx:24
@@ -1201,89 +1229,89 @@ msgstr "Data type"
 msgid "ZvKSfJ"
 msgstr "Events"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:797
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:758
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:270
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:271
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:75
 msgid "NZyhSX"
 msgstr "News"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:798
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:759
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:276
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:277
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:82
 msgid "zB5VYc"
 msgstr "Opportunities"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:799
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:760
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:246
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:247
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:80
 msgid "5+5Dw/"
 msgstr "Funding calls"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:800
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:761
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:282
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:283
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:75
 msgid "CxfKLC"
 msgstr "Pages"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:801
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:762
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:288
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:289
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:82
 msgid "FZzBJD"
 msgstr "Spotlight articles"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:802
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:763
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:252
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:253
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:82
 msgid "99bd1b"
 msgstr "Impact case studies"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:818
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:779
 msgid "AEMsy2"
 msgstr "Selection mode"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:835
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:796
 msgid "fq86MK"
 msgstr "Most recent"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:836
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:797
 msgid "uRNuPl"
 msgstr "Explicit selection"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:849
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:810
 msgid "JyIOg4"
 msgstr "Number of entries"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:857
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:818
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list.tsx:104
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:385
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:417
 msgid "xmcVZ0"
 msgstr "Search"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:869
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:830
 msgid "P5XIax"
 msgstr "No entries found."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:869
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:830
 msgid "c1irFW"
 msgstr "Search to browse entries."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:894
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:855
 msgid "LtTjKV"
 msgstr "selected"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:936
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:897
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field.tsx:78
 msgid "qaarax"
 msgstr "Change image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:949
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1086
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:910
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1047
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-details.tsx:66
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:49
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:97
@@ -1320,16 +1348,16 @@ msgstr "Change image"
 msgid "9a9+ww"
 msgstr "Title"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:958
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:919
 msgid "raTwUa"
 msgstr "Eyebrow"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:990
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:951
 msgid "NhOsKC"
 msgstr "CTAs"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1002
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:563
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:963
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:595
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:168
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:148
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:149
@@ -1339,7 +1367,7 @@ msgstr "CTAs"
 msgid "753yX5"
 msgstr "Label"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1014
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:975
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx:190
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:144
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:55
@@ -1355,15 +1383,15 @@ msgstr "Label"
 msgid "bWjdfa"
 msgstr "URL"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1037
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:998
 msgid "DysEL3"
 msgstr "Add CTA"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1065
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1026
 msgid "5ujeDa"
 msgstr "Item"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1140
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1101
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx:87
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:257
 msgid "KDO3hW"
@@ -2226,24 +2254,24 @@ msgstr "Discard unpublished changes? The published version will remain."
 msgid "nmpevl"
 msgstr "Discard"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:54
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:72
 msgid "5Nphuh"
 msgstr "The link keeps working if the page is later renamed."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:73
 msgid "OJ4DQp"
 msgstr "Link to a page"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:59
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:63
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:77
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:81
 msgid "vu9H6y"
 msgstr "Page to link to"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:66
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:84
 msgid "SNZw1M"
 msgstr "Search for a page…"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:87
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx:157
 msgid "JBWS0c"
 msgstr "Link"
@@ -2395,96 +2423,96 @@ msgstr "Please select an image."
 msgid "iFsDVR"
 msgstr "Loading"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:251
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:282
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:103
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:34
 msgid "Fl1BuZ"
 msgstr "The selected image is too large. Choose an image smaller than {size}."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:322
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:354
 msgid "6nAe2O"
 msgstr "Select image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:328
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:360
 msgid "ciJ33H"
 msgstr "Select an existing image or upload a new one."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:329
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:340
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:401
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:436
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:361
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:372
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:433
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:468
 msgid "BFLVwB"
 msgstr "Media library"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:341
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:597
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:373
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:629
 msgid "kQAf2d"
 msgstr "Select"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:342
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:612
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:374
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:644
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:187
 msgid "p4N05H"
 msgstr "Upload"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:365
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:397
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:103
 msgid "RQ4EKT"
 msgstr "Layout"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:376
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:408
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:114
 msgid "3BFETM"
 msgstr "Grid layout"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:379
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:411
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:117
 msgid "dbABIT"
 msgstr "List layout"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:386
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:418
 msgid "0BUTMv"
 msgstr "Search..."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:393
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:425
 msgid "rEooS9"
 msgstr "No assets found for your search."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:394
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:426
 msgid "n0m/x/"
 msgstr "No assets found. Upload one to get started."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:519
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:551
 msgid "JJNc3c"
 msgstr "Previous"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:522
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:554
 msgid "9+Ddtu"
 msgstr "Next"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:539
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:571
 msgid "ylLD+l"
 msgstr "Choose file..."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:545
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:577
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:121
 msgid "TJo5E6"
 msgstr "Preview"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:575
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:607
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:183
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:199
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:163
 msgid "HBxXD/"
 msgstr "License"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:578
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:610
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:187
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:167
 msgid "KWv6Ra"
 msgstr "No license"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:609
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:641
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:183
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:184
 msgid "JEsxDw"

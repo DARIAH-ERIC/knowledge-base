@@ -109,6 +109,25 @@ export const WithContent: Story = {
 	},
 };
 
+/**
+ * The optional blocks are opt-in by name. Nothing else is wired up here — each one inserts itself
+ * and its node view opens whatever panel it needs, so the insert menu and the slash menu both offer
+ * them without the surrounding form contributing a button.
+ */
+export const WithOptionalBlocks: Story = {
+	args: {
+		content: sampleContent,
+		blocks: ["embed", "callout", "mediaText", "buttonLink"],
+	},
+	render(props) {
+		return (
+			<div className="inline-160">
+				<RichTextEditor {...props} />
+			</div>
+		);
+	},
+};
+
 export const ReadOnly: Story = {
 	args: {
 		content: sampleContent,

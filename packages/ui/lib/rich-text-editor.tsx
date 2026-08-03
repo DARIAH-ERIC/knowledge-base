@@ -2,6 +2,10 @@
 
 "use client";
 
+import {
+	placeholderValueKindLabels,
+	placeholderValueKindsEnum,
+} from "@dariah-eric/database/placeholder-values";
 import { type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
@@ -21,26 +25,14 @@ import cn from "clsx/lite";
 import {
 	ArrowDownIcon,
 	ArrowUpIcon,
-	BoldIcon,
-	CodeIcon,
-	Columns2Icon,
-	GalleryHorizontalEndIcon,
-	Heading2Icon,
-	Heading3Icon,
-	Heading4Icon,
-	ImageIcon,
-	InfoIcon,
-	ItalicIcon,
+	ChevronDownIcon,
 	LinkIcon,
-	ListIcon,
-	ListOrderedIcon,
-	MousePointerClickIcon,
+	PaperclipIcon,
 	PencilIcon,
-	QuoteIcon,
+	PlusIcon,
 	TableIcon,
 	Trash2Icon,
 	VariableIcon,
-	VideoIcon,
 } from "lucide-react";
 import { useExtracted } from "next-intl";
 import {
@@ -61,36 +53,51 @@ import { buttonStyles } from "@/lib/button-styles";
 import { InlineRichTextEditor } from "@/lib/inline-rich-text-editor";
 import { InlineRichTextRenderer } from "@/lib/inline-rich-text-renderer";
 import { Input } from "@/lib/input";
+import {
+	Menu,
+	MenuContent,
+	MenuItem,
+	MenuLabel,
+	MenuSeparator,
+	MenuSubMenu,
+	MenuTrigger,
+} from "@/lib/menu";
 import { Note } from "@/lib/note";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
 import { formatPlaceholderValue, isEmptyRichTextDocument } from "@/lib/rich-text";
 import {
+	type RichTextInsertableBlock,
+	selectRichTextActiveState,
+	useRichTextActions,
+} from "@/lib/rich-text-actions";
+import {
+	type ButtonLinkVariant,
+	type CalloutIntent,
+	type GalleryItemAttrs,
+	type GalleryLayout,
+	type ImageCaptionMode,
+	type ImageLayout,
+	type MediaTextSide,
+	normalizeButtonLinkVariant,
+	normalizeCalloutIntent,
+	normalizeGalleryItems,
+	normalizeGalleryLayout,
+	normalizeImageLayout,
+	normalizeMediaTextSide,
+	parseCaptionAttr,
+	parseGalleryItemsAttr,
+	resolveImageCaption,
+	serializeCaptionAttr,
+	serializeGalleryItemsAttr,
+} from "@/lib/rich-text-block-attrs";
+import {
 	type SlashCommandHandlers,
-	type SlashCommandItem,
 	SlashCommandMenu,
-	canInsertBlock,
 	createSlashCommandExtension,
 } from "@/lib/rich-text-slash-menu";
 import { RichTextEditorToolbarButton } from "@/lib/rich-text-toolbar-button";
 import { ToggleGroup, ToggleGroupItem } from "@/lib/toggle-group";
 import { Tooltip, TooltipContent } from "@/lib/tooltip";
-
-/** Serialize a richtext caption for storage in an HTML `data-caption` attribute (copy/paste). */
-function serializeCaptionAttr(caption: JSONContent | null): string | null {
-	return caption != null ? JSON.stringify(caption) : null;
-}
-
-/** Parse a `data-caption` attribute back into richtext JSON; invalid/empty values become null. */
-function parseCaptionAttr(value: string | null | undefined): JSONContent | null {
-	if (value == null || value === "") {
-		return null;
-	}
-	try {
-		return JSON.parse(value) as JSONContent;
-	} catch {
-		return null;
-	}
-}
 
 type RichTextSize = "sm" | "md" | "lg";
 
@@ -109,21 +116,25 @@ interface RichTextEditorProps {
 	isEditable?: boolean;
 	name?: string;
 	onChange?: (content: JSONContent) => void;
-	renderEmbedInsert?: (insertEmbed: () => void) => ReactNode;
-	renderCalloutInsert?: (insertCallout: () => void) => ReactNode;
-	renderMediaTextInsert?: (insertMediaText: () => void) => ReactNode;
-	renderGalleryInsert?: (insertGallery: () => void) => ReactNode;
-	renderButtonLinkInsert?: (insertButtonLink: () => void) => ReactNode;
-	renderPlaceholderValueInsert?: (
-		insertPlaceholderValue: (value: { kind: string; label: string }) => void,
-	) => ReactNode;
-	renderImagePicker?: (
-		insert: (
-			imageKey: string,
-			imageUrl: string,
-			asset?: { alt?: string | null; caption?: JSONContent | null },
-		) => void,
-	) => ReactNode;
+	/**
+	 * Optional blocks the surrounding form allows, beyond the ones every editor offers. Each is
+	 * self-contained — the editor inserts it and its node view opens whatever panel it needs — so
+	 * enabling one is a matter of naming it, not of handing back a button to insert it.
+	 *
+	 * Defaults to none, so a plain editor stays a plain editor.
+	 */
+	blocks?: ReadonlyArray<RichTextInsertableBlock>;
+	/**
+	 * Picker a block's own panel opens, to fill in or replace the image it points at. Rendered by the
+	 * node view with a trigger of its own, so this keeps the trigger-shaped signature.
+	 */
+	renderImagePicker?: (insert: InsertImage) => ReactNode;
+	/**
+	 * Picker the insert menu opens, to drop a finished image into the document. Separate from
+	 * `renderImagePicker` because the menu has to own when it opens — inserting an empty image and
+	 * making the author fill it in from its panel would cost three clicks the toolbar never did.
+	 */
+	renderImageInsert?: (args: RichTextPickerRenderArgs<InsertImage>) => ReactNode;
 	/**
 	 * Card identifying the asset a block points at - what it is called, what it already says, and how
 	 * to correct that. Blocks store only a storage key, so the app resolves it: this package cannot
@@ -135,13 +146,33 @@ interface RichTextEditorProps {
 		onMetadataChange: (metadata: { alt: string | null; caption: JSONContent | null }) => void;
 	}) => ReactNode;
 	/**
-	 * Picker for linking selected text to a stored document. Lives in the toolbar rather than in the
-	 * link popover: the picker is a modal dialog, and opening one from inside a popover dismisses the
-	 * popover it was opened from.
+	 * Picker for linking selected text to a stored document. Rendered outside the insert menu and
+	 * opened by it: the picker is a modal dialog, and a dialog mounted inside a menu goes away with
+	 * the menu that opened it.
 	 */
-	renderDocumentPicker?: (link: (assetKey: string, label: string) => void) => ReactNode;
-	/** Picker for linking selected text to another entity. In the toolbar, for the same reason. */
-	renderEntityPicker?: (link: (entityId: string, label: string) => void) => ReactNode;
+	renderDocumentPicker?: (
+		args: RichTextPickerRenderArgs<(assetKey: string, label: string) => void>,
+	) => ReactNode;
+	/** Picker for linking selected text to another entity. Rendered the same way, for the same reason. */
+	renderEntityPicker?: (
+		args: RichTextPickerRenderArgs<(entityId: string, label: string) => void>,
+	) => ReactNode;
+}
+
+export type InsertImage = (
+	imageKey: string,
+	imageUrl: string,
+	asset?: { alt?: string | null; caption?: JSONContent | null },
+) => void;
+
+/**
+ * A host-owned dialog the insert menu drives. The editor decides when it is open — the menu item
+ * that opens it has closed the menu by then — and the host renders it wherever it likes.
+ */
+export interface RichTextPickerRenderArgs<TSelect> {
+	isOpen: boolean;
+	onOpenChange: (isOpen: boolean) => void;
+	select: TSelect;
 }
 
 function normalizeInitialContent(content: JSONContent | undefined): JSONContent | undefined {
@@ -158,100 +189,19 @@ function normalizeInitialContent(content: JSONContent | undefined): JSONContent 
 
 type ImagePickerRenderer = NonNullable<RichTextEditorProps["renderImagePicker"]>;
 type AssetMetadataRenderer = NonNullable<RichTextEditorProps["renderAssetMetadata"]>;
-type ImageCaptionMode = "hidden" | "inherit" | "override";
-
-/** Mirrors `imageLayoutEnum` in `@dariah-eric/database` — the stored column is a closed set. */
-type ImageLayout = "default" | "wide" | "full" | "float-start" | "float-end";
-
-const imageLayouts = new Set<ImageLayout>(["default", "wide", "full", "float-start", "float-end"]);
-
-function normalizeImageLayout(value: unknown): ImageLayout {
-	return imageLayouts.has(value as ImageLayout) ? (value as ImageLayout) : "default";
-}
-
-/** Mirrors `galleryLayoutEnum` in `@dariah-eric/database` — the stored column is a closed set. */
-type GalleryLayout = "carousel" | "grid";
-
-function normalizeGalleryLayout(value: unknown): GalleryLayout {
-	return value === "carousel" ? "carousel" : "grid";
-}
-
-/**
- * One image of a gallery node. `alt` and `assetCaption` are copies of the asset's own metadata,
- * kept beside the key for rendering and for an `inherit` caption; only the key is persisted.
- */
-interface GalleryItemAttrs {
-	imageKey: string | null;
-	imageUrl: string | null;
-	alt: string | null;
-	assetCaption: JSONContent | null;
-	caption: JSONContent | null;
-	captionMode: ImageCaptionMode;
-}
-
-function toGalleryItem(value: unknown): GalleryItemAttrs | null {
-	if (typeof value !== "object" || value == null) {
-		return null;
-	}
-
-	const item = value as Record<string, unknown>;
-	const captionMode = item.captionMode;
-
-	return {
-		imageKey: typeof item.imageKey === "string" ? item.imageKey : null,
-		imageUrl: typeof item.imageUrl === "string" ? item.imageUrl : null,
-		alt: typeof item.alt === "string" ? item.alt : null,
-		assetCaption: (item.assetCaption as JSONContent | null) ?? null,
-		caption: (item.caption as JSONContent | null) ?? null,
-		captionMode:
-			captionMode === "hidden" || captionMode === "override" || captionMode === "inherit"
-				? captionMode
-				: "inherit",
-	};
-}
-
-function normalizeGalleryItems(value: unknown): Array<GalleryItemAttrs> {
-	if (!Array.isArray(value)) {
-		return [];
-	}
-	return value
-		.map((item) => toGalleryItem(item))
-		.filter((item): item is GalleryItemAttrs => item?.imageKey != null);
-}
-
-/** Gallery items survive a round trip through HTML (copy/paste, import) as one JSON attribute. */
-function serializeGalleryItemsAttr(items: Array<GalleryItemAttrs>): string {
-	return JSON.stringify(items);
-}
-
-function parseGalleryItemsAttr(value: string | null | undefined): Array<GalleryItemAttrs> {
-	if (value == null || value === "") {
-		return [];
-	}
-	try {
-		return normalizeGalleryItems(JSON.parse(value));
-	} catch {
-		return [];
-	}
-}
-
-function resolveImageCaption(
-	captionMode: ImageCaptionMode,
-	caption: JSONContent | null,
-	assetCaption: JSONContent | null,
-): JSONContent | null {
-	if (captionMode === "hidden") {
-		return null;
-	}
-	return captionMode === "override" ? caption : assetCaption;
-}
-
 // Re-export so existing consumers can keep importing from `@dariah-eric/ui/rich-text-editor`.
 export { RichTextEditorToolbarButton };
 export type { RichTextEditorToolbarButtonProps } from "@/lib/rich-text-toolbar-button";
 
 // Keep the internal alias for backward-compat within this file.
 const RichTextEditorIconButton = RichTextEditorToolbarButton;
+
+/**
+ * Matches `RichTextEditorToolbarButton` for the toolbar controls that have to own their own
+ * element: a popover or menu trigger is the button, so it cannot wrap one.
+ */
+const toolbarTriggerClassName =
+	"relative inline-flex block-8 cursor-pointer items-center justify-center gap-x-1 rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
 
 /** One row/column command in the table popover — a labelled entry rather than another icon. */
 function TableCommandButton({
@@ -584,24 +534,6 @@ export const EmbedNode = Node.create({
 	},
 });
 
-type CalloutIntent = "neutral" | "info" | "warning" | "danger" | "success";
-
-function normalizeCalloutIntent(intent: unknown): CalloutIntent {
-	if (intent === "default") {
-		return "neutral";
-	}
-	if (
-		intent === "neutral" ||
-		intent === "info" ||
-		intent === "warning" ||
-		intent === "danger" ||
-		intent === "success"
-	) {
-		return intent;
-	}
-	return "info";
-}
-
 function CalloutNodeView({
 	editor,
 	getPos,
@@ -808,15 +740,6 @@ export const CalloutNode = Node.create({
 		return ReactNodeViewRenderer(CalloutNodeView);
 	},
 });
-
-type ButtonLinkVariant = "primary" | "secondary" | "outline";
-
-function normalizeButtonLinkVariant(value: unknown): ButtonLinkVariant {
-	if (value === "primary" || value === "secondary" || value === "outline") {
-		return value;
-	}
-	return "primary";
-}
 
 /**
  * Inline call-to-action node: a link rendered to look like a button. Stored as structured
@@ -1513,12 +1436,6 @@ function createAssetImageNode(
 			));
 		},
 	});
-}
-
-type MediaTextSide = "start" | "end";
-
-function normalizeMediaTextSide(value: unknown): MediaTextSide {
-	return value === "end" ? "end" : "start";
 }
 
 interface MediaTextNodeViewProps extends NodeViewProps {
@@ -2370,13 +2287,9 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		name,
 		className,
 		size,
-		renderEmbedInsert,
-		renderCalloutInsert,
-		renderMediaTextInsert,
-		renderGalleryInsert,
-		renderButtonLinkInsert,
-		renderPlaceholderValueInsert,
+		blocks = [],
 		renderImagePicker,
+		renderImageInsert,
 		renderAssetMetadata,
 		renderDocumentPicker,
 		renderEntityPicker,
@@ -2424,26 +2337,58 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		},
 	});
 
-	const activeState = useEditorState({
+	const activeState = useEditorState({ editor, selector: selectRichTextActiveState });
+
+	/** Which host-owned picker dialog the insert menu has asked for, if any. */
+	const [openPicker, setOpenPicker] = useState<"document" | "entity" | "image" | null>(null);
+
+	const closePicker = useCallback((isOpen: boolean) => {
+		if (!isOpen) {
+			setOpenPicker(null);
+		}
+	}, []);
+
+	const pickImage = useCallback(() => {
+		setOpenPicker("image");
+	}, []);
+
+	const actions = useRichTextActions({
 		editor,
-		selector(ctx) {
-			return {
-				isBold: ctx.editor?.isActive("bold"),
-				isItalic: ctx.editor?.isActive("italic"),
-				isCode: ctx.editor?.isActive("code"),
-				isHeading2: ctx.editor?.isActive("heading", { level: 2 }),
-				isHeading3: ctx.editor?.isActive("heading", { level: 3 }),
-				isHeading4: ctx.editor?.isActive("heading", { level: 4 }),
-				isBulletList: ctx.editor?.isActive("bulletList"),
-				isOrderedList: ctx.editor?.isActive("orderedList"),
-				isBlockquote: ctx.editor?.isActive("blockquote"),
-				isLink: ctx.editor?.isActive("link"),
-				isInTable: ctx.editor?.isActive("table"),
-				linkHref: ctx.editor?.getAttributes("link").href as string | undefined,
-				linkTargetKind: ctx.editor?.getAttributes("link").targetKind as string | undefined,
-			};
-		},
+		activeState: activeState ?? null,
+		blocks,
+		hasImagePicker: renderImagePicker != null,
+		onPickImage: renderImageInsert != null ? pickImage : undefined,
 	});
+
+	const actionsByGroup = useMemo(() => {
+		return {
+			blockStyle: actions.filter((action) => action.group === "block-style"),
+			format: actions.filter((action) => action.group === "format"),
+			block: actions.filter((action) => action.group === "block"),
+			insert: actions.filter((action) => action.group === "insert"),
+		};
+	}, [actions]);
+
+	/** The slash menu offers everything but inline marks — it fires on an empty cursor. */
+	const slashCommandItems = useMemo(
+		() => actions.filter((action) => action.group !== "format"),
+		[actions],
+	);
+
+	/** What the text-style trigger shows: the style at the cursor, falling back to the first entry. */
+	const activeBlockStyle =
+		actionsByGroup.blockStyle.find((action) => action.isActive === true) ??
+		actionsByGroup.blockStyle[0];
+
+	const insertActions = useMemo(
+		() => actionsByGroup.insert.filter((action) => action.isAvailable?.() !== false),
+		[actionsByGroup],
+	);
+
+	const hasLinkTargetPickers =
+		renderDocumentPicker != null ||
+		renderEntityPicker != null ||
+		blocks.includes("placeholderValue");
 
 	const [editorJson, setEditorJson] = useState<JSONContent | undefined>(initialContent);
 
@@ -2510,82 +2455,6 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		setIsLinkPopoverOpen(false);
 	}, [editor, activeState?.isLink]);
 
-	const insertEmbed = useCallback(() => {
-		if (!editor) {
-			return;
-		}
-		editor
-			.chain()
-			.focus()
-			.insertContent({ type: "embedBlock", attrs: { url: null, title: null, caption: null } })
-			.run();
-	}, [editor]);
-
-	const insertCallout = useCallback(() => {
-		if (!editor) {
-			return;
-		}
-		editor
-			.chain()
-			.focus()
-			.insertContent({
-				type: "calloutBlock",
-				attrs: { intent: "info", title: null, content: null },
-			})
-			.run();
-	}, [editor]);
-
-	const insertMediaText = useCallback(() => {
-		if (!editor) {
-			return;
-		}
-		editor
-			.chain()
-			.focus()
-			.insertContent({
-				type: "mediaTextBlock",
-				attrs: {
-					imageKey: null,
-					imageUrl: null,
-					alt: null,
-					assetCaption: null,
-					caption: null,
-					captionMode: "inherit",
-					side: "start",
-				},
-				// The content expression requires at least one child; an empty node would be rejected.
-				content: [{ type: "paragraph" }],
-			})
-			.run();
-	}, [editor]);
-
-	const insertGallery = useCallback(() => {
-		if (!editor) {
-			return;
-		}
-		editor
-			.chain()
-			.focus()
-			// Inserted empty, like a media and text block: the node view opens its own panel — and so
-			// the host's image picker — as soon as it mounts without images.
-			.insertContent({ type: "galleryBlock", attrs: { layout: "grid", items: [] } })
-			.run();
-	}, [editor]);
-
-	const insertButtonLink = useCallback(() => {
-		if (!editor) {
-			return;
-		}
-		editor
-			.chain()
-			.focus()
-			.insertContent({
-				type: "buttonLink",
-				attrs: { href: null, label: null, variant: "primary" },
-			})
-			.run();
-	}, [editor]);
-
 	const insertPlaceholderValue = useCallback(
 		(value: { kind: string; label: string }) => {
 			if (!editor) {
@@ -2649,12 +2518,8 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		[linkTarget],
 	);
 
-	const insertImage = useCallback(
-		(
-			imageKey: string,
-			imageUrl: string,
-			asset?: { alt?: string | null; caption?: JSONContent | null },
-		) => {
+	const insertImage = useCallback<InsertImage>(
+		(imageKey, imageUrl, asset) => {
 			if (!editor) {
 				return;
 			}
@@ -2680,201 +2545,6 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		[editor],
 	);
 
-	/**
-	 * Blocks the author can reach by typing `/`. Everything self-contained is here; the toolbar's
-	 * remaining entries — document links, entity links and placeholder values — are not, because each
-	 * needs the host's own picker dialog, which nothing here can open on the author's behalf.
-	 *
-	 * The optional block types are gated on the same render props as the toolbar, so a menu never
-	 * offers a block the surrounding form did not enable.
-	 */
-	const slashCommandItems = useMemo<Array<SlashCommandItem>>(() => {
-		if (editor == null) {
-			return [];
-		}
-
-		const items: Array<SlashCommandItem> = [
-			{
-				id: "heading-2",
-				label: t("Heading 2"),
-				keywords: ["h2"],
-				icon: Heading2Icon,
-				run() {
-					editor.chain().focus().setNode("heading", { level: 2 }).run();
-				},
-			},
-			{
-				id: "heading-3",
-				label: t("Heading 3"),
-				keywords: ["h3"],
-				icon: Heading3Icon,
-				run() {
-					editor.chain().focus().setNode("heading", { level: 3 }).run();
-				},
-			},
-			{
-				id: "heading-4",
-				label: t("Heading 4"),
-				keywords: ["h4"],
-				icon: Heading4Icon,
-				run() {
-					editor.chain().focus().setNode("heading", { level: 4 }).run();
-				},
-			},
-			{
-				id: "bullet-list",
-				label: t("Bullet List"),
-				keywords: ["ul", "unordered"],
-				icon: ListIcon,
-				run() {
-					editor.chain().focus().toggleBulletList().run();
-				},
-			},
-			{
-				id: "ordered-list",
-				label: t("Ordered List"),
-				keywords: ["ol", "numbered"],
-				icon: ListOrderedIcon,
-				run() {
-					editor.chain().focus().toggleOrderedList().run();
-				},
-			},
-			{
-				id: "blockquote",
-				label: t("Blockquote"),
-				keywords: ["quote"],
-				icon: QuoteIcon,
-				run() {
-					editor.chain().focus().toggleBlockquote().run();
-				},
-			},
-			{
-				id: "table",
-				label: t("Insert table"),
-				keywords: ["table", "grid"],
-				icon: TableIcon,
-				isAvailable() {
-					return canInsertBlock(editor, "table");
-				},
-				run() {
-					editor.chain().focus().insertTable({ rows: 3, cols: 2, withHeaderRow: true }).run();
-				},
-			},
-		];
-
-		if (renderImagePicker != null) {
-			items.push({
-				id: "image",
-				label: t("Image"),
-				keywords: ["picture", "photo"],
-				icon: ImageIcon,
-				isAvailable() {
-					return canInsertBlock(editor, "assetImage");
-				},
-				run() {
-					/**
-					 * Inserted without an asset, the way a media and text block is: the node view opens its
-					 * own panel — and so the host's image picker — as soon as it mounts empty.
-					 */
-					editor
-						.chain()
-						.focus()
-						.insertContent({
-							type: "assetImage",
-							attrs: {
-								imageKey: null,
-								imageUrl: null,
-								alt: null,
-								assetCaption: null,
-								caption: null,
-								captionMode: "inherit",
-								layout: "default",
-							},
-						})
-						.run();
-				},
-			});
-		}
-
-		if (renderEmbedInsert != null) {
-			items.push({
-				id: "embed",
-				label: t("Embed"),
-				keywords: ["video", "youtube", "iframe"],
-				icon: VideoIcon,
-				isAvailable() {
-					return canInsertBlock(editor, "embedBlock");
-				},
-				run: insertEmbed,
-			});
-		}
-
-		if (renderCalloutInsert != null) {
-			items.push({
-				id: "callout",
-				label: t("Callout"),
-				keywords: ["note", "info", "warning"],
-				icon: InfoIcon,
-				isAvailable() {
-					return canInsertBlock(editor, "calloutBlock");
-				},
-				run: insertCallout,
-			});
-		}
-
-		if (renderMediaTextInsert != null) {
-			items.push({
-				id: "media-text",
-				label: t("Media and text"),
-				keywords: ["image", "biography", "speaker"],
-				icon: Columns2Icon,
-				isAvailable() {
-					return canInsertBlock(editor, "mediaTextBlock");
-				},
-				run: insertMediaText,
-			});
-		}
-
-		if (renderGalleryInsert != null && renderImagePicker != null) {
-			items.push({
-				id: "gallery",
-				label: t("Gallery"),
-				keywords: ["images", "slideshow", "carousel", "grid"],
-				icon: GalleryHorizontalEndIcon,
-				isAvailable() {
-					return canInsertBlock(editor, "galleryBlock");
-				},
-				run: insertGallery,
-			});
-		}
-
-		if (renderButtonLinkInsert != null) {
-			items.push({
-				id: "button-link",
-				label: t("Button"),
-				keywords: ["cta", "link"],
-				icon: MousePointerClickIcon,
-				run: insertButtonLink,
-			});
-		}
-
-		return items;
-	}, [
-		editor,
-		t,
-		renderImagePicker,
-		renderEmbedInsert,
-		renderCalloutInsert,
-		renderMediaTextInsert,
-		renderGalleryInsert,
-		renderButtonLinkInsert,
-		insertEmbed,
-		insertCallout,
-		insertMediaText,
-		insertGallery,
-		insertButtonLink,
-	]);
-
 	if (editor == null) {
 		return null;
 	}
@@ -2885,171 +2555,58 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		>
 			{isEditable ? (
 				<div className="sticky inset-bs-0 z-10 flex flex-wrap items-center gap-0.5 border-be border-border bg-muted px-2 py-1.5">
-					<RichTextEditorIconButton
-						aria-label={t("Bold")}
-						icon={BoldIcon}
-						isActive={activeState?.isBold}
-						onClick={() => {
-							editor.chain().focus().toggleBold().run();
-						}}
-					/>
-					<RichTextEditorIconButton
-						aria-label={t("Italic")}
-						icon={ItalicIcon}
-						isActive={activeState?.isItalic}
-						onClick={() => {
-							editor.chain().focus().toggleItalic().run();
-						}}
-					/>
-					<RichTextEditorIconButton
-						aria-label={t("Code")}
-						icon={CodeIcon}
-						isActive={activeState?.isCode}
-						onClick={() => {
-							editor.chain().focus().toggleCode().run();
-						}}
-					/>
-					<span className="mx-1 block-4 inline-px bg-border" />
-					<RichTextEditorIconButton
-						aria-label={t("Heading 2")}
-						icon={Heading2Icon}
-						isActive={activeState?.isHeading2}
-						onClick={() => {
-							editor.chain().focus().toggleHeading({ level: 2 }).run();
-						}}
-					/>
-					<RichTextEditorIconButton
-						aria-label={t("Heading 3")}
-						icon={Heading3Icon}
-						isActive={activeState?.isHeading3}
-						onClick={() => {
-							editor.chain().focus().toggleHeading({ level: 3 }).run();
-						}}
-					/>
-					<RichTextEditorIconButton
-						aria-label={t("Heading 4")}
-						icon={Heading4Icon}
-						isActive={activeState?.isHeading4}
-						onClick={() => {
-							editor.chain().focus().toggleHeading({ level: 4 }).run();
-						}}
-					/>
-					<span className="mx-1 block-4 inline-px bg-border" />
-					<RichTextEditorIconButton
-						aria-label={t("Bullet List")}
-						icon={ListIcon}
-						isActive={activeState?.isBulletList}
-						onClick={() => {
-							editor.chain().focus().toggleBulletList().run();
-						}}
-					/>
-					<RichTextEditorIconButton
-						aria-label={t("Ordered List")}
-						icon={ListOrderedIcon}
-						isActive={activeState?.isOrderedList}
-						onClick={() => {
-							editor.chain().focus().toggleOrderedList().run();
-						}}
-					/>
-					<RichTextEditorIconButton
-						aria-label={t("Blockquote")}
-						icon={QuoteIcon}
-						isActive={activeState?.isBlockquote}
-						onClick={() => {
-							editor.chain().focus().toggleBlockquote().run();
-						}}
-					/>
-					<span className="mx-1 block-4 inline-px bg-border" />
-					<Popover>
+					{/* Paragraph and the headings are alternatives to one another, so they read as one
+					    choice rather than as four toggles that happen to cancel each other out. */}
+					<Menu>
 						<Tooltip>
-							<PopoverTrigger
-								aria-label={t("Table")}
-								className={twMerge(
-									"relative inline-flex block-8 inline-8 cursor-pointer items-center justify-center rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-									activeState?.isInTable === true && "bg-primary-subtle/50 text-fg",
-								)}
+							{/* The name carries the visible label as well as the purpose: the trigger shows the
+							    style at the cursor, and a name of "Text style" alone would not contain it. */}
+							<MenuTrigger
+								aria-label={`${t("Text style")}: ${activeBlockStyle?.label ?? t("Paragraph")}`}
+								className={twMerge(toolbarTriggerClassName, "px-2 text-sm")}
 							>
-								<TableIcon className="block-4 inline-4" />
-							</PopoverTrigger>
-							<TooltipContent inverse={true}>{t("Table")}</TooltipContent>
+								{activeBlockStyle?.label ?? t("Paragraph")}
+								<ChevronDownIcon className="block-3 inline-3" />
+							</MenuTrigger>
+							<TooltipContent inverse={true}>{t("Text style")}</TooltipContent>
 						</Tooltip>
-						{/* The row and column commands act on the cell holding the cursor, so they are only
-							    offered once the selection is inside a table. */}
-						<PopoverContent className="flex inline-56 flex-col gap-1 p-2">
-							{activeState?.isInTable === true ? (
-								<>
-									<TableCommandButton
-										label={t("Toggle header row")}
-										onPress={() => {
-											editor.chain().focus().toggleHeaderRow().run();
-										}}
-									/>
-									<TableCommandButton
-										label={t("Add row above")}
-										onPress={() => {
-											editor.chain().focus().addRowBefore().run();
-										}}
-									/>
-									<TableCommandButton
-										label={t("Add row below")}
-										onPress={() => {
-											editor.chain().focus().addRowAfter().run();
-										}}
-									/>
-									<TableCommandButton
-										label={t("Delete row")}
-										onPress={() => {
-											editor.chain().focus().deleteRow().run();
-										}}
-									/>
-									<span className="my-1 block-px inline-full bg-border" />
-									<TableCommandButton
-										label={t("Add column before")}
-										onPress={() => {
-											editor.chain().focus().addColumnBefore().run();
-										}}
-									/>
-									<TableCommandButton
-										label={t("Add column after")}
-										onPress={() => {
-											editor.chain().focus().addColumnAfter().run();
-										}}
-									/>
-									<TableCommandButton
-										label={t("Delete column")}
-										onPress={() => {
-											editor.chain().focus().deleteColumn().run();
-										}}
-									/>
-									<span className="my-1 block-px inline-full bg-border" />
-									<TableCommandButton
-										label={t("Delete table")}
-										onPress={() => {
-											editor.chain().focus().deleteTable().run();
-										}}
-									/>
-								</>
-							) : (
-								<TableCommandButton
-									label={t("Insert table")}
-									onPress={() => {
-										editor
-											.chain()
-											.focus()
-											.insertTable({ rows: 3, cols: 2, withHeaderRow: true })
-											.run();
-									}}
-								/>
-							)}
-						</PopoverContent>
-					</Popover>
+						<MenuContent placement="bottom start">
+							{actionsByGroup.blockStyle.map((action) => (
+								<MenuItem key={action.id} onAction={action.run}>
+									<action.icon />
+									<MenuLabel>{action.label}</MenuLabel>
+								</MenuItem>
+							))}
+						</MenuContent>
+					</Menu>
+					<span className="mx-1 block-4 inline-px bg-border" />
+					{actionsByGroup.format.map((action) => (
+						<RichTextEditorIconButton
+							aria-label={action.label}
+							icon={action.icon}
+							isActive={action.isActive}
+							key={action.id}
+							onClick={action.run}
+						/>
+					))}
+					<span className="mx-1 block-4 inline-px bg-border" />
+					{actionsByGroup.block.map((action) => (
+						<RichTextEditorIconButton
+							aria-label={action.label}
+							icon={action.icon}
+							isActive={action.isActive}
+							key={action.id}
+							onClick={action.run}
+						/>
+					))}
 					<span className="mx-1 block-4 inline-px bg-border" />
 					<Popover isOpen={isLinkPopoverOpen} onOpenChange={handleLinkPopoverOpenChange}>
 						<Tooltip>
 							<PopoverTrigger
 								aria-label={t("Link")}
 								className={twMerge(
-									"relative inline-flex block-8 inline-8 cursor-pointer items-center justify-center rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+									toolbarTriggerClassName,
+									"inline-8",
 									activeState?.isLink === true && "bg-primary-subtle/50 text-fg",
 								)}
 							>
@@ -3103,33 +2660,163 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							)}
 						</PopoverContent>
 					</Popover>
-					{renderImagePicker != null ? (
-						<>
-							<span className="mx-1 block-4 inline-px bg-border" />
-							{renderImagePicker(insertImage)}
-						</>
+					{/* The row and column commands act on the cell holding the cursor, so the whole control
+					    only appears once the selection is inside a table. Inserting one is in the insert
+					    menu, with every other block. */}
+					{activeState?.isInTable === true ? (
+						<Popover>
+							<Tooltip>
+								<PopoverTrigger
+									aria-label={t("Table")}
+									className={twMerge(
+										toolbarTriggerClassName,
+										"inline-8",
+										"bg-primary-subtle/50 text-fg",
+									)}
+								>
+									<TableIcon className="block-4 inline-4" />
+								</PopoverTrigger>
+								<TooltipContent inverse={true}>{t("Table")}</TooltipContent>
+							</Tooltip>
+							<PopoverContent className="flex inline-56 flex-col gap-1 p-2">
+								<TableCommandButton
+									label={t("Toggle header row")}
+									onPress={() => {
+										editor.chain().focus().toggleHeaderRow().run();
+									}}
+								/>
+								<TableCommandButton
+									label={t("Add row above")}
+									onPress={() => {
+										editor.chain().focus().addRowBefore().run();
+									}}
+								/>
+								<TableCommandButton
+									label={t("Add row below")}
+									onPress={() => {
+										editor.chain().focus().addRowAfter().run();
+									}}
+								/>
+								<TableCommandButton
+									label={t("Delete row")}
+									onPress={() => {
+										editor.chain().focus().deleteRow().run();
+									}}
+								/>
+								<span className="my-1 block-px inline-full bg-border" />
+								<TableCommandButton
+									label={t("Add column before")}
+									onPress={() => {
+										editor.chain().focus().addColumnBefore().run();
+									}}
+								/>
+								<TableCommandButton
+									label={t("Add column after")}
+									onPress={() => {
+										editor.chain().focus().addColumnAfter().run();
+									}}
+								/>
+								<TableCommandButton
+									label={t("Delete column")}
+									onPress={() => {
+										editor.chain().focus().deleteColumn().run();
+									}}
+								/>
+								<span className="my-1 block-px inline-full bg-border" />
+								<TableCommandButton
+									label={t("Delete table")}
+									onPress={() => {
+										editor.chain().focus().deleteTable().run();
+									}}
+								/>
+							</PopoverContent>
+						</Popover>
 					) : null}
-					{renderDocumentPicker != null ? renderDocumentPicker(linkDocument) : null}
-					{renderEntityPicker != null ? renderEntityPicker(linkEntity) : null}
-					{renderEmbedInsert != null ? (
-						<>
-							{renderImagePicker == null && renderDocumentPicker == null ? (
-								<span className="mx-1 block-4 inline-px bg-border" />
+					<span className="mx-1 block-4 inline-px bg-border" />
+					<Menu>
+						<Tooltip>
+							<MenuTrigger
+								aria-label={t("Insert")}
+								className={twMerge(toolbarTriggerClassName, "px-2 text-sm")}
+							>
+								<PlusIcon className="block-4 inline-4" />
+								{t("Insert")}
+								<ChevronDownIcon className="block-3 inline-3" />
+							</MenuTrigger>
+							<TooltipContent inverse={true}>{t("Insert")}</TooltipContent>
+						</Tooltip>
+						<MenuContent placement="bottom end">
+							{/* `isAvailable` keeps the menu from offering a block the schema would refuse
+							    where the cursor is — a table inside a table, an image inside a media body. */}
+							{insertActions.map((action) => (
+								<MenuItem key={action.id} onAction={action.run}>
+									<action.icon />
+									<MenuLabel>{action.label}</MenuLabel>
+								</MenuItem>
+							))}
+							{hasLinkTargetPickers ? <MenuSeparator /> : null}
+							{renderDocumentPicker != null ? (
+								<MenuItem
+									onAction={() => {
+										setOpenPicker("document");
+									}}
+								>
+									<PaperclipIcon />
+									<MenuLabel>{t("Link to document")}</MenuLabel>
+								</MenuItem>
 							) : null}
-							{renderEmbedInsert(insertEmbed)}
-						</>
-					) : null}
-					{renderCalloutInsert != null ? renderCalloutInsert(insertCallout) : null}
-					{renderMediaTextInsert != null ? renderMediaTextInsert(insertMediaText) : null}
-					{/* A gallery is built out of picked assets, so it is only insertable where the host
-					    supplies a picker. */}
-					{renderGalleryInsert != null && renderImagePicker != null
-						? renderGalleryInsert(insertGallery)
-						: null}
-					{renderButtonLinkInsert != null ? renderButtonLinkInsert(insertButtonLink) : null}
-					{renderPlaceholderValueInsert != null
-						? renderPlaceholderValueInsert(insertPlaceholderValue)
-						: null}
+							{renderEntityPicker != null ? (
+								<MenuItem
+									onAction={() => {
+										setOpenPicker("entity");
+									}}
+								>
+									<LinkIcon />
+									<MenuLabel>{t("Link to page")}</MenuLabel>
+								</MenuItem>
+							) : null}
+							{blocks.includes("placeholderValue") ? (
+								<MenuSubMenu>
+									<MenuItem>
+										<VariableIcon />
+										<MenuLabel>{t("Placeholder value")}</MenuLabel>
+									</MenuItem>
+									<MenuContent>
+										{placeholderValueKindsEnum.map((kind) => (
+											<MenuItem
+												key={kind}
+												onAction={() => {
+													insertPlaceholderValue({
+														kind,
+														label: placeholderValueKindLabels[kind],
+													});
+												}}
+											>
+												<MenuLabel>{placeholderValueKindLabels[kind]}</MenuLabel>
+											</MenuItem>
+										))}
+									</MenuContent>
+								</MenuSubMenu>
+							) : null}
+						</MenuContent>
+					</Menu>
+					{/* Mounted outside the menu that opens them: a dialog nested in a menu is unmounted by
+					    the menu closing, before it ever gets to open. */}
+					{renderImageInsert?.({
+						isOpen: openPicker === "image",
+						onOpenChange: closePicker,
+						select: insertImage,
+					})}
+					{renderDocumentPicker?.({
+						isOpen: openPicker === "document",
+						onOpenChange: closePicker,
+						select: linkDocument,
+					})}
+					{renderEntityPicker?.({
+						isOpen: openPicker === "entity",
+						onOpenChange: closePicker,
+						select: linkEntity,
+					})}
 				</div>
 			) : null}
 			{name != null && (

@@ -113,9 +113,11 @@ export class AdminProjectsPage {
 	}
 
 	async insertImageInDescription(assetLabel: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Insert image" }).click();
-		await this.page.waitForSelector('[role="dialog"]');
+		/** The insert menu opens the picker directly; the image lands finished. */
+		await this.page.getByRole("button", { name: "Insert", exact: true }).click();
+		await this.page.getByRole("menuitem", { name: "Image", exact: true }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
 		const asset = dialog.getByRole("gridcell", { name: assetLabel });
 		await expect(asset).toHaveCount(1);
 		await asset.click();
