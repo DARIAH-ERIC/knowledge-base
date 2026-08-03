@@ -36,6 +36,16 @@ function visit(node: unknown, parts: Array<string>) {
 		return;
 	}
 
+	if (node.type === "footnote" && isRecord(node.attrs)) {
+		// A footnote keeps its note in an attribute, which the content walk below never reaches. Flatten
+		// it in place, padded, so the note is indexed alongside the sentence it belongs to instead of
+		// running into the word before the marker.
+		parts.push(" ");
+		visit(node.attrs.content, parts);
+		parts.push(" ");
+		return;
+	}
+
 	if (node.type === "placeholderValue" && isRecord(node.attrs)) {
 		// Annotated nodes flatten to their resolved value so it is searchable; raw references fall
 		// back to the display label.

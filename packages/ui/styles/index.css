@@ -924,6 +924,30 @@
 	}
 }
 
+/**
+ * Numbers footnote markers from their position in the text.
+ *
+ * A footnote stores only its note, never its number: the number is whatever the marker's place in
+ * the document makes it, so inserting, moving or deleting one renumbers the rest with no stored
+ * state to keep in step. Put this on whatever element spans one article — the editor's content
+ * element, or the container the rendered content blocks share — since that is what the count runs
+ * across. Nesting it resets the count, which is what a self-contained excerpt wants.
+ */
+@utility footnotes {
+	counter-reset: footnote;
+
+	:where([data-footnote])::before {
+		counter-increment: footnote;
+		content: counter(footnote);
+	}
+
+	/** Rendered markers. The editor's marker is a button, styled by its node view instead. */
+	:where(sup[data-footnote]) {
+		color: var(--primary);
+		font-weight: 500;
+	}
+}
+
 @utility richtext-sm {
 	font-size: 0.875rem;
 	line-height: 1.7142857;

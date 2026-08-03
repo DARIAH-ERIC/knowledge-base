@@ -6,7 +6,7 @@ import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/databas
 import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
 import { Note } from "@dariah-eric/ui/note";
-import { isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
+import { collectFootnotes, isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
 import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 import { renderToReactElement } from "@tiptap/static-renderer/pm/react";
@@ -156,6 +156,11 @@ function isFloatedImage(contentBlock: ContentBlock | undefined): boolean {
 }
 
 export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewProps>): ReactNode {
+	// Footnote markers are numbered by a CSS counter rooted on the element below (`footnotes`), so the
+	// count runs across the whole article rather than restarting per block — blocks are a storage
+	// split of one document, and a reader sees one sequence of notes.
+	const footnotes = collectFootnotes(contentBlocks);
+
 	// Normal document flow (not a flex column) so a floated `image` block's float escapes into the
 	// following block and the text wraps around it. The immediately-following `rich_text` is allowed
 	// to wrap; every other block clears, so a float can never overlap a structural block below it.
@@ -167,7 +172,7 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 	// after a heading). Each block zeroes its own first/last child margins, so this gap is the whole
 	// spacing story — no per-block or neighbour-aware adjustment.
 	return (
-		<div className="@container space-y-4">
+		<div className="@container footnotes space-y-4">
 			{contentBlocks.map((contentBlock, index) => {
 				const wrapsPrecedingFloat =
 					contentBlock.type === "rich_text" && isFloatedImage(contentBlocks[index - 1]);
@@ -181,6 +186,21 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 					</div>
 				);
 			})}
+			{/* The notes themselves, collected out of the blocks in the order their markers appear. The
+			    public site assembles this section the same way — from the document, not from a stored
+			    list — so what an editor proof-reads here is what a reader gets. */}
+			{footnotes.length > 0 ? (
+				<section aria-label="Footnotes" className="clear-both border-bs border-border pbs-4">
+					<h2 className="text-xs font-medium tracking-wide text-muted-fg uppercase">
+						{"Footnotes"}
+					</h2>
+					<ol className="mbs-2 list-decimal space-y-1 ps-5 text-sm">
+						{footnotes.map((note, index) => (
+							<li key={index}>{note != null ? <InlineRichTextRenderer content={note} /> : null}</li>
+						))}
+					</ol>
+				</section>
+			) : null}
 		</div>
 	);
 }

@@ -504,7 +504,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -1391,7 +1393,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -2541,7 +2545,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -3564,7 +3570,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -4697,7 +4705,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -6607,7 +6617,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -8111,7 +8123,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -9287,7 +9301,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -10864,7 +10880,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -11759,7 +11777,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -12828,7 +12848,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -13724,7 +13746,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -14786,7 +14810,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -16236,7 +16262,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
@@ -17430,7 +17458,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "anyOf": [
                 {
                   "properties": {
-                    "content": {},
+                    "content": {
+                      "description": "Richtext as Tiptap JSON. The inline \`footnote\` node is a marker carrying its own note in \`attrs.content\` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item's content blocks and lists the notes, in that order, at the end of the item.",
+                    },
                     "type": {
                       "const": "rich_text",
                     },
