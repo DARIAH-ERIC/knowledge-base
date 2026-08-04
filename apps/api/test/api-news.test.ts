@@ -107,6 +107,23 @@ describe("news", () => {
 				expect(data.offset).toBe(offset);
 			});
 		});
+
+		it("should return 400 for an offset beyond the safe integer range", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				/** Postgres cannot parse the exponential notation such a number stringifies to. */
+				const offset = "1200000000000000000000";
+
+				const response = await client.news.$get({
+					query: {
+						offset,
+					},
+				});
+
+				expect(response.status).toBe(400);
+			});
+		});
 	});
 
 	describe("GET /api/news/:id", () => {
