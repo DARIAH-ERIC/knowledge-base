@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           filter: "blob:none"
@@ -36,7 +36,7 @@ jobs:
           cache: true
 
       - name: Use node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24.x
 
@@ -114,7 +114,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up docker buildx
         uses: docker/setup-buildx-action@v4
@@ -228,7 +228,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up docker buildx
         uses: docker/setup-buildx-action@v4

@@ -78,7 +78,6 @@
 		"babel-plugin-react-compiler": "catalog:",
 		"concurrently": "catalog:",
 		"is-in-ci": "catalog:",
-		"next-devtools-mcp": "catalog:",
 		"npm-run-all2": "catalog:",
 		"null-loader": "catalog:",
 		"schema-dts": "catalog:",
