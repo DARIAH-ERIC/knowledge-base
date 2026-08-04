@@ -8,6 +8,7 @@ import { DashboardCommandPaletteProvider } from "@/app/(app)/[locale]/(dashboard
 import { DashboardSidebar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar";
 import { DashboardSidebarNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav";
 import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/main";
+import { ImpersonationBanner } from "@/app/(app)/[locale]/_components/impersonation-banner";
 import { SkipLink } from "@/components/skip-link";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getUserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
@@ -33,7 +34,7 @@ export default async function DashbardLayout(
 	const sidebarState = store.get("sidebar_state");
 	const defaultOpen = sidebarState ? sidebarState.value === "true" : true;
 
-	const { user } = await assertAuthenticated();
+	const { isImpersonating, realUser, user } = await assertAuthenticated();
 	const organisationalUnitScopes = await getUserOrganisationalUnitScopes(user);
 
 	return (
@@ -52,6 +53,15 @@ export default async function DashbardLayout(
 					/>
 
 					<SidebarInset>
+						{isImpersonating ? (
+							<ImpersonationBanner
+								impersonatedUserIsEmailVerified={user.isEmailVerified}
+								impersonatedUserIsTwoFactorRegistered={user.isTwoFactorRegistered}
+								impersonatedUserName={user.name}
+								realUserName={realUser.name}
+							/>
+						) : null}
+
 						<DashboardSidebarNav breadcrumbs={breadcrumbs} user={user} />
 
 						<div className="flex flex-1 flex-col gap-y-(--layout-padding) p-(--layout-padding) [--layout-padding:--spacing(4)] sm:[--layout-padding:--spacing(6)]">

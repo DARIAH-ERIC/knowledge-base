@@ -509,6 +509,7 @@ export async function getAuditLogEntries(
 				summary: schema.auditLogs.summary,
 				createdAt: schema.auditLogs.createdAt,
 				actorUserId: schema.auditLogs.actorUserId,
+				impersonatedByUserId: schema.auditLogs.impersonatedByUserId,
 			})
 			.from(schema.auditLogs)
 			.where(where)
@@ -520,7 +521,9 @@ export async function getAuditLogEntries(
 
 	const subjectIds = unique(items.map((item) => item.subjectId));
 	const actorIds = unique(
-		items.map((item) => item.actorUserId).filter((id): id is string => id != null),
+		items
+			.flatMap((item) => [item.actorUserId, item.impersonatedByUserId])
+			.filter((id): id is string => id != null),
 	);
 
 	// `subjectId` is a free-form text column, so it can hold non-uuid sentinels (e.g. "all" for
@@ -570,10 +573,16 @@ export async function getAuditLogEntries(
 			unitRelationLabels.get(item.subjectId) ??
 			`${humanizeSubjectType(item.subjectType)} #${item.subjectId}`;
 
+		function resolveActorLabel(id: string | null): string {
+			return id == null ? "System" : (actorLabels.get(id) ?? `Unknown user #${id}`);
+		}
+
+		// Attributed to the account the change was made under, with the impersonating admin named
+		// alongside it -- the impersonated user reading their own history needs to see both.
 		const actorLabel =
-			item.actorUserId == null
-				? "System"
-				: (actorLabels.get(item.actorUserId) ?? `Unknown user #${item.actorUserId}`);
+			item.impersonatedByUserId == null
+				? resolveActorLabel(item.actorUserId)
+				: `${resolveActorLabel(item.actorUserId)} (via ${resolveActorLabel(item.impersonatedByUserId)})`;
 
 		return {
 			id: item.id,

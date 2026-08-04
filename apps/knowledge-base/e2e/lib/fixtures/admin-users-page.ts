@@ -125,4 +125,22 @@ export class AdminUsersPage {
 	async confirmDelete(dialog: Locator): Promise<void> {
 		await dialog.getByRole("button", { name: "Delete" }).click();
 	}
+
+	/**
+	 * Starts impersonating the named user. The action redirects to the dashboard, where the caller
+	 * should assert on the banner.
+	 */
+	async startImpersonation(name: string): Promise<void> {
+		const row = this.rowByName(name);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await this.page.getByRole("menuitem", { name: "Sign in as this user" }).click();
+		await this.page.waitForURL("**/dashboard");
+	}
+
+	/** Opens the row's actions menu and returns the impersonation item, for asserting it is disabled. */
+	async openImpersonationRowAction(name: string): Promise<Locator> {
+		const row = this.rowByName(name);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		return this.page.getByRole("menuitem", { name: "Sign in as this user" });
+	}
 }

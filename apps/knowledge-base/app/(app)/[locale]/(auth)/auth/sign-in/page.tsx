@@ -35,7 +35,7 @@ export default async function SignInPage(_props: Readonly<SignInPageProps>): Pro
 		return t("Too many requests.");
 	}
 
-	const { session, user } = await getCurrentSession();
+	const { realUser: user, session } = await getCurrentSession();
 
 	if (session != null) {
 		if (!user.isEmailVerified) {

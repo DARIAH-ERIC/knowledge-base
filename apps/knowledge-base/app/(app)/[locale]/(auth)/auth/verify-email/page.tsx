@@ -39,7 +39,7 @@ export default async function VerifyEmailPage(
 		return t("Too many requests.");
 	}
 
-	const { user } = await getCurrentSession();
+	const { realUser: user } = await getCurrentSession();
 
 	if (user == null) {
 		redirect({ href: "/auth/sign-in", locale });

@@ -3566,6 +3566,29 @@ export class DatabaseService {
 	 * Finds all users whose name starts with `[e2e-worker-{workerIndex}]` and deletes them. Called in
 	 * afterAll to ensure a clean state.
 	 */
+	/**
+	 * Clears any impersonation left on a session. The admin persona's session is shared by every test
+	 * in the `admin` project, so a test that fails mid-impersonation would otherwise hand the next
+	 * test a non-admin identity and fail it for unrelated reasons.
+	 */
+	async clearAllImpersonations(): Promise<void> {
+		await this.db
+			.update(schema.sessions)
+			.set({ impersonatedUserId: null, impersonationExpiresAt: null })
+			.where(sql`${schema.sessions.impersonatedUserId} IS NOT NULL`);
+	}
+
+	/**
+	 * Backdates every live impersonation's expiry, so a test can observe the lapse without waiting
+	 * out `sessions.impersonation.durationMs`.
+	 */
+	async expireAllImpersonations(): Promise<void> {
+		await this.db
+			.update(schema.sessions)
+			.set({ impersonationExpiresAt: new Date(Date.now() - 1000) })
+			.where(sql`${schema.sessions.impersonatedUserId} IS NOT NULL`);
+	}
+
 	async cleanupWorkerUsers(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
 

@@ -9,6 +9,11 @@ export type AuditLogAction = (typeof schema.auditLogActionEnum)[number];
 
 export interface RecordAuditEventInput {
 	actorUserId?: string | null;
+	/**
+	 * The admin who was impersonating `actorUserId`, if any. Set by the action wrappers from the
+	 * session; manual callers only need it if they record events outside a wrapper.
+	 */
+	impersonatedByUserId?: string | null;
 	action: AuditLogAction;
 	subjectType: string;
 	subjectId: string;
@@ -28,6 +33,7 @@ export async function recordAuditEvent(
 	const {
 		action,
 		actorUserId = null,
+		impersonatedByUserId = null,
 		subjectId,
 		subjectType,
 		subjectLabel = null,
@@ -37,6 +43,7 @@ export async function recordAuditEvent(
 	await client.insert(schema.auditLogs).values({
 		action,
 		actorUserId,
+		impersonatedByUserId,
 		subjectId,
 		subjectType,
 		subjectLabel,

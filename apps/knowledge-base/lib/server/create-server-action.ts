@@ -10,15 +10,20 @@ import { getExtracted } from "next-intl/server";
 import { headers } from "next/headers";
 import { unstable_rethrow as rethrow } from "next/navigation";
 
-import { assertAdmin, assertAuthenticated } from "@/lib/auth/session";
+import { assertAdmin, assertAuthenticated, assertNotImpersonating } from "@/lib/auth/session";
 import { getUserFacingErrorMessage } from "@/lib/server/get-user-facing-error-message";
 
 export interface ServerActionContext {
 	/**
-	 * The authenticated user. Non-null when the wrapper was configured with `requireAdmin` or
-	 * `requireAuth`; null otherwise. Handlers that opted into auth can dereference without a check.
+	 * The effective user -- whom the action is performed _as_, which is the impersonated user while
+	 * impersonating. Non-null when the wrapper was configured with `requireAdmin`, `requireAuth` or
+	 * `requireNoImpersonation`; null otherwise. Handlers that opted into auth can dereference without
+	 * a check.
 	 */
 	user: User | null;
+	/** The account that actually authenticated; differs from `user` only while impersonating. */
+	realUser: User | null;
+	isImpersonating: boolean;
 }
 
 export type ServerAction<TData = unknown, TValidationErrors extends object = ValidationErrors> = (
@@ -40,6 +45,12 @@ export interface CreateServerActionOptions {
 	requireAdmin?: boolean;
 	/** Asserts that the caller has a valid authenticated session. Implied by requireAdmin. */
 	requireAuth?: boolean;
+	/**
+	 * Refuses the action while impersonating. For anything that mutates the credential behind the
+	 * session, which must never be applied to the impersonated user's account. Implies
+	 * `requireAuth`.
+	 */
+	requireNoImpersonation?: boolean;
 }
 
 /**
@@ -94,15 +105,25 @@ export function createServerAction<
 			}
 
 			let user: User | null = null;
-			if (options.requireAdmin === true) {
+			let realUser: User | null = null;
+			let isImpersonating = false;
+			if (options.requireNoImpersonation === true) {
+				const session = await assertNotImpersonating();
+				user = session.user;
+				realUser = session.realUser;
+			} else if (options.requireAdmin === true) {
 				const session = await assertAdmin();
 				user = session.user;
+				realUser = session.realUser;
+				isImpersonating = session.isImpersonating;
 			} else if (options.requireAuth === true) {
 				const session = await assertAuthenticated();
 				user = session.user;
+				realUser = session.realUser;
+				isImpersonating = session.isImpersonating;
 			}
 
-			return await handler(state, formData, { user });
+			return await handler(state, formData, { user, realUser, isImpersonating });
 		} catch (error) {
 			rethrow(error);
 

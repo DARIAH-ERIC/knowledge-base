@@ -15,8 +15,8 @@ msgstr "Could not load options."
 
 #: ../../packages/ui/lib/async-list-select.tsx:235
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:245
-#: ../../packages/ui/lib/rich-text-editor.tsx:2628
-#: ../../packages/ui/lib/rich-text-editor.tsx:2655
+#: ../../packages/ui/lib/rich-text-editor.tsx:2876
+#: ../../packages/ui/lib/rich-text-editor.tsx:2903
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
@@ -165,27 +165,27 @@ msgid "4ZUjCU"
 msgstr "Reorder item"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:192
-#: ../../packages/ui/lib/rich-text-actions.tsx:150
+#: ../../packages/ui/lib/rich-text-actions.tsx:152
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:200
-#: ../../packages/ui/lib/rich-text-actions.tsx:160
+#: ../../packages/ui/lib/rich-text-actions.tsx:162
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:211
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:219
-#: ../../packages/ui/lib/rich-text-editor.tsx:2606
-#: ../../packages/ui/lib/rich-text-editor.tsx:2615
+#: ../../packages/ui/lib/rich-text-editor.tsx:2854
+#: ../../packages/ui/lib/rich-text-editor.tsx:2863
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:241
-#: ../../packages/ui/lib/rich-text-editor.tsx:2651
+#: ../../packages/ui/lib/rich-text-editor.tsx:2899
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
@@ -206,173 +206,188 @@ msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:170
+#: ../../packages/ui/lib/rich-text-actions.tsx:172
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:180
-#: ../../packages/ui/lib/rich-text-editor.tsx:2565
-#: ../../packages/ui/lib/rich-text-editor.tsx:2568
+#: ../../packages/ui/lib/rich-text-actions.tsx:182
+#: ../../packages/ui/lib/rich-text-editor.tsx:2813
+#: ../../packages/ui/lib/rich-text-editor.tsx:2816
 msgctxt "ui"
 msgid "qKqtMC"
 msgstr "Paragraph"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:191
+#: ../../packages/ui/lib/rich-text-actions.tsx:193
 msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:202
+#: ../../packages/ui/lib/rich-text-actions.tsx:204
 msgctxt "ui"
 msgid "BDbgCL"
 msgstr "Heading 3"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:213
+#: ../../packages/ui/lib/rich-text-actions.tsx:215
 msgctxt "ui"
 msgid "BKF2fN"
 msgstr "Heading 4"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:224
+#: ../../packages/ui/lib/rich-text-actions.tsx:226
 msgctxt "ui"
 msgid "6sdKFe"
 msgstr "Bullet List"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:235
+#: ../../packages/ui/lib/rich-text-actions.tsx:237
 msgctxt "ui"
 msgid "rU4xig"
 msgstr "Ordered List"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:246
+#: ../../packages/ui/lib/rich-text-actions.tsx:248
 msgctxt "ui"
 msgid "+RDJVD"
 msgstr "Blockquote"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:257
+#: ../../packages/ui/lib/rich-text-actions.tsx:259
 msgctxt "ui"
 msgid "j9jqNw"
 msgstr "Insert table"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:273
+#: ../../packages/ui/lib/rich-text-actions.tsx:275
 msgctxt "ui"
 msgid "+0zv6g"
 msgstr "Image"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:287
+#: ../../packages/ui/lib/rich-text-actions.tsx:289
 msgctxt "ui"
 msgid "bp3HuS"
 msgstr "Embed"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:307
+#: ../../packages/ui/lib/rich-text-actions.tsx:309
 msgctxt "ui"
 msgid "fErjHU"
 msgstr "Callout"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:330
+#: ../../packages/ui/lib/rich-text-actions.tsx:332
 msgctxt "ui"
 msgid "1EqXlD"
 msgstr "Media and text"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:367
+#: ../../packages/ui/lib/rich-text-actions.tsx:369
 msgctxt "ui"
 msgid "WExVSr"
 msgstr "Gallery"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:389
+#: ../../packages/ui/lib/rich-text-actions.tsx:391
 msgctxt "ui"
 msgid "KP63fg"
 msgstr "Button"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2565
-#: ../../packages/ui/lib/rich-text-editor.tsx:2571
+#: ../../packages/ui/lib/rich-text-actions.tsx:411
+msgctxt "ui"
+msgid "fhp4gl"
+msgstr "Footnote"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:2813
+#: ../../packages/ui/lib/rich-text-editor.tsx:2819
 msgctxt "ui"
 msgid "hBrEtp"
 msgstr "Text style"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2624
+#: ../../packages/ui/lib/rich-text-editor.tsx:2872
 msgctxt "ui"
 msgid "ZgFjjD"
 msgstr "This link points to a document."
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2625
+#: ../../packages/ui/lib/rich-text-editor.tsx:2873
 msgctxt "ui"
 msgid "TANa98"
 msgstr "This link points to another page."
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2670
-#: ../../packages/ui/lib/rich-text-editor.tsx:2679
+#: ../../packages/ui/lib/rich-text-editor.tsx:2918
+#: ../../packages/ui/lib/rich-text-editor.tsx:2927
 msgctxt "ui"
 msgid "IeBejt"
 msgstr "Table"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2683
+#: ../../packages/ui/lib/rich-text-editor.tsx:2931
 msgctxt "ui"
 msgid "yy68o/"
 msgstr "Toggle header row"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2689
+#: ../../packages/ui/lib/rich-text-editor.tsx:2937
 msgctxt "ui"
 msgid "Lag3AX"
 msgstr "Add row above"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2695
+#: ../../packages/ui/lib/rich-text-editor.tsx:2943
 msgctxt "ui"
 msgid "+MYMhj"
 msgstr "Add row below"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2701
+#: ../../packages/ui/lib/rich-text-editor.tsx:2949
 msgctxt "ui"
 msgid "w19eTC"
 msgstr "Delete row"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2708
+#: ../../packages/ui/lib/rich-text-editor.tsx:2956
 msgctxt "ui"
 msgid "UNGmTw"
 msgstr "Add column before"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2714
+#: ../../packages/ui/lib/rich-text-editor.tsx:2962
 msgctxt "ui"
 msgid "X6kBtc"
 msgstr "Add column after"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2720
+#: ../../packages/ui/lib/rich-text-editor.tsx:2968
 msgctxt "ui"
 msgid "qfX6ms"
 msgstr "Delete column"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2727
+#: ../../packages/ui/lib/rich-text-editor.tsx:2975
 msgctxt "ui"
 msgid "2CyUQr"
 msgstr "Delete table"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2739
-#: ../../packages/ui/lib/rich-text-editor.tsx:2743
-#: ../../packages/ui/lib/rich-text-editor.tsx:2746
+#: ../../packages/ui/lib/rich-text-editor.tsx:2987
+#: ../../packages/ui/lib/rich-text-editor.tsx:2991
+#: ../../packages/ui/lib/rich-text-editor.tsx:2994
 msgctxt "ui"
 msgid "freMIM"
 msgstr "Insert"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2765
+#: ../../packages/ui/lib/rich-text-editor.tsx:3013
 msgctxt "ui"
 msgid "nxS3sg"
 msgstr "Link to document"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2775
+#: ../../packages/ui/lib/rich-text-editor.tsx:3023
 msgctxt "ui"
 msgid "/GpEhj"
 msgstr "Link to page"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2782
+#: ../../packages/ui/lib/rich-text-editor.tsx:3030
 msgctxt "ui"
 msgid "ojUXiU"
 msgstr "Placeholder value"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2833
+#: ../../packages/ui/lib/rich-text-editor.tsx:3081
+msgctxt "ui"
+msgid "t1Ql7Y"
+msgstr "Footnotes"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:3091
+msgctxt "ui"
+msgid "cZp00l"
+msgstr "Empty note"
+
+#: ../../packages/ui/lib/rich-text-editor.tsx:3101
 msgctxt "ui"
 msgid "VXTh3F"
 msgstr "No matching blocks"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2836
+#: ../../packages/ui/lib/rich-text-editor.tsx:3104
 msgctxt "ui"
 msgid "FeZ3P6"
 msgstr "Insert block"
@@ -414,6 +429,30 @@ msgstr "Remove tag"
 msgid "rru3FW"
 msgstr "Toggle color scheme"
 
+#: app/(app)/[locale]/_components/impersonation-banner.tsx:43
+msgid "e3DXdx"
+msgstr "They have not verified their email or set up two-factor authentication, so they cannot sign in themselves yet — you are seeing more than they can."
+
+#: app/(app)/[locale]/_components/impersonation-banner.tsx:49
+msgid "OHp7Gh"
+msgstr "They have not verified their email, so they cannot sign in themselves yet — you are seeing more than they can."
+
+#: app/(app)/[locale]/_components/impersonation-banner.tsx:55
+msgid "KD/mMa"
+msgstr "They have not set up two-factor authentication, so they cannot sign in themselves yet — you are seeing more than they can."
+
+#: app/(app)/[locale]/_components/impersonation-banner.tsx:73
+msgid "bbxzX2"
+msgstr "You are signed in as {name}."
+
+#: app/(app)/[locale]/_components/impersonation-banner.tsx:75
+msgid "63e7Lm"
+msgstr "Your own account is {name}."
+
+#: app/(app)/[locale]/_components/impersonation-banner.tsx:91
+msgid "BsKWQ5"
+msgstr "Return to my account"
+
 #: app/(app)/[locale]/(auth)/auth/forgot-password/_components/forgot-password-form.tsx:25
 #: app/(app)/[locale]/(auth)/auth/sign-in/_components/sign-in-form.tsx:25
 #: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx:31
@@ -422,7 +461,7 @@ msgstr "Toggle color scheme"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:116
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:96
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx:140
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:151
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:32
@@ -455,11 +494,11 @@ msgstr "Send"
 #: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/page.tsx:38
 #: app/(app)/[locale]/(auth)/auth/settings/_lib/regenerate-recovery-code.action.ts:16
 #: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:22
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:34
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:59
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:45
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:70
 #: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:21
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:33
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:59
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:44
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:70
 #: app/(app)/[locale]/(auth)/auth/settings/page.tsx:41
 #: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts:21
 #: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts:26
@@ -471,28 +510,28 @@ msgstr "Send"
 #: app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.action.ts:62
 #: app/(app)/[locale]/(auth)/auth/sign-up/page.tsx:36
 #: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:24
-#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:38
-#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:59
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:49
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:70
 #: app/(app)/[locale]/(auth)/auth/two-factor/page.tsx:38
-#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:29
-#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:50
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:40
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:61
 #: app/(app)/[locale]/(auth)/auth/two-factor/reset/page.tsx:38
 #: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:25
-#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:40
-#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:71
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:51
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:82
 #: app/(app)/[locale]/(auth)/auth/two-factor/setup/page.tsx:40
-#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:23
-#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:33
-#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:39
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:34
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:44
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:50
 #: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:22
-#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:34
-#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:61
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:45
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:72
 #: app/(app)/[locale]/(auth)/auth/verify-email/page.tsx:39
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/close-reporting-campaign.action.ts:20
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/delete-working-group-report-question.action.ts:20
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/launch-reporting-campaign.action.ts:20
-#: lib/server/create-command-action.ts:85
-#: lib/server/create-server-action.ts:93
+#: lib/server/create-command-action.ts:95
+#: lib/server/create-server-action.ts:104
 msgid "CDu063"
 msgstr "Too many requests."
 
@@ -501,14 +540,14 @@ msgstr "Too many requests."
 #: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-recovery-code.action.ts:49
 #: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-totp.action.ts:48
 #: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_lib/verify-password-reset-email.action.ts:46
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:47
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:46
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:58
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:57
 #: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts:37
 #: app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.action.ts:44
-#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:51
-#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:42
-#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:53
-#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:53
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:62
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:53
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:64
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:64
 #: app/(app)/[locale]/(dashboard)/dashboard/_lib/create-delegated-person.action.ts:44
 #: app/(app)/[locale]/(dashboard)/dashboard/_lib/update-delegated-person.action.ts:45
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action.ts:36
@@ -523,7 +562,7 @@ msgstr "Too many requests."
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/update-delegated-unit-relation.action.ts:39
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action.ts:42
 #: app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action.ts:36
-#: lib/server/create-mutation-action.ts:180
+#: lib/server/create-mutation-action.ts:195
 msgid "z9RwCc"
 msgstr "Invalid or missing fields."
 
@@ -630,7 +669,7 @@ msgstr "Reset password"
 #: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:31
 #: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:17
 #: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:28
-#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:40
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:51
 msgid "FA2cpe"
 msgstr "Not authenticated."
 
@@ -639,23 +678,23 @@ msgstr "Not authenticated."
 #: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-totp.action.ts:30
 #: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-totp.action.ts:57
 #: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_lib/verify-password-reset-email.action.ts:30
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/regenerate-recovery-code.action.ts:25
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/regenerate-recovery-code.action.ts:28
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:31
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:30
-#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:34
-#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:65
-#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:26
-#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:34
-#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:37
-#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:20
-#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:30
-#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:31
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/regenerate-recovery-code.action.ts:36
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/regenerate-recovery-code.action.ts:39
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:42
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:41
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:45
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:76
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:37
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:45
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:48
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:31
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:41
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:42
 msgid "z6socI"
 msgstr "Forbidden."
 
 #: app/(app)/[locale]/(auth)/auth/reset-password/_lib/reset-password.action.ts:56
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:55
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:66
 #: app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.action.ts:58
 msgid "aZPBJm"
 msgstr "Weak password."
@@ -682,8 +721,8 @@ msgstr "Code"
 #: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-recovery-code.action.ts:62
 #: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-totp.action.ts:63
 #: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_lib/verify-password-reset-email.action.ts:57
-#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:69
-#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:79
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:80
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:90
 msgid "UkurAm"
 msgstr "Incorrect code."
 
@@ -747,17 +786,28 @@ msgstr "New password"
 msgid "fe7Y2Z"
 msgstr "Confirm new password"
 
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:56
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/regenerate-recovery-code.action.ts:32
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:38
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:37
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:40
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:33
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:41
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:27
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:38
+msgid "n5qhEe"
+msgstr "Not available while signed in as another user."
+
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:67
 #: app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.action.ts:53
 msgid "Qs87l8"
 msgstr "Email is already used."
 
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:65
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:76
 #: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts:59
 msgid "fHT0Co"
 msgstr "Incorrect password."
 
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:76
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:87
 msgid "Whl44A"
 msgstr "Updated password."
 
@@ -839,7 +889,7 @@ msgstr "Forgot password?"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx:95
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:110
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:93
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:95
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx:104
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:79
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:99
@@ -870,7 +920,7 @@ msgstr "Already have an account?"
 msgid "VF/mcI"
 msgstr "Use recovery code"
 
-#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:55
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:66
 msgid "mG1WL7"
 msgstr "Invalid recovery code."
 
@@ -935,11 +985,11 @@ msgstr "Verify the code from the app"
 msgid "jvo0vs"
 msgstr "Save"
 
-#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:65
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:76
 msgid "gFFn6i"
 msgstr "Invalid key."
 
-#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:74
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:85
 msgid "htnvWj"
 msgstr "Invalid code."
 
@@ -959,11 +1009,11 @@ msgstr "Verification code"
 msgid "62beOi"
 msgstr "Resend verification code"
 
-#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:54
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:65
 msgid "Lvibqr"
 msgstr "A new code was sent to your inbox."
 
-#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:74
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:85
 msgid "Rlr6vl"
 msgstr "The verification code was expired. We sent another code to your inbox."
 
@@ -1024,45 +1074,45 @@ msgstr "Entities"
 msgid "/mbrE7"
 msgstr "Too many requests. Please wait a moment and try again."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:319
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:327
 msgid "zJ7SUK"
 msgstr "Press ArrowUp or ArrowDown to reorder"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:448
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1125
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:459
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1153
 msgid "ryK3qR"
 msgstr "Accordion"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:449
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1126
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:460
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1154
 msgid "fErjHU"
 msgstr "Callout"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:450
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1127
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:461
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1155
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-comments-section.tsx:36
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-step-nav.tsx:31
 msgid "XHHR08"
 msgstr "Data"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:451
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1128
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:462
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1156
 msgid "bp3HuS"
 msgstr "Embed"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:452
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1129
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:463
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1157
 msgid "WExVSr"
 msgstr "Gallery"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:453
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1130
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:464
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1158
 msgid "dzcp7T"
 msgstr "Hero"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:454
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:923
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1131
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:465
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:951
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1159
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-details.tsx:118
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:112
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx:125
@@ -1096,20 +1146,20 @@ msgstr "Hero"
 msgid "+0zv6g"
 msgstr "Image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:455
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1132
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:466
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1160
 msgid "Z3BcRD"
 msgstr "Media with text"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:456
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1133
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:467
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1161
 msgid "0tCfi4"
 msgstr "Rich text"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:457
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1051
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1055
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1134
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:468
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1079
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1083
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1162
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-details.tsx:72
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:62
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-page-details.tsx:70
@@ -1136,20 +1186,20 @@ msgstr "Rich text"
 msgid "Jq3FDz"
 msgstr "Content"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:495
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:506
 msgid "aJ/bsX"
 msgstr "Drag to reorder"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:546
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:553
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:557
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:564
 msgid "g8fdXA"
 msgstr "Remove block"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:557
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:568
 msgid "LF5H8N"
 msgstr "Are you sure you want to remove this content block? This action cannot be undone."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:563
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:574
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:486
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:612
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:642
@@ -1196,7 +1246,7 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 msgid "47FYwb"
 msgstr "Cancel"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:565
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:576
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-questions-form.tsx:63
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx:86
@@ -1208,11 +1258,11 @@ msgstr "Cancel"
 msgid "G/yZLu"
 msgstr "Remove"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:752
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:780
 msgid "X6ruKu"
 msgstr "Data type"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:757
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:785
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:234
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:235
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav.tsx:24
@@ -1229,89 +1279,89 @@ msgstr "Data type"
 msgid "ZvKSfJ"
 msgstr "Events"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:758
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:786
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:270
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:271
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:75
 msgid "NZyhSX"
 msgstr "News"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:759
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:787
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:276
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:277
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:82
 msgid "zB5VYc"
 msgstr "Opportunities"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:760
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:788
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:246
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:247
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:80
 msgid "5+5Dw/"
 msgstr "Funding calls"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:761
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:789
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:282
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:283
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:75
 msgid "CxfKLC"
 msgstr "Pages"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:762
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:790
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:288
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:289
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:82
 msgid "FZzBJD"
 msgstr "Spotlight articles"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:763
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:791
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:252
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:253
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:82
 msgid "99bd1b"
 msgstr "Impact case studies"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:779
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:807
 msgid "AEMsy2"
 msgstr "Selection mode"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:796
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:824
 msgid "fq86MK"
 msgstr "Most recent"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:797
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:825
 msgid "uRNuPl"
 msgstr "Explicit selection"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:810
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:838
 msgid "JyIOg4"
 msgstr "Number of entries"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:818
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:846
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list.tsx:104
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:417
 msgid "xmcVZ0"
 msgstr "Search"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:830
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:858
 msgid "P5XIax"
 msgstr "No entries found."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:830
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:858
 msgid "c1irFW"
 msgstr "Search to browse entries."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:855
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:883
 msgid "LtTjKV"
 msgstr "selected"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:897
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:925
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field.tsx:78
 msgid "qaarax"
 msgstr "Change image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:910
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1047
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:938
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1075
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-details.tsx:66
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:49
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:97
@@ -1348,15 +1398,15 @@ msgstr "Change image"
 msgid "9a9+ww"
 msgstr "Title"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:919
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:947
 msgid "raTwUa"
 msgstr "Eyebrow"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:951
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:979
 msgid "NhOsKC"
 msgstr "CTAs"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:963
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:991
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:595
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:168
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:148
@@ -1367,7 +1417,7 @@ msgstr "CTAs"
 msgid "753yX5"
 msgstr "Label"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:975
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1003
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx:190
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx:144
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:55
@@ -1383,15 +1433,15 @@ msgstr "Label"
 msgid "bWjdfa"
 msgstr "URL"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:998
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1026
 msgid "DysEL3"
 msgstr "Add CTA"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1026
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1054
 msgid "5ujeDa"
 msgstr "Item"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1101
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1129
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx:87
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:257
 msgid "KDO3hW"
@@ -1420,7 +1470,7 @@ msgstr "Contributions"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:219
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:348
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:128
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:101
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section.tsx:128
 #: app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section.tsx:192
@@ -1788,7 +1838,7 @@ msgstr "This will permanently delete this contribution."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:168
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:119
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx:128
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:138
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:156
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:129
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:154
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:130
@@ -1892,7 +1942,7 @@ msgstr "Tasks"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:90
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:91
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:75
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:77
 msgid "YDMrKK"
 msgstr "Users"
 
@@ -2179,7 +2229,7 @@ msgstr "Save and publish"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx:118
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:66
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx:131
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:119
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:144
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-reports-list-page.tsx:69
@@ -3313,7 +3363,7 @@ msgstr "Manage all countries in the DARIAH knowledge base."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:80
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:75
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx:79
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:82
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:86
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:82
@@ -4428,16 +4478,16 @@ msgstr "DARIAH branding"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:80
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:84
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:115
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:116
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:117
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:118
 msgid "a5msuh"
 msgstr "Yes"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:80
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:84
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:115
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:116
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:117
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:118
 msgid "oUWADl"
 msgstr "No"
 
@@ -6248,23 +6298,27 @@ msgstr "Select a person"
 msgid "EEdOfh"
 msgstr "Select a country"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:76
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:78
 msgid "BOrcWk"
 msgstr "Manage all users in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:102
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:104
 msgid "dsRV5z"
 msgstr "Can manage admins"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:105
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:107
 msgid "DC8+TO"
 msgstr "Email verified"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:151
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:142
+msgid "D/ZZLA"
+msgstr "Sign in as this user"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:169
 msgid "sUNhQE"
 msgstr "user"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:173
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:191
 msgid "uJ0LeV"
 msgstr "Could not delete user. Please try again."
 
@@ -6545,7 +6599,7 @@ msgstr "Country dashboard - Edit summary"
 msgid "JLjqom"
 msgstr "Edit summary"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/layout.tsx:41
+#: app/(app)/[locale]/(dashboard)/dashboard/layout.tsx:42
 #: app/(app)/[locale]/(default)/layout.tsx:18
 msgid "2sRCsy"
 msgstr "Skip to main content"
@@ -7627,7 +7681,7 @@ msgstr "Edit impact case study"
 msgid "rk0u5P"
 msgstr "Enter the impact case study details."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:187
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:194
 msgid "Ig2JLg"
 msgstr "Impact case study"
 
@@ -8130,82 +8184,82 @@ msgstr "You need to sign in to access this page. If you already have an account,
 msgid "yJqGgj"
 msgstr "This SSHOC marketplace actor id is already assigned to another organisational unit."
 
-#: lib/server/create-command-action.ts:142
-#: lib/server/create-server-action.ts:111
+#: lib/server/create-command-action.ts:163
+#: lib/server/create-server-action.ts:132
 msgid "Ni9MxS"
 msgstr "An entity with this slug already exists."
 
-#: lib/server/create-command-action.ts:143
-#: lib/server/create-server-action.ts:112
+#: lib/server/create-command-action.ts:164
+#: lib/server/create-server-action.ts:133
 msgid "WtzfWm"
 msgstr "A record with these values already exists."
 
-#: lib/server/create-command-action.ts:144
-#: lib/server/create-server-action.ts:126
+#: lib/server/create-command-action.ts:165
+#: lib/server/create-server-action.ts:147
 msgid "7XzbEI"
 msgstr "A related record no longer exists. Refresh the page and try again."
 
-#: lib/server/create-command-action.ts:147
-#: lib/server/create-server-action.ts:129
+#: lib/server/create-command-action.ts:168
+#: lib/server/create-server-action.ts:150
 msgid "G5W8LK"
 msgstr "This entity is published, so its address can only be changed by an administrator on the Maintenance page."
 
-#: lib/server/create-command-action.ts:150
-#: lib/server/create-server-action.ts:132
+#: lib/server/create-command-action.ts:171
+#: lib/server/create-server-action.ts:153
 msgid "FhIASk"
 msgstr "This record conflicts with an existing record."
 
-#: lib/server/create-command-action.ts:151
-#: lib/server/create-server-action.ts:113
+#: lib/server/create-command-action.ts:172
+#: lib/server/create-server-action.ts:134
 msgid "UxrCFa"
 msgstr "The DARIAH-EU organisational unit could not be found, so this relation cannot be recorded."
 
-#: lib/server/create-command-action.ts:154
-#: lib/server/create-server-action.ts:116
+#: lib/server/create-command-action.ts:175
+#: lib/server/create-server-action.ts:137
 msgid "pJL6Fh"
 msgstr "The governance body this role must also be recorded against could not be found."
 
-#: lib/server/create-command-action.ts:157
-#: lib/server/create-server-action.ts:122
+#: lib/server/create-command-action.ts:178
+#: lib/server/create-server-action.ts:143
 msgid "Ehoi3a"
 msgstr "The end date must fall after the relation started."
 
-#: lib/server/create-command-action.ts:158
-#: lib/server/create-server-action.ts:123
+#: lib/server/create-command-action.ts:179
+#: lib/server/create-server-action.ts:144
 msgid "lNKpUQ"
 msgstr "This relation is not one this form can end, or it has already been ended. Refresh the page and try again."
 
-#: lib/server/create-command-action.ts:161
-#: lib/server/create-server-action.ts:119
+#: lib/server/create-command-action.ts:182
+#: lib/server/create-server-action.ts:140
 msgid "6L0TeR"
 msgstr "This relation already exists during an overlapping period. Adjust the dates and try again."
 
-#: lib/server/create-command-action.ts:164
-#: lib/server/create-server-action.ts:133
+#: lib/server/create-command-action.ts:185
+#: lib/server/create-server-action.ts:154
 msgid "Hr85CO"
 msgstr "Both services have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge."
 
-#: lib/server/create-command-action.ts:167
-#: lib/server/create-server-action.ts:136
+#: lib/server/create-command-action.ts:188
+#: lib/server/create-server-action.ts:157
 msgid "paaApZ"
 msgstr "This slug is too long to be used as a web address. Please shorten it."
 
-#: lib/server/create-command-action.ts:168
-#: lib/server/create-server-action.ts:137
+#: lib/server/create-command-action.ts:189
+#: lib/server/create-server-action.ts:158
 msgid "Jl3xT+"
 msgstr "Both accounts have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge."
 
-#: lib/server/create-command-action.ts:171
-#: lib/server/create-server-action.ts:140
+#: lib/server/create-command-action.ts:192
+#: lib/server/create-server-action.ts:161
 msgid "qDy0wr"
 msgstr "The submitted data violates a data rule."
 
-#: lib/server/create-command-action.ts:172
-#: lib/server/create-server-action.ts:141
+#: lib/server/create-command-action.ts:193
+#: lib/server/create-server-action.ts:162
 msgid "Bosjdo"
 msgstr "The submitted data is incomplete."
 
-#: lib/server/create-command-action.ts:175
-#: lib/server/create-server-action.ts:146
+#: lib/server/create-command-action.ts:196
+#: lib/server/create-server-action.ts:167
 msgid "lkI8/e"
 msgstr "Internal server error."
