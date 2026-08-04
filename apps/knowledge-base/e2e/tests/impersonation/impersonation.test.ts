@@ -4,6 +4,7 @@ import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import {
 	AuthSettingsPage,
 	ImpersonationBanner,
+	impersonationAdmin,
 	impersonationRefusalMessage,
 	signOutFromUserMenu,
 } from "@/e2e/lib/fixtures/impersonation";
@@ -15,28 +16,31 @@ import { expect, test } from "@/e2e/lib/test";
  * admin-only routes close behind them, credential-mutating actions refuse outright, and there is
  * always a way back.
  *
- * Runs under the `admin` project, impersonating the seeded `nc` persona -- the same national
- * coordinator the `nc` suite signs in as -- so "an admin sees what the coordinator sees" is
- * asserted against a persona whose own view is covered elsewhere.
+ * Runs under the `impersonation` project -- its own admin, and the reason the project exists: an
+ * impersonation lives on the session row, so sharing the `admin` session would turn every admin
+ * test running concurrently in the other worker non-admin for as long as it lasted. It impersonates
+ * the seeded `nc` persona -- the same national coordinator the `nc` suite signs in as -- so "an
+ * admin sees what the coordinator sees" is asserted against a persona whose own view is covered
+ * elsewhere.
  */
 test.describe("impersonation", () => {
 	test.describe.configure({ mode: "default" });
 
 	const ncName = "E2E National Coordinator";
 	const ncEmail = "e2e-nc@example.com";
-	const adminName = "E2E Admin";
-	const adminEmail = "e2e-admin@example.com";
+	const adminName = impersonationAdmin.name;
+	const adminEmail = impersonationAdmin.email;
 
 	/** The audit log renders actors as `name (email)` -- see `resolveActorLabels`. */
 	const ncActorLabel = `${ncName} (${ncEmail})`;
 	const adminActorLabel = `${adminName} (${adminEmail})`;
 
 	/**
-	 * The admin persona's session is shared across this project, so an impersonation surviving a
-	 * failed assertion would hand every later admin test a non-admin identity.
+	 * This suite's own session is shared across its tests, so an impersonation surviving a failed
+	 * assertion would hand every later test here a non-admin identity.
 	 */
 	test.afterEach(async ({ db }) => {
-		await db.clearAllImpersonations();
+		await db.clearImpersonationsForUser(adminEmail);
 	});
 
 	test.afterAll(async ({ db }, testInfo) => {
@@ -232,7 +236,7 @@ test.describe("impersonation", () => {
 		await usersPage.startImpersonation(ncName);
 		await banner.expectVisibleFor(ncName);
 
-		await db.expireAllImpersonations();
+		await db.expireImpersonationsForUser(adminEmail);
 
 		await page.goto("/en/dashboard");
 

@@ -4,7 +4,11 @@ import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
 import { resolveEntityDocumentLabel } from "@/lib/data/audit-log";
-import { deleteDocumentRelations, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import {
+	assertDocumentNotLinkedToUser,
+	deleteDocumentRelations,
+	getDocumentVersions,
+} from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { eq, inArray, or } from "@/lib/db/sql";
 import {
@@ -25,6 +29,8 @@ export const deleteGovernanceBodyAction = createCommandAction({
 			columns: { id: true },
 		});
 		assert(entity, "Document not found.");
+
+		await assertDocumentNotLinkedToUser(tx, documentId);
 
 		// Snapshot the label before deletion so the audit log doesn't fall back to the uuid.
 		const subjectLabel = await resolveEntityDocumentLabel(tx, documentId);

@@ -7,6 +7,10 @@ import { join } from "node:path";
 import { log } from "@acdh-oeaw/lib";
 import { config as dotenv } from "@dotenvx/dotenvx";
 
+// Relative, like the `./fixtures/database-service` import below: this module is loaded by Playwright
+// before any tsconfig path aliases are needed.
+import { impersonationAdmin } from "./fixtures/impersonation";
+
 dotenv({
 	path: [".env.test.local", ".env.local", ".env.test", ".env"].map((filePath) =>
 		join(import.meta.dirname, "../..", filePath),
@@ -63,7 +67,7 @@ export default async function globalSetup(): Promise<void> {
 	}
 	const encryptionKey = Buffer.from(authEncryptionKeyHex, "hex");
 
-	const [{ and, eq }, { createDatabaseService }, schema] = await Promise.all([
+	const [{ and, eq, sql }, { createDatabaseService }, schema] = await Promise.all([
 		import("@dariah-eric/database/sql"),
 		import("@dariah-eric/database"),
 		import("@dariah-eric/database/schema"),
@@ -209,6 +213,9 @@ export default async function globalSetup(): Promise<void> {
 					and(
 						eq(schema.organisationalUnitTypes.type, unitType),
 						eq(schema.entityStatus.type, "published"),
+						// Rows left over from a run that died are deleted further below, and the `get*Option`
+						// helpers skip them too — seed the personas against a unit that will still be there.
+						sql`${schema.organisationalUnits.name} NOT LIKE ${"[e2e-worker-%"}`,
 					),
 				)
 				.orderBy(schema.organisationalUnits.name)
@@ -394,6 +401,19 @@ export default async function globalSetup(): Promise<void> {
 			role: "user",
 			canManageAdmins: false,
 			storageFile: "non-admin.json",
+		});
+
+		/**
+		 * The `impersonation` project's own admin — see `impersonationAdmin`. Impersonating makes the
+		 * session non-admin for as long as it lasts, so it must not be the session every other admin
+		 * test is running against.
+		 */
+		await upsertUserAndWriteSession({
+			email: impersonationAdmin.email,
+			name: impersonationAdmin.name,
+			role: "admin",
+			canManageAdmins: true,
+			storageFile: impersonationAdmin.storageFile,
 		});
 
 		await seedReportingPersonas();

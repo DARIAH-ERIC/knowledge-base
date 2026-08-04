@@ -1,6 +1,22 @@
 import { type Locator, type Page, expect } from "@playwright/test";
 
 /**
+ * The identity behind the `impersonation` project: seeded in `global-setup`, used by
+ * `playwright.config.ts` to resolve its storage state, and named here so the suite can assert its
+ * own actor labels in the audit log.
+ *
+ * It is a second admin rather than the shared `admin` persona because impersonation is stored on
+ * the impersonator's _session_ row: every test sharing that session is impersonated with it,
+ * including the suites running concurrently in the other Playwright worker, which would find the
+ * whole `/administrator` tree answering 403 mid-test.
+ */
+export const impersonationAdmin = {
+	email: "e2e-impersonation-admin@example.com",
+	name: "E2E Impersonation Admin",
+	storageFile: "admin-impersonation.json",
+} as const;
+
+/**
  * Shared helpers for driving an impersonated session. The banner is the only control that appears
  * on every dashboard page while impersonating, so it doubles as the assertion target for "am I
  * still acting as someone else" and as the way back.

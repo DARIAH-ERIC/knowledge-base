@@ -3,6 +3,7 @@ import type { Locator, Page } from "@playwright/test";
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { E2E_TEST_ASSET_KEY } from "@/e2e/lib/fixtures/database-service";
+import { SEEDED_PERSON_SEARCH_TERM, firstSeededOption } from "@/e2e/lib/fixtures/options";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 import { createSocialMediaInForm } from "@/e2e/lib/fixtures/social-media-form";
 
@@ -164,8 +165,8 @@ export class AdminGovernanceBodiesPage {
 
 	async selectFirstRelatedUnit(): Promise<void> {
 		await this.page.getByRole("button", { name: "No related unit selected" }).click();
-		await this.page.getByRole("option").first().waitFor({ state: "visible" });
-		await this.page.getByRole("option").first().click();
+		await firstSeededOption(this.page).waitFor({ state: "visible" });
+		await firstSeededOption(this.page).click();
 		// Wait for the selection to commit so a later submit isn't blocked by an empty required field
 		// (which would fire no POST and time out `waitForActionSuccess`).
 		await this.page
@@ -287,26 +288,26 @@ export class AdminGovernanceBodiesPage {
 		await this.page.getByRole("option").first().click();
 	}
 
+	/** Any person will do, as long as it is a seeded one — see {@link firstSeededOption}. */
 	async selectFirstPerson(): Promise<void> {
+		await this.selectPersonByName(SEEDED_PERSON_SEARCH_TERM);
+	}
+
+	async selectPersonByName(searchText: string): Promise<void> {
 		await this.page.getByRole("button", { name: "No person selected" }).click();
-		// Search field is auto-focused; press Enter to trigger a search with an empty query.
-		await this.page.keyboard.press("Enter");
+		// `fill` rather than typing into the auto-focused field: `AsyncSelect` keeps its search text in
+		// component state, which closing the popover does not reset. A second selection on the same form
+		// would append to the first query and match nothing.
+		const search = this.page
+			.getByRole("dialog", { name: "No person selected" })
+			.getByRole("searchbox");
+		await search.fill(searchText);
+		await search.press("Enter");
 		await this.page.getByRole("option").first().waitFor({ state: "visible" });
 		await this.page.getByRole("option").first().click();
 		// Wait for the selection to commit (the placeholder is replaced by the person's name). Without
 		// this, a click landing mid-refresh can leave the field empty, so a later submit silently fails
 		// client validation and fires no POST — surfacing as a `waitForActionSuccess` timeout.
-		await this.page
-			.getByRole("button", { name: "No person selected" })
-			.waitFor({ state: "hidden" });
-	}
-
-	async selectPersonByName(searchText: string): Promise<void> {
-		await this.page.getByRole("button", { name: "No person selected" }).click();
-		await this.page.keyboard.type(searchText);
-		await this.page.keyboard.press("Enter");
-		await this.page.getByRole("option").first().waitFor({ state: "visible" });
-		await this.page.getByRole("option").first().click();
 		await this.page
 			.getByRole("button", { name: "No person selected" })
 			.waitFor({ state: "hidden" });

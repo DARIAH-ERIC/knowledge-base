@@ -716,6 +716,8 @@ export async function discardDraftVersion(
 	// would survive with no version (`document_lifecycle` is a view derived from `entity_versions`),
 	// leaving e.g. a person↔unit relation pointing at a versionless "ghost" document.
 	if (publishedId == null) {
+		// This branch deletes the document itself, so it needs the same refusal the delete actions get.
+		await assertDocumentNotLinkedToUser(tx, documentId);
 		await deleteDocumentVersionTail(tx, draftId, documentId);
 		return;
 	}
@@ -732,6 +734,43 @@ export async function getDocumentIdForVersion(tx: Transaction, versionId: string
 	});
 	assert(v);
 	return v.entityId;
+}
+
+/**
+ * Refuses to delete a document that a user account still names as its actor.
+ *
+ * `users.person_document_id` / `users.organisational_unit_document_id` reference `entities.id`
+ * without `ON DELETE CASCADE`, so the delete would fail anyway — but on the raw foreign-key
+ * violation, which reads to the admin as "a related record no longer exists. Refresh the page and
+ * try again". Refreshing cannot help: the problem is a record that still exists.
+ *
+ * Refusing rather than unlinking is deliberate. The actor link is what `lib/auth/permissions.ts`
+ * derives national-coordinator and working-group-chair authority from, so clearing it silently
+ * would revoke a user's access as a side effect of tidying up an entity. The admin has to decide
+ * what that user's link should become.
+ *
+ * Called from every document delete: the columns are plain `entities` references, so nothing but
+ * this check keeps a link to a type the user form does not currently offer from behaving
+ * differently.
+ */
+export async function assertDocumentNotLinkedToUser(
+	tx: Transaction,
+	documentId: string,
+): Promise<void> {
+	const [linkedUser] = await tx
+		.select({ id: schema.users.id })
+		.from(schema.users)
+		.where(
+			or(
+				eq(schema.users.personDocumentId, documentId),
+				eq(schema.users.organisationalUnitDocumentId, documentId),
+			),
+		)
+		.limit(1);
+
+	if (linkedUser != null) {
+		throw new UserFacingError("document-linked-to-user");
+	}
 }
 
 /**

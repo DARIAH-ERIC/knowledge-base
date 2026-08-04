@@ -5,6 +5,8 @@ import { config as dotenv } from "@dotenvx/dotenvx";
 import { type PlaywrightTestConfig, defineConfig, devices } from "@playwright/test";
 import isCI from "is-in-ci";
 
+import { impersonationAdmin } from "./lib/fixtures/impersonation";
+
 /**
  * Reading `.env` files here instead of using `dotenvx run` so environment variables are available
  * to the vs code plugin as well.
@@ -22,8 +24,8 @@ type WebServer = Extract<NonNullable<PlaywrightTestConfig["webServer"]>, { comma
 
 /**
  * Tests under these directories require a specific authenticated storage state and run in their own
- * projects (`admin`, `non-admin`, `nc`, `wgchair`, `reporter`). The cross-browser projects must
- * ignore them so they only run once, under the matching identity.
+ * projects (`admin`, `non-admin`, `nc`, `wgchair`, `reporter`, `impersonation`). The cross-browser
+ * projects must ignore them so they only run once, under the matching identity.
  */
 const authenticatedProjectGlobs = [
 	"**/admin/**/*.test.ts",
@@ -31,6 +33,7 @@ const authenticatedProjectGlobs = [
 	"**/nc/**/*.test.ts",
 	"**/wgchair/**/*.test.ts",
 	"**/reporter/**/*.test.ts",
+	"**/impersonation/**/*.test.ts",
 ];
 
 function getConfig():
@@ -164,6 +167,21 @@ export default defineConfig({
 			use: {
 				...devices["Desktop Chrome"],
 				storageState: join(import.meta.dirname, ".auth/non-admin.json"),
+			},
+		},
+		/**
+		 * A second admin, whose session exists so that impersonating on it cannot reach the `admin`
+		 * project. Impersonation lives on the session row, so a suite that shared the `admin` session
+		 * would turn every admin test running concurrently in the other worker non-admin for as long as
+		 * the impersonation lasted. Kept in the same CI job as `admin` on purpose: running the two side
+		 * by side is what would catch that regression coming back.
+		 */
+		{
+			name: "impersonation",
+			testMatch: "**/impersonation/**/*.test.ts",
+			use: {
+				...devices["Desktop Chrome"],
+				storageState: join(import.meta.dirname, ".auth", impersonationAdmin.storageFile),
 			},
 		},
 		/**

@@ -8,6 +8,9 @@ import { env } from "../../../config/env.config";
 export const E2E_TEST_ASSET_KEY = "images/e2e-test-asset";
 export const E2E_TEST_ASSET_LABEL = "E2E Test Asset";
 
+/** Matches the `[e2e-worker-N] …` names every worker gives the fixtures it creates. */
+const WORKER_FIXTURE_NAME_PATTERN = "[e2e-worker-%";
+
 type Database = InferOk<ReturnType<typeof createDatabaseService>>;
 
 interface WorkingGroupVersionRow {
@@ -1615,6 +1618,14 @@ export class DatabaseService {
 		return { ...row, ownerUnitDocumentIds, providerUnitDocumentIds };
 	}
 
+	/**
+	 * The `get*Option` helpers answer "any published row will do". They must never answer with
+	 * another worker's fixture: those are deleted by that worker's afterAll, which can land in the
+	 * middle of this test — taking the relation under test with it, or leaving a row this worker
+	 * linked to and the other worker can no longer delete. Only seeded rows outlive every worker, and
+	 * `[e2e-worker-N] …` names sort ahead of the seeded ones in the default collation, so the
+	 * exclusion is load-bearing rather than belt-and-braces.
+	 */
 	async getOrganisationalUnitOptions(
 		limit = 4,
 	): Promise<Array<{ documentId: string; name: string }>> {
@@ -1626,18 +1637,29 @@ export class DatabaseService {
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published"))
+			.where(
+				and(
+					eq(schema.entityStatus.type, "published"),
+					sql`${schema.organisationalUnits.name} NOT LIKE ${WORKER_FIXTURE_NAME_PATTERN}`,
+				),
+			)
 			.orderBy(schema.organisationalUnits.name)
 			.limit(limit);
 	}
 
+	/** A seeded published person. See {@link getOrganisationalUnitOptions} on the exclusion. */
 	async getPersonOption(): Promise<{ id: string; name: string }> {
 		const [row] = await this.db
 			.select({ id: schema.persons.id, name: schema.persons.name })
 			.from(schema.persons)
 			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published"))
+			.where(
+				and(
+					eq(schema.entityStatus.type, "published"),
+					sql`${schema.persons.name} NOT LIKE ${WORKER_FIXTURE_NAME_PATTERN}`,
+				),
+			)
 			.orderBy(schema.persons.name)
 			.limit(1);
 
@@ -1651,6 +1673,7 @@ export class DatabaseService {
 	/**
 	 * Published org-unit documents of a given type, ordered by name. `id` is the document id (matches
 	 * how reports key their org unit) and `slug` is the document slug used to build reporting URLs.
+	 * Seeded rows only — see {@link getOrganisationalUnitOptions}.
 	 */
 	private async getPublishedOrgUnitOptions(
 		unitType: "country" | "working_group",
@@ -1674,6 +1697,7 @@ export class DatabaseService {
 				and(
 					eq(schema.organisationalUnitTypes.type, unitType),
 					eq(schema.entityStatus.type, "published"),
+					sql`${schema.organisationalUnits.name} NOT LIKE ${WORKER_FIXTURE_NAME_PATTERN}`,
 				),
 			)
 			.orderBy(schema.organisationalUnits.name)
@@ -2814,6 +2838,19 @@ export class DatabaseService {
 			.limit(1);
 
 		if (remainingVersions.length === 0) {
+			// A user's actor points at a person or org-unit document via a non-cascading FK
+			// (`users_person_document_id_entities_id_fkey`). A suite that linked a user to this document
+			// may still be running in the other worker, and its own afterAll cannot help us here — so
+			// unlink first rather than let the FK abort this cleanup and leak every row after it.
+			await tx
+				.update(schema.users)
+				.set({ personDocumentId: null })
+				.where(eq(schema.users.personDocumentId, documentId));
+			await tx
+				.update(schema.users)
+				.set({ organisationalUnitDocumentId: null })
+				.where(eq(schema.users.organisationalUnitDocumentId, documentId));
+
 			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
 		}
 	}
@@ -3563,32 +3600,47 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Finds all users whose name starts with `[e2e-worker-{workerIndex}]` and deletes them. Called in
-	 * afterAll to ensure a clean state.
+	 * Clears any impersonation left on the given account's sessions, so a test that fails
+	 * mid-impersonation does not hand the next one a non-admin identity. Scoped to a single account:
+	 * impersonation lives on the impersonator's session row, and the suites in the other Playwright
+	 * worker are signed in as different personas that must not be touched.
 	 */
-	/**
-	 * Clears any impersonation left on a session. The admin persona's session is shared by every test
-	 * in the `admin` project, so a test that fails mid-impersonation would otherwise hand the next
-	 * test a non-admin identity and fail it for unrelated reasons.
-	 */
-	async clearAllImpersonations(): Promise<void> {
+	async clearImpersonationsForUser(email: string): Promise<void> {
 		await this.db
 			.update(schema.sessions)
 			.set({ impersonatedUserId: null, impersonationExpiresAt: null })
-			.where(sql`${schema.sessions.impersonatedUserId} IS NOT NULL`);
+			.where(inArray(schema.sessions.userId, await this.getUserIdsByEmail(email)));
 	}
 
 	/**
-	 * Backdates every live impersonation's expiry, so a test can observe the lapse without waiting
-	 * out `sessions.impersonation.durationMs`.
+	 * Backdates the given account's live impersonations, so a test can observe the lapse without
+	 * waiting out `sessions.impersonation.durationMs`. Scoped like {@link clearImpersonationsForUser}.
 	 */
-	async expireAllImpersonations(): Promise<void> {
+	async expireImpersonationsForUser(email: string): Promise<void> {
 		await this.db
 			.update(schema.sessions)
 			.set({ impersonationExpiresAt: new Date(Date.now() - 1000) })
-			.where(sql`${schema.sessions.impersonatedUserId} IS NOT NULL`);
+			.where(inArray(schema.sessions.userId, await this.getUserIdsByEmail(email)));
 	}
 
+	private async getUserIdsByEmail(email: string): Promise<Array<string>> {
+		const rows = await this.db
+			.select({ id: schema.users.id })
+			.from(schema.users)
+			// The unique index is on `lower(email)`, so match the same way.
+			.where(sql`lower(${schema.users.email}) = lower(${email})`);
+
+		if (rows.length === 0) {
+			throw new Error(`Expected a seeded e2e user with email "${email}".`);
+		}
+
+		return rows.map((row) => row.id);
+	}
+
+	/**
+	 * Finds all users whose name starts with `[e2e-worker-{workerIndex}]` and deletes them. Called in
+	 * afterAll to ensure a clean state.
+	 */
 	async cleanupWorkerUsers(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
 

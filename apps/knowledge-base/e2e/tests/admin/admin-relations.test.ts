@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import type { Locator, Page } from "@playwright/test";
 
 import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
+import { firstSeededOption } from "@/e2e/lib/fixtures/options";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 import { expect, test } from "@/e2e/lib/test";
 
@@ -90,7 +91,9 @@ async function selectAsyncOption(
 		await searchInput.press("Enter");
 	}
 
-	const option = page.getByRole("option").first();
+	// With a search text the caller named the row it wants; without one, any row will do — but only a
+	// seeded one, never a fixture the other worker is about to delete.
+	const option = searchText != null ? page.getByRole("option").first() : firstSeededOption(page);
 	await option.waitFor({ state: "visible" });
 	await option.click();
 	// Wait for the selection to commit (the trigger no longer shows its placeholder) before the caller

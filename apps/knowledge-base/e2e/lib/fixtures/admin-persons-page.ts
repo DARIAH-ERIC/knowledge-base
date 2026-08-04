@@ -2,6 +2,7 @@ import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
+import { firstSeededOption } from "@/e2e/lib/fixtures/options";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/administrator/persons";
@@ -216,8 +217,8 @@ export class AdminPersonsPage {
 
 	async selectFirstContributionOrg(): Promise<void> {
 		await this.page.getByRole("button", { name: "Select an organisation" }).click();
-		await this.page.getByRole("option").first().waitFor({ state: "visible" });
-		await this.page.getByRole("option").first().click();
+		await firstSeededOption(this.page).waitFor({ state: "visible" });
+		await firstSeededOption(this.page).click();
 		// Wait for the selection to commit so a later submit isn't blocked by an empty required field
 		// (which would fire no POST and time out `waitForActionSuccess`).
 		await this.page
