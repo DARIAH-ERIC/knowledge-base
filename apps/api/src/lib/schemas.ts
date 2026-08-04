@@ -48,7 +48,7 @@ export const PaginationQuerySchema = v.object({
 		v.description("Maximum number of items in paginated list"),
 	),
 	offset: v.pipe(
-		v.optional(v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(0)), "0"),
+		v.optional(v.pipe(v.string(), v.toNumber(), v.safeInteger(), v.minValue(0)), "0"),
 		v.description("Offset in paginated list"),
 	),
 });
