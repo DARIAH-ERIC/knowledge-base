@@ -160,6 +160,9 @@ export function createCommandAction<
 			rethrow(error);
 			log.error(error);
 			const message = getUserFacingErrorMessage(error, {
+				documentLinkedToUser: t(
+					"A user account is linked to this record. Update that user's linked person or country before deleting it.",
+				),
 				entitySlugConflict: t("An entity with this slug already exists."),
 				uniqueConflict: t("A record with these values already exists."),
 				missingRelatedRecord: t(

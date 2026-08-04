@@ -1,5 +1,6 @@
 /** The disallowed operations a mutation can reject with a message that is safe to show the user. */
 export type UserFacingErrorKind =
+	| "document-linked-to-user"
 	| "missing-dariah-eric"
 	| "missing-paired-relation-unit"
 	| "published-slug-rename"

@@ -2,6 +2,7 @@ import { getUserFacingDatabaseError } from "@/lib/db/errors";
 import { findUserFacingError } from "@/lib/user-facing-error";
 
 interface ErrorMessages {
+	documentLinkedToUser: string;
 	entitySlugConflict: string;
 	invalidData: string;
 	missingDariahEric: string;
@@ -26,6 +27,9 @@ export function getUserFacingErrorMessage(error: unknown, messages: ErrorMessage
 	const appError = findUserFacingError(error);
 	if (appError != null) {
 		switch (appError.kind) {
+			case "document-linked-to-user": {
+				return messages.documentLinkedToUser;
+			}
 			case "missing-dariah-eric": {
 				return messages.missingDariahEric;
 			}

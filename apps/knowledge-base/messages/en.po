@@ -8186,80 +8186,85 @@ msgstr "This SSHOC marketplace actor id is already assigned to another organisat
 
 #: lib/server/create-command-action.ts:163
 #: lib/server/create-server-action.ts:132
+msgid "aca+RI"
+msgstr "A user account is linked to this record. Update that user's linked person or country before deleting it."
+
+#: lib/server/create-command-action.ts:166
+#: lib/server/create-server-action.ts:135
 msgid "Ni9MxS"
 msgstr "An entity with this slug already exists."
 
-#: lib/server/create-command-action.ts:164
-#: lib/server/create-server-action.ts:133
+#: lib/server/create-command-action.ts:167
+#: lib/server/create-server-action.ts:136
 msgid "WtzfWm"
 msgstr "A record with these values already exists."
 
-#: lib/server/create-command-action.ts:165
-#: lib/server/create-server-action.ts:147
+#: lib/server/create-command-action.ts:168
+#: lib/server/create-server-action.ts:150
 msgid "7XzbEI"
 msgstr "A related record no longer exists. Refresh the page and try again."
 
-#: lib/server/create-command-action.ts:168
-#: lib/server/create-server-action.ts:150
+#: lib/server/create-command-action.ts:171
+#: lib/server/create-server-action.ts:153
 msgid "G5W8LK"
 msgstr "This entity is published, so its address can only be changed by an administrator on the Maintenance page."
 
-#: lib/server/create-command-action.ts:171
-#: lib/server/create-server-action.ts:153
+#: lib/server/create-command-action.ts:174
+#: lib/server/create-server-action.ts:156
 msgid "FhIASk"
 msgstr "This record conflicts with an existing record."
 
-#: lib/server/create-command-action.ts:172
-#: lib/server/create-server-action.ts:134
+#: lib/server/create-command-action.ts:175
+#: lib/server/create-server-action.ts:137
 msgid "UxrCFa"
 msgstr "The DARIAH-EU organisational unit could not be found, so this relation cannot be recorded."
 
-#: lib/server/create-command-action.ts:175
-#: lib/server/create-server-action.ts:137
+#: lib/server/create-command-action.ts:178
+#: lib/server/create-server-action.ts:140
 msgid "pJL6Fh"
 msgstr "The governance body this role must also be recorded against could not be found."
 
-#: lib/server/create-command-action.ts:178
-#: lib/server/create-server-action.ts:143
+#: lib/server/create-command-action.ts:181
+#: lib/server/create-server-action.ts:146
 msgid "Ehoi3a"
 msgstr "The end date must fall after the relation started."
 
-#: lib/server/create-command-action.ts:179
-#: lib/server/create-server-action.ts:144
+#: lib/server/create-command-action.ts:182
+#: lib/server/create-server-action.ts:147
 msgid "lNKpUQ"
 msgstr "This relation is not one this form can end, or it has already been ended. Refresh the page and try again."
 
-#: lib/server/create-command-action.ts:182
-#: lib/server/create-server-action.ts:140
+#: lib/server/create-command-action.ts:185
+#: lib/server/create-server-action.ts:143
 msgid "6L0TeR"
 msgstr "This relation already exists during an overlapping period. Adjust the dates and try again."
 
-#: lib/server/create-command-action.ts:185
-#: lib/server/create-server-action.ts:154
+#: lib/server/create-command-action.ts:188
+#: lib/server/create-server-action.ts:157
 msgid "Hr85CO"
 msgstr "Both services have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge."
 
-#: lib/server/create-command-action.ts:188
-#: lib/server/create-server-action.ts:157
+#: lib/server/create-command-action.ts:191
+#: lib/server/create-server-action.ts:160
 msgid "paaApZ"
 msgstr "This slug is too long to be used as a web address. Please shorten it."
 
-#: lib/server/create-command-action.ts:189
-#: lib/server/create-server-action.ts:158
+#: lib/server/create-command-action.ts:192
+#: lib/server/create-server-action.ts:161
 msgid "Jl3xT+"
 msgstr "Both accounts have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge."
 
-#: lib/server/create-command-action.ts:192
-#: lib/server/create-server-action.ts:161
+#: lib/server/create-command-action.ts:195
+#: lib/server/create-server-action.ts:164
 msgid "qDy0wr"
 msgstr "The submitted data violates a data rule."
 
-#: lib/server/create-command-action.ts:193
-#: lib/server/create-server-action.ts:162
+#: lib/server/create-command-action.ts:196
+#: lib/server/create-server-action.ts:165
 msgid "Bosjdo"
 msgstr "The submitted data is incomplete."
 
-#: lib/server/create-command-action.ts:196
-#: lib/server/create-server-action.ts:167
+#: lib/server/create-command-action.ts:199
+#: lib/server/create-server-action.ts:170
 msgid "lkI8/e"
 msgstr "Internal server error."
