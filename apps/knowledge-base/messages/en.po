@@ -461,7 +461,7 @@ msgstr "Return to my account"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:116
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:98
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:100
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx:140
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:151
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:32
@@ -889,7 +889,7 @@ msgstr "Forgot password?"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx:95
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:110
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:95
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:97
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx:104
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:79
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:99
@@ -1470,7 +1470,7 @@ msgstr "Contributions"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:219
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:348
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:128
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:101
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:103
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section.tsx:128
 #: app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section.tsx:192
@@ -1838,7 +1838,7 @@ msgstr "This will permanently delete this contribution."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:168
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:119
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx:128
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:156
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:181
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:129
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:154
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:130
@@ -1942,7 +1942,7 @@ msgstr "Tasks"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:90
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:91
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:77
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:79
 msgid "YDMrKK"
 msgstr "Users"
 
@@ -2229,7 +2229,7 @@ msgstr "Save and publish"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx:118
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx:66
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx:131
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:151
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:119
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:144
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-reports-list-page.tsx:69
@@ -3363,7 +3363,7 @@ msgstr "Manage all countries in the DARIAH knowledge base."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:80
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:75
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx:79
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:82
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:84
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:86
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:82
@@ -4478,16 +4478,16 @@ msgstr "DARIAH branding"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:80
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:84
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:117
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:118
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:131
 msgid "a5msuh"
 msgstr "Yes"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:80
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx:84
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:117
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:118
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:131
 msgid "oUWADl"
 msgstr "No"
 
@@ -6265,10 +6265,12 @@ msgid "s8s39T"
 msgstr "Edit user"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:132
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:121
 msgid "EwRIOm"
 msgstr "User"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:133
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:121
 msgid "iHN12u"
 msgstr "Admin"
 
@@ -6298,27 +6300,31 @@ msgstr "Select a person"
 msgid "EEdOfh"
 msgstr "Select a country"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:78
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:80
 msgid "BOrcWk"
 msgstr "Manage all users in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:104
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:106
 msgid "dsRV5z"
 msgstr "Can manage admins"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:107
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:109
 msgid "DC8+TO"
 msgstr "Email verified"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:142
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:111
+msgid "O4dgz1"
+msgstr "Linked actor"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:167
 msgid "D/ZZLA"
 msgstr "Sign in as this user"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:169
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:194
 msgid "sUNhQE"
 msgstr "user"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:191
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:216
 msgid "uJ0LeV"
 msgstr "Could not delete user. Please try again."
 
