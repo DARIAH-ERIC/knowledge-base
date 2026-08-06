@@ -471,7 +471,14 @@ export class WebsiteNewsPage {
 	/** Link the current selection to another entity, stored as a document id rather than a path. */
 	async insertEntityLink(entityName: string): Promise<void> {
 		await this.chooseInsert("Link to page");
+		await this.pickEntityInLinkDialog(entityName);
+	}
 
+	/**
+	 * Choose an entity in the "Link to a page" dialog, whichever opened it — the insert menu to make
+	 * a link, or the link popover to point an existing one somewhere else.
+	 */
+	private async pickEntityInLinkDialog(entityName: string): Promise<void> {
 		/** Scoped to the modal: the toolbar's own link popover trigger is also named "Link". */
 		const dialog = this.page.getByRole("dialog").filter({ hasText: "Link to a page" });
 		await dialog.waitFor({ state: "visible" });
@@ -488,6 +495,56 @@ export class WebsiteNewsPage {
 
 		await dialog.getByRole("button", { name: "Link", exact: true }).click();
 		await dialog.waitFor({ state: "hidden" });
+	}
+
+	/** Put the caret inside a link that stores a reference, so the toolbar acts on that link. */
+	async placeCaretInTargetLink(kind: "asset" | "entity"): Promise<void> {
+		await this.contentBlockEditor().locator(`a[data-target-kind="${kind}"]`).first().click();
+	}
+
+	/**
+	 * Open the toolbar's link popover on the link at the cursor, and check it offers the target panel
+	 * rather than the url form: a link that stores a reference has no href to show, and reporting the
+	 * wrong kind here is how the popover would offer the wrong picker.
+	 *
+	 * Located by the note it shows rather than by a role — the popover renders its content directly,
+	 * with no dialog of its own, which is why `linkPopoverForm` goes by its input as well.
+	 */
+	async openLinkTargetPopover(kind: "document" | "page"): Promise<void> {
+		await this.page.getByRole("button", { name: "Link", exact: true }).click();
+		await expect(
+			this.page.getByText(
+				kind === "document"
+					? "This link points to a document."
+					: "This link points to another page.",
+				{ exact: true },
+			),
+		).toBeVisible();
+	}
+
+	/**
+	 * Point the document link at the cursor at a different stored document. The link text is left
+	 * alone on purpose — the author wrote it, so retargeting must not overwrite it with the new
+	 * document's label.
+	 */
+	async changeDocumentLink(assetLabel: string): Promise<void> {
+		await this.openLinkTargetPopover("document");
+		await this.page.getByRole("button", { name: "Change document", exact: true }).click();
+
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
+		const asset = dialog.getByRole("gridcell", { name: assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	/** Point the entity link at the cursor at a different page. */
+	async changeEntityLink(entityName: string): Promise<void> {
+		await this.openLinkTargetPopover("page");
+		await this.page.getByRole("button", { name: "Change page", exact: true }).click();
+		await this.pickEntityInLinkDialog(entityName);
 	}
 
 	/** Insert a placeholder-value chip, which stores a kind reference rather than a rendered value. */
@@ -713,6 +770,55 @@ export class WebsiteNewsPage {
 		/** The table goes last: the cursor ends inside it, and leaving it needs a gap cursor. */
 		await this.startNewParagraph();
 		await this.insertTable(options.headers);
+	}
+
+	/**
+	 * Build one content block holding a document link and an entity link, each wrapping a paragraph
+	 * of its own so a click anywhere in that paragraph lands inside the link.
+	 */
+	async addContentWithTargetLinks(options: {
+		documentLinkText: string;
+		documentLabel: string;
+		entityLinkText: string;
+		entityName: string;
+	}): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.waitForMenuToClose();
+
+		const editor = this.contentBlockEditor();
+
+		await editor.click();
+		await editor.pressSequentially(options.documentLinkText);
+		await editor.press("Enter");
+		await editor.pressSequentially(options.entityLinkText);
+
+		/** Both are made by wrapping a selection, so each keeps the text typed above as its label. */
+		await this.selectParagraph(0);
+		await this.insertDocumentLink(options.documentLabel);
+		await expect(editor.locator('a[data-target-kind="asset"]')).toHaveText(
+			options.documentLinkText,
+		);
+
+		await this.selectParagraph(1);
+		await this.insertEntityLink(options.entityName);
+		await expect(editor.locator('a[data-target-kind="entity"]')).toHaveText(options.entityLinkText);
+	}
+
+	/** Build one content block holding a single paragraph that is wholly an entity link. */
+	async addContentWithEntityLink(options: { linkText: string; entityName: string }): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.waitForMenuToClose();
+
+		const editor = this.contentBlockEditor();
+
+		await editor.click();
+		await editor.pressSequentially(options.linkText);
+
+		await this.selectParagraph(0);
+		await this.insertEntityLink(options.entityName);
+		await expect(editor.locator('a[data-target-kind="entity"]')).toHaveText(options.linkText);
 	}
 
 	/** Build one content block with a paragraph followed by an inline media_text node. */

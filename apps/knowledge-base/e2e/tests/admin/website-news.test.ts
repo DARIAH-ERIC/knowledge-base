@@ -737,6 +737,114 @@ test.describe("website news admin", () => {
 		await assertFeatures();
 	});
 
+	/**
+	 * A link that stores a reference can be pointed somewhere else without being removed and made
+	 * again. The popover offers the picker matching the kind it already is, and the picked target
+	 * replaces the reference while the author's own link text stays as written.
+	 *
+	 * Asserted on the stored mark rather than on the rendering: retargeting writes over attributes
+	 * that are merged into the mark already there, and a reference left behind by the target it
+	 * replaced renders identically today — until an export or a paste reads the stale one back.
+	 */
+	test("should point a document link at another document, and a page link at another page", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const [firstEntity, secondEntity] = await db.getTestEntities(2);
+		const title = `${newsPage.workerPrefix} Retarget Links ${randomUUID()}`;
+		const documentLinkText = `the guidelines ${randomUUID()}`;
+		const entityLinkText = `our partner page ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item exercising link retargeting");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await newsPage.addContentWithTargetLinks({
+			documentLinkText,
+			documentLabel: "E2E Test Document",
+			entityLinkText,
+			entityName: firstEntity!.name,
+		});
+		await newsPage.submitForm();
+
+		let doc = JSON.stringify((await db.getNewsContentBlocksByTitle(title))[0]!.content);
+		expect(doc).toContain("documents/e2e-test-document");
+		expect(doc).toContain(firstEntity!.id);
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoDetailsFromList(title);
+		await newsPage.gotoEditFromDetails();
+
+		await newsPage.placeCaretInTargetLink("asset");
+		await newsPage.changeDocumentLink("E2E Other Document");
+
+		await newsPage.placeCaretInTargetLink("entity");
+		await newsPage.changeEntityLink(secondEntity!.name);
+
+		await newsPage.submitForm();
+
+		doc = JSON.stringify((await db.getNewsContentBlocksByTitle(title))[0]!.content);
+
+		/** Both links point at the new target, and neither kept the one it replaced. */
+		expect(doc).toContain("documents/e2e-other-document");
+		expect(doc).not.toContain("documents/e2e-test-document");
+		expect(doc).toContain(secondEntity!.id);
+		expect(doc).not.toContain(firstEntity!.id);
+
+		/** Each stayed the kind it was, and kept the text the author wrote rather than a label. */
+		expect(doc).toContain('"targetKind":"asset"');
+		expect(doc).toContain('"targetKind":"entity"');
+		expect(doc).toContain(documentLinkText);
+		expect(doc).toContain(entityLinkText);
+	});
+
+	/**
+	 * The popover only ever offers the picker matching the kind the link already is, so changing kind
+	 * goes the other way: select the link's text and pick a target of the other kind from the insert
+	 * menu, which lays the new mark over the one already there.
+	 *
+	 * That merge is what this guards. The new attributes are merged into the existing mark rather
+	 * than replacing it, so a document link laid over an entity link keeps the `entityId` unless
+	 * every attribute is written — and a mark carrying both references renders as the new kind while
+	 * a round trip through HTML can parse it back as the old one.
+	 */
+	test("should drop the old reference when a link changes from a page to a document", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const testEntity = await db.getTestEntity();
+		const title = `${newsPage.workerPrefix} Retarget Kind ${randomUUID()}`;
+		const linkText = `read more ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item changing a link's target kind");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await newsPage.addContentWithEntityLink({ linkText, entityName: testEntity.name });
+		await newsPage.submitForm();
+
+		let doc = JSON.stringify((await db.getNewsContentBlocksByTitle(title))[0]!.content);
+		expect(doc).toContain('"targetKind":"entity"');
+		expect(doc).toContain(testEntity.id);
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoDetailsFromList(title);
+		await newsPage.gotoEditFromDetails();
+
+		/** Selecting the link's text, so the document link is laid over the entity link. */
+		await newsPage.selectParagraph(0);
+		await newsPage.insertDocumentLink("E2E Test Document");
+		await newsPage.submitForm();
+
+		doc = JSON.stringify((await db.getNewsContentBlocksByTitle(title))[0]!.content);
+		expect(doc).toContain('"targetKind":"asset"');
+		expect(doc).toContain("documents/e2e-test-document");
+		expect(doc).not.toContain('"targetKind":"entity"');
+		expect(doc).not.toContain(testEntity.id);
+	});
+
 	test("should save an inline media_text block with its prose and side", async ({
 		createWebsiteNewsPage,
 		db,

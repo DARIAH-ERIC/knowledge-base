@@ -2563,6 +2563,17 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 	/** Which host-owned picker dialog the insert menu has asked for, if any. */
 	const [openPicker, setOpenPicker] = useState<"document" | "entity" | "image" | null>(null);
 
+	/**
+	 * Whether the open target picker replaces the target of the link the cursor is in, rather than
+	 * linking the selection to a newly picked one. The same two dialogs serve both: the insert menu
+	 * opens them to make a link, the link popover to point an existing one somewhere else.
+	 *
+	 * A ref rather than state because nothing renders differently either way — and because state here
+	 * would rebuild the select callbacks, and with them the host's dialogs, at the moment the picker
+	 * opens.
+	 */
+	const isRetargetingLinkRef = useRef(false);
+
 	const closePicker = useCallback((isOpen: boolean) => {
 		if (!isOpen) {
 			setOpenPicker(null);
@@ -2571,6 +2582,12 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const pickImage = useCallback(() => {
 		setOpenPicker("image");
+	}, []);
+
+	/** Opens a target picker to link the selection to whatever is picked. */
+	const openTargetPicker = useCallback((kind: "document" | "entity") => {
+		isRetargetingLinkRef.current = false;
+		setOpenPicker(kind);
 	}, []);
 
 	const actions = useRichTextActions({
@@ -2610,6 +2627,18 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		renderDocumentPicker != null ||
 		renderEntityPicker != null ||
 		blocks.includes("placeholderValue");
+
+	/**
+	 * The picker that can repoint the link at the cursor, or `null` where there is no such link or
+	 * the host did not supply that picker — a form that never offered document links has no dialog to
+	 * change one with, even if the content it opened on holds some.
+	 */
+	const retargetPicker: "document" | "entity" | null =
+		activeState?.linkTargetKind === "asset" && renderDocumentPicker != null
+			? "document"
+			: activeState?.linkTargetKind === "entity" && renderEntityPicker != null
+				? "entity"
+				: null;
 
 	const [editorJson, setEditorJson] = useState<JSONContent | undefined>(initialContent);
 
@@ -2710,7 +2739,10 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	/**
 	 * Turns the selection into a link to something we own — or, with nothing selected, inserts the
-	 * target's label as the link text, so a picked target always ends up readable.
+	 * target's label as the link text, so a picked target always ends up readable. Where the picker
+	 * was opened to retarget, points the link the cursor is in at the new target instead, keeping
+	 * whatever text it already reads as: the author wrote that, and a picked label would overwrite
+	 * it.
 	 *
 	 * No href is stored: the reference is, and read paths resolve it to wherever the target currently
 	 * lives.
@@ -2721,11 +2753,48 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				return;
 			}
 
+			// Every target attribute is spelled out, including the ones this kind leaves empty, because
+			// `setMark` merges into the mark that is already there. A document link retargeted at a page
+			// would otherwise keep its `assetKey`, and be read back as a document link by the
+			// `a[data-asset-key]` parse rule on the next round-trip through HTML.
+			const targetAttrs = {
+				href: null,
+				targetKind: null,
+				assetKey: null,
+				entityId: null,
+				asset: null,
+				entity: null,
+				...attrs,
+			};
+
+			const isRetargeting = isRetargetingLinkRef.current;
+			isRetargetingLinkRef.current = false;
+
+			// `setMark` rather than `setLink` throughout: the link extension's setter takes (and
+			// validates) an href, and these links deliberately have none — the reference is the target.
+			if (isRetargeting && editor.isActive("link")) {
+				const chain = editor.chain().focus();
+				// The popover took the cursor out of the editor when it opened, so restore what it saved
+				// before extending over the link — the same restore `applyLink` and `removeLink` do.
+				const selection = savedSelectionRef.current;
+				if (selection) {
+					chain.setTextSelection(selection);
+				}
+				chain.extendMarkRange("link").setMark("link", targetAttrs).run();
+				return;
+			}
+
 			const { from, to } = editor.state.selection;
 			const chain = editor.chain().focus();
 
 			if (from === to) {
-				chain.insertContent({ type: "text", text: label, marks: [{ type: "link", attrs }] }).run();
+				chain
+					.insertContent({
+						type: "text",
+						text: label,
+						marks: [{ type: "link", attrs: targetAttrs }],
+					})
+					.run();
 				return;
 			}
 
@@ -2733,26 +2802,35 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				chain.extendMarkRange("link");
 			}
 
-			// `setMark` rather than `setLink`: the link extension's setter takes (and validates) an href,
-			// and these links deliberately have none — the reference is the target.
-			chain.setMark("link", attrs).run();
+			chain.setMark("link", targetAttrs).run();
 		},
 		[editor],
 	);
 
 	const linkDocument = useCallback(
 		(assetKey: string, label: string) => {
-			linkTarget({ href: null, targetKind: "asset", assetKey }, label);
+			linkTarget({ targetKind: "asset", assetKey }, label);
 		},
 		[linkTarget],
 	);
 
 	const linkEntity = useCallback(
 		(entityId: string, label: string) => {
-			linkTarget({ href: null, targetKind: "entity", entityId }, label);
+			linkTarget({ targetKind: "entity", entityId }, label);
 		},
 		[linkTarget],
 	);
+
+	/**
+	 * Opens a target picker to point the link the cursor is in at something else. Closes the popover
+	 * that offered it: the picker is a modal dialog, and the popover would sit under it and take the
+	 * selection restore with it when it closed.
+	 */
+	const retargetLink = useCallback((kind: "document" | "entity") => {
+		isRetargetingLinkRef.current = true;
+		setIsLinkPopoverOpen(false);
+		setOpenPicker(kind);
+	}, []);
 
 	const insertImage = useCallback<InsertImage>(
 		(imageKey, imageUrl, asset) => {
@@ -2860,16 +2938,32 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						<PopoverContent className="p-3">
 							{activeState?.linkTargetKind != null ? (
 								// These links hold a reference, not an href, so the url field would have nothing
-								// to show and applying it would silently replace the target.
+								// to show and applying it would silently replace the target. Changing one means
+								// picking a new target, which is the same dialog the insert menu opens.
 								<div className="flex inline-56 flex-col gap-2">
 									<Note intent="info">
 										{activeState.linkTargetKind === "asset"
 											? t("This link points to a document.")
 											: t("This link points to another page.")}
 									</Note>
-									<Button intent="outline" onPress={removeLink} size="sm" type="button">
-										{t("Remove")}
-									</Button>
+									<div className="flex gap-2">
+										{retargetPicker != null ? (
+											<Button
+												className="flex-1"
+												intent="primary"
+												onPress={() => {
+													retargetLink(retargetPicker);
+												}}
+												size="sm"
+												type="button"
+											>
+												{retargetPicker === "document" ? t("Change document") : t("Change page")}
+											</Button>
+										) : null}
+										<Button intent="outline" onPress={removeLink} size="sm" type="button">
+											{t("Remove")}
+										</Button>
+									</div>
 								</div>
 							) : (
 								<form
@@ -3015,7 +3109,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							{renderDocumentPicker != null ? (
 								<MenuItem
 									onAction={() => {
-										setOpenPicker("document");
+										openTargetPicker("document");
 									}}
 								>
 									<PaperclipIcon data-slot="icon" />
@@ -3025,7 +3119,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							{renderEntityPicker != null ? (
 								<MenuItem
 									onAction={() => {
-										setOpenPicker("entity");
+										openTargetPicker("entity");
 									}}
 								>
 									<LinkIcon data-slot="icon" />
