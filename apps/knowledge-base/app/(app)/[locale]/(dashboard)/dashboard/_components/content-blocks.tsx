@@ -60,6 +60,7 @@ import { twMerge } from "tailwind-merge";
 import { BlockAssetMetadata } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/block-asset-metadata";
 import { EntityLinkDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog";
 import { ImageCaptionModeField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-caption-mode-field";
+import { LinkTargetSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/link-target-summary";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
 import {
@@ -701,7 +702,7 @@ function ContentBlockPanel({
 					}
 					renderDocumentPicker={
 						initialAssets != null
-							? ({ isOpen, onOpenChange, select }) => (
+							? ({ isOpen, onOpenChange, select, current }) => (
 									<MediaLibraryDialog
 										defaultPrefix="documents"
 										initialAssets={initialAssets}
@@ -711,13 +712,20 @@ function ContentBlockPanel({
 											select(key, asset?.label ?? key);
 										}}
 										prefixes={["documents"]}
+										selectedKey={current}
 									/>
 								)
 							: undefined
 					}
-					renderEntityPicker={({ isOpen, onOpenChange, select }) => (
-						<EntityLinkDialog isOpen={isOpen} onOpenChange={onOpenChange} onSelect={select} />
+					renderEntityPicker={({ isOpen, onOpenChange, select, current }) => (
+						<EntityLinkDialog
+							isOpen={isOpen}
+							onOpenChange={onOpenChange}
+							onSelect={select}
+							selectedEntityId={current}
+						/>
 					)}
+					renderLinkTargetSummary={(target) => <LinkTargetSummary target={target} />}
 				/>
 			);
 		}

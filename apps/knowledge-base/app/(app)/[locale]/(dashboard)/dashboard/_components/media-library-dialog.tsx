@@ -55,6 +55,11 @@ interface MediaLibraryDialogProps<T extends AssetPrefix> {
 	 */
 	trigger?: ComponentType<{ open: () => void }>;
 	triggerLabel?: string;
+	/**
+	 * The asset the dialog opens on, when it was opened to replace one. Only honoured if the key is
+	 * on the first page of the default prefix — see the open effect.
+	 */
+	selectedKey?: string | null;
 	isOpen?: boolean;
 	onOpenChange?: (isOpen: boolean) => void;
 }
@@ -80,6 +85,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		prefixes,
 		trigger,
 		triggerLabel,
+		selectedKey,
 		isOpen: controlledIsOpen,
 		onOpenChange,
 	} = props;
@@ -154,8 +160,15 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	}
 
 	/**
-	 * Everything the dialog needs on its way open: a clean selection and a freshly fetched first
-	 * page, rather than the `initialAssets` the last render happened to leave behind.
+	 * Everything the dialog needs on its way open: a freshly fetched first page rather than the
+	 * `initialAssets` the last render happened to leave behind, and a selection that starts on
+	 * `selectedKey` where the caller named one — opening on nothing would make "change this" look
+	 * like "pick from scratch", and hide which asset is about to be replaced.
+	 *
+	 * The selection is applied once the page has arrived, because the asset behind the key is only
+	 * known from the fetched rows. A key that is not on the first page (an older document, one the
+	 * caller reached by searching) simply stays unselected; the author searches for its replacement
+	 * as they would anyway.
 	 *
 	 * Driven by an effect rather than by the trigger's click handler, because a controlled caller
 	 * opens the dialog by flipping `isOpen` and never goes through a trigger at all.
@@ -179,6 +192,13 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 			]);
 			setDisplayedAssets(items);
 			setLicenseOptions(licenses);
+
+			const preselected =
+				selectedKey != null ? items.find((item) => item.key === selectedKey) : undefined;
+			if (preselected != null) {
+				setSelectedKeys(new Set([preselected.key]));
+				setSelectedAsset(preselected);
+			}
 		});
 		// oxlint-disable-next-line react-hooks/exhaustive-deps -- runs on the transition into open only.
 	}, [isOpen]);

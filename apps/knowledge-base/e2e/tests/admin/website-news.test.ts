@@ -774,13 +774,24 @@ test.describe("website news admin", () => {
 
 		await newsPage.searchByTitle(title);
 		await newsPage.gotoDetailsFromList(title);
+
+		/**
+		 * The preview names the page the link leads to. The mark holds only a document id, so a title
+		 * here means the read path resolved it — the same resolution the popover and picker rely on.
+		 */
+		await newsPage.expectEntityLinkPreviewTarget(entityLinkText, firstEntity!.name);
+
 		await newsPage.gotoEditFromDetails();
 
+		/**
+		 * Each picker is told which target it is replacing, so the popover names it and the dialog
+		 * opens on it. Passing the current label is what asserts both.
+		 */
 		await newsPage.placeCaretInTargetLink("asset");
-		await newsPage.changeDocumentLink("E2E Other Document");
+		await newsPage.changeDocumentLink("E2E Other Document", "E2E Test Document");
 
 		await newsPage.placeCaretInTargetLink("entity");
-		await newsPage.changeEntityLink(secondEntity!.name);
+		await newsPage.changeEntityLink(secondEntity!.name, firstEntity!.name);
 
 		await newsPage.submitForm();
 
@@ -797,6 +808,18 @@ test.describe("website news admin", () => {
 		expect(doc).toContain('"targetKind":"entity"');
 		expect(doc).toContain(documentLinkText);
 		expect(doc).toContain(entityLinkText);
+
+		/**
+		 * The resolved title the preview shows is never stored. Details pages annotate links on the way
+		 * out (`getResolvedEntityContentBlocks`); edit screens load the raw blocks, and an edit screen
+		 * that took the annotated ones would save a copy of a title that goes stale on the next rename
+		 * — the exact staleness the reference exists to avoid.
+		 *
+		 * The attribute itself is always serialised, as the `null` the schema defaults it to; what must
+		 * not appear is a resolved object in it, or the title such an object would carry.
+		 */
+		expect(doc).not.toContain('"entity":{');
+		expect(doc).not.toContain(secondEntity!.name);
 	});
 
 	/**

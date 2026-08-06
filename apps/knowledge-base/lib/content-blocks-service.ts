@@ -1,5 +1,9 @@
 import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import {
+	annotateEntityLinkTargets,
+	collectLinkTargetEntityIds,
+} from "@dariah-eric/database/link-targets";
+import {
 	annotatePlaceholderValues,
 	collectPlaceholderValueKinds,
 } from "@dariah-eric/database/placeholder-values";
@@ -12,6 +16,7 @@ import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import type { SelectedImage } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
 import { imageGridOptions } from "@/config/assets.config";
 import type { ContentBlockInput } from "@/lib/content-block-input";
+import { getEntityRelationOptionsByIds } from "@/lib/data/relations";
 import { type Transaction, db } from "@/lib/db";
 import { and, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
@@ -770,12 +775,43 @@ export async function resolvePlaceholderValuesInContentBlocks(
 	return annotatePlaceholderValues(blocks, values);
 }
 
-/** `getEntityContentBlocks` with placeholder-value nodes substituted by their current values. */
+/**
+ * Names the entity every `entity`-targeted link points at, so a preview can show which page a link
+ * leads to rather than only that it leads to one.
+ *
+ * No href is attached. Turning a document id into a website url means reproducing the per-type
+ * routing the public API owns — including the country a consortium is surfaced under, and the
+ * author-defined path of a page — and the dashboard preview is not the website. An unresolved id
+ * stays unresolved, which is how a reader tells a live reference from one whose target has been
+ * deleted or unpublished.
+ */
+export async function resolveEntityLinksInContentBlocks(
+	blocks: Array<ContentBlock>,
+): Promise<Array<ContentBlock>> {
+	const ids = collectLinkTargetEntityIds(blocks);
+	if (ids.size === 0) {
+		return blocks;
+	}
+
+	const entities = await getEntityRelationOptionsByIds([...ids]);
+
+	const resolved = new Map(
+		entities.map((entity) => [entity.id, { label: entity.name, type: entity.entityType }] as const),
+	);
+
+	return annotateEntityLinkTargets(blocks, resolved);
+}
+
+/**
+ * `getEntityContentBlocks` with placeholder-value nodes substituted by their current values, and
+ * entity links named. Both are read-only annotations: edit screens load the raw blocks, so authors
+ * keep seeing (and can remove) the references themselves.
+ */
 export async function getResolvedEntityContentBlocks(
 	entityVersionId: string,
 	fieldName?: string,
 ): Promise<Array<ContentBlock>> {
 	const blocks = await getEntityContentBlocks(entityVersionId, fieldName);
 
-	return resolvePlaceholderValuesInContentBlocks(blocks);
+	return resolveEntityLinksInContentBlocks(await resolvePlaceholderValuesInContentBlocks(blocks));
 }

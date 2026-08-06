@@ -215,9 +215,16 @@ export function collectLinkTargetEntityIds(value: unknown): Set<string> {
 	return ids;
 }
 
-/** A resolved `entity` target: where it lives, and what it is called. */
+/** A resolved `entity` target: what it is called, and — where the caller knows it — where it lives. */
 export interface ResolvedEntityLinkTarget {
-	href: string;
+	/**
+	 * The website url, for callers that can build one. Omitted by callers that can name an entity but
+	 * not route to it: the dashboard resolves titles for its previews without reproducing the
+	 * website's per-type url rules, and a preview that named the target is worth more than one that
+	 * also linked to it. A target with no href annotates its `label` and `type` and leaves the mark's
+	 * own href alone, so a renderer still sees "no url" and degrades to plain text.
+	 */
+	href?: string | null;
 	label: string;
 	/** The public entity type, e.g. `news`, `country`, `working_group`. */
 	type: string;
@@ -265,7 +272,9 @@ export function annotateEntityLinkTargets<T>(value: T, entities: ResolvedEntityL
 				...node,
 				attrs: {
 					...(node.attrs as Record<string, unknown>),
-					href: resolved.href,
+					// Only overwritten by a caller that knows a url. Writing `href: undefined` for the rest
+					// would erase whatever the mark carried, which is the opposite of leaving it alone.
+					...(resolved.href != null ? { href: resolved.href } : {}),
 					entity: resolved,
 				},
 			} satisfies JSONContent;
