@@ -390,6 +390,42 @@ export class WebsiteNewsPage {
 		await this.page.getByRole("button", { name, exact: true }).click();
 	}
 
+	/**
+	 * Retype the block holding the cursor through the toolbar's text style menu. The styles are
+	 * alternatives to one another, so the menu offers them as radios rather than as plain commands.
+	 */
+	async applyTextStyle(name: string): Promise<void> {
+		await this.textStyleTrigger().click();
+		await this.page.getByRole("menuitemradio", { name, exact: true }).click();
+		await this.waitForMenuToClose();
+	}
+
+	/**
+	 * The style the toolbar reports for the block at the cursor — named on the trigger, and marked
+	 * inside the menu, both of which are read off the same editor state.
+	 */
+	async expectTextStyle(name: string): Promise<void> {
+		await expect(this.textStyleTrigger()).toHaveAccessibleName(`Text style: ${name}`);
+
+		await this.textStyleTrigger().click();
+		await expect(this.page.getByRole("menuitemradio", { name, exact: true })).toHaveAttribute(
+			"aria-checked",
+			"true",
+		);
+		await this.page.keyboard.press("Escape");
+		await this.waitForMenuToClose();
+	}
+
+	/** The element a run ends up in, so retyping a block is checked in the document as well. */
+	async expectBlockTag(tag: "p" | "h2" | "h3" | "h4", text: string): Promise<void> {
+		await expect(this.contentBlockEditor().locator(tag).filter({ hasText: text })).toHaveCount(1);
+	}
+
+	/** Named by its purpose rather than by the style it currently shows, which changes as we go. */
+	private textStyleTrigger(): Locator {
+		return this.page.getByRole("button", { name: /^Text style: / });
+	}
+
 	/** The text the given mark renders over, so a failure names the step that lost it. */
 	async expectMarkedText(tag: "strong" | "em" | "code" | "a", text: string): Promise<void> {
 		await expect(this.contentBlockEditor().locator(tag).filter({ hasText: text })).toHaveCount(1);
