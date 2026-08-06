@@ -1,29 +1,13 @@
 "use client";
 
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
 import { formatFileSize } from "@/lib/format-file-size";
+import type { SelectedImage } from "@/lib/selected-image";
 
-/**
- * A picked asset as an editing screen knows it. Only `key` and `url` are needed to submit and
- * preview the selection; the rest is metadata the summary surfaces so authors can see - and correct
- * - what they picked without leaving the form.
- */
-export interface SelectedImage {
-	key: string;
-	url: string;
-	id?: string | null;
-	label?: string | null;
-	alt?: string | null;
-	caption?: JSONContent | null;
-	license?: { code: string; name: string } | null;
-	licenseId?: string | null;
-	mimeType?: string | null;
-	size?: number | null;
-}
+export type { SelectedImage };
 
 interface AssetSummaryProps {
 	image: SelectedImage;

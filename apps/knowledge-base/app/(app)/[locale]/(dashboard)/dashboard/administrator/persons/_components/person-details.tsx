@@ -11,11 +11,11 @@ import { Fragment, type ReactNode } from "react";
 
 import type { SelectedImage } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary";
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { FeaturedImageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/featured-image-details";
 import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import { ContentBlocksView } from "@/components/content-blocks-view";
 import type { PersonArticle } from "@/lib/data/article-contributors";
 import type { PersonContribution } from "@/lib/data/contributions";
 import { getEntityDetailHref, getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";

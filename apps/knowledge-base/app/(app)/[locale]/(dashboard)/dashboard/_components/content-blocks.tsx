@@ -1,6 +1,5 @@
 "use client";
 
-import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import type { ContentBlockTypes } from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
@@ -62,143 +61,20 @@ import { EntityLinkDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_co
 import { ImageCaptionModeField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-caption-mode-field";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
-import {
-	type SelectedImage,
-	SelectedImageCard,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
+import { SelectedImageCard } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
+import type {
+	AccordionContentBlockItem,
+	ContentBlock,
+	DataContentBlockItem,
+	HeroContentBlockItem,
+} from "@/lib/content-block-types";
 import {
 	type MergeableBlock,
 	mergeBlocksToDocument,
 	splitDocumentToBlocks,
 } from "@/lib/content-blocks-document";
 
-interface RichTextContentBlockItem {
-	id: Key;
-	type: "rich_text";
-	position?: number;
-	content?: JSONContent;
-}
-
-interface ImageContentBlockItem {
-	id: Key;
-	type: "image";
-	position?: number;
-	content?: {
-		imageKey?: string;
-		imageUrl?: string;
-		alt?: string | null;
-		assetCaption?: JSONContent | null;
-		caption?: JSONContent | null;
-		captionMode?: ImageCaptionMode;
-		layout?: "default" | "wide" | "full" | "float-start" | "float-end";
-	};
-}
-
-interface EmbedContentBlockItem {
-	id: Key;
-	type: "embed";
-	position?: number;
-	content?: { url?: string; title?: string; caption?: JSONContent | null };
-}
-
-interface DataContentBlockItem {
-	id: Key;
-	type: "data";
-	position?: number;
-	content?: {
-		dataType?:
-			| "events"
-			| "news"
-			| "opportunities"
-			| "funding_calls"
-			| "pages"
-			| "spotlight_articles"
-			| "impact_case_studies";
-		limit?: number;
-		selectedIds?: Array<string>;
-	};
-}
-
-interface CalloutContentBlockItem {
-	id: Key;
-	type: "callout";
-	position?: number;
-	content?: {
-		intent?: "neutral" | "info" | "warning" | "danger" | "success";
-		title?: string;
-		content?: JSONContent;
-	};
-}
-
-interface HeroContentBlockItem {
-	id: Key;
-	type: "hero";
-	position?: number;
-	content?: {
-		title?: string;
-		eyebrow?: string;
-		imageKey?: string;
-		imageUrl?: string;
-		/** The picked asset, for the editor's image card. Only `imageKey` is persisted. */
-		asset?: SelectedImage;
-		caption?: JSONContent | null;
-		captionMode?: ImageCaptionMode;
-		ctas?: Array<{ label: string; url: string }>;
-	};
-}
-
-interface GalleryContentBlockItem {
-	id: Key;
-	type: "gallery";
-	position?: number;
-	content?: {
-		layout?: "carousel" | "grid";
-		items?: Array<{
-			imageKey?: string;
-			imageUrl?: string;
-			/** The picked asset, for the editor's image card. Only `imageKey` is persisted. */
-			asset?: SelectedImage;
-			caption?: JSONContent | null;
-			captionMode?: ImageCaptionMode;
-		}>;
-	};
-}
-
-interface AccordionContentBlockItem {
-	id: Key;
-	type: "accordion";
-	position?: number;
-	content?: {
-		items?: Array<{ title: string; content?: JSONContent }>;
-	};
-}
-
-interface MediaTextContentBlockItem {
-	id: Key;
-	type: "media_text";
-	position?: number;
-	content?: {
-		imageKey?: string;
-		imageUrl?: string;
-		alt?: string | null;
-		assetCaption?: JSONContent | null;
-		caption?: JSONContent | null;
-		captionMode?: ImageCaptionMode;
-		side?: "start" | "end";
-		content?: JSONContent;
-	};
-}
-
-export type ContentBlock =
-	| RichTextContentBlockItem
-	| ImageContentBlockItem
-	| EmbedContentBlockItem
-	| CalloutContentBlockItem
-	| DataContentBlockItem
-	| GalleryContentBlockItem
-	| HeroContentBlockItem
-	| AccordionContentBlockItem
-	| MediaTextContentBlockItem;
+export type { ContentBlock };
 
 interface UnifiedContentBlockItem {
 	id: Key;
@@ -903,6 +779,7 @@ function HeroContentBlockPanel({
 	const t = useExtracted();
 
 	const title = item.content?.title;
+	const subtitle = item.content?.subtitle;
 	const eyebrow = item.content?.eyebrow;
 	const imageKey = item.content?.imageKey;
 	const imageUrl = item.content?.imageUrl;
@@ -936,6 +813,15 @@ function HeroContentBlockPanel({
 				value={title ?? ""}
 			>
 				<Label>{t("Title")}</Label>
+				<Input />
+			</TextField>
+			<TextField
+				onChange={(value) => {
+					onChange({ ...item.content, subtitle: value });
+				}}
+				value={subtitle ?? ""}
+			>
+				<Label>{t("Subtitle")}</Label>
 				<Input />
 			</TextField>
 			<TextField

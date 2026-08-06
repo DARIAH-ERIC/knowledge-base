@@ -73,6 +73,7 @@ export const DataContentBlockSchema = v.object({
 export const HeroContentBlockSchema = v.object({
 	type: v.literal("hero"),
 	title: v.string(),
+	subtitle: v.nullable(v.string()),
 	eyebrow: v.nullable(v.string()),
 	image: v.nullable(
 		v.object({
@@ -169,6 +170,7 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			dataLimit: schema.dataContentBlocks.limit,
 			dataType: schema.dataContentBlockTypes.type,
 			heroTitle: schema.heroContentBlocks.title,
+			heroSubtitle: schema.heroContentBlocks.subtitle,
 			heroEyebrow: schema.heroContentBlocks.eyebrow,
 			heroImageKey: heroAssets.key,
 			heroImageAlt: heroAssets.alt,
@@ -420,6 +422,7 @@ function normalizeRow(row: {
 	dataLimit: number | null;
 	dataType: string | null;
 	heroTitle: string | null;
+	heroSubtitle: string | null;
 	heroEyebrow: string | null;
 	heroImageKey: string | null;
 	heroImageAlt: string | null;
@@ -525,6 +528,7 @@ function normalizeRow(row: {
 			return {
 				type: "hero",
 				title: row.heroTitle!,
+				subtitle: row.heroSubtitle,
 				eyebrow: row.heroEyebrow,
 				image,
 				caption,

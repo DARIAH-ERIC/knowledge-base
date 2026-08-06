@@ -10,12 +10,12 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
 import { RelationTypeSuffix } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-type-suffix";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import { ContentBlocksView } from "@/components/content-blocks-view";
 import type { EricReverseRelationGroups } from "@/lib/data/eric";
 import {
 	type EricReverseRelationSourceType,

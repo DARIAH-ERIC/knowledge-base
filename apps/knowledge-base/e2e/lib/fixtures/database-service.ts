@@ -299,6 +299,7 @@ export class DatabaseService {
 			galleryItems: unknown;
 			galleryLayout: string | null;
 			heroCtas: unknown;
+			heroSubtitle: string | null;
 			heroEyebrow: string | null;
 			heroTitle: string | null;
 			imageCaptionMode: string | null;
@@ -347,6 +348,7 @@ export class DatabaseService {
 				)`,
 				galleryLayout: schema.galleryContentBlocks.layout,
 				heroCtas: schema.heroContentBlocks.ctas,
+				heroSubtitle: schema.heroContentBlocks.subtitle,
 				heroEyebrow: schema.heroContentBlocks.eyebrow,
 				heroTitle: schema.heroContentBlocks.title,
 				imageCaptionMode: schema.imageContentBlocks.captionMode,

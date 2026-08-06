@@ -64,7 +64,9 @@ export function InternalPagesPage(props: Readonly<InternalPagesPageProps>): Reac
 		<Fragment>
 			<EntityListHeader
 				title={t("Internal pages")}
-				description={t("Manage internal knowledge base pages such as legal pages.")}
+				description={t(
+					"Manage editable knowledge base pages such as the home page, the contact page, and legal pages.",
+				)}
 				action={<EntityListSearchField search={search} />}
 			/>
 

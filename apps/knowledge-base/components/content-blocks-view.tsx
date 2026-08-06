@@ -13,7 +13,7 @@ import { renderToReactElement } from "@tiptap/static-renderer/pm/react";
 import type { ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 
-import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import type { ContentBlock } from "@/lib/content-block-types";
 import { getEmbedUrl } from "@/lib/embed-url";
 
 const richTextExtensions = createRichTextExtensions();
@@ -144,8 +144,114 @@ function CaptionFigcaption({
 	);
 }
 
+/**
+ * Which surface the blocks are being rendered on — not a property of the entity, which is why it is
+ * not a caller-supplied option: the two surfaces have their own entry points below, so a page
+ * cannot pick the wrong one by omission. Only the `hero` block differs so far: it is a page-level
+ * banner, and a banner shown at full size inside an editor's form is noise.
+ */
+type ContentBlocksViewVariant = "preview" | "public";
+
+export type HeroContentBlockContent = Extract<ContentBlock, { type: "hero" }>["content"];
+
+interface HeroSectionProps {
+	content: HeroContentBlockContent;
+	/**
+	 * `"h1"` only where the hero replaces the page's own heading — the home page. Everywhere else the
+	 * page already has an `h1` above the content blocks.
+	 */
+	headingLevel?: "h1" | "h2";
+	/** Rendered in the call-to-action row, after any CTAs configured on the block. */
+	ctaSlot?: ReactNode;
+}
+
+/**
+ * The public rendering of a `hero` block. Exported so the home page can render its leading hero as
+ * the page heading and hand in the session-dependent call to action, which cannot be expressed as a
+ * configured CTA because its target and label depend on who is looking.
+ */
+export function HeroSection(props: Readonly<HeroSectionProps>): ReactNode {
+	const { content, ctaSlot, headingLevel: Heading = "h2" } = props;
+
+	const title = content?.title;
+	const subtitle = content?.subtitle;
+	const eyebrow = content?.eyebrow;
+	const imageUrl = content?.imageUrl;
+	const ctas = content?.ctas ?? [];
+
+	if (title == null || !title) {
+		return null;
+	}
+
+	const { caption } = resolveImageCaption({
+		assetCaption: content?.asset?.caption,
+		blockCaption: content?.caption,
+		captionMode: content?.captionMode ?? (content?.caption != null ? "override" : "inherit"),
+	});
+
+	return (
+		<div className="flex flex-col items-center gap-y-6 text-center">
+			<div className="flex flex-col items-center gap-y-4">
+				{eyebrow != null && eyebrow !== "" ? (
+					<p className="text-sm font-medium tracking-wide text-text-weak uppercase">{eyebrow}</p>
+				) : null}
+				<Heading className="text-balance text-5xl font-extrabold tracking-tight text-text-strong sm:text-6xl">
+					{title}
+				</Heading>
+				{subtitle != null && subtitle !== "" ? (
+					<p className="max-inline-(--breakpoint-sm) text-balance text-xl/relaxed text-text-weak">
+						{subtitle}
+					</p>
+				) : null}
+			</div>
+			{imageUrl != null ? (
+				<figure className="inline-full">
+					<img alt="" className="inline-full rounded-lg object-cover" src={imageUrl} />
+					<CaptionFigcaption caption={caption} />
+				</figure>
+			) : null}
+			{ctas.length > 0 || ctaSlot != null ? (
+				<div className="flex flex-col gap-3 sm:flex-row">
+					{/* Configured CTAs are secondary: the primary action, where there is one, comes from the
+					    page via `ctaSlot` — an editor cannot know what it should say. */}
+					{ctas.map((cta, index) => (
+						<ButtonLink
+							key={index}
+							className="min-inline-40"
+							href={cta.url}
+							intent="outline"
+							size="lg"
+						>
+							{cta.label}
+						</ButtonLink>
+					))}
+					{ctaSlot}
+				</div>
+			) : null}
+		</div>
+	);
+}
+
 interface ContentBlocksViewProps {
 	contentBlocks: Array<ContentBlock>;
+}
+
+/** The dashboard's compact rendering, which has to stay legible inside a description list. */
+export function ContentBlocksView(props: Readonly<ContentBlocksViewProps>): ReactNode {
+	const { contentBlocks } = props;
+
+	return <ContentBlocksList contentBlocks={contentBlocks} variant="preview" />;
+}
+
+/** What a reader gets on the site. */
+export function PublicContentBlocksView(props: Readonly<ContentBlocksViewProps>): ReactNode {
+	const { contentBlocks } = props;
+
+	return <ContentBlocksList contentBlocks={contentBlocks} variant="public" />;
+}
+
+interface ContentBlocksListProps extends ContentBlocksViewProps {
+	variant: ContentBlocksViewVariant;
 }
 
 function isFloatedImage(contentBlock: ContentBlock | undefined): boolean {
@@ -155,7 +261,10 @@ function isFloatedImage(contentBlock: ContentBlock | undefined): boolean {
 	);
 }
 
-export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewProps>): ReactNode {
+function ContentBlocksList({
+	contentBlocks,
+	variant,
+}: Readonly<ContentBlocksListProps>): ReactNode {
 	// Footnote markers are numbered by a CSS counter rooted on the element below (`footnotes`), so the
 	// count runs across the whole article rather than restarting per block — blocks are a storage
 	// split of one document, and a reader sees one sequence of notes.
@@ -182,7 +291,7 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 						className={wrapsPrecedingFloat ? undefined : "clear-both"}
 						key={String(contentBlock.id)}
 					>
-						<ContentBlockView contentBlock={contentBlock} />
+						<ContentBlockView contentBlock={contentBlock} variant={variant} />
 					</div>
 				);
 			})}
@@ -207,9 +316,10 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 
 interface ContentBlockViewProps {
 	contentBlock: ContentBlock;
+	variant: ContentBlocksViewVariant;
 }
 
-function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): ReactNode {
+function ContentBlockView({ contentBlock, variant }: Readonly<ContentBlockViewProps>): ReactNode {
 	switch (contentBlock.type) {
 		case "callout": {
 			const content = contentBlock.content?.content;
@@ -361,7 +471,12 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 		}
 
 		case "hero": {
+			if (variant === "public") {
+				return <HeroSection content={contentBlock.content} />;
+			}
+
 			const title = contentBlock.content?.title;
+			const subtitle = contentBlock.content?.subtitle;
 			const eyebrow = contentBlock.content?.eyebrow;
 			const imageUrl = contentBlock.content?.imageUrl;
 			const ctas = contentBlock.content?.ctas;
@@ -384,6 +499,9 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 						<p className="text-sm font-medium uppercase tracking-wide text-muted-fg">{eyebrow}</p>
 					)}
 					<h2 className="text-2xl font-bold">{title}</h2>
+					{subtitle != null && subtitle !== "" && (
+						<p className="text-sm text-muted-fg">{subtitle}</p>
+					)}
 					{imageUrl != null && (
 						<figure>
 							<img alt="" className="inline-full rounded-lg object-cover" src={imageUrl} />

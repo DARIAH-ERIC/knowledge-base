@@ -3,6 +3,7 @@
 import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
+import { internalPagesRevalidatePaths } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_lib/revalidate-paths";
 import { UpdateInternalPageActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_lib/update-internal-page.schema";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
@@ -17,11 +18,7 @@ export const updateInternalPageAction = createMutationAction({
 	schema: UpdateInternalPageActionInputSchema,
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "internal_pages" },
-	revalidate: [
-		"/[locale]/dashboard/administrator/internal-pages",
-		"/[locale]/privacy-policy",
-		"/[locale]/terms-of-use",
-	],
+	revalidate: internalPagesRevalidatePaths,
 	redirect: "/dashboard/administrator/internal-pages",
 
 	async mutate(tx, input, { formData }) {

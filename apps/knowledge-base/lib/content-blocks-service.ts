@@ -275,6 +275,7 @@ export async function upsertTypedContentBlock(
 
 			const heroImageKey = block.content?.imageKey;
 			const heroImageId = heroImageKey != null ? await getAssetIdByKey(tx, heroImageKey) : null;
+			const subtitle = block.content?.subtitle ?? null;
 			const eyebrow = block.content?.eyebrow ?? null;
 			const ctas = block.content?.ctas ?? null;
 			const heroCaption = block.content?.caption ?? null;
@@ -285,6 +286,7 @@ export async function upsertTypedContentBlock(
 				await tx.insert(schema.heroContentBlocks).values({
 					id: blockId,
 					title: heroTitle,
+					subtitle,
 					eyebrow,
 					imageId: heroImageId,
 					caption: heroCaption,
@@ -296,6 +298,7 @@ export async function upsertTypedContentBlock(
 					.update(schema.heroContentBlocks)
 					.set({
 						title: heroTitle,
+						subtitle,
 						eyebrow,
 						imageId: heroImageId,
 						caption: heroCaption,
@@ -516,6 +519,7 @@ export async function getEntityContentBlocks(
 				id: schema.heroContentBlocks.id,
 				position: schema.contentBlocks.position,
 				title: schema.heroContentBlocks.title,
+				subtitle: schema.heroContentBlocks.subtitle,
 				eyebrow: schema.heroContentBlocks.eyebrow,
 				imageKey: schema.assets.key,
 				imageId: schema.assets.id,
@@ -692,6 +696,7 @@ export async function getEntityContentBlocks(
 			type: "hero" as const,
 			content: {
 				title: row.title,
+				subtitle: row.subtitle ?? undefined,
 				eyebrow: row.eyebrow ?? undefined,
 				imageKey: row.imageKey ?? undefined,
 				imageUrl,

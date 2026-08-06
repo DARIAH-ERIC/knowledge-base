@@ -209,6 +209,7 @@ async function cloneTypedContentBlock(
 			const [source] = await tx
 				.select({
 					title: schema.heroContentBlocks.title,
+					subtitle: schema.heroContentBlocks.subtitle,
 					eyebrow: schema.heroContentBlocks.eyebrow,
 					imageId: schema.heroContentBlocks.imageId,
 					caption: schema.heroContentBlocks.caption,

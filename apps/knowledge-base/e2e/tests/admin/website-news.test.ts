@@ -932,6 +932,7 @@ test.describe("website news admin", () => {
 		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
 		const title = `${newsPage.workerPrefix} Standalone Blocks ${randomUUID()}`;
 		const heroTitle = `Hero title ${randomUUID()}`;
+		const heroSubtitle = `Hero subtitle ${randomUUID()}`;
 		const heroEyebrow = `Hero eyebrow ${randomUUID()}`;
 		const cta = { label: `Apply now ${randomUUID()}`, url: "https://example.com/apply" };
 		const accordionTitle = `Accordion item ${randomUUID()}`;
@@ -945,6 +946,7 @@ test.describe("website news admin", () => {
 		await newsPage.addDataBlock({ dataType: "Events", limit: 3 });
 		await newsPage.addHeroBlock({
 			title: heroTitle,
+			subtitle: heroSubtitle,
 			eyebrow: heroEyebrow,
 			assetLabel: "E2E Test Asset",
 			cta,
@@ -957,7 +959,7 @@ test.describe("website news admin", () => {
 		expect(contentBlocks.map(({ position }) => position)).toStrictEqual([0, 1, 2]);
 
 		expect(contentBlocks[0]).toMatchObject({ dataLimit: 3 });
-		expect(contentBlocks[1]).toMatchObject({ heroTitle, heroEyebrow });
+		expect(contentBlocks[1]).toMatchObject({ heroTitle, heroSubtitle, heroEyebrow });
 		expect(JSON.stringify(contentBlocks[1]!.heroCtas)).toContain(cta.url);
 		expect(JSON.stringify(contentBlocks[2]!.accordionItems)).toContain(accordionTitle);
 		expect(JSON.stringify(contentBlocks[2]!.accordionItems)).toContain(accordionBody);

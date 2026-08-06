@@ -103,6 +103,7 @@ export const ContentBlockInputSchema = v.union([
 		content: v.optional(
 			v.object({
 				title: v.optional(v.string()),
+				subtitle: v.optional(v.string()),
 				eyebrow: v.optional(v.string()),
 				imageKey: v.optional(v.string()),
 				imageUrl: v.optional(v.string()),

@@ -985,12 +985,16 @@ export class WebsiteNewsPage {
 
 	async addHeroBlock(options: {
 		title: string;
+		subtitle: string;
 		eyebrow: string;
 		assetLabel: string;
 		cta: { label: string; url: string };
 	}): Promise<void> {
 		const panel = await this.addBlock("Hero");
-		await panel.getByRole("textbox", { name: "Title" }).fill(options.title);
+		// `exact` matters here: accessible-name matching is substring-based by default, so "Title"
+		// would also match the "Subtitle" field and resolve to two nodes.
+		await panel.getByRole("textbox", { name: "Title", exact: true }).fill(options.title);
+		await panel.getByRole("textbox", { name: "Subtitle", exact: true }).fill(options.subtitle);
 		await panel.getByRole("textbox", { name: "Eyebrow" }).fill(options.eyebrow);
 
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });

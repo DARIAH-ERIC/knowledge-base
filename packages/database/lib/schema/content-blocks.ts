@@ -311,6 +311,7 @@ export const heroContentBlocks = p.snakeCase.table(
 			.primaryKey()
 			.references(() => contentBlocks.id, { onDelete: "cascade" }),
 		title: p.text("title").notNull(),
+		subtitle: p.text("subtitle"),
 		eyebrow: p.text("eyebrow"),
 		imageId: p.uuid("image_id").references(() => assets.id),
 		caption: p.jsonb("caption").$type<JSONContent>(),

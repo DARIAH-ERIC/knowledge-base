@@ -2,8 +2,8 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
+import { PublicContentBlocksView } from "@/components/content-blocks-view";
 import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -62,7 +62,9 @@ export default async function DocumentationPage(
 		<Main className="container flex-1 px-8 py-12 xs:px-16">
 			<section className="flex max-inline-(--breakpoint-md) flex-col gap-y-8">
 				<h1 className="text-5xl font-extrabold tracking-tight text-text-strong">{page.title}</h1>
-				{contentBlocks.length > 0 ? <ContentBlocksView contentBlocks={contentBlocks} /> : null}
+				{contentBlocks.length > 0 ? (
+					<PublicContentBlocksView contentBlocks={contentBlocks} />
+				) : null}
 			</section>
 		</Main>
 	);
