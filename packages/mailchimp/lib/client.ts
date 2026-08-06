@@ -1,12 +1,17 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
 import { request } from "@dariah-eric/request";
 
-import type { CreateListMemberResponse, GetCampaignsResponse } from "./types";
+import type {
+	CreateListMemberResponse,
+	GetCampaignFoldersResponse,
+	GetCampaignsResponse,
+} from "./types";
 
 export interface CreateMailchimpClientParams {
 	config: {
 		apiKey: string;
 		baseUrl: string;
+		campaignFolderId?: string;
 		listId: string;
 	};
 }
@@ -14,16 +19,22 @@ export interface CreateMailchimpClientParams {
 export interface ListCampaignsParams {
 	count?: number;
 	offset?: number;
+	folderId?: string;
 	status?: string;
 	beforeSendTime?: string;
 	sinceSendTime?: string;
+}
+
+export interface ListCampaignFoldersParams {
+	count?: number;
+	offset?: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createMailchimpClient(params: CreateMailchimpClientParams) {
 	const { config } = params;
 
-	const { apiKey, baseUrl, listId } = config;
+	const { apiKey, baseUrl, campaignFolderId, listId } = config;
 
 	const credentials = `key:${apiKey}`;
 
@@ -40,6 +51,7 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 					count: params?.count ?? 10,
 
 					offset: params?.offset ?? 0,
+					folder_id: params?.folderId ?? campaignFolderId,
 					list_id: listId,
 					sort_dir: "DESC",
 					/**
@@ -57,6 +69,25 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 
 			/** @see {@link https://mailchimp.com/developer/marketing/api/campaigns/list-campaigns/} */
 			const result = await request<GetCampaignsResponse>(url, {
+				headers,
+				responseType: "json",
+			});
+
+			return result;
+		},
+
+		async getCampaignFolders(params?: ListCampaignFoldersParams) {
+			const url = createUrl({
+				baseUrl,
+				pathname: "/3.0/campaign-folders",
+				searchParams: createUrlSearchParams({
+					count: params?.count ?? 10,
+					offset: params?.offset ?? 0,
+				}),
+			});
+
+			/** @see {@link https://mailchimp.com/developer/marketing/api/campaign-folders/list-campaign-folders/} */
+			const result = await request<GetCampaignFoldersResponse>(url, {
 				headers,
 				responseType: "json",
 			});

@@ -15,6 +15,7 @@ export const mailchimp = createMailchimpClient({
 	config: {
 		apiKey: env.MAILCHIMP_API_KEY,
 		baseUrl: env.MAILCHIMP_API_BASE_URL,
+		campaignFolderId: env.MAILCHIMP_CAMPAIGN_FOLDER_ID,
 		listId: env.MAILCHIMP_LIST_ID,
 	},
 });

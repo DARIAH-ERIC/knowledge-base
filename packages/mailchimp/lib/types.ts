@@ -204,6 +204,24 @@ export interface GetCampaignsResponse {
 	];
 }
 
+export interface GetCampaignFoldersResponse {
+	folders: Array<{
+		id: string;
+		name: string;
+		count: number;
+	}>;
+	total_items: number;
+	_links: [
+		{
+			rel: string;
+			href: string;
+			method: string;
+			targetSchema: string;
+			schema: string;
+		},
+	];
+}
+
 export interface CreateListMemberResponse {
 	id: string;
 	email_address: string;
