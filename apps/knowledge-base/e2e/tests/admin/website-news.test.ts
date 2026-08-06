@@ -665,16 +665,17 @@ test.describe("website news admin", () => {
 	});
 
 	/**
-	 * Tables, document links, entity links and placeholder values all live inside a `rich_text` run.
-	 * They are the features added most recently and the ones with the least coverage; each stores
-	 * attributes that must survive the same load/save cycle image `layout` failed.
+	 * Tables, dividers, document links, entity links and placeholder values all live inside a
+	 * `rich_text` run. They are the features added most recently and the ones with the least
+	 * coverage; each stores attributes that must survive the same load/save cycle image `layout`
+	 * failed.
 	 *
 	 * Neither link kind stores an href — a document link stores the asset key and an entity link the
 	 * document id, both resolved at read time. Asserting on the stored attributes rather than on a
 	 * rendered url is the point: a regression that turned these back into plain hrefs would keep
 	 * rendering correctly today and break the moment a slug or file changed.
 	 */
-	test("should preserve tables, link targets and placeholder values across an edit round trip", async ({
+	test("should preserve tables, dividers, link targets and placeholder values across an edit round trip", async ({
 		createWebsiteNewsPage,
 		db,
 	}) => {
@@ -710,6 +711,9 @@ test.describe("website news admin", () => {
 			expect(doc).toContain('"type":"tableHeader"');
 			expect(doc).toContain(headers[0]);
 			expect(doc).toContain(headers[1]);
+
+			/** The divider is a leaf with no attributes, so its node type is the whole of it. */
+			expect(doc).toContain('"type":"horizontalRule"');
 
 			/** Both link kinds kept their reference rather than decaying to an href. */
 			expect(doc).toContain('"targetKind":"asset"');

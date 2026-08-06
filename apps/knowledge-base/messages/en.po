@@ -165,13 +165,13 @@ msgid "4ZUjCU"
 msgstr "Reorder item"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:192
-#: ../../packages/ui/lib/rich-text-actions.tsx:157
+#: ../../packages/ui/lib/rich-text-actions.tsx:158
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:200
-#: ../../packages/ui/lib/rich-text-actions.tsx:167
+#: ../../packages/ui/lib/rich-text-actions.tsx:168
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
@@ -206,86 +206,91 @@ msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:177
+#: ../../packages/ui/lib/rich-text-actions.tsx:178
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:187
+#: ../../packages/ui/lib/rich-text-actions.tsx:188
 #: ../../packages/ui/lib/rich-text-editor.tsx:2801
 #: ../../packages/ui/lib/rich-text-editor.tsx:2804
 msgctxt "ui"
 msgid "qKqtMC"
 msgstr "Paragraph"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:198
+#: ../../packages/ui/lib/rich-text-actions.tsx:199
 msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:209
+#: ../../packages/ui/lib/rich-text-actions.tsx:210
 msgctxt "ui"
 msgid "BDbgCL"
 msgstr "Heading 3"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:220
+#: ../../packages/ui/lib/rich-text-actions.tsx:221
 msgctxt "ui"
 msgid "BKF2fN"
 msgstr "Heading 4"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:231
+#: ../../packages/ui/lib/rich-text-actions.tsx:232
 msgctxt "ui"
 msgid "drh2NU"
 msgstr "Bullet list"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:242
+#: ../../packages/ui/lib/rich-text-actions.tsx:243
 msgctxt "ui"
 msgid "5j/gIz"
 msgstr "Ordered list"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:253
+#: ../../packages/ui/lib/rich-text-actions.tsx:254
 msgctxt "ui"
 msgid "+RDJVD"
 msgstr "Blockquote"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:264
+#: ../../packages/ui/lib/rich-text-actions.tsx:265
 #: ../../packages/ui/lib/rich-text-editor.tsx:2913
 #: ../../packages/ui/lib/rich-text-editor.tsx:2922
 msgctxt "ui"
 msgid "IeBejt"
 msgstr "Table"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:280
+#: ../../packages/ui/lib/rich-text-actions.tsx:283
+msgctxt "ui"
+msgid "0XWmRm"
+msgstr "Divider"
+
+#: ../../packages/ui/lib/rich-text-actions.tsx:299
 msgctxt "ui"
 msgid "+0zv6g"
 msgstr "Image"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:294
+#: ../../packages/ui/lib/rich-text-actions.tsx:313
 msgctxt "ui"
 msgid "bp3HuS"
 msgstr "Embed"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:314
+#: ../../packages/ui/lib/rich-text-actions.tsx:333
 msgctxt "ui"
 msgid "fErjHU"
 msgstr "Callout"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:337
+#: ../../packages/ui/lib/rich-text-actions.tsx:356
 msgctxt "ui"
 msgid "1EqXlD"
 msgstr "Media and text"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:374
+#: ../../packages/ui/lib/rich-text-actions.tsx:393
 msgctxt "ui"
 msgid "WExVSr"
 msgstr "Gallery"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:396
+#: ../../packages/ui/lib/rich-text-actions.tsx:415
 msgctxt "ui"
 msgid "KP63fg"
 msgstr "Button"
 
-#: ../../packages/ui/lib/rich-text-actions.tsx:416
+#: ../../packages/ui/lib/rich-text-actions.tsx:435
 msgctxt "ui"
 msgid "fhp4gl"
 msgstr "Footnote"

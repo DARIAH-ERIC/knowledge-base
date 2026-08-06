@@ -165,13 +165,13 @@ msgid "4ZUjCU"
 msgstr "Reorder item"
 
 #: lib/inline-rich-text-editor.tsx:192
-#: lib/rich-text-actions.tsx:157
+#: lib/rich-text-actions.tsx:158
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
 #: lib/inline-rich-text-editor.tsx:200
-#: lib/rich-text-actions.tsx:167
+#: lib/rich-text-actions.tsx:168
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
@@ -206,86 +206,91 @@ msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: lib/rich-text-actions.tsx:177
+#: lib/rich-text-actions.tsx:178
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: lib/rich-text-actions.tsx:187
+#: lib/rich-text-actions.tsx:188
 #: lib/rich-text-editor.tsx:2801
 #: lib/rich-text-editor.tsx:2804
 msgctxt "ui"
 msgid "qKqtMC"
 msgstr "Paragraph"
 
-#: lib/rich-text-actions.tsx:198
+#: lib/rich-text-actions.tsx:199
 msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
-#: lib/rich-text-actions.tsx:209
+#: lib/rich-text-actions.tsx:210
 msgctxt "ui"
 msgid "BDbgCL"
 msgstr "Heading 3"
 
-#: lib/rich-text-actions.tsx:220
+#: lib/rich-text-actions.tsx:221
 msgctxt "ui"
 msgid "BKF2fN"
 msgstr "Heading 4"
 
-#: lib/rich-text-actions.tsx:231
+#: lib/rich-text-actions.tsx:232
 msgctxt "ui"
 msgid "drh2NU"
 msgstr "Bullet list"
 
-#: lib/rich-text-actions.tsx:242
+#: lib/rich-text-actions.tsx:243
 msgctxt "ui"
 msgid "5j/gIz"
 msgstr "Ordered list"
 
-#: lib/rich-text-actions.tsx:253
+#: lib/rich-text-actions.tsx:254
 msgctxt "ui"
 msgid "+RDJVD"
 msgstr "Blockquote"
 
-#: lib/rich-text-actions.tsx:264
+#: lib/rich-text-actions.tsx:265
 #: lib/rich-text-editor.tsx:2913
 #: lib/rich-text-editor.tsx:2922
 msgctxt "ui"
 msgid "IeBejt"
 msgstr "Table"
 
-#: lib/rich-text-actions.tsx:280
+#: lib/rich-text-actions.tsx:283
+msgctxt "ui"
+msgid "0XWmRm"
+msgstr "Divider"
+
+#: lib/rich-text-actions.tsx:299
 msgctxt "ui"
 msgid "+0zv6g"
 msgstr "Image"
 
-#: lib/rich-text-actions.tsx:294
+#: lib/rich-text-actions.tsx:313
 msgctxt "ui"
 msgid "bp3HuS"
 msgstr "Embed"
 
-#: lib/rich-text-actions.tsx:314
+#: lib/rich-text-actions.tsx:333
 msgctxt "ui"
 msgid "fErjHU"
 msgstr "Callout"
 
-#: lib/rich-text-actions.tsx:337
+#: lib/rich-text-actions.tsx:356
 msgctxt "ui"
 msgid "1EqXlD"
 msgstr "Media and text"
 
-#: lib/rich-text-actions.tsx:374
+#: lib/rich-text-actions.tsx:393
 msgctxt "ui"
 msgid "WExVSr"
 msgstr "Gallery"
 
-#: lib/rich-text-actions.tsx:396
+#: lib/rich-text-actions.tsx:415
 msgctxt "ui"
 msgid "KP63fg"
 msgstr "Button"
 
-#: lib/rich-text-actions.tsx:416
+#: lib/rich-text-actions.tsx:435
 msgctxt "ui"
 msgid "fhp4gl"
 msgstr "Footnote"

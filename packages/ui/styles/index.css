@@ -574,6 +574,22 @@
 			border-top-width: 1px;
 		}
 
+		/**
+		 * A divider holds no text, so selecting the node is the only way to act on one — and
+		 * ProseMirror marks that selection with this class and nothing else. Without a visible state,
+		 * clicking a divider in the editor looks like nothing happened, and the delete key that follows
+		 * looks like it hit the block above. Read views never carry the class, so this is editor-only
+		 * without having to be scoped to one.
+		 *
+		 * Matched as an attribute rather than as a class: the name is ProseMirror's, and it is not in
+		 * the case this project's own class names are linted for.
+		 */
+		&:where(hr[class~="ProseMirror-selectednode"]) {
+			border-color: var(--primary);
+			outline: 2px solid color-mix(in oklab, var(--primary) 30%, transparent);
+			outline-offset: 4px;
+		}
+
 		&:where(blockquote) {
 			margin-top: 1.6em;
 			margin-bottom: 1.6em;

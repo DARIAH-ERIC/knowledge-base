@@ -701,6 +701,15 @@ export class WebsiteNewsPage {
 		await this.placeCaretInParagraph(3);
 		await this.insertPlaceholderValue(options.placeholderLabel);
 
+		/**
+		 * A divider holds no text of its own, so it is inserted from the menu rather than typed. The
+		 * migrated content brought these in, which makes surviving a round trip the whole point of
+		 * having one here.
+		 */
+		await this.startNewParagraph();
+		await this.chooseInsert("Divider");
+		await expect(this.contentBlockEditor().locator("hr")).toHaveCount(1);
+
 		/** The table goes last: the cursor ends inside it, and leaving it needs a gap cursor. */
 		await this.startNewParagraph();
 		await this.insertTable(options.headers);
