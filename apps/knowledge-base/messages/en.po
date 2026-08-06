@@ -15,8 +15,8 @@ msgstr "Could not load options."
 
 #: ../../packages/ui/lib/async-list-select.tsx:235
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:245
-#: ../../packages/ui/lib/rich-text-editor.tsx:3004
-#: ../../packages/ui/lib/rich-text-editor.tsx:3032
+#: ../../packages/ui/lib/rich-text-editor.tsx:3012
+#: ../../packages/ui/lib/rich-text-editor.tsx:3040
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
@@ -178,14 +178,14 @@ msgstr "Italic"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:211
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:219
-#: ../../packages/ui/lib/rich-text-editor.tsx:2965
-#: ../../packages/ui/lib/rich-text-editor.tsx:2974
+#: ../../packages/ui/lib/rich-text-editor.tsx:2973
+#: ../../packages/ui/lib/rich-text-editor.tsx:2982
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:241
-#: ../../packages/ui/lib/rich-text-editor.tsx:3028
+#: ../../packages/ui/lib/rich-text-editor.tsx:3036
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
@@ -212,8 +212,8 @@ msgid "h2vipu"
 msgstr "Code"
 
 #: ../../packages/ui/lib/rich-text-actions.tsx:192
-#: ../../packages/ui/lib/rich-text-editor.tsx:2917
-#: ../../packages/ui/lib/rich-text-editor.tsx:2920
+#: ../../packages/ui/lib/rich-text-editor.tsx:2925
+#: ../../packages/ui/lib/rich-text-editor.tsx:2928
 msgctxt "ui"
 msgid "qKqtMC"
 msgstr "Paragraph"
@@ -249,8 +249,8 @@ msgid "+RDJVD"
 msgstr "Blockquote"
 
 #: ../../packages/ui/lib/rich-text-actions.tsx:269
-#: ../../packages/ui/lib/rich-text-editor.tsx:3047
-#: ../../packages/ui/lib/rich-text-editor.tsx:3056
+#: ../../packages/ui/lib/rich-text-editor.tsx:3055
+#: ../../packages/ui/lib/rich-text-editor.tsx:3064
 msgctxt "ui"
 msgid "IeBejt"
 msgstr "Table"
@@ -295,110 +295,110 @@ msgctxt "ui"
 msgid "fhp4gl"
 msgstr "Footnote"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2917
-#: ../../packages/ui/lib/rich-text-editor.tsx:2923
+#: ../../packages/ui/lib/rich-text-editor.tsx:2925
+#: ../../packages/ui/lib/rich-text-editor.tsx:2931
 msgctxt "ui"
 msgid "hBrEtp"
 msgstr "Text style"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2985
+#: ../../packages/ui/lib/rich-text-editor.tsx:2993
 msgctxt "ui"
 msgid "ZgFjjD"
 msgstr "This link points to a document."
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2986
+#: ../../packages/ui/lib/rich-text-editor.tsx:2994
 msgctxt "ui"
 msgid "TANa98"
 msgstr "This link points to another page."
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3000
+#: ../../packages/ui/lib/rich-text-editor.tsx:3008
 msgctxt "ui"
 msgid "y8KNhq"
 msgstr "Change document"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3000
+#: ../../packages/ui/lib/rich-text-editor.tsx:3008
 msgctxt "ui"
 msgid "KDqj1t"
 msgstr "Change page"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3066
+#: ../../packages/ui/lib/rich-text-editor.tsx:3074
 msgctxt "ui"
 msgid "yy68o/"
 msgstr "Toggle header row"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3074
+#: ../../packages/ui/lib/rich-text-editor.tsx:3082
 msgctxt "ui"
 msgid "Lag3AX"
 msgstr "Add row above"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3081
+#: ../../packages/ui/lib/rich-text-editor.tsx:3089
 msgctxt "ui"
 msgid "+MYMhj"
 msgstr "Add row below"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3088
+#: ../../packages/ui/lib/rich-text-editor.tsx:3096
 msgctxt "ui"
 msgid "w19eTC"
 msgstr "Delete row"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3096
+#: ../../packages/ui/lib/rich-text-editor.tsx:3104
 msgctxt "ui"
 msgid "UNGmTw"
 msgstr "Add column before"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3103
+#: ../../packages/ui/lib/rich-text-editor.tsx:3111
 msgctxt "ui"
 msgid "X6kBtc"
 msgstr "Add column after"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3110
+#: ../../packages/ui/lib/rich-text-editor.tsx:3118
 msgctxt "ui"
 msgid "qfX6ms"
 msgstr "Delete column"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3119
+#: ../../packages/ui/lib/rich-text-editor.tsx:3127
 msgctxt "ui"
 msgid "2CyUQr"
 msgstr "Delete table"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3128
-#: ../../packages/ui/lib/rich-text-editor.tsx:3132
-#: ../../packages/ui/lib/rich-text-editor.tsx:3135
+#: ../../packages/ui/lib/rich-text-editor.tsx:3136
+#: ../../packages/ui/lib/rich-text-editor.tsx:3140
+#: ../../packages/ui/lib/rich-text-editor.tsx:3143
 msgctxt "ui"
 msgid "freMIM"
 msgstr "Insert"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3156
+#: ../../packages/ui/lib/rich-text-editor.tsx:3164
 msgctxt "ui"
 msgid "nxS3sg"
 msgstr "Link to document"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3166
+#: ../../packages/ui/lib/rich-text-editor.tsx:3174
 msgctxt "ui"
 msgid "/GpEhj"
 msgstr "Link to page"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3173
+#: ../../packages/ui/lib/rich-text-editor.tsx:3181
 msgctxt "ui"
 msgid "ojUXiU"
 msgstr "Placeholder value"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3226
+#: ../../packages/ui/lib/rich-text-editor.tsx:3234
 msgctxt "ui"
 msgid "t1Ql7Y"
 msgstr "Footnotes"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3236
+#: ../../packages/ui/lib/rich-text-editor.tsx:3244
 msgctxt "ui"
 msgid "cZp00l"
 msgstr "Empty note"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3246
+#: ../../packages/ui/lib/rich-text-editor.tsx:3254
 msgctxt "ui"
 msgid "VXTh3F"
 msgstr "No matching blocks"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3249
+#: ../../packages/ui/lib/rich-text-editor.tsx:3257
 msgctxt "ui"
 msgid "FeZ3P6"
 msgstr "Insert block"
@@ -2848,7 +2848,7 @@ msgstr "ROR"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx:286
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-details.tsx:127
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:125
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:162
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:166
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-details.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:111
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:138
@@ -4628,86 +4628,90 @@ msgstr "Administrator dashboard - New internal service"
 msgid "WP5Hdj"
 msgstr "Administrator dashboard - Internal services"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:119
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:121
 msgid "2KtWqT"
 msgstr "Internal"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:120
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:122
 msgid "5g+82s"
 msgstr "Internal diagnostics for administrators."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:126
 msgid "hIVSGF"
 msgstr "Internal diagnostics"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:125
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:152
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:127
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:156
 msgid "ED9RG5"
 msgstr "Audit log"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:126
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:193
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:128
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:197
 msgid "0klKKn"
 msgstr "Expensive queries"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:132
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:133
+msgid "Mr2Lpe"
+msgstr "Search by subject"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:136
 msgid "QinKCt"
 msgstr "Filter by action"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:145
 msgid "jK9a9x"
 msgstr "All actions"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:157
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:161
 msgid "ug01Mk"
 msgstr "Time"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:159
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:163
 msgid "CHXoWz"
 msgstr "Actor"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:160
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:164
 msgid "QlsDcr"
 msgstr "Action"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:161
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:165
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:50
 msgid "LLtKhp"
 msgstr "Subject"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:164
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:168
 msgid "Je3HwC"
 msgstr "No audit log entries."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:198
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:202
 msgid "qj71j1"
 msgstr "Query"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:200
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:204
 msgid "fQFNOL"
 msgstr "Calls"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:201
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:205
 msgid "QsSili"
 msgstr "Total time (ms)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:202
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:206
 msgid "uG15p0"
 msgstr "Mean time (ms)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:203
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:207
 msgid "4lbK5K"
 msgstr "Rows"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:209
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:213
 msgid "8XPIPe"
 msgstr "No statements recorded yet."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:232
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/_components/internal-dashboard.tsx:236
 msgid "5L04Xa"
 msgstr "The pg_stat_statements extension is not enabled on this database. Enable it via shared_preload_libraries in the Postgres configuration to see query statistics."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/page.tsx:42
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal/page.tsx:46
 msgid "Oo2iPN"
 msgstr "Administrator dashboard - Internal"
 

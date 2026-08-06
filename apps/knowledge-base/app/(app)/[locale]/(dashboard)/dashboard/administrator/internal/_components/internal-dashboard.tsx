@@ -18,6 +18,7 @@ import type { Key } from "react-aria-components";
 import {
 	EntityListHeader,
 	EntityListPagination,
+	EntityListSearchField,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { dashboardPageSize } from "@/config/pagination.config";
@@ -28,6 +29,7 @@ interface InternalDashboardProps {
 	action: AuditLogAction | undefined;
 	auditLog: AuditLogResult;
 	page: number;
+	q: string;
 	statements: ExpensiveStatementsResult;
 }
 
@@ -99,7 +101,7 @@ function AuditSummary({ summary }: Readonly<{ summary: Record<string, unknown> }
 }
 
 export function InternalDashboard(props: Readonly<InternalDashboardProps>): ReactNode {
-	const { action, auditLog, page, statements } = props;
+	const { action, auditLog, page, q, statements } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -108,7 +110,7 @@ export function InternalDashboard(props: Readonly<InternalDashboardProps>): Reac
 	const search = useUrlPaginatedSearch({
 		filters: { action: action ?? "" },
 		page,
-		q: "",
+		q,
 	});
 
 	const selectedAction = search.filters.action !== "" ? search.filters.action : "all";
@@ -127,7 +129,9 @@ export function InternalDashboard(props: Readonly<InternalDashboardProps>): Reac
 				</TabList>
 
 				<TabPanel id="audit" className="flex flex-col gap-y-(--layout-padding)">
-					<div className="flex justify-end">
+					<div className="flex flex-wrap items-center justify-end gap-1.5">
+						<EntityListSearchField search={search} placeholder={t("Search by subject")} />
+
 						<Select
 							aria-label={t("Filter by action")}
 							onChange={(key) => {
