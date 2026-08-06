@@ -38,6 +38,29 @@ function markNodesOn(
 	return undefined;
 }
 
+/**
+ * The textblock a run ended up in, so a style assertion names one block rather than the document —
+ * "the document holds a heading" would hold just as well when the wrong paragraph was retyped.
+ */
+function blockHolding(doc: JSONContent, text: string): JSONContent | undefined {
+	for (const child of doc.content ?? []) {
+		const holdsText =
+			child.content?.some((node) => node.type === "text" && node.text?.includes(text) === true) ===
+			true;
+
+		if (holdsText) {
+			return child;
+		}
+
+		const found = blockHolding(child, text);
+		if (found != null) {
+			return found;
+		}
+	}
+
+	return undefined;
+}
+
 test.describe("website news admin", () => {
 	/**
 	 * Run sequentially within this file. Suites may run concurrently because test data is isolated by
@@ -416,7 +439,46 @@ test.describe("website news admin", () => {
 		expect(linkMark?.attrs?.targetKind ?? null).toBeNull();
 	});
 
-	test("should add and remove table rows and columns from the table popover", async ({
+	test("should retype blocks from the text style menu", async ({ createWebsiteNewsPage, db }) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Text Styles ${randomUUID()}`;
+		const headingText = `Heading run ${randomUUID()}`;
+		const bodyText = `Body run ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item exercising the text style menu");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+
+		await newsPage.addContentBlock(headingText);
+		await newsPage.startNewParagraph();
+		await newsPage.typeInContentBlock(bodyText);
+
+		/** Retyping the first paragraph leaves the body text as the only paragraph left. */
+		await newsPage.placeCaretInParagraph(0);
+		await newsPage.applyTextStyle("Heading 2");
+		await newsPage.expectBlockTag("h2", headingText);
+		await newsPage.expectTextStyle("Heading 2");
+
+		/**
+		 * The trigger and the menu follow the cursor rather than the last command run: moving into a
+		 * block that was never retyped has to report the paragraph it still is.
+		 */
+		await newsPage.placeCaretInParagraph(0);
+		await newsPage.expectTextStyle("Paragraph");
+
+		await newsPage.submitForm();
+
+		const contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		const stored = contentBlocks[0]!.content as JSONContent;
+
+		const heading = blockHolding(stored, headingText);
+		expect(heading?.type).toBe("heading");
+		expect(heading?.attrs?.level).toBe(2);
+		expect(blockHolding(stored, bodyText)?.type).toBe("paragraph");
+	});
+
+	test("should add and remove table rows and columns from the table menu", async ({
 		createWebsiteNewsPage,
 		db,
 	}) => {
@@ -456,6 +518,15 @@ test.describe("website news admin", () => {
 		await newsPage.expectTableSize({ rows: 4, headerCells: 4 });
 
 		await newsPage.runTableCommands(["Delete column"]);
+		await newsPage.expectTableSize({ rows: 4, headerCells: 3 });
+
+		/**
+		 * Toggled off and straight back on: the command rewrites the header row into body cells, which
+		 * is a different shape from every other command here, and the row count must survive it.
+		 */
+		await newsPage.runTableCommands(["Toggle header row"]);
+		await newsPage.expectTableSize({ rows: 4, headerCells: 0 });
+		await newsPage.runTableCommands(["Toggle header row"]);
 		await newsPage.expectTableSize({ rows: 4, headerCells: 3 });
 
 		await newsPage.submitForm();

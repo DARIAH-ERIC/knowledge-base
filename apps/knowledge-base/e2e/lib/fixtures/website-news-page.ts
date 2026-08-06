@@ -351,7 +351,7 @@ export class WebsiteNewsPage {
 
 	/** Insert a 3x2 table with a header row at the cursor, then fill the two header cells. */
 	async insertTable(headers: [string, string]): Promise<void> {
-		await this.chooseInsert("Insert table");
+		await this.chooseInsert("Table");
 
 		/**
 		 * The row and column commands live behind a Table button that only appears while the cursor is
@@ -369,16 +369,15 @@ export class WebsiteNewsPage {
 	}
 
 	/**
-	 * Run commands from the table popover. Opened once for the whole batch: running a command leaves
-	 * the popover open — it re-renders with the in-table commands — and its overlay swallows every
-	 * click aimed at the document underneath, so it is dismissed at the end rather than between.
+	 * Run commands from the table menu. Choosing an entry closes the menu — it is a menu like the
+	 * insert one, not a panel that stays open — so each command reopens it.
 	 */
 	async runTableCommands(labels: ReadonlyArray<string>): Promise<void> {
-		await this.page.getByRole("button", { name: "Table", exact: true }).click();
 		for (const label of labels) {
-			await this.page.getByRole("button", { name: label, exact: true }).click();
+			await this.page.getByRole("button", { name: "Table", exact: true }).click();
+			await this.page.getByRole("menuitem", { name: label, exact: true }).click();
+			await this.waitForMenuToClose();
 		}
-		await this.page.keyboard.press("Escape");
 	}
 
 	/** Put the cursor in the table's first body cell, so row and column commands act from there. */
@@ -389,6 +388,42 @@ export class WebsiteNewsPage {
 	/** Toggle an inline mark over whatever is selected, from the toolbar. */
 	async toggleMark(name: "Bold" | "Italic" | "Code"): Promise<void> {
 		await this.page.getByRole("button", { name, exact: true }).click();
+	}
+
+	/**
+	 * Retype the block holding the cursor through the toolbar's text style menu. The styles are
+	 * alternatives to one another, so the menu offers them as radios rather than as plain commands.
+	 */
+	async applyTextStyle(name: string): Promise<void> {
+		await this.textStyleTrigger().click();
+		await this.page.getByRole("menuitemradio", { name, exact: true }).click();
+		await this.waitForMenuToClose();
+	}
+
+	/**
+	 * The style the toolbar reports for the block at the cursor — named on the trigger, and marked
+	 * inside the menu, both of which are read off the same editor state.
+	 */
+	async expectTextStyle(name: string): Promise<void> {
+		await expect(this.textStyleTrigger()).toHaveAccessibleName(`Text style: ${name}`);
+
+		await this.textStyleTrigger().click();
+		await expect(this.page.getByRole("menuitemradio", { name, exact: true })).toHaveAttribute(
+			"aria-checked",
+			"true",
+		);
+		await this.page.keyboard.press("Escape");
+		await this.waitForMenuToClose();
+	}
+
+	/** The element a run ends up in, so retyping a block is checked in the document as well. */
+	async expectBlockTag(tag: "p" | "h2" | "h3" | "h4", text: string): Promise<void> {
+		await expect(this.contentBlockEditor().locator(tag).filter({ hasText: text })).toHaveCount(1);
+	}
+
+	/** Named by its purpose rather than by the style it currently shows, which changes as we go. */
+	private textStyleTrigger(): Locator {
+		return this.page.getByRole("button", { name: /^Text style: / });
 	}
 
 	/** The text the given mark renders over, so a failure names the step that lost it. */

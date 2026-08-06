@@ -27,7 +27,7 @@ export interface SlashCommandTrigger {
 export interface SlashCommandItem {
 	id: string;
 	label: string;
-	/** Extra words the query may match, so `/ul` finds "Bullet List" as well as `/bul` does. */
+	/** Extra words the query may match, so `/ul` finds "Bullet list" as well as `/bul` does. */
 	keywords?: Array<string>;
 	icon: ComponentType<{ className?: string }>;
 	/** Hides the item when the command cannot run where the cursor is, e.g. a table inside a table. */
