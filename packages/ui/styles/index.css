@@ -459,6 +459,12 @@
 	font-size: 1rem;
 	line-height: 1.75;
 
+	/**
+	 * The one gap lists are spaced by — see the list rules below. Each size variant restates it,
+	 * the way they restate `font-size`.
+	 */
+	--richtext-list-gap: 0.5em;
+
 	:not(:where([class~="not-richtext"], [class~="not-richtext"] *)) {
 		&:where(p) {
 			margin-top: 1.25em;
@@ -841,8 +847,8 @@
 		}
 
 		&:where(li) {
-			margin-top: 0.5em;
-			margin-bottom: 0.5em;
+			margin-top: var(--richtext-list-gap);
+			margin-bottom: var(--richtext-list-gap);
 		}
 
 		&:where(ol > li) {
@@ -853,30 +859,31 @@
 			padding-left: 0.375em;
 		}
 
-		&:where(.richtext > ul > li p) {
-			margin-top: 0.75em;
-			margin-bottom: 0.75em;
+		/*
+		 * Lists get one rendering, so a single gap has to serve both a list of one-line items and one
+		 * whose items hold several blocks. Upstream spaces those two cases differently, keyed off
+		 * whether a list item wraps its content in a paragraph — markdown's loose/tight distinction.
+		 * Our content model has no such distinction to key off: Tiptap's `listItem` is
+		 * `paragraph block*`, so the paragraph is always there and every list came out loose.
+		 *
+		 * So: zero the paragraph margins at an item's edges, and space everything — items, and blocks
+		 * stacked within one item — by `--richtext-list-gap`. An item's internal breaks then never
+		 * open wider than the gaps between the items themselves, which would otherwise read as if the
+		 * paragraphs were items in their own right. What keeps a multi-paragraph item legible as one
+		 * item is its indent past the marker, not extra space around it.
+		 */
+		&:where(li > p) {
+			margin-top: 0;
+			margin-bottom: 0;
 		}
 
-		&:where(.richtext > ul > li > *:first-child) {
-			margin-top: 1.25em;
-		}
-
-		&:where(.richtext > ul > li > *:last-child) {
-			margin-bottom: 1.25em;
-		}
-
-		&:where(.richtext > ol > li > *:first-child) {
-			margin-top: 1.25em;
-		}
-
-		&:where(.richtext > ol > li > *:last-child) {
-			margin-bottom: 1.25em;
+		&:where(li > * + *) {
+			margin-top: var(--richtext-list-gap);
 		}
 
 		&:where(ul ul, ul ol, ol ul, ol ol) {
-			margin-top: 0.75em;
-			margin-bottom: 0.75em;
+			margin-top: var(--richtext-list-gap);
+			margin-bottom: var(--richtext-list-gap);
 		}
 
 		&:where(dl) {
@@ -967,6 +974,8 @@
 @utility richtext-sm {
 	font-size: 0.875rem;
 	line-height: 1.7142857;
+
+	--richtext-list-gap: 0.5em;
 
 	:not(:where([class~="not-richtext"], [class~="not-richtext"] *)) {
 		&:where(p) {
@@ -1078,8 +1087,8 @@
 		}
 
 		&:where(li) {
-			margin-top: 0.2857143em;
-			margin-bottom: 0.2857143em;
+			margin-top: var(--richtext-list-gap);
+			margin-bottom: var(--richtext-list-gap);
 		}
 
 		&:where(ol > li) {
@@ -1090,30 +1099,19 @@
 			padding-inline-start: 0.4285714em;
 		}
 
-		&:where(.richtext-sm > ul > li p) {
-			margin-top: 0.5714286em;
-			margin-bottom: 0.5714286em;
+		/** One gap for lists — see the `richtext` utility. */
+		&:where(li > p) {
+			margin-top: 0;
+			margin-bottom: 0;
 		}
 
-		&:where(.richtext-sm > ul > li > p:first-child) {
-			margin-top: 1.1428571em;
-		}
-
-		&:where(.richtext-sm > ul > li > p:last-child) {
-			margin-bottom: 1.1428571em;
-		}
-
-		&:where(.richtext-sm > ol > li > p:first-child) {
-			margin-top: 1.1428571em;
-		}
-
-		&:where(.richtext-sm > ol > li > p:last-child) {
-			margin-bottom: 1.1428571em;
+		&:where(li > * + *) {
+			margin-top: var(--richtext-list-gap);
 		}
 
 		&:where(ul ul, ul ol, ol ul, ol ol) {
-			margin-top: 0.5714286em;
-			margin-bottom: 0.5714286em;
+			margin-top: var(--richtext-list-gap);
+			margin-bottom: var(--richtext-list-gap);
 		}
 
 		&:where(dl) {
@@ -1212,6 +1210,8 @@
 @utility richtext-base {
 	font-size: 1rem;
 	line-height: 1.75;
+
+	--richtext-list-gap: 0.5em;
 
 	:not(:where([class~="not-richtext"], [class~="not-richtext"] *)) {
 		&:where(p) {
@@ -1323,8 +1323,8 @@
 		}
 
 		&:where(li) {
-			margin-top: 0.5em;
-			margin-bottom: 0.5em;
+			margin-top: var(--richtext-list-gap);
+			margin-bottom: var(--richtext-list-gap);
 		}
 
 		&:where(ol > li) {
@@ -1335,45 +1335,19 @@
 			padding-inline-start: 0.375em;
 		}
 
-		.richtext-base :where(.richtext-base > ul > li p) {
-			margin-top: 0.75em;
-			margin-bottom: 0.75em;
+		/** One gap for lists — see the `richtext` utility. */
+		&:where(li > p) {
+			margin-top: 0;
+			margin-bottom: 0;
 		}
 
-		.richtext-base
-			:where(.richtext-base > ul > li > p:first-child):not(
-				:where([class~="not-richtext"], [class~="not-richtext"] *)
-			) {
-			margin-top: 1.25em;
+		&:where(li > * + *) {
+			margin-top: var(--richtext-list-gap);
 		}
 
-		.richtext-base
-			:where(.richtext-base > ul > li > p:last-child):not(
-				:where([class~="not-richtext"], [class~="not-richtext"] *)
-			) {
-			margin-bottom: 1.25em;
-		}
-
-		.richtext-base
-			:where(.richtext-base > ol > li > p:first-child):not(
-				:where([class~="not-richtext"], [class~="not-richtext"] *)
-			) {
-			margin-top: 1.25em;
-		}
-
-		.richtext-base
-			:where(.richtext-base > ol > li > p:last-child):not(
-				:where([class~="not-richtext"], [class~="not-richtext"] *)
-			) {
-			margin-bottom: 1.25em;
-		}
-
-		.richtext-base
-			:where(ul ul, ul ol, ol ul, ol ol):not(
-				:where([class~="not-richtext"], [class~="not-richtext"] *)
-			) {
-			margin-top: 0.75em;
-			margin-bottom: 0.75em;
+		&:where(ul ul, ul ol, ol ul, ol ol) {
+			margin-top: var(--richtext-list-gap);
+			margin-bottom: var(--richtext-list-gap);
 		}
 
 		&:where(dl):not(:where([class~="not-richtext"], [class~="not-richtext"] *)) {
@@ -1488,6 +1462,8 @@
 	font-size: 1.125rem;
 	line-height: 1.7777778;
 
+	--richtext-list-gap: 0.5em;
+
 	:not(:where([class~="not-richtext"], [class~="not-richtext"] *)) {
 		&:where(p) {
 			margin-top: 1.3333333em;
@@ -1598,8 +1574,8 @@
 		}
 
 		&:where(li) {
-			margin-top: 0.6666667em;
-			margin-bottom: 0.6666667em;
+			margin-top: var(--richtext-list-gap);
+			margin-bottom: var(--richtext-list-gap);
 		}
 
 		&:where(ol > li) {
@@ -1610,42 +1586,19 @@
 			padding-inline-start: 0.4444444em;
 		}
 
-		.richtext-lg :where(.richtext-lg > ul > li p) {
-			margin-top: 0.8888889em;
-			margin-bottom: 0.8888889em;
+		/** One gap for lists — see the `richtext` utility. */
+		&:where(li > p) {
+			margin-top: 0;
+			margin-bottom: 0;
 		}
 
-		.richtext-lg
-			:where(.richtext-lg > ul > li > p:first-child):not(
-				:where([class~="not-richtext"], [class~="not-richtext"] *)
-			) {
-			margin-top: 1.3333333em;
+		&:where(li > * + *) {
+			margin-top: var(--richtext-list-gap);
 		}
 
-		.richtext-lg
-			:where(.richtext-lg > ul > li > p:last-child):not(
-				:where([class~="not-richtext"], [class~="not-richtext"] *)
-			) {
-			margin-bottom: 1.3333333em;
-		}
-
-		.richtext-lg
-			:where(.richtext-lg > ol > li > p:first-child):not(
-				:where([class~="not-richtext"], [class~="not-richtext"] *)
-			) {
-			margin-top: 1.3333333em;
-		}
-
-		.richtext-lg
-			:where(.richtext-lg > ol > li > p:last-child):not(
-				:where([class~="not-richtext"], [class~="not-richtext"] *)
-			) {
-			margin-bottom: 1.3333333em;
-		}
-
-		.richtext-lg :where(ul ul, ul ol, ol ul, ol ol) {
-			margin-top: 0.8888889em;
-			margin-bottom: 0.8888889em;
+		&:where(ul ul, ul ol, ol ul, ol ol) {
+			margin-top: var(--richtext-list-gap);
+			margin-bottom: var(--richtext-list-gap);
 		}
 
 		&:where(dl) {
