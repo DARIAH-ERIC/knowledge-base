@@ -510,29 +510,52 @@ export class WebsiteNewsPage {
 	 * Located by the note it shows rather than by a role — the popover renders its content directly,
 	 * with no dialog of its own, which is why `linkPopoverForm` goes by its input as well.
 	 */
-	async openLinkTargetPopover(kind: "document" | "page"): Promise<void> {
+	async openLinkTargetPopover(kind: "document" | "page", targetLabel?: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Link", exact: true }).click();
-		await expect(
-			this.page.getByText(
-				kind === "document"
+
+		/**
+		 * With a label, the popover has to name the target, not merely its kind — the mark holds only a
+		 * reference, so naming it means the host resolved that reference. Without one, the generic note
+		 * is what an unresolvable (or not-yet-loaded) target falls back to.
+		 */
+		const summary =
+			targetLabel != null
+				? kind === "document"
+					? `Links to the document ${targetLabel}.`
+					: `Links to the page ${targetLabel}.`
+				: kind === "document"
 					? "This link points to a document."
-					: "This link points to another page.",
-				{ exact: true },
-			),
-		).toBeVisible();
+					: "This link points to another page.";
+
+		await expect(this.page.getByText(summary, { exact: true })).toBeVisible();
 	}
 
 	/**
 	 * Point the document link at the cursor at a different stored document. The link text is left
 	 * alone on purpose — the author wrote it, so retargeting must not overwrite it with the new
 	 * document's label.
+	 *
+	 * `currentLabel` is the document the link points at now: the picker opens on it, so an author can
+	 * see what they are replacing rather than an empty grid.
 	 */
-	async changeDocumentLink(assetLabel: string): Promise<void> {
-		await this.openLinkTargetPopover("document");
+	async changeDocumentLink(assetLabel: string, currentLabel?: string): Promise<void> {
+		await this.openLinkTargetPopover("document", currentLabel);
 		await this.page.getByRole("button", { name: "Change document", exact: true }).click();
 
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
+
+		if (currentLabel != null) {
+			/**
+			 * `aria-selected` sits on the row, not on the cell inside it — the cell is what the clicks
+			 * below target, because that is what carries the label.
+			 */
+			const currentRow = dialog
+				.getByRole("row")
+				.filter({ has: this.page.getByRole("gridcell", { name: currentLabel }) });
+			await expect(currentRow).toHaveAttribute("aria-selected", "true");
+		}
+
 		const asset = dialog.getByRole("gridcell", { name: assetLabel });
 		await expect(asset).toHaveCount(1);
 		await asset.click();
@@ -541,10 +564,30 @@ export class WebsiteNewsPage {
 	}
 
 	/** Point the entity link at the cursor at a different page. */
-	async changeEntityLink(entityName: string): Promise<void> {
-		await this.openLinkTargetPopover("page");
+	async changeEntityLink(entityName: string, currentName?: string): Promise<void> {
+		await this.openLinkTargetPopover("page", currentName);
 		await this.page.getByRole("button", { name: "Change page", exact: true }).click();
+
+		if (currentName != null) {
+			/** The picker opens on the page the link points at now, rather than on an empty select. */
+			const dialog = this.page.getByRole("dialog").filter({ hasText: "Link to a page" });
+			await dialog.waitFor({ state: "visible" });
+			await expect(dialog.getByText(currentName, { exact: true }).first()).toBeVisible();
+		}
+
 		await this.pickEntityInLinkDialog(entityName);
+	}
+
+	/**
+	 * The preview's rendering of an entity link. It names the page the link leads to but stays
+	 * unclickable — the dashboard resolves the title without reproducing the website's url rules — so
+	 * the title attribute is where the resolution shows.
+	 */
+	async expectEntityLinkPreviewTarget(linkText: string, entityName: string): Promise<void> {
+		await expect(this.page.getByText(linkText, { exact: true })).toHaveAttribute(
+			"title",
+			`Links to “${entityName}” on the website. Its address is resolved when the site renders it.`,
+		);
 	}
 
 	/** Insert a placeholder-value chip, which stores a kind reference rather than a rendered value. */

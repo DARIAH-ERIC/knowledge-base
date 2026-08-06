@@ -4,10 +4,11 @@ import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Button } from "@dariah-eric/ui/button";
 import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
 import { useExtracted } from "next-intl";
-import { type ComponentType, type ReactNode, useState } from "react";
+import { type ComponentType, type ReactNode, useEffect, useState } from "react";
 
 import {
 	type EntityOption,
+	fetchEntityOptionsByIds,
 	fetchEntityOptionsPage,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option";
 import { renderEntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option-item";
@@ -15,6 +16,13 @@ import { renderEntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/a
 interface EntityLinkDialogProps {
 	/** Receives the entity's document id and its label, to use as the link text. */
 	onSelect: (entityId: string, label: string) => void;
+	/**
+	 * The entity the link already points at, when the dialog was opened to change one. Only its id is
+	 * stored, so the dialog resolves it to a name of its own accord — opening on a blank picker would
+	 * make "change" indistinguishable from "start again", and hide which page is about to be
+	 * replaced.
+	 */
+	selectedEntityId?: string | null;
 	/**
 	 * Renders its own trigger when given one. Callers that open the dialog from a menu pass
 	 * `isOpen`/`onOpenChange` instead and omit this: a trigger nested in a menu is unmounted by the
@@ -37,6 +45,7 @@ interface EntityLinkDialogProps {
  */
 export function EntityLinkDialog({
 	onSelect,
+	selectedEntityId = null,
 	trigger: Trigger,
 	isOpen: controlledIsOpen,
 	onOpenChange,
@@ -47,6 +56,42 @@ export function EntityLinkDialog({
 	const [selected, setSelected] = useState<EntityOption | null>(null);
 
 	const isOpen = controlledIsOpen ?? uncontrolledIsOpen;
+
+	/**
+	 * Resolve the entity the link points at, once the dialog is actually open. Deferred until then
+	 * because this component stays mounted for the life of the editor — the dialog it renders is
+	 * opened from a menu, which cannot host it — so resolving on mount would look every link up
+	 * whether or not anyone ever opens the picker.
+	 *
+	 * An id that no longer resolves leaves the picker empty, which is the honest rendering: the
+	 * dialog cannot name a page that is gone, and the author is choosing a replacement anyway.
+	 */
+	useEffect(() => {
+		if (!isOpen || selectedEntityId == null) {
+			return;
+		}
+
+		const controller = new AbortController();
+		const entityId = selectedEntityId;
+
+		async function resolveSelected() {
+			try {
+				const items = await fetchEntityOptionsByIds([entityId], controller.signal);
+				const entity = items.at(0);
+				if (entity != null) {
+					setSelected(entity);
+				}
+			} catch {
+				// Leaves the picker empty, same as an id that resolved to nothing.
+			}
+		}
+
+		void resolveSelected();
+
+		return () => {
+			controller.abort();
+		};
+	}, [isOpen, selectedEntityId]);
 
 	function setIsOpen(next: boolean) {
 		setUncontrolledIsOpen(next);

@@ -158,11 +158,22 @@ interface RichTextEditorProps {
 	 * the menu that opened it.
 	 */
 	renderDocumentPicker?: (
-		args: RichTextPickerRenderArgs<(assetKey: string, label: string) => void>,
+		args: RichTextTargetPickerRenderArgs<(assetKey: string, label: string) => void>,
 	) => ReactNode;
 	/** Picker for linking selected text to another entity. Rendered the same way, for the same reason. */
 	renderEntityPicker?: (
-		args: RichTextPickerRenderArgs<(entityId: string, label: string) => void>,
+		args: RichTextTargetPickerRenderArgs<(entityId: string, label: string) => void>,
+	) => ReactNode;
+	/**
+	 * Names the target a link points at, for the link popover. A link that points at something we own
+	 * stores only the reference, so the editor can say which _kind_ of thing it is but not which one:
+	 * resolving an asset key or a document id to a title needs the media library or the database, and
+	 * this package can read neither. Same division as `renderAssetMetadata`.
+	 *
+	 * Falls back to naming the kind alone where the host supplies nothing.
+	 */
+	renderLinkTargetSummary?: (
+		target: { kind: "asset"; assetKey: string } | { kind: "entity"; entityId: string },
 	) => ReactNode;
 }
 
@@ -180,6 +191,19 @@ export interface RichTextPickerRenderArgs<TSelect> {
 	isOpen: boolean;
 	onOpenChange: (isOpen: boolean) => void;
 	select: TSelect;
+}
+
+/**
+ * What a link-target picker is handed. Beyond opening and reporting a choice, it is told which
+ * target it is replacing, so "change this link" opens on the document or page the link points at
+ * now rather than on an empty picker.
+ */
+export interface RichTextTargetPickerRenderArgs<TSelect> extends RichTextPickerRenderArgs<TSelect> {
+	/**
+	 * The asset key or document id the link at the cursor points at, when the picker was opened from
+	 * the link popover to change it. `null` when the insert menu opened it to make a new link.
+	 */
+	current: string | null;
 }
 
 function normalizeInitialContent(content: JSONContent | undefined): JSONContent | undefined {
@@ -2503,6 +2527,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		renderAssetMetadata,
 		renderDocumentPicker,
 		renderEntityPicker,
+		renderLinkTargetSummary,
 	} = props;
 
 	const t = useExtracted("ui");
@@ -2564,19 +2589,24 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 	const [openPicker, setOpenPicker] = useState<"document" | "entity" | "image" | null>(null);
 
 	/**
-	 * Whether the open target picker replaces the target of the link the cursor is in, rather than
-	 * linking the selection to a newly picked one. The same two dialogs serve both: the insert menu
-	 * opens them to make a link, the link popover to point an existing one somewhere else.
+	 * The target the open picker is replacing — the asset key or document id the link at the cursor
+	 * currently points at — or `null` when the picker was opened to make a new link. The same two
+	 * dialogs serve both: the insert menu opens them to link a selection, the link popover to point
+	 * an existing link somewhere else.
 	 *
-	 * A ref rather than state because nothing renders differently either way — and because state here
-	 * would rebuild the select callbacks, and with them the host's dialogs, at the moment the picker
-	 * opens.
+	 * Held as state rather than a ref because the pickers are handed it, to open on the target they
+	 * are about to replace. Safe to clear when the picker closes: both dialogs report the selection
+	 * before they close, so this is still set when `linkTarget` reads it.
 	 */
-	const isRetargetingLinkRef = useRef(false);
+	const [linkRetarget, setLinkRetarget] = useState<{
+		kind: "document" | "entity";
+		target: string;
+	} | null>(null);
 
 	const closePicker = useCallback((isOpen: boolean) => {
 		if (!isOpen) {
 			setOpenPicker(null);
+			setLinkRetarget(null);
 		}
 	}, []);
 
@@ -2586,7 +2616,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	/** Opens a target picker to link the selection to whatever is picked. */
 	const openTargetPicker = useCallback((kind: "document" | "entity") => {
-		isRetargetingLinkRef.current = false;
+		setLinkRetarget(null);
 		setOpenPicker(kind);
 	}, []);
 
@@ -2638,6 +2668,25 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			? "document"
 			: activeState?.linkTargetKind === "entity" && renderEntityPicker != null
 				? "entity"
+				: null;
+
+	/** The reference the link at the cursor holds, which is what a picker would be replacing. */
+	const currentLinkTarget =
+		retargetPicker === "document"
+			? (activeState?.linkAssetKey ?? null)
+			: retargetPicker === "entity"
+				? (activeState?.linkEntityId ?? null)
+				: null;
+
+	/**
+	 * What the popover says the link points at. The host names the target where it can; otherwise the
+	 * kind alone, which is all the editor itself knows.
+	 */
+	const linkTargetSummary =
+		activeState?.linkTargetKind === "asset" && activeState.linkAssetKey != null
+			? renderLinkTargetSummary?.({ kind: "asset", assetKey: activeState.linkAssetKey })
+			: activeState?.linkTargetKind === "entity" && activeState.linkEntityId != null
+				? renderLinkTargetSummary?.({ kind: "entity", entityId: activeState.linkEntityId })
 				: null;
 
 	const [editorJson, setEditorJson] = useState<JSONContent | undefined>(initialContent);
@@ -2767,12 +2816,9 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				...attrs,
 			};
 
-			const isRetargeting = isRetargetingLinkRef.current;
-			isRetargetingLinkRef.current = false;
-
 			// `setMark` rather than `setLink` throughout: the link extension's setter takes (and
 			// validates) an href, and these links deliberately have none — the reference is the target.
-			if (isRetargeting && editor.isActive("link")) {
+			if (linkRetarget != null && editor.isActive("link")) {
 				const chain = editor.chain().focus();
 				// The popover took the cursor out of the editor when it opened, so restore what it saved
 				// before extending over the link — the same restore `applyLink` and `removeLink` do.
@@ -2804,7 +2850,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 			chain.setMark("link", targetAttrs).run();
 		},
-		[editor],
+		[editor, linkRetarget],
 	);
 
 	const linkDocument = useCallback(
@@ -2826,8 +2872,8 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 	 * that offered it: the picker is a modal dialog, and the popover would sit under it and take the
 	 * selection restore with it when it closed.
 	 */
-	const retargetLink = useCallback((kind: "document" | "entity") => {
-		isRetargetingLinkRef.current = true;
+	const retargetLink = useCallback((kind: "document" | "entity", target: string) => {
+		setLinkRetarget({ kind, target });
 		setIsLinkPopoverOpen(false);
 		setOpenPicker(kind);
 	}, []);
@@ -2941,18 +2987,20 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 								// to show and applying it would silently replace the target. Changing one means
 								// picking a new target, which is the same dialog the insert menu opens.
 								<div className="flex inline-56 flex-col gap-2">
-									<Note intent="info">
-										{activeState.linkTargetKind === "asset"
-											? t("This link points to a document.")
-											: t("This link points to another page.")}
-									</Note>
+									{linkTargetSummary ?? (
+										<Note intent="info">
+											{activeState.linkTargetKind === "asset"
+												? t("This link points to a document.")
+												: t("This link points to another page.")}
+										</Note>
+									)}
 									<div className="flex gap-2">
-										{retargetPicker != null ? (
+										{retargetPicker != null && currentLinkTarget != null ? (
 											<Button
 												className="flex-1"
 												intent="primary"
 												onPress={() => {
-													retargetLink(retargetPicker);
+													retargetLink(retargetPicker, currentLinkTarget);
 												}}
 												size="sm"
 												type="button"
@@ -3162,11 +3210,13 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						isOpen: openPicker === "document",
 						onOpenChange: closePicker,
 						select: linkDocument,
+						current: linkRetarget?.kind === "document" ? linkRetarget.target : null,
 					})}
 					{renderEntityPicker?.({
 						isOpen: openPicker === "entity",
 						onOpenChange: closePicker,
 						select: linkEntity,
+						current: linkRetarget?.kind === "entity" ? linkRetarget.target : null,
 					})}
 				</div>
 			) : null}

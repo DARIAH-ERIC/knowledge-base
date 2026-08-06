@@ -46,6 +46,33 @@ export async function fetchEntityOptionsPage(
 }
 
 /**
+ * Look pickable entities up by document id, in the order asked for. Ids that no longer resolve —
+ * deleted, unpublished, or a type with no public page — are absent from the result rather than
+ * reported as an error: a stored reference going stale is ordinary, and the callers show it as
+ * such.
+ */
+export async function fetchEntityOptionsByIds(
+	ids: ReadonlyArray<string>,
+	signal?: AbortSignal,
+): Promise<Array<EntityOption>> {
+	if (ids.length === 0) {
+		return [];
+	}
+
+	const searchParams = new URLSearchParams({ ids: ids.join(",") });
+
+	const response = await fetch(`/api/relations/entities?${searchParams.toString()}`, { signal });
+
+	if (!response.ok) {
+		throw new Error("Failed to load entities.");
+	}
+
+	const result = (await response.json()) as { items: Array<EntityOption> };
+
+	return result.items;
+}
+
+/**
  * Fetch a page of pickable entities including never-published drafts. For maintenance tools that
  * act on a document itself (the slug editor) rather than pick a relation target.
  */

@@ -55,16 +55,28 @@ function renderLinkMark({
 	const attrs = mark.attrs ?? {};
 	const assetKey = typeof attrs.assetKey === "string" ? attrs.assetKey : null;
 
-	// An entity link stores only a document id, and turning that into a url needs a lookup this
-	// client component cannot do — unlike an asset key, which is a url by string substitution. So the
-	// preview cannot make it clickable, and must not claim to know whether it still resolves. It is
-	// marked as a reference instead, so an editor can tell a working link from a broken one rather
-	// than seeing both as bare text.
+	// An entity link stores only a document id. The read path names it (`resolveEntityLinksInContent
+	// Blocks`) but attaches no url — building one means the website's per-type routing, which lives
+	// in the public API — so the preview says which page the link leads to without being clickable.
+	//
+	// An id that resolved to nothing is called out rather than passed over: deleted, unpublished and
+	// page-less targets all render as plain text on the website, and an editor proof-reading a page
+	// needs to see that while they can still fix it.
 	if (attrs.targetKind === "entity") {
-		return (
+		const entity = attrs.entity as { label?: unknown } | null | undefined;
+		const label = typeof entity?.label === "string" ? entity.label : null;
+
+		return label != null ? (
 			<span
 				className="underline decoration-dotted underline-offset-2 text-muted-fg"
-				title="Links to a page on the website. Its address is resolved when the site renders it."
+				title={`Links to “${label}” on the website. Its address is resolved when the site renders it.`}
+			>
+				{children}
+			</span>
+		) : (
+			<span
+				className="underline decoration-wavy underline-offset-2 text-danger"
+				title="This link points to a page that is no longer published, so it will render as plain text."
 			>
 				{children}
 			</span>
