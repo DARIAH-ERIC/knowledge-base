@@ -175,6 +175,7 @@ RUN --mount=type=secret,id=API_ACCESS_TOKEN,env=API_ACCESS_TOKEN \
     --mount=type=secret,id=IMGPROXY_SALT,env=IMGPROXY_SALT \
     --mount=type=secret,id=MAILCHIMP_API_BASE_URL,env=MAILCHIMP_API_BASE_URL \
     --mount=type=secret,id=MAILCHIMP_API_KEY,env=MAILCHIMP_API_KEY \
+    --mount=type=secret,id=MAILCHIMP_CAMPAIGN_FOLDER_ID,env=MAILCHIMP_CAMPAIGN_FOLDER_ID \
     --mount=type=secret,id=MAILCHIMP_LIST_ID,env=MAILCHIMP_LIST_ID \
     --mount=type=secret,id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,env=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY \
     --mount=type=secret,id=OPENAIRE_API_BASE_URL,env=OPENAIRE_API_BASE_URL \

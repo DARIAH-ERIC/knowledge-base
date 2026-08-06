@@ -53,14 +53,32 @@ export interface ListCampaignsParams {
 	sinceSendTime?: string;
 	beforeCreateTime?: string;
 	sinceCreateTime?: string;
+	folderId?: string;
 	sortField?: "create_time" | "send_time";
 	sortDir?: "ASC" | "DESC";
+}
+
+export interface CampaignFolder {
+	id: string;
+	name: string;
+	count: number;
+}
+
+export interface ListCampaignFoldersResponse {
+	folders: Array<CampaignFolder>;
+	total_items: number;
+}
+
+export interface ListCampaignFoldersParams {
+	count?: number;
+	offset?: number;
 }
 
 export interface CreateMailchimpClientParams {
 	config: {
 		apiKey: string;
 		baseUrl: string;
+		campaignFolderId?: string;
 		listId: string;
 	};
 }
@@ -71,7 +89,7 @@ const pageSize = 1000;
 export function createMailchimpClient(params: CreateMailchimpClientParams) {
 	const { config } = params;
 
-	const { apiKey, baseUrl, listId } = config;
+	const { apiKey, baseUrl, campaignFolderId, listId } = config;
 
 	const credentials = `key:${apiKey}`;
 
@@ -91,6 +109,7 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 			sinceSendTime,
 			beforeCreateTime,
 			sinceCreateTime,
+			folderId,
 			sortField,
 			sortDir,
 		} = params;
@@ -110,6 +129,7 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 					since_send_time: sinceSendTime,
 					before_create_time: beforeCreateTime,
 					since_create_time: sinceCreateTime,
+					folder_id: folderId ?? campaignFolderId,
 					sort_field: sortField,
 					sort_dir: sortDir,
 				}),
@@ -143,6 +163,27 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 
 					return Result.ok(items);
 				});
+			},
+		},
+
+		campaignFolders: {
+			list(
+				params: ListCampaignFoldersParams = {},
+			): Promise<RequestResult<ListCampaignFoldersResponse>> {
+				const { count, offset } = params;
+
+				/** @see {@link https://mailchimp.com/developer/marketing/api/campaign-folders/list-campaign-folders/} */
+				return request<ListCampaignFoldersResponse>(
+					createUrl({
+						baseUrl,
+						pathname: "/3.0/campaign-folders",
+						searchParams: createUrlSearchParams({
+							count,
+							offset,
+						}),
+					}),
+					{ headers, responseType: "json" },
+				);
 			},
 		},
 
