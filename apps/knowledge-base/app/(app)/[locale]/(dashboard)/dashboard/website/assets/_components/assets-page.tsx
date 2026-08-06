@@ -163,7 +163,9 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 										/>
 									</div>
 									<figcaption className="flex flex-col gap-y-0.5 px-0.5">
-										<span className="truncate text-sm/tight font-medium">{asset.label}</span>
+										<span className="truncate text-sm/tight font-medium" title={asset.label}>
+											{asset.label}
+										</span>
 										<span className="text-xs text-muted-fg">
 											{prefix}
 											{asset.size != null ? ` · ${formatFileSize(asset.size)}` : null}
@@ -195,7 +197,9 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 									</div>
 									<figcaption className="flex min-inline-0 flex-1 flex-col gap-y-1.5">
 										<div className="flex flex-row items-baseline gap-x-2">
-											<span className="truncate text-sm/tight font-medium">{asset.label}</span>
+											<span className="truncate text-sm/tight font-medium" title={asset.label}>
+												{asset.label}
+											</span>
 											<span className="shrink-0 text-xs text-muted-fg">{prefix}</span>
 										</div>
 										{asset.alt != null && asset.alt !== "" ? (

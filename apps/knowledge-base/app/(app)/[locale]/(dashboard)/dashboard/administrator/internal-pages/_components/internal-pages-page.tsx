@@ -18,6 +18,7 @@ import {
 	EntityListHeader,
 	EntityListPagination,
 	EntityListSearchField,
+	EntityListTitle,
 	RowActionsMenu,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
@@ -84,7 +85,7 @@ export function InternalPagesPage(props: Readonly<InternalPagesPageProps>): Reac
 					{(item) => (
 						<TableRow href={`/dashboard/administrator/internal-pages/${item.entity.slug}/details`}>
 							<TableCell>
-								<div className="max-inline-64 truncate">{item.title}</div>
+								<EntityListTitle title={item.title} />
 							</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
