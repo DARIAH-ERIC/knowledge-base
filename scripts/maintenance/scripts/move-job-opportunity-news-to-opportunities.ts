@@ -1,6 +1,8 @@
+import { parseArgs } from "node:util";
+
 import { log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
-import { sql } from "@dariah-eric/database/sql";
+import { type SQL, sql } from "@dariah-eric/database/sql";
 
 import { env } from "../config/env.config";
 
@@ -8,6 +10,9 @@ import { env } from "../config/env.config";
  * One-off script moving news documents whose title starts with "Job opportunity" to opportunities.
  * The match is case-insensitive and also covers "Job-opportunity", the plural "Job opportunities",
  * and "Job opening(s)".
+ *
+ * Pass one or more news item slugs as positional arguments to move exactly those documents instead,
+ * regardless of how their titles are worded.
  *
  * Dry run by default; pass `--apply` to mutate the database.
  *
@@ -18,6 +23,8 @@ import { env } from "../config/env.config";
  * @example
  * 	pnpm run data:move:job-opportunity-news
  * 	pnpm run data:move:job-opportunity-news -- --apply
+ * 	pnpm run data:move:job-opportunity-news -- some-news-slug another-news-slug
+ * 	pnpm run data:move:job-opportunity-news -- some-news-slug --apply
  */
 
 /**
@@ -52,7 +59,28 @@ interface SlugConflict {
 	conflictingDocumentId: string;
 }
 
-async function findCandidates(): Promise<Array<Candidate>> {
+/**
+ * The news documents to move: those whose title matches `titlePattern`, or, when slugs are given,
+ * exactly the news documents with those slugs.
+ *
+ * A document is selected as a whole, so all of its versions move together.
+ */
+function targetDocuments(slugs: Array<string>): SQL {
+	const filter =
+		slugs.length > 0 ? sql`"e"."slug" IN ${slugs}` : sql`"n"."title" ~* ${titlePattern}`;
+
+	return sql`
+		SELECT DISTINCT "ev"."entity_id" AS "document_id"
+		FROM "news" AS "n"
+		JOIN "entity_versions" AS "ev" ON "ev"."id" = "n"."id"
+		JOIN "entities" AS "e" ON "e"."id" = "ev"."entity_id"
+		JOIN "entity_types" AS "et" ON "et"."id" = "e"."type_id"
+		WHERE "et"."type" = 'news'
+			AND ${filter}
+	`;
+}
+
+async function findCandidates(slugs: Array<string>): Promise<Array<Candidate>> {
 	const result = await db.execute<{
 		document_id: string;
 		slug: string;
@@ -62,13 +90,7 @@ async function findCandidates(): Promise<Array<Candidate>> {
 		publication_date: string;
 	}>(sql`
 		WITH "target_documents" AS (
-			SELECT DISTINCT "ev"."entity_id" AS "document_id"
-			FROM "news" AS "n"
-			JOIN "entity_versions" AS "ev" ON "ev"."id" = "n"."id"
-			JOIN "entities" AS "e" ON "e"."id" = "ev"."entity_id"
-			JOIN "entity_types" AS "et" ON "et"."id" = "e"."type_id"
-			WHERE "et"."type" = 'news'
-				AND "n"."title" ~* ${titlePattern}
+			${targetDocuments(slugs)}
 		)
 		SELECT
 			"e"."id"::text AS "document_id",
@@ -97,20 +119,14 @@ async function findCandidates(): Promise<Array<Candidate>> {
 	});
 }
 
-async function findSlugConflicts(): Promise<Array<SlugConflict>> {
+async function findSlugConflicts(slugs: Array<string>): Promise<Array<SlugConflict>> {
 	const result = await db.execute<{
 		document_id: string;
 		slug: string;
 		conflicting_document_id: string;
 	}>(sql`
 		WITH "target_documents" AS (
-			SELECT DISTINCT "ev"."entity_id" AS "document_id"
-			FROM "news" AS "n"
-			JOIN "entity_versions" AS "ev" ON "ev"."id" = "n"."id"
-			JOIN "entities" AS "e" ON "e"."id" = "ev"."entity_id"
-			JOIN "entity_types" AS "et" ON "et"."id" = "e"."type_id"
-			WHERE "et"."type" = 'news'
-				AND "n"."title" ~* ${titlePattern}
+			${targetDocuments(slugs)}
 		)
 		SELECT
 			"target"."id"::text AS "document_id",
@@ -181,7 +197,7 @@ async function assertRequiredLookupsExist(): Promise<void> {
 	}
 }
 
-async function moveCandidates(): Promise<{
+async function moveCandidates(slugs: Array<string>): Promise<{
 	movedVersions: number;
 	movedDocuments: number;
 	updatedFields: number;
@@ -193,13 +209,7 @@ async function moveCandidates(): Promise<{
 			updated_fields: string;
 		}>(sql`
 			WITH "target_documents" AS (
-				SELECT DISTINCT "ev"."entity_id" AS "document_id"
-				FROM "news" AS "n"
-				JOIN "entity_versions" AS "ev" ON "ev"."id" = "n"."id"
-				JOIN "entities" AS "e" ON "e"."id" = "ev"."entity_id"
-				JOIN "entity_types" AS "et" ON "et"."id" = "e"."type_id"
-				WHERE "et"."type" = 'news'
-					AND "n"."title" ~* ${titlePattern}
+				${targetDocuments(slugs)}
 			),
 			"target_news" AS (
 				SELECT
@@ -349,18 +359,31 @@ function formatCandidate(candidate: Candidate): string {
 }
 
 async function main(): Promise<void> {
-	const apply = process.argv.includes("--apply");
+	/**
+	 * `pnpm run <script> -- --apply` forwards the `--` separator to the script, which `parseArgs`
+	 * would otherwise read as "everything after this is a positional argument".
+	 */
+	const args = process.argv.slice(2);
+	const { positionals: slugs, values } = parseArgs({
+		allowPositionals: true,
+		args: args[0] === "--" ? args.slice(1) : args,
+		options: {
+			apply: { type: "boolean", default: false },
+		},
+	});
+	const apply = values.apply;
 
 	await assertRequiredLookupsExist();
 
-	const candidates = await findCandidates();
+	const candidates = await findCandidates(slugs);
 	const documentCount = new Set(candidates.map((candidate) => candidate.documentId)).size;
 
-	log.info(
-		apply
-			? "Moving job-opportunity news items to opportunities..."
-			: "Finding job-opportunity news items (dry run)...",
-	);
+	const subject =
+		slugs.length > 0
+			? `${String(slugs.length)} requested news item(s)`
+			: "job-opportunity news items";
+
+	log.info(apply ? `Moving ${subject} to opportunities...` : `Finding ${subject} (dry run)...`);
 	log.info(
 		`Found ${String(candidates.length)} version(s) across ${String(documentCount)} document(s).`,
 	);
@@ -369,11 +392,18 @@ async function main(): Promise<void> {
 		log.info(formatCandidate(candidate));
 	}
 
+	const foundSlugs = new Set(candidates.map((candidate) => candidate.slug));
+	for (const slug of slugs) {
+		if (!foundSlugs.has(slug)) {
+			log.warn(`No news document found with slug "${slug}".`);
+		}
+	}
+
 	if (candidates.length === 0) {
 		return;
 	}
 
-	const conflicts = await findSlugConflicts();
+	const conflicts = await findSlugConflicts(slugs);
 	if (conflicts.length > 0) {
 		for (const conflict of conflicts) {
 			log.error(
@@ -388,7 +418,7 @@ async function main(): Promise<void> {
 		return;
 	}
 
-	const result = await moveCandidates();
+	const result = await moveCandidates(slugs);
 
 	log.success(
 		`Moved ${String(result.movedVersions)} version(s) across ${String(result.movedDocuments)} document(s) from news to opportunities; remapped ${String(result.updatedFields)} content field(s).`,
