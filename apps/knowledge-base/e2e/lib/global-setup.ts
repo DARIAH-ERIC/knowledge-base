@@ -46,6 +46,12 @@ const E2E_TEST_ASSET_KEYS: Array<{ key: string; label: string; mimeType?: string
 	{ key: "images/e2e-test-asset", label: "E2E Test Asset" },
 	{ key: "logos/e2e-test-asset", label: "E2E Test Asset" },
 	{ key: "documents/e2e-test-document", label: "E2E Test Document", mimeType: "application/pdf" },
+	/** A second document, so a document link has somewhere else to be pointed at. */
+	{
+		key: "documents/e2e-other-document",
+		label: "E2E Other Document",
+		mimeType: "application/pdf",
+	},
 ];
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 30;
 

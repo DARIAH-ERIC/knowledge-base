@@ -96,6 +96,8 @@ export interface RichTextActiveState {
 	isInTable: boolean | undefined;
 	linkHref: string | undefined;
 	linkTargetKind: string | undefined;
+	linkAssetKey: string | undefined;
+	linkEntityId: string | undefined;
 }
 
 export function selectRichTextActiveState(ctx: { editor: Editor | null }): RichTextActiveState {
@@ -114,6 +116,8 @@ export function selectRichTextActiveState(ctx: { editor: Editor | null }): RichT
 		isInTable: ctx.editor?.isActive("table"),
 		linkHref: ctx.editor?.getAttributes("link").href as string | undefined,
 		linkTargetKind: ctx.editor?.getAttributes("link").targetKind as string | undefined,
+		linkAssetKey: ctx.editor?.getAttributes("link").assetKey as string | undefined,
+		linkEntityId: ctx.editor?.getAttributes("link").entityId as string | undefined,
 	};
 }
 

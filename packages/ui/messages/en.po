@@ -15,8 +15,8 @@ msgstr "Could not load options."
 
 #: lib/async-list-select.tsx:235
 #: lib/inline-rich-text-editor.tsx:245
-#: lib/rich-text-editor.tsx:2871
-#: lib/rich-text-editor.tsx:2898
+#: lib/rich-text-editor.tsx:2964
+#: lib/rich-text-editor.tsx:2992
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
@@ -165,27 +165,27 @@ msgid "4ZUjCU"
 msgstr "Reorder item"
 
 #: lib/inline-rich-text-editor.tsx:192
-#: lib/rich-text-actions.tsx:158
+#: lib/rich-text-actions.tsx:162
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
 #: lib/inline-rich-text-editor.tsx:200
-#: lib/rich-text-actions.tsx:168
+#: lib/rich-text-actions.tsx:172
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
 
 #: lib/inline-rich-text-editor.tsx:211
 #: lib/inline-rich-text-editor.tsx:219
-#: lib/rich-text-editor.tsx:2849
-#: lib/rich-text-editor.tsx:2858
+#: lib/rich-text-editor.tsx:2927
+#: lib/rich-text-editor.tsx:2936
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
 #: lib/inline-rich-text-editor.tsx:241
-#: lib/rich-text-editor.tsx:2894
+#: lib/rich-text-editor.tsx:2988
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
@@ -206,189 +206,199 @@ msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: lib/rich-text-actions.tsx:178
+#: lib/rich-text-actions.tsx:182
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: lib/rich-text-actions.tsx:188
-#: lib/rich-text-editor.tsx:2801
-#: lib/rich-text-editor.tsx:2804
+#: lib/rich-text-actions.tsx:192
+#: lib/rich-text-editor.tsx:2879
+#: lib/rich-text-editor.tsx:2882
 msgctxt "ui"
 msgid "qKqtMC"
 msgstr "Paragraph"
 
-#: lib/rich-text-actions.tsx:199
+#: lib/rich-text-actions.tsx:203
 msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
-#: lib/rich-text-actions.tsx:210
+#: lib/rich-text-actions.tsx:214
 msgctxt "ui"
 msgid "BDbgCL"
 msgstr "Heading 3"
 
-#: lib/rich-text-actions.tsx:221
+#: lib/rich-text-actions.tsx:225
 msgctxt "ui"
 msgid "BKF2fN"
 msgstr "Heading 4"
 
-#: lib/rich-text-actions.tsx:232
+#: lib/rich-text-actions.tsx:236
 msgctxt "ui"
 msgid "drh2NU"
 msgstr "Bullet list"
 
-#: lib/rich-text-actions.tsx:243
+#: lib/rich-text-actions.tsx:247
 msgctxt "ui"
 msgid "5j/gIz"
 msgstr "Ordered list"
 
-#: lib/rich-text-actions.tsx:254
+#: lib/rich-text-actions.tsx:258
 msgctxt "ui"
 msgid "+RDJVD"
 msgstr "Blockquote"
 
-#: lib/rich-text-actions.tsx:265
-#: lib/rich-text-editor.tsx:2913
-#: lib/rich-text-editor.tsx:2922
+#: lib/rich-text-actions.tsx:269
+#: lib/rich-text-editor.tsx:3007
+#: lib/rich-text-editor.tsx:3016
 msgctxt "ui"
 msgid "IeBejt"
 msgstr "Table"
 
-#: lib/rich-text-actions.tsx:283
+#: lib/rich-text-actions.tsx:287
 msgctxt "ui"
 msgid "0XWmRm"
 msgstr "Divider"
 
-#: lib/rich-text-actions.tsx:299
+#: lib/rich-text-actions.tsx:303
 msgctxt "ui"
 msgid "+0zv6g"
 msgstr "Image"
 
-#: lib/rich-text-actions.tsx:313
+#: lib/rich-text-actions.tsx:317
 msgctxt "ui"
 msgid "bp3HuS"
 msgstr "Embed"
 
-#: lib/rich-text-actions.tsx:333
+#: lib/rich-text-actions.tsx:337
 msgctxt "ui"
 msgid "fErjHU"
 msgstr "Callout"
 
-#: lib/rich-text-actions.tsx:356
+#: lib/rich-text-actions.tsx:360
 msgctxt "ui"
 msgid "1EqXlD"
 msgstr "Media and text"
 
-#: lib/rich-text-actions.tsx:393
+#: lib/rich-text-actions.tsx:397
 msgctxt "ui"
 msgid "WExVSr"
 msgstr "Gallery"
 
-#: lib/rich-text-actions.tsx:415
+#: lib/rich-text-actions.tsx:419
 msgctxt "ui"
 msgid "KP63fg"
 msgstr "Button"
 
-#: lib/rich-text-actions.tsx:435
+#: lib/rich-text-actions.tsx:439
 msgctxt "ui"
 msgid "fhp4gl"
 msgstr "Footnote"
 
-#: lib/rich-text-editor.tsx:2801
-#: lib/rich-text-editor.tsx:2807
+#: lib/rich-text-editor.tsx:2879
+#: lib/rich-text-editor.tsx:2885
 msgctxt "ui"
 msgid "hBrEtp"
 msgstr "Text style"
 
-#: lib/rich-text-editor.tsx:2867
+#: lib/rich-text-editor.tsx:2946
 msgctxt "ui"
 msgid "ZgFjjD"
 msgstr "This link points to a document."
 
-#: lib/rich-text-editor.tsx:2868
+#: lib/rich-text-editor.tsx:2947
 msgctxt "ui"
 msgid "TANa98"
 msgstr "This link points to another page."
 
-#: lib/rich-text-editor.tsx:2932
+#: lib/rich-text-editor.tsx:2960
+msgctxt "ui"
+msgid "y8KNhq"
+msgstr "Change document"
+
+#: lib/rich-text-editor.tsx:2960
+msgctxt "ui"
+msgid "KDqj1t"
+msgstr "Change page"
+
+#: lib/rich-text-editor.tsx:3026
 msgctxt "ui"
 msgid "yy68o/"
 msgstr "Toggle header row"
 
-#: lib/rich-text-editor.tsx:2940
+#: lib/rich-text-editor.tsx:3034
 msgctxt "ui"
 msgid "Lag3AX"
 msgstr "Add row above"
 
-#: lib/rich-text-editor.tsx:2947
+#: lib/rich-text-editor.tsx:3041
 msgctxt "ui"
 msgid "+MYMhj"
 msgstr "Add row below"
 
-#: lib/rich-text-editor.tsx:2954
+#: lib/rich-text-editor.tsx:3048
 msgctxt "ui"
 msgid "w19eTC"
 msgstr "Delete row"
 
-#: lib/rich-text-editor.tsx:2962
+#: lib/rich-text-editor.tsx:3056
 msgctxt "ui"
 msgid "UNGmTw"
 msgstr "Add column before"
 
-#: lib/rich-text-editor.tsx:2969
+#: lib/rich-text-editor.tsx:3063
 msgctxt "ui"
 msgid "X6kBtc"
 msgstr "Add column after"
 
-#: lib/rich-text-editor.tsx:2976
+#: lib/rich-text-editor.tsx:3070
 msgctxt "ui"
 msgid "qfX6ms"
 msgstr "Delete column"
 
-#: lib/rich-text-editor.tsx:2985
+#: lib/rich-text-editor.tsx:3079
 msgctxt "ui"
 msgid "2CyUQr"
 msgstr "Delete table"
 
-#: lib/rich-text-editor.tsx:2994
-#: lib/rich-text-editor.tsx:2998
-#: lib/rich-text-editor.tsx:3001
+#: lib/rich-text-editor.tsx:3088
+#: lib/rich-text-editor.tsx:3092
+#: lib/rich-text-editor.tsx:3095
 msgctxt "ui"
 msgid "freMIM"
 msgstr "Insert"
 
-#: lib/rich-text-editor.tsx:3022
+#: lib/rich-text-editor.tsx:3116
 msgctxt "ui"
 msgid "nxS3sg"
 msgstr "Link to document"
 
-#: lib/rich-text-editor.tsx:3032
+#: lib/rich-text-editor.tsx:3126
 msgctxt "ui"
 msgid "/GpEhj"
 msgstr "Link to page"
 
-#: lib/rich-text-editor.tsx:3039
+#: lib/rich-text-editor.tsx:3133
 msgctxt "ui"
 msgid "ojUXiU"
 msgstr "Placeholder value"
 
-#: lib/rich-text-editor.tsx:3090
+#: lib/rich-text-editor.tsx:3184
 msgctxt "ui"
 msgid "t1Ql7Y"
 msgstr "Footnotes"
 
-#: lib/rich-text-editor.tsx:3100
+#: lib/rich-text-editor.tsx:3194
 msgctxt "ui"
 msgid "cZp00l"
 msgstr "Empty note"
 
-#: lib/rich-text-editor.tsx:3110
+#: lib/rich-text-editor.tsx:3204
 msgctxt "ui"
 msgid "VXTh3F"
 msgstr "No matching blocks"
 
-#: lib/rich-text-editor.tsx:3113
+#: lib/rich-text-editor.tsx:3207
 msgctxt "ui"
 msgid "FeZ3P6"
 msgstr "Insert block"
