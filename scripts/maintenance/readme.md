@@ -237,3 +237,58 @@ A value that holds no recognisable ORCID or ROR id is left untouched and listed 
 `action=unrecognised` for a human to look at — the script never guesses. Normalisation is idempotent
 and runs per version row, so a document's draft and published copies are both corrected. Only the
 database is touched (needs the `DATABASE_*` env vars).
+
+### `data:normalise:slug-suffixes`
+
+Drops the numeric dedup suffix from `entities.slug` where the unsuffixed slug is in fact free. The
+WordPress migration copied slugs verbatim, so an item whose slug collided _in WordPress_ carries a
+`-2` here even though nothing in this database claims the base. Writes a TSV report to
+`.cache/slug-suffixes.tsv`.
+
+```bash
+pnpm --filter @dariah-eric/maintenance run data:normalise:slug-suffixes                      # dry run (report only)
+pnpm --filter @dariah-eric/maintenance run data:normalise:slug-suffixes -- --max-suffix=9
+pnpm --filter @dariah-eric/maintenance run data:normalise:slug-suffixes -- --apply           # rename the confident ones
+pnpm --filter @dariah-eric/maintenance run data:normalise:slug-suffixes -- --apply --include-referenced
+pnpm --filter @dariah-eric/maintenance run data:normalise:slug-suffixes -- --apply --from-file=.cache/slug-suffixes.tsv
+```
+
+**A slug is a public URL segment.** Renaming one changes that URL and 404s every external link to
+the old one, and nothing in this repo emits a redirect. That is the trade the report exists to let
+someone make deliberately, row by row — and the reason `--apply` is deliberately narrow.
+
+Each candidate carries a confidence:
+
+| confidence     | basis                                                           | auto-applied |
+| -------------- | --------------------------------------------------------------- | ------------ |
+| `derived`      | base slug free, and the label slugifies to exactly that base    | yes          |
+| `free`         | base slug free, label says nothing either way                   | yes          |
+| `title_suffix` | the label itself ends in the same number ("… Part 2")           | no           |
+| `ambiguous`    | two documents of the type want the same base (`foo-2`, `foo-3`) | no           |
+| `collision`    | another document of the type already holds the base slug        | no           |
+
+`title_suffix` is the false positive worth caring about: a slug ending in `-2` because the _title_
+does. The label is the only thing that separates it from a dedup counter, so a document that has
+never been published (no denormalised label) can only ever reach `free`.
+
+The suffix is dropped, never renumbered — `foo-3` becomes `foo`, and if `foo` is taken it is left
+alone. Slugs are unique per type (`entities_type_id_slug_unique`), so both the collision check and
+the rename are scoped to the candidate's own type. `--max-suffix` (default 50, matching
+`maxSlugAttempts` in the CMS's own deduplication) is what keeps years out of the candidate set; drop
+it to 9 where the data holds "phase 10"-style titles.
+
+A rich-text link that points at one of our documents stores a _reference_ and survives a rename, but
+a plain `href` stores the slug as text and does not. The script finds those first — across every
+`jsonb` column and every text column named like a link, discovered from the Postgres catalog — lists
+them in the `references` column and **holds those rows back**; pass `--include-referenced` to rename
+anyway.
+
+To decide row by row instead, edit `new_slug` in the report — clear it to reject a rename, fill it in
+to accept one the script would not have made — and re-run with `--apply --from-file=…`. Reviewed
+slugs are held to the same rules (slugified, free within the type), and a row whose slug changed
+since the report was written is skipped rather than force-applied. A run that reads a report writes
+none, so pointing `--from-file` at the report the script itself wrote cannot overwrite the edits it
+is about to read.
+
+Renaming changes public urls: rebuild the website and re-run `data:ingest:search` afterwards. Only
+the database is touched (needs the `DATABASE_*` env vars).
