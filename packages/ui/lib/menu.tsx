@@ -117,12 +117,23 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 
 	return (
 		<AriaMenuItem
-			className={composeRenderProps(className, (className, { hasSubmenu, ...renderProps }) =>
-				dropdownItemStyles({
-					...renderProps,
-					intent,
-					className: hasSubmenu
-						? twMerge(
+			className={composeRenderProps(
+				className,
+				(className, { hasSubmenu, selectionMode, ...renderProps }) =>
+					dropdownItemStyles({
+						...renderProps,
+						intent,
+						className: twMerge(
+							// An item whose leading column is already taken by an icon carries its check at the
+							// far end instead, positioned over the item rather than laid out in it — so the menu
+							// would otherwise be exactly as wide as its labels, and the check would land against
+							// the text. Reserved on every item, selected or not, since the widest label is what
+							// the menu sizes to.
+							//
+							// Only where there is an icon: without one the check sits in the leading column,
+							// which is laid out and needs no room made for it.
+							selectionMode !== "none" && "has-data-[slot=icon]:*:[[slot=label]]:pe-6",
+							hasSubmenu && [
 								// The chevron is positioned over the item rather than laid out in it, so the
 								// label has to keep its own room clear of it.
 								"*:[[slot=label]]:pe-6",
@@ -130,10 +141,10 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 								intent === "warning" && "open:bg-warning-subtle open:text-warning-subtle-fg",
 								intent === undefined &&
 									"open:bg-accent open:text-accent-fg open:*:data-[slot=icon]:text-accent-fg open:*:[.text-muted-fg]:text-accent-fg",
-								className,
-							)
-						: className,
-				}),
+							],
+							className,
+						),
+					}),
 			)}
 			data-slot="menu-item"
 			render={(domProps, renderProps) => {
