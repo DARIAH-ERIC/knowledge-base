@@ -17,6 +17,7 @@ import {
 	MousePointerClickIcon,
 	PilcrowIcon,
 	QuoteIcon,
+	SeparatorHorizontalIcon,
 	SuperscriptIcon,
 	TableIcon,
 	VideoIcon,
@@ -269,6 +270,24 @@ export function useRichTextActions({
 				},
 				run() {
 					editor.chain().focus().insertTable({ rows: 3, cols: 2, withHeaderRow: true }).run();
+				},
+			},
+			/**
+			 * Not an optional block: the node comes with the starter kit, so every document the editor
+			 * opens can already hold one — the migrated WordPress content does — and a divider an author
+			 * cannot insert is also one they have no obvious way to put back after deleting it.
+			 */
+			{
+				id: "divider",
+				group: "insert",
+				label: t("Divider"),
+				keywords: ["hr", "rule", "separator", "line", "break"],
+				icon: SeparatorHorizontalIcon,
+				isAvailable() {
+					return canInsertBlock(editor, "horizontalRule");
+				},
+				run() {
+					editor.chain().focus().setHorizontalRule().run();
 				},
 			},
 		];
