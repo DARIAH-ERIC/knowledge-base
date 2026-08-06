@@ -123,6 +123,9 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 					intent,
 					className: hasSubmenu
 						? twMerge(
+								// The chevron is positioned over the item rather than laid out in it, so the
+								// label has to keep its own room clear of it.
+								"*:[[slot=label]]:pe-6",
 								intent === "danger" && "open:bg-danger-subtle open:text-danger-subtle-fg",
 								intent === "warning" && "open:bg-warning-subtle open:text-warning-subtle-fg",
 								intent === undefined &&
@@ -154,8 +157,11 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 					{values.isSelected && (
 						<span
 							className={twJoin(
-								"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:inset-e-0",
-								"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:inset-e-0",
+								// An item which already has an icon in its leading column moves the check to the
+								// far end, where it is centred on the row rather than left at the static position
+								// its own line would have put it — the same treatment `DropdownItem` gives it.
+								"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:inset-bs-1/2 group-has-data-[slot=avatar]:inset-e-0 group-has-data-[slot=avatar]:-translate-y-1/2",
+								"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:inset-bs-1/2 group-has-data-[slot=icon]:inset-e-0 group-has-data-[slot=icon]:-translate-y-1/2",
 							)}
 						>
 							{values.selectionMode === "single" && (

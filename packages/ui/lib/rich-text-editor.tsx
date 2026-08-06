@@ -208,19 +208,7 @@ const RichTextEditorIconButton = RichTextEditorToolbarButton;
  * element: a popover or menu trigger is the button, so it cannot wrap one.
  */
 const toolbarTriggerClassName =
-	"relative inline-flex block-8 cursor-pointer items-center justify-center gap-x-1 rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
-
-/** One row/column command in the table popover — a labelled entry rather than another icon. */
-function TableCommandButton({
-	label,
-	onPress,
-}: Readonly<{ label: string; onPress: () => void }>): ReactNode {
-	return (
-		<Button className="justify-start" intent="plain" onPress={onPress} size="sm" type="button">
-			{label}
-		</Button>
-	);
-}
+	"relative inline-flex block-8 cursor-pointer items-center justify-center gap-x-1 rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 pressed:bg-primary-subtle/50 pressed:text-fg";
 
 interface BlockNodeSurfaceProps {
 	children: ReactNode;
@@ -2818,10 +2806,17 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							</MenuTrigger>
 							<TooltipContent inverse={true}>{t("Text style")}</TooltipContent>
 						</Tooltip>
-						<MenuContent placement="bottom start">
+						{/* The styles are alternatives, so the menu marks the one at the cursor rather than
+						    leaving the trigger as the only place it is named. */}
+						<MenuContent
+							disallowEmptySelection={true}
+							placement="bottom start"
+							selectedKeys={activeBlockStyle != null ? [activeBlockStyle.id] : []}
+							selectionMode="single"
+						>
 							{actionsByGroup.blockStyle.map((action) => (
-								<MenuItem key={action.id} onAction={action.run}>
-									<action.icon />
+								<MenuItem id={action.id} key={action.id} onAction={action.run}>
+									<action.icon data-slot="icon" />
 									<MenuLabel>{action.label}</MenuLabel>
 								</MenuItem>
 							))}
@@ -2912,9 +2907,9 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					    only appears once the selection is inside a table. Inserting one is in the insert
 					    menu, with every other block. */}
 					{activeState?.isInTable === true ? (
-						<Popover>
+						<Menu>
 							<Tooltip>
-								<PopoverTrigger
+								<MenuTrigger
 									aria-label={t("Table")}
 									className={twMerge(
 										toolbarTriggerClassName,
@@ -2923,62 +2918,74 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 									)}
 								>
 									<TableIcon className="block-4 inline-4" />
-								</PopoverTrigger>
+								</MenuTrigger>
 								<TooltipContent inverse={true}>{t("Table")}</TooltipContent>
 							</Tooltip>
-							<PopoverContent className="flex inline-56 flex-col gap-1 p-2">
-								<TableCommandButton
-									label={t("Toggle header row")}
-									onPress={() => {
+							{/* A menu rather than a popover of buttons: these are commands, like the ones the
+							    insert menu offers, and a menu is what gives them keyboard navigation. */}
+							<MenuContent placement="bottom start">
+								<MenuItem
+									onAction={() => {
 										editor.chain().focus().toggleHeaderRow().run();
 									}}
-								/>
-								<TableCommandButton
-									label={t("Add row above")}
-									onPress={() => {
+								>
+									<MenuLabel>{t("Toggle header row")}</MenuLabel>
+								</MenuItem>
+								<MenuSeparator />
+								<MenuItem
+									onAction={() => {
 										editor.chain().focus().addRowBefore().run();
 									}}
-								/>
-								<TableCommandButton
-									label={t("Add row below")}
-									onPress={() => {
+								>
+									<MenuLabel>{t("Add row above")}</MenuLabel>
+								</MenuItem>
+								<MenuItem
+									onAction={() => {
 										editor.chain().focus().addRowAfter().run();
 									}}
-								/>
-								<TableCommandButton
-									label={t("Delete row")}
-									onPress={() => {
+								>
+									<MenuLabel>{t("Add row below")}</MenuLabel>
+								</MenuItem>
+								<MenuItem
+									onAction={() => {
 										editor.chain().focus().deleteRow().run();
 									}}
-								/>
-								<span className="my-1 block-px inline-full bg-border" />
-								<TableCommandButton
-									label={t("Add column before")}
-									onPress={() => {
+								>
+									<MenuLabel>{t("Delete row")}</MenuLabel>
+								</MenuItem>
+								<MenuSeparator />
+								<MenuItem
+									onAction={() => {
 										editor.chain().focus().addColumnBefore().run();
 									}}
-								/>
-								<TableCommandButton
-									label={t("Add column after")}
-									onPress={() => {
+								>
+									<MenuLabel>{t("Add column before")}</MenuLabel>
+								</MenuItem>
+								<MenuItem
+									onAction={() => {
 										editor.chain().focus().addColumnAfter().run();
 									}}
-								/>
-								<TableCommandButton
-									label={t("Delete column")}
-									onPress={() => {
+								>
+									<MenuLabel>{t("Add column after")}</MenuLabel>
+								</MenuItem>
+								<MenuItem
+									onAction={() => {
 										editor.chain().focus().deleteColumn().run();
 									}}
-								/>
-								<span className="my-1 block-px inline-full bg-border" />
-								<TableCommandButton
-									label={t("Delete table")}
-									onPress={() => {
+								>
+									<MenuLabel>{t("Delete column")}</MenuLabel>
+								</MenuItem>
+								<MenuSeparator />
+								<MenuItem
+									intent="danger"
+									onAction={() => {
 										editor.chain().focus().deleteTable().run();
 									}}
-								/>
-							</PopoverContent>
-						</Popover>
+								>
+									<MenuLabel>{t("Delete table")}</MenuLabel>
+								</MenuItem>
+							</MenuContent>
+						</Menu>
 					) : null}
 					<span className="mx-1 block-4 inline-px bg-border" />
 					<Menu>
@@ -2993,12 +3000,14 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							</MenuTrigger>
 							<TooltipContent inverse={true}>{t("Insert")}</TooltipContent>
 						</Tooltip>
-						<MenuContent placement="bottom end">
+						{/* Aligned to the trigger's start rather than its end: the menu is wider than the
+						    trigger, and an end-aligned one hangs off to the left over unrelated toolbar. */}
+						<MenuContent placement="bottom start">
 							{/* `isAvailable` keeps the menu from offering a block the schema would refuse
 							    where the cursor is — a table inside a table, an image inside a media body. */}
 							{insertActions.map((action) => (
 								<MenuItem key={action.id} onAction={action.run}>
-									<action.icon />
+									<action.icon data-slot="icon" />
 									<MenuLabel>{action.label}</MenuLabel>
 								</MenuItem>
 							))}
@@ -3009,7 +3018,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 										setOpenPicker("document");
 									}}
 								>
-									<PaperclipIcon />
+									<PaperclipIcon data-slot="icon" />
 									<MenuLabel>{t("Link to document")}</MenuLabel>
 								</MenuItem>
 							) : null}
@@ -3019,14 +3028,14 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 										setOpenPicker("entity");
 									}}
 								>
-									<LinkIcon />
+									<LinkIcon data-slot="icon" />
 									<MenuLabel>{t("Link to page")}</MenuLabel>
 								</MenuItem>
 							) : null}
 							{blocks.includes("placeholderValue") ? (
 								<MenuSubMenu>
 									<MenuItem>
-										<VariableIcon />
+										<VariableIcon data-slot="icon" />
 										<MenuLabel>{t("Placeholder value")}</MenuLabel>
 									</MenuItem>
 									<MenuContent>

@@ -351,7 +351,7 @@ export class WebsiteNewsPage {
 
 	/** Insert a 3x2 table with a header row at the cursor, then fill the two header cells. */
 	async insertTable(headers: [string, string]): Promise<void> {
-		await this.chooseInsert("Insert table");
+		await this.chooseInsert("Table");
 
 		/**
 		 * The row and column commands live behind a Table button that only appears while the cursor is
@@ -369,16 +369,15 @@ export class WebsiteNewsPage {
 	}
 
 	/**
-	 * Run commands from the table popover. Opened once for the whole batch: running a command leaves
-	 * the popover open — it re-renders with the in-table commands — and its overlay swallows every
-	 * click aimed at the document underneath, so it is dismissed at the end rather than between.
+	 * Run commands from the table menu. Choosing an entry closes the menu — it is a menu like the
+	 * insert one, not a panel that stays open — so each command reopens it.
 	 */
 	async runTableCommands(labels: ReadonlyArray<string>): Promise<void> {
-		await this.page.getByRole("button", { name: "Table", exact: true }).click();
 		for (const label of labels) {
-			await this.page.getByRole("button", { name: label, exact: true }).click();
+			await this.page.getByRole("button", { name: "Table", exact: true }).click();
+			await this.page.getByRole("menuitem", { name: label, exact: true }).click();
+			await this.waitForMenuToClose();
 		}
-		await this.page.keyboard.press("Escape");
 	}
 
 	/** Put the cursor in the table's first body cell, so row and column commands act from there. */

@@ -57,9 +57,14 @@ export interface RichTextAction {
 	id: string;
 	group: RichTextActionGroup;
 	label: string;
-	/** Extra words the slash query may match, so `/ul` finds "Bullet List" as well as `/bul` does. */
+	/** Extra words the slash query may match, so `/ul` finds "Bullet list" as well as `/bul` does. */
 	keywords?: Array<string>;
-	icon: ComponentType<{ className?: string }>;
+	/**
+	 * Takes `data-slot` as well as a class name: menu items style their icon through that attribute —
+	 * size, colour and the gap to the label all hang off it — while the toolbar and the slash menu
+	 * size theirs directly.
+	 */
+	icon: ComponentType<{ className?: string; "data-slot"?: string }>;
 	/**
 	 * Whether the mark or node is active at the cursor. Toolbar toggles reflect it; the menu ignores
 	 * it.
@@ -223,7 +228,7 @@ export function useRichTextActions({
 			{
 				id: "bullet-list",
 				group: "block",
-				label: t("Bullet List"),
+				label: t("Bullet list"),
 				keywords: ["ul", "unordered"],
 				icon: ListIcon,
 				isActive: activeState?.isBulletList,
@@ -234,7 +239,7 @@ export function useRichTextActions({
 			{
 				id: "ordered-list",
 				group: "block",
-				label: t("Ordered List"),
+				label: t("Ordered list"),
 				keywords: ["ol", "numbered"],
 				icon: ListOrderedIcon,
 				isActive: activeState?.isOrderedList,
@@ -256,7 +261,7 @@ export function useRichTextActions({
 			{
 				id: "table",
 				group: "insert",
-				label: t("Insert table"),
+				label: t("Table"),
 				keywords: ["table", "grid"],
 				icon: TableIcon,
 				isAvailable() {
