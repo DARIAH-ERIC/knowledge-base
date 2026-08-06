@@ -20,6 +20,7 @@ import {
 	EntityListHeader,
 	EntityListPagination,
 	EntityListSearchField,
+	EntityListTitle,
 	NewLink,
 	RowActionsMenu,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
@@ -105,7 +106,7 @@ export function DocumentationPagesPage(props: Readonly<DocumentationPagesPagePro
 							href={`/dashboard/administrator/documentation-pages/${item.entity.slug}/details`}
 						>
 							<TableCell>
-								<div className="max-inline-64 truncate">{item.title}</div>
+								<EntityListTitle title={item.title} />
 							</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge

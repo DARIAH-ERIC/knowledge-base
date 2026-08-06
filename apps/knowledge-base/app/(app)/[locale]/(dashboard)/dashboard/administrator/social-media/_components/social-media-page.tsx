@@ -18,6 +18,7 @@ import {
 	EntityListHeader,
 	EntityListPagination,
 	EntityListSearchField,
+	EntityListTitle,
 	NewLink,
 	RowActionsMenu,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
@@ -101,11 +102,17 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 					{(item) => (
 						<TableRow id={item.id}>
 							<TableCell>
-								<div className="max-inline-64 truncate">{item.name}</div>
+								<EntityListTitle title={item.name} />
 							</TableCell>
 							<TableCell>{item.type.type}</TableCell>
-							<TableCell className="max-inline-xs truncate">
-								<a className="underline" href={item.url} rel="noreferrer" target="_blank">
+							<TableCell>
+								<a
+									className="block max-inline-xs truncate underline"
+									href={item.url}
+									rel="noreferrer"
+									target="_blank"
+									title={item.url}
+								>
 									{item.url}
 								</a>
 							</TableCell>
