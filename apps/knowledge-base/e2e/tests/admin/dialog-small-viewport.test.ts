@@ -33,6 +33,14 @@ async function expectDialogFitsViewport(dialog: Locator) {
 
 	expect(box.y).toBeGreaterThanOrEqual(0);
 	expect(box.y + box.height).toBeLessThanOrEqual(shortViewport.height);
+
+	/**
+	 * The dialog stands at its cap, which is what keeps the assertion above from passing for the
+	 * wrong reason: content short enough to fit at its natural height would never have been clipped
+	 * in the first place, and would prove nothing about the cap being honoured. The tolerance covers
+	 * the overlay's padding and the rounding of a fractional layout.
+	 */
+	expect(box.height).toBeGreaterThanOrEqual(shortViewport.height - 48);
 }
 
 test.describe("dialogs on a short viewport", () => {
@@ -59,9 +67,8 @@ test.describe("dialogs on a short viewport", () => {
 		await expectDialogFitsViewport(dialog);
 
 		/**
-		 * The preview, four fields and the caption editor add up to more than fits at this height, so
-		 * the body has to be the region that scrolls. Asserting it does keeps the check above honest: a
-		 * dialog that fits without overflowing anywhere would satisfy it for the wrong reason.
+		 * The preview holds its aspect ratio rather than collapsing to make room, so at this height the
+		 * body is genuinely the region that has to scroll.
 		 */
 		const body = dialog.locator("[data-slot=dialog-body]");
 		const isBodyScrollable = await body.evaluate(
