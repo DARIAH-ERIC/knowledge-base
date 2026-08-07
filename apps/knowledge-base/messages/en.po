@@ -1043,7 +1043,7 @@ msgstr "Selected image"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary.tsx:82
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:528
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:620
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:207
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:232
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:174
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:154
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:155
@@ -1053,7 +1053,7 @@ msgstr "Alt text"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary.tsx:88
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field.tsx:24
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:534
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:212
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:237
 msgid "sq1btl"
 msgstr "Caption"
 
@@ -2116,7 +2116,7 @@ msgstr "Website"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:222
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:223
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:77
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:98
 msgid "d1uESJ"
 msgstr "Assets"
 
@@ -2541,17 +2541,17 @@ msgid "p4N05H"
 msgstr "Upload"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:417
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:103
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:124
 msgid "RQ4EKT"
 msgstr "Layout"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:428
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:114
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:135
 msgid "3BFETM"
 msgstr "Grid layout"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:431
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:117
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:138
 msgid "dbABIT"
 msgstr "List layout"
 
@@ -5363,7 +5363,7 @@ msgid "FRVN+N"
 msgstr "unknown size"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:221
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:234
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:70
 msgid "5q3qC0"
 msgstr "Download"
 
@@ -7297,27 +7297,27 @@ msgstr "Add a person as a contributor to this article."
 msgid "CWbizX"
 msgstr "Website dashboard"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:78
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:99
 msgid "kw3Rq2"
 msgstr "Manage all images in the media library."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:81
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:102
 msgid "ZpQLnA"
 msgstr "Search by label"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:84
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:105
 msgid "eOvGa5"
 msgstr "Filter by prefix"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:93
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:114
 msgid "sCpvlY"
 msgstr "All prefixes"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:136
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:157
 msgid "0GuJv0"
 msgstr "No images match your filters."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:137
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:158
 msgid "vC8XBw"
 msgstr "No images found. Upload one to get started."
 

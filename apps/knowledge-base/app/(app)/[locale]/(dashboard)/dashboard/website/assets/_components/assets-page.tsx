@@ -56,6 +56,27 @@ const pageSize = dashboardPageSize;
 
 type AssetsLayout = "grid" | "list";
 
+/**
+ * Downloads the asset's original bytes. Offered in both layouts - grid is the default view, so a
+ * list-only button is one most people would never come across.
+ */
+function AssetDownloadLink(props: Readonly<{ assetKey: string; className?: string }>): ReactNode {
+	const { assetKey, className } = props;
+
+	const t = useExtracted();
+
+	return (
+		<a
+			aria-label={t("Download")}
+			className={buttonStyles({ className, intent: "plain", size: "sq-sm" })}
+			download={true}
+			href={`/api/assets/download?key=${encodeURIComponent(assetKey)}`}
+		>
+			<ArrowDownTrayIcon aria-hidden={true} className="block-4 inline-4" />
+		</a>
+	);
+}
+
 export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 	const { assets, licenses, page: initialPage, prefix: initialPrefix, q: initialQ } = props;
 
@@ -154,13 +175,17 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 											src={asset.url}
 											storageKey={asset.key}
 										/>
-										<EditAssetMetadataDialog
-											asset={asset}
-											licenses={licenses}
-											onSuccess={() => {
-												router.refresh();
-											}}
-										/>
+										<div className="absolute inset-bs-2 inset-e-2 flex flex-row items-center gap-x-1">
+											<AssetDownloadLink assetKey={asset.key} className="bg-bg" />
+											<EditAssetMetadataDialog
+												asset={asset}
+												licenses={licenses}
+												onSuccess={() => {
+													router.refresh();
+												}}
+												triggerClassName="bg-bg"
+											/>
+										</div>
 									</div>
 									<figcaption className="flex flex-col gap-y-0.5 px-0.5">
 										<span className="truncate text-sm/tight font-medium" title={asset.label}>
@@ -230,14 +255,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 										</div>
 									</figcaption>
 									<div className="flex shrink-0 items-start gap-x-1.5">
-										<a
-											aria-label={t("Download")}
-											className={buttonStyles({ intent: "plain", size: "sq-sm" })}
-											download={true}
-											href={`/api/assets/download?key=${encodeURIComponent(asset.key)}`}
-										>
-											<ArrowDownTrayIcon aria-hidden={true} className="block-4 inline-4" />
-										</a>
+										<AssetDownloadLink assetKey={asset.key} />
 										<EditAssetMetadataDialog
 											asset={asset}
 											licenses={licenses}
