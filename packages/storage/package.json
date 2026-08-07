@@ -21,6 +21,7 @@
 		"lint:fix": "oxlint --fix --report-unused-disable-directives --type-aware --type-check",
 		"storage:buckets:create": "tsx ./scripts/create-buckets.ts",
 		"storage:buckets:reset": "tsx ./scripts/reset-buckets.ts",
+		"test": "vitest run",
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -39,7 +40,8 @@
 		"sharp": "catalog:",
 		"tsdown": "catalog:",
 		"tsx": "catalog:",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vitest": "catalog:"
 	},
 	"engines": {
 		"node": "24.x"
