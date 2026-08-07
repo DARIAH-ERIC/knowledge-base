@@ -139,6 +139,37 @@ export function collectFootnotes(input: unknown): Array<JSONContent | null> {
 }
 
 /**
+ * A copy of `input` with every footnote marker carrying its 1-based position in `attrs.number`, so
+ * a renderer can anchor a marker to its note and back.
+ *
+ * Walks in the same order as {@link collectFootnotes}, so `number` indexes that list directly. The
+ * number stays derived rather than stored — read paths attach it, the same way link targets are
+ * resolved at read time — because a marker's number is only ever its place in the document.
+ */
+export function numberFootnotes<T>(input: T): T {
+	let number = 0;
+
+	function visit(node: unknown): unknown {
+		if (Array.isArray(node)) {
+			return node.map((item) => visit(item));
+		}
+
+		if (!isRecord(node)) {
+			return node;
+		}
+
+		if (node.type === "footnote") {
+			number += 1;
+			return { ...node, attrs: { ...(isRecord(node.attrs) ? node.attrs : {}), number } };
+		}
+
+		return Object.fromEntries(Object.entries(node).map(([key, value]) => [key, visit(value)]));
+	}
+
+	return visit(input) as T;
+}
+
+/**
  * Whether a richtext document carries no meaningful text. An empty editor still produces a `doc`
  * with a single empty paragraph, so callers persist `null` instead of storing that placeholder.
  */
