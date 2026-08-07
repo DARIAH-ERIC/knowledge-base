@@ -152,7 +152,11 @@ export function EditAssetMetadataDialog(props: Readonly<EditAssetMetadataDialogP
 
 						<input name="id" type="hidden" value={asset.id} />
 
-						<div className="overflow-hidden rounded-lg bg-muted aspect-video">
+						{/* Holds its aspect ratio instead of shrinking: the body is a flex column, so on a
+						    short viewport the preview is the one child with nothing to keep it from being
+						    squashed to a letterbox — in the dialog where you write this image's alt text.
+						    Scrolling the body is the better trade. */}
+						<div className="shrink-0 overflow-hidden rounded-lg bg-muted aspect-video">
 							<AssetPreview
 								alt={asset.alt ?? asset.label}
 								className="block-full inline-full"
