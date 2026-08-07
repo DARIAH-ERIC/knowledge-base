@@ -132,6 +132,21 @@ function resolveGalleryItemCaption(item: {
 	});
 }
 
+/**
+ * A figure that stacks in the content flow reads as crowded at the `space-y-4` block gap alone —
+ * that gap is the paragraph rhythm, and the richtext scale gives a figure roughly twice it. These
+ * figures sit outside any `richtext` container though (see `CaptionFigcaption`), so that rule never
+ * reaches them.
+ *
+ * Padding rather than margin: the block gap is itself a margin, and the wrapper around each block
+ * has neither padding nor border, so a margin here would collapse into it and mostly vanish.
+ *
+ * Only for figures in the flow. A floated figure keeps the margins tuned at its call site — padding
+ * would grow the box the text wraps around and drop the image below the line it aligns to — and
+ * gallery items are spaced by their grid.
+ */
+const blockFigurePadding = "py-2";
+
 /** Renders a richtext caption inside a `figcaption`, or nothing when the caption is empty. */
 function CaptionFigcaption({
 	caption,
@@ -299,7 +314,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			const embedUrl = getEmbedUrl(url);
 
 			return (
-				<figure>
+				<figure className={blockFigurePadding}>
 					<div className="aspect-video inline-full overflow-hidden rounded-lg">
 						<iframe
 							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -443,9 +458,9 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			const figureClassName = {
 				"float-start": "mbe-4 @lg:mbe-2 @lg:me-6 @lg:float-start @lg:inline-[min(18rem,45%)]",
 				"float-end": "mbe-4 @lg:mbe-2 @lg:ms-6 @lg:float-end @lg:inline-[min(18rem,45%)]",
-				wide: "ms-auto me-auto inline-[min(56rem,92vw)]",
-				full: "inline-[100vw] ms-[calc(50%-50vw)] me-[calc(50%-50vw)]",
-				default: undefined,
+				wide: `${blockFigurePadding} ms-auto me-auto inline-[min(56rem,92vw)]`,
+				full: `${blockFigurePadding} inline-[100vw] ms-[calc(50%-50vw)] me-[calc(50%-50vw)]`,
+				default: blockFigurePadding,
 			}[layout];
 
 			return (
