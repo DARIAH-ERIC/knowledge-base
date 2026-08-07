@@ -25,6 +25,7 @@
 		"data:convert:floated-images-to-media-text": "tsx ./scripts/convert-floated-images-to-media-text.ts",
 		"data:deduplicate:assets": "tsx ./scripts/deduplicate-assets.ts",
 		"data:move:job-opportunity-news": "tsx ./scripts/move-job-opportunity-news-to-opportunities.ts",
+		"data:move:opportunities-to-news": "tsx ./scripts/move-opportunities-to-news.ts",
 		"data:normalise:identifier-urls": "tsx ./scripts/normalise-identifier-urls.ts",
 		"data:normalise:slug-suffixes": "tsx ./scripts/normalise-slug-suffixes.ts",
 		"format:check": "oxfmt --check",
