@@ -5,6 +5,7 @@ import type { ReadableStream } from "node:stream/web";
 
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
+import { type Dimensions, toDisplayDimensions } from "@dariah-eric/storage/lib";
 import sharp from "sharp";
 
 import type { SelectedImage } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
@@ -166,27 +167,44 @@ const vectorMimeType = "image/svg+xml";
 
 /**
  * Ensures the uploaded image stays within imgproxy's source-resolution limit (see
- * {@link imageMaxResolution}). Images above the limit are downscaled with sharp — imgproxy only ever
- * serves much smaller derived variants, so the extra pixels carry no deliverable value and would
- * only break rendering. Images within the limit keep their original bytes untouched.
+ * {@link imageMaxResolution}). Images above the limit are downscaled with sharp — imgproxy only
+ * ever serves much smaller derived variants, so the extra pixels carry no deliverable value and
+ * would only break rendering. Images within the limit keep their original bytes untouched.
+ *
+ * Also reports the dimensions the image will be _displayed_ at, which `assets` records so consumers
+ * can size a responsive `srcset` against the source's real resolution. Null when there is nothing
+ * meaningful to record: vectors have no raster resolution, and sharp cannot measure every file it
+ * accepts.
  */
 async function prepareImageForUpload(
 	file: File,
-): Promise<{ input: Readable | Buffer; size: number }> {
+): Promise<{ input: Readable | Buffer; size: number; dimensions: Dimensions | null }> {
 	if (file.type === vectorMimeType) {
-		return { input: Readable.fromWeb(file.stream() as ReadableStream), size: file.size };
+		return {
+			input: Readable.fromWeb(file.stream() as ReadableStream),
+			size: file.size,
+			dimensions: null,
+		};
 	}
 
 	const buffer = Buffer.from(await file.arrayBuffer());
-	const { height, width } = await sharp(buffer).metadata();
+	const { height, orientation, width } = await sharp(buffer).metadata();
 	const resolution = width * height;
 
 	/**
 	 * `Number.isFinite` guards against images sharp cannot measure (guarding against `NaN`
 	 * dimensions).
 	 */
-	if (!Number.isFinite(resolution) || resolution <= imageMaxResolution) {
-		return { input: buffer, size: buffer.byteLength };
+	if (!Number.isFinite(resolution)) {
+		return { input: buffer, size: buffer.byteLength, dimensions: null };
+	}
+
+	if (resolution <= imageMaxResolution) {
+		return {
+			input: buffer,
+			size: buffer.byteLength,
+			dimensions: toDisplayDimensions({ width, height, orientation }),
+		};
 	}
 
 	const scale = Math.sqrt(imageMaxResolution / resolution);
@@ -196,7 +214,18 @@ async function prepareImageForUpload(
 		.resize({ fit: "inside", height: Math.floor(height * scale), width: Math.floor(width * scale) })
 		.toBuffer();
 
-	return { input: resized, size: resized.byteLength };
+	/**
+	 * Measured rather than computed from `scale`: `.rotate()` has baked in the orientation by now,
+	 * and `fit: "inside"` rounds to preserve the aspect ratio, so the buffer is the only thing that
+	 * knows what it actually ended up as.
+	 */
+	const resizedMetadata = await sharp(resized).metadata();
+
+	return {
+		input: resized,
+		size: resized.byteLength,
+		dimensions: { width: resizedMetadata.width, height: resizedMetadata.height },
+	};
 }
 
 interface UploadAssetParams {
@@ -211,7 +240,7 @@ interface UploadAssetParams {
 export async function uploadAsset(params: UploadAssetParams) {
 	const { file, licenseId, prefix, label, alt, caption } = params;
 
-	const { input, size } = await prepareImageForUpload(file);
+	const { input, size, dimensions } = await prepareImageForUpload(file);
 	const metadata = { "content-type": file.type, name: file.name };
 
 	const { key } = (await s3.upload({ input, prefix, metadata, size })).unwrap();
@@ -224,6 +253,8 @@ export async function uploadAsset(params: UploadAssetParams) {
 			mimeType: metadata["content-type"],
 			filename: file.name,
 			size,
+			width: dimensions?.width,
+			height: dimensions?.height,
 			label: label ?? file.name,
 			alt,
 			caption,
