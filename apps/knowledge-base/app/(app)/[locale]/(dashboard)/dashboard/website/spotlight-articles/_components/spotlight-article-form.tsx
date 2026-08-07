@@ -172,7 +172,13 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 				) : null}
 
 				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
-					<ContentBlocks initialAssets={initialAssets} items={contentBlocks ?? []} />
+					{/* Long-form editorial writing which sources what it reports, so it carries the same
+					    citation apparatus as an impact case study. */}
+					<ContentBlocks
+						hasFootnotes={true}
+						initialAssets={initialAssets}
+						items={contentBlocks ?? []}
+					/>
 				</FormSection>
 
 				{spotlightArticle != null ? (

@@ -169,9 +169,9 @@ export function ImpactCaseStudyForm(props: Readonly<ImpactCaseStudyFormProps>): 
 				) : null}
 
 				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
-					{/* The one entity whose genre carries a citation apparatus: a case study states its
-					    impact and then evidences it, which is what the migrated articles hand-numbered as
-					    `[1]`, `[2]` under "Evidence of the Impact". */}
+					{/* A case study states its impact and then evidences it, which is what the migrated
+					    articles hand-numbered as `[1]`, `[2]` under "Evidence of the Impact". Spotlight
+					    articles carry the same apparatus. */}
 					<ContentBlocks
 						hasFootnotes={true}
 						initialAssets={initialAssets}
