@@ -432,6 +432,14 @@ export class WebsiteNewsPage {
 	}
 
 	/**
+	 * The anchor the editor renders for a link run — for reading the attributes it carries, which
+	 * `expectMarkedText` deliberately says nothing about.
+	 */
+	contentBlockLink(text: string): Locator {
+		return this.contentBlockEditor().locator("a").filter({ hasText: text });
+	}
+
+	/**
 	 * Link the current selection to an external url through the toolbar's link popover — the plain
 	 * kind that stores an href, as opposed to the document and entity links that store a reference.
 	 */

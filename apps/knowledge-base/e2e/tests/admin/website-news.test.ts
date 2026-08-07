@@ -439,6 +439,74 @@ test.describe("website news admin", () => {
 		expect(linkMark?.attrs?.targetKind ?? null).toBeNull();
 	});
 
+	/**
+	 * A link is the one mark whose stored form is a set of attributes rather than just a name, and
+	 * the extension ships defaults nobody asked for: `target="_blank"` and `rel="noopener noreferrer
+	 * nofollow"`. They apply at render time _and_, because `target`/`rel`/`class` are declared
+	 * attributes taking their defaults from the same option, get written into whatever the editor
+	 * saves — which is how they reached the database on articles that had been edited.
+	 *
+	 * Hence the full loop, editor → database → editor → database. The unit test in
+	 * `rich-text-link-attrs.test.ts` covers the extension in isolation; only this covers the hop that
+	 * actually produced the bad data, which is a document being parsed back into an editor and saved
+	 * again.
+	 */
+	test("should round-trip a link without picking up target or rel", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Link Round Trip ${randomUUID()}`;
+		const linkText = `Linked run ${randomUUID()}`;
+		const linkUrl = "https://example.com/e2e-link-round-trip";
+
+		/**
+		 * The href is the whole of what a plain url link should carry. `target`/`rel`/`class` are
+		 * asserted nullish rather than absent: whether the key is written at all depends on the
+		 * extension version, and neither form renders — what matters is that no _value_ comes back.
+		 */
+		function expectBareLink(content: JSONContent): void {
+			const link = markOn(content, linkText, "link");
+
+			expect(link?.attrs?.href).toBe(linkUrl);
+			expect(link?.attrs?.target ?? null).toBeNull();
+			expect(link?.attrs?.rel ?? null).toBeNull();
+			expect(link?.attrs?.class ?? null).toBeNull();
+		}
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item exercising a link round-trip");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+
+		await newsPage.addContentBlock(linkText);
+		await newsPage.selectParagraph(0);
+		await newsPage.insertUrlLink(linkUrl);
+		await newsPage.expectMarkedText("a", linkText);
+		await newsPage.submitForm();
+
+		const afterCreate = await db.getNewsContentBlocksByTitle(title);
+		expect(afterCreate).toHaveLength(1);
+		expectBareLink(afterCreate[0]!.content as JSONContent);
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoEditFromList(title);
+
+		/** Reopening parses the stored json back into an editor, where a default would re-apply. */
+		const link = newsPage.contentBlockLink(linkText);
+		await expect(link).toBeVisible();
+		await expect(link).toHaveAttribute("href", linkUrl);
+		expect(await link.getAttribute("target")).toBeNull();
+		expect(await link.getAttribute("rel")).toBeNull();
+
+		/** Saving again unchanged: anything the load re-applied would be written here. */
+		await newsPage.submitForm();
+
+		const afterEdit = await db.getNewsContentBlocksByTitle(title);
+		expect(afterEdit).toHaveLength(1);
+		expectBareLink(afterEdit[0]!.content as JSONContent);
+	});
+
 	test("should retype blocks from the text style menu", async ({ createWebsiteNewsPage, db }) => {
 		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
 		const title = `${newsPage.workerPrefix} Text Styles ${randomUUID()}`;
