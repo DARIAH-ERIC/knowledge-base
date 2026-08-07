@@ -14,6 +14,11 @@ import slugify from "@sindresorhus/slugify";
 
 /** Extensions for the mime types we accept but whose storage keys carry no extension. */
 const mimeTypeExtensions = new Map([
+	["image/jpeg", ".jpg"],
+	["image/png", ".png"],
+	["image/webp", ".webp"],
+	["image/avif", ".avif"],
+	["image/svg+xml", ".svg"],
 	["application/pdf", ".pdf"],
 	["application/msword", ".doc"],
 	["application/vnd.openxmlformats-officedocument.wordprocessingml.document", ".docx"],

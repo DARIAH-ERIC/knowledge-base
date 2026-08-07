@@ -190,6 +190,25 @@ describe("assets", () => {
 			});
 		});
 
+		it("should infer the extension for an image without a stored filename", async () => {
+			await withTransaction(async (db) => {
+				const { name } = await seedAsset(db, {
+					filename: null,
+					label: "Training Series Flyer",
+					mimeType: "image/png",
+				});
+				const client = createTestClient(db, createMockStorage());
+
+				const response = await client.assets[":prefix"][":name"].download.$get({
+					param: { prefix: "documents", name },
+				});
+
+				expect(response.headers.get("Content-Disposition")).toBe(
+					`inline; filename="training-series-flyer.png"; filename*=UTF-8''training-series-flyer.png`,
+				);
+			});
+		});
+
 		it("should return 404 for a key no asset claims", async () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db, createMockStorage());
