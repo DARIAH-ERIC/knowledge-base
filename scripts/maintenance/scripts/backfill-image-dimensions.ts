@@ -3,7 +3,7 @@ import * as path from "node:path";
 import { log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
-import { eq, isNull } from "@dariah-eric/database/sql";
+import { and, count, eq, isNull, like, not } from "@dariah-eric/database/sql";
 import { createStorageService } from "@dariah-eric/storage";
 import { type Dimensions, buffer, toDisplayDimensions } from "@dariah-eric/storage/lib";
 
@@ -25,6 +25,10 @@ import { writeTsvReport } from "../lib/tsv-report";
  * Nothing is re-encoded and no object is written. The stored bytes are read and measured, exactly
  * as they will be read and measured by imgproxy, so a re-run is a no-op and an asset whose object
  * has been replaced since is simply measured as it now stands.
+ *
+ * Only assets with an `image/*` mime type are looked at. `assets` also holds the documents the
+ * richtext link targets point at, which sharp cannot decode and which have no dimensions to
+ * record.
  *
  * Vector images are skipped rather than measured. sharp will happily report an svg's viewBox as
  * pixel dimensions, but a vector has no native resolution and no width above which a request stops
@@ -71,8 +75,19 @@ interface CandidateAsset {
 }
 
 /**
- * Only rows still missing dimensions are considered, so the script is restartable and a re-run
- * after a partial apply picks up exactly where it stopped.
+ * Only image rows still missing dimensions are considered.
+ *
+ * The mime-type filter is not an optimisation. `assets` holds every uploaded file, and the
+ * `documents` prefix is full of pdfs that the richtext link targets point at — handing one of those
+ * to sharp raises "Input buffer contains unsupported image format", so without the filter a run
+ * downloads the entire document corpus only to fail on all of it.
+ *
+ * Matching on `image/%` rather than an allowlist of the four raster types the upload UI accepts, so
+ * that anything migrated in a format the dashboard would not accept today (gif and tiff, both of
+ * which sharp reads) is measured rather than silently left null.
+ *
+ * Restricting to null dimensions makes the script restartable: a re-run after a partial apply picks
+ * up exactly where it stopped.
  */
 async function findCandidateAssets(): Promise<Array<CandidateAsset>> {
 	return db
@@ -83,8 +98,18 @@ async function findCandidateAssets(): Promise<Array<CandidateAsset>> {
 			mimeType: schema.assets.mimeType,
 		})
 		.from(schema.assets)
-		.where(isNull(schema.assets.width))
+		.where(and(isNull(schema.assets.width), like(schema.assets.mimeType, "image/%")))
 		.orderBy(schema.assets.key);
+}
+
+/** Non-image assets keep null dimensions by definition; counted only so a run can say so. */
+async function countNonImageAssets(): Promise<number> {
+	const [row] = await db
+		.select({ total: count() })
+		.from(schema.assets)
+		.where(and(isNull(schema.assets.width), not(like(schema.assets.mimeType, "image/%"))));
+
+	return row?.total ?? 0;
 }
 
 type SkipReason = "download-failed" | "unmeasurable" | "vector";
@@ -113,17 +138,27 @@ async function decide(asset: CandidateAsset): Promise<Decision> {
 		return { ...base, action: "vector" };
 	}
 
-	let dimensions: Dimensions;
+	let image: Buffer;
 	try {
-		const image = await readStoredImage(asset.key);
-		const metadata = await buffer.getMetadata(image);
-		dimensions = toDisplayDimensions(metadata);
+		image = await readStoredImage(asset.key);
 	} catch (error) {
+		// Storage is unreachable or the object is gone — worth an error, since the row points at
+		// something that should be there.
 		log.error(`Failed to read the stored object for \`${asset.key}\`: ${String(error)}`);
 		return { ...base, action: "download-failed" };
 	}
 
-	/** Guards against a file sharp accepts but cannot measure, which would write `NaN` columns. */
+	let dimensions: Dimensions;
+	try {
+		dimensions = toDisplayDimensions(await buffer.getMetadata(image));
+	} catch (error) {
+		// The bytes are there, sharp just will not decode them. Expected for the odd exotic upload, so
+		// this is a warning rather than an error, and the row keeps its null.
+		log.warn(`Cannot measure \`${asset.key}\` (${asset.mimeType}): ${String(error)}`);
+		return { ...base, action: "unmeasurable" };
+	}
+
+	/** Guards against a file sharp decodes but cannot size, which would write `NaN` columns. */
 	if (!Number.isFinite(dimensions.width * dimensions.height)) {
 		return { ...base, action: "unmeasurable" };
 	}
@@ -174,7 +209,11 @@ async function main(): Promise<void> {
 	const apply = process.argv.includes("--apply");
 
 	log.info("Loading image assets without recorded dimensions…");
-	const assets = await findCandidateAssets();
+	const [assets, nonImages] = await Promise.all([findCandidateAssets(), countNonImageAssets()]);
+
+	if (nonImages > 0) {
+		log.info(`Ignoring ${String(nonImages)} non-image assets (documents keep null dimensions).`);
+	}
 
 	const decisions: Array<Decision> = [];
 	let measured = 0;

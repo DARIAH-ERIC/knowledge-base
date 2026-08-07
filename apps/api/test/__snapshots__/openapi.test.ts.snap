@@ -379,6 +379,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -401,12 +412,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -1095,6 +1125,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -1117,12 +1158,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -2012,6 +2072,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -2034,12 +2105,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -2269,6 +2359,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -2291,12 +2392,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -4177,6 +4297,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -4199,12 +4330,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -4393,6 +4543,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -4415,12 +4576,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -4628,6 +4808,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -4650,12 +4841,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -5310,6 +5520,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -5332,12 +5553,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -5475,6 +5715,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -5497,12 +5748,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -5589,6 +5859,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -5611,12 +5892,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -7208,6 +7508,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -7230,12 +7541,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -7359,6 +7689,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                           ],
                         },
+                        "height": {
+                          "anyOf": [
+                            {
+                              "description": "Source height in pixels; null for vectors",
+                              "type": "number",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "license": {
                           "anyOf": [
                             {
@@ -7381,12 +7722,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                           ],
                         },
-                        "url": {
+                        "srcUrl": {
+                          "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                           "type": "string",
+                        },
+                        "url": {
+                          "description": "Default rendition, sized for this placement",
+                          "type": "string",
+                        },
+                        "width": {
+                          "anyOf": [
+                            {
+                              "description": "Source width in pixels; null for vectors",
+                              "type": "number",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
                         },
                       },
                       "required": [
                         "url",
+                        "srcUrl",
+                        "width",
+                        "height",
                         "alt",
                         "caption",
                         "license",
@@ -7694,6 +8054,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -7716,12 +8087,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -7845,6 +8235,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                           ],
                         },
+                        "height": {
+                          "anyOf": [
+                            {
+                              "description": "Source height in pixels; null for vectors",
+                              "type": "number",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "license": {
                           "anyOf": [
                             {
@@ -7867,12 +8268,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                           ],
                         },
-                        "url": {
+                        "srcUrl": {
+                          "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                           "type": "string",
+                        },
+                        "url": {
+                          "description": "Default rendition, sized for this placement",
+                          "type": "string",
+                        },
+                        "width": {
+                          "anyOf": [
+                            {
+                              "description": "Source width in pixels; null for vectors",
+                              "type": "number",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
                         },
                       },
                       "required": [
                         "url",
+                        "srcUrl",
+                        "width",
+                        "height",
                         "alt",
                         "caption",
                         "license",
@@ -8706,6 +9126,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                           ],
                         },
+                        "height": {
+                          "anyOf": [
+                            {
+                              "description": "Source height in pixels; null for vectors",
+                              "type": "number",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "license": {
                           "anyOf": [
                             {
@@ -8728,12 +9159,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                           ],
                         },
-                        "url": {
+                        "srcUrl": {
+                          "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                           "type": "string",
+                        },
+                        "url": {
+                          "description": "Default rendition, sized for this placement",
+                          "type": "string",
+                        },
+                        "width": {
+                          "anyOf": [
+                            {
+                              "description": "Source width in pixels; null for vectors",
+                              "type": "number",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
                         },
                       },
                       "required": [
                         "url",
+                        "srcUrl",
+                        "width",
+                        "height",
                         "alt",
                         "caption",
                         "license",
@@ -8855,6 +9305,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -8877,12 +9338,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -9004,6 +9484,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -9026,12 +9517,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -9164,6 +9674,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -9186,12 +9707,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -9892,6 +10432,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -9914,12 +10465,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -10244,6 +10814,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -10266,12 +10847,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -10555,6 +11155,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -10577,12 +11188,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -10812,6 +11442,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -10834,12 +11475,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -11469,6 +12129,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -11491,12 +12162,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -11617,6 +12307,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -11639,12 +12340,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -12382,6 +13102,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -12404,12 +13135,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -12579,6 +13329,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -12601,12 +13362,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -12712,6 +13492,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -12734,12 +13525,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -13439,6 +14249,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -13461,12 +14282,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -13594,6 +14434,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -13616,12 +14467,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -14347,6 +15217,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -14369,12 +15250,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -14499,6 +15399,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -14521,12 +15432,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -14621,6 +15551,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -14643,12 +15584,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -15435,6 +16395,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -15457,12 +16428,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -15637,6 +16627,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -15659,12 +16660,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -15922,6 +16942,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -15944,12 +16975,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -16035,6 +17085,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -16057,12 +17118,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -16845,6 +17925,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                           ],
                         },
+                        "height": {
+                          "anyOf": [
+                            {
+                              "description": "Source height in pixels; null for vectors",
+                              "type": "number",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "license": {
                           "anyOf": [
                             {
@@ -16867,12 +17958,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                           ],
                         },
-                        "url": {
+                        "srcUrl": {
+                          "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                           "type": "string",
+                        },
+                        "url": {
+                          "description": "Default rendition, sized for this placement",
+                          "type": "string",
+                        },
+                        "width": {
+                          "anyOf": [
+                            {
+                              "description": "Source width in pixels; null for vectors",
+                              "type": "number",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
                         },
                       },
                       "required": [
                         "url",
+                        "srcUrl",
+                        "width",
+                        "height",
                         "alt",
                         "caption",
                         "license",
@@ -16994,6 +18104,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -17016,12 +18137,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -17143,6 +18283,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
+              "height": {
+                "anyOf": [
+                  {
+                    "description": "Source height in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
               "license": {
                 "anyOf": [
                   {
@@ -17165,12 +18316,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   },
                 ],
               },
-              "url": {
+              "srcUrl": {
+                "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                 "type": "string",
+              },
+              "url": {
+                "description": "Default rendition, sized for this placement",
+                "type": "string",
+              },
+              "width": {
+                "anyOf": [
+                  {
+                    "description": "Source width in pixels; null for vectors",
+                    "type": "number",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
               },
             },
             "required": [
               "url",
+              "srcUrl",
+              "width",
+              "height",
               "alt",
               "caption",
               "license",
@@ -17330,6 +18500,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                           ],
                         },
+                        "height": {
+                          "anyOf": [
+                            {
+                              "description": "Source height in pixels; null for vectors",
+                              "type": "number",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
                         "license": {
                           "anyOf": [
                             {
@@ -17352,12 +18533,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                           ],
                         },
-                        "url": {
+                        "srcUrl": {
+                          "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                           "type": "string",
+                        },
+                        "url": {
+                          "description": "Default rendition, sized for this placement",
+                          "type": "string",
+                        },
+                        "width": {
+                          "anyOf": [
+                            {
+                              "description": "Source width in pixels; null for vectors",
+                              "type": "number",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
                         },
                       },
                       "required": [
                         "url",
+                        "srcUrl",
+                        "width",
+                        "height",
                         "alt",
                         "caption",
                         "license",
@@ -18059,6 +19259,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -18081,12 +19292,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -18377,6 +19607,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
+                  "height": {
+                    "anyOf": [
+                      {
+                        "description": "Source height in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
                   "license": {
                     "anyOf": [
                       {
@@ -18399,12 +19640,31 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                     ],
                   },
-                  "url": {
+                  "srcUrl": {
+                    "description": "Base url of the image-variant endpoint for this asset; append \`?w=\` and optionally \`&ar=\` to request a rendition",
                     "type": "string",
+                  },
+                  "url": {
+                    "description": "Default rendition, sized for this placement",
+                    "type": "string",
+                  },
+                  "width": {
+                    "anyOf": [
+                      {
+                        "description": "Source width in pixels; null for vectors",
+                        "type": "number",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
                   },
                 },
                 "required": [
                   "url",
+                  "srcUrl",
+                  "width",
+                  "height",
                   "alt",
                   "caption",
                   "license",
@@ -18766,6 +20026,99 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
         },
         "summary": "Download asset file",
+        "tags": [
+          "assets",
+        ],
+      },
+    },
+    "/api/v1/assets/{prefix}/{name}/image/{version}": {
+      "get": {
+        "description": "Sign an imgproxy rendition of an image asset and redirect to it, by storage key. Widths and aspect ratios are restricted to the supported sets.",
+        "operationId": "getAssetImage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "prefix",
+            "required": true,
+            "schema": {
+              "enum": [
+                "avatars",
+                "documents",
+                "images",
+                "logos",
+              ],
+              "type": "string",
+            },
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "pattern": "^[\\w.-]+$",
+              "type": "string",
+            },
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "const": "v1",
+            },
+          },
+          {
+            "description": "Rendered width in pixels; must be one of the supported widths",
+            "in": "query",
+            "name": "w",
+            "required": true,
+            "schema": {
+              "enum": [
+                320,
+                480,
+                640,
+                960,
+                1280,
+                1600,
+                2048,
+                2560,
+                3200,
+                3840,
+              ],
+              "type": "number",
+            },
+          },
+          {
+            "description": "Aspect ratio to crop to; omit to scale to width without cropping",
+            "in": "query",
+            "name": "ar",
+            "schema": {
+              "enum": [
+                "1x1",
+                "3x2",
+                "16x9",
+                "21x9",
+              ],
+              "type": "string",
+            },
+          },
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to the signed imgproxy url for the requested rendition",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+        "summary": "Redirect to a rendered image variant",
         "tags": [
           "assets",
         ],

@@ -35,6 +35,8 @@ function selectNationalConsortiumRows() {
 		acronym: schema.organisationalUnits.acronym,
 		slug: consortiumEntities.slug,
 		logoKey: schema.assets.key,
+		logoWidth: schema.assets.width,
+		logoHeight: schema.assets.height,
 		logoAlt: schema.assets.alt,
 		logoCaption: schema.assets.caption,
 		licenseName: schema.licenses.name,
@@ -53,6 +55,8 @@ interface NationalConsortiumRow {
 	acronym: string | null;
 	slug: string;
 	logoKey: string | null;
+	logoWidth: number | null;
+	logoHeight: number | null;
 	logoAlt: string | null;
 	logoCaption: JSONContent | null;
 	licenseName: string | null;
@@ -123,6 +127,8 @@ function mapNationalConsortiumRow(row: NationalConsortiumRow) {
 				key: row.logoKey,
 				alt: row.logoAlt,
 				caption: row.logoCaption,
+				width: row.logoWidth,
+				height: row.logoHeight,
 				licenseName: row.licenseName,
 				licenseUrl: row.licenseUrl,
 			}),

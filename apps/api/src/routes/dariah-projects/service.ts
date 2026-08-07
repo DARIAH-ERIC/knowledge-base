@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { getContentBlocks } from "@/lib/content-blocks";
 import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { type ImageAsset, generateImageUrl } from "@/lib/images";
+import { type ImageAsset, generateImageUrl, imageAssetColumns } from "@/lib/images";
 import {
 	getPublishedProjectPartners,
 	getPublishedProjectPartnersByDocuments,
@@ -97,21 +97,7 @@ export async function getDariahProjects(
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 				scope: {
 					columns: {
 						scope: true,
@@ -218,21 +204,7 @@ export async function getDariahProjectById(
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 				scope: {
 					columns: {
 						scope: true,
@@ -390,21 +362,7 @@ export async function getDariahProjectBySlug(
 					},
 				},
 			},
-			image: {
-				columns: {
-					key: true,
-					alt: true,
-					caption: true,
-				},
-				with: {
-					license: {
-						columns: {
-							name: true,
-							url: true,
-						},
-					},
-				},
-			},
+			image: imageAssetColumns,
 			scope: {
 				columns: {
 					scope: true,

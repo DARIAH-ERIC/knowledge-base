@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl, withResolvedCaption } from "@/lib/images";
+import { generateImageUrl, imageAssetColumns, withResolvedCaption } from "@/lib/images";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
@@ -46,21 +46,7 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 			},
 			orderBy(t, { desc, sql }) {
 				return [desc(t.publicationDate), desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
@@ -126,21 +112,7 @@ export async function getNewsItemById(db: Database | Transaction, params: GetNew
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 			},
 		}),
 		getContentBlocks(db, id),
@@ -204,21 +176,7 @@ export async function getNewsItemSlugs(db: Database | Transaction, params: GetNe
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 			},
 			orderBy(t, { desc, sql }) {
 				return [desc(t.publicationDate), desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
@@ -285,21 +243,7 @@ export async function getNewsItemBySlug(
 					},
 				},
 			},
-			image: {
-				columns: {
-					key: true,
-					alt: true,
-					caption: true,
-				},
-				with: {
-					license: {
-						columns: {
-							name: true,
-							url: true,
-						},
-					},
-				},
-			},
+			image: imageAssetColumns,
 		},
 	});
 

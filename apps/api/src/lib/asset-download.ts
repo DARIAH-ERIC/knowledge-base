@@ -1,3 +1,4 @@
+import { imageVariantVersion } from "~/config/api.config";
 import { env } from "~/config/env.config";
 
 export {
@@ -18,10 +19,24 @@ export {
  * with the dashboard; only the url is app-specific, since it needs this API's own base url.
  */
 export function getAssetDownloadUrl(key: string): string {
-	const path = key
+	return new URL(`/api/v1/assets/${toKeyPath(key)}/download`, env.API_BASE_URL).href;
+}
+
+/**
+ * Absolute base url of the image-variant endpoint for an asset, by storage key.
+ *
+ * Emitted rather than the bare key so that the route shape and the signing version stay this api's
+ * concern: a consumer appends `?w=`/`&ar=` and never has to know how the path is spelled, and a key
+ * rotation that bumps {@link imageVariantVersion} propagates on its own.
+ */
+export function getAssetImageUrl(key: string): string {
+	return new URL(`/api/v1/assets/${toKeyPath(key)}/image/${imageVariantVersion}`, env.API_BASE_URL)
+		.href;
+}
+
+function toKeyPath(key: string): string {
+	return key
 		.split("/")
 		.map((segment) => encodeURIComponent(segment))
 		.join("/");
-
-	return new URL(`/api/v1/assets/${path}/download`, env.API_BASE_URL).href;
 }

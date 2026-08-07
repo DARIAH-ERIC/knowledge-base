@@ -2,26 +2,10 @@
 
 import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl, withResolvedCaption } from "@/lib/images";
+import { generateImageUrl, imageAssetColumns, withResolvedCaption } from "@/lib/images";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { Announcement } from "@/routes/announcements/schemas";
 import { imageWidth } from "~/config/api.config";
-
-const imageColumns = {
-	columns: {
-		key: true,
-		alt: true,
-		caption: true,
-	},
-	with: {
-		license: {
-			columns: {
-				name: true,
-				url: true,
-			},
-		},
-	},
-} as const;
 
 const entityVersionColumns = {
 	columns: { updatedAt: true },
@@ -77,7 +61,7 @@ async function getFeaturedAnnouncements(db: Database | Transaction, ids: Array<s
 			},
 			with: {
 				entityVersion: entityVersionColumns,
-				image: imageColumns,
+				image: imageAssetColumns,
 			},
 		}),
 		db.query.opportunities.findMany({
@@ -102,7 +86,7 @@ async function getFeaturedAnnouncements(db: Database | Transaction, ids: Array<s
 			},
 			with: {
 				entityVersion: entityVersionColumns,
-				image: imageColumns,
+				image: imageAssetColumns,
 				source: { columns: { source: true } },
 			},
 		}),
@@ -127,7 +111,7 @@ async function getFeaturedAnnouncements(db: Database | Transaction, ids: Array<s
 			},
 			with: {
 				entityVersion: entityVersionColumns,
-				image: imageColumns,
+				image: imageAssetColumns,
 			},
 		}),
 	]);
@@ -215,21 +199,7 @@ async function getFeaturedEvents(db: Database | Transaction, ids: Array<string>)
 					},
 				},
 			},
-			image: {
-				columns: {
-					key: true,
-					alt: true,
-					caption: true,
-				},
-				with: {
-					license: {
-						columns: {
-							name: true,
-							url: true,
-						},
-					},
-				},
-			},
+			image: imageAssetColumns,
 		},
 	});
 

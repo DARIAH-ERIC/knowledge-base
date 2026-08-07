@@ -162,6 +162,8 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			imageCaptionMode: schema.imageContentBlocks.captionMode,
 			imageLayout: schema.imageContentBlocks.layout,
 			imageKey: schema.assets.key,
+			imageWidth: schema.assets.width,
+			imageHeight: schema.assets.height,
 			imageAlt: schema.assets.alt,
 			imageAssetCaption: schema.assets.caption,
 			imageLicenseName: schema.licenses.name,
@@ -171,6 +173,8 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			heroTitle: schema.heroContentBlocks.title,
 			heroEyebrow: schema.heroContentBlocks.eyebrow,
 			heroImageKey: heroAssets.key,
+			heroImageWidth: heroAssets.width,
+			heroImageHeight: heroAssets.height,
 			heroImageAlt: heroAssets.alt,
 			heroImageCaption: heroAssets.caption,
 			heroLicenseName: heroLicenses.name,
@@ -184,6 +188,8 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			mediaTextCaption: schema.mediaTextContentBlocks.caption,
 			mediaTextCaptionMode: schema.mediaTextContentBlocks.captionMode,
 			mediaTextImageKey: mediaTextAssets.key,
+			mediaTextImageWidth: mediaTextAssets.width,
+			mediaTextImageHeight: mediaTextAssets.height,
 			mediaTextImageAlt: mediaTextAssets.alt,
 			mediaTextImageCaption: mediaTextAssets.caption,
 			mediaTextLicenseName: mediaTextLicenses.name,
@@ -305,6 +311,8 @@ async function getGalleryItems(
 			caption: schema.galleryContentBlockItems.caption,
 			captionMode: schema.galleryContentBlockItems.captionMode,
 			imageKey: galleryAssets.key,
+			imageWidth: galleryAssets.width,
+			imageHeight: galleryAssets.height,
 			imageAlt: galleryAssets.alt,
 			imageAssetCaption: galleryAssets.caption,
 			licenseName: galleryLicenses.name,
@@ -327,6 +335,8 @@ async function getGalleryItems(
 				key: row.imageKey,
 				alt: row.imageAlt,
 				caption: row.imageAssetCaption,
+				width: row.imageWidth,
+				height: row.imageHeight,
 				licenseName: row.licenseName,
 				licenseUrl: row.licenseUrl,
 			}),
@@ -413,6 +423,8 @@ function normalizeRow(row: {
 	imageCaptionMode: ImageCaptionMode | null;
 	imageLayout: (typeof schema.imageLayoutEnum)[number] | null;
 	imageKey: string | null;
+	imageWidth: number | null;
+	imageHeight: number | null;
 	imageAlt: string | null;
 	imageAssetCaption: JSONContent | null;
 	imageLicenseName: string | null;
@@ -422,6 +434,8 @@ function normalizeRow(row: {
 	heroTitle: string | null;
 	heroEyebrow: string | null;
 	heroImageKey: string | null;
+	heroImageWidth: number | null;
+	heroImageHeight: number | null;
 	heroImageAlt: string | null;
 	heroImageCaption: JSONContent | null;
 	heroCaption: JSONContent | null;
@@ -435,6 +449,8 @@ function normalizeRow(row: {
 	mediaTextCaption: JSONContent | null;
 	mediaTextCaptionMode: ImageCaptionMode | null;
 	mediaTextImageKey: string | null;
+	mediaTextImageWidth: number | null;
+	mediaTextImageHeight: number | null;
 	mediaTextImageAlt: string | null;
 	mediaTextImageCaption: JSONContent | null;
 	mediaTextLicenseName: string | null;
@@ -471,6 +487,8 @@ function normalizeRow(row: {
 					key: row.imageKey!,
 					alt: row.imageAlt,
 					caption: row.imageAssetCaption,
+					width: row.imageWidth,
+					height: row.imageHeight,
 					licenseName: row.imageLicenseName,
 					licenseUrl: row.imageLicenseUrl,
 				}),
@@ -506,6 +524,8 @@ function normalizeRow(row: {
 					key: row.heroImageKey,
 					alt: row.heroImageAlt,
 					caption: row.heroImageCaption,
+					width: row.heroImageWidth,
+					height: row.heroImageHeight,
 					licenseName: row.heroLicenseName,
 					licenseUrl: row.heroLicenseUrl,
 				}),
@@ -544,6 +564,8 @@ function normalizeRow(row: {
 					key: row.mediaTextImageKey!,
 					alt: row.mediaTextImageAlt,
 					caption: row.mediaTextImageCaption,
+					width: row.mediaTextImageWidth,
+					height: row.mediaTextImageHeight,
 					licenseName: row.mediaTextLicenseName,
 					licenseUrl: row.mediaTextLicenseUrl,
 				}),
