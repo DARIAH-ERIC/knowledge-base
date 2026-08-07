@@ -16,8 +16,12 @@ interface DashboardAdministratorInternalPageProps extends PageProps<"/[locale]/d
 
 const pageSize = dashboardPageSize;
 
-function createListHref(page: number, action: AuditLogAction | undefined): string {
+function createListHref(page: number, action: AuditLogAction | undefined, q: string): string {
 	const searchParams = new URLSearchParams();
+
+	if (q !== "") {
+		searchParams.set("q", q);
+	}
 
 	if (action != null) {
 		searchParams.set("action", action);
@@ -55,22 +59,28 @@ export default async function DashboardAdministratorInternalPage(
 		assertAdminPageAccess(),
 	]);
 
-	const { page } = getListSearchParams(rawSearchParams);
+	const { page, q } = getListSearchParams(rawSearchParams);
 	const rawAction = getSearchParam(rawSearchParams, "action");
 	const action = auditLogActions.find((value) => value === rawAction);
 
 	const [auditLog, statements] = await Promise.all([
-		getAuditLogEntries({ limit: pageSize, offset: (page - 1) * pageSize, action }),
+		getAuditLogEntries({ limit: pageSize, offset: (page - 1) * pageSize, action, q }),
 		getExpensiveStatements(),
 	]);
 
 	const totalPages = Math.max(Math.ceil(auditLog.total / pageSize), 1);
 
 	if (page > totalPages) {
-		redirect({ href: createListHref(totalPages, action), locale: locale as IntlLocale });
+		redirect({ href: createListHref(totalPages, action, q), locale: locale as IntlLocale });
 	}
 
 	return (
-		<InternalDashboard action={action} auditLog={auditLog} page={page} statements={statements} />
+		<InternalDashboard
+			action={action}
+			auditLog={auditLog}
+			page={page}
+			q={q}
+			statements={statements}
+		/>
 	);
 }
