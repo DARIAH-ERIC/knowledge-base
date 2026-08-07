@@ -25,6 +25,16 @@ export function Dialog({
 		<AriaDialog
 			className={twMerge(
 				"peer/dialog group/dialog relative flex max-block-[calc(var(--visual-viewport-height)-var(--visual-viewport-vertical-padding))] flex-col overflow-hidden outline-hidden [--gutter:--spacing(6)] sm:[--gutter:--spacing(8)]",
+				/**
+				 * Dialogs that submit a form wrap header, body and footer in one — so the column that caps
+				 * at the viewport height is the dialog, but the element actually holding the three regions
+				 * is the form. Left as a plain block it sizes to its content, overflows the capped dialog,
+				 * and is clipped by `overflow-hidden`: the body's `overflow-auto` never gets a constrained
+				 * height to scroll within, and the footer's buttons end up below the viewport with no way
+				 * to reach them. Handing the form the same column layout puts the regions back under the
+				 * cap.
+				 */
+				"[&>form]:flex [&>form]:min-block-0 [&>form]:flex-1 [&>form]:flex-col",
 				className,
 			)}
 			data-slot="dialog"

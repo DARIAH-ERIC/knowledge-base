@@ -64,4 +64,29 @@ export class AssetsPage {
 	mediaLibraryAssetByLabel(dialog: Locator, label: string): Locator {
 		return dialog.getByRole("gridcell", { name: label });
 	}
+
+	// ---------------------------------------------------------------------------
+	// Edit asset metadata dialog (opened from a card on the assets list page)
+	// ---------------------------------------------------------------------------
+
+	/**
+	 * Opens the metadata dialog on the card for `label`, and waits until its license options have
+	 * arrived — they are fetched after the dialog opens and grow its content when they replace the
+	 * loading placeholder, so measuring before they land measures the wrong layout.
+	 */
+	async openEditAssetMetadataDialog(label: string): Promise<Locator> {
+		await this.goto();
+		await this.search(label);
+
+		await this.assetCardByLabel(label)
+			.first()
+			.getByRole("button", { name: "Edit metadata" })
+			.click();
+
+		const dialog = this.page.getByRole("dialog", { name: "Edit asset metadata" });
+		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("progressbar", { name: "Loading..." }).waitFor({ state: "detached" });
+
+		return dialog;
+	}
 }
