@@ -27,6 +27,7 @@ import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_compon
 import { CaptionField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field";
 import { updateAssetMetadataAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/update-asset-metadata.action";
 import { UpdateAssetMetadataInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/update-asset-metadata.schema";
+import { formatDimensions } from "@/lib/format-dimensions";
 
 interface AssetMetadataItem {
 	id: string;
@@ -36,6 +37,13 @@ interface AssetMetadataItem {
 	caption: JSONContent | null;
 	licenseId: string | null;
 	mimeType: string;
+	/**
+	 * Stated under the preview, never edited: the dimensions describe the stored file, and the only
+	 * way to change them is to upload a different one. Absent for vectors and for assets whose
+	 * dimensions have not been measured yet.
+	 */
+	width?: number | null;
+	height?: number | null;
 	url: string;
 }
 
@@ -81,6 +89,7 @@ export function EditAssetMetadataDialog(props: Readonly<EditAssetMetadataDialogP
 	const [fetchedLicenses, setFetchedLicenses] = useState<Array<LicenseOption> | null>(null);
 
 	const licenseOptions = licenses ?? fetchedLicenses;
+	const dimensions = formatDimensions(asset.width, asset.height);
 
 	const [state, formAction, isPending] = useActionState(
 		async (prevState: ActionState, formData: FormData) => {
@@ -152,16 +161,24 @@ export function EditAssetMetadataDialog(props: Readonly<EditAssetMetadataDialogP
 
 						<input name="id" type="hidden" value={asset.id} />
 
-						<div className="overflow-hidden rounded-lg bg-muted aspect-video">
-							<AssetPreview
-								alt={asset.alt ?? asset.label}
-								className="block-full inline-full"
-								imageClassName="object-contain"
-								kindLabelClassName="bg-background/90 text-xs"
-								mimeType={asset.mimeType}
-								src={asset.url}
-								storageKey={asset.key}
-							/>
+						<div className="flex flex-col gap-y-1.5">
+							<div className="overflow-hidden rounded-lg bg-muted aspect-video">
+								<AssetPreview
+									alt={asset.alt ?? asset.label}
+									className="block-full inline-full"
+									imageClassName="object-contain"
+									kindLabelClassName="bg-background/90 text-xs"
+									mimeType={asset.mimeType}
+									src={asset.url}
+									storageKey={asset.key}
+								/>
+							</div>
+
+							{dimensions != null ? (
+								<span className="text-muted-fg text-xs">
+									<span className="font-medium">{t("Dimensions")}:</span> {dimensions}
+								</span>
+							) : null}
 						</div>
 
 						<TextField defaultValue={asset.label} isRequired={true} name="label">
