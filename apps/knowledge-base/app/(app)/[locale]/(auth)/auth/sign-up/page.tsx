@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 import { SignUpForm } from "@/app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form";
 import { Main } from "@/components/main";
 import { passwords } from "@/config/auth.config";
+import { env } from "@/config/env.config";
 import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -52,6 +53,14 @@ export default async function SignUpPage(_props: Readonly<SignUpPageProps>): Pro
 		}
 
 		redirect({ href: "/dashboard", locale });
+	}
+
+	/**
+	 * Checked in `signUpAction` as well, which is what actually enforces this. Repeated here so
+	 * visitors are not offered a form which can only ever be rejected on submit.
+	 */
+	if (env.AUTH_SIGN_UP !== "enabled") {
+		redirect({ href: "/auth/sign-in", locale });
 	}
 
 	return (
