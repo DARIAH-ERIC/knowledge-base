@@ -13,10 +13,14 @@ import {
 } from "@dariah-eric/ui/menu";
 import {
 	CommandLineIcon as IconCommandMenu,
+	EnvelopeIcon as IconContact,
 	Squares2X2Icon as IconDashboard,
 	DocumentTextIcon as IconDocumentation,
+	InformationCircleIcon as IconImprint,
+	ShieldCheckIcon as IconPrivacyPolicy,
 	Cog6ToothIcon as IconSettings,
 	ArrowLeftStartOnRectangleIcon as IconSignOut,
+	ScaleIcon as IconTermsOfUse,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
@@ -58,7 +62,7 @@ export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 
 				<MenuItem href="/auth/settings">
 					<IconSettings />
-					<MenuLabel>{t("Settings")}</MenuLabel>
+					<MenuLabel>{t("Account settings")}</MenuLabel>
 				</MenuItem>
 
 				<MenuSeparator />
@@ -77,6 +81,28 @@ export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 				<MenuItem href="/documentation">
 					<IconDocumentation />
 					<MenuLabel>{t("Documentation")}</MenuLabel>
+				</MenuItem>
+
+				<MenuItem href="/contact">
+					<IconContact />
+					<MenuLabel>{t("Contact")}</MenuLabel>
+				</MenuItem>
+
+				<MenuSeparator />
+
+				<MenuItem href="/privacy-policy">
+					<IconPrivacyPolicy />
+					<MenuLabel>{t("Privacy policy")}</MenuLabel>
+				</MenuItem>
+
+				<MenuItem href="/terms-of-use">
+					<IconTermsOfUse />
+					<MenuLabel>{t("Terms of use")}</MenuLabel>
+				</MenuItem>
+
+				<MenuItem href="/imprint">
+					<IconImprint />
+					<MenuLabel>{t("Imprint")}</MenuLabel>
 				</MenuItem>
 
 				<MenuSeparator />

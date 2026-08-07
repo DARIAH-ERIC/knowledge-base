@@ -24,7 +24,7 @@ export async function generateMetadata(
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Settings"),
+		title: t("Account settings"),
 	});
 
 	return metadata;
@@ -77,7 +77,7 @@ export default async function SettingsPage(
 				</Link>
 
 				<div>
-					<h1 className="text-xl/10 font-semibold">{t("Settings")}</h1>
+					<h1 className="text-xl/10 font-semibold">{t("Account settings")}</h1>
 
 					{/* <Text>{t("message")}</Text> */}
 				</div>
