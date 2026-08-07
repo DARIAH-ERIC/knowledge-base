@@ -25,6 +25,7 @@
 		"data:deduplicate:assets": "tsx ./scripts/deduplicate-assets.ts",
 		"data:move:job-opportunity-news": "tsx ./scripts/move-job-opportunity-news-to-opportunities.ts",
 		"data:normalise:identifier-urls": "tsx ./scripts/normalise-identifier-urls.ts",
+		"data:normalise:slug-suffixes": "tsx ./scripts/normalise-slug-suffixes.ts",
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",
 		"lint:check": "oxlint --report-unused-disable-directives --type-aware --type-check",
