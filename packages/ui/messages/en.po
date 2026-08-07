@@ -143,7 +143,7 @@ msgctxt "ui"
 msgid "OHAWov"
 msgstr "Open calendar"
 
-#: lib/dialog.tsx:149
+#: lib/dialog.tsx:159
 #: lib/toast.tsx:58
 msgctxt "ui"
 msgid "rbrahO"

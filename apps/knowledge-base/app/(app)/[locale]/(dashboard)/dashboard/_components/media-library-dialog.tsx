@@ -40,6 +40,7 @@ import { CaptionField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_compon
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
 import { imageMimeTypes, imageSizeLimit, mediaLibraryPageSize } from "@/config/assets.config";
+import { formatDimensions } from "@/lib/format-dimensions";
 import { formatFileSize } from "@/lib/format-file-size";
 
 interface MediaLibraryDialogProps<T extends AssetPrefix> {
@@ -497,6 +498,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 												const prefix = asset.key.split("/")[0] ?? "";
 												const license =
 													asset.licenseId != null ? licensesById.get(asset.licenseId) : undefined;
+												const dimensions = formatDimensions(asset.width, asset.height);
 												return (
 													<GridListItem className="p-2.5" id={asset.key} textValue={asset.label}>
 														{/* React Aria wraps a row's children in one grid cell, so the columns are
@@ -543,6 +545,12 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 																		</Fragment>
 																	) : null}
 																	{asset.mimeType != null ? <span>{asset.mimeType}</span> : null}
+																	{dimensions != null ? (
+																		<Fragment>
+																			<span aria-hidden={true}>{"·"}</span>
+																			<span>{dimensions}</span>
+																		</Fragment>
+																	) : null}
 																	{asset.size != null ? (
 																		<Fragment>
 																			<span aria-hidden={true}>{"·"}</span>

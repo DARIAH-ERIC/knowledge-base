@@ -108,6 +108,8 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 				licenseId: schema.assets.licenseId,
 				mimeType: schema.assets.mimeType,
 				size: schema.assets.size,
+				width: schema.assets.width,
+				height: schema.assets.height,
 			})
 			.from(schema.assets)
 			.where(where)
@@ -132,6 +134,8 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 			licenseId: asset.licenseId,
 			mimeType: asset.mimeType,
 			size: asset.size,
+			width: asset.width,
+			height: asset.height,
 			url,
 		};
 	});
@@ -318,6 +322,8 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 				licenseId: schema.assets.licenseId,
 				mimeType: schema.assets.mimeType,
 				size: schema.assets.size,
+				width: schema.assets.width,
+				height: schema.assets.height,
 			})
 			.from(schema.assets)
 			.where(where)
@@ -342,6 +348,8 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 			licenseId: asset.licenseId,
 			mimeType: asset.mimeType,
 			size: asset.size,
+			width: asset.width,
+			height: asset.height,
 			url,
 		};
 	});

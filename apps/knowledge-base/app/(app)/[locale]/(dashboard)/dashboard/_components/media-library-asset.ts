@@ -24,6 +24,9 @@ export interface MediaLibraryAsset {
 	caption?: JSONContent | null;
 	licenseId?: string | null;
 	size?: number | null;
+	/** Null for vectors, and for assets whose dimensions have not been measured yet. */
+	width?: number | null;
+	height?: number | null;
 	/**
 	 * Resolved from {@link MediaLibraryAsset.licenseId} when the media library hands an asset to a
 	 * caller, so consumers can label the license without loading the license list themselves.
