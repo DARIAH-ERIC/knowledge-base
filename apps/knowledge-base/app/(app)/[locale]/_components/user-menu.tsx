@@ -12,17 +12,20 @@ import {
 	MenuTrigger,
 } from "@dariah-eric/ui/menu";
 import {
-	ArrowLeftStartOnRectangleIcon,
-	Cog6ToothIcon,
-	DocumentTextIcon,
-	Squares2X2Icon,
+	CommandLineIcon as IconCommandMenu,
+	Squares2X2Icon as IconDashboard,
+	DocumentTextIcon as IconDocumentation,
+	Cog6ToothIcon as IconSettings,
+	ArrowLeftStartOnRectangleIcon as IconSignOut,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import { signOutAction } from "@/lib/auth/sign-out.action";
 
 interface UserMenuProps {
+	/** Only the dashboard has a command palette to open. */
+	onOpenCommandMenu?: () => void;
 	user: {
 		name: string;
 		email: string;
@@ -30,17 +33,17 @@ interface UserMenuProps {
 }
 
 export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
-	const { user } = props;
+	const { onOpenCommandMenu, user } = props;
 
 	const t = useExtracted();
 
 	return (
 		<Menu>
 			<MenuTrigger aria-label={t("Open menu")}>
-				<Avatar initials={user.name.at(0)} />
+				<Avatar alt={user.name} initials={user.name.at(0)} />
 			</MenuTrigger>
 
-			<MenuContent className="min-inline-64" popover={{ placement: "bottom end" }}>
+			<MenuContent className="min-inline-60" popover={{ placement: "bottom end" }}>
 				<MenuSection>
 					<MenuHeader separator={true}>
 						<span className="block">{user.name}</span>
@@ -49,20 +52,31 @@ export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 				</MenuSection>
 
 				<MenuItem href="/dashboard">
-					<Squares2X2Icon />
-					<MenuLabel>Dashboard</MenuLabel>
+					<IconDashboard />
+					<MenuLabel>{t("Dashboard")}</MenuLabel>
 				</MenuItem>
 
 				<MenuItem href="/auth/settings">
-					<Cog6ToothIcon />
-					<MenuLabel>Settings</MenuLabel>
+					<IconSettings />
+					<MenuLabel>{t("Settings")}</MenuLabel>
 				</MenuItem>
 
 				<MenuSeparator />
 
+				{onOpenCommandMenu != null ? (
+					<Fragment>
+						<MenuItem onAction={onOpenCommandMenu}>
+							<IconCommandMenu />
+							<MenuLabel>{t("Command menu")}</MenuLabel>
+						</MenuItem>
+
+						<MenuSeparator />
+					</Fragment>
+				) : null}
+
 				<MenuItem href="/documentation">
-					<DocumentTextIcon />
-					<MenuLabel>Documentation</MenuLabel>
+					<IconDocumentation />
+					<MenuLabel>{t("Documentation")}</MenuLabel>
 				</MenuItem>
 
 				<MenuSeparator />
@@ -72,8 +86,8 @@ export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 						void signOutAction();
 					}}
 				>
-					<ArrowLeftStartOnRectangleIcon />
-					<MenuLabel>Sign out</MenuLabel>
+					<IconSignOut />
+					<MenuLabel>{t("Sign out")}</MenuLabel>
 				</MenuItem>
 			</MenuContent>
 		</Menu>

@@ -23,6 +23,7 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useEffect } from "react";
 
 import { useDashboardCommandPalette } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-command-palette-context";
+import { ColorSchemeToggle } from "@/app/(app)/[locale]/_components/color-scheme-toggle";
 import { Logo } from "@/components/logo";
 import type { UserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
 import { useMetadata } from "@/lib/i18n/metadata";
@@ -427,6 +428,9 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 	const meta = useMetadata();
 	const t = useExtracted();
 
+	/** On mobile the sidebar is shown as a sheet at full width, however collapsed the desktop one is. */
+	const isCollapsed = state === "collapsed" && !isMobile;
+
 	useEffect(() => {
 		setIsOpenOnMobile(false);
 	}, [pathname, setIsOpenOnMobile]);
@@ -506,9 +510,11 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 				</SidebarSectionGroup>
 			</SidebarContent>
 
-			<SidebarFooter
-				className={state === "collapsed" ? "p-4" : "border-bs px-4 py-2.5"}
-			></SidebarFooter>
+			{/* The docked rail is only `--sidebar-width-dock` wide, so the stacked toggle needs the same
+			    slim padding the sections get rather than the roomier expanded one. */}
+			<SidebarFooter className={isCollapsed ? "p-2" : "border-bs px-4 py-2.5"}>
+				<ColorSchemeToggle orientation={isCollapsed ? "vertical" : "horizontal"} />
+			</SidebarFooter>
 
 			<SidebarRail />
 		</Sidebar>

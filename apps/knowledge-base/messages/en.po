@@ -435,10 +435,21 @@ msgctxt "ui"
 msgid "NNbHjg"
 msgstr "Remove tag"
 
-#: app/(app)/[locale]/_components/color-scheme-toggle.tsx:9
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:116
-msgid "rru3FW"
-msgstr "Toggle color scheme"
+#: app/(app)/[locale]/_components/color-scheme-toggle.tsx:39
+msgid "+CwN9C"
+msgstr "System"
+
+#: app/(app)/[locale]/_components/color-scheme-toggle.tsx:40
+msgid "3cc4Ct"
+msgstr "Light"
+
+#: app/(app)/[locale]/_components/color-scheme-toggle.tsx:41
+msgid "tOdNiY"
+msgstr "Dark"
+
+#: app/(app)/[locale]/_components/color-scheme-toggle.tsx:53
+msgid "DxgBSX"
+msgstr "Color scheme"
 
 #: app/(app)/[locale]/_components/impersonation-banner.tsx:43
 msgid "e3DXdx"
@@ -463,6 +474,38 @@ msgstr "Your own account is {name}."
 #: app/(app)/[locale]/_components/impersonation-banner.tsx:91
 msgid "BsKWQ5"
 msgstr "Return to my account"
+
+#: app/(app)/[locale]/_components/user-menu.tsx:42
+msgid "bdcMGy"
+msgstr "Open menu"
+
+#: app/(app)/[locale]/_components/user-menu.tsx:56
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-breadcrumbs.tsx:56
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:482
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:485
+msgid "hzSNj4"
+msgstr "Dashboard"
+
+#: app/(app)/[locale]/_components/user-menu.tsx:61
+#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:27
+#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav.tsx:23
+msgid "D3idYv"
+msgstr "Settings"
+
+#: app/(app)/[locale]/_components/user-menu.tsx:70
+msgid "tCOYpl"
+msgstr "Command menu"
+
+#: app/(app)/[locale]/_components/user-menu.tsx:79
+#: app/(app)/[locale]/(default)/documentation/(index)/page.tsx:52
+#: app/(app)/[locale]/(default)/documentation/(index)/page.tsx:69
+msgid "isGKnz"
+msgstr "Documentation"
+
+#: app/(app)/[locale]/_components/user-menu.tsx:90
+msgid "xXbJso"
+msgstr "Sign out"
 
 #: app/(app)/[locale]/(auth)/auth/forgot-password/_components/forgot-password-form.tsx:25
 #: app/(app)/[locale]/(auth)/auth/sign-in/_components/sign-in-form.tsx:25
@@ -599,7 +642,7 @@ msgstr "Forgot password"
 #: app/(app)/[locale]/(auth)/auth/two-factor/setup/page.tsx:63
 #: app/(app)/[locale]/(auth)/auth/verify-email/page.tsx:61
 #: app/(app)/[locale]/(default)/_components/default-footer.tsx:26
-#: app/(app)/[locale]/(default)/_components/default-header.tsx:25
+#: app/(app)/[locale]/(default)/_components/default-header.tsx:26
 #: app/(app)/[locale]/error-page.tsx:32
 #: app/(app)/[locale]/forbidden.tsx:37
 #: app/(app)/[locale]/not-found.tsx:37
@@ -621,7 +664,7 @@ msgstr "We will send a password reset code to your email address."
 #: app/(app)/[locale]/(auth)/auth/sign-in/page.tsx:24
 #: app/(app)/[locale]/(auth)/auth/sign-in/page.tsx:69
 #: app/(app)/[locale]/(auth)/auth/sign-up/page.tsx:86
-#: app/(app)/[locale]/(default)/_components/default-header.tsx:52
+#: app/(app)/[locale]/(default)/_components/default-header.tsx:54
 #: app/(app)/[locale]/(default)/(index)/page.tsx:33
 #: app/(app)/[locale]/unauthorized.tsx:39
 msgid "SQJto2"
@@ -821,13 +864,6 @@ msgstr "Incorrect password."
 #: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:87
 msgid "Whl44A"
 msgstr "Updated password."
-
-#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:27
-#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:80
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:105
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav.tsx:23
-msgid "D3idYv"
-msgstr "Settings"
 
 #: app/(app)/[locale]/(auth)/auth/settings/page.tsx:87
 msgid "ivZVky"
@@ -1866,39 +1902,9 @@ msgstr "This will permanently delete this contribution."
 msgid "K3r6DQ"
 msgstr "Delete"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-breadcrumbs.tsx:56
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:101
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:482
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:485
-msgid "hzSNj4"
-msgstr "Dashboard"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:59
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:39
 msgid "h7ympN"
 msgstr "Open command menu"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:89
-#: app/(app)/[locale]/(default)/_components/user-menu.tsx:39
-msgid "bdcMGy"
-msgstr "Open menu"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:110
-msgid "tCOYpl"
-msgstr "Command menu"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:114
-msgid "DxgBSX"
-msgstr "Color scheme"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:121
-#: app/(app)/[locale]/(default)/documentation/(index)/page.tsx:52
-#: app/(app)/[locale]/(default)/documentation/(index)/page.tsx:69
-msgid "isGKnz"
-msgstr "Documentation"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:130
-msgid "xXbJso"
-msgstr "Sign out"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:50
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/administration/page.tsx:23
@@ -8121,7 +8127,7 @@ msgstr "Imprint"
 msgid "6FQuCT"
 msgstr "Secondary"
 
-#: app/(app)/[locale]/(default)/_components/default-header.tsx:32
+#: app/(app)/[locale]/(default)/_components/default-header.tsx:33
 msgid "EFTSMc"
 msgstr "Main"
 

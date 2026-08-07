@@ -6,7 +6,7 @@ import type { ComponentProps, ReactNode } from "react";
 
 // import { LocaleSelect } from "@/app/(app)/[locale]/_components/locale-select";
 import { Navigation } from "@/app/(app)/[locale]/(default)/_components/navigation";
-import { UserMenu } from "@/app/(app)/[locale]/(default)/_components/user-menu";
+import { UserMenu } from "@/app/(app)/[locale]/_components/user-menu";
 import { getCurrentSession } from "@/lib/auth/session";
 import { createHref } from "@/lib/navigation/create-href";
 import type { NavigationConfig } from "@/lib/navigation/navigation";
