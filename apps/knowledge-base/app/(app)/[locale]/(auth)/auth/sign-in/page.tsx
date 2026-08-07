@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 
 import { SignInForm } from "@/app/(app)/[locale]/(auth)/auth/sign-in/_components/sign-in-form";
 import { Main } from "@/components/main";
+import { env } from "@/config/env.config";
 import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -74,7 +75,9 @@ export default async function SignInPage(_props: Readonly<SignInPageProps>): Pro
 				<SignInForm />
 
 				<Text className="flex flex-wrap items-center gap-x-6">
-					<TextLink href="/auth/sign-up">{t("Create an account")}</TextLink>
+					{env.AUTH_SIGN_UP === "enabled" ? (
+						<TextLink href="/auth/sign-up">{t("Create an account")}</TextLink>
+					) : null}
 					<TextLink href="/auth/forgot-password">{t("Forgot password?")}</TextLink>
 				</Text>
 			</div>
