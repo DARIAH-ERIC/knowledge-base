@@ -4,7 +4,12 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl, toImageAsset, withResolvedCaption } from "@/lib/images";
+import {
+	generateImageUrl,
+	imageAssetColumns,
+	toImageAsset,
+	withResolvedCaption,
+} from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
@@ -100,21 +105,7 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 				socialMedia: {
 					...socialMediaByPosition,
 					columns: {
@@ -219,6 +210,8 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 			name: schema.persons.name,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
+			imageWidth: schema.assets.width,
+			imageHeight: schema.assets.height,
 			imageAlt: schema.assets.alt,
 			imageCaption: schema.assets.caption,
 			personImageCaption: schema.persons.imageCaption,
@@ -264,6 +257,8 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 			imageKey,
 			imageAlt,
 			imageCaption,
+			imageWidth: imageSourceWidth,
+			imageHeight: imageSourceHeight,
 			personImageCaption,
 			personImageCaptionMode,
 			licenseName,
@@ -281,6 +276,8 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 							key: imageKey,
 							alt: imageAlt,
 							caption: imageCaption,
+							width: imageSourceWidth,
+							height: imageSourceHeight,
 							licenseName,
 							licenseUrl,
 						}),
@@ -330,21 +327,7 @@ export async function getWorkingGroupById(
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 				socialMedia: {
 					...socialMediaByPosition,
 					columns: {
@@ -426,21 +409,7 @@ export async function getWorkingGroupSlugs(
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 			},
 			orderBy(t, { desc, sql }) {
 				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
@@ -509,21 +478,7 @@ export async function getWorkingGroupBySlug(
 					},
 				},
 			},
-			image: {
-				columns: {
-					key: true,
-					alt: true,
-					caption: true,
-				},
-				with: {
-					license: {
-						columns: {
-							name: true,
-							url: true,
-						},
-					},
-				},
-			},
+			image: imageAssetColumns,
 			socialMedia: {
 				...socialMediaByPosition,
 				columns: {

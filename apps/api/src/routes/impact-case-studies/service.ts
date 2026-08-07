@@ -4,7 +4,12 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl, toImageAsset, withResolvedCaption } from "@/lib/images";
+import {
+	generateImageUrl,
+	imageAssetColumns,
+	toImageAsset,
+	withResolvedCaption,
+} from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
@@ -50,21 +55,7 @@ export async function getImpactCaseStudies(
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 			},
 			orderBy(t, { desc, sql }) {
 				return [desc(t.publicationDate), desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
@@ -111,6 +102,8 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 			name: schema.persons.name,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
+			imageWidth: schema.assets.width,
+			imageHeight: schema.assets.height,
 			imageAlt: schema.assets.alt,
 			imageCaption: schema.assets.caption,
 			personImageCaption: schema.persons.imageCaption,
@@ -145,6 +138,8 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 			imageKey,
 			imageAlt,
 			imageCaption,
+			imageWidth: imageSourceWidth,
+			imageHeight: imageSourceHeight,
 			personImageCaption,
 			personImageCaptionMode,
 			licenseName,
@@ -160,6 +155,8 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 							key: imageKey,
 							alt: imageAlt,
 							caption: imageCaption,
+							width: imageSourceWidth,
+							height: imageSourceHeight,
 							licenseName,
 							licenseUrl,
 						}),
@@ -207,21 +204,7 @@ export async function getImpactCaseStudyById(
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 			},
 		}),
 		getContentBlocks(db, id),
@@ -290,21 +273,7 @@ export async function getImpactCaseStudySlugs(
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 			},
 			orderBy(t, { desc, sql }) {
 				return [desc(t.publicationDate), desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
@@ -371,21 +340,7 @@ export async function getImpactCaseStudyBySlug(
 					},
 				},
 			},
-			image: {
-				columns: {
-					key: true,
-					alt: true,
-					caption: true,
-				},
-				with: {
-					license: {
-						columns: {
-							name: true,
-							url: true,
-						},
-					},
-				},
-			},
+			image: imageAssetColumns,
 		},
 	});
 

@@ -6,7 +6,12 @@ import type { JSONContent } from "@tiptap/core";
 
 import { type ContentBlock, getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl, toImageAsset, withResolvedCaption } from "@/lib/images";
+import {
+	generateImageUrl,
+	imageAssetColumns,
+	toImageAsset,
+	withResolvedCaption,
+} from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
 import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
@@ -54,21 +59,7 @@ export async function getMembersAndPartners(
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 				socialMedia: {
 					...socialMediaByPosition,
 					columns: {
@@ -133,6 +124,8 @@ function mapPersonContributors(
 		imageKey: string | null;
 		imageAlt: string | null;
 		imageCaption: JSONContent | null;
+		imageWidth: number | null;
+		imageHeight: number | null;
 		personImageCaption: JSONContent | null;
 		personImageCaptionMode: ImageCaptionMode;
 		licenseName: string | null;
@@ -147,6 +140,8 @@ function mapPersonContributors(
 			imageKey,
 			imageAlt,
 			imageCaption,
+			imageWidth: imageSourceWidth,
+			imageHeight: imageSourceHeight,
 			personImageCaption,
 			personImageCaptionMode,
 			licenseName,
@@ -165,6 +160,8 @@ function mapPersonContributors(
 							key: imageKey,
 							alt: imageAlt,
 							caption: imageCaption,
+							width: imageSourceWidth,
+							height: imageSourceHeight,
 							licenseName,
 							licenseUrl,
 						}),
@@ -509,21 +506,7 @@ async function getNationalConsortium(
 					},
 				},
 			},
-			image: {
-				columns: {
-					key: true,
-					alt: true,
-					caption: true,
-				},
-				with: {
-					license: {
-						columns: {
-							name: true,
-							url: true,
-						},
-					},
-				},
-			},
+			image: imageAssetColumns,
 			socialMedia: {
 				...socialMediaByPosition,
 				columns: {
@@ -580,6 +563,8 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 			name: schema.persons.name,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
+			imageWidth: schema.assets.width,
+			imageHeight: schema.assets.height,
 			imageAlt: schema.assets.alt,
 			imageCaption: schema.assets.caption,
 			personImageCaption: schema.persons.imageCaption,
@@ -691,21 +676,7 @@ export async function getMemberOrPartnerById(
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 				socialMedia: {
 					...socialMediaByPosition,
 					columns: {
@@ -835,21 +806,7 @@ export async function getMemberOrPartnerSlugs(
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 			},
 			orderBy(t, { desc, sql }) {
 				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
@@ -917,21 +874,7 @@ export async function getMemberOrPartnerBySlug(
 					},
 				},
 			},
-			image: {
-				columns: {
-					key: true,
-					alt: true,
-					caption: true,
-				},
-				with: {
-					license: {
-						columns: {
-							name: true,
-							url: true,
-						},
-					},
-				},
-			},
+			image: imageAssetColumns,
 			socialMedia: {
 				...socialMediaByPosition,
 				columns: {

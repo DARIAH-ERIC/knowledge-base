@@ -3,7 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { serializeDateRange } from "@/lib/date-range";
-import { generateImageUrl, withResolvedCaption } from "@/lib/images";
+import { generateImageUrl, imageAssetColumns, withResolvedCaption } from "@/lib/images";
 import type { Database, Transaction } from "@/middlewares/db";
 import {
 	type Announcement,
@@ -20,22 +20,6 @@ interface GetAnnouncementsParams {
 	offset?: number;
 	type?: AnnouncementType | Array<AnnouncementType>;
 }
-
-const imageColumns = {
-	columns: {
-		key: true,
-		alt: true,
-		caption: true,
-	},
-	with: {
-		license: {
-			columns: {
-				name: true,
-				url: true,
-			},
-		},
-	},
-} as const;
 
 const entityVersionColumns = {
 	columns: { updatedAt: true },
@@ -178,7 +162,7 @@ export async function getAnnouncements(db: Database | Transaction, params: GetAn
 						imageCaption: true,
 						imageCaptionMode: true,
 					},
-					with: { entityVersion: entityVersionColumns, image: imageColumns },
+					with: { entityVersion: entityVersionColumns, image: imageAssetColumns },
 				})
 			: [],
 		idsByType.opportunities.length > 0
@@ -195,7 +179,7 @@ export async function getAnnouncements(db: Database | Transaction, params: GetAn
 					},
 					with: {
 						entityVersion: entityVersionColumns,
-						image: imageColumns,
+						image: imageAssetColumns,
 						source: { columns: { source: true } },
 					},
 				})
@@ -211,7 +195,7 @@ export async function getAnnouncements(db: Database | Transaction, params: GetAn
 						imageCaption: true,
 						imageCaptionMode: true,
 					},
-					with: { entityVersion: entityVersionColumns, image: imageColumns },
+					with: { entityVersion: entityVersionColumns, image: imageAssetColumns },
 				})
 			: [],
 	]);

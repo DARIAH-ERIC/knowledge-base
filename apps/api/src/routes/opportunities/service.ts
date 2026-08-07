@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { getContentBlocks } from "@/lib/content-blocks";
 import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl, withResolvedCaption } from "@/lib/images";
+import { generateImageUrl, imageAssetColumns, withResolvedCaption } from "@/lib/images";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { OpportunitySource, OpportunityStatus } from "@/routes/opportunities/schemas";
@@ -97,21 +97,7 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 				source: {
 					columns: {
 						id: true,
@@ -193,21 +179,7 @@ export async function getOpportunityById(
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 				source: {
 					columns: {
 						id: true,
@@ -344,21 +316,7 @@ export async function getOpportunityBySlug(
 					},
 				},
 			},
-			image: {
-				columns: {
-					key: true,
-					alt: true,
-					caption: true,
-				},
-				with: {
-					license: {
-						columns: {
-							name: true,
-							url: true,
-						},
-					},
-				},
-			},
+			image: imageAssetColumns,
 			source: {
 				columns: {
 					id: true,

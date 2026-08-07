@@ -32,7 +32,22 @@ export const LicenseSchema = v.object({
 });
 
 export const ImageSchema = v.object({
-	url: v.string(),
+	url: v.pipe(v.string(), v.description("Default rendition, sized for this placement")),
+	srcUrl: v.pipe(
+		v.string(),
+		v.description(
+			"Base url of the image-variant endpoint for this asset; append `?w=` and optionally `&ar=` to request a rendition",
+		),
+	),
+	/**
+	 * Null for vectors. A consumer sizing its own renditions must not ask for a width above this:
+	 * imgproxy does not enlarge, so wider requests return the source size while a `srcset` descriptor
+	 * claims otherwise.
+	 */
+	width: v.nullable(v.pipe(v.number(), v.description("Source width in pixels; null for vectors"))),
+	height: v.nullable(
+		v.pipe(v.number(), v.description("Source height in pixels; null for vectors")),
+	),
 	alt: v.nullable(v.string()),
 	/** Richtext caption as Tiptap JSON (bold/italic/link); consumers render it like other richtext. */
 	caption: v.nullable(v.any()),

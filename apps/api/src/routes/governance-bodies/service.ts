@@ -6,7 +6,12 @@ import type { JSONContent } from "@tiptap/core";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
-import { generateImageUrl, toImageAsset, withResolvedCaption } from "@/lib/images";
+import {
+	generateImageUrl,
+	imageAssetColumns,
+	toImageAsset,
+	withResolvedCaption,
+} from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
@@ -79,6 +84,8 @@ function mapGovernanceBodyPerson(
 		orcid: string | null;
 		slug: string;
 		imageKey: string | null;
+		imageWidth: number | null;
+		imageHeight: number | null;
 		imageAlt: string | null;
 		imageCaption: JSONContent | null;
 		personImageCaption: JSONContent | null;
@@ -104,6 +111,8 @@ function mapGovernanceBodyPerson(
 					key: row.imageKey,
 					alt: row.imageAlt,
 					caption: row.imageCaption,
+					width: row.imageWidth,
+					height: row.imageHeight,
 					licenseName: row.licenseName,
 					licenseUrl: row.licenseUrl,
 				}),
@@ -137,6 +146,8 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			orcid: schema.persons.orcid,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
+			imageWidth: schema.assets.width,
+			imageHeight: schema.assets.height,
 			imageAlt: schema.assets.alt,
 			imageCaption: schema.assets.caption,
 			personImageCaption: schema.persons.imageCaption,
@@ -262,6 +273,8 @@ async function getActiveGovernanceBodyPersons(
 			orcid: schema.persons.orcid,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
+			imageWidth: schema.assets.width,
+			imageHeight: schema.assets.height,
 			imageAlt: schema.assets.alt,
 			imageCaption: schema.assets.caption,
 			personImageCaption: schema.persons.imageCaption,
@@ -375,21 +388,7 @@ export async function getGovernanceBodies(
 						},
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						alt: true,
-						caption: true,
-					},
-					with: {
-						license: {
-							columns: {
-								name: true,
-								url: true,
-							},
-						},
-					},
-				},
+				image: imageAssetColumns,
 				socialMedia: {
 					...socialMediaByPosition,
 					columns: {
@@ -496,21 +495,7 @@ export async function getGovernanceBodyById(
 							},
 						},
 					},
-					image: {
-						columns: {
-							key: true,
-							alt: true,
-							caption: true,
-						},
-						with: {
-							license: {
-								columns: {
-									name: true,
-									url: true,
-								},
-							},
-						},
-					},
+					image: imageAssetColumns,
 					socialMedia: {
 						...socialMediaByPosition,
 						columns: {
@@ -671,21 +656,7 @@ export async function getGovernanceBodyBySlug(
 					},
 				},
 			},
-			image: {
-				columns: {
-					key: true,
-					alt: true,
-					caption: true,
-				},
-				with: {
-					license: {
-						columns: {
-							name: true,
-							url: true,
-						},
-					},
-				},
-			},
+			image: imageAssetColumns,
 			socialMedia: {
 				...socialMediaByPosition,
 				columns: {

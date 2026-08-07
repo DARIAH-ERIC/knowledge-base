@@ -182,6 +182,8 @@ interface ArticleRow {
 	imageKey: string;
 	imageAlt: string | null;
 	imageCaption: JSONContent | null;
+	imageWidth: number | null;
+	imageHeight: number | null;
 	/** The article's own caption choice for its featured image (see `withResolvedCaption`). */
 	entityImageCaption: JSONContent | null;
 	entityImageCaptionMode: ImageCaptionMode;
@@ -202,6 +204,8 @@ function toArticle(type: PersonArticleType, row: ArticleRow): PersonArticle {
 		imageKey,
 		imageAlt,
 		imageCaption,
+		imageWidth: imageSourceWidth,
+		imageHeight: imageSourceHeight,
 		entityImageCaption,
 		entityImageCaptionMode,
 		licenseName,
@@ -222,6 +226,8 @@ function toArticle(type: PersonArticleType, row: ArticleRow): PersonArticle {
 					key: imageKey,
 					alt: imageAlt,
 					caption: imageCaption,
+					width: imageSourceWidth,
+					height: imageSourceHeight,
 					licenseName,
 					licenseUrl,
 				}),
@@ -278,6 +284,8 @@ export async function getPersonArticles(
 				imageKey: spotlightArticleAssets.key,
 				imageAlt: spotlightArticleAssets.alt,
 				imageCaption: spotlightArticleAssets.caption,
+				imageWidth: spotlightArticleAssets.width,
+				imageHeight: spotlightArticleAssets.height,
 				entityImageCaption: schema.spotlightArticles.imageCaption,
 				entityImageCaptionMode: schema.spotlightArticles.imageCaptionMode,
 				licenseName: spotlightArticleLicenses.name,
@@ -320,6 +328,8 @@ export async function getPersonArticles(
 				imageKey: impactCaseStudyAssets.key,
 				imageAlt: impactCaseStudyAssets.alt,
 				imageCaption: impactCaseStudyAssets.caption,
+				imageWidth: impactCaseStudyAssets.width,
+				imageHeight: impactCaseStudyAssets.height,
 				entityImageCaption: schema.impactCaseStudies.imageCaption,
 				entityImageCaptionMode: schema.impactCaseStudies.imageCaptionMode,
 				licenseName: impactCaseStudyLicenses.name,
