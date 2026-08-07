@@ -138,6 +138,55 @@ matches, because plenty of upstream providers are recorded locally as `is_locate
 
 Needs the `DATABASE_*` env vars and `SSHOC_MARKETPLACE_API_BASE_URL`.
 
+### `data:backfill:footnotes-from-references`
+
+Converts the hand-numbered references of migrated impact case studies into footnotes. Writes
+`.cache/footnote-conversions.tsv` (what it would change) and `.cache/footnote-review.tsv` (what it
+will not touch).
+
+WordPress had no footnotes, so authors kept the apparatus by hand: `[1]` or `(1)` typed into the
+prose, and a matching `[1] …` paragraph under an "Evidence of the Impact" heading. Nothing tied the
+two together and the numbering had drifted in every article sampled. This pairs each marker with its
+entry, replaces the marker with a footnote node carrying that entry, and takes the entry out of the
+list — after which the number is the marker's position in the document and cannot drift again.
+
+```bash
+pnpm --filter @dariah-eric/maintenance run data:backfill:footnotes-from-references            # dry run (reports only)
+pnpm --filter @dariah-eric/maintenance run data:backfill:footnotes-from-references -- --apply
+```
+
+> [!IMPORTANT]
+> Apply only once the public website renders footnotes. The conversion moves the evidence out of a
+> list the site renders today and into nodes it does not, so applying it early takes the references
+> off the live page. The dry run is safe at any time.
+
+Impact case studies only: they are the only entity type whose form enables footnotes
+(`hasFootnotes`), and a footnote in a field where the editor hides the feature is one no author can
+maintain.
+
+A marker is converted only when every number it names resolves to an entry. That is also what
+separates a parenthesised citation from an ordinary parenthetical — `(2021)`, `(Spain)` and
+`(2018-1-AT01-KA204-039209)` are everywhere in these articles, and only the number the list defines
+is a reference. Ranges (`(10-11)`) and lists (`[4, 5]`) become one footnote per entry, and entries
+sharing a paragraph across a `<br>` are read as the separate lines the author typed.
+
+| review kind       | what it means                                   | left as |
+| ----------------- | ----------------------------------------------- | ------- |
+| `missing-entry`   | the prose cites a number the list never defines | text    |
+| `uncited-entry`   | the list defines a number no marker cites       | list    |
+| `duplicate-entry` | two entries claim the same number               | list    |
+| `asterisk-note`   | a note marked `*` rather than numbered          | text    |
+
+Nothing in that report is changed: the mechanical half is done here, the editorial half is quicker
+in the editor. The "Evidence of the Impact" heading is removed only when every entry under it was
+converted; anything left keeps its section. Re-running is a no-op, so a partially reviewed article
+can be re-run after the rest is fixed by hand.
+
+A conversion can leave a `rich_text` block empty where the evidence list was all it held —
+`data:clean:empty-content-blocks` removes those.
+
+Needs the `DATABASE_*` env vars.
+
 ### `data:clean:unused-assets`
 
 Finds assets that are not referenced anywhere — neither by a foreign key to `assets.id` (columns
