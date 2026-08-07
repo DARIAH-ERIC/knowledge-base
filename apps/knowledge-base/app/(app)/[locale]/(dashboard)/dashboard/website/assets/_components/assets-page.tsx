@@ -20,6 +20,7 @@ import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { EditAssetMetadataDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog";
 import { UploadImageDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog";
 import { dashboardPageSize } from "@/config/pagination.config";
+import { formatDimensions } from "@/lib/format-dimensions";
 import { formatFileSize } from "@/lib/format-file-size";
 import { useRouter } from "@/lib/navigation/navigation";
 
@@ -32,6 +33,9 @@ interface AssetItem {
 	licenseId: string | null;
 	mimeType: string;
 	size: number | null;
+	/** Null for vectors, and for assets whose dimensions have not been measured yet. */
+	width: number | null;
+	height: number | null;
 	url: string;
 }
 
@@ -162,6 +166,12 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 				<ul className="grid grid-cols-[repeat(auto-fill,minmax(min(12rem,100%),1fr))] gap-4 content-start">
 					{assets.items.map((asset) => {
 						const prefix = asset.key.split("/")[0] ?? "";
+						/** Kept to one line under the thumbnail, so the grid stays a grid of pictures. */
+						const details = [
+							prefix,
+							formatDimensions(asset.width, asset.height),
+							asset.size != null ? formatFileSize(asset.size) : null,
+						].filter((detail) => detail != null && detail !== "");
 						return (
 							<li key={asset.id}>
 								<figure className="flex flex-col gap-y-2">
@@ -191,9 +201,8 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 										<span className="truncate text-sm/tight font-medium" title={asset.label}>
 											{asset.label}
 										</span>
-										<span className="text-xs text-muted-fg">
-											{prefix}
-											{asset.size != null ? ` · ${formatFileSize(asset.size)}` : null}
+										<span className="truncate text-xs text-muted-fg" title={details.join(" · ")}>
+											{details.join(" · ")}
 										</span>
 									</figcaption>
 								</figure>
@@ -206,6 +215,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 					{assets.items.map((asset) => {
 						const prefix = asset.key.split("/")[0] ?? "";
 						const license = asset.licenseId != null ? licensesById.get(asset.licenseId) : undefined;
+						const dimensions = formatDimensions(asset.width, asset.height);
 						return (
 							<li key={asset.id}>
 								<figure className="flex flex-row items-start gap-x-3 rounded-lg border border-border p-2.5">
@@ -246,6 +256,12 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 												</Fragment>
 											) : null}
 											<span>{asset.mimeType}</span>
+											{dimensions != null ? (
+												<Fragment>
+													<span aria-hidden={true}>{"·"}</span>
+													<span>{dimensions}</span>
+												</Fragment>
+											) : null}
 											{asset.size != null ? (
 												<Fragment>
 													<span aria-hidden={true}>{"·"}</span>

@@ -78,6 +78,8 @@ export function SelectedImageCard(props: Readonly<SelectedImageCardProps>): Reac
 							caption: image.caption ?? null,
 							licenseId: image.licenseId ?? null,
 							mimeType: image.mimeType ?? "",
+							width: image.width,
+							height: image.height,
 							url: image.url,
 						}}
 						onSuccess={handleSaved}

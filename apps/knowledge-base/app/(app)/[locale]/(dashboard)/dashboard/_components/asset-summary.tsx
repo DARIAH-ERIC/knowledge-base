@@ -5,6 +5,7 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
+import { formatDimensions } from "@/lib/format-dimensions";
 import { formatFileSize } from "@/lib/format-file-size";
 
 /**
@@ -23,6 +24,9 @@ export interface SelectedImage {
 	licenseId?: string | null;
 	mimeType?: string | null;
 	size?: number | null;
+	/** Absent for vectors and for assets whose dimensions have not been measured yet. */
+	width?: number | null;
+	height?: number | null;
 }
 
 interface AssetSummaryProps {
@@ -56,6 +60,7 @@ export function AssetSummary(props: Readonly<AssetSummaryProps>): ReactNode {
 	const fileDetails = [
 		image.license?.code,
 		image.mimeType,
+		formatDimensions(image.width, image.height),
 		image.size != null ? formatFileSize(image.size) : null,
 	].filter((detail) => detail != null && detail !== "");
 

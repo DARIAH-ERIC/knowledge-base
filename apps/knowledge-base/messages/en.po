@@ -143,7 +143,7 @@ msgctxt "ui"
 msgid "OHAWov"
 msgstr "Open calendar"
 
-#: ../../packages/ui/lib/dialog.tsx:149
+#: ../../packages/ui/lib/dialog.tsx:159
 #: ../../packages/ui/lib/toast.tsx:58
 msgctxt "ui"
 msgid "rbrahO"
@@ -1048,7 +1048,7 @@ msgstr "Verify the code from the app"
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-events-form.tsx:117
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-data-form.tsx:51
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-questions-form.tsx:70
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:219
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:240
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx:72
 #: app/(app)/[locale]/(dashboard)/dashboard/website/featured/_components/featured-items-form.tsx:137
 #: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:117
@@ -1096,24 +1096,24 @@ msgstr "We sent an 8-digit verification code to {email}."
 msgid "EI6y9l"
 msgstr "Change email address"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary.tsx:66
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary.tsx:71
 msgid "T7w3zq"
 msgstr "Selected image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary.tsx:82
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:528
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:620
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:232
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:174
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary.tsx:87
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:530
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:628
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:242
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:195
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:154
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:155
 msgid "VGwyxc"
 msgstr "Alt text"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary.tsx:88
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/asset-summary.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field.tsx:24
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:534
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:237
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:536
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:247
 msgid "sq1btl"
 msgstr "Caption"
 
@@ -1127,8 +1127,8 @@ msgstr "This image is no longer in the media library."
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx:852
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section.tsx:885
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx:437
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:201
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:202
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:222
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:223
 msgid "gjBiyj"
 msgstr "Loading..."
 
@@ -1277,7 +1277,7 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal.tsx:55
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx:136
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:645
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:653
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx:619
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx:737
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx:767
@@ -1307,7 +1307,7 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:395
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:391
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx:421
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:210
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:231
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:178
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:170
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-create-dialog.tsx:55
@@ -1410,7 +1410,7 @@ msgstr "Number of entries"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:854
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list.tsx:104
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:437
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:438
 msgid "xmcVZ0"
 msgstr "Search"
 
@@ -1478,8 +1478,8 @@ msgid "NhOsKC"
 msgstr "CTAs"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:999
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:615
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:168
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:623
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:189
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:148
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:149
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-create-dialog.tsx:48
@@ -1855,8 +1855,8 @@ msgstr "Description"
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-questions-form.tsx:67
 #: app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section.tsx:211
 #: app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section.tsx:212
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:215
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:216
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:236
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:237
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx:68
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx:69
 #: app/(app)/[locale]/(dashboard)/dashboard/website/featured/_components/featured-items-form.tsx:137
@@ -2146,7 +2146,7 @@ msgstr "Website"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:223
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:224
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:98
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:102
 msgid "d1uESJ"
 msgstr "Assets"
 
@@ -2538,96 +2538,96 @@ msgstr "This page is no longer published."
 msgid "iFsDVR"
 msgstr "Loading"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:302
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:303
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:103
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:34
 msgid "Fl1BuZ"
 msgstr "The selected image is too large. Choose an image smaller than {size}."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:374
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:375
 msgid "6nAe2O"
 msgstr "Select image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:380
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:381
 msgid "ciJ33H"
 msgstr "Select an existing image or upload a new one."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:381
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:392
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:453
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:488
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:382
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:393
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:454
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:489
 msgid "BFLVwB"
 msgstr "Media library"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:393
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:649
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:394
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:657
 msgid "kQAf2d"
 msgstr "Select"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:394
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:664
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:395
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:672
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:187
 msgid "p4N05H"
 msgstr "Upload"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:417
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:418
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:128
 msgid "RQ4EKT"
 msgstr "Layout"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:428
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:135
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:429
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:139
 msgid "3BFETM"
 msgstr "Grid layout"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:431
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:138
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:432
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:142
 msgid "dbABIT"
 msgstr "List layout"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:438
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:439
 msgid "0BUTMv"
 msgstr "Search..."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:445
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:446
 msgid "rEooS9"
 msgstr "No assets found for your search."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:446
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:447
 msgid "n0m/x/"
 msgstr "No assets found. Upload one to get started."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:571
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:579
 msgid "JJNc3c"
 msgstr "Previous"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:574
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:582
 msgid "9+Ddtu"
 msgstr "Next"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:591
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:599
 msgid "ylLD+l"
 msgstr "Choose file..."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:597
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:605
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:121
 msgid "TJo5E6"
 msgstr "Preview"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:627
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:183
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:199
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:635
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:204
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:220
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:163
 msgid "HBxXD/"
 msgstr "License"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:630
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:187
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:638
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:208
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:167
 msgid "KWv6Ra"
 msgstr "No license"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:661
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:669
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:183
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:184
 msgid "JEsxDw"
@@ -2912,12 +2912,12 @@ msgstr "Summary"
 msgid "bzBBY+"
 msgstr "Edit the details of the selected entry."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card.tsx:86
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:133
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card.tsx:88
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:142
 msgid "4GyDYS"
 msgstr "Edit metadata"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card.tsx:101
 msgid "5Dh2Di"
 msgstr "Download original"
 
@@ -5393,7 +5393,7 @@ msgid "FRVN+N"
 msgstr "unknown size"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx:221
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:70
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:74
 msgid "5q3qC0"
 msgstr "Download"
 
@@ -7324,39 +7324,43 @@ msgstr "Add a person as a contributor to this article."
 msgid "CWbizX"
 msgstr "Website dashboard"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:103
 msgid "kw3Rq2"
 msgstr "Manage all images in the media library."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:102
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:106
 msgid "ZpQLnA"
 msgstr "Search by label"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:105
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:109
 msgid "eOvGa5"
 msgstr "Filter by prefix"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:114
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:118
 msgid "sCpvlY"
 msgstr "All prefixes"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:157
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:161
 msgid "0GuJv0"
 msgstr "No images match your filters."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:158
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:162
 msgid "vC8XBw"
 msgstr "No images found. Upload one to get started."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:146
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:155
 msgid "hXURkq"
 msgstr "Update label, alt text, and caption for this asset."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:147
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:156
 msgid "23lI3e"
 msgstr "Edit asset metadata"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:175
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:183
+msgid "ThZMaA"
+msgstr "Dimensions"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:196
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:156
 msgid "DAQ44c"
 msgstr "Describe the image for accessibility"
@@ -7469,14 +7473,14 @@ msgid "mRL9Vh"
 msgstr "Creating..."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx:49
+msgid "IIV9+R"
+msgstr "Update the document group title."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx:49
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:189
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:198
 msgid "Z/1udv"
 msgstr "Edit group"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx:49
-msgid "IIV9+R"
-msgstr "Update the document group title."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:79
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:89
