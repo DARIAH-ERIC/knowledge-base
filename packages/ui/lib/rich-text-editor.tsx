@@ -1230,6 +1230,19 @@ export const FootnoteNode = Node.create({
 		return {
 			/** The note itself, as the constrained `{ doc > paragraph }` richtext captions also use. */
 			content: { default: null },
+			/**
+			 * The marker's place in the document, attached by read paths (`numberFootnotes`) so a
+			 * renderer can anchor a marker to its note. Never authored and never serialised: the editor
+			 * numbers its markers from the `footnotes` CSS counter instead, which is what lets an
+			 * insertion renumber the rest for free.
+			 */
+			number: {
+				default: null,
+				parseHTML: () => null,
+				renderHTML: () => {
+					return {};
+				},
+			},
 		};
 	},
 

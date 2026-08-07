@@ -6,7 +6,12 @@ import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/databas
 import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
 import { Note } from "@dariah-eric/ui/note";
-import { collectFootnotes, isEmptyRichTextDocument, toPlainText } from "@dariah-eric/ui/rich-text";
+import {
+	collectFootnotes,
+	isEmptyRichTextDocument,
+	numberFootnotes,
+	toPlainText,
+} from "@dariah-eric/ui/rich-text";
 import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 import { renderToReactElement } from "@tiptap/static-renderer/pm/react";
@@ -114,9 +119,34 @@ function renderLinkMark({
 	);
 }
 
+/**
+ * The marker, as a link to its note. The node's own `renderHTML` is a bare `<sup data-footnote>`,
+ * which cannot anchor itself: it has no idea where it sits in the document, and the number comes
+ * from a CSS counter. `numberFootnotes` attaches the position, and this turns it into the anchor
+ * pair the note links back to.
+ *
+ * The visible number still comes from the counter, so the `<sup>` stays empty; `aria-label` names
+ * it because generated content is not reliably announced.
+ */
+function renderFootnoteNode({
+	node,
+}: Readonly<{ node: { attrs?: Record<string, unknown> | null } }>): ReactNode {
+	const number = node.attrs?.number;
+
+	if (typeof number !== "number") {
+		return <sup data-footnote="" />;
+	}
+
+	return (
+		<a aria-label={`Footnote ${String(number)}`} href={`#footnote-${String(number)}`}>
+			<sup data-footnote="" id={`footnote-ref-${String(number)}`} />
+		</a>
+	);
+}
+
 const richTextRenderOptions = {
 	markMapping: { link: renderLinkMark },
-	nodeMapping: { buttonLink: renderButtonLinkNode },
+	nodeMapping: { buttonLink: renderButtonLinkNode, footnote: renderFootnoteNode },
 };
 
 /** Gallery items follow the same caption model as image blocks: inherit, override, or hide. */
@@ -186,7 +216,12 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 	// Footnote markers are numbered by a CSS counter rooted on the element below (`footnotes`), so the
 	// count runs across the whole article rather than restarting per block — blocks are a storage
 	// split of one document, and a reader sees one sequence of notes.
-	const footnotes = collectFootnotes(contentBlocks);
+	//
+	// `numberFootnotes` walks the same markers in the same order to attach that position as an
+	// attribute, which is what lets a marker link to its note: a counter can show a number but cannot
+	// put it in an `id`.
+	const numbered = numberFootnotes(contentBlocks);
+	const footnotes = collectFootnotes(numbered);
 
 	// Normal document flow (not a flex column) so a floated `image` block's float escapes into the
 	// following block and the text wraps around it. The immediately-following `rich_text` is allowed
@@ -200,9 +235,9 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 	// spacing story — no per-block or neighbour-aware adjustment.
 	return (
 		<div className="@container footnotes space-y-4">
-			{contentBlocks.map((contentBlock, index) => {
+			{numbered.map((contentBlock, index) => {
 				const wrapsPrecedingFloat =
-					contentBlock.type === "rich_text" && isFloatedImage(contentBlocks[index - 1]);
+					contentBlock.type === "rich_text" && isFloatedImage(numbered[index - 1]);
 
 				return (
 					<div
@@ -222,9 +257,22 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 						{"Footnotes"}
 					</h2>
 					<ol className="mbs-2 list-decimal space-y-1 ps-5 text-sm">
-						{footnotes.map((note, index) => (
-							<li key={index}>{note != null ? <InlineRichTextRenderer content={note} /> : null}</li>
-						))}
+						{footnotes.map((note, index) => {
+							const number = index + 1;
+
+							return (
+								<li id={`footnote-${String(number)}`} key={index}>
+									{note != null ? <InlineRichTextRenderer content={note} /> : null}{" "}
+									<a
+										aria-label={`Back to footnote ${String(number)} in the text`}
+										className="text-muted-fg no-underline"
+										href={`#footnote-ref-${String(number)}`}
+									>
+										{"↩"}
+									</a>
+								</li>
+							);
+						})}
 					</ol>
 				</section>
 			) : null}
