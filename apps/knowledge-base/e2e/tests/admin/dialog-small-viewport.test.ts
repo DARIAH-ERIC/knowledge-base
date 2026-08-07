@@ -16,7 +16,7 @@ test.use({ viewport: shortViewport });
  * page behind it to scroll — so anything outside the dialog box is unreachable. Only the body may
  * scroll; the footer's actions must stay in place and stay on screen.
  */
-async function expectDialogFitsViewport(dialog: Locator) {
+async function expectDialogFitsViewport(dialog: Locator): Promise<{ height: number }> {
 	/**
 	 * Nothing sticks out of the dialog. This is what regressed: with header, body and footer wrapped
 	 * in a form, the form sized itself to its content, overflowed the capped dialog, and pushed the
@@ -34,16 +34,15 @@ async function expectDialogFitsViewport(dialog: Locator) {
 	expect(box.y).toBeGreaterThanOrEqual(0);
 	expect(box.y + box.height).toBeLessThanOrEqual(shortViewport.height);
 
-	/**
-	 * The dialog stands at its cap, which is what keeps the assertion above from passing for the
-	 * wrong reason: content short enough to fit at its natural height would never have been clipped
-	 * in the first place, and would prove nothing about the cap being honoured. The tolerance covers
-	 * the overlay's padding and the rounding of a fractional layout.
-	 */
-	expect(box.height).toBeGreaterThanOrEqual(shortViewport.height - 48);
+	return box;
 }
 
 test.describe("dialogs on a short viewport", () => {
+	/**
+	 * Unlike the metadata dialog below, this one is not currently a constrained case: its body sizes
+	 * to the seeded assets and comes in well under the cap, so this is a guard against the dialog
+	 * growing - or picking up a form wrapper - rather than a reproduction of the reported bug.
+	 */
 	test("keeps the media library actions reachable", async ({ createAssetsPage }) => {
 		const assetsPage = createAssetsPage();
 
@@ -64,7 +63,15 @@ test.describe("dialogs on a short viewport", () => {
 
 		const dialog = await assetsPage.openEditAssetMetadataDialog(E2E_TEST_ASSET_LABEL);
 
-		await expectDialogFitsViewport(dialog);
+		const box = await expectDialogFitsViewport(dialog);
+
+		/**
+		 * The dialog stands at its cap, which is what keeps the check above from passing for the wrong
+		 * reason: content short enough to fit at its natural height was never at risk of being clipped
+		 * and would prove nothing about the cap being honoured. The tolerance covers the overlay's
+		 * padding and the rounding of a fractional layout.
+		 */
+		expect(box.height).toBeGreaterThanOrEqual(shortViewport.height - 48);
 
 		/**
 		 * The preview holds its aspect ratio rather than collapsing to make room, so at this height the
