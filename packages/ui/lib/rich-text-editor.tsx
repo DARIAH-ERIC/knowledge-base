@@ -2441,7 +2441,21 @@ const LinkWithTargets = Link.extend({
 	parseHTML() {
 		return [...(this.parent?.() ?? []), { tag: "a[data-asset-key]" }, { tag: "a[data-entity-id]" }];
 	},
-}).configure({ openOnClick: false, defaultProtocol: "https" });
+	/**
+	 * `target`/`rel` are nulled against the extension's `_blank` / `noopener noreferrer nofollow`
+	 * defaults: opening in a new tab is the reader's call, and the default applied to `#fragment` and
+	 * `mailto:` links too. Nulled one by one rather than `HTMLAttributes: {}`, because `configure`
+	 * deep-merges.
+	 *
+	 * These are also _declared attributes_ defaulting to this option, so the stock options had every
+	 * saved link storing them — which is how they reached the database. Saves now write `"target":
+	 * null`, which renders as nothing and `normalizeRichTextDocument` strips.
+	 */
+}).configure({
+	openOnClick: false,
+	defaultProtocol: "https",
+	HTMLAttributes: { target: null, rel: null },
+});
 
 interface CreateRichTextExtensionsOptions {
 	renderImagePicker?: ImagePickerRenderer;

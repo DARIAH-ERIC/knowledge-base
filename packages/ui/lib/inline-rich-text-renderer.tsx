@@ -17,11 +17,10 @@ function renderText(node: JSONContent, key: number): ReactNode {
 			element = <em>{element}</em>;
 		} else if (mark.type === "link") {
 			const href = mark.attrs?.href as string | undefined;
-			element = (
-				<a href={href} rel="noreferrer" target="_blank">
-					{element}
-				</a>
-			);
+			// No `target`/`rel`: whether a link opens in a new tab is the reader's call, and this
+			// renderer also serves in-page anchors, where a new tab is simply wrong. Matches the link
+			// mark's own `HTMLAttributes: {}`.
+			element = <a href={href}>{element}</a>;
 		}
 	}
 
