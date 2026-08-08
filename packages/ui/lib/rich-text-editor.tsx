@@ -1102,13 +1102,21 @@ export const PlaceholderValueNode = Node.create({
 /**
  * Inline footnote: a marker in the prose which carries its own note text.
  *
- * The note lives in the marker's `content` attribute rather than in a list node at the end of the
- * document — the shape the ProseMirror footnote example and most Tiptap extensions use. A document
- * here is split into content blocks on save (`splitDocumentToBlocks` in the app), so a trailing
- * list node would land in whichever block happened to be last while its markers stayed behind in
- * the others. Carrying the note means marker and note are moved, copied and deleted as one: a note
- * can never be orphaned, and a marker can never point at a note that is gone — which is exactly the
- * failure the hand-numbered `[1]`/`[2]` references in the migrated WordPress case studies show.
+ * The note lives in the marker's `content` attribute. Prior art splits two ways: the ProseMirror
+ * footnote example keeps the note as the marker's node _content_, edited through a popup
+ * sub-editor, while `buttondown/tiptap-footnotes` puts a `footnotes` list at the end of the
+ * document and links the two by uuid.
+ *
+ * The list is out because a document here is split into content blocks on save
+ * (`splitDocumentToBlocks` in the app): a trailing list would land in whichever block happened to
+ * be last while its markers stayed behind in the others. It also needs a plugin to renumber, to
+ * strip orphans and to re-key pasted references, none of which can go wrong if there is nothing to
+ * keep in sync. An attribute rather than node content keeps the note out of the editable flow, so a
+ * caption editor can own it.
+ *
+ * Either way marker and note move, copy and delete as one: a note can never be orphaned, and a
+ * marker can never point at a note that is gone — exactly the failure the hand-numbered `[1]`/`[2]`
+ * references in the migrated WordPress case studies show.
  *
  * No number is stored. Markers number themselves from document order through a CSS counter (see the
  * `footnotes` utility in the stylesheet), so inserting one renumbers the rest for free; read paths

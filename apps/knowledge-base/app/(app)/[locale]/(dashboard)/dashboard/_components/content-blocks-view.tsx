@@ -15,7 +15,7 @@ import {
 import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 import { renderToReactElement } from "@tiptap/static-renderer/pm/react";
-import type { ReactNode } from "react";
+import { type ReactNode, useId } from "react";
 import { twMerge } from "tailwind-merge";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
@@ -125,8 +125,12 @@ function renderLinkMark({
  * from a CSS counter. `numberFootnotes` attaches the position, and this turns it into the anchor
  * pair the note links back to.
  *
- * The visible number still comes from the counter, so the `<sup>` stays empty; `aria-label` names
- * it because generated content is not reliably announced.
+ * `fn1`/`fnref1` and the `doc-noteref`/`doc-backlink` roles are Pandoc's convention, which is what
+ * most markdown-to-html pipelines emit — worth matching for anything that ever reads these pages.
+ *
+ * The number is written as text rather than left to the `footnotes` CSS counter: it is already
+ * known here, and generated content is neither announced, selectable nor copied. An empty marker
+ * still falls back to the counter (see the utility) — that is what the editor renders.
  */
 function renderFootnoteNode({
 	node,
@@ -138,8 +142,13 @@ function renderFootnoteNode({
 	}
 
 	return (
-		<a aria-label={`Footnote ${String(number)}`} href={`#footnote-${String(number)}`}>
-			<sup data-footnote="" id={`footnote-ref-${String(number)}`} />
+		<a
+			aria-label={`Footnote ${String(number)}`}
+			href={`#fn${String(number)}`}
+			id={`fnref${String(number)}`}
+			role="doc-noteref"
+		>
+			<sup data-footnote="">{number}</sup>
 		</a>
 	);
 }
@@ -222,6 +231,7 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 	// put it in an `id`.
 	const numbered = numberFootnotes(contentBlocks);
 	const footnotes = collectFootnotes(numbered);
+	const footnotesLabelId = useId();
 
 	// Normal document flow (not a flex column) so a floated `image` block's float escapes into the
 	// following block and the text wraps around it. The immediately-following `rich_text` is allowed
@@ -252,21 +262,35 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 			    public site assembles this section the same way — from the document, not from a stored
 			    list — so what an editor proof-reads here is what a reader gets. */}
 			{footnotes.length > 0 ? (
-				<section aria-label="Footnotes" className="clear-both border-bs border-border pbs-4">
-					<h2 className="text-xs font-medium tracking-wide text-muted-fg uppercase">
+				/*
+				 * Labelled by its own caption rather than by a heading. A heading would have to pick a
+				 * level, and this component cannot know one — it renders wherever a details page puts it
+				 * (today inside a `dd`), under content that brings its own `h2`–`h4`. Naming the section
+				 * from the visible text also beats repeating it in an `aria-label`.
+				 */
+				<section
+					aria-labelledby={footnotesLabelId}
+					className="clear-both border-bs border-border pbs-4"
+					role="doc-endnotes"
+				>
+					<p
+						className="text-xs font-medium tracking-wide text-muted-fg uppercase"
+						id={footnotesLabelId}
+					>
 						{"Footnotes"}
-					</h2>
+					</p>
 					<ol className="mbs-2 list-decimal space-y-1 ps-5 text-sm">
 						{footnotes.map((note, index) => {
 							const number = index + 1;
 
 							return (
-								<li id={`footnote-${String(number)}`} key={index}>
+								<li id={`fn${String(number)}`} key={index}>
 									{note != null ? <InlineRichTextRenderer content={note} /> : null}{" "}
 									<a
 										aria-label={`Back to footnote ${String(number)} in the text`}
 										className="text-muted-fg no-underline"
-										href={`#footnote-ref-${String(number)}`}
+										href={`#fnref${String(number)}`}
+										role="doc-backlink"
 									>
 										{"↩"}
 									</a>
