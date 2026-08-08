@@ -27,15 +27,15 @@ function renderText(node: JSONContent, key: number): ReactNode {
 	return <span key={key}>{element}</span>;
 }
 
-function renderNode(node: JSONContent, key: number): ReactNode {
+function renderNode(node: JSONContent, key: number, isInline: boolean): ReactNode {
 	if (node.type === "text") {
 		return renderText(node, key);
 	}
 
-	const children = (node.content ?? []).map((child, index) => renderNode(child, index));
+	const children = (node.content ?? []).map((child, index) => renderNode(child, index, isInline));
 
 	if (node.type === "paragraph") {
-		return <p key={key}>{children}</p>;
+		return isInline ? <span key={key}>{children}</span> : <p key={key}>{children}</p>;
 	}
 
 	// `doc` and any unexpected wrapper node: render children transparently.
@@ -45,6 +45,13 @@ function renderNode(node: JSONContent, key: number): ReactNode {
 interface InlineRichTextRendererProps {
 	content: JSONContent;
 	className?: string;
+	/**
+	 * Renders the text as part of the surrounding line rather than as its own block — for a caller
+	 * that puts something after it and wants it on the same line, like the backlink following a
+	 * footnote. The editor swallows Enter, so this content is a single paragraph and nothing is lost
+	 * by dropping the block boxes.
+	 */
+	isInline?: boolean;
 }
 
 /**
@@ -54,11 +61,13 @@ interface InlineRichTextRendererProps {
  * lists/tables don't each mount a Tiptap editor.
  */
 export function InlineRichTextRenderer(props: Readonly<InlineRichTextRendererProps>): ReactNode {
-	const { content, className } = props;
+	const { content, className, isInline = false } = props;
+
+	const Element = isInline ? "span" : "div";
 
 	return (
-		<div className={twMerge("richtext richtext-sm", className)}>
-			{(content.content ?? []).map((node, index) => renderNode(node, index))}
-		</div>
+		<Element className={twMerge("richtext richtext-sm", className)}>
+			{(content.content ?? []).map((node, index) => renderNode(node, index, isInline))}
+		</Element>
 	);
 }

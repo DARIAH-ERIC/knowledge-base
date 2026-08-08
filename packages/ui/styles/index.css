@@ -959,7 +959,13 @@
 @utility footnotes {
 	counter-reset: footnote;
 
-	:where([data-footnote])::before {
+	/*
+	 * Only for markers with no number of their own. The editor's are empty — nothing there knows a
+	 * marker's position, so the counter supplies it and an insertion renumbers the rest for free.
+	 * Read paths number the markers themselves (`numberFootnotes`), because a counter can show a
+	 * number but cannot put one in an `id`, and render it as text; those must not be counted twice.
+	 */
+	:where([data-footnote]:empty)::before {
 		counter-increment: footnote;
 		content: counter(footnote);
 	}
