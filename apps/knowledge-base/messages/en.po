@@ -15,8 +15,8 @@ msgstr "Could not load options."
 
 #: ../../packages/ui/lib/async-list-select.tsx:235
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:245
-#: ../../packages/ui/lib/rich-text-editor.tsx:3012
-#: ../../packages/ui/lib/rich-text-editor.tsx:3040
+#: ../../packages/ui/lib/rich-text-editor.tsx:3047
+#: ../../packages/ui/lib/rich-text-editor.tsx:3075
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
@@ -178,14 +178,14 @@ msgstr "Italic"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:211
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:219
-#: ../../packages/ui/lib/rich-text-editor.tsx:2973
-#: ../../packages/ui/lib/rich-text-editor.tsx:2982
+#: ../../packages/ui/lib/rich-text-editor.tsx:3008
+#: ../../packages/ui/lib/rich-text-editor.tsx:3017
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx:241
-#: ../../packages/ui/lib/rich-text-editor.tsx:3036
+#: ../../packages/ui/lib/rich-text-editor.tsx:3071
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
@@ -212,8 +212,8 @@ msgid "h2vipu"
 msgstr "Code"
 
 #: ../../packages/ui/lib/rich-text-actions.tsx:192
-#: ../../packages/ui/lib/rich-text-editor.tsx:2925
-#: ../../packages/ui/lib/rich-text-editor.tsx:2928
+#: ../../packages/ui/lib/rich-text-editor.tsx:2960
+#: ../../packages/ui/lib/rich-text-editor.tsx:2963
 msgctxt "ui"
 msgid "qKqtMC"
 msgstr "Paragraph"
@@ -249,8 +249,8 @@ msgid "+RDJVD"
 msgstr "Blockquote"
 
 #: ../../packages/ui/lib/rich-text-actions.tsx:269
-#: ../../packages/ui/lib/rich-text-editor.tsx:3055
-#: ../../packages/ui/lib/rich-text-editor.tsx:3064
+#: ../../packages/ui/lib/rich-text-editor.tsx:3090
+#: ../../packages/ui/lib/rich-text-editor.tsx:3099
 msgctxt "ui"
 msgid "IeBejt"
 msgstr "Table"
@@ -295,110 +295,110 @@ msgctxt "ui"
 msgid "fhp4gl"
 msgstr "Footnote"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2925
-#: ../../packages/ui/lib/rich-text-editor.tsx:2931
+#: ../../packages/ui/lib/rich-text-editor.tsx:2960
+#: ../../packages/ui/lib/rich-text-editor.tsx:2966
 msgctxt "ui"
 msgid "hBrEtp"
 msgstr "Text style"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2993
+#: ../../packages/ui/lib/rich-text-editor.tsx:3028
 msgctxt "ui"
 msgid "ZgFjjD"
 msgstr "This link points to a document."
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:2994
+#: ../../packages/ui/lib/rich-text-editor.tsx:3029
 msgctxt "ui"
 msgid "TANa98"
 msgstr "This link points to another page."
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3008
+#: ../../packages/ui/lib/rich-text-editor.tsx:3043
 msgctxt "ui"
 msgid "y8KNhq"
 msgstr "Change document"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3008
+#: ../../packages/ui/lib/rich-text-editor.tsx:3043
 msgctxt "ui"
 msgid "KDqj1t"
 msgstr "Change page"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3074
+#: ../../packages/ui/lib/rich-text-editor.tsx:3109
 msgctxt "ui"
 msgid "yy68o/"
 msgstr "Toggle header row"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3082
+#: ../../packages/ui/lib/rich-text-editor.tsx:3117
 msgctxt "ui"
 msgid "Lag3AX"
 msgstr "Add row above"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3089
+#: ../../packages/ui/lib/rich-text-editor.tsx:3124
 msgctxt "ui"
 msgid "+MYMhj"
 msgstr "Add row below"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3096
+#: ../../packages/ui/lib/rich-text-editor.tsx:3131
 msgctxt "ui"
 msgid "w19eTC"
 msgstr "Delete row"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3104
+#: ../../packages/ui/lib/rich-text-editor.tsx:3139
 msgctxt "ui"
 msgid "UNGmTw"
 msgstr "Add column before"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3111
+#: ../../packages/ui/lib/rich-text-editor.tsx:3146
 msgctxt "ui"
 msgid "X6kBtc"
 msgstr "Add column after"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3118
+#: ../../packages/ui/lib/rich-text-editor.tsx:3153
 msgctxt "ui"
 msgid "qfX6ms"
 msgstr "Delete column"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3127
+#: ../../packages/ui/lib/rich-text-editor.tsx:3162
 msgctxt "ui"
 msgid "2CyUQr"
 msgstr "Delete table"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3136
-#: ../../packages/ui/lib/rich-text-editor.tsx:3140
-#: ../../packages/ui/lib/rich-text-editor.tsx:3143
+#: ../../packages/ui/lib/rich-text-editor.tsx:3171
+#: ../../packages/ui/lib/rich-text-editor.tsx:3175
+#: ../../packages/ui/lib/rich-text-editor.tsx:3178
 msgctxt "ui"
 msgid "freMIM"
 msgstr "Insert"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3164
+#: ../../packages/ui/lib/rich-text-editor.tsx:3199
 msgctxt "ui"
 msgid "nxS3sg"
 msgstr "Link to document"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3174
+#: ../../packages/ui/lib/rich-text-editor.tsx:3209
 msgctxt "ui"
 msgid "/GpEhj"
 msgstr "Link to page"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3181
+#: ../../packages/ui/lib/rich-text-editor.tsx:3216
 msgctxt "ui"
 msgid "ojUXiU"
 msgstr "Placeholder value"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3234
+#: ../../packages/ui/lib/rich-text-editor.tsx:3269
 msgctxt "ui"
 msgid "t1Ql7Y"
 msgstr "Footnotes"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3244
+#: ../../packages/ui/lib/rich-text-editor.tsx:3279
 msgctxt "ui"
 msgid "cZp00l"
 msgstr "Empty note"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3254
+#: ../../packages/ui/lib/rich-text-editor.tsx:3289
 msgctxt "ui"
 msgid "VXTh3F"
 msgstr "No matching blocks"
 
-#: ../../packages/ui/lib/rich-text-editor.tsx:3257
+#: ../../packages/ui/lib/rich-text-editor.tsx:3292
 msgctxt "ui"
 msgid "FeZ3P6"
 msgstr "Insert block"
@@ -497,8 +497,9 @@ msgid "tCOYpl"
 msgstr "Command menu"
 
 #: app/(app)/[locale]/_components/user-menu.tsx:83
-#: app/(app)/[locale]/(default)/documentation/(index)/page.tsx:52
-#: app/(app)/[locale]/(default)/documentation/(index)/page.tsx:69
+#: app/(app)/[locale]/(default)/documentation/(index)/page.tsx:27
+#: app/(app)/[locale]/(default)/documentation/(index)/page.tsx:62
+#: app/(app)/[locale]/(default)/documentation/layout.tsx:28
 msgid "isGKnz"
 msgstr "Documentation"
 
@@ -640,7 +641,7 @@ msgstr "Too many requests."
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/update-delegated-unit-relation.action.ts:39
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action.ts:42
 #: app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action.ts:36
-#: lib/server/create-mutation-action.ts:195
+#: lib/server/create-mutation-action.ts:196
 msgid "z9RwCc"
 msgstr "Invalid or missing fields."
 
@@ -1947,6 +1948,7 @@ msgstr "Administration"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:334
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:335
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:482
+#: app/(app)/[locale]/(default)/documentation/layout.tsx:29
 msgid "9uOFF3"
 msgstr "Overview"
 
@@ -4633,12 +4635,12 @@ msgid "fcnuSn"
 msgstr "Could not delete service. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/create-service.action.ts:29
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/update-service.action.ts:39
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/update-service.action.ts:40
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/upsert-project-partner.action.ts:41
 msgid "hxHUHk"
 msgstr "Relations can only target published entities."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/update-service.action.ts:29
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/update-service.action.ts:30
 msgid "OpDmsb"
 msgstr "Only locally managed services can be updated here."
 
@@ -7019,6 +7021,7 @@ msgstr "Operational cost"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx:131
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx:93
+#: app/(app)/[locale]/(default)/documentation/_components/documentation-article.tsx:45
 msgid "TM7OHi"
 msgstr "On this page"
 
@@ -7473,14 +7476,14 @@ msgid "mRL9Vh"
 msgstr "Creating..."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx:49
-msgid "IIV9+R"
-msgstr "Update the document group title."
-
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx:49
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:189
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:198
 msgid "Z/1udv"
 msgstr "Edit group"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx:49
+msgid "IIV9+R"
+msgstr "Update the document group title."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:79
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:89
@@ -8077,7 +8080,7 @@ msgstr "Edit spotlight article"
 msgid "z3yGN/"
 msgstr "Enter the spotlight article details."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form.tsx:190
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form.tsx:196
 msgid "5uRwRL"
 msgstr "Spotlight article"
 
@@ -8170,6 +8173,22 @@ msgstr "Failed to send message."
 #: app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action.ts:59
 msgid "hrWbQB"
 msgstr "Successfully sent message."
+
+#: app/(app)/[locale]/(default)/documentation/_components/documentation-article.tsx:44
+msgid "gjyzc7"
+msgstr "Table of contents"
+
+#: app/(app)/[locale]/(default)/documentation/(index)/page.tsx:65
+msgid "CbmDsw"
+msgstr "Guides and reference material for working with the DARIAH Knowledge Base."
+
+#: app/(app)/[locale]/(default)/documentation/(index)/page.tsx:83
+msgid "JVNy4g"
+msgstr "No documentation pages have been published yet."
+
+#: app/(app)/[locale]/(default)/documentation/layout.tsx:31
+msgid "mCZAmW"
+msgstr "All pages"
 
 #: app/(app)/[locale]/error-page.tsx:27
 msgid "8njDaj"
