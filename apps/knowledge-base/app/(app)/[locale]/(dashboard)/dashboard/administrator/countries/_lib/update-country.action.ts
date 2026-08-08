@@ -6,6 +6,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { UpdateCountryActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/update-country.schema";
 import {
 	ensureDraftVersion,
+	getDocumentSlug,
 	publishVersion,
 	touchVersion,
 	updateDraftDocumentSlug,
@@ -18,7 +19,7 @@ import { eq } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getResultSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateCountryAction = createMutationAction({
@@ -26,7 +27,7 @@ export const updateCountryAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "countries" },
 	revalidate: "/[locale]/dashboard/administrator/countries",
-	redirect: "/dashboard/administrator/countries",
+	redirect: ({ result }) => `/dashboard/administrator/countries/${getResultSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(
@@ -80,6 +81,7 @@ export const updateCountryAction = createMutationAction({
 
 		return {
 			subjectId: input.documentId,
+			subjectSlug: await getDocumentSlug(tx, input.documentId),
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

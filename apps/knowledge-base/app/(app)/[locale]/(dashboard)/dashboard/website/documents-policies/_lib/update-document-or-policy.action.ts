@@ -8,6 +8,7 @@ import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
 import {
 	ensureDraftVersion,
+	getDocumentSlug,
 	publishVersion,
 	touchVersion,
 	updateDraftDocumentSlug,
@@ -18,7 +19,7 @@ import { eq, inArray, isNull } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getResultSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateDocumentOrPolicyAction = createMutationAction<
@@ -29,7 +30,8 @@ export const updateDocumentOrPolicyAction = createMutationAction<
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "documents_policies" },
 	revalidate: "/[locale]/dashboard/website/documents-policies",
-	redirect: "/dashboard/website/documents-policies",
+	redirect: ({ result }) =>
+		`/dashboard/website/documents-policies/${getResultSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(
@@ -130,6 +132,7 @@ export const updateDocumentOrPolicyAction = createMutationAction<
 
 		return {
 			subjectId: input.documentId,
+			subjectSlug: await getDocumentSlug(tx, input.documentId),
 			auditSummary: { lifecycle: published ? "published" : "draft" },
 			successData: { published },
 		};

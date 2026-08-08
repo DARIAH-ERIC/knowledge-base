@@ -36,8 +36,8 @@ export interface MutationResult<TSuccessData = unknown> {
 	 */
 	subjectLabel?: string | null;
 	/**
-	 * The subject's slug as stored by the database. Set this in creates that redirect to a slug-based
-	 * route, and build the `redirect` from it via `getCreatedSlug`.
+	 * The subject's slug as stored by the database. Set this in mutations that redirect to a
+	 * slug-based route, and build the `redirect` from it via `getResultSlug`.
 	 */
 	subjectSlug?: string;
 	auditSummary?: Record<string, unknown>;
@@ -46,17 +46,18 @@ export interface MutationResult<TSuccessData = unknown> {
 }
 
 /**
- * Reads the slug of a just-created entity out of its mutate result, for building a `redirect`.
+ * Reads the slug of a mutated entity out of its mutate result, for building a `redirect`.
  *
- * Create actions must route to the slug `createDraftDocument` reports, never to a second
- * `slugify(title)` call: the two agree only for as long as every requested slug is stored verbatim,
- * so re-deriving would send the user to a stale — or another entity's — URL once a slug is adjusted
- * to keep `(type, slug)` unique.
+ * Actions must route to the slug stored in the database, never to a second `slugify(title)` call or
+ * an untrusted form value: those agree only for as long as every requested slug is stored
+ * verbatim.
  */
-export function getCreatedSlug(result: MutationResult): string {
-	assert(result.subjectSlug, "Create actions redirecting to a slug must return `subjectSlug`.");
+export function getResultSlug(result: MutationResult): string {
+	assert(result.subjectSlug, "Actions redirecting to a slug must return `subjectSlug`.");
 	return result.subjectSlug;
 }
+
+export const getCreatedSlug = getResultSlug;
 
 export interface MutationContext {
 	/** The effective user: whom the mutation is made _as_. */

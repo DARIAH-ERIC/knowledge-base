@@ -7,6 +7,7 @@ import { UpdateSpotlightArticleActionInputSchema } from "@/app/(app)/[locale]/(d
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import {
 	ensureDraftVersion,
+	getDocumentSlug,
 	publishVersion,
 	touchVersion,
 	updateDraftDocumentSlug,
@@ -19,7 +20,7 @@ import { eq, inArray } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getResultSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateSpotlightArticleAction = createMutationAction({
@@ -27,7 +28,8 @@ export const updateSpotlightArticleAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "spotlight_articles" },
 	revalidate: "/[locale]/dashboard/website/spotlight-articles",
-	redirect: "/dashboard/website/spotlight-articles",
+	redirect: ({ result }) =>
+		`/dashboard/website/spotlight-articles/${getResultSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(
@@ -108,6 +110,7 @@ export const updateSpotlightArticleAction = createMutationAction({
 
 		return {
 			subjectId: input.documentId,
+			subjectSlug: await getDocumentSlug(tx, input.documentId),
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

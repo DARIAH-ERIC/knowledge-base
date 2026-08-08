@@ -4,7 +4,12 @@ import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
 import { UpdateEricActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_lib/update-eric.schema";
-import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
+import {
+	ensureDraftVersion,
+	getDocumentSlug,
+	publishVersion,
+	touchVersion,
+} from "@/lib/data/entity-lifecycle";
 import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
@@ -13,7 +18,7 @@ import { checkSshocMarketplaceActorIdAvailable } from "@/lib/data/sshoc-marketpl
 import { eq } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getResultSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateEricAction = createMutationAction({
@@ -21,7 +26,7 @@ export const updateEricAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "eric" },
 	revalidate: "/[locale]/dashboard/administrator/eric",
-	redirect: "/dashboard/administrator/eric",
+	redirect: ({ result }) => `/dashboard/administrator/eric/${getResultSlug(result)}/details`,
 
 	async preCheck({ input }) {
 		return checkSshocMarketplaceActorIdAvailable({
@@ -82,6 +87,7 @@ export const updateEricAction = createMutationAction({
 
 		return {
 			subjectId: input.documentId,
+			subjectSlug: await getDocumentSlug(tx, input.documentId),
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

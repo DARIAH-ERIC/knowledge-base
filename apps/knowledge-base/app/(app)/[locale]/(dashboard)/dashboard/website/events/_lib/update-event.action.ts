@@ -8,6 +8,7 @@ import { UpdateEventActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/d
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import {
 	ensureDraftVersion,
+	getDocumentSlug,
 	publishVersion,
 	touchVersion,
 	updateDraftDocumentSlug,
@@ -20,7 +21,7 @@ import { eq, inArray } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getResultSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateEventAction = createMutationAction({
@@ -28,7 +29,7 @@ export const updateEventAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "events" },
 	revalidate: "/[locale]/dashboard/website/events",
-	redirect: "/dashboard/website/events",
+	redirect: ({ result }) => `/dashboard/website/events/${getResultSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(tx, input.documentId, eventsLifecycleAdapter);
@@ -108,6 +109,7 @@ export const updateEventAction = createMutationAction({
 
 		return {
 			subjectId: input.documentId,
+			subjectSlug: await getDocumentSlug(tx, input.documentId),
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

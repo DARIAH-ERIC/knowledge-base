@@ -6,6 +6,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { UpdateInstitutionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/update-institution.schema";
 import {
 	ensureDraftVersion,
+	getDocumentSlug,
 	publishVersion,
 	touchVersion,
 	updateDraftDocumentSlug,
@@ -19,7 +20,7 @@ import { eq } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getResultSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateInstitutionAction = createMutationAction({
@@ -27,7 +28,8 @@ export const updateInstitutionAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "institutions" },
 	revalidate: "/[locale]/dashboard/administrator/institutions",
-	redirect: "/dashboard/administrator/institutions",
+	redirect: ({ result }) =>
+		`/dashboard/administrator/institutions/${getResultSlug(result)}/details`,
 
 	async preCheck({ input }) {
 		return checkSshocMarketplaceActorIdAvailable({
@@ -95,6 +97,7 @@ export const updateInstitutionAction = createMutationAction({
 
 		return {
 			subjectId: input.documentId,
+			subjectSlug: await getDocumentSlug(tx, input.documentId),
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

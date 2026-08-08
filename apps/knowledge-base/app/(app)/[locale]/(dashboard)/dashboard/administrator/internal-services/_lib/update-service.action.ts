@@ -15,7 +15,8 @@ export const updateServiceAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "internal_services" },
 	revalidate: "/[locale]/dashboard/administrator/internal-services",
-	redirect: "/dashboard/administrator/internal-services",
+	redirect: ({ result }) =>
+		`/dashboard/administrator/internal-services/${result.subjectId}/details`,
 
 	async preCheck({ input }) {
 		const t = await getExtracted();

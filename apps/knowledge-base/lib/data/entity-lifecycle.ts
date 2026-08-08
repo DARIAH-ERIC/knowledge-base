@@ -525,6 +525,16 @@ export async function createDraftDocumentWithSlug(
 		: createDraftDocumentFromTitle(tx, typeId, title);
 }
 
+export async function getDocumentSlug(tx: Transaction, documentId: string): Promise<string> {
+	const [document] = await tx
+		.select({ slug: schema.entities.slug })
+		.from(schema.entities)
+		.where(eq(schema.entities.id, documentId))
+		.limit(1);
+	assert(document, `Entity "${documentId}" not found.`);
+	return document.slug;
+}
+
 /** Return the draft and published version IDs for a document (either may be null). */
 export async function getDocumentVersions(
 	tx: Transaction,
@@ -559,16 +569,11 @@ export async function updateDraftDocumentSlug(
 	documentId: string,
 	slug: string,
 ): Promise<void> {
-	const [document] = await tx
-		.select({ slug: schema.entities.slug })
-		.from(schema.entities)
-		.where(eq(schema.entities.id, documentId))
-		.limit(1);
-	assert(document, `Entity "${documentId}" not found.`);
+	const currentSlug = await getDocumentSlug(tx, documentId);
 
 	// Resubmitting the unchanged slug is what every ordinary save does; only an actual rename has to
 	// clear the published check.
-	if (document.slug === slug) {
+	if (currentSlug === slug) {
 		return;
 	}
 

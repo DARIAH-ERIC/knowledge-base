@@ -8,6 +8,7 @@ import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { documentationPagesLifecycleAdapter } from "@/lib/data/documentation-pages.lifecycle-adapter";
 import {
 	ensureDraftVersion,
+	getDocumentSlug,
 	publishVersion,
 	touchVersion,
 	updateDraftDocumentSlug,
@@ -17,14 +18,15 @@ import { db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getResultSlug } from "@/lib/server/create-mutation-action";
 
 export const updateDocumentationPageAction = createMutationAction({
 	schema: UpdateDocumentationPageActionInputSchema,
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "documentation_pages" },
 	revalidate: "/[locale]/dashboard/administrator/documentation-pages",
-	redirect: "/dashboard/administrator/documentation-pages",
+	redirect: ({ result }) =>
+		`/dashboard/administrator/documentation-pages/${getResultSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(
@@ -103,6 +105,7 @@ export const updateDocumentationPageAction = createMutationAction({
 
 		return {
 			subjectId: input.documentId,
+			subjectSlug: await getDocumentSlug(tx, input.documentId),
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

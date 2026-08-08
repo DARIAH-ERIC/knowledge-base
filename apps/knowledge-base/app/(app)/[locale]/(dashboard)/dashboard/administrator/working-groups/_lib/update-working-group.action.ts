@@ -6,6 +6,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { UpdateWorkingGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/update-working-group.schema";
 import {
 	ensureDraftVersion,
+	getDocumentSlug,
 	publishVersion,
 	touchVersion,
 	updateDraftDocumentSlug,
@@ -19,7 +20,7 @@ import { eq } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getResultSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateWorkingGroupAction = createMutationAction({
@@ -27,7 +28,8 @@ export const updateWorkingGroupAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "working_groups" },
 	revalidate: "/[locale]/dashboard/administrator/working-groups",
-	redirect: "/dashboard/administrator/working-groups",
+	redirect: ({ result }) =>
+		`/dashboard/administrator/working-groups/${getResultSlug(result)}/details`,
 
 	async preCheck({ input }) {
 		return checkSshocMarketplaceActorIdAvailable({
@@ -96,6 +98,7 @@ export const updateWorkingGroupAction = createMutationAction({
 
 		return {
 			subjectId: input.documentId,
+			subjectSlug: await getDocumentSlug(tx, input.documentId),
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},
