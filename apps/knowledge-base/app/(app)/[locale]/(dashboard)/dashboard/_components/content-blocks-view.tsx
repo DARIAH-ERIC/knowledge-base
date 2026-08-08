@@ -285,7 +285,11 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 
 							return (
 								<li id={`fn${String(number)}`} key={index}>
-									{note != null ? <InlineRichTextRenderer content={note} /> : null}{" "}
+									{/* Inline: the backlink belongs at the end of the note's last line, not under it. */}
+									{note != null ? <InlineRichTextRenderer content={note} isInline={true} /> : null}
+									{/* Non-breaking, so a note that fills its last line cannot leave the arrow stranded
+									    on a line of its own — the very thing the inline rendering above avoids. */}
+									{"\u00A0"}
 									<a
 										aria-label={`Back to footnote ${String(number)} in the text`}
 										className="text-muted-fg no-underline"
