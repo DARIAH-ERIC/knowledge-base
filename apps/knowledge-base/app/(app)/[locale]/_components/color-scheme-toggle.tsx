@@ -61,7 +61,7 @@ export function ColorSchemeToggle(props: Readonly<ColorSchemeToggleProps>): Reac
 		<RadioGroup
 			aria-label={t("Color scheme")}
 			className={twMerge(
-				"inline-flex items-center gap-0.5 rounded-full p-0.5 inset-ring inset-ring-border",
+				"inline-flex items-center gap-0.5 rounded-full bg-muted p-0.5 inset-ring inset-ring-border",
 				orientation === "vertical" && "flex-col",
 				className,
 			)}
@@ -78,7 +78,13 @@ export function ColorSchemeToggle(props: Readonly<ColorSchemeToggleProps>): Reac
 							twJoin(
 								"touch-area grid cursor-default place-items-center rounded-full block-7 inline-7 text-muted-fg transition duration-200",
 								isHovered && "text-fg",
-								isSelected && "bg-secondary text-primary inset-ring inset-ring-border",
+								/**
+								 * The selected option reads as a knob lifted off the track, so it needs to stay
+								 * lighter than the `muted` track in both schemes - which means opposite ends of the
+								 * scale, since `bg` is the lightest token in light mode but nearly the darkest in
+								 * dark mode.
+								 */
+								isSelected && "bg-bg text-fg shadow-xs inset-ring inset-ring-border dark:bg-accent",
 								isFocusVisible && "outline-2 outline-offset-2 outline-ring",
 							)
 						}
