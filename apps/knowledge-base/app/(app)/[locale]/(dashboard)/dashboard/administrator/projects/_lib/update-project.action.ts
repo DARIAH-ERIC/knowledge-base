@@ -6,6 +6,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { UpdateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/update-project.schema";
 import {
 	ensureDraftVersion,
+	getDocumentSlug,
 	publishVersion,
 	touchVersion,
 	updateDraftDocumentSlug,
@@ -18,7 +19,7 @@ import { eq } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getResultSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateProjectAction = createMutationAction({
@@ -26,7 +27,7 @@ export const updateProjectAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "projects" },
 	revalidate: "/[locale]/dashboard/administrator/projects",
-	redirect: "/dashboard/administrator/projects",
+	redirect: ({ result }) => `/dashboard/administrator/projects/${getResultSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(tx, input.documentId, projectsLifecycleAdapter);
@@ -87,6 +88,7 @@ export const updateProjectAction = createMutationAction({
 
 		return {
 			subjectId: input.documentId,
+			subjectSlug: await getDocumentSlug(tx, input.documentId),
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

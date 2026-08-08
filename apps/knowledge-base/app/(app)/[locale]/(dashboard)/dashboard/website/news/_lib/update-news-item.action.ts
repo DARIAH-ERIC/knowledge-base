@@ -7,6 +7,7 @@ import { UpdateNewsItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import {
 	ensureDraftVersion,
+	getDocumentSlug,
 	publishVersion,
 	touchVersion,
 	updateDraftDocumentSlug,
@@ -19,7 +20,7 @@ import { eq, inArray } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getResultSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateNewsItemAction = createMutationAction({
@@ -27,7 +28,7 @@ export const updateNewsItemAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "news" },
 	revalidate: "/[locale]/dashboard/website/news",
-	redirect: "/dashboard/website/news",
+	redirect: ({ result }) => `/dashboard/website/news/${getResultSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(tx, input.documentId, newsLifecycleAdapter);
@@ -107,6 +108,7 @@ export const updateNewsItemAction = createMutationAction({
 
 		return {
 			subjectId: input.documentId,
+			subjectSlug: await getDocumentSlug(tx, input.documentId),
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

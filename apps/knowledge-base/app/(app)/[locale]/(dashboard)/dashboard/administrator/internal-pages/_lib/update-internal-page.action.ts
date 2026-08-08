@@ -5,13 +5,18 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { UpdateInternalPageActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_lib/update-internal-page.schema";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
-import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
+import {
+	ensureDraftVersion,
+	getDocumentSlug,
+	publishVersion,
+	touchVersion,
+} from "@/lib/data/entity-lifecycle";
 import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
 import { internalPagesLifecycleAdapter } from "@/lib/data/internal-pages.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getResultSlug } from "@/lib/server/create-mutation-action";
 
 export const updateInternalPageAction = createMutationAction({
 	schema: UpdateInternalPageActionInputSchema,
@@ -22,7 +27,8 @@ export const updateInternalPageAction = createMutationAction({
 		"/[locale]/privacy-policy",
 		"/[locale]/terms-of-use",
 	],
-	redirect: "/dashboard/administrator/internal-pages",
+	redirect: ({ result }) =>
+		`/dashboard/administrator/internal-pages/${getResultSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(
@@ -93,6 +99,7 @@ export const updateInternalPageAction = createMutationAction({
 
 		return {
 			subjectId: input.documentId,
+			subjectSlug: await getDocumentSlug(tx, input.documentId),
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

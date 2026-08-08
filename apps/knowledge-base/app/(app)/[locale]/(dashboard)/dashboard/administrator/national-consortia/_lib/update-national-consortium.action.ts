@@ -6,6 +6,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { UpdateNationalConsortiumActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/update-national-consortium.schema";
 import {
 	ensureDraftVersion,
+	getDocumentSlug,
 	publishVersion,
 	touchVersion,
 	updateDraftDocumentSlug,
@@ -19,7 +20,7 @@ import { eq } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getResultSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateNationalConsortiumAction = createMutationAction({
@@ -27,7 +28,8 @@ export const updateNationalConsortiumAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "national_consortia" },
 	revalidate: "/[locale]/dashboard/administrator/national-consortia",
-	redirect: "/dashboard/administrator/national-consortia",
+	redirect: ({ result }) =>
+		`/dashboard/administrator/national-consortia/${getResultSlug(result)}/details`,
 
 	async preCheck({ input }) {
 		return checkSshocMarketplaceActorIdAvailable({
@@ -95,6 +97,7 @@ export const updateNationalConsortiumAction = createMutationAction({
 
 		return {
 			subjectId: input.documentId,
+			subjectSlug: await getDocumentSlug(tx, input.documentId),
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},

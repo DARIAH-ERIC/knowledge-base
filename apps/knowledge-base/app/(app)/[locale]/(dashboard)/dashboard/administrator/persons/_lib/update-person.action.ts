@@ -6,6 +6,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { UpdatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.schema";
 import {
 	ensureDraftVersion,
+	getDocumentSlug,
 	publishVersion,
 	touchVersion,
 	updateDraftDocumentSlug,
@@ -16,7 +17,7 @@ import { eq } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { createMutationAction, getResultSlug } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updatePersonAction = createMutationAction({
@@ -24,7 +25,7 @@ export const updatePersonAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "persons" },
 	revalidate: "/[locale]/dashboard/administrator/persons",
-	redirect: "/dashboard/administrator/persons",
+	redirect: ({ result }) => `/dashboard/administrator/persons/${getResultSlug(result)}/details`,
 
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(tx, input.documentId, personsLifecycleAdapter);
@@ -72,6 +73,7 @@ export const updatePersonAction = createMutationAction({
 
 		return {
 			subjectId: input.documentId,
+			subjectSlug: await getDocumentSlug(tx, input.documentId),
 			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},
