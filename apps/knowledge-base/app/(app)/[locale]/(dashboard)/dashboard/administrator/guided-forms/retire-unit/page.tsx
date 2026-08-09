@@ -4,10 +4,7 @@ import type { ReactNode } from "react";
 
 import { RetireUnitWizard } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard";
 import { assertAdminPageAccess } from "@/lib/auth/session";
-import {
-	type OrganisationalUnitType,
-	getOrganisationalUnitOptions,
-} from "@/lib/data/organisational-units";
+import { getOrganisationalUnitOptions } from "@/lib/data/organisational-units";
 import { retirableUnitTypes } from "@/lib/data/wizard-preflight";
 import { toOrganisationalUnitDocumentOptionsPage } from "@/lib/organisational-unit-options";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -34,7 +31,7 @@ export default async function DashboardAdministratorRetireUnitWizardPage(
 
 	// Which subtypes can be retired is decided by `inactiveUnitRelationRules`, not by this page.
 	const units = await getOrganisationalUnitOptions({
-		unitType: retirableUnitTypes[0] as OrganisationalUnitType | undefined,
+		unitType: retirableUnitTypes[0],
 	});
 
 	const initialUnits = toOrganisationalUnitDocumentOptionsPage(units);

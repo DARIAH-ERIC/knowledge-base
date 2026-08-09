@@ -439,7 +439,7 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 		<Sidebar {...sidebarProps}>
 			<SidebarHeader>
 				<Link
-					className="flex items-center gap-x-2 group-data-[collapsible=dock]:block-8 group-data-[collapsible=dock]:inline-8 group-data-[collapsible=dock]:items-center group-data-[collapsible=dock]:justify-center"
+					className="flex items-center gap-x-2 group-data-[collapsible=dock]:items-center group-data-[collapsible=dock]:justify-center group-data-[collapsible=dock]:block-8 group-data-[collapsible=dock]:inline-8"
 					href="/dashboard"
 				>
 					<Logo className="block-5 inline-5" />
@@ -456,7 +456,7 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 									className={cn(
 										"group",
 										state === "expanded" &&
-											"bg-bg sm:inline-full sm:justify-between dark:bg-secondary/50",
+											"bg-bg sm:justify-between sm:inline-full dark:bg-secondary/50",
 									)}
 									intent={state === "expanded" ? "outline" : "plain"}
 									onPress={openCommandPalette}

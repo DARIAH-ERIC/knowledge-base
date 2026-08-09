@@ -382,7 +382,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 					title={t("Media library")}
 				/>
 
-				<ModalBody className="flex block-128 flex-col">
+				<ModalBody className="flex flex-col block-128">
 					<Tabs
 						className="flex flex-1 flex-col min-block-0"
 						onSelectionChange={(key) => {
@@ -441,7 +441,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 
 							{displayedAssets.length === 0 && !isPending ? (
 								<div className="flex flex-1 items-center justify-center">
-									<p className="text-center text-muted-fg text-sm">
+									<p className="text-center text-sm text-muted-fg">
 										{appliedQ
 											? t("No assets found for your search.")
 											: t("No assets found. Upload one to get started.")}
@@ -465,7 +465,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 										>
 											{(asset) => (
 												<GridListItem
-													className="flex flex-col gap-1 p-1 place-content-center"
+													className="flex flex-col place-content-center gap-1 p-1"
 													id={asset.key}
 													textValue={asset.label}
 												>
@@ -478,7 +478,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 														src={asset.url}
 														storageKey={asset.key}
 													/>
-													<span className="inline-24 truncate text-center text-xs text-muted-fg">
+													<span className="truncate text-center text-xs text-muted-fg inline-24">
 														{asset.label}
 													</span>
 												</GridListItem>
@@ -504,8 +504,8 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 														{/* React Aria wraps a row's children in one grid cell, so the columns are
 														    laid out inside that cell: flexing the row itself only arranges the
 														    single cell and leaves thumbnail and metadata stacked. */}
-														<div className="flex inline-full flex-row items-start gap-3">
-															<div className="block-16 inline-24 shrink-0 overflow-hidden rounded-md bg-muted">
+														<div className="flex flex-row items-start gap-3 inline-full">
+															<div className="shrink-0 overflow-hidden rounded-md bg-muted block-16 inline-24">
 																<AssetPreview
 																	alt={asset.alt ?? asset.label}
 																	className="block-full inline-full"
@@ -516,7 +516,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 																	storageKey={asset.key}
 																/>
 															</div>
-															<div className="flex min-inline-0 flex-1 flex-col gap-y-1">
+															<div className="flex flex-1 flex-col gap-y-1 min-inline-0">
 																<div className="flex flex-row items-baseline gap-x-2">
 																	<span className="truncate text-sm/tight font-medium">
 																		{asset.label}
@@ -603,18 +603,18 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 										{pendingFileUrl != null ? (
 											<img
 												alt={t("Preview")}
-												className="block-24 inline-auto max-inline-full rounded-sm"
+												className="rounded-sm block-24 inline-auto max-inline-full"
 												src={pendingFileUrl}
 											/>
 										) : null}
 									</div>
 
 									{pendingFile != null ? (
-										<p className="text-muted-fg text-sm">{pendingFile.name}</p>
+										<p className="text-sm text-muted-fg">{pendingFile.name}</p>
 									) : null}
 
 									{uploadError != null ? (
-										<p className="text-danger text-sm" role="alert">
+										<p className="text-sm text-danger" role="alert">
 											{uploadError}
 										</p>
 									) : null}

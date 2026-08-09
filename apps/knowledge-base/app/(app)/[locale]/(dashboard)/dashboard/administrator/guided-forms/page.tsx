@@ -42,7 +42,7 @@ export default async function DashboardAdministratorWizardsPage(
 
 			{/* Stacked, and held to the same width as the forms themselves, so the hub and the wizard it
 			    opens read as one column rather than the page reflowing on the way in. */}
-			<div className="mbs-(--layout-padding) flex max-inline-3xl flex-col gap-y-4">
+			<div className="mbs-(--layout-padding) flex flex-col gap-y-4 max-inline-3xl">
 				<WizardCard
 					actionLabel={t("Start")}
 					description={t(

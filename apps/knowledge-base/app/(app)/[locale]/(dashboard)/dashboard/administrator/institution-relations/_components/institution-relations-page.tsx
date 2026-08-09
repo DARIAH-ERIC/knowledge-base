@@ -308,13 +308,13 @@ export function InstitutionRelationsPage(
 					<TableColumn allowsSorting={true} id="durationEnd">
 						{t("Until")}
 					</TableColumn>
-					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
+					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
 						<TableRow id={item.id}>
 							<TableCell>
-								<div className="max-inline-80 truncate" title={item.institutionName}>
+								<div className="truncate max-inline-80" title={item.institutionName}>
 									{item.institutionName}
 								</div>
 							</TableCell>
@@ -325,7 +325,7 @@ export function InstitutionRelationsPage(
 								</Badge>
 							</TableCell>
 							<TableCell>
-								<div className="max-inline-80 truncate" title={item.relatedUnitName}>
+								<div className="truncate max-inline-80" title={item.relatedUnitName}>
 									{item.relatedUnitName}
 								</div>
 							</TableCell>
@@ -335,7 +335,7 @@ export function InstitutionRelationsPage(
 									? format.dateTime(item.durationEnd, { dateStyle: "short" })
 									: t("present")}
 							</TableCell>
-							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Action
 										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}

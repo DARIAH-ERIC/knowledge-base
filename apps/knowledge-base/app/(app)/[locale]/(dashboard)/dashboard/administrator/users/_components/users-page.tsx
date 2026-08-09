@@ -109,7 +109,7 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 						{t("Email verified")}
 					</TableColumn>
 					<TableColumn id="actor">{t("Linked actor")}</TableColumn>
-					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
+					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
@@ -141,7 +141,7 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 									</span>
 								) : null}
 							</TableCell>
-							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Link
 										href={`/dashboard/administrator/users/${item.id}/edit`}

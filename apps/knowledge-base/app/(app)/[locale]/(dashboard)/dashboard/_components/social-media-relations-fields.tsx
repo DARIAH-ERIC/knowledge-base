@@ -135,7 +135,7 @@ export function SocialMediaRelationsFields(
 							<GridListDescription className="truncate">{item.description}</GridListDescription>
 						) : null}
 						<LocaleLink
-							className="mbs-1 inline-flex inline-fit items-center gap-x-1 text-muted-fg text-xs hover:text-fg hover:underline"
+							className="mbs-1 inline-flex items-center gap-x-1 text-xs text-muted-fg inline-fit hover:text-fg hover:underline"
 							href={`/dashboard/administrator/social-media/${item.id}/edit`}
 							rel="noreferrer"
 							target="_blank"

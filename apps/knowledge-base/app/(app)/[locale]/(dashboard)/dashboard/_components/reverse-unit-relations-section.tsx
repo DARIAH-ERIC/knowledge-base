@@ -389,7 +389,7 @@ export function ReverseUnitRelationsSection(
 
 	return (
 		<Fragment>
-			<div className="max-inline-3xl space-y-6">
+			<div className="space-y-6 max-inline-3xl">
 				<div className="space-y-1">
 					<FormSectionTitle title={messages.title} />
 				</div>
@@ -421,13 +421,13 @@ export function ReverseUnitRelationsSection(
 							<TableColumn allowsSorting={true} id="until">
 								{t("Until")}
 							</TableColumn>
-							<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
+							<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end" />
 						</TableHeader>
 						<TableBody items={table.pageItems}>
 							{(relation) => (
 								<TableRow id={relation.id}>
 									<TableCell>
-										<div className="max-inline-80 truncate" title={relation.unitName}>
+										<div className="truncate max-inline-80" title={relation.unitName}>
 											{relation.unitName}
 										</div>
 									</TableCell>
@@ -444,7 +444,7 @@ export function ReverseUnitRelationsSection(
 											? format.dateTime(relation.duration.end, { dateStyle: "short" })
 											: t("present")}
 									</TableCell>
-									<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+									<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end">
 										<RowActionsMenu>
 											<RowActionsMenu.Action
 												icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}

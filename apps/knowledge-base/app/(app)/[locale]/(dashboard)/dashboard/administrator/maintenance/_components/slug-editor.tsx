@@ -59,7 +59,7 @@ export function SlugEditor(): ReactNode {
 	}
 
 	return (
-		<div className="flex max-inline-xl flex-col gap-y-4">
+		<div className="flex flex-col gap-y-4 max-inline-xl">
 			<AsyncSelect<EntityOption>
 				aria-label={t("Entity")}
 				fetchPage={fetchMaintenanceEntityOptionsPage}

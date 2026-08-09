@@ -68,7 +68,7 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 
 	return (
 		<div className="flex items-center gap-x-2 rounded-md p-2 hover:bg-muted/50">
-			<div className="min-inline-0 flex flex-1 items-center gap-x-2">
+			<div className="flex flex-1 items-center gap-x-2 min-inline-0">
 				<EntityLifecycleStatusBadge hasDraft={item.hasDraft} isPublished={item.isPublished} />
 				<span className="text-sm font-medium">{item.title}</span>
 			</div>
@@ -134,7 +134,7 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 						}}
 						size="sq-sm"
 					>
-						<TrashIcon className="block-4 inline-4 text-danger" />
+						<TrashIcon className="text-danger block-4 inline-4" />
 					</Button>
 					<TooltipContent inverse={true}>{t("Delete")}</TooltipContent>
 				</Tooltip>
@@ -234,7 +234,7 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 								}}
 								size="sq-sm"
 							>
-								<TrashIcon className="block-4 inline-4 text-danger" />
+								<TrashIcon className="text-danger block-4 inline-4" />
 							</Button>
 							<TooltipContent inverse={true}>{t("Delete group")}</TooltipContent>
 						</Tooltip>
@@ -243,7 +243,7 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 			</div>
 
 			{items.length === 0 ? (
-				<p className="text-muted-fg p-2 text-xs">{t("No documents yet.")}</p>
+				<p className="p-2 text-xs text-muted-fg">{t("No documents yet.")}</p>
 			) : (
 				<div className="flex flex-col gap-y-0.5">
 					{items.map((item, index) => (

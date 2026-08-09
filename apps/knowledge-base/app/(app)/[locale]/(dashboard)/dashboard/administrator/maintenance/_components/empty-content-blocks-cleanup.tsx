@@ -90,7 +90,7 @@ export function EmptyContentBlocksCleanup(
 
 	if (visibleBlocks.length === 0) {
 		return (
-			<div className="my-8 text-balance text-muted-fg text-sm">
+			<div className="my-8 text-sm text-balance text-muted-fg">
 				{result != null && result.deletedCount > 0
 					? t("Deleted {count} empty content blocks.", { count: String(result.deletedCount) })
 					: t("No empty content blocks found.")}
@@ -123,7 +123,7 @@ export function EmptyContentBlocksCleanup(
 					className="flex items-center gap-x-2 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning-subtle-fg"
 					role="alert"
 				>
-					<AlertTriangleIcon aria-hidden={true} className="block-4 inline-4 shrink-0" />
+					<AlertTriangleIcon aria-hidden={true} className="shrink-0 block-4 inline-4" />
 					{t("{skipped} blocks were skipped (no longer empty).", {
 						skipped: String(result.skippedIds.length),
 					})}
@@ -202,10 +202,10 @@ export function EmptyContentBlocksCleanup(
 				{error != null ? (
 					<div className="px-6 pbe-2">
 						<p
-							className="flex items-center gap-x-2 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-danger text-sm"
+							className="flex items-center gap-x-2 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
 							role="alert"
 						>
-							<AlertTriangleIcon aria-hidden={true} className="block-4 inline-4 shrink-0" />
+							<AlertTriangleIcon aria-hidden={true} className="shrink-0 block-4 inline-4" />
 							{error}
 						</p>
 					</div>

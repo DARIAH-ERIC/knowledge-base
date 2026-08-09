@@ -48,7 +48,7 @@ export function WizardReview(props: Readonly<WizardReviewProps>): ReactNode {
 					))}
 				</ul>
 			) : (
-				<p className="text-muted-fg text-sm">{t("Nothing to save yet.")}</p>
+				<p className="text-sm text-muted-fg">{t("Nothing to save yet.")}</p>
 			)}
 		</section>
 	);

@@ -136,7 +136,7 @@ export function CommandPalette(props: Readonly<CommandPaletteProps>): ReactNode 
 					</CommandMenuSection>
 				) : null}
 				{searchError === "rate-limit" ? (
-					<div className="col-span-full px-2.5 py-2 text-muted-fg text-sm">
+					<div className="col-span-full px-2.5 py-2 text-sm text-muted-fg">
 						{t("Too many requests. Please wait a moment and try again.")}
 					</div>
 				) : null}

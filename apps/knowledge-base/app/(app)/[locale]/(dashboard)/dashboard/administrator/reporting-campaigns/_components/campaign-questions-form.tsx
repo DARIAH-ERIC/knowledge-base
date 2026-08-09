@@ -30,7 +30,7 @@ export function CampaignQuestionsForm(props: Readonly<CampaignQuestionsFormProps
 	const [state, action, isPending] = useActionState(createAction, createActionStateInitial());
 
 	return (
-		<div className="flex max-inline-3xl flex-col gap-y-8">
+		<div className="flex flex-col gap-y-8 max-inline-3xl">
 			{questions.length === 0 ? (
 				<p className="text-sm text-muted-fg">{t("No questions yet.")}</p>
 			) : (

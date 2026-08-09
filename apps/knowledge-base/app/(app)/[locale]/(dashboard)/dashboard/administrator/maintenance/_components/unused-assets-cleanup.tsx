@@ -89,7 +89,7 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 
 	if (visibleAssets.length === 0) {
 		return (
-			<div className="my-8 text-balance text-muted-fg text-sm">
+			<div className="my-8 text-sm text-balance text-muted-fg">
 				{result != null && result.deletedCount > 0
 					? t("Deleted {count} unused assets, reclaiming {size}.", {
 							count: String(result.deletedCount),
@@ -139,7 +139,7 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 					className="flex items-center gap-x-2 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning-subtle-fg"
 					role="alert"
 				>
-					<AlertTriangleIcon aria-hidden={true} className="block-4 inline-4 shrink-0" />
+					<AlertTriangleIcon aria-hidden={true} className="shrink-0 block-4 inline-4" />
 					{t(
 						"{skipped} assets were skipped (no longer unused) and {failed} could not be removed from storage.",
 						{
@@ -165,16 +165,16 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 						className={(values) =>
 							cn(
 								"items-stretch gap-3 p-2.5 [--grid-list-item-text-active:var(--color-fg)]",
-								values.isSelected && "inset-ring-danger/60 bg-danger/8",
+								values.isSelected && "bg-danger/8 inset-ring-danger/60",
 							)
 						}
 						id={asset.id}
 						textValue={asset.label}
 					>
-						<div className="relative block-32 inline-32 shrink-0 self-start">
+						<div className="relative shrink-0 self-start block-32 inline-32">
 							<AssetPreview
 								alt={asset.label}
-								className="block-32 inline-32 overflow-hidden rounded-sm bg-muted"
+								className="overflow-hidden rounded-sm bg-muted block-32 inline-32"
 								imageClassName="object-contain"
 								kindLabelClassName="bg-bg/90"
 								mimeType={asset.mimeType}
@@ -195,7 +195,7 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 										<div className="flex items-center justify-center p-4">
 											<img
 												alt={asset.label}
-												className="max-block-[80vh] max-inline-full object-contain"
+												className="object-contain max-block-[80vh] max-inline-full"
 												src={`/api/assets/${asset.id}/download`}
 											/>
 										</div>
@@ -203,17 +203,17 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 								</Modal>
 							) : null}
 						</div>
-						<div className="flex min-inline-0 flex-1 flex-col gap-y-1">
-							<span className="line-clamp-2 wrap-break-word font-medium text-sm/tight">
+						<div className="flex flex-1 flex-col gap-y-1 min-inline-0">
+							<span className="line-clamp-2 text-sm/tight font-medium wrap-break-word">
 								{asset.label}
 							</span>
-							<div className="mbs-auto flex flex-col gap-y-0.5 pbs-1 text-muted-fg text-xs">
+							<div className="mbs-auto flex flex-col gap-y-0.5 pbs-1 text-xs text-muted-fg">
 								<span>{asset.size != null ? formatFileSize(asset.size) : t("unknown size")}</span>
 								<span className="truncate" title={asset.mimeType}>
 									{asset.mimeType}
 								</span>
 								<a
-									className="mbs-0.5 inline-flex inline-fit items-center gap-x-1 underline hover:text-fg"
+									className="mbs-0.5 inline-flex items-center gap-x-1 underline inline-fit hover:text-fg"
 									download={true}
 									href={`/api/assets/${asset.id}/download`}
 								>
@@ -254,10 +254,10 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 				{error != null ? (
 					<div className="px-6 pbe-2">
 						<p
-							className="flex items-center gap-x-2 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-danger text-sm"
+							className="flex items-center gap-x-2 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
 							role="alert"
 						>
-							<AlertTriangleIcon aria-hidden={true} className="block-4 inline-4 shrink-0" />
+							<AlertTriangleIcon aria-hidden={true} className="shrink-0 block-4 inline-4" />
 							{error}
 						</p>
 					</div>

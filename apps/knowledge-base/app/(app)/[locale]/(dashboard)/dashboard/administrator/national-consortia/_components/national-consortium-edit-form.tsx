@@ -160,7 +160,7 @@ export function NationalConsortiumEditForm(
 					id="institutions"
 					shouldPreserveState={true}
 				>
-					<p className="max-inline-3xl text-sm text-neutral-500">
+					<p className="text-sm text-neutral-500 max-inline-3xl">
 						{countrySlug != null
 							? t.rich(
 									'Institutions listed here are members of this national consortium. To edit "partner institutions", the "national coordinating institution", or the "national representative institution", go to the country\'s <link>institutions</link>.',

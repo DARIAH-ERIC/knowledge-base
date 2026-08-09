@@ -302,7 +302,7 @@ async function findNewsEntityBlocks(): Promise<Map<string, Array<EntityVersion>>
 				blockType: row.blockType,
 				// `rich_text` and `media_text` blocks both store the same rich-text doc shape and can hold
 				// a CTA link; only one join matches per row.
-				content: ((row.content ?? row.mediaTextContent) as RtNode | null) ?? null,
+				content: ((row.content ?? row.mediaTextContent)) ?? null,
 			});
 		},
 	});

@@ -42,7 +42,7 @@ export function DocumentationNavigation(props: Readonly<DocumentationNavigationP
 	return (
 		<nav
 			aria-label={label}
-			className="border-be border-stroke-weak py-4 lg:sticky lg:inset-bs-0 lg:max-block-screen lg:self-start lg:overflow-y-auto lg:border-be-0 lg:border-e lg:py-12 lg:pe-6"
+			className="border-be border-stroke-weak py-4 lg:sticky lg:inset-bs-0 lg:self-start lg:overflow-y-auto lg:border-e lg:border-be-0 lg:py-12 lg:pe-6 lg:max-block-screen"
 		>
 			<button
 				aria-controls={listId}
@@ -56,7 +56,7 @@ export function DocumentationNavigation(props: Readonly<DocumentationNavigationP
 				<svg
 					aria-hidden={true}
 					className={cn(
-						"block-4 inline-4 shrink-0 transition-transform",
+						"shrink-0 transition-transform block-4 inline-4",
 						isExpanded && "rotate-90",
 					)}
 					fill="none"

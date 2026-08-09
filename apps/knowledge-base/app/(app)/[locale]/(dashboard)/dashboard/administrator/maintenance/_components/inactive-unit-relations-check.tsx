@@ -50,7 +50,7 @@ export function InactiveUnitRelationsCheck(
 	return (
 		<Fragment>
 			{result.errors.length > 0 ? (
-				<div className="flex flex-col gap-y-1 text-danger-subtle-fg text-sm">
+				<div className="flex flex-col gap-y-1 text-sm text-danger-subtle-fg">
 					{result.errors.map((error) => (
 						<p key={error}>{error}</p>
 					))}
@@ -72,7 +72,7 @@ export function InactiveUnitRelationsCheck(
 				<TableBody
 					items={pageItems}
 					renderEmptyState={() => (
-						<p className="p-(--gutter) text-muted-fg text-sm">
+						<p className="p-(--gutter) text-sm text-muted-fg">
 							{t("No data-integrity issues found.")}
 						</p>
 					)}
@@ -114,7 +114,7 @@ export function InactiveUnitRelationsCheck(
 								<TableCell>
 									<div className="flex flex-col gap-y-2">
 										<div className="flex flex-col">
-											<span className="text-muted-fg text-xs">{t("Relation")}</span>
+											<span className="text-xs text-muted-fg">{t("Relation")}</span>
 											<span className="block whitespace-nowrap text-danger-subtle-fg">
 												{format.dateTime(new Date(finding.personRelationStart), {
 													dateStyle: "medium",
@@ -128,7 +128,7 @@ export function InactiveUnitRelationsCheck(
 											</span>
 										</div>
 										<div className="flex flex-col">
-											<span className="text-muted-fg text-xs">{t("Unit inactive since")}</span>
+											<span className="text-xs text-muted-fg">{t("Unit inactive since")}</span>
 											<span className="block whitespace-nowrap">
 												{format.dateTime(new Date(finding.unitEnd), { dateStyle: "medium" })}
 											</span>

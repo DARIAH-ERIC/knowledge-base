@@ -86,7 +86,7 @@ export async function WorkingGroupReportSummary(
 	}
 
 	return (
-		<div className="flex max-inline-4xl flex-col gap-y-8">
+		<div className="flex flex-col gap-y-8 max-inline-4xl">
 			<ReportSummaryNav
 				aria-label={t("Report sections")}
 				links={sectionLinks}
@@ -95,7 +95,7 @@ export async function WorkingGroupReportSummary(
 
 			<div className="flex flex-col">
 				<ReportSummarySection id="working-group-report-data" title={dataLabel}>
-					<dl className="grid max-inline-sm grid-cols-[auto_1fr] gap-x-8 gap-y-3 text-sm">
+					<dl className="grid grid-cols-[auto_1fr] gap-x-8 gap-y-3 text-sm max-inline-sm">
 						<dt className="text-muted-fg">{t("Number of members")}</dt>
 						<dd>{data.numberOfMembers ?? "—"}</dd>
 					</dl>
@@ -103,7 +103,7 @@ export async function WorkingGroupReportSummary(
 
 				{data.chairs.length > 0 && (
 					<ReportSummarySection id="working-group-report-chairs" title={chairsLabel}>
-						<ul className="max-inline-sm divide-y rounded-md border">
+						<ul className="divide-y rounded-md border max-inline-sm">
 							{data.chairs.map((chair) => (
 								<li key={chair.id} className="px-4 py-3">
 									<p className="text-sm font-medium text-fg">{chair.personName}</p>
@@ -116,7 +116,7 @@ export async function WorkingGroupReportSummary(
 
 				{data.socialMedia.length > 0 && (
 					<ReportSummarySection id="working-group-report-social-media" title={socialMediaLabel}>
-						<ul className="max-inline-sm divide-y rounded-md border">
+						<ul className="divide-y rounded-md border max-inline-sm">
 							{data.socialMedia.map((item) => (
 								<li key={item.id} className="px-4 py-3">
 									<p className="text-sm font-medium text-fg">{item.socialMedia.name}</p>

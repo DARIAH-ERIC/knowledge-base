@@ -81,7 +81,7 @@ export async function runBackgroundJob<T>(
 				.set({
 					status: "succeeded",
 					finishedAt: new Date(),
-					result: result as Record<string, unknown>,
+					result,
 				})
 				.where(eq(schema.backgroundJobs.id, jobId));
 		} catch (error) {

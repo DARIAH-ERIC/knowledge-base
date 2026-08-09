@@ -58,7 +58,7 @@ export function CountryReportClaimedContributorsForm(
 		<div className="flex flex-col gap-y-8">
 			<div className="flex flex-col gap-y-2">
 				<h2 className="text-sm font-semibold text-fg">{t("Other compensated contributors")}</h2>
-				<p className="max-inline-md text-sm text-muted-fg">
+				<p className="text-sm text-muted-fg max-inline-md">
 					{t(
 						"Cross-cutting roles (committee and working-group chairs, JRC members) claimed for this report. These are not tied to the country, so add or remove them here.",
 					)}

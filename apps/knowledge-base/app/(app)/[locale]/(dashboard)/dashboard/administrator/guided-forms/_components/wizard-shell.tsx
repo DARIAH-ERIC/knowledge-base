@@ -47,7 +47,7 @@ export function WizardShell(props: Readonly<WizardShellProps>): ReactNode {
 									aria-current={isCurrent ? "step" : undefined}
 									className={twJoin(
 										"flex items-center gap-x-2 rounded-full px-3 py-1 text-sm",
-										isCurrent && "bg-primary-subtle text-primary-subtle-fg font-medium",
+										isCurrent && "bg-primary-subtle font-medium text-primary-subtle-fg",
 										isDone && "text-muted-fg",
 										!isCurrent && !isDone && "text-muted-fg/70",
 									)}
@@ -55,7 +55,7 @@ export function WizardShell(props: Readonly<WizardShellProps>): ReactNode {
 									<span
 										aria-hidden={true}
 										className={twJoin(
-											"grid block-5 inline-5 shrink-0 place-content-center rounded-full text-xs",
+											"grid shrink-0 place-content-center rounded-full text-xs block-5 inline-5",
 											isDone
 												? "bg-success-subtle text-success-subtle-fg"
 												: "inset-ring inset-ring-border",
@@ -77,7 +77,7 @@ export function WizardShell(props: Readonly<WizardShellProps>): ReactNode {
 				</ol>
 			</nav>
 
-			<div className="max-inline-3xl space-y-6">{children}</div>
+			<div className="space-y-6 max-inline-3xl">{children}</div>
 		</Fragment>
 	);
 }

@@ -31,7 +31,7 @@ export function EntityListTitle(props: Readonly<EntityListTitleProps>): ReactNod
 	const { title } = props;
 
 	return (
-		<div className="max-inline-96 truncate" title={title}>
+		<div className="truncate max-inline-96" title={title}>
 			{title}
 		</div>
 	);

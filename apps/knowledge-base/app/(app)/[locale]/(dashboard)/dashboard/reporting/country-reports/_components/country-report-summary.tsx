@@ -124,7 +124,7 @@ export async function CountryReportSummary(
 	}
 
 	return (
-		<div className="flex max-inline-4xl flex-col gap-y-8">
+		<div className="flex flex-col gap-y-8 max-inline-4xl">
 			<ReportSummaryNav
 				aria-label={t("Report sections")}
 				links={sectionLinks}
@@ -204,7 +204,7 @@ export async function CountryReportSummary(
 							))}
 						</ul>
 					)}
-					<dl className="grid max-inline-xs grid-cols-[auto_1fr] gap-x-8 gap-y-2 text-sm">
+					<dl className="grid grid-cols-[auto_1fr] gap-x-8 gap-y-2 text-sm max-inline-xs">
 						<dt className="text-muted-fg">{t("Total contributors")}</dt>
 						<dd>{data.totalContributors ?? "—"}</dd>
 					</dl>
@@ -238,7 +238,7 @@ export async function CountryReportSummary(
 							})}
 						</ul>
 					)}
-					<dl className="grid max-inline-xs grid-cols-[auto_1fr] gap-x-8 text-sm">
+					<dl className="grid grid-cols-[auto_1fr] gap-x-8 text-sm max-inline-xs">
 						<dt className="text-muted-fg">{t("Number of institutions")}</dt>
 						<dd>{data.institutions.length.toLocaleString()}</dd>
 					</dl>

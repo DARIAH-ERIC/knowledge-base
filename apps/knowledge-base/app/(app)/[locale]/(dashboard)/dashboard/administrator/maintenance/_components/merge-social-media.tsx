@@ -111,7 +111,7 @@ export function MergeSocialMedia(): ReactNode {
 	}
 
 	return (
-		<div className="flex max-inline-xl flex-col gap-y-4">
+		<div className="flex flex-col gap-y-4 max-inline-xl">
 			<div className="flex flex-col gap-y-1">
 				<AsyncSelect<SocialMediaOption>
 					aria-label={t("Duplicate (source)")}
@@ -129,7 +129,7 @@ export function MergeSocialMedia(): ReactNode {
 					selectedItem={source}
 				/>
 				{source?.description != null ? (
-					<p className="break-all text-muted-fg text-xs">{source.description}</p>
+					<p className="text-xs break-all text-muted-fg">{source.description}</p>
 				) : null}
 			</div>
 
@@ -150,7 +150,7 @@ export function MergeSocialMedia(): ReactNode {
 					selectedItem={target}
 				/>
 				{target?.description != null ? (
-					<p className="break-all text-muted-fg text-xs">{target.description}</p>
+					<p className="text-xs break-all text-muted-fg">{target.description}</p>
 				) : null}
 			</div>
 
@@ -208,13 +208,13 @@ export function MergeSocialMedia(): ReactNode {
 				<ModalBody className="flex flex-col gap-y-3 text-sm">
 					{source != null ? (
 						<div>
-							<div className="text-muted-fg text-xs uppercase">{t("Delete (source)")}</div>
+							<div className="text-xs text-muted-fg uppercase">{t("Delete (source)")}</div>
 							<SocialMediaSummary item={source} />
 						</div>
 					) : null}
 					{target != null ? (
 						<div>
-							<div className="text-muted-fg text-xs uppercase">{t("Keep (target)")}</div>
+							<div className="text-xs text-muted-fg uppercase">{t("Keep (target)")}</div>
 							<SocialMediaSummary item={target} />
 						</div>
 					) : null}

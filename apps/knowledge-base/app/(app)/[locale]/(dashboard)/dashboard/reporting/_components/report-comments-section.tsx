@@ -47,7 +47,7 @@ export async function ReportCommentsSection(
 		>
 			{comments.map((item) => (
 				<div key={item.screenKey} className="flex flex-col gap-y-2">
-					<h3 className="font-medium text-sm text-fg">{labels[item.screenKey]}</h3>
+					<h3 className="text-sm font-medium text-fg">{labels[item.screenKey]}</h3>
 					<div className="rounded-md border border-border px-4 py-3">
 						<RichTextView
 							ariaLabel={t("Comment for {section}", { section: labels[item.screenKey] })}

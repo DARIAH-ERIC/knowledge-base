@@ -245,7 +245,7 @@ export function RetireUnitWizard(props: Readonly<RetireUnitWizardProps>): ReactN
 						))}
 
 					{isPreflightPending || preflight == null ? (
-						<div className="flex items-center gap-x-2 text-muted-fg text-sm">
+						<div className="flex items-center gap-x-2 text-sm text-muted-fg">
 							<ProgressCircle aria-label={t("Checking...")} isIndeterminate={true} />
 							{t("Checking against the data-integrity rules...")}
 						</div>

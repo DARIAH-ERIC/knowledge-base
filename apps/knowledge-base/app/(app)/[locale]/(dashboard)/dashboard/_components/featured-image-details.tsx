@@ -38,7 +38,7 @@ export function FeaturedImageDetails(props: Readonly<FeaturedImageDetailsProps>)
 			caption={
 				!isEmptyRichTextDocument(caption) ? (
 					<InlineRichTextRenderer
-						className="inline text-muted-fg text-xs [&_p]:m-0 [&_p]:inline"
+						className="inline text-xs text-muted-fg [&_p]:m-0 [&_p]:inline"
 						content={caption!}
 					/>
 				) : undefined

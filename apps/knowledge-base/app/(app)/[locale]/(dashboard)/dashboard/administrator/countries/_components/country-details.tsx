@@ -120,7 +120,7 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 					{country.image != null ? (
 						<img
 							alt=""
-							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
+							className="rounded-lg object-contain block-24 inline-auto max-inline-full"
 							src={country.image.url}
 						/>
 					) : null}

@@ -57,7 +57,7 @@ async function DocumentationIndex(): Promise<ReactNode> {
 
 	return (
 		<Main className="flex flex-col gap-y-10 py-8 lg:py-12">
-			<div className="flex max-inline-(--breakpoint-md) flex-col gap-y-4">
+			<div className="flex flex-col gap-y-4 max-inline-(--breakpoint-md)">
 				<h1 className="text-4xl font-extrabold tracking-tight text-text-strong">
 					{t("Documentation")}
 				</h1>
@@ -71,7 +71,7 @@ async function DocumentationIndex(): Promise<ReactNode> {
 					{pages.map((page) => (
 						<li key={page.id}>
 							<Link
-								className="flex block-full flex-col rounded-lg border border-stroke-weak p-5 font-semibold text-text-strong transition duration-200 hover:border-stroke-strong"
+								className="flex flex-col rounded-lg border border-stroke-weak p-5 font-semibold text-text-strong transition duration-200 block-full hover:border-stroke-strong"
 								href={`/documentation/${page.slug}`}
 							>
 								{page.title}

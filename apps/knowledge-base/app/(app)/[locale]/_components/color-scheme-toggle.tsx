@@ -76,7 +76,7 @@ export function ColorSchemeToggle(props: Readonly<ColorSchemeToggleProps>): Reac
 					<RadioButton
 						className={({ isSelected, isFocusVisible, isHovered }) =>
 							twJoin(
-								"touch-area grid cursor-default place-items-center rounded-full block-7 inline-7 text-muted-fg transition duration-200",
+								"touch-area grid cursor-default place-items-center rounded-full text-muted-fg transition duration-200 block-7 inline-7",
 								isHovered && "text-fg",
 								/**
 								 * The selected option reads as a knob lifted off the track, so it needs to stay

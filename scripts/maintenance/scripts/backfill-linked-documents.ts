@@ -506,7 +506,7 @@ async function main(): Promise<void> {
 			case "accordion": {
 				await db
 					.update(schema.accordionContentBlocks)
-					.set({ items: next as never })
+					.set({ items: next })
 					.where(eq(schema.accordionContentBlocks.id, target.blockId));
 				break;
 			}

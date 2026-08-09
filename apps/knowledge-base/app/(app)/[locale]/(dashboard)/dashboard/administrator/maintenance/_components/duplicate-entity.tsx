@@ -58,7 +58,7 @@ export function DuplicateEntity(): ReactNode {
 	}
 
 	return (
-		<div className="flex max-inline-xl flex-col gap-y-4">
+		<div className="flex flex-col gap-y-4 max-inline-xl">
 			<div className="flex flex-col gap-y-1">
 				<AsyncSelect<EntityOption>
 					aria-label={t("Entity to duplicate")}
@@ -80,7 +80,7 @@ export function DuplicateEntity(): ReactNode {
 					selectedItem={source}
 				/>
 				{source?.slug != null ? (
-					<p className="break-all text-muted-fg text-xs">{source.slug}</p>
+					<p className="text-xs break-all text-muted-fg">{source.slug}</p>
 				) : null}
 			</div>
 

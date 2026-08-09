@@ -34,7 +34,7 @@ export async function DocumentationArticle(
 
 	return (
 		<Main className="grid gap-x-12 py-8 lg:py-12 xl:grid-cols-[minmax(0,1fr)_14rem]">
-			<article className="flex max-inline-(--breakpoint-md) flex-col gap-y-8">
+			<article className="flex flex-col gap-y-8 max-inline-(--breakpoint-md)">
 				<h1 className="text-4xl font-extrabold tracking-tight text-text-strong">{title}</h1>
 				{contentBlocks.length > 0 ? <ContentBlocksView contentBlocks={contentBlocks} /> : null}
 			</article>

@@ -107,7 +107,7 @@ export function GovernanceBodyDetails(props: Readonly<GovernanceBodyDetailsProps
 					{governanceBody.image != null ? (
 						<img
 							alt=""
-							className="block-24 inline-auto max-inline-full rounded-lg object-contain"
+							className="rounded-lg object-contain block-24 inline-auto max-inline-full"
 							src={governanceBody.image.url}
 						/>
 					) : null}

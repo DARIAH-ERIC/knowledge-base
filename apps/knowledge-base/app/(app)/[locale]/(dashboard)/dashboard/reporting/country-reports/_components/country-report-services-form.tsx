@@ -57,7 +57,7 @@ export function CountryReportServicesForm(
 		<div className="flex flex-col gap-y-10">
 			<div className="flex flex-col gap-y-2">
 				<h2 className="text-sm font-semibold text-fg">{t("Services")}</h2>
-				<p className="max-inline-md text-sm text-muted-fg">
+				<p className="text-sm text-muted-fg max-inline-md">
 					{t(
 						"The services this report covers. Add the relevant metrics per service — you only need to fill in the numbers you have.",
 					)}
@@ -178,13 +178,13 @@ function ServiceCard(props: Readonly<ServiceCardProps>): ReactNode {
 					{metrics.map((metric) => (
 						<li key={metric.kpi} className="flex items-center gap-x-3">
 							<label
-								className="inline-40 shrink-0 text-sm text-fg"
+								className="shrink-0 text-sm text-fg inline-40"
 								htmlFor={`${service.id}-${metric.kpi}`}
 							>
 								{formatKpi(metric.kpi)}
 							</label>
 							<input
-								className="inline-32 rounded-md border border-border bg-bg px-2 py-1 text-sm text-fg"
+								className="rounded-md border border-border bg-bg px-2 py-1 text-sm text-fg inline-32"
 								form={KPI_FORM_ID}
 								id={`${service.id}-${metric.kpi}`}
 								min={0}

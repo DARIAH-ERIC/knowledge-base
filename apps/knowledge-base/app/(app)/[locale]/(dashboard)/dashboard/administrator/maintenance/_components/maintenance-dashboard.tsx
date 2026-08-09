@@ -70,7 +70,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</TabList>
 
 						<TabPanel id="paired-relations" className="flex flex-col gap-y-(--layout-padding)">
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Pairs of relations which must always be recorded together, e.g. a national representative must also be a member of the General Assembly, and a national coordinator must also be a member of the National Coordinator Committee, for the same period.",
 								)}
@@ -83,7 +83,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							id="unit-relation-requirements"
 							className="flex flex-col gap-y-(--layout-padding)"
 						>
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Organisational units whose relations imply another that is missing, e.g. every institution that is a partner institution or cooperating partner of DARIAH-EU must also record which country it is located in.",
 								)}
@@ -96,7 +96,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							id="mutually-exclusive-relations"
 							className="flex flex-col gap-y-(--layout-padding)"
 						>
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Institutions whose relations to DARIAH-EU cannot both hold at once. A national coordinating institution is by definition a partner institution, so the partner relation is redundant and should be removed; a cooperating partner, by contrast, contradicts the full partner statuses, so one of the two is simply wrong. Flagged only where the periods overlap — an institution that held one status before the other is valid history.",
 								)}
@@ -106,7 +106,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</TabPanel>
 
 						<TabPanel id="country-membership" className="flex flex-col gap-y-(--layout-padding)">
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Institutions whose status with DARIAH-EU does not match the country they are located in. A partner, national coordinating, or national representative institution must sit in a country that is a member or observer of DARIAH-EU for the whole period it holds that status; a cooperating partner must sit in one that is neither.",
 								)}
@@ -119,7 +119,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 							id="inactive-unit-relations"
 							className="flex flex-col gap-y-(--layout-padding)"
 						>
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Organisational units that are no longer active but still have open person relations, e.g. a working group whose membership in an ERIC has ended, or a country that is no longer a member, but whose chair, member, coordinator, representative, or contact relations have no end date.",
 								)}
@@ -129,7 +129,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</TabPanel>
 
 						<TabPanel id="web-addresses" className="flex flex-col gap-y-(--layout-padding)">
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Records whose stored web address is not a valid https URL: a missing or non-https scheme, or a value that does not parse. Covers event and opportunity websites, document and policy links, license URLs, social-media links, embed blocks, and working-group report events. A social-media entry may also be an email address. Reported only — the correct address needs an editor.",
 								)}
@@ -151,7 +151,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</TabList>
 
 						<TabPanel id="unused-assets" className="flex flex-col gap-y-(--layout-padding)">
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Assets (images) which are not referenced by any record or embedded in any rich-text field. Review and select the ones to permanently remove from storage and the database.",
 								)}
@@ -161,7 +161,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</TabPanel>
 
 						<TabPanel id="empty-content-blocks" className="flex flex-col gap-y-(--layout-padding)">
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Rich-text content blocks with no meaningful content (empty paragraphs, stray line breaks). Review and select the ones to remove from their entities.",
 								)}
@@ -171,7 +171,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</TabPanel>
 
 						<TabPanel id="unused-social-media" className="flex flex-col gap-y-(--layout-padding)">
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Social-media entries not linked to any project, organisational unit, service, or report. Review and select the ones to permanently remove from the database.",
 								)}
@@ -181,7 +181,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</TabPanel>
 
 						<TabPanel id="richtext" className="flex flex-col gap-y-(--layout-padding)">
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Content blocks whose rich text can be tidied: empty paragraphs, stray line breaks, non-breaking spaces, imported HTML attributes, and bold headings. Review and select the ones to rewrite.",
 								)}
@@ -191,7 +191,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</TabPanel>
 
 						<TabPanel id="heading-hierarchy" className="flex flex-col gap-y-(--layout-padding)">
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Rich-text fields whose headings do not form a proper outline. Every field should open at a level-2 heading (the page title is the only level-1), and levels must not be skipped on the way down — a level-2 heading may be followed by a level-3, but not straight by a level-4. Unlike the normalisation above, these are reported only: the right level cannot be guessed automatically and needs an editor to correct.",
 								)}
@@ -213,7 +213,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</TabList>
 
 						<TabPanel id="merge-entities" className="flex flex-col gap-y-(--layout-padding)">
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Merge a duplicate entity into a canonical one: all relations are re-pointed onto the target and the source is permanently deleted. Both entities must be the same type.",
 								)}
@@ -223,7 +223,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</TabPanel>
 
 						<TabPanel id="merge-social-media" className="flex flex-col gap-y-(--layout-padding)">
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Merge a duplicate social-media account into a canonical one: every link from organisational units, projects, services, and reports is re-pointed onto the target and the source is permanently deleted. Use it to make sure a single account is the one everything points at, then clear out what is left via Unused social media.",
 								)}
@@ -233,7 +233,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</TabPanel>
 
 						<TabPanel id="merge-services" className="flex flex-col gap-y-(--layout-padding)">
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Merge a duplicate service into a canonical one: consortium roles, social-media links, and every country report that lists the service or reports KPIs against it are re-pointed onto the target, and the source is permanently deleted. Use it to retire a service the SSHOC marketplace no longer lists — deleting one outright discards the reporting history attached to it, whereas merging carries that history over.",
 								)}
@@ -243,7 +243,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</TabPanel>
 
 						<TabPanel id="duplicate-entity" className="flex flex-col gap-y-(--layout-padding)">
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Copy an entity — content and relations, but no reporting data — into a new unpublished draft. Use it to split an imported “Institution A and Institution B” record into two, or to succeed a wound-up working group with a fresh entity instead of reopening the old one.",
 								)}
@@ -253,7 +253,7 @@ export function MaintenanceDashboard(props: Readonly<MaintenanceDashboardProps>)
 						</TabPanel>
 
 						<TabPanel id="edit-slug" className="flex flex-col gap-y-(--layout-padding)">
-							<p className="text-balance text-muted-fg text-sm">
+							<p className="text-sm text-balance text-muted-fg">
 								{t(
 									"Change an entity's slug. This is an administrator-only maintenance action — slugs are normally managed by the system and form part of the public URL.",
 								)}
