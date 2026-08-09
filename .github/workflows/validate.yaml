@@ -72,14 +72,16 @@ env:
   UNR_S3_BUCKET_NAME: "dariah-unr"
 
 jobs:
-  validate:
-    name: Validate
+  config:
+    name: Configure
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 5
+    outputs:
+      playwright_version: ${{ steps.playwright.outputs.version }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6
@@ -87,7 +89,43 @@ jobs:
           cache: true
 
       - name: Use node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+
+      - name: Resolve Playwright version
+        id: playwright
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(
+            pnpm list @playwright/test --json --depth 0 --lockfile-only \
+              | jq -r '.[0].devDependencies["@playwright/test"].version // empty'
+          )"
+
+          if [ -z "$version" ]; then
+            echo "Could not resolve @playwright/test version from pnpm list." >&2
+            exit 1
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  validate:
+    name: Validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          cache: true
+
+      - name: Use node.js
+        uses: actions/setup-node@v7
         with:
           node-version: 24.x
 
@@ -107,7 +145,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6
@@ -115,7 +153,7 @@ jobs:
           cache: true
 
       - name: Use node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24.x
 
@@ -159,8 +197,9 @@ jobs:
   e2e:
     name: End-to-end tests / ${{ matrix.name }}
     runs-on: ubuntu-24.04
+    needs: config
     container:
-      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      image: mcr.microsoft.com/playwright:v${{ needs.config.outputs.playwright_version }}-noble
       options: --user 1001 --ipc=host
     timeout-minutes: 60
 
@@ -261,7 +300,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Trust repository
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -272,7 +311,7 @@ jobs:
           cache: true
 
       - name: Use node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24.x
 
