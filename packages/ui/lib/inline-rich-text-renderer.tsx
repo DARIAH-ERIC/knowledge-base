@@ -2,11 +2,6 @@ import type { JSONContent } from "@tiptap/core";
 import type { ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 
-interface Mark {
-	type: string;
-	attrs?: Record<string, unknown>;
-}
-
 function renderText(node: JSONContent, key: number): ReactNode {
 	let element: ReactNode = node.text ?? "";
 

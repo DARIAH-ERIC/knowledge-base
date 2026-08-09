@@ -4,7 +4,6 @@ import { PlusIcon } from "@heroicons/react/20/solid";
 import { useResizeObserver } from "@react-aria/utils";
 import { useExtracted } from "next-intl";
 import {
-	type CSSProperties,
 	Children,
 	Fragment,
 	type ReactElement,

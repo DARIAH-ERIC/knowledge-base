@@ -3,7 +3,7 @@
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useResizeObserver } from "@react-aria/utils";
 import { useExtracted } from "next-intl";
-import { type CSSProperties, Fragment, type ReactNode, useCallback, useRef, useState } from "react";
+import { Fragment, type ReactNode, useCallback, useRef, useState } from "react";
 import {
 	Button as AriaButton,
 	DialogTrigger as AriaDialogTrigger,
