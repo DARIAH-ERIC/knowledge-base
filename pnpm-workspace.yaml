@@ -25,15 +25,15 @@ catalog:
   "@fontsource-variable/inter": ^5.3.0
   "@heroicons/react": ^2.2.0
   "@hono/node-server": ^2.1.0
-  "@hono/standard-validator": ^0.2.3
+  "@hono/standard-validator": ^0.4.0
   "@hono/swagger-ui": ^0.6.1
   "@imgproxy/imgproxy-js-core": ^1.7.0
   "@imgproxy/imgproxy-node": ^1.1.0
   "@internationalized/date": ^3.12.2
   "@node-rs/argon2": ^2.0.2
-  "@opentelemetry/exporter-trace-otlp-proto": ^0.219.0
-  "@opentelemetry/instrumentation-http": ^0.219.0
-  "@opentelemetry/sdk-node": ^0.219.0
+  "@opentelemetry/exporter-trace-otlp-proto": ^0.221.0
+  "@opentelemetry/instrumentation-http": ^0.221.0
+  "@opentelemetry/sdk-node": ^0.221.0
   "@opentelemetry/sdk-trace-base": ^2.10.0
   "@oslojs/binary": ^1.0.0
   "@oslojs/crypto": ^1.0.1
@@ -78,7 +78,7 @@ catalog:
   axe-core: ^4.13.0
   axe-playwright: ^2.2.2
   babel-plugin-react-compiler: ^1.0.0
-  better-result: ^2.7.0
+  better-result: ^3.0.0
   client-only: ^0.0.1
   clsx: ^2.1.1
   concurrently: ^10.0.4
@@ -103,9 +103,9 @@ catalog:
   lefthook: ^2.1.10
   lucide-react: ^1.30.0
   minio: ^8.0.7
-  motion: ^12.43.0
+  motion: ^13.0.0
   next: ^16.3.0
-  next-intl: ^4.8.3
+  next-intl: ^4.13.5
   nodemailer: ^9.0.5
   npm-run-all2: ^9.0.3
   null-loader: ^4.0.1
@@ -131,7 +131,7 @@ catalog:
   schema-dts: ^2.0.0
   server-nodejs-only: ^0.0.1
   server-only: ^0.0.1
-  sharp: ^0.34.5
+  sharp: ^0.35.3
   sonner: ^2.0.7
   storybook: ^10.5.7
   storybook-next-intl: ^10.1.3
