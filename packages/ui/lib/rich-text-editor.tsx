@@ -457,7 +457,7 @@ function EmbedNodeView({
 						)}
 						{editor.isEditable ? (
 							<div className="flex items-center justify-between gap-x-2 border-bs border-border px-4 py-2">
-								<span className="min-inline-0 truncate text-xs text-muted-fg">{url}</span>
+								<span className="truncate text-xs text-muted-fg min-inline-0">{url}</span>
 								<div className="flex shrink-0 gap-x-1">
 									<button
 										aria-label="Edit embed"
@@ -485,7 +485,7 @@ function EmbedNodeView({
 							</div>
 						) : (
 							<div className="border-bs border-border px-4 py-2">
-								<span className="min-inline-0 truncate text-xs text-muted-fg">{url}</span>
+								<span className="truncate text-xs text-muted-fg min-inline-0">{url}</span>
 							</div>
 						)}
 						{!isEmptyRichTextDocument(caption) ? (
@@ -850,7 +850,7 @@ function ButtonLinkNodeView({
 				</PopoverTrigger>
 				<PopoverContent className="p-3">
 					<form
-						className="flex inline-64 flex-col gap-2"
+						className="flex flex-col gap-2 inline-64"
 						onSubmit={(e) => {
 							e.preventDefault();
 							handleApply();
@@ -1036,7 +1036,7 @@ function PlaceholderValueNodeView({
 					{label}
 				</PopoverTrigger>
 				<PopoverContent className="p-3">
-					<div className="flex inline-64 flex-col gap-2">
+					<div className="flex flex-col gap-2 inline-64">
 						<span className="text-sm font-medium">{label}</span>
 						<p className="text-xs text-muted-fg">
 							{"Replaced with the current value whenever the content is displayed."}
@@ -1191,7 +1191,7 @@ function FootnoteNodeView({
 				</Tooltip>
 				<PopoverContent className="p-3">
 					<form
-						className="flex inline-72 flex-col gap-2"
+						className="flex flex-col gap-2 inline-72"
 						onSubmit={(e) => {
 							e.preventDefault();
 							handleApply();
@@ -1419,7 +1419,7 @@ function AssetImageNodeView({
 				   node's DOM — so every label rendered inside it comes up highlighted as if the user
 				   had dragged across it. The panel is a form, not document text, so nothing in its
 				   chrome is selectable; the fields inside it opt back in. */
-				<div className="flex select-none flex-col gap-y-3 p-4 **:[[contenteditable]]:select-text [&_input]:select-text">
+				<div className="flex flex-col gap-y-3 p-4 select-none **:[[contenteditable]]:select-text [&_input]:select-text">
 					{renderAssetMetadata != null && imageKey != null
 						? renderAssetMetadata({
 								imageKey,
@@ -1570,7 +1570,7 @@ function AssetImageNodeView({
 					<div className="relative">
 						<img
 							alt={alt ?? ""}
-							className="block inline-full max-block-96 object-contain"
+							className="block object-contain inline-full max-block-96"
 							data-asset-image=""
 							data-image-key={imageKey ?? undefined}
 							draggable={false}
@@ -1872,12 +1872,12 @@ function MediaTextNodeView({
 					{imageUrl != null ? (
 						<img
 							alt={alt ?? ""}
-							className="block inline-full rounded-md object-cover"
+							className="block rounded-md object-cover inline-full"
 							draggable={false}
 							src={imageUrl}
 						/>
 					) : (
-						<div className="flex block-32 items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-fg">
+						<div className="flex items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-fg block-32">
 							{"No image"}
 						</div>
 					)}
@@ -1911,7 +1911,7 @@ function MediaTextNodeView({
 						</div>
 					) : null}
 				</div>
-				<NodeViewContent className="min-inline-0 flex-1" data-media-text-content="" />
+				<NodeViewContent className="flex-1 min-inline-0" data-media-text-content="" />
 			</div>
 		</NodeViewWrapper>
 	);
@@ -2100,7 +2100,7 @@ function GalleryNodeView({
 			}}
 		>
 			{isEditing ? (
-				<div className="flex select-none flex-col gap-y-3 p-4 **:[[contenteditable]]:select-text [&_input]:select-text">
+				<div className="flex flex-col gap-y-3 p-4 select-none **:[[contenteditable]]:select-text [&_input]:select-text">
 					<div className="flex flex-col gap-y-1">
 						<span className="text-sm/6 font-medium">{"Layout"}</span>
 						<ToggleGroup
@@ -2172,7 +2172,7 @@ function GalleryNodeView({
 							{item.imageUrl != null ? (
 								<img
 									alt={item.alt ?? ""}
-									className="block max-block-40 inline-full object-contain"
+									className="block object-contain inline-full max-block-40"
 									draggable={false}
 									src={item.imageUrl}
 								/>
@@ -2282,7 +2282,7 @@ function GalleryNodeView({
 							className={cn(
 								"grid list-none gap-2 p-2",
 								layout === "carousel"
-									? "grid-flow-col auto-cols-[minmax(8rem,1fr)] overflow-x-auto"
+									? "auto-cols-[minmax(8rem,1fr)] grid-flow-col overflow-x-auto"
 									: "grid-cols-2 sm:grid-cols-3",
 							)}
 						>
@@ -2297,7 +2297,7 @@ function GalleryNodeView({
 									<li key={index} className="flex flex-col gap-y-1">
 										<img
 											alt={item.alt ?? ""}
-											className="block aspect-video inline-full rounded-sm object-cover"
+											className="block aspect-video rounded-sm object-cover inline-full"
 											draggable={false}
 											src={item.imageUrl ?? ""}
 										/>
@@ -2608,7 +2608,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					// `footnotes` roots the counter that numbers footnote markers: one editor holds one whole
 					// document (the app splits it into content blocks only on save), so numbering here runs
 					// across the article exactly as it will on the page.
-					"richtext footnotes max-inline-none px-4 py-3 min-block-37.5 focus:outline-none",
+					"richtext px-4 py-3 footnotes max-inline-none min-block-37.5 focus:outline-none",
 					size != null ? richtextSizeClass[size] : undefined,
 				),
 				role: "textbox",
@@ -2981,7 +2981,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							))}
 						</MenuContent>
 					</Menu>
-					<span className="mx-1 block-4 inline-px bg-border" />
+					<span className="mx-1 bg-border block-4 inline-px" />
 					{actionsByGroup.format.map((action) => (
 						<RichTextEditorIconButton
 							aria-label={action.label}
@@ -2991,7 +2991,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							onClick={action.run}
 						/>
 					))}
-					<span className="mx-1 block-4 inline-px bg-border" />
+					<span className="mx-1 bg-border block-4 inline-px" />
 					{actionsByGroup.block.map((action) => (
 						<RichTextEditorIconButton
 							aria-label={action.label}
@@ -3001,7 +3001,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							onClick={action.run}
 						/>
 					))}
-					<span className="mx-1 block-4 inline-px bg-border" />
+					<span className="mx-1 bg-border block-4 inline-px" />
 					<Popover isOpen={isLinkPopoverOpen} onOpenChange={handleLinkPopoverOpenChange}>
 						<Tooltip>
 							<PopoverTrigger
@@ -3021,7 +3021,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 								// These links hold a reference, not an href, so the url field would have nothing
 								// to show and applying it would silently replace the target. Changing one means
 								// picking a new target, which is the same dialog the insert menu opens.
-								<div className="flex inline-56 flex-col gap-2">
+								<div className="flex flex-col gap-2 inline-56">
 									{linkTargetSummary ?? (
 										<Note intent="info">
 											{activeState.linkTargetKind === "asset"
@@ -3050,7 +3050,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 								</div>
 							) : (
 								<form
-									className="flex inline-56 flex-col gap-2"
+									className="flex flex-col gap-2 inline-56"
 									onSubmit={(e) => {
 										e.preventDefault();
 										applyLink();
@@ -3164,7 +3164,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							</MenuContent>
 						</Menu>
 					) : null}
-					<span className="mx-1 block-4 inline-px bg-border" />
+					<span className="mx-1 bg-border block-4 inline-px" />
 					<Menu>
 						<Tooltip>
 							<MenuTrigger

@@ -55,10 +55,10 @@ export function Tag(props: Readonly<TagProps>): ReactNode {
 			{...rest}
 			className={cx(
 				"inset-ring inset-ring-input outline-hidden dark:bg-input/30",
-				"inline-flex items-center gap-x-1.5 py-0.5 font-medium text-xs/5 forced-colors:outline",
-				"*:data-[slot=icon]:block-3 *:data-[slot=icon]:inline-3 *:data-[slot=icon]:shrink-0",
+				"inline-flex items-center gap-x-1.5 py-0.5 text-xs/5 font-medium forced-colors:outline",
+				"*:data-[slot=icon]:shrink-0 *:data-[slot=icon]:block-3 *:data-[slot=icon]:inline-3",
 				"cursor-default rounded-full px-2",
-				"selected:inset-ring-ring/70 selected:bg-primary-subtle selected:text-primary-subtle-fg",
+				"selected:bg-primary-subtle selected:text-primary-subtle-fg selected:inset-ring-ring/70",
 				"disabled:opacity-50 forced-colors:disabled:text-[GrayText]",
 				className,
 			)}

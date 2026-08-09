@@ -88,7 +88,7 @@ interface MenuContentProps<T> extends AriaMenuProps<T>, Pick<PopoverContentProps
 }
 
 export const menuContentStyles = tv({
-	base: "grid max-block-[inherit] grid-cols-[auto_1fr] overflow-y-auto overflow-x-hidden overscroll-contain p-1 outline-hidden [clip-path:inset(0_0_0_0_round_calc(var(--radius-xl)-(--spacing(1))))] *:[[role='group']+[role=group]]:mbs-1 *:[[role='group']+[role=separator]]:mbs-1",
+	base: "grid grid-cols-[auto_1fr] overflow-x-hidden overflow-y-auto overscroll-contain p-1 outline-hidden [clip-path:inset(0_0_0_0_round_calc(var(--radius-xl)-(--spacing(1))))] max-block-[inherit] *:[[role='group']+[role=group]]:mbs-1 *:[[role='group']+[role=separator]]:mbs-1",
 });
 
 export function MenuContent<T extends object>(props: Readonly<MenuContentProps<T>>): ReactNode {
@@ -171,8 +171,8 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 								// An item which already has an icon in its leading column moves the check to the
 								// far end, where it is centred on the row rather than left at the static position
 								// its own line would have put it — the same treatment `DropdownItem` gives it.
-								"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:inset-bs-1/2 group-has-data-[slot=avatar]:inset-e-0 group-has-data-[slot=avatar]:-translate-y-1/2",
-								"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:inset-bs-1/2 group-has-data-[slot=icon]:inset-e-0 group-has-data-[slot=icon]:-translate-y-1/2",
+								"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:inset-e-0 group-has-data-[slot=avatar]:inset-bs-1/2 group-has-data-[slot=avatar]:-translate-y-1/2",
+								"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:inset-e-0 group-has-data-[slot=icon]:inset-bs-1/2 group-has-data-[slot=icon]:-translate-y-1/2",
 							)}
 						>
 							{values.selectionMode === "single" && (
@@ -208,7 +208,7 @@ export function MenuHeader(props: Readonly<MenuHeaderProps>): ReactNode {
 	return (
 		<AriaHeader
 			className={twMerge(
-				"col-span-full px-2.5 py-2 font-medium text-base sm:text-sm",
+				"col-span-full px-2.5 py-2 text-base font-medium sm:text-sm",
 				separator && "-mx-1 mbe-1 border-be sm:px-3 sm:pbe-2.5",
 				className,
 			)}

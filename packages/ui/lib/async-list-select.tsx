@@ -227,13 +227,13 @@ function AsyncListSelectInner<T extends AsyncOption>(
 
 						return (
 							<GridListItem className="inline-full" id={item.id} textValue={item.name}>
-								<GridListStart className="min-inline-0 flex-1">
-									<div className="flex min-inline-0 flex-col">{content}</div>
+								<GridListStart className="flex-1 min-inline-0">
+									<div className="flex flex-col min-inline-0">{content}</div>
 								</GridListStart>
 								{!isDisabled ? (
 									<AriaButton
 										aria-label={t("Remove")}
-										className="grid block-7 inline-7 shrink-0 cursor-default place-content-center rounded-md text-muted-fg hover:bg-muted hover:text-fg"
+										className="grid shrink-0 cursor-default place-content-center rounded-md text-muted-fg block-7 inline-7 hover:bg-muted hover:text-fg"
 										onPress={() => {
 											remove(item.id);
 										}}
@@ -246,7 +246,7 @@ function AsyncListSelectInner<T extends AsyncOption>(
 					}}
 				</GridList>
 			) : (
-				<p className="text-muted-fg text-sm">{emptySelectionMessage ?? t("No selected items")}</p>
+				<p className="text-sm text-muted-fg">{emptySelectionMessage ?? t("No selected items")}</p>
 			)}
 
 			<AriaDialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
@@ -257,14 +257,14 @@ function AsyncListSelectInner<T extends AsyncOption>(
 
 				<AriaPopover
 					className={cx(
-						"group/popover flex min-inline-72 max-inline-120 origin-(--trigger-anchor-point) flex-col overflow-hidden rounded-xl border border-fg/10 bg-overlay text-overlay-fg shadow-xs outline-hidden",
-						"entering:fade-in entering:animate-in",
-						"exiting:fade-out exiting:animate-out",
+						"group/popover flex origin-(--trigger-anchor-point) flex-col overflow-hidden rounded-xl border border-fg/10 bg-overlay text-overlay-fg shadow-xs outline-hidden max-inline-120 min-inline-72",
+						"entering:animate-in entering:fade-in",
+						"exiting:animate-out exiting:fade-out",
 					)}
 					placement="bottom start"
 				>
 					<div
-						className="flex min-block-0 flex-1 flex-col gap-3 p-3"
+						className="flex flex-1 flex-col gap-3 p-3 min-block-0"
 						// Close on Escape. Captured before the search field (clears its value) and the list box
 						// (clears selection) can consume the key, so Escape reliably dismisses the popover.
 						onKeyDownCapture={(event) => {
@@ -279,13 +279,13 @@ function AsyncListSelectInner<T extends AsyncOption>(
 						</SearchField>
 
 						{loadError != null ? (
-							<p className="py-3 text-center text-danger-subtle-fg text-sm">{loadErrorMessage}</p>
+							<p className="py-3 text-center text-sm text-danger-subtle-fg">{loadErrorMessage}</p>
 						) : displayedItems.length > 0 ? (
-							<div className="relative flex min-block-0 flex-1">
+							<div className="relative flex flex-1 min-block-0">
 								<ListBox
 									aria-label={ariaLabel}
 									className={cx(
-										"max-block-none inline-full min-block-0 flex-1 [&::-webkit-scrollbar]:block-2! [&::-webkit-scrollbar]:inline-2!",
+										"flex-1 inline-full max-block-none min-block-0 [&::-webkit-scrollbar]:block-2! [&::-webkit-scrollbar]:inline-2!",
 										isPending ? "opacity-50" : undefined,
 									)}
 									disabledKeys={disabledOptionKeys}
@@ -334,7 +334,7 @@ function AsyncListSelectInner<T extends AsyncOption>(
 								<ProgressCircle aria-label={t("Pending...")} isIndeterminate={true} />
 							</div>
 						) : (
-							<p className="py-3 text-center text-muted-fg text-sm">
+							<p className="py-3 text-center text-sm text-muted-fg">
 								{emptyMessage ?? t("No options found.")}
 							</p>
 						)}

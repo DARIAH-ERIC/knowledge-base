@@ -204,13 +204,13 @@ export function InlineRichTextEditor(props: Readonly<InlineRichTextEditorProps>)
 							editor.chain().focus().toggleItalic().run();
 						}}
 					/>
-					<span className="mx-1 block-4 inline-px bg-border" />
+					<span className="mx-1 bg-border block-4 inline-px" />
 					<Popover isOpen={isLinkPopoverOpen} onOpenChange={handleLinkPopoverOpenChange}>
 						<Tooltip>
 							<PopoverTrigger
 								aria-label={t("Link")}
 								className={twMerge(
-									"relative inline-flex block-8 inline-8 cursor-pointer items-center justify-center rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+									"relative inline-flex cursor-pointer items-center justify-center rounded-md border-transparent bg-transparent text-muted-fg transition-colors block-8 inline-8 hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
 									activeState?.isLink === true && "bg-primary-subtle/50 text-fg",
 								)}
 							>
@@ -220,7 +220,7 @@ export function InlineRichTextEditor(props: Readonly<InlineRichTextEditorProps>)
 						</Tooltip>
 						<PopoverContent className="p-3">
 							<form
-								className="flex inline-56 flex-col gap-2"
+								className="flex flex-col gap-2 inline-56"
 								onSubmit={(e) => {
 									e.preventDefault();
 									applyLink();
