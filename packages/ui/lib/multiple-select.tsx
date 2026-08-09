@@ -4,7 +4,6 @@ import { PlusIcon } from "@heroicons/react/20/solid";
 import { useResizeObserver } from "@react-aria/utils";
 import { useExtracted } from "next-intl";
 import {
-	type CSSProperties,
 	Children,
 	Fragment,
 	type ReactElement,
@@ -114,7 +113,7 @@ export function MultipleSelect<T extends OptionBase>(
 				<Fragment>
 					<div
 						ref={triggerRef}
-						className="flex inline-full items-center gap-2 rounded-lg border border-input p-1 group-open/select:border-ring/70 group-open/select:ring-3 group-open/select:ring-ring/20 has-[:focus-visible]:border-ring/70 has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/20"
+						className="flex items-center gap-2 rounded-lg border border-input p-1 inline-full group-open/select:border-ring/70 group-open/select:ring-3 group-open/select:ring-ring/20 has-[:focus-visible]:border-ring/70 has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/20"
 						data-slot="control"
 					>
 						<SelectValue<T> className="flex-1 min-inline-0">
@@ -131,7 +130,7 @@ export function MultipleSelect<T extends OptionBase>(
 									<TagList
 										items={selectedItems.filter((i) => i != null)}
 										renderEmptyState={() => (
-											<i className="ps-2 text-muted-fg text-sm not-italic">{placeholder}</i>
+											<i className="ps-2 text-sm text-muted-fg not-italic">{placeholder}</i>
 										)}
 									>
 										{(item) => <Tag className="rounded-md">{item.name}</Tag>}
@@ -149,13 +148,9 @@ export function MultipleSelect<T extends OptionBase>(
 						</Button>
 					</div>
 					<PopoverContent
-						className="flex inline-(--trigger-width) max-inline-none flex-col overflow-hidden p-0"
+						className="flex flex-col overflow-hidden p-0 inline-(--trigger-width) max-inline-none"
 						placement="bottom"
-						style={
-							triggerWidth != null
-								? ({ "--trigger-width": triggerWidth } as CSSProperties)
-								: undefined
-						}
+						style={triggerWidth != null ? { "--trigger-width": triggerWidth } : undefined}
 						triggerRef={triggerRef}
 					>
 						<Autocomplete filter={contains}>
@@ -169,7 +164,7 @@ export function MultipleSelect<T extends OptionBase>(
 								/>
 							</SearchField>
 							<ListBox
-								className="grid min-block-0 inline-full flex-1 grid-cols-[auto_1fr] gap-y-1 overflow-y-auto rounded-none border-0 bg-transparent p-1 shadow-none outline-hidden"
+								className="grid flex-1 grid-cols-[auto_1fr] gap-y-1 overflow-y-auto rounded-none border-0 bg-transparent p-1 shadow-none outline-hidden inline-full min-block-0"
 								items={list.items}
 							>
 								{list.children}

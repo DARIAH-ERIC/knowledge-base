@@ -79,7 +79,7 @@ export function InternalPagesPage(props: Readonly<InternalPagesPageProps>): Reac
 						{t("Title")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
-					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
+					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end" />
 				</TableHeader>
 				<TableBody items={internalPages.data}>
 					{(item) => (
@@ -93,7 +93,7 @@ export function InternalPagesPage(props: Readonly<InternalPagesPageProps>): Reac
 									isPublished={item.isPublished}
 								/>
 							</TableCell>
-							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Link
 										href={`/dashboard/administrator/internal-pages/${item.entity.slug}/details`}

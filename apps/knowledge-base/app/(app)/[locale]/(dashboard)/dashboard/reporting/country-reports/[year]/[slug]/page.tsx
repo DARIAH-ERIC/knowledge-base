@@ -96,7 +96,7 @@ export default async function DashboardReportingCountryReportPage(
 				</HeaderAction>
 			</Header>
 
-			<div className="mbs-8 flex max-inline-4xl flex-col gap-y-10 px-(--layout-padding)">
+			<div className="mbs-8 flex flex-col gap-y-10 px-(--layout-padding) max-inline-4xl">
 				<CountryReportSummary data={report.summary} extraSectionLinks={commentSectionLinks} />
 				<ReportCommentsSection comments={comments} />
 			</div>

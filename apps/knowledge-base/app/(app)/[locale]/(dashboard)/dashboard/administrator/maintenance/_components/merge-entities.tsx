@@ -90,7 +90,7 @@ export function MergeEntities(): ReactNode {
 	}
 
 	return (
-		<div className="flex max-inline-xl flex-col gap-y-4">
+		<div className="flex flex-col gap-y-4 max-inline-xl">
 			<div className="flex flex-col gap-y-1">
 				<AsyncSelect<EntityOption>
 					aria-label={t("Duplicate (source)")}
@@ -109,7 +109,7 @@ export function MergeEntities(): ReactNode {
 					selectedItem={source}
 				/>
 				{source?.slug != null ? (
-					<p className="break-all text-muted-fg text-xs">{source.slug}</p>
+					<p className="text-xs break-all text-muted-fg">{source.slug}</p>
 				) : null}
 			</div>
 
@@ -131,7 +131,7 @@ export function MergeEntities(): ReactNode {
 					selectedItem={target}
 				/>
 				{target?.slug != null ? (
-					<p className="break-all text-muted-fg text-xs">{target.slug}</p>
+					<p className="text-xs break-all text-muted-fg">{target.slug}</p>
 				) : null}
 			</div>
 
@@ -195,13 +195,13 @@ export function MergeEntities(): ReactNode {
 				<ModalBody className="flex flex-col gap-y-3 text-sm">
 					{source != null ? (
 						<div>
-							<div className="text-muted-fg text-xs uppercase">{t("Delete (source)")}</div>
+							<div className="text-xs text-muted-fg uppercase">{t("Delete (source)")}</div>
 							<EntitySummary item={source} />
 						</div>
 					) : null}
 					{target != null ? (
 						<div>
-							<div className="text-muted-fg text-xs uppercase">{t("Keep (target)")}</div>
+							<div className="text-xs text-muted-fg uppercase">{t("Keep (target)")}</div>
 							<EntitySummary item={target} />
 						</div>
 					) : null}

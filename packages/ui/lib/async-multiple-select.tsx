@@ -3,15 +3,7 @@
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useResizeObserver } from "@react-aria/utils";
 import { useExtracted } from "next-intl";
-import {
-	type CSSProperties,
-	Fragment,
-	type ReactNode,
-	useCallback,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import { Fragment, type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import {
 	Button as AriaButton,
 	DialogTrigger as AriaDialogTrigger,
@@ -180,7 +172,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 				<div
 					ref={triggerRef}
 					className={twMerge(
-						"flex inline-full items-center gap-2 rounded-lg border border-input p-1",
+						"flex items-center gap-2 rounded-lg border border-input p-1 inline-full",
 						"has-[:focus-visible]:border-ring/70 has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/20",
 						isOpen ? "border-ring/70 ring-3 ring-ring/20" : undefined,
 						isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
@@ -201,7 +193,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 				>
 					<TagGroup
 						aria-label={t("Selected items")}
-						className="min-inline-0 flex-1"
+						className="flex-1 min-inline-0"
 						onRemove={
 							isDisabled
 								? undefined
@@ -213,7 +205,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 						<TagList
 							items={resolvedSelectedItems}
 							renderEmptyState={() => (
-								<i className="ps-2 text-muted-fg text-sm not-italic">
+								<i className="ps-2 text-sm text-muted-fg not-italic">
 									{placeholder ?? t("No selected items")}
 								</i>
 							)}
@@ -223,8 +215,8 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 								const text = typeof content === "string" ? content : item.name;
 
 								return (
-									<Tag className="max-inline-64 rounded-md" textValue={text}>
-										<span className="min-inline-0 truncate" title={text}>
+									<Tag className="rounded-md max-inline-64" textValue={text}>
+										<span className="truncate min-inline-0" title={text}>
 											{content}
 										</span>
 									</Tag>
@@ -234,7 +226,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 					</TagGroup>
 					<AriaButton
 						aria-label={t("Open options")}
-						className="grid block-7 inline-7 shrink-0 cursor-default place-content-center rounded-[calc(var(--radius-lg)-(--spacing(1)))] text-muted-fg hover:bg-muted hover:text-fg"
+						className="grid shrink-0 cursor-default place-content-center rounded-[calc(var(--radius-lg)-(--spacing(1)))] text-muted-fg block-7 inline-7 hover:bg-muted hover:text-fg"
 						isDisabled={isDisabled}
 					>
 						<ChevronUpDownIcon className="block-4 inline-4" data-slot="chevron" />
@@ -245,15 +237,11 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 					className={cx(
 						"group/popover origin-(--trigger-anchor-point) overflow-hidden rounded-xl border border-fg/10 bg-overlay text-overlay-fg shadow-xs outline-hidden",
 						"inline-(--trigger-width)",
-						"entering:fade-in entering:animate-in",
-						"exiting:fade-out exiting:animate-out",
+						"entering:animate-in entering:fade-in",
+						"exiting:animate-out exiting:fade-out",
 					)}
 					placement="bottom"
-					style={
-						triggerWidth != null
-							? ({ "--trigger-width": triggerWidth } as CSSProperties)
-							: undefined
-					}
+					style={triggerWidth != null ? { "--trigger-width": triggerWidth } : undefined}
 					triggerRef={triggerRef}
 				>
 					<div
@@ -272,7 +260,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 						</SearchField>
 
 						{loadError != null ? (
-							<p className="py-3 text-center text-danger-subtle-fg text-sm">{loadErrorMessage}</p>
+							<p className="py-3 text-center text-sm text-danger-subtle-fg">{loadErrorMessage}</p>
 						) : displayedItems.length > 0 ? (
 							<div className="relative">
 								<ListBox
@@ -326,7 +314,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 								<ProgressCircle aria-label={t("Pending...")} isIndeterminate={true} />
 							</div>
 						) : (
-							<p className="py-3 text-center text-muted-fg text-sm">
+							<p className="py-3 text-center text-sm text-muted-fg">
 								{emptyMessage ?? t("No options found.")}
 							</p>
 						)}

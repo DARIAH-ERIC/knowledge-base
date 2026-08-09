@@ -42,7 +42,7 @@ export async function WorkingGroupReportsListPage(
 					title={t("No reports found")}
 				/>
 			) : (
-				<ul className="divide-y rounded-lg border mx-(--layout-padding)">
+				<ul className="mx-(--layout-padding) divide-y rounded-lg border">
 					{reports.map((report) => {
 						// Mirrors `isReportEditable` (lib/auth/permissions): admins always; otherwise
 						// only while the report is a `draft` and its campaign is `open`.

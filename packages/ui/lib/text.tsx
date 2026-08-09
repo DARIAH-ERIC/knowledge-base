@@ -45,7 +45,7 @@ export function Code({ className, ...props }: ComponentPropsWithoutRef<"code">):
 		<code
 			{...props}
 			className={twMerge(
-				"rounded-sm border bg-muted px-0.5 font-medium text-sm sm:text-[0.8125rem]",
+				"rounded-sm border bg-muted px-0.5 text-sm font-medium sm:text-[0.8125rem]",
 				className,
 			)}
 		/>

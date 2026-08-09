@@ -72,7 +72,7 @@ export function ReportExternalResourcesSnapshotSection(
 		<section className="flex scroll-mbs-24 flex-col gap-y-4" id={sectionId}>
 			<div className="flex flex-col gap-y-1">
 				<h2 className="text-sm font-semibold text-fg">{title}</h2>
-				<p className="max-inline-md text-sm text-muted-fg">{description}</p>
+				<p className="text-sm text-muted-fg max-inline-md">{description}</p>
 				{capturedAt == null ? (
 					<Badge className="self-start" intent="warning">
 						{t("No snapshot captured")}

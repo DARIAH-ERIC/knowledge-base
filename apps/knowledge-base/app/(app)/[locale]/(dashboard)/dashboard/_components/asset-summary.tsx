@@ -66,7 +66,7 @@ export function AssetSummary(props: Readonly<AssetSummaryProps>): ReactNode {
 
 	return (
 		<div className="flex flex-col gap-y-3">
-			<div className="flex block-56 items-center justify-center overflow-hidden rounded-md bg-muted">
+			<div className="flex items-center justify-center overflow-hidden rounded-md bg-muted block-56">
 				<AssetPreview
 					alt={image.alt ?? image.label ?? t("Selected image")}
 					className="block-full inline-full"
@@ -79,24 +79,24 @@ export function AssetSummary(props: Readonly<AssetSummaryProps>): ReactNode {
 			</div>
 
 			<div className="flex flex-col gap-y-1.5">
-				<span className="font-medium text-sm/tight">{image.label ?? image.key}</span>
+				<span className="text-sm/tight font-medium">{image.label ?? image.key}</span>
 
 				{isImage ? (
 					<Fragment>
-						<span className="line-clamp-2 text-muted-fg text-xs">
+						<span className="line-clamp-2 text-xs text-muted-fg">
 							<span className="font-medium">{t("Alt text")}:</span>{" "}
 							{image.alt != null && image.alt !== "" ? image.alt : "—"}
 						</span>
 
 						{/* A div, because a rendered richtext caption is not an inline element. */}
-						<div className="line-clamp-2 text-muted-fg text-xs">
+						<div className="line-clamp-2 text-xs text-muted-fg">
 							<span className="font-medium">{t("Caption")}:</span> {caption ?? "—"}
 						</div>
 					</Fragment>
 				) : null}
 
 				{fileDetails.length > 0 ? (
-					<div className="flex flex-row flex-wrap items-center gap-x-1.5 text-muted-fg text-xs">
+					<div className="flex flex-row flex-wrap items-center gap-x-1.5 text-xs text-muted-fg">
 						{fileDetails.map((detail, index) => (
 							<Fragment key={detail}>
 								{index > 0 ? <span aria-hidden={true}>{"·"}</span> : null}

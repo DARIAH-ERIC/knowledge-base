@@ -128,7 +128,7 @@ export function MergeServices(): ReactNode {
 	}
 
 	return (
-		<div className="flex max-inline-xl flex-col gap-y-4">
+		<div className="flex flex-col gap-y-4 max-inline-xl">
 			<div className="flex flex-col gap-y-1">
 				<AsyncSelect<ServiceOption>
 					aria-label={t("Duplicate (source)")}
@@ -146,7 +146,7 @@ export function MergeServices(): ReactNode {
 					selectedItem={source}
 				/>
 				{source?.description != null ? (
-					<p className="break-all text-muted-fg text-xs">{source.description}</p>
+					<p className="text-xs break-all text-muted-fg">{source.description}</p>
 				) : null}
 			</div>
 
@@ -167,7 +167,7 @@ export function MergeServices(): ReactNode {
 					selectedItem={target}
 				/>
 				{target?.description != null ? (
-					<p className="break-all text-muted-fg text-xs">{target.description}</p>
+					<p className="text-xs break-all text-muted-fg">{target.description}</p>
 				) : null}
 			</div>
 
@@ -233,13 +233,13 @@ export function MergeServices(): ReactNode {
 				<ModalBody className="flex flex-col gap-y-3 text-sm">
 					{source != null ? (
 						<div>
-							<div className="text-muted-fg text-xs uppercase">{t("Delete (source)")}</div>
+							<div className="text-xs text-muted-fg uppercase">{t("Delete (source)")}</div>
 							<ServiceSummary item={source} />
 						</div>
 					) : null}
 					{target != null ? (
 						<div>
-							<div className="text-muted-fg text-xs uppercase">{t("Keep (target)")}</div>
+							<div className="text-xs text-muted-fg uppercase">{t("Keep (target)")}</div>
 							<ServiceSummary item={target} />
 						</div>
 					) : null}

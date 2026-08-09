@@ -70,7 +70,7 @@ export function MutuallyExclusiveRelationsCheck(
 	return (
 		<Fragment>
 			{result.errors.length > 0 ? (
-				<div className="flex flex-col gap-y-1 text-danger-subtle-fg text-sm">
+				<div className="flex flex-col gap-y-1 text-sm text-danger-subtle-fg">
 					{result.errors.map((error) => (
 						<p key={error}>{error}</p>
 					))}
@@ -92,7 +92,7 @@ export function MutuallyExclusiveRelationsCheck(
 				<TableBody
 					items={pageItems}
 					renderEmptyState={() => (
-						<p className="p-(--gutter) text-muted-fg text-sm">
+						<p className="p-(--gutter) text-sm text-muted-fg">
 							{t("No data-integrity issues found.")}
 						</p>
 					)}
@@ -121,7 +121,7 @@ export function MutuallyExclusiveRelationsCheck(
 									</Badge>
 								</TableCell>
 								<TableCell>
-									<span className="block max-inline-96 whitespace-normal">{finding.detail}</span>
+									<span className="block whitespace-normal max-inline-96">{finding.detail}</span>
 								</TableCell>
 								<TableCell>{formatIntervals(finding.overlaps)}</TableCell>
 							</TableRow>

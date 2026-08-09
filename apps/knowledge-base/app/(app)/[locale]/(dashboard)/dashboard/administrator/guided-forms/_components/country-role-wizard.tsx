@@ -433,7 +433,7 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 						variant="stacked"
 					>
 						{appointments == null ? (
-							<div className="flex items-center gap-x-2 text-muted-fg text-sm">
+							<div className="flex items-center gap-x-2 text-sm text-muted-fg">
 								<ProgressCircle aria-label={t("Loading...")} isIndeterminate={true} />
 								{t("Loading appointments...")}
 							</div>
@@ -584,7 +584,7 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 					<input name="end" type="hidden" value={endDate?.toString() ?? ""} />
 
 					{isPreflightPending || endPreflight == null ? (
-						<div className="flex items-center gap-x-2 text-muted-fg text-sm">
+						<div className="flex items-center gap-x-2 text-sm text-muted-fg">
 							<ProgressCircle aria-label={t("Checking...")} isIndeterminate={true} />
 							{t("Checking against the data-integrity rules...")}
 						</div>
@@ -651,7 +651,7 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 					<input name="end" type="hidden" value={end?.toString() ?? ""} />
 
 					{isPreflightPending || preflight == null ? (
-						<div className="flex items-center gap-x-2 text-muted-fg text-sm">
+						<div className="flex items-center gap-x-2 text-sm text-muted-fg">
 							<ProgressCircle aria-label={t("Checking...")} isIndeterminate={true} />
 							{t("Checking against the data-integrity rules...")}
 						</div>

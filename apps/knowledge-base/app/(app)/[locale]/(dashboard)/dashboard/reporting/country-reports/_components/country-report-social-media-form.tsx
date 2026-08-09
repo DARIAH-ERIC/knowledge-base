@@ -68,7 +68,7 @@ export function CountryReportSocialMediaForm(
 		<div className="flex flex-col gap-y-10">
 			<div className="flex flex-col gap-y-2">
 				<h2 className="text-sm font-semibold text-fg">{t("Social media")}</h2>
-				<p className="max-inline-md text-sm text-muted-fg">
+				<p className="text-sm text-muted-fg max-inline-md">
 					{t(
 						"The social media accounts this report covers. Add the relevant metrics per account — you only need to fill in the numbers you have.",
 					)}
@@ -197,13 +197,13 @@ function AccountCard(props: Readonly<AccountCardProps>): ReactNode {
 					{metrics.map((metric) => (
 						<li key={metric.kpi} className="flex items-center gap-x-3">
 							<label
-								className="inline-40 shrink-0 text-sm text-fg"
+								className="shrink-0 text-sm text-fg inline-40"
 								htmlFor={`${account.id}-${metric.kpi}`}
 							>
 								{formatKpi(metric.kpi)}
 							</label>
 							<input
-								className="inline-32 rounded-md border border-border bg-bg px-2 py-1 text-sm text-fg"
+								className="rounded-md border border-border bg-bg px-2 py-1 text-sm text-fg inline-32"
 								form={KPI_FORM_ID}
 								id={`${account.id}-${metric.kpi}`}
 								min={0}
@@ -330,7 +330,7 @@ function CreateAccountForm(props: Readonly<CreateAccountFormProps>): ReactNode {
 	return (
 		<section className="flex flex-col gap-y-3">
 			<h3 className="text-sm font-semibold text-fg">{t("Create a new account")}</h3>
-			<p className="max-inline-md text-sm text-muted-fg">
+			<p className="text-sm text-muted-fg max-inline-md">
 				{t("For an account not yet in the system, e.g. a website set up for a specific event.")}
 			</p>
 			<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>

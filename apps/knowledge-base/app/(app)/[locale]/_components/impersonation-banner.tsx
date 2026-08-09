@@ -67,7 +67,7 @@ export function ImpersonationBanner(props: Readonly<ImpersonationBannerProps>): 
 			className="flex flex-wrap items-center gap-x-3 gap-y-2 border-be border-current/15 bg-warning-subtle px-(--layout-padding) py-2 text-warning-subtle-fg [--layout-padding:--spacing(4)] sm:text-sm/6 sm:[--layout-padding:--spacing(6)]"
 			role="status"
 		>
-			<IconWarning aria-hidden={true} className="block-5 inline-5 shrink-0" />
+			<IconWarning aria-hidden={true} className="shrink-0 block-5 inline-5" />
 
 			<p className="text-sm">
 				{t("You are signed in as {name}.", { name: impersonatedUserName })}{" "}

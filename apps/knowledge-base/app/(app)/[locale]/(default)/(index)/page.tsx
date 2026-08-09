@@ -35,7 +35,7 @@ export default async function IndexPage(_props: Readonly<IndexPageProps>): Promi
 
 	return (
 		<Main className="container flex-1 px-8 py-12 xs:px-16">
-			<section className="flex min-block-full flex-col items-center justify-center gap-y-8 py-24">
+			<section className="flex flex-col items-center justify-center gap-y-8 py-24 min-block-full">
 				<div className="flex flex-col items-center gap-y-4">
 					<h1 className="text-center text-6xl font-extrabold tracking-tight text-text-strong">
 						{t("DARIAH Knowledge Base")}

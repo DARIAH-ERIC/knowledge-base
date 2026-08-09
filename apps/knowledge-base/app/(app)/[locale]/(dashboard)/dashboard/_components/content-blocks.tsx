@@ -470,29 +470,29 @@ function ContentBlockItem({
 	};
 
 	const contentBlockTypeIcons: Record<ContentBlockTypes["type"] | "unified_content", ReactNode> = {
-		accordion: <ListBulletIcon className="block-4 inline-4 shrink-0" />,
-		callout: <InformationCircleIcon className="block-4 inline-4 shrink-0" />,
-		data: <Square3Stack3DIcon className="block-4 inline-4 shrink-0" />,
-		embed: <CodeBracketSquareIcon className="block-4 inline-4 shrink-0" />,
-		gallery: <Squares2X2Icon className="block-4 inline-4 shrink-0" />,
-		hero: <RectangleGroupIcon className="block-4 inline-4 shrink-0" />,
-		image: <PhotoIcon className="block-4 inline-4 shrink-0" />,
-		media_text: <ViewColumnsIcon className="block-4 inline-4 shrink-0" />,
-		rich_text: <PencilSquareIcon className="block-4 inline-4 shrink-0" />,
-		unified_content: <PencilSquareIcon className="block-4 inline-4 shrink-0" />,
+		accordion: <ListBulletIcon className="shrink-0 block-4 inline-4" />,
+		callout: <InformationCircleIcon className="shrink-0 block-4 inline-4" />,
+		data: <Square3Stack3DIcon className="shrink-0 block-4 inline-4" />,
+		embed: <CodeBracketSquareIcon className="shrink-0 block-4 inline-4" />,
+		gallery: <Squares2X2Icon className="shrink-0 block-4 inline-4" />,
+		hero: <RectangleGroupIcon className="shrink-0 block-4 inline-4" />,
+		image: <PhotoIcon className="shrink-0 block-4 inline-4" />,
+		media_text: <ViewColumnsIcon className="shrink-0 block-4 inline-4" />,
+		rich_text: <PencilSquareIcon className="shrink-0 block-4 inline-4" />,
+		unified_content: <PencilSquareIcon className="shrink-0 block-4 inline-4" />,
 	};
 
 	return (
 		<>
 			{isDropTarget && dropPosition === "before" && (
-				<div aria-hidden={true} className="mx-1 block-0.5 rounded-full bg-accent" />
+				<div aria-hidden={true} className="mx-1 rounded-full bg-accent block-0.5" />
 			)}
 			{/* tabIndex={-1} makes the element programmatically focusable for DragManager
 			    keyboard navigation without adding it to the natural tab order. */}
 			<div ref={dropRef} tabIndex={-1} {...dropProps}>
 				<Disclosure
 					className={twMerge(
-						"group inset-ring inset-ring-border rounded-lg transition-opacity",
+						"group rounded-lg inset-ring inset-ring-border transition-opacity",
 						isDragging && "opacity-50",
 					)}
 					id={String(item.id)}
@@ -512,7 +512,7 @@ function ContentBlockItem({
 							onPress={dragButtonProps.onPress}
 						>
 							<svg
-								className="block-5 inline-5 text-muted-fg sm:block-4 sm:inline-4"
+								className="text-muted-fg block-5 inline-5 sm:block-4 sm:inline-4"
 								fill="none"
 								viewBox="0 0 24 24"
 								xmlns="http://www.w3.org/2000/svg"
@@ -550,13 +550,13 @@ function ContentBlockItem({
 							>
 								{contentBlockTypeIcons[item.type]}
 								<span className="flex-1">{contentBlockTypeNames[item.type]}</span>
-								<ChevronDownIcon className="block-4 inline-4 shrink-0 transition-transform group-data-expanded:rotate-180" />
+								<ChevronDownIcon className="shrink-0 transition-transform block-4 inline-4 group-data-expanded:rotate-180" />
 							</AriaButton>
 						</Heading>
 						<Modal>
 							<AriaButton
 								aria-label={t("Remove block")}
-								className="shrink-0 text-muted-fg rounded-sm hover:text-danger focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+								className="shrink-0 rounded-sm text-muted-fg hover:text-danger focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
 							>
 								<TrashIcon className="block-4 inline-4" />
 							</AriaButton>
@@ -593,7 +593,7 @@ function ContentBlockItem({
 				</Disclosure>
 			</div>
 			{isDropTarget && dropPosition === "after" && (
-				<div aria-hidden={true} className="mx-1 block-0.5 rounded-full bg-accent" />
+				<div aria-hidden={true} className="mx-1 rounded-full bg-accent block-0.5" />
 			)}
 		</>
 	);
@@ -860,7 +860,7 @@ function DataContentBlockPanel({
 					>
 						<SearchInput />
 					</SearchField>
-					<div className="flex max-block-64 flex-col gap-y-2 overflow-y-auto rounded-lg border border-border p-2">
+					<div className="flex flex-col gap-y-2 overflow-y-auto rounded-lg border border-border p-2 max-block-64">
 						{entries.length === 0 ? (
 							<p className="px-2 py-1 text-sm text-muted-fg">
 								{query.trim() !== "" ? t("No entries found.") : t("Search to browse entries.")}

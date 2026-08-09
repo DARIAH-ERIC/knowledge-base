@@ -75,7 +75,7 @@ export default async function DashboardReportingAdministratorPage(
 						className="flex flex-col justify-between gap-y-4 rounded-lg border bg-bg p-4"
 					>
 						<div className="flex flex-col gap-y-1">
-							<h2 className="font-medium text-sm text-fg">{item.title}</h2>
+							<h2 className="text-sm font-medium text-fg">{item.title}</h2>
 							<p className="text-sm text-muted-fg">{item.description}</p>
 						</div>
 

@@ -430,7 +430,7 @@ export function SlashCommandMenu(props: Readonly<SlashCommandMenuProps>): ReactN
 	return createPortal(
 		<div
 			aria-label={label}
-			className="fixed z-50 inline-64 overflow-y-auto rounded-lg border border-border bg-bg py-1 shadow-lg max-block-72"
+			className="fixed z-50 overflow-y-auto rounded-lg border border-border bg-bg py-1 shadow-lg inline-64 max-block-72"
 			id={listboxId}
 			ref={listRef}
 			role="listbox"
@@ -443,7 +443,7 @@ export function SlashCommandMenu(props: Readonly<SlashCommandMenuProps>): ReactN
 					<button
 						aria-selected={index === activeIndex}
 						className={twMerge(
-							"flex inline-full cursor-pointer items-center gap-x-2 px-3 py-1.5 text-start text-sm transition-colors text-fg",
+							"flex cursor-pointer items-center gap-x-2 px-3 py-1.5 text-start text-sm text-fg transition-colors inline-full",
 							index === activeIndex && "bg-primary-subtle/50",
 						)}
 						data-index={index}
@@ -459,7 +459,7 @@ export function SlashCommandMenu(props: Readonly<SlashCommandMenuProps>): ReactN
 						role="option"
 						type="button"
 					>
-						<item.icon className="shrink-0 block-4 inline-4 text-muted-fg" />
+						<item.icon className="shrink-0 text-muted-fg block-4 inline-4" />
 						{item.label}
 					</button>
 				))

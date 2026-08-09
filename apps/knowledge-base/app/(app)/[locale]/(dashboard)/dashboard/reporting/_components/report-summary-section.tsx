@@ -21,7 +21,7 @@ export function ReportSummaryNav(props: Readonly<ReportSummaryNavProps>): ReactN
 
 	return (
 		<nav aria-label={ariaLabel} className="flex flex-col gap-y-3 border-be border-border pbe-6">
-			<p className="font-semibold text-fg text-xs uppercase tracking-wide">{title}</p>
+			<p className="text-xs font-semibold tracking-wide text-fg uppercase">{title}</p>
 			<ul className="flex flex-wrap gap-x-4 gap-y-2">
 				{links.map((link) => (
 					<li key={link.id}>
@@ -49,13 +49,13 @@ export function ReportSummarySection(props: Readonly<ReportSummarySectionProps>)
 	return (
 		<section
 			className={twMerge(
-				"scroll-mbs-24 mbs-8 border-bs border-border pbs-8 first:mbs-0 first:border-bs-0 first:pbs-0",
+				"mbs-8 scroll-mbs-24 border-bs border-border pbs-8 first:mbs-0 first:border-bs-0 first:pbs-0",
 				className,
 			)}
 			{...sectionProps}
 		>
 			<div className={twMerge("flex flex-col gap-y-4", contentClassName)}>
-				<h2 className="font-semibold text-base text-fg sm:text-lg">{title}</h2>
+				<h2 className="text-base font-semibold text-fg sm:text-lg">{title}</h2>
 				{children}
 			</div>
 		</section>

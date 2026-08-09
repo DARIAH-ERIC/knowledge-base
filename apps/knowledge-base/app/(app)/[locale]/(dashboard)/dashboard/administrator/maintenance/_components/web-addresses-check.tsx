@@ -52,7 +52,7 @@ export function WebAddressesCheck(props: Readonly<WebAddressesCheckProps>): Reac
 	return (
 		<Fragment>
 			{result.errors.length > 0 ? (
-				<div className="flex flex-col gap-y-1 text-danger-subtle-fg text-sm">
+				<div className="flex flex-col gap-y-1 text-sm text-danger-subtle-fg">
 					{result.errors.map((error) => (
 						<p key={error}>{error}</p>
 					))}
@@ -74,7 +74,7 @@ export function WebAddressesCheck(props: Readonly<WebAddressesCheckProps>): Reac
 				<TableBody
 					items={pageItems}
 					renderEmptyState={() => (
-						<p className="p-(--gutter) text-muted-fg text-sm">
+						<p className="p-(--gutter) text-sm text-muted-fg">
 							{t("No data-integrity issues found.")}
 						</p>
 					)}
@@ -93,8 +93,8 @@ export function WebAddressesCheck(props: Readonly<WebAddressesCheckProps>): Reac
 						return (
 							<TableRow id={finding.id}>
 								<TableCell>
-									<div className="flex min-inline-0 flex-col items-start gap-y-1">
-										<div className="max-inline-80 truncate" title={finding.recordLabel}>
+									<div className="flex flex-col items-start gap-y-1 min-inline-0">
+										<div className="truncate max-inline-80" title={finding.recordLabel}>
 											{href != null ? (
 												<Link className="underline" href={href}>
 													{finding.recordLabel}
@@ -111,7 +111,7 @@ export function WebAddressesCheck(props: Readonly<WebAddressesCheckProps>): Reac
 								<TableCell>{finding.sourceLabel}</TableCell>
 								<TableCell>
 									<div className="flex flex-col items-start gap-y-1">
-										<span className="block max-inline-96 whitespace-normal break-all font-mono text-xs">
+										<span className="block font-mono text-xs break-all whitespace-normal max-inline-96">
 											{finding.value}
 										</span>
 										<Badge intent={findingKindBadgeIntents[finding.kind]}>
@@ -120,7 +120,7 @@ export function WebAddressesCheck(props: Readonly<WebAddressesCheckProps>): Reac
 									</div>
 								</TableCell>
 								<TableCell>
-									<span className="block max-inline-96 whitespace-normal">{finding.detail}</span>
+									<span className="block whitespace-normal max-inline-96">{finding.detail}</span>
 								</TableCell>
 							</TableRow>
 						);

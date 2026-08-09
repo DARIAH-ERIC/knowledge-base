@@ -60,7 +60,7 @@ export function HeadingHierarchyCheck(props: Readonly<HeadingHierarchyCheckProps
 	return (
 		<Fragment>
 			{result.errors.length > 0 ? (
-				<div className="flex flex-col gap-y-1 text-danger-subtle-fg text-sm">
+				<div className="flex flex-col gap-y-1 text-sm text-danger-subtle-fg">
 					{result.errors.map((error) => (
 						<p key={error}>{error}</p>
 					))}
@@ -83,7 +83,7 @@ export function HeadingHierarchyCheck(props: Readonly<HeadingHierarchyCheckProps
 				<TableBody
 					items={pageItems}
 					renderEmptyState={() => (
-						<p className="p-(--gutter) text-muted-fg text-sm">
+						<p className="p-(--gutter) text-sm text-muted-fg">
 							{t("No data-integrity issues found.")}
 						</p>
 					)}
@@ -112,7 +112,7 @@ export function HeadingHierarchyCheck(props: Readonly<HeadingHierarchyCheckProps
 									<div className="flex flex-col items-start gap-y-1">
 										<Badge intent="secondary">{`h${String(finding.level)}`}</Badge>
 										{finding.headingText !== "" ? (
-											<span className="block max-inline-64 whitespace-normal text-muted-fg">
+											<span className="block whitespace-normal text-muted-fg max-inline-64">
 												{finding.headingText}
 											</span>
 										) : null}
@@ -122,7 +122,7 @@ export function HeadingHierarchyCheck(props: Readonly<HeadingHierarchyCheckProps
 									</div>
 								</TableCell>
 								<TableCell>
-									<span className="block max-inline-96 whitespace-normal">{finding.detail}</span>
+									<span className="block whitespace-normal max-inline-96">{finding.detail}</span>
 								</TableCell>
 							</TableRow>
 						);

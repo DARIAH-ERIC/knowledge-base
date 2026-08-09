@@ -117,9 +117,9 @@ export function DocumentationTableOfContents(
 	return (
 		<nav
 			aria-label={label}
-			className="hidden xl:sticky xl:inset-bs-0 xl:block xl:max-block-screen xl:self-start xl:overflow-y-auto xl:py-12"
+			className="hidden xl:sticky xl:inset-bs-0 xl:block xl:self-start xl:overflow-y-auto xl:py-12 xl:max-block-screen"
 		>
-			<p className="mbe-3 text-xs font-medium uppercase tracking-wide text-text-weak">{title}</p>
+			<p className="mbe-3 text-xs font-medium tracking-wide text-text-weak uppercase">{title}</p>
 			<ul className="flex flex-col gap-y-0.5 text-sm">
 				{headings.map((heading) => {
 					const isCurrent = heading.id === currentId;

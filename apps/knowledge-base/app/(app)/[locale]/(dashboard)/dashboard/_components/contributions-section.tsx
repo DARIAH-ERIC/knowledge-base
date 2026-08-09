@@ -233,7 +233,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 
 	return (
 		<Fragment>
-			<div className="max-inline-3xl space-y-6">
+			<div className="space-y-6 max-inline-3xl">
 				<div className="space-y-1">
 					<FormSectionTitle title={t("Contributions")} />
 				</div>
@@ -261,7 +261,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 							<TableColumn allowsSorting={true} id="until">
 								{t("Until")}
 							</TableColumn>
-							<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
+							<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end" />
 						</TableHeader>
 						<TableBody items={table.pageItems}>
 							{(contribution) => (
@@ -285,7 +285,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									</TableCell>
 									<TableCell>
 										<div
-											className="max-inline-80 truncate"
+											className="truncate max-inline-80"
 											title={contribution.organisationalUnitName}
 										>
 											{contribution.organisationalUnitName}
@@ -299,7 +299,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 											? format.dateTime(contribution.duration.end, { dateStyle: "short" })
 											: t("present")}
 									</TableCell>
-									<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+									<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end">
 										<RowActionsMenu>
 											<RowActionsMenu.Action
 												icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}

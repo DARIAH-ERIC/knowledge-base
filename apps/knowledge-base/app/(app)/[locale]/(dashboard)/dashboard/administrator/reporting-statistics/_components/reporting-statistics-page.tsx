@@ -201,7 +201,7 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 				>
 					<section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 						<div className="rounded-lg border bg-bg p-4">
-							<p className="text-xs font-medium uppercase tracking-wide text-muted-fg">
+							<p className="text-xs font-medium tracking-wide text-muted-fg uppercase">
 								{t("Campaigns")}
 							</p>
 							<p className="mbs-2 text-2xl font-semibold text-fg">
@@ -213,7 +213,7 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 						</div>
 
 						<div className="rounded-lg border bg-bg p-4">
-							<p className="text-xs font-medium uppercase tracking-wide text-muted-fg">
+							<p className="text-xs font-medium tracking-wide text-muted-fg uppercase">
 								{t("Country reports")}
 							</p>
 							<p className="mbs-2 text-2xl font-semibold text-fg">
@@ -227,7 +227,7 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 						</div>
 
 						<div className="rounded-lg border bg-bg p-4">
-							<p className="text-xs font-medium uppercase tracking-wide text-muted-fg">
+							<p className="text-xs font-medium tracking-wide text-muted-fg uppercase">
 								{t("Events")}
 							</p>
 							<p className="mbs-2 text-2xl font-semibold text-fg">
@@ -244,7 +244,7 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 						</div>
 
 						<div className="rounded-lg border bg-bg p-4">
-							<p className="text-xs font-medium uppercase tracking-wide text-muted-fg">
+							<p className="text-xs font-medium tracking-wide text-muted-fg uppercase">
 								{t("Project contributions")}
 							</p>
 							<p className="mbs-2 text-2xl font-semibold text-fg">
@@ -270,7 +270,7 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 
 						<Table
 							aria-label="campaign summary"
-							className="[--gutter:0] overflow-x-auto sm:[--gutter:0]"
+							className="overflow-x-auto [--gutter:0] sm:[--gutter:0]"
 						>
 							<TableHeader>
 								<TableColumn isRowHeader={true}>{t("Year")}</TableColumn>
@@ -350,7 +350,7 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 
 						<Table
 							aria-label="country trends"
-							className="[--gutter:0] overflow-x-auto sm:[--gutter:0]"
+							className="overflow-x-auto [--gutter:0] sm:[--gutter:0]"
 						>
 							<TableHeader>
 								<TableColumn isRowHeader={true}>{t("Country")}</TableColumn>
@@ -405,7 +405,7 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 
 							<Table
 								aria-label="working group yearly summary"
-								className="[--gutter:0] overflow-x-auto sm:[--gutter:0]"
+								className="overflow-x-auto [--gutter:0] sm:[--gutter:0]"
 							>
 								<TableHeader>
 									<TableColumn isRowHeader={true}>{t("Year")}</TableColumn>

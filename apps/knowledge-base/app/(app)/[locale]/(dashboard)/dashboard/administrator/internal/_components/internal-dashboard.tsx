@@ -178,7 +178,7 @@ export function InternalDashboard(props: Readonly<InternalDashboardProps>): Reac
 									<TableCell>{humanizeAction(item.action)}</TableCell>
 									<TableCell>
 										<span className="block">{item.subjectLabel}</span>
-										<span className="block text-muted-fg text-xs">{item.subjectType}</span>
+										<span className="block text-xs text-muted-fg">{item.subjectType}</span>
 									</TableCell>
 									<TableCell>
 										<AuditSummary summary={item.summary} />
@@ -215,7 +215,7 @@ export function InternalDashboard(props: Readonly<InternalDashboardProps>): Reac
 								{(item) => (
 									<TableRow id={item.id}>
 										<TableCell>
-											<code className="block max-inline-3xl whitespace-pre-wrap text-xs">
+											<code className="block text-xs whitespace-pre-wrap max-inline-3xl">
 												{item.query}
 											</code>
 										</TableCell>
@@ -232,7 +232,7 @@ export function InternalDashboard(props: Readonly<InternalDashboardProps>): Reac
 							</TableBody>
 						</Table>
 					) : (
-						<div className="my-8 text-balance text-muted-fg text-sm">
+						<div className="my-8 text-sm text-balance text-muted-fg">
 							{t(
 								"The pg_stat_statements extension is not enabled on this database. Enable it via shared_preload_libraries in the Postgres configuration to see query statistics.",
 							)}

@@ -88,7 +88,7 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 							</label>
 							<input
 								accept="image/jpeg, image/png"
-								className="block inline-full text-sm file:me-4 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-fg focus:outline-none hover:file:bg-secondary/80"
+								className="block text-sm inline-full file:me-4 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-fg hover:file:bg-secondary/80 focus:outline-none"
 								name="file"
 								onChange={(e) => {
 									const file = e.target.files?.[0];
@@ -119,12 +119,12 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 							{filePreview != null && (
 								<img
 									alt={t("Preview")}
-									className="mbs-1 block-24 inline-auto max-inline-full rounded-lg object-cover"
+									className="mbs-1 rounded-lg object-cover block-24 inline-auto max-inline-full"
 									src={filePreview}
 								/>
 							)}
 							{fileError != null ? (
-								<p className="text-danger text-sm" role="alert">
+								<p className="text-sm text-danger" role="alert">
 									{fileError}
 								</p>
 							) : null}

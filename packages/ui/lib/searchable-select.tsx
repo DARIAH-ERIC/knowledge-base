@@ -59,7 +59,7 @@ export function SearchableSelectContent<T extends object>(
 	return (
 		<PopoverContent
 			className={cx(
-				"inline-(--trigger-width) max-inline-none overflow-hidden p-0",
+				"overflow-hidden p-0 inline-(--trigger-width) max-inline-none",
 				popover?.className,
 			)}
 			placement={popover?.placement ?? "bottom"}
@@ -67,7 +67,7 @@ export function SearchableSelectContent<T extends object>(
 		>
 			<AriaListBox
 				className={cx(
-					"grid max-block-96 inline-full grid-cols-[auto_1fr] flex-col gap-y-1 overflow-y-auto p-1 outline-hidden *:[[role='group']+[role=group]]:mbs-4 *:[[role='group']+[role=separator]]:mbs-1",
+					"grid grid-cols-[auto_1fr] flex-col gap-y-1 overflow-y-auto p-1 outline-hidden inline-full max-block-96 *:[[role='group']+[role=group]]:mbs-4 *:[[role='group']+[role=separator]]:mbs-1",
 					className,
 				)}
 				items={items}
@@ -90,7 +90,7 @@ export function SearchableSelectInput(props: Readonly<SearchableSelectInputProps
 			<Input className={cx("pe-10", className)} {...rest} />
 			<AriaButton
 				aria-label={t("Open options")}
-				className="absolute inset-be-0 inset-e-0 inset-bs-0 grid cursor-default place-content-center px-3 text-muted-fg pressed:text-fg hover:text-fg sm:px-2.5"
+				className="absolute inset-e-0 inset-bs-0 inset-be-0 grid cursor-default place-content-center px-3 text-muted-fg hover:text-fg sm:px-2.5 pressed:text-fg"
 			>
 				<ChevronUpDownIcon
 					className="block-5 inline-5 sm:block-4 sm:inline-4"

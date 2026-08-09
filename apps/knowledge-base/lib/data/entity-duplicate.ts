@@ -78,7 +78,7 @@ function relationPayload<T extends object>(row: T): RelationPayload<T> {
 		...rest
 	} = row as T & Partial<Record<"id" | "createdAt" | "updatedAt", unknown>>;
 
-	return rest as RelationPayload<T>;
+	return rest;
 }
 
 /**

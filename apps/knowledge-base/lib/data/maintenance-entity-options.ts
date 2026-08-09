@@ -186,7 +186,7 @@ export async function getMaintenanceEntityOptions(
 				entityType: row.entityType,
 				unitType: row.unitType,
 				slug: row.slug,
-				state: row.state as MaintenanceEntityState,
+				state: row.state,
 			};
 		}),
 		total: aggregate.at(0)?.total ?? 0,

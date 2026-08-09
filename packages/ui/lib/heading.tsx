@@ -13,10 +13,10 @@ export function Heading({ className, level = 1, ...props }: Readonly<HeadingProp
 		<Element
 			className={twMerge(
 				"text-fg",
-				level === 1 && "font-semibold text-xl sm:text-2xl",
-				level === 2 && "font-semibold text-lg sm:text-xl",
-				level === 3 && "font-semibold text-base sm:text-lg",
-				level === 4 && "font-semibold text-base",
+				level === 1 && "text-xl font-semibold sm:text-2xl",
+				level === 2 && "text-lg font-semibold sm:text-xl",
+				level === 3 && "text-base font-semibold sm:text-lg",
+				level === 4 && "text-base font-semibold",
 				className,
 			)}
 			{...props}

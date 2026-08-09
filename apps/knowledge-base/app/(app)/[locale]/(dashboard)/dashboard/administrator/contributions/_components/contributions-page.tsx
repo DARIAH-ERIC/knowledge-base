@@ -327,7 +327,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 					<TableColumn allowsSorting={true} id="durationEnd">
 						{t("Until")}
 					</TableColumn>
-					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
+					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => {
@@ -339,7 +339,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 						return (
 							<TableRow id={item.id}>
 								<TableCell>
-									<div className="max-inline-80 truncate" title={item.personName}>
+									<div className="truncate max-inline-80" title={item.personName}>
 										{item.personName}
 									</div>
 								</TableCell>
@@ -350,7 +350,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 									</Badge>
 								</TableCell>
 								<TableCell>
-									<div className="max-inline-80 truncate" title={item.organisationalUnitName}>
+									<div className="truncate max-inline-80" title={item.organisationalUnitName}>
 										{item.organisationalUnitName}
 									</div>
 								</TableCell>
@@ -360,7 +360,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 										? format.dateTime(item.durationEnd, { dateStyle: "short" })
 										: t("present")}
 								</TableCell>
-								<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+								<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end">
 									<RowActionsMenu>
 										<RowActionsMenu.Link
 											href={`/dashboard/administrator/persons/${item.personSlug}/edit`}

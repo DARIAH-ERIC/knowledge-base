@@ -102,7 +102,7 @@ export function SelectedImageCard(props: Readonly<SelectedImageCardProps>): Reac
 				</a>
 			</div>
 
-			{footer != null ? <div className="border-border border-bs pbs-4">{footer}</div> : null}
+			{footer != null ? <div className="border-bs border-border pbs-4">{footer}</div> : null}
 		</div>
 	);
 }

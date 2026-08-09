@@ -10,6 +10,10 @@ function matchesPathname(pathname: string, expected: string | RegExp): boolean {
 	return typeof expected === "string" ? pathname === expected : expected.test(pathname);
 }
 
+function isSuccessfulRedirectResponse(status: number): boolean {
+	return status >= 200 && status < 400;
+}
+
 export async function waitForActionRedirect(
 	options: Readonly<WaitForActionRedirectOptions>,
 ): Promise<void> {
@@ -30,7 +34,7 @@ export async function waitForActionRedirect(
 			return (
 				response.request().method() === "POST" &&
 				url.pathname === currentPathname &&
-				response.status() === 303 &&
+				isSuccessfulRedirectResponse(response.status()) &&
 				matchesPathname(redirectUrl.pathname, redirectPathname)
 			);
 		}),

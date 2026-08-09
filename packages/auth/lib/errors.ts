@@ -4,7 +4,7 @@ export class InvalidUserIdError extends TaggedError("InvalidUserIdError")<{
 	readonly cause?: unknown;
 	readonly id: string;
 	readonly message?: string;
-}>() {}
+}> {}
 
 export type ImpersonationNotAllowedReason =
 	| "already_impersonating"
@@ -18,4 +18,4 @@ export class ImpersonationNotAllowedError extends TaggedError("ImpersonationNotA
 	readonly cause?: unknown;
 	readonly message?: string;
 	readonly reason: ImpersonationNotAllowedReason;
-}>() {}
+}> {}

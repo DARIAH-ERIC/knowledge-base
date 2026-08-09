@@ -16,9 +16,7 @@ const config: Config = {
 	experimental: {
 		authInterrupts: true,
 		globalNotFound: true,
-		rootParams: true,
-		turbopackFileSystemCacheForDev: true,
-		viewTransition: true,
+		// turbopackRustReactCompiler: true,
 	},
 	headers() {
 		const headers: Awaited<ReturnType<NonNullable<Config["headers"]>>> = [

@@ -166,7 +166,7 @@ export function EditAssetMetadataDialog(props: Readonly<EditAssetMetadataDialogP
 						    squashed to a letterbox — in the dialog where you write this image's alt text.
 						    Scrolling the body is the better trade. */}
 						<div className="flex shrink-0 flex-col gap-y-1.5">
-							<div className="shrink-0 overflow-hidden rounded-lg bg-muted aspect-video">
+							<div className="aspect-video shrink-0 overflow-hidden rounded-lg bg-muted">
 								<AssetPreview
 									alt={asset.alt ?? asset.label}
 									className="block-full inline-full"
@@ -179,7 +179,7 @@ export function EditAssetMetadataDialog(props: Readonly<EditAssetMetadataDialogP
 							</div>
 
 							{dimensions != null ? (
-								<span className="text-muted-fg text-xs">
+								<span className="text-xs text-muted-fg">
 									<span className="font-medium">{t("Dimensions")}:</span> {dimensions}
 								</span>
 							) : null}
@@ -218,7 +218,7 @@ export function EditAssetMetadataDialog(props: Readonly<EditAssetMetadataDialogP
 							   submitting early keeps it instead of clearing it. */
 							<div className="flex flex-col gap-y-1">
 								<span className={labelStyles()}>{t("License")}</span>
-								<div className="flex items-center gap-x-2 text-muted-fg text-sm">
+								<div className="flex items-center gap-x-2 text-sm text-muted-fg">
 									<ProgressCircle aria-label={t("Loading...")} isIndeterminate={true} />
 									<span>{t("Loading...")}</span>
 								</div>

@@ -51,7 +51,7 @@ export function ImageCaptionModeField(props: Readonly<ImageCaptionModeFieldProps
 			    action, so the selected segment is a neutral chip and hover stays quieter still. */}
 			<ToggleGroup
 				aria-label={t("Caption behavior")}
-				className="[--toggle-focused-bg:var(--color-muted)] [--toggle-hover-bg:var(--color-muted)] [--toggle-selected-bg:var(--color-secondary)] [--toggle-selected-fg:var(--color-secondary-fg)] self-start"
+				className="self-start [--toggle-focused-bg:var(--color-muted)] [--toggle-hover-bg:var(--color-muted)] [--toggle-selected-bg:var(--color-secondary)] [--toggle-selected-fg:var(--color-secondary-fg)]"
 				disallowEmptySelection={true}
 				onSelectionChange={(keys) => {
 					const [mode] = [...keys] as Array<ImageCaptionMode>;
@@ -71,11 +71,11 @@ export function ImageCaptionModeField(props: Readonly<ImageCaptionModeFieldProps
 			{captionMode === "inherit" ? (
 				hasAssetCaption && assetCaption != null ? (
 					<InlineRichTextRenderer
-						className="rounded-lg border border-border px-3 py-2 text-muted-fg text-sm"
+						className="rounded-lg border border-border px-3 py-2 text-sm text-muted-fg"
 						content={assetCaption}
 					/>
 				) : (
-					<p className="text-muted-fg text-xs">
+					<p className="text-xs text-muted-fg">
 						{t("This asset has no caption, so no caption will be shown.")}
 					</p>
 				)

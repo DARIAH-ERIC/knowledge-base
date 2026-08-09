@@ -46,14 +46,14 @@ function Stat(props: Readonly<{ label: string; value: number; intent?: "attentio
 	return (
 		// `flex-col-reverse` keeps the value above its label visually while `dt` still precedes `dd`.
 		<div className="flex flex-col-reverse">
-			<dt className="text-muted-fg text-xs">{label}</dt>
+			<dt className="text-xs text-muted-fg">{label}</dt>
 			<dd
 				className={
 					intent === "attention" && value > 0
 						? // `warning-fg` is meant for text *on* a warning background; on the card background
 							// the tinted `warning-subtle-fg` is the readable one.
-							"font-semibold text-sm text-warning-subtle-fg tabular-nums"
-						: "font-semibold text-fg text-sm tabular-nums"
+							"text-sm font-semibold text-warning-subtle-fg tabular-nums"
+						: "text-sm font-semibold text-fg tabular-nums"
 				}
 			>
 				{format.number(value)}
@@ -77,8 +77,8 @@ function DetailSection(
 	const { summary, hint, children } = props;
 
 	return (
-		<details className="group border-muted border-bs pbs-2">
-			<summary className="cursor-pointer text-fg text-xs hover:text-muted-fg">{summary}</summary>
+		<details className="group border-bs border-muted pbs-2">
+			<summary className="cursor-pointer text-xs text-fg hover:text-muted-fg">{summary}</summary>
 			<div className="mbs-2 space-y-2">
 				{hint != null ? <p className="text-[11px] text-muted-fg">{hint}</p> : null}
 				{children}

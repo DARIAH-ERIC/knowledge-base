@@ -24,7 +24,7 @@ export function RichTextEditorToolbarButton({
 			<ButtonPrimitive
 				aria-label={ariaLabel}
 				className={twMerge(
-					"relative inline-flex block-8 inline-8 items-center justify-center rounded-md transition-colors text-muted-fg hover:text-fg focus:outline-none focus:ring-2 focus:ring-ring",
+					"relative inline-flex items-center justify-center rounded-md text-muted-fg transition-colors block-8 inline-8 hover:text-fg focus:ring-2 focus:ring-ring focus:outline-none",
 					isActive === true && "bg-primary-subtle/50 text-fg",
 				)}
 				onPress={() => {

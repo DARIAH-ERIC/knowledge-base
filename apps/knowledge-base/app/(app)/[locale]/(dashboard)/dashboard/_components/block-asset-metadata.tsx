@@ -65,13 +65,13 @@ export function BlockAssetMetadata(props: Readonly<BlockAssetMetadataProps>): Re
 
 	if (isMissing) {
 		return (
-			<p className="text-muted-fg text-xs">{t("This image is no longer in the media library.")}</p>
+			<p className="text-xs text-muted-fg">{t("This image is no longer in the media library.")}</p>
 		);
 	}
 
 	if (asset == null) {
 		return (
-			<div className="flex items-center gap-x-2 text-muted-fg text-sm">
+			<div className="flex items-center gap-x-2 text-sm text-muted-fg">
 				<ProgressCircle aria-label={t("Loading...")} isIndeterminate={true} />
 				<span>{t("Loading...")}</span>
 			</div>

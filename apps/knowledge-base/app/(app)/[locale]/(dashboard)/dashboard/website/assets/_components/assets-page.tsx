@@ -156,14 +156,14 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 
 			{assets.items.length === 0 ? (
 				<div className="flex flex-1 items-center justify-center py-16">
-					<p className="text-center text-muted-fg text-sm">
+					<p className="text-center text-sm text-muted-fg">
 						{search.inputValue !== "" || selectedPrefix !== "all"
 							? t("No images match your filters.")
 							: t("No images found. Upload one to get started.")}
 					</p>
 				</div>
 			) : layout === "grid" ? (
-				<ul className="grid grid-cols-[repeat(auto-fill,minmax(min(12rem,100%),1fr))] gap-4 content-start">
+				<ul className="grid grid-cols-[repeat(auto-fill,minmax(min(12rem,100%),1fr))] content-start gap-4">
 					{assets.items.map((asset) => {
 						const prefix = asset.key.split("/")[0] ?? "";
 						/** Kept to one line under the thumbnail, so the grid stays a grid of pictures. */
@@ -175,7 +175,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 						return (
 							<li key={asset.id}>
 								<figure className="flex flex-col gap-y-2">
-									<div className="relative overflow-hidden rounded-lg bg-muted aspect-square">
+									<div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
 										<AssetPreview
 											alt={asset.alt ?? asset.label}
 											className="block-full inline-full"
@@ -185,7 +185,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 											src={asset.url}
 											storageKey={asset.key}
 										/>
-										<div className="absolute inset-bs-2 inset-e-2 flex flex-row items-center gap-x-1">
+										<div className="absolute inset-e-2 inset-bs-2 flex flex-row items-center gap-x-1">
 											<AssetDownloadLink assetKey={asset.key} className="bg-bg" />
 											<EditAssetMetadataDialog
 												asset={asset}
@@ -211,7 +211,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 					})}
 				</ul>
 			) : (
-				<ul className="flex flex-col gap-y-3 content-start">
+				<ul className="flex flex-col content-start gap-y-3">
 					{assets.items.map((asset) => {
 						const prefix = asset.key.split("/")[0] ?? "";
 						const license = asset.licenseId != null ? licensesById.get(asset.licenseId) : undefined;
@@ -219,7 +219,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 						return (
 							<li key={asset.id}>
 								<figure className="flex flex-row items-start gap-x-3 rounded-lg border border-border p-2.5">
-									<div className="block-24 inline-32 shrink-0 overflow-hidden rounded-md bg-muted">
+									<div className="shrink-0 overflow-hidden rounded-md bg-muted block-24 inline-32">
 										<AssetPreview
 											alt={asset.alt ?? asset.label}
 											className="block-full inline-full"
@@ -230,7 +230,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 											storageKey={asset.key}
 										/>
 									</div>
-									<figcaption className="flex min-inline-0 flex-1 flex-col gap-y-1.5">
+									<figcaption className="flex flex-1 flex-col gap-y-1.5 min-inline-0">
 										<div className="flex flex-row items-baseline gap-x-2">
 											<span className="truncate text-sm/tight font-medium" title={asset.label}>
 												{asset.label}

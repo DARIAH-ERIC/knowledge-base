@@ -29,7 +29,7 @@ export function DescriptionTerm({
 		<dt
 			ref={ref}
 			className={twMerge(
-				"col-start-1 border-bs pbs-3 max-inline-3xl text-muted-fg first:border-none sm:py-3",
+				"col-start-1 border-bs pbs-3 text-muted-fg max-inline-3xl first:border-none sm:py-3",
 				className,
 			)}
 			{...props}
@@ -45,7 +45,7 @@ export function DescriptionDetails({
 		<dd
 			{...props}
 			className={twMerge(
-				"pbs-1 pbe-3 max-inline-3xl text-fg sm:border-bs sm:py-3 sm:nth-2:border-none",
+				"pbs-1 pbe-3 text-fg max-inline-3xl sm:border-bs sm:py-3 sm:nth-2:border-none",
 				className,
 			)}
 			data-slot="description-details"

@@ -34,7 +34,7 @@ export function WizardWarnings(props: Readonly<WizardWarningsProps>): ReactNode 
 				<Note key={warning.id} intent={warning.severity === "warning" ? "warning" : "info"}>
 					<WizardWarningMessage warning={warning} />
 					{warning.periods != null && warning.periods.length > 0 ? (
-						<p className="mbs-1 text-muted-fg text-xs">
+						<p className="mbs-1 text-xs text-muted-fg">
 							<WizardWarningPeriods periods={warning.periods} />
 						</p>
 					) : null}

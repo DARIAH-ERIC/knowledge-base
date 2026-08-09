@@ -96,7 +96,7 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 						{t("Type")}
 					</TableColumn>
 					<TableColumn>{t("URL")}</TableColumn>
-					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end" />
+					<TableColumn className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end" />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
@@ -107,7 +107,7 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 							<TableCell>{item.type.type}</TableCell>
 							<TableCell>
 								<a
-									className="block max-inline-xs truncate underline"
+									className="block truncate underline max-inline-xs"
 									href={item.url}
 									rel="noreferrer"
 									target="_blank"
@@ -116,7 +116,7 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 									{item.url}
 								</a>
 							</TableCell>
-							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-60% from-bg text-end">
+							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Link
 										href={`/dashboard/administrator/social-media/${item.id}/edit`}

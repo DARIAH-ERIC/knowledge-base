@@ -8,7 +8,7 @@ import { Result, TaggedError } from "better-result";
 export class CacheFileError extends TaggedError("CacheFileError")<{
 	readonly cause?: unknown;
 	readonly message?: string;
-}>() {}
+}> {}
 
 export interface CreateCacheServiceParams {
 	cacheDir: string;

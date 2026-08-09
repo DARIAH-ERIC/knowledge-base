@@ -86,7 +86,7 @@ export function UnusedSocialMediaCleanup(
 
 	if (visibleItems.length === 0) {
 		return (
-			<div className="my-8 text-balance text-muted-fg text-sm">
+			<div className="my-8 text-sm text-balance text-muted-fg">
 				{result != null && result.deletedCount > 0
 					? t("Deleted {count} unused social-media entries.", {
 							count: String(result.deletedCount),
@@ -121,7 +121,7 @@ export function UnusedSocialMediaCleanup(
 					className="flex items-center gap-x-2 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning-subtle-fg"
 					role="alert"
 				>
-					<AlertTriangleIcon aria-hidden={true} className="block-4 inline-4 shrink-0" />
+					<AlertTriangleIcon aria-hidden={true} className="shrink-0 block-4 inline-4" />
 					{t("{skipped} entries were skipped (no longer unused).", {
 						skipped: String(result.skippedIds.length),
 					})}
@@ -147,7 +147,7 @@ export function UnusedSocialMediaCleanup(
 					{(item) => (
 						<TableRow id={item.id}>
 							<TableCell>
-								<div className="max-inline-80 truncate" title={item.name}>
+								<div className="truncate max-inline-80" title={item.name}>
 									{item.name}
 								</div>
 							</TableCell>
@@ -192,10 +192,10 @@ export function UnusedSocialMediaCleanup(
 				{error != null ? (
 					<div className="px-6 pbe-2">
 						<p
-							className="flex items-center gap-x-2 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-danger text-sm"
+							className="flex items-center gap-x-2 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
 							role="alert"
 						>
-							<AlertTriangleIcon aria-hidden={true} className="block-4 inline-4 shrink-0" />
+							<AlertTriangleIcon aria-hidden={true} className="shrink-0 block-4 inline-4" />
 							{error}
 						</p>
 					</div>

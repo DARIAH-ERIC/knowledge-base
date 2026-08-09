@@ -89,7 +89,7 @@ export function FormSectionTitle({
 	...props
 }: Readonly<FormSectionTitleProps>): ReactNode {
 	return (
-		<h2 className={twMerge("font-semibold text-base/7 text-fg sm:text-sm/6", className)} {...props}>
+		<h2 className={twMerge("text-base/7 font-semibold text-fg sm:text-sm/6", className)} {...props}>
 			{title ?? children}
 			{isRequired === true ? (
 				<span aria-hidden={true} className="ms-0.5 text-danger">
@@ -121,7 +121,7 @@ export function FormActions({
 	return (
 		<div
 			className={twMerge(
-				"flex inline-full max-inline-3xl items-center justify-end gap-x-4",
+				"flex items-center justify-end gap-x-4 inline-full max-inline-3xl",
 				className,
 			)}
 			{...props}

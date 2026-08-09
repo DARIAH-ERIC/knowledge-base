@@ -109,7 +109,7 @@ export function CountryReportInstitutionsForm(
 				<h2 className="text-sm font-semibold text-fg">
 					{t("Partner institutions")} ({currentPartnerCount.toLocaleString()})
 				</h2>
-				<p className="max-inline-md text-sm text-muted-fg">
+				<p className="text-sm text-muted-fg max-inline-md">
 					{t(
 						"The partner institutions connected to this country in the {year} reporting campaign. Edit the underlying relations on the institution itself, then refresh to update this snapshot.",
 						{ year: String(campaignYear) },
@@ -186,7 +186,7 @@ export function CountryReportInstitutionsForm(
 			{missing.length > 0 && (
 				<section className="flex flex-col gap-y-3">
 					<h3 className="text-sm font-semibold text-fg">{t("Not yet captured")}</h3>
-					<p className="max-inline-md text-sm text-muted-fg">
+					<p className="text-sm text-muted-fg max-inline-md">
 						{t(
 							"These are current partner institutions of this country that are not in the report snapshot. Refresh to add them.",
 						)}

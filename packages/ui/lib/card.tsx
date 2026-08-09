@@ -45,7 +45,7 @@ export function CardHeader({
 export function CardTitle({ className, ...props }: Readonly<ComponentProps<"div">>): ReactNode {
 	return (
 		<div
-			className={twMerge("text-balance font-semibold text-base/6", className)}
+			className={twMerge("text-base/6 font-semibold text-balance", className)}
 			data-slot="card-title"
 			{...props}
 		/>
@@ -58,7 +58,7 @@ export function CardDescription({
 }: Readonly<HTMLAttributes<HTMLDivElement>>): ReactNode {
 	return (
 		<div
-			className={twMerge("row-start-2 text-pretty text-muted-fg text-sm/6", className)}
+			className={twMerge("row-start-2 text-sm/6 text-pretty text-muted-fg", className)}
 			data-slot="card-description"
 			{...props}
 		/>

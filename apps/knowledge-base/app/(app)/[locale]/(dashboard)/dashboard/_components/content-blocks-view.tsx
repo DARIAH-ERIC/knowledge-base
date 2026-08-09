@@ -74,14 +74,14 @@ function renderLinkMark({
 
 		return label != null ? (
 			<span
-				className="underline decoration-dotted underline-offset-2 text-muted-fg"
+				className="text-muted-fg underline decoration-dotted underline-offset-2"
 				title={`Links to “${label}” on the website. Its address is resolved when the site renders it.`}
 			>
 				{children}
 			</span>
 		) : (
 			<span
-				className="underline decoration-wavy underline-offset-2 text-danger"
+				className="text-danger underline decoration-wavy underline-offset-2"
 				title="This link points to a page that is no longer published, so it will render as plain text."
 			>
 				{children}
@@ -101,7 +101,7 @@ function renderLinkMark({
 	if (href == null) {
 		return (
 			<span
-				className="underline decoration-wavy underline-offset-2 text-danger"
+				className="text-danger underline decoration-wavy underline-offset-2"
 				title="This link has no target."
 			>
 				{children}
@@ -278,7 +278,7 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 	// after a heading). Each block zeroes its own first/last child margins, so this gap is the whole
 	// spacing story — no per-block or neighbour-aware adjustment.
 	return (
-		<div className="@container footnotes space-y-4">
+		<div className="@container space-y-4 footnotes">
 			{numbered.map((contentBlock, index) => {
 				const wrapsPrecedingFloat =
 					contentBlock.type === "rich_text" && isFloatedImage(numbered[index - 1]);
@@ -380,7 +380,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							<summary className="flex cursor-pointer items-center justify-between py-3 text-sm font-medium">
 								{accordionItem.title}
 								<svg
-									className="block-4 inline-4 shrink-0 transition-transform group-open:rotate-180"
+									className="shrink-0 transition-transform block-4 inline-4 group-open:rotate-180"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
@@ -425,7 +425,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 
 			return (
 				<figure className={blockFigurePadding}>
-					<div className="aspect-video inline-full overflow-hidden rounded-lg">
+					<div className="aspect-video overflow-hidden rounded-lg inline-full">
 						<iframe
 							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 							allowFullScreen={true}
@@ -459,10 +459,10 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							const { caption } = resolveGalleryItemCaption(item);
 
 							return (
-								<figure key={idx} className="inline-[min(20rem,80vw)] shrink-0 snap-start">
+								<figure key={idx} className="shrink-0 snap-start inline-[min(20rem,80vw)]">
 									<img
 										alt={toPlainText(caption)}
-										className="aspect-4/3 inline-full rounded-lg object-cover"
+										className="aspect-4/3 rounded-lg object-cover inline-full"
 										src={item.imageUrl}
 									/>
 									<CaptionFigcaption caption={caption} />
@@ -486,7 +486,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							<figure key={idx}>
 								<img
 									alt={toPlainText(caption)}
-									className="aspect-4/3 inline-full rounded-lg object-cover"
+									className="aspect-4/3 rounded-lg object-cover inline-full"
 									src={item.imageUrl}
 								/>
 								<CaptionFigcaption caption={caption} />
@@ -518,12 +518,12 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			return (
 				<div className="flex flex-col gap-y-4">
 					{eyebrow != null && (
-						<p className="text-sm font-medium uppercase tracking-wide text-muted-fg">{eyebrow}</p>
+						<p className="text-sm font-medium tracking-wide text-muted-fg uppercase">{eyebrow}</p>
 					)}
 					<h2 className="text-2xl font-bold">{title}</h2>
 					{imageUrl != null && (
 						<figure>
-							<img alt="" className="inline-full rounded-lg object-cover" src={imageUrl} />
+							<img alt="" className="rounded-lg object-cover inline-full" src={imageUrl} />
 							<CaptionFigcaption caption={caption} />
 						</figure>
 					)}
@@ -615,13 +615,13 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							// the text's cap height — the first line's half-leading otherwise makes the
 							// top-aligned text look lower than the image — so it rides along with the float.
 							side === "end"
-								? "mbe-2 inline-36 @sm:mbs-1.5 @sm:ms-4 @sm:float-end"
-								: "mbe-2 inline-36 @sm:mbs-1.5 @sm:me-4 @sm:float-start"
+								? "mbe-2 inline-36 @sm:float-end @sm:ms-4 @sm:mbs-1.5"
+								: "mbe-2 inline-36 @sm:float-start @sm:me-4 @sm:mbs-1.5"
 						}
 					>
 						<img
 							alt={alt ?? ""}
-							className="block-36 inline-full rounded-lg object-cover"
+							className="rounded-lg object-cover block-36 inline-full"
 							src={imageUrl}
 						/>
 						<CaptionFigcaption caption={caption} className="mbs-1" />

@@ -48,7 +48,7 @@ export function WorkingGroupReportChairsSnapshotForm(
 		<section className="flex flex-col gap-y-8">
 			<div className="flex flex-col gap-y-2">
 				<h2 className="text-sm font-semibold text-fg">{t("Chairs")}</h2>
-				<p className="max-inline-md text-sm text-muted-fg">
+				<p className="text-sm text-muted-fg max-inline-md">
 					{t(
 						"Chairs and vice chairs recorded for this report. Edit the relation on the person, then refresh to update this snapshot.",
 					)}
@@ -94,7 +94,7 @@ export function WorkingGroupReportChairsSnapshotForm(
 			{missing.length > 0 && (
 				<section className="flex flex-col gap-y-3">
 					<h3 className="text-sm font-semibold text-fg">{t("Not yet captured")}</h3>
-					<p className="max-inline-md text-sm text-muted-fg">
+					<p className="text-sm text-muted-fg max-inline-md">
 						{t("These current chairs are not in the report snapshot. Refresh to add them.")}
 					</p>
 					<ul className="divide-y divide-border rounded-md border max-inline-sm">

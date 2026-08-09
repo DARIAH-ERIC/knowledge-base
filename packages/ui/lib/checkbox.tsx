@@ -77,20 +77,20 @@ export function Checkbox({
 							<>
 								<span
 									className={twMerge([
-										"relative inset-ring inset-ring-input isolate flex shrink-0 items-center justify-center rounded-sm text-bg transition group-hover:inset-ring-muted-fg/30",
+										"relative isolate flex shrink-0 items-center justify-center rounded-sm text-bg inset-ring inset-ring-input transition group-hover:inset-ring-muted-fg/30",
 										"sm:block-4 sm:inline-4 sm:*:data-[slot=check-indicator]:block-3.5 sm:*:data-[slot=check-indicator]:inline-3.5",
 										"block-4.5 inline-4.5 *:data-[slot=check-indicator]:block-4 *:data-[slot=check-indicator]:inline-4",
 										"in-disabled:bg-muted",
 										(isSelected ?? isIndeterminate) && [
-											"inset-ring-(--checkbox-ring,var(--color-ring)) bg-(--checkbox-bg,var(--color-primary)) text-(--checkbox-fg,var(--color-primary-fg))",
+											"bg-(--checkbox-bg,var(--color-primary)) text-(--checkbox-fg,var(--color-primary-fg)) inset-ring-(--checkbox-ring,var(--color-ring))",
 											"group-invalid:bg-danger group-invalid:text-danger-fg dark:group-invalid:inset-ring-danger-subtle-fg/70",
 										],
 										isFocusVisible && [
-											"inset-ring-(--checkbox-ring,var(--color-ring)) ring-(--checkbox-ring,var(--color-ring))/20 ring-3",
-											"group-invalid:inset-ring-danger-subtle-fg/70 group-invalid:text-danger-fg group-invalid:ring-danger-subtle-fg/20",
+											"ring-3 ring-(--checkbox-ring,var(--color-ring))/20 inset-ring-(--checkbox-ring,var(--color-ring))",
+											"group-invalid:text-danger-fg group-invalid:ring-danger-subtle-fg/20 group-invalid:inset-ring-danger-subtle-fg/70",
 										],
 										isInvalid &&
-											"inset-ring-danger-subtle-fg/70 bg-danger-subtle/5 text-danger-fg ring-danger-subtle-fg/20 group-hover:inset-ring-danger-subtle-fg/70",
+											"bg-danger-subtle/5 text-danger-fg ring-danger-subtle-fg/20 inset-ring-danger-subtle-fg/70 group-hover:inset-ring-danger-subtle-fg/70",
 									])}
 									data-slot="indicator"
 								>
