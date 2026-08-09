@@ -455,6 +455,7 @@ describe("assets", () => {
 					type: "link",
 					attrs: {
 						assetKey: key,
+						// oxlint-disable-next-line typescript/no-unsafe-assignment
 						href: expect.stringContaining(`/api/v1/assets/${key}/download`),
 						asset: { filename: "flyer.pdf", mimeType: "application/pdf" },
 					},
@@ -503,6 +504,7 @@ describe("assets", () => {
 				expect(mark!.attrs).toMatchObject({
 					targetKind: "entity",
 					entityId: entity.entityId,
+					// oxlint-disable-next-line typescript/no-unsafe-assignment
 					href: expect.stringContaining("/news/"),
 					entity: { type: "news" },
 				});
