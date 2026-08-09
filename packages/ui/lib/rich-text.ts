@@ -169,6 +169,164 @@ export function numberFootnotes<T>(input: T): T {
 	return visit(input) as T;
 }
 
+export interface RichTextHeading {
+	/** The anchor {@link attachHeadingIds} puts on the heading, without a leading `#`. */
+	id: string;
+	/** 1-6, as stored on the node. The editor only offers 2-4. */
+	level: number;
+	/** The heading's text, for the table-of-contents entry that links to it. */
+	text: string;
+}
+
+/**
+ * A heading's text, which is both its anchor id and its table-of-contents label.
+ *
+ * Footnote markers are dropped: a note attached to a heading belongs to the prose, not to the
+ * outline, and `toPlainText` would otherwise flatten the whole note into the label and the slug.
+ */
+function headingText(node: Record<string, unknown>): string {
+	function withoutFootnotes(value: unknown): unknown {
+		if (Array.isArray(value)) {
+			return value
+				.filter((item) => !(isRecord(item) && item.type === "footnote"))
+				.map((item) => withoutFootnotes(item));
+		}
+
+		if (!isRecord(value)) {
+			return value;
+		}
+
+		return Object.fromEntries(
+			Object.entries(value).map(([key, child]) => [key, withoutFootnotes(child)]),
+		);
+	}
+
+	return toPlainText(withoutFootnotes(node.content));
+}
+
+function headingLevel(node: Record<string, unknown>): number {
+	const level = isRecord(node.attrs) ? node.attrs.level : undefined;
+
+	return typeof level === "number" ? level : 1;
+}
+
+/**
+ * Hands out the anchor id for each heading, in the order the headings are walked.
+ *
+ * Two headings can carry the same text — "Overview" under each of several sections is ordinary —
+ * and an id has to be unique on the page, so a repeat is suffixed with its occurrence count. That
+ * makes an id depend on what came before it, which is why both walks below take their ids from one
+ * of these and have to visit headings in the same order.
+ */
+function createHeadingIdFactory(): (text: string) => string {
+	const occurrences = new Map<string, number>();
+
+	return function nextHeadingId(text: string): string {
+		const base =
+			text
+				// Decompose accented characters so the combining marks can be dropped separately, leaving
+				// the base letter behind: "Über" slugs to "uber" rather than losing the "u" entirely.
+				.normalize("NFKD")
+				.replaceAll(/\p{Mark}/gu, "")
+				.toLowerCase()
+				.replaceAll(/[^\p{Letter}\p{Number}]+/gu, "-")
+				.replaceAll(/^-+|-+$/g, "") || "section";
+
+		const count = (occurrences.get(base) ?? 0) + 1;
+		occurrences.set(base, count);
+
+		return count === 1 ? base : `${base}-${String(count)}`;
+	};
+}
+
+/**
+ * Every heading in reading order, each carrying the anchor id {@link attachHeadingIds} gives it.
+ *
+ * Accepts arbitrary JSON — one richtext document, the ordered content blocks of a whole page, ... —
+ * and walks every value, exactly like {@link collectFootnotes}, so a caller can hand over whatever
+ * shape it holds and get one outline across the lot. That deliberately reaches headings inside an
+ * accordion item or a `media_text` block too: those render on the page, so a reader can be sent to
+ * them.
+ *
+ * A heading with no text is skipped, because there is nothing to label it with in an outline and
+ * nothing to build an id from. {@link attachHeadingIds} skips the same ones, so the ids line up.
+ */
+export function collectHeadings(input: unknown): Array<RichTextHeading> {
+	const headings: Array<RichTextHeading> = [];
+	const nextHeadingId = createHeadingIdFactory();
+
+	function visit(node: unknown) {
+		if (Array.isArray(node)) {
+			for (const item of node) {
+				visit(item);
+			}
+			return;
+		}
+
+		if (!isRecord(node)) {
+			return;
+		}
+
+		if (node.type === "heading") {
+			const text = headingText(node);
+
+			if (text !== "") {
+				headings.push({ id: nextHeadingId(text), level: headingLevel(node), text });
+			}
+
+			return;
+		}
+
+		for (const value of Object.values(node)) {
+			visit(value);
+		}
+	}
+
+	visit(input);
+
+	return headings;
+}
+
+/**
+ * A copy of `input` with every heading carrying its anchor in `attrs.id`, so a renderer can emit a
+ * heading a table of contents can link to.
+ *
+ * Walks in the same order as {@link collectHeadings} and takes its ids from the same factory, so the
+ * two agree on which heading gets which id. Like a footnote's number, the anchor stays derived
+ * rather than stored: it is only ever a function of the heading's text and its place in the page,
+ * so an editor renaming a heading gets the new anchor without a migration.
+ */
+export function attachHeadingIds<T>(input: T): T {
+	const nextHeadingId = createHeadingIdFactory();
+
+	function visit(node: unknown): unknown {
+		if (Array.isArray(node)) {
+			return node.map((item) => visit(item));
+		}
+
+		if (!isRecord(node)) {
+			return node;
+		}
+
+		if (node.type === "heading") {
+			const text = headingText(node);
+
+			if (text === "") {
+				return node;
+			}
+
+			return {
+				...node,
+				attrs: { ...(isRecord(node.attrs) ? node.attrs : {}), id: nextHeadingId(text) },
+			};
+		}
+
+		return Object.fromEntries(Object.entries(node).map(([key, value]) => [key, visit(value)]));
+	}
+
+	return visit(input) as T;
+}
+
 /**
  * Whether a richtext document carries no meaningful text. An empty editor still produces a `doc`
  * with a single empty paragraph, so callers persist `null` instead of storing that placeholder.

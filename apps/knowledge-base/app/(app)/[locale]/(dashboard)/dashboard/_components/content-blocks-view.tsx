@@ -7,6 +7,7 @@ import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
 import { Note } from "@dariah-eric/ui/note";
 import {
+	attachHeadingIds,
 	collectFootnotes,
 	isEmptyRichTextDocument,
 	numberFootnotes,
@@ -153,9 +154,37 @@ function renderFootnoteNode({
 	);
 }
 
+/**
+ * A heading, anchored. The node's own `renderHTML` emits a bare `<h2>`–`<h4>`, which nothing can
+ * link to — the anchor is not stored on the heading but derived at read time by `attachHeadingIds`
+ * (see below), the same way a footnote's number is. Writing it into the `id` here is what lets a
+ * page's table of contents send a reader to a section.
+ *
+ * Nothing sets a scroll offset: the global `:target` rule already keeps whatever was jumped to
+ * clear of the top edge, and it should stay the one place that decides by how much.
+ */
+function renderHeadingNode({
+	node,
+	children,
+}: Readonly<{
+	node: { attrs?: Record<string, unknown> | null };
+	children?: ReactNode | Array<ReactNode>;
+}>): ReactNode {
+	const attrs = node.attrs ?? {};
+	const level = typeof attrs.level === "number" ? Math.min(Math.max(attrs.level, 1), 6) : 1;
+	const id = typeof attrs.id === "string" ? attrs.id : undefined;
+	const Heading = `h${String(level)}` as "h2";
+
+	return <Heading id={id}>{children}</Heading>;
+}
+
 const richTextRenderOptions = {
 	markMapping: { link: renderLinkMark },
-	nodeMapping: { buttonLink: renderButtonLinkNode, footnote: renderFootnoteNode },
+	nodeMapping: {
+		buttonLink: renderButtonLinkNode,
+		footnote: renderFootnoteNode,
+		heading: renderHeadingNode,
+	},
 };
 
 /** Gallery items follow the same caption model as image blocks: inherit, override, or hide. */
@@ -229,7 +258,12 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 	// `numberFootnotes` walks the same markers in the same order to attach that position as an
 	// attribute, which is what lets a marker link to its note: a counter can show a number but cannot
 	// put it in an `id`.
-	const numbered = numberFootnotes(contentBlocks);
+	//
+	// Heading anchors are derived the same way and for the same reason — `collectHeadings` walks the
+	// identical order to build a page's table of contents, so the two agree on which heading an
+	// entry points at. Numbering runs first: `attachHeadingIds` hands a heading node back untouched
+	// apart from its `attrs`, so a marker inside a heading keeps the number it was just given.
+	const numbered = attachHeadingIds(numberFootnotes(contentBlocks));
 	const footnotes = collectFootnotes(numbered);
 	const footnotesLabelId = useId();
 
