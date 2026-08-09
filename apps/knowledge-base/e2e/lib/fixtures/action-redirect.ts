@@ -37,7 +37,7 @@ export async function waitForActionRedirect(
 				isSuccessfulRedirectResponse(response.status()) &&
 				matchesPathname(redirectUrl.pathname, redirectPathname)
 			);
-			}),
+		}),
 		trigger(),
 	]);
 
