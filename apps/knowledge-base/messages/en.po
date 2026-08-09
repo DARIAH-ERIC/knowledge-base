@@ -7476,14 +7476,14 @@ msgid "mRL9Vh"
 msgstr "Creating..."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx:49
+msgid "IIV9+R"
+msgstr "Update the document group title."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx:49
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:189
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:198
 msgid "Z/1udv"
 msgstr "Edit group"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx:49
-msgid "IIV9+R"
-msgstr "Update the document group title."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:79
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:89
