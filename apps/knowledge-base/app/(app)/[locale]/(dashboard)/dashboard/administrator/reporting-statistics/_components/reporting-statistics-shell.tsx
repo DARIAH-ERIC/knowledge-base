@@ -1,0 +1,241 @@
+"use client";
+
+import { Button } from "@dariah-eric/ui/button";
+import { Label } from "@dariah-eric/ui/field";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import { useExtracted } from "next-intl";
+import { type ReactNode, useOptimistic, useTransition } from "react";
+import type { Key } from "react-aria-components";
+
+import {
+	Header,
+	HeaderContent,
+	HeaderDescription,
+	HeaderTitle,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import {
+	type StatisticsFilterValues,
+	statisticsFilterKeys,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_lib/statistics-filters";
+import {
+	type ReportStep,
+	ReportStepTabs,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-step-tabs";
+import type { ReportingStatisticsFilterOptions } from "@/lib/data/admin-reporting";
+import { usePathname, useRouter, useSearchParams } from "@/lib/navigation/navigation";
+
+const basePath = "/dashboard/administrator/reporting-statistics";
+
+/**
+ * Sentinel `Select` key for the "no filter" option. React Aria's `Select` needs a non-null key for
+ * every option, but "all" is represented by an _absent_ search param. The sentinel is converted
+ * away at the search-param boundary (see `applyFilters` and `toSelectedKey`) and is never written
+ * to the URL, so it cannot collide with a real campaign year or country name.
+ */
+const ALL_OPTION = "__all__";
+
+function toSelectedKey(value: string): Key {
+	return value === "" ? ALL_OPTION : value;
+}
+
+function fromSelectedKey(key: Key | null): string {
+	return key == null || key === ALL_OPTION ? "" : String(key);
+}
+
+interface ReportingStatisticsShellProps {
+	children: ReactNode;
+	filterOptions: ReportingStatisticsFilterOptions;
+}
+
+/**
+ * Chrome shared by every reporting-statistics tab: the section header, the routed tab bar, and the
+ * campaign-year/country/status filters.
+ *
+ * The filters live here rather than in each page so the selection survives a tab switch, which also
+ * means they are read from — and written to — the URL client-side; a layout never receives
+ * `searchParams`. Each page parses the very same params server-side to fetch its data, so the URL
+ * stays the single source of truth and a filtered view is shareable as a link.
+ */
+export function ReportingStatisticsShell(
+	props: Readonly<ReportingStatisticsShellProps>,
+): ReactNode {
+	const { children, filterOptions } = props;
+
+	const t = useExtracted();
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+	const [isPending, startTransition] = useTransition();
+
+	const filters: StatisticsFilterValues = {
+		campaignYear: searchParams.get("campaignYear") ?? "",
+		country: searchParams.get("country") ?? "",
+		status: searchParams.get("status") ?? "",
+	};
+	const [optimisticFilters, setOptimisticFilters] = useOptimistic(filters);
+
+	/** Carry the active filters across a tab switch, but never the previous tab's paging/sorting. */
+	function toTabHref(path: string): string {
+		const params = new URLSearchParams();
+
+		for (const key of statisticsFilterKeys) {
+			const value = searchParams.get(key);
+
+			if (value != null && value !== "") {
+				params.set(key, value);
+			}
+		}
+
+		const query = params.toString();
+
+		return query === "" ? path : `${path}?${query}`;
+	}
+
+	const steps: Array<ReportStep> = [
+		{ href: toTabHref(basePath), label: t("Overview"), path: basePath },
+		{
+			href: toTabHref(`${basePath}/projects`),
+			label: t("Projects"),
+			path: `${basePath}/projects`,
+		},
+	];
+
+	/** Sync the filters to the search params, refetching the active tab's data server-side. */
+	function applyFilters(next: StatisticsFilterValues) {
+		const params = new URLSearchParams(searchParams.toString());
+
+		for (const key of statisticsFilterKeys) {
+			const value = next[key];
+
+			if (value === "") {
+				params.delete(key);
+			} else {
+				params.set(key, value);
+			}
+		}
+
+		// A narrower filter shrinks the result set, so any page beyond the first is meaningless.
+		params.delete("page");
+
+		const query = params.toString();
+
+		startTransition(() => {
+			// Reflect the choice in the selects immediately; React resets this to the URL-derived
+			// `filters` once the navigation settles.
+			setOptimisticFilters(next);
+			router.replace(query === "" ? pathname : `${pathname}?${query}`, { scroll: false });
+		});
+	}
+
+	const hasFilters =
+		optimisticFilters.campaignYear !== "" ||
+		optimisticFilters.country !== "" ||
+		optimisticFilters.status !== "";
+
+	return (
+		<div className="flex flex-col gap-y-8">
+			<Header>
+				<HeaderContent>
+					<HeaderTitle>{t("Statistics")}</HeaderTitle>
+					<HeaderDescription>
+						{t(
+							"Review aggregate reporting data across campaigns and compare country-level changes over time.",
+						)}
+					</HeaderDescription>
+				</HeaderContent>
+			</Header>
+
+			<div className="flex flex-col gap-y-8 px-(--layout-padding)">
+				<ReportStepTabs aria-label={t("Statistics views")} steps={steps} />
+
+				<section className="rounded-lg border bg-bg p-4">
+					<div className="grid gap-4 md:grid-cols-[minmax(0,12rem)_minmax(0,16rem)_minmax(0,12rem)_auto]">
+						<Select
+							onChange={(key) => {
+								applyFilters({ ...optimisticFilters, campaignYear: fromSelectedKey(key) });
+							}}
+							value={toSelectedKey(optimisticFilters.campaignYear)}
+						>
+							<Label>{t("Campaign year")}</Label>
+							<SelectTrigger />
+							<SelectContent>
+								<SelectItem id={ALL_OPTION}>{t("All years")}</SelectItem>
+								{filterOptions.campaignYears.map((year) => (
+									<SelectItem key={year} id={String(year)}>
+										{String(year)}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+
+						<Select
+							onChange={(key) => {
+								applyFilters({ ...optimisticFilters, country: fromSelectedKey(key) });
+							}}
+							value={toSelectedKey(optimisticFilters.country)}
+						>
+							<Label>{t("Country")}</Label>
+							<SelectTrigger />
+							<SelectContent>
+								<SelectItem id={ALL_OPTION}>{t("All countries")}</SelectItem>
+								{filterOptions.countries.map((country) => (
+									<SelectItem key={country} id={country}>
+										{country}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+
+						<Select
+							onChange={(key) => {
+								applyFilters({ ...optimisticFilters, status: fromSelectedKey(key) });
+							}}
+							value={toSelectedKey(optimisticFilters.status)}
+						>
+							<Label>{t("Report status")}</Label>
+							<SelectTrigger />
+							<SelectContent>
+								<SelectItem id={ALL_OPTION}>{t("All statuses")}</SelectItem>
+								<SelectItem id="draft">{t("Draft")}</SelectItem>
+								<SelectItem id="submitted">{t("Submitted")}</SelectItem>
+								<SelectItem id="accepted">{t("Accepted")}</SelectItem>
+							</SelectContent>
+						</Select>
+
+						<div className="flex items-end">
+							<Button
+								intent="outline"
+								isDisabled={!hasFilters}
+								onPress={() => {
+									applyFilters({ campaignYear: "", country: "", status: "" });
+								}}
+							>
+								{t("Reset")}
+							</Button>
+						</div>
+					</div>
+				</section>
+
+				{/* Visually hidden, polite status region announces the refetch to assistive tech. */}
+				<p className="sr-only" role="status">
+					{isPending ? t("Loading results…") : ""}
+				</p>
+
+				{/*
+				 * Dim the results while the new data is fetched. The fade only kicks in after a short
+				 * delay so a quick response never flashes; on the way back the delay is 0 so it snaps
+				 * to full opacity immediately.
+				 */}
+				<div
+					className={
+						isPending
+							? "flex flex-col gap-y-10 opacity-60 transition-opacity delay-300 duration-200"
+							: "flex flex-col gap-y-10 opacity-100 transition-opacity duration-200"
+					}
+				>
+					{children}
+				</div>
+			</div>
+		</div>
+	);
+}

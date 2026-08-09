@@ -8,11 +8,20 @@ import { usePathname } from "@/lib/navigation/navigation";
 export interface ReportStep {
 	href: string;
 	label: string;
+	/**
+	 * Route to match the current pathname against. Defaults to {@link href}, and only needs setting
+	 * when `href` carries search params (which never take part in the match).
+	 */
+	path?: string;
 }
 
 interface ReportStepTabsProps {
 	"aria-label": string;
 	steps: ReadonlyArray<ReportStep>;
+}
+
+function stepPath(step: ReportStep): string {
+	return step.path ?? step.href;
 }
 
 /**
@@ -27,15 +36,16 @@ export function ReportStepTabs(props: Readonly<ReportStepTabsProps>): ReactNode 
 	const pathname = usePathname();
 
 	const active = steps
-		.toSorted((a, b) => b.href.length - a.href.length)
-		.find((step) => pathname === step.href || pathname.startsWith(`${step.href}/`));
-	const selectedKey = active?.href ?? steps[0]?.href;
+		.toSorted((a, b) => stepPath(b).length - stepPath(a).length)
+		.find((step) => pathname === stepPath(step) || pathname.startsWith(`${stepPath(step)}/`));
+	const selectedStep = active ?? steps[0];
+	const selectedKey = selectedStep != null ? stepPath(selectedStep) : undefined;
 
 	return (
 		<Tabs aria-label={ariaLabel} className="-mx-3 overflow-x-auto px-3" selectedKey={selectedKey}>
 			<TabList>
 				{steps.map((step) => (
-					<Tab key={step.href} href={step.href} id={step.href}>
+					<Tab key={stepPath(step)} href={step.href} id={stepPath(step)}>
 						{step.label}
 					</Tab>
 				))}
