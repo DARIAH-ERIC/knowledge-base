@@ -18,7 +18,6 @@
 		"lint:fix": "run-p --continue-on-error \"lint:*:fix\"",
 		"lint:styles:check": "stylelint \"./styles/**/*.css\" --cache --ignore-path ./../../.gitignore",
 		"lint:styles:fix": "stylelint \"./styles/**/*.css\" --cache --fix --ignore-path ./../../.gitignore",
-		"prepare": "run-s types:prepare",
 		"start": "PORT=3001 next start --experimental-next-config-strip-types",
 		"test": "dotenvx run -q -f ./.env.local --ignore MISSING_ENV_FILE -- vitest run",
 		"test:e2e": "PORT=3001 playwright test --config ./e2e/playwright.config.ts",
