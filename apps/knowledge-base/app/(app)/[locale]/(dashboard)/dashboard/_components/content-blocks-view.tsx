@@ -564,7 +564,8 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			// enough (`@lg` ≈ 32rem): a constrained image pulled aside with the following block's text
 			// wrapping, natural aspect ratio so portrait images show in full, and gap on the text side.
 			// In a narrower column it spans the full width so text never wraps in a cramped column.
-			// `wide`/`full` break out past the text column; `default` fills the column.
+			// `wide`/`full` break out past the text column; `default` takes the column. These are the
+			// slot the block claims, not the size the image is drawn at — see below.
 			const figureClassName = {
 				"float-start": "mbe-4 @lg:mbe-2 @lg:me-6 @lg:float-start @lg:inline-[min(18rem,45%)]",
 				"float-end": "mbe-4 @lg:mbe-2 @lg:ms-6 @lg:float-end @lg:inline-[min(18rem,45%)]",
@@ -573,9 +574,19 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 				default: blockFigurePadding,
 			}[layout];
 
+			// The layout picks the slot; the image is drawn at its natural width inside it and centred,
+			// never upscaled to fill. imgproxy does not enlarge, so a source narrower than the slot has
+			// no more detail to give and stretching it only renders it soft — an author who wants a
+			// bigger image needs a bigger upload, not a wider box. The `figcaption` keeps the slot's
+			// width rather than tracking the image: deriving it would need the asset's intrinsic width,
+			// which this preview's block shape does not carry.
 			return (
 				<figure className={figureClassName}>
-					<img alt={contentBlock.content?.alt ?? ""} src={imageUrl} />
+					<img
+						alt={contentBlock.content?.alt ?? ""}
+						className="ms-auto me-auto inline-auto max-inline-full"
+						src={imageUrl}
+					/>
 					<CaptionFigcaption caption={caption} />
 				</figure>
 			);

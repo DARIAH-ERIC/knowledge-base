@@ -1568,9 +1568,13 @@ function AssetImageNodeView({
 			) : (
 				<div className="group">
 					<div className="relative">
+						{/* Natural width, centred, never upscaled: imgproxy does not enlarge, so stretching a
+						    source narrower than the card only rendered it soft and told the author the block
+						    was bigger than the read view will draw it. `max-block-96` still bounds a tall
+						    image, and scales it down by ratio because the width stays `auto`. */}
 						<img
 							alt={alt ?? ""}
-							className="block object-contain inline-full max-block-96"
+							className="ms-auto me-auto block inline-auto max-block-96 max-inline-full"
 							data-asset-image=""
 							data-image-key={imageKey ?? undefined}
 							draggable={false}
