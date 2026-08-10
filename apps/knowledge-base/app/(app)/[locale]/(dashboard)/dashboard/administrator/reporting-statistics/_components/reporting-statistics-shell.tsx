@@ -13,6 +13,7 @@ import {
 	HeaderDescription,
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import { LoadingDots } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-dots";
 import {
 	type StatisticsFilterValues,
 	statisticsFilterKeys,
@@ -51,10 +52,15 @@ interface ReportingStatisticsShellProps {
  * Chrome shared by every reporting-statistics tab: the section header, the routed tab bar, and the
  * campaign-year/country/status filters.
  *
- * The filters live here rather than in each page so the selection survives a tab switch, which also
- * means they are read from — and written to — the URL client-side; a layout never receives
- * `searchParams`. Each page parses the very same params server-side to fetch its data, so the URL
- * stays the single source of truth and a filtered view is shareable as a link.
+ * Each page renders this itself rather than it living in a `layout.tsx` for the section. A layout
+ * here looked tidier, but an async layout re-suspends on every search-param navigation, and the
+ * nearest boundary above it is `dashboard/loading.tsx` — so changing a filter blanked the header,
+ * the tabs, and the very select the reader had just used. The sibling list screens have no layout
+ * of their own and never flashed; this follows them. The cost is that the chrome re-renders on a
+ * tab switch, which is invisible because its state comes from the URL either way.
+ *
+ * Filter state is read from and written to the URL, so a filtered view is shareable as a link and
+ * the server pages parse the very same params to fetch their data.
  */
 export function ReportingStatisticsShell(
 	props: Readonly<ReportingStatisticsShellProps>,
@@ -74,7 +80,13 @@ export function ReportingStatisticsShell(
 	};
 	const [optimisticFilters, setOptimisticFilters] = useOptimistic(filters);
 
-	/** Carry the active filters across a tab switch, but never the previous tab's paging/sorting. */
+	/**
+	 * Carry the shared filters across a tab switch, but nothing tab-local.
+	 *
+	 * Paging and sorting are dropped because they mean different things per tab. So is the KPI
+	 * filter: services and social media report different categories, so carrying "followers" onto the
+	 * services tab would filter it down to nothing that exists.
+	 */
 	function toTabHref(path: string): string {
 		const params = new URLSearchParams();
 
@@ -97,6 +109,16 @@ export function ReportingStatisticsShell(
 			href: toTabHref(`${basePath}/projects`),
 			label: t("Projects"),
 			path: `${basePath}/projects`,
+		},
+		{
+			href: toTabHref(`${basePath}/services`),
+			label: t("Services"),
+			path: `${basePath}/services`,
+		},
+		{
+			href: toTabHref(`${basePath}/social-media`),
+			label: t("Social media"),
+			path: `${basePath}/social-media`,
 		},
 	];
 
@@ -235,6 +257,23 @@ export function ReportingStatisticsShell(
 				>
 					{children}
 				</div>
+			</div>
+
+			{/*
+			 * Fixed so it stays visible when the reader has scrolled into a long table. Kept mounted and
+			 * faded rather than conditionally rendered, so the same 300ms delay that governs the dimming
+			 * suppresses it entirely for a fast response.
+			 */}
+			<div
+				aria-hidden={true}
+				className={
+					isPending
+						? "pointer-events-none fixed inset-e-6 inset-be-6 z-20 flex items-center gap-x-2 rounded-full border bg-overlay px-3 py-2 text-xs text-muted-fg opacity-100 shadow-md transition-opacity delay-300 duration-200"
+						: "pointer-events-none fixed inset-e-6 inset-be-6 z-20 flex items-center gap-x-2 rounded-full border bg-overlay px-3 py-2 text-xs text-muted-fg opacity-0 shadow-md transition-opacity duration-200"
+				}
+			>
+				<LoadingDots size="small" />
+				{t("Updating")}
 			</div>
 		</div>
 	);
