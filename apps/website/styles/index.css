@@ -664,15 +664,6 @@
 			color: var(--richtext-quotes);
 			font-weight: 500;
 			font-style: italic;
-			quotes: "\201C" "\201D" "\2018" "\2019";
-		}
-
-		&:where(blockquote p:first-of-type)::before {
-			content: open-quote;
-		}
-
-		&:where(blockquote p:last-of-type)::after {
-			content: close-quote;
 		}
 
 		&:where(h1) {
