@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ReportingStatisticsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page";
+import { getStatisticsFilters } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_lib/statistics-filters";
 import { assertAdminPageAccess } from "@/lib/auth/session";
 import { getReportingStatisticsForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -28,29 +29,7 @@ export default async function DashboardAdministratorReportingStatisticsPage(
 	const { searchParams } = props;
 	const rawSearchParams = await searchParams;
 	const { user } = await assertAdminPageAccess();
-	const campaignYearValue = rawSearchParams.campaignYear;
-	const countryNameValue = rawSearchParams.country;
-	const campaignYear =
-		typeof campaignYearValue === "string" && campaignYearValue !== ""
-			? Number.parseInt(campaignYearValue, 10)
-			: undefined;
-	const countryName =
-		typeof countryNameValue === "string" && countryNameValue !== "" ? countryNameValue : undefined;
-	const data = await getReportingStatisticsForAdmin(user, {
-		campaignYear: Number.isNaN(campaignYear) ? undefined : campaignYear,
-		countryName,
-	});
+	const data = await getReportingStatisticsForAdmin(user, getStatisticsFilters(rawSearchParams));
 
-	return (
-		<ReportingStatisticsPage
-			data={data}
-			filters={{
-				campaignYear:
-					typeof campaignYearValue === "string" && campaignYearValue !== ""
-						? campaignYearValue
-						: "",
-				countryName: typeof countryNameValue === "string" ? countryNameValue : "",
-			}}
-		/>
-	);
+	return <ReportingStatisticsPage data={data} />;
 }

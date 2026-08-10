@@ -8,7 +8,19 @@ import { forbidden } from "next/navigation";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
-import { and, asc, count, desc, eq, inArray, sql } from "@/lib/db/sql";
+import {
+	type PgSelect,
+	type SQL,
+	type SQLWrapper,
+	alias,
+	and,
+	asc,
+	count,
+	desc,
+	eq,
+	inArray,
+	sql,
+} from "@/lib/db/sql";
 import type { ListSortDirection } from "@/lib/server/list-search-params";
 
 interface GetReportingListParams {
@@ -103,15 +115,27 @@ export interface ReportingStatisticsData {
 	campaignSummaries: Array<ReportingStatisticsCampaignSummary>;
 	countryTrends: Array<ReportingStatisticsCountryTrend>;
 	workingGroupYearSummaries: Array<ReportingStatisticsWorkingGroupYearSummary>;
-	filterOptions: {
-		campaignYears: Array<number>;
-		countries: Array<string>;
-	};
 }
 
+export type ReportStatus = (typeof schema.reportStatusEnum)[number];
+
+/**
+ * The filters shared by every reporting-statistics tab. They live in the URL and are owned by the
+ * section layout, so switching tabs keeps the current selection.
+ */
 export interface ReportingStatisticsFilters {
 	campaignYear?: number;
 	countryName?: string;
+	status?: ReportStatus;
+}
+
+/**
+ * Options for the shared filter bar. Deliberately independent of the active filters — the selects
+ * must keep offering every year/country even once a narrower filter is applied.
+ */
+export interface ReportingStatisticsFilterOptions {
+	campaignYears: Array<number>;
+	countries: Array<string>;
 }
 
 export async function getCountryReportsForAdmin(
@@ -476,24 +500,21 @@ export async function getReportingStatisticsForAdmin(
 		},
 	});
 
-	const filterOptions = {
-		campaignYears: campaigns.map((campaign) => campaign.year),
-		countries: Array.from(
-			new Set(
-				campaigns.flatMap((campaign) =>
-					campaign.countryReports.map((report) => report.country?.name ?? ""),
-				),
-			),
-		).toSorted((left, right) => left.localeCompare(right)),
-	};
-
 	const filteredCampaigns = campaigns
 		.filter((campaign) => filters.campaignYear == null || campaign.year === filters.campaignYear)
 		.map((campaign) => {
 			const countryReports = campaign.countryReports.filter(
-				(report) => filters.countryName == null || report.country?.name === filters.countryName,
+				(report) =>
+					(filters.countryName == null || report.country?.name === filters.countryName) &&
+					(filters.status == null || report.status === filters.status),
 			);
-			const workingGroupReports = filters.countryName == null ? campaign.workingGroupReports : [];
+			// A country filter excludes working-group reports entirely — they are not country-scoped.
+			const workingGroupReports =
+				filters.countryName != null
+					? []
+					: campaign.workingGroupReports.filter(
+							(report) => filters.status == null || report.status === filters.status,
+						);
 
 			return {
 				...campaign,
@@ -687,7 +708,215 @@ export async function getReportingStatisticsForAdmin(
 		campaignSummaries,
 		countryTrends,
 		workingGroupYearSummaries,
-		filterOptions,
+	};
+}
+
+/**
+ * Join predicate resolving a document to the version that carries its display name: the latest
+ * editable one (published, else draft), so an entity whose publication was withdrawn still renders
+ * with a name instead of dropping out of the statistics.
+ *
+ * Takes the lifecycle columns rather than the view itself so it accepts an `alias()`ed lifecycle —
+ * the statistics queries join it more than once (country and project) in a single statement.
+ */
+function joinLatestEditableVersion(
+	versionId: SQLWrapper,
+	publishedId: SQLWrapper,
+	draftId: SQLWrapper,
+): SQL {
+	return sql`${versionId} = COALESCE(${publishedId}, ${draftId})`;
+}
+
+export async function getReportingStatisticsFilterOptionsForAdmin(
+	currentUser: Pick<User, "role">,
+): Promise<ReportingStatisticsFilterOptions> {
+	assertAdminUser(currentUser);
+
+	const countryLifecycle = alias(schema.documentLifecycle, "country_document_lifecycle");
+
+	const [campaigns, countries] = await Promise.all([
+		db
+			.select({ year: schema.reportingCampaigns.year })
+			.from(schema.reportingCampaigns)
+			.orderBy(desc(schema.reportingCampaigns.year)),
+		// Only countries that actually have a report — an empty option would filter to nothing.
+		db
+			.selectDistinct({ name: schema.organisationalUnits.name })
+			.from(schema.countryReports)
+			.innerJoin(
+				countryLifecycle,
+				eq(countryLifecycle.documentId, schema.countryReports.countryDocumentId),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				joinLatestEditableVersion(
+					schema.organisationalUnits.id,
+					countryLifecycle.publishedId,
+					countryLifecycle.draftId,
+				),
+			)
+			.orderBy(schema.organisationalUnits.name),
+	]);
+
+	return {
+		campaignYears: campaigns.map((campaign) => campaign.year),
+		countries: countries.map((country) => country.name),
+	};
+}
+
+export type ReportingProjectContributionsSort = "amount" | "campaignYear" | "country" | "project";
+
+interface GetReportingProjectContributionsParams
+	extends GetReportingListParams, ReportingStatisticsFilters {
+	dir?: ListSortDirection;
+	sort?: ReportingProjectContributionsSort;
+}
+
+export interface ReportingProjectContributionRow {
+	id: string;
+	amountEuros: number;
+	campaignYear: number;
+	countryName: string;
+	projectAcronym: string | null;
+	projectName: string;
+	projectSlug: string;
+	status: string;
+}
+
+export interface ReportingProjectContributionsData {
+	data: Array<ReportingProjectContributionRow>;
+	total: number;
+	/** Sum over the whole filtered set, not just the current page. */
+	totalAmountEuros: number;
+}
+
+/**
+ * The project contributions reported by each country, one row per (report, project) pair — which
+ * country reported which project, in which campaign year, for how much. Aggregate country/campaign
+ * totals live in {@link getReportingStatisticsForAdmin}; this is the line-item view behind them.
+ */
+export async function getReportingProjectContributionsForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetReportingProjectContributionsParams>,
+): Promise<ReportingProjectContributionsData> {
+	assertAdminUser(currentUser);
+
+	const {
+		campaignYear,
+		countryName,
+		dir = "desc",
+		limit,
+		offset,
+		q,
+		sort = "campaignYear",
+		status,
+	} = params;
+
+	const countryLifecycle = alias(schema.documentLifecycle, "country_document_lifecycle");
+	const projectLifecycle = alias(schema.documentLifecycle, "project_document_lifecycle");
+	const projectEntities = alias(schema.entities, "project_entities");
+
+	/**
+	 * The filters below reach into the joined campaign, country, and project tables, so the aggregate
+	 * query needs exactly the same `FROM` as the paged one. Applied to both via `$dynamic()` rather
+	 * than written out twice, where the two copies could drift apart.
+	 */
+	function withContributionJoins<TQuery extends PgSelect>(query: TQuery) {
+		return query
+			.innerJoin(
+				schema.countryReports,
+				eq(schema.countryReports.id, schema.countryReportProjectContributions.countryReportId),
+			)
+			.innerJoin(
+				schema.reportingCampaigns,
+				eq(schema.reportingCampaigns.id, schema.countryReports.campaignId),
+			)
+			.innerJoin(
+				countryLifecycle,
+				eq(countryLifecycle.documentId, schema.countryReports.countryDocumentId),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				joinLatestEditableVersion(
+					schema.organisationalUnits.id,
+					countryLifecycle.publishedId,
+					countryLifecycle.draftId,
+				),
+			)
+			.innerJoin(
+				projectEntities,
+				eq(projectEntities.id, schema.countryReportProjectContributions.projectDocumentId),
+			)
+			.innerJoin(projectLifecycle, eq(projectLifecycle.documentId, projectEntities.id))
+			.innerJoin(
+				schema.projects,
+				joinLatestEditableVersion(
+					schema.projects.id,
+					projectLifecycle.publishedId,
+					projectLifecycle.draftId,
+				),
+			);
+	}
+
+	const where = and(
+		campaignYear != null ? eq(schema.reportingCampaigns.year, campaignYear) : undefined,
+		countryName != null && countryName !== ""
+			? eq(schema.organisationalUnits.name, countryName)
+			: undefined,
+		status != null ? eq(schema.countryReports.status, status) : undefined,
+		matchesAllTerms(q, schema.projects.name, schema.projects.acronym),
+	);
+
+	const direction = dir === "asc" ? asc : desc;
+	const primaryOrderBy = {
+		amount: direction(schema.countryReportProjectContributions.amountEuros),
+		campaignYear: direction(schema.reportingCampaigns.year),
+		country: direction(schema.organisationalUnits.name),
+		project: direction(schema.projects.name),
+	}[sort];
+
+	const [data, aggregate] = await Promise.all([
+		withContributionJoins(
+			db
+				.select({
+					id: schema.countryReportProjectContributions.id,
+					amountEuros: schema.countryReportProjectContributions.amountEuros,
+					campaignYear: schema.reportingCampaigns.year,
+					countryName: schema.organisationalUnits.name,
+					projectAcronym: schema.projects.acronym,
+					projectName: schema.projects.name,
+					projectSlug: projectEntities.slug,
+					status: schema.countryReports.status,
+				})
+				.from(schema.countryReportProjectContributions)
+				.$dynamic(),
+		)
+			.where(where)
+			// Tie-breakers keep paging stable when the primary column has duplicates.
+			.orderBy(
+				primaryOrderBy,
+				asc(schema.organisationalUnits.name),
+				asc(schema.projects.name),
+				asc(schema.countryReportProjectContributions.id),
+			)
+			.limit(limit)
+			.offset(offset),
+		withContributionJoins(
+			db
+				.select({
+					total: count(),
+					// `SUM` over `numeric` comes back as a string; cast so the caller gets a number.
+					totalAmountEuros: sql<number>`COALESCE(SUM(${schema.countryReportProjectContributions.amountEuros}), 0)::float8`,
+				})
+				.from(schema.countryReportProjectContributions)
+				.$dynamic(),
+		).where(where),
+	]);
+
+	return {
+		data,
+		total: aggregate[0]?.total ?? 0,
+		totalAmountEuros: aggregate[0]?.totalAmountEuros ?? 0,
 	};
 }
 
