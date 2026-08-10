@@ -402,8 +402,17 @@ export function ChartFrame(props: Readonly<ChartFrameProps>): ReactNode {
 					aria-label={ariaLabel}
 					height={geometry.height}
 					role="img"
+					/*
+					 * Sized in real pixels from the measured container, so at steady state nothing scales
+					 * and the type stays at its intended size.
+					 *
+					 * The cap matters for the render before that measurement exists: the server has no DOM
+					 * to measure, so it emits the fallback width, and a fallback wider than the card would
+					 * paint a chart overflowing into whatever sits beside it until hydration corrects it.
+					 * With the cap that first paint is merely scaled down, then snaps to exact.
+					 */
+					style={{ height: "auto", maxWidth: "100%" }}
 					width={geometry.width}
-					// The SVG is sized in real pixels from the measured container, so nothing scales.
 					viewBox={`0 0 ${String(geometry.width)} ${String(geometry.height)}`}
 				>
 					{children}
