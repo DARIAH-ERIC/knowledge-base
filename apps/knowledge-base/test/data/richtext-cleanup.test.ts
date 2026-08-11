@@ -16,7 +16,7 @@ import { withTransaction } from "@/test/lib/with-transaction";
 
 /**
  * Richtext does not live in one place: a block keeps its prose in a table of its own, and a caption
- * is a second document beside it — on the block's row, or, for a gallery, on a row per item. These
+ * is a second document beside it — on the block's row and, for a gallery, on a row per item. These
  * assertions are what keeps every one of those reachable, because a caption the service cannot see
  * is a caption that keeps the oddities everything else had cleaned away.
  *
@@ -233,6 +233,40 @@ describe("richtext cleanup", () => {
 				cleanup: "normalize_rich_text",
 				blockType: "gallery",
 			});
+		});
+	});
+
+	// A gallery holds richtext in two places, and the item rows were the only ones the service used to
+	// reach. A gallery whose items are all tidy is what tells the two apart.
+	it("reaches a gallery's own caption, not only its items'", async () => {
+		await withTransaction(async (tx) => {
+			const fieldId = await seedField(tx);
+			const asset = await getAsset(tx);
+
+			const galleryId = await addBlock(tx, fieldId, "gallery", 0);
+			await tx
+				.insert(schema.galleryContentBlocks)
+				.values({ id: galleryId, layout: "grid", caption: untidy("The set") });
+			await tx.insert(schema.galleryContentBlockItems).values({
+				galleryContentBlockId: galleryId,
+				imageId: asset.id,
+				position: 0,
+				caption: tidy("One image"),
+			});
+
+			const { blocks } = await findRichTextNeedingCleanup(tx);
+			expect(blocks.map((block) => block.contentBlockId)).toContain(galleryId);
+
+			await cleanRichText(tx, [galleryId]);
+
+			const gallery = await tx.query.galleryContentBlocks.findFirst({
+				where: { id: galleryId },
+				columns: { caption: true },
+			});
+			expect(gallery?.caption).toStrictEqual(tidy("The set"));
+
+			const { blocks: remaining } = await findRichTextNeedingCleanup(tx);
+			expect(remaining.map((block) => block.contentBlockId)).not.toContain(galleryId);
 		});
 	});
 

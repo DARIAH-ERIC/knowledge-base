@@ -1822,14 +1822,17 @@ function GalleryNodeView({
 }: Readonly<GalleryNodeViewProps>): ReactNode {
 	const layout = normalizeGalleryLayout(node.attrs.layout);
 	const items = useMemo(() => normalizeGalleryItems(node.attrs.items), [node.attrs.items]);
+	const caption = node.attrs.caption as JSONContent | null;
 
 	const [isEditing, setIsEditing] = useState(items.length === 0 && editor.isEditable);
 	const [layoutInput, setLayoutInput] = useState<GalleryLayout>(layout);
 	const [itemsInput, setItemsInput] = useState<Array<GalleryItemAttrs>>(items);
+	const [captionInput, setCaptionInput] = useState<JSONContent | null>(caption);
 
 	function resetInputs() {
 		setLayoutInput(layout);
 		setItemsInput(items);
+		setCaptionInput(caption);
 	}
 
 	function selectNode() {
@@ -1876,7 +1879,11 @@ function GalleryNodeView({
 			return;
 		}
 
-		updateAttributes({ layout: layoutInput, items: nextItems });
+		updateAttributes({
+			layout: layoutInput,
+			items: nextItems,
+			caption: isEmptyRichTextDocument(captionInput) ? null : captionInput,
+		});
 		setIsEditing(false);
 	}
 
@@ -1912,6 +1919,18 @@ function GalleryNodeView({
 							<ToggleGroupItem id="grid">{"Grid"}</ToggleGroupItem>
 							<ToggleGroupItem id="carousel">{"Carousel"}</ToggleGroupItem>
 						</ToggleGroup>
+					</div>
+					{/* The gallery's own caption, describing the set. The per-item captions below credit the
+					    individual images, and follow the shared inherit/override/hide model; this one has no
+					    asset behind it, so it is simply written or left empty. */}
+					<div className="flex flex-col gap-y-1">
+						<span className="text-sm/6 font-medium">{"Caption"}</span>
+						<InlineRichTextEditor
+							aria-label="Gallery caption"
+							content={caption ?? undefined}
+							extensions={hasFootnotes ? inlineFootnoteExtensions : undefined}
+							onChange={setCaptionInput}
+						/>
 					</div>
 					{itemsInput.map((item, index) => (
 						<div
@@ -2130,6 +2149,12 @@ function GalleryNodeView({
 							</div>
 						) : null}
 					</div>
+					{!isEmptyRichTextDocument(caption) ? (
+						<InlineRichTextRenderer
+							className="border-bs border-border px-4 py-2 text-muted-fg"
+							content={caption!}
+						/>
+					) : null}
 					<div className="border-bs border-border px-4 py-2 text-xs text-muted-fg">
 						{`${layout === "carousel" ? "Carousel" : "Grid"} · ${String(items.length)} ${items.length === 1 ? "image" : "images"}`}
 					</div>
@@ -2155,6 +2180,7 @@ function createGalleryNode(
 			return {
 				layout: { default: "grid" },
 				items: { default: [] },
+				caption: { default: null },
 			};
 		},
 
@@ -2166,6 +2192,7 @@ function createGalleryNode(
 						return {
 							layout: normalizeGalleryLayout(dom.dataset.layout),
 							items: parseGalleryItemsAttr(dom.dataset.items),
+							caption: parseCaptionAttr(dom.dataset.caption),
 						};
 					},
 				},
@@ -2179,6 +2206,7 @@ function createGalleryNode(
 					"data-gallery-block": "",
 					"data-layout": normalizeGalleryLayout(node.attrs.layout),
 					"data-items": serializeGalleryItemsAttr(normalizeGalleryItems(node.attrs.items)),
+					"data-caption": serializeCaptionAttr(node.attrs.caption as JSONContent | null),
 				}),
 			];
 		},

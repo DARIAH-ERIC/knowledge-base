@@ -296,6 +296,7 @@ export class DatabaseService {
 			dataLimit: number | null;
 			embedTitle: string | null;
 			embedUrl: string | null;
+			galleryCaption: unknown;
 			galleryItems: unknown;
 			galleryLayout: string | null;
 			heroCtas: unknown;
@@ -327,6 +328,8 @@ export class DatabaseService {
 				dataLimit: schema.dataContentBlocks.limit,
 				embedTitle: schema.embedContentBlocks.title,
 				embedUrl: schema.embedContentBlocks.url,
+				/** The gallery's own caption, on its row — its items' captions are aggregated below. */
+				galleryCaption: schema.galleryContentBlocks.caption,
 				/**
 				 * Items live in their own table, one row per image. Aggregated here rather than joined so a
 				 * gallery stays one row like every other block type.

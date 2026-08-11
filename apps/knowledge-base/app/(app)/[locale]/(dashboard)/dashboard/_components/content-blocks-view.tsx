@@ -492,13 +492,14 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 		case "gallery": {
 			const layout = contentBlock.content?.layout ?? "grid";
 			const items = contentBlock.content?.items ?? [];
+			const galleryCaption = contentBlock.content?.caption;
 
 			if (items.length === 0) {
 				return null;
 			}
 
-			if (layout === "carousel") {
-				return (
+			const images =
+				layout === "carousel" ? (
 					<div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pbe-2">
 						{items.map((item, idx) => {
 							if (item.imageUrl == null || item.imageUrl === "") {
@@ -519,30 +520,41 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							);
 						})}
 					</div>
+				) : (
+					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{items.map((item, idx) => {
+							if (item.imageUrl == null || item.imageUrl === "") {
+								return null;
+							}
+
+							const { caption } = resolveGalleryItemCaption(item);
+
+							return (
+								<figure key={idx}>
+									<img
+										alt={toPlainText(caption)}
+										className="aspect-4/3 rounded-lg object-cover inline-full"
+										src={item.imageUrl}
+									/>
+									<CaptionFigcaption caption={caption} />
+								</figure>
+							);
+						})}
+					</div>
 				);
+
+			// Only a captioned gallery becomes a figure of its own — the item figures nest inside it,
+			// which is what makes the outer caption read as the set's rather than any one image's. An
+			// uncaptioned gallery keeps its bare grid, so its spacing does not shift.
+			if (isEmptyRichTextDocument(galleryCaption)) {
+				return images;
 			}
 
 			return (
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{items.map((item, idx) => {
-						if (item.imageUrl == null || item.imageUrl === "") {
-							return null;
-						}
-
-						const { caption } = resolveGalleryItemCaption(item);
-
-						return (
-							<figure key={idx}>
-								<img
-									alt={toPlainText(caption)}
-									className="aspect-4/3 rounded-lg object-cover inline-full"
-									src={item.imageUrl}
-								/>
-								<CaptionFigcaption caption={caption} />
-							</figure>
-						);
-					})}
-				</div>
+				<figure className={blockFigurePadding}>
+					{images}
+					<CaptionFigcaption caption={galleryCaption} />
+				</figure>
 			);
 		}
 
