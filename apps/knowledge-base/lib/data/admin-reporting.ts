@@ -5,10 +5,12 @@ import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
+import { hasDariahCommissionedEvent } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/calculate-operational-cost";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import {
+	type PgColumn,
 	type PgSelect,
 	type SQL,
 	type SQLWrapper,
@@ -57,11 +59,25 @@ function assertAdminUser(user: Pick<User, "role">): void {
 export interface ReportingStatisticsOverview {
 	campaignCount: number;
 	totalCountryReports: number;
-	totalWorkingGroupReports: number;
 	totalContributors: number;
 	totalCountryEvents: number;
 	totalWorkingGroupEvents: number;
+	/**
+	 * Each country's contribution to each project, counted once across the whole range in scope.
+	 *
+	 * Countries re-report a project every campaign year it runs, entering the whole-duration amount
+	 * each time, so adding the rows up would multiply the same money by the number of years. Where
+	 * the amount changed between years, the most recent report wins. Includes every report status
+	 * unless the status filter narrows it.
+	 */
 	totalProjectContributions: number;
+	/**
+	 * How many distinct country–project pairs, and how many country reports, are behind
+	 * {@link totalProjectContributions}. Only country reports carry project contributions — working
+	 * groups do not report projects at all — so these two say what the sum is actually made of.
+	 */
+	totalProjectContributionCount: number;
+	countryReportsWithProjectContributions: number;
 }
 
 export interface ReportingStatisticsCampaignSummary {
@@ -473,17 +489,23 @@ export async function getReportingStatisticsForAdmin(
 				columns: {
 					id: true,
 					status: true,
+					countryDocumentId: true,
 					totalContributors: true,
 					smallEvents: true,
 					mediumEvents: true,
 					largeEvents: true,
 					veryLargeEvents: true,
+					dariahCommissionedEvent: true,
 				},
 				with: {
 					country: { columns: { name: true } },
-					institutions: { columns: { id: true } },
+					// The document id, not the row id: an institution is captured once per representation
+					// type, so the rows over-count it. See the `institutions` tally below.
+					institutions: { columns: { organisationalUnitDocumentId: true } },
 					serviceKpis: { columns: { serviceId: true } },
-					projectContributions: { columns: { amountEuros: true } },
+					// The project id too, so a contribution repeated across campaign years can be
+					// recognised as the same one. See `latestContributionPerProject`.
+					projectContributions: { columns: { amountEuros: true, projectDocumentId: true } },
 				},
 			},
 			workingGroupReports: {
@@ -529,11 +551,12 @@ export async function getReportingStatisticsForAdmin(
 	const overview: ReportingStatisticsOverview = {
 		campaignCount: filteredCampaigns.length,
 		totalCountryReports: 0,
-		totalWorkingGroupReports: 0,
 		totalContributors: 0,
 		totalCountryEvents: 0,
 		totalWorkingGroupEvents: 0,
 		totalProjectContributions: 0,
+		totalProjectContributionCount: 0,
+		countryReportsWithProjectContributions: 0,
 	};
 
 	const campaignSummaries: Array<ReportingStatisticsCampaignSummary> = [];
@@ -544,6 +567,21 @@ export async function getReportingStatisticsForAdmin(
 		>
 	> = [];
 	const workingGroupYearSummaries: Array<ReportingStatisticsWorkingGroupYearSummary> = [];
+
+	/**
+	 * The most recently reported contribution for each (country, project) pair.
+	 *
+	 * Under the current reporting forms a country re-reports a project in every campaign year it
+	 * runs, and each time enters the contribution for the project's _whole duration_ — not the part
+	 * falling in that year. Adding the rows up therefore multiplies the same money by however many
+	 * years the project was active. Any total spanning more than one campaign year has to count each
+	 * pair once.
+	 *
+	 * Where the reported amount changed between years the latest one wins: it is the country's most
+	 * recent word on that project. Within a single campaign year there is nothing to collapse, since
+	 * a country files one report per campaign and a report holds a project at most once.
+	 */
+	const latestContributionPerProject = new Map<string, { amountEuros: number; year: number }>();
 
 	for (const campaign of filteredCampaigns) {
 		let countryDraftCount = 0;
@@ -575,23 +613,50 @@ export async function getReportingStatisticsForAdmin(
 			}
 
 			const contributors = report.totalContributors ?? 0;
+			// A DARIAH-commissioned event is captured by title rather than as a count, and counts as one
+			// event — the same way the report's own operational-cost breakdown counts it. Leaving it out
+			// made the dashboard disagree with every individual report it summarises.
 			const events =
 				(report.smallEvents ?? 0) +
 				(report.mediumEvents ?? 0) +
 				(report.largeEvents ?? 0) +
-				(report.veryLargeEvents ?? 0);
-			const institutions = report.institutions.length;
+				(report.veryLargeEvents ?? 0) +
+				(hasDariahCommissionedEvent(report.dariahCommissionedEvent) ? 1 : 0);
+			// Distinct institutions, not rows: one institution can be captured once per representation
+			// type, and the report summary groups them the same way before displaying them.
+			const institutions = new Set(
+				report.institutions.map((institution) => institution.organisationalUnitDocumentId),
+			).size;
 			const services = new Set(report.serviceKpis.map((serviceKpi) => serviceKpi.serviceId)).size;
+			// Per campaign year this is a straight sum — a report holds each project at most once, so
+			// there is nothing to collapse. It reads as "the whole-duration value of the projects this
+			// country had running that year", not as money spent in that year.
 			const projectContributions = report.projectContributions.reduce(
 				(sum, contribution) => sum + contribution.amountEuros,
 				0,
 			);
+
+			for (const contribution of report.projectContributions) {
+				const key = `${report.countryDocumentId}:${contribution.projectDocumentId}`;
+				const seen = latestContributionPerProject.get(key);
+
+				if (seen == null || campaign.year > seen.year) {
+					latestContributionPerProject.set(key, {
+						amountEuros: contribution.amountEuros,
+						year: campaign.year,
+					});
+				}
+			}
 
 			totalContributors += contributors;
 			totalCountryEvents += events;
 			totalInstitutions += institutions;
 			totalServices += services;
 			totalProjectContributions += projectContributions;
+
+			if (report.projectContributions.length > 0) {
+				overview.countryReportsWithProjectContributions += 1;
+			}
 
 			countryTrendBaseRows.push({
 				campaignYear: campaign.year,
@@ -631,11 +696,12 @@ export async function getReportingStatisticsForAdmin(
 		}
 
 		overview.totalCountryReports += campaign.countryReports.length;
-		overview.totalWorkingGroupReports += campaign.workingGroupReports.length;
 		overview.totalContributors += totalContributors;
 		overview.totalCountryEvents += totalCountryEvents;
 		overview.totalWorkingGroupEvents += totalWorkingGroupEvents;
-		overview.totalProjectContributions += totalProjectContributions;
+		// `totalProjectContributions` is deliberately *not* accumulated per campaign here — summing the
+		// yearly figures would re-add the same whole-duration amounts. It is set once, after the loop,
+		// from the deduplicated pairs.
 
 		campaignSummaries.push({
 			id: campaign.id,
@@ -669,6 +735,14 @@ export async function getReportingStatisticsForAdmin(
 			socialMediaAccounts,
 		});
 	}
+
+	// Each (country, project) once, at its most recently reported amount — see
+	// `latestContributionPerProject`. With a single campaign year in scope this is identical to the
+	// per-year sum, because nothing repeats inside one year.
+	for (const contribution of latestContributionPerProject.values()) {
+		overview.totalProjectContributions += contribution.amountEuros;
+	}
+	overview.totalProjectContributionCount = latestContributionPerProject.size;
 
 	const countryRowsByName = new Map<string, Array<(typeof countryTrendBaseRows)[number]>>();
 
@@ -785,8 +859,15 @@ export interface ReportingProjectContributionRow {
 
 export interface ReportingProjectContributionsData {
 	data: Array<ReportingProjectContributionRow>;
+	/** Reported entries in the filtered set — the rows the table lists, one per campaign year. */
 	total: number;
-	/** Sum over the whole filtered set, not just the current page. */
+	/** Distinct country–project pairs behind those entries. */
+	totalPairs: number;
+	/**
+	 * Sum over the whole filtered set, counting each country–project pair once at its most recently
+	 * reported amount. Adding the listed rows up instead would multiply a project's contribution by
+	 * the number of campaign years it was reported in.
+	 */
 	totalAmountEuros: number;
 }
 
@@ -875,6 +956,26 @@ export async function getReportingProjectContributionsForAdmin(
 		project: direction(schema.projects.name),
 	}[sort];
 
+	/**
+	 * The filtered rows, each ranked within its (country, project) pair with the newest campaign year
+	 * first. A window function cannot sit inside an aggregate, so the ranking has to happen one level
+	 * down and the totals are then taken over this.
+	 */
+	const rankedContributions = withContributionJoins(
+		db
+			.select({
+				amountEuros: schema.countryReportProjectContributions.amountEuros,
+				pairRank:
+					sql<number>`ROW_NUMBER() OVER (PARTITION BY ${schema.countryReports.countryDocumentId}, ${schema.countryReportProjectContributions.projectDocumentId} ORDER BY ${schema.reportingCampaigns.year} DESC)`.as(
+						"pair_rank",
+					),
+			})
+			.from(schema.countryReportProjectContributions)
+			.$dynamic(),
+	)
+		.where(where)
+		.as("ranked_contributions");
+
 	const [data, aggregate] = await Promise.all([
 		withContributionJoins(
 			db
@@ -901,14 +1002,201 @@ export async function getReportingProjectContributionsForAdmin(
 			)
 			.limit(limit)
 			.offset(offset),
-		withContributionJoins(
+		db
+			.select({
+				total: count(),
+				// A pair's newest row carries its current amount; the rest are the same money re-reported.
+				// `SUM` over `numeric` comes back as a string, hence the cast.
+				totalAmountEuros: sql<number>`COALESCE(SUM(${rankedContributions.amountEuros}) FILTER (WHERE ${rankedContributions.pairRank} = 1), 0)::float8`,
+				totalPairs: sql<number>`COUNT(*) FILTER (WHERE ${rankedContributions.pairRank} = 1)`,
+			})
+			.from(rankedContributions),
+	]);
+
+	return {
+		data,
+		total: aggregate[0]?.total ?? 0,
+		totalPairs: aggregate[0]?.totalPairs ?? 0,
+		totalAmountEuros: aggregate[0]?.totalAmountEuros ?? 0,
+	};
+}
+
+export type ReportingKpiSort = "campaignYear" | "country" | "entity" | "kpi" | "value";
+
+interface GetReportingKpisParams extends GetReportingListParams, ReportingStatisticsFilters {
+	dir?: ListSortDirection;
+	/** One of the entity's KPI categories; absent means every category. */
+	kpi?: string;
+	sort?: ReportingKpiSort;
+}
+
+/**
+ * One reported KPI value. `entityName`/`entityType` are the service or social-media account the
+ * value belongs to — the two KPI tabs render the same shape.
+ */
+export interface ReportingKpiRow {
+	id: string;
+	campaignYear: number;
+	countryName: string;
+	entityName: string;
+	entityType: string;
+	kpi: string;
+	status: string;
+	value: number;
+}
+
+export interface ReportingKpisData {
+	data: Array<ReportingKpiRow>;
+	total: number;
+	/**
+	 * Sum over the whole filtered set, but only when a single KPI category is selected. Adding
+	 * followers to page views produces a number that means nothing, so mixed categories return null
+	 * and the caller shows no total.
+	 */
+	totalValue: number | null;
+}
+
+/**
+ * The parts of a KPI query that differ between services and social media: which column holds the
+ * entity's name and type, and which column holds the KPI category.
+ *
+ * Only the filter and sort expressions are shared this way. The join chains stay written out in
+ * each function, where Drizzle can infer the row types — threading a join helper through a common
+ * signature erases them and buys a cast for every column.
+ */
+interface ReportingKpiColumns {
+	entityName: PgColumn;
+	entityType: PgColumn;
+	kpi: PgColumn;
+	value: PgColumn;
+}
+
+function reportingKpiWhere(
+	params: Readonly<GetReportingKpisParams>,
+	columns: Readonly<Pick<ReportingKpiColumns, "entityName" | "kpi">>,
+): SQL | undefined {
+	const { campaignYear, countryName, kpi, q, status } = params;
+
+	return and(
+		campaignYear != null ? eq(schema.reportingCampaigns.year, campaignYear) : undefined,
+		countryName != null && countryName !== ""
+			? eq(schema.organisationalUnits.name, countryName)
+			: undefined,
+		status != null ? eq(schema.countryReports.status, status) : undefined,
+		kpi != null && kpi !== "" ? eq(columns.kpi, kpi) : undefined,
+		matchesAllTerms(q, columns.entityName),
+	);
+}
+
+function reportingKpiOrderBy(
+	params: Readonly<GetReportingKpisParams>,
+	columns: Readonly<ReportingKpiColumns>,
+): SQL {
+	const { dir = "desc", sort = "campaignYear" } = params;
+	const direction = dir === "asc" ? asc : desc;
+
+	return {
+		campaignYear: direction(schema.reportingCampaigns.year),
+		country: direction(schema.organisationalUnits.name),
+		entity: direction(columns.entityName),
+		kpi: direction(columns.kpi),
+		value: direction(columns.value),
+	}[sort];
+}
+
+/** Sum over the filtered set — meaningful only within one category, so it is gated on that. */
+function reportingKpiTotalValue(
+	kpi: string | undefined,
+	totalValue: number | undefined,
+): number | null {
+	return kpi != null && kpi !== "" ? (totalValue ?? 0) : null;
+}
+
+/**
+ * Reported service KPIs, one row per (report, service, KPI). Country reports carry a set of
+ * services and a value per KPI category for each; this is the flattened line-item view of those.
+ */
+export async function getReportingServiceKpisForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetReportingKpisParams>,
+): Promise<ReportingKpisData> {
+	assertAdminUser(currentUser);
+
+	const { limit, offset } = params;
+	const countryLifecycle = alias(schema.documentLifecycle, "country_document_lifecycle");
+	const columns: ReportingKpiColumns = {
+		entityName: schema.services.name,
+		entityType: schema.serviceTypes.type,
+		kpi: schema.countryReportServiceKpis.kpi,
+		value: schema.countryReportServiceKpis.value,
+	};
+
+	function withJoins<TQuery extends PgSelect>(query: TQuery) {
+		return (
+			query
+				.innerJoin(
+					schema.countryReports,
+					eq(schema.countryReports.id, schema.countryReportServiceKpis.countryReportId),
+				)
+				.innerJoin(
+					schema.reportingCampaigns,
+					eq(schema.reportingCampaigns.id, schema.countryReports.campaignId),
+				)
+				.innerJoin(
+					countryLifecycle,
+					eq(countryLifecycle.documentId, schema.countryReports.countryDocumentId),
+				)
+				.innerJoin(
+					schema.organisationalUnits,
+					joinLatestEditableVersion(
+						schema.organisationalUnits.id,
+						countryLifecycle.publishedId,
+						countryLifecycle.draftId,
+					),
+				)
+				// Services are plain records rather than versioned documents, so they join directly.
+				.innerJoin(
+					schema.services,
+					eq(schema.services.id, schema.countryReportServiceKpis.serviceId),
+				)
+				.innerJoin(schema.serviceTypes, eq(schema.serviceTypes.id, schema.services.typeId))
+		);
+	}
+
+	const where = reportingKpiWhere(params, columns);
+
+	const [data, aggregate] = await Promise.all([
+		withJoins(
+			db
+				.select({
+					id: schema.countryReportServiceKpis.id,
+					campaignYear: schema.reportingCampaigns.year,
+					countryName: schema.organisationalUnits.name,
+					entityName: schema.services.name,
+					entityType: schema.serviceTypes.type,
+					kpi: schema.countryReportServiceKpis.kpi,
+					status: schema.countryReports.status,
+					value: schema.countryReportServiceKpis.value,
+				})
+				.from(schema.countryReportServiceKpis)
+				.$dynamic(),
+		)
+			.where(where)
+			.orderBy(
+				reportingKpiOrderBy(params, columns),
+				asc(schema.organisationalUnits.name),
+				asc(schema.services.name),
+				asc(schema.countryReportServiceKpis.id),
+			)
+			.limit(limit)
+			.offset(offset),
+		withJoins(
 			db
 				.select({
 					total: count(),
-					// `SUM` over `numeric` comes back as a string; cast so the caller gets a number.
-					totalAmountEuros: sql<number>`COALESCE(SUM(${schema.countryReportProjectContributions.amountEuros}), 0)::float8`,
+					totalValue: sql<number>`COALESCE(SUM(${schema.countryReportServiceKpis.value}), 0)::float8`,
 				})
-				.from(schema.countryReportProjectContributions)
+				.from(schema.countryReportServiceKpis)
 				.$dynamic(),
 		).where(where),
 	]);
@@ -916,7 +1204,100 @@ export async function getReportingProjectContributionsForAdmin(
 	return {
 		data,
 		total: aggregate[0]?.total ?? 0,
-		totalAmountEuros: aggregate[0]?.totalAmountEuros ?? 0,
+		totalValue: reportingKpiTotalValue(params.kpi, aggregate[0]?.totalValue),
+	};
+}
+
+/** Reported social-media KPIs, one row per (report, account, KPI). Mirrors the service KPIs. */
+export async function getReportingSocialMediaKpisForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetReportingKpisParams>,
+): Promise<ReportingKpisData> {
+	assertAdminUser(currentUser);
+
+	const { limit, offset } = params;
+	const countryLifecycle = alias(schema.documentLifecycle, "country_document_lifecycle");
+	const columns: ReportingKpiColumns = {
+		entityName: schema.socialMedia.name,
+		entityType: schema.socialMediaTypes.type,
+		kpi: schema.countryReportSocialMediaKpis.kpi,
+		value: schema.countryReportSocialMediaKpis.value,
+	};
+
+	function withJoins<TQuery extends PgSelect>(query: TQuery) {
+		return query
+			.innerJoin(
+				schema.countryReports,
+				eq(schema.countryReports.id, schema.countryReportSocialMediaKpis.countryReportId),
+			)
+			.innerJoin(
+				schema.reportingCampaigns,
+				eq(schema.reportingCampaigns.id, schema.countryReports.campaignId),
+			)
+			.innerJoin(
+				countryLifecycle,
+				eq(countryLifecycle.documentId, schema.countryReports.countryDocumentId),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				joinLatestEditableVersion(
+					schema.organisationalUnits.id,
+					countryLifecycle.publishedId,
+					countryLifecycle.draftId,
+				),
+			)
+			.innerJoin(
+				schema.socialMedia,
+				eq(schema.socialMedia.id, schema.countryReportSocialMediaKpis.socialMediaId),
+			)
+			.innerJoin(
+				schema.socialMediaTypes,
+				eq(schema.socialMediaTypes.id, schema.socialMedia.typeId),
+			);
+	}
+
+	const where = reportingKpiWhere(params, columns);
+
+	const [data, aggregate] = await Promise.all([
+		withJoins(
+			db
+				.select({
+					id: schema.countryReportSocialMediaKpis.id,
+					campaignYear: schema.reportingCampaigns.year,
+					countryName: schema.organisationalUnits.name,
+					entityName: schema.socialMedia.name,
+					entityType: schema.socialMediaTypes.type,
+					kpi: schema.countryReportSocialMediaKpis.kpi,
+					status: schema.countryReports.status,
+					value: schema.countryReportSocialMediaKpis.value,
+				})
+				.from(schema.countryReportSocialMediaKpis)
+				.$dynamic(),
+		)
+			.where(where)
+			.orderBy(
+				reportingKpiOrderBy(params, columns),
+				asc(schema.organisationalUnits.name),
+				asc(schema.socialMedia.name),
+				asc(schema.countryReportSocialMediaKpis.id),
+			)
+			.limit(limit)
+			.offset(offset),
+		withJoins(
+			db
+				.select({
+					total: count(),
+					totalValue: sql<number>`COALESCE(SUM(${schema.countryReportSocialMediaKpis.value}), 0)::float8`,
+				})
+				.from(schema.countryReportSocialMediaKpis)
+				.$dynamic(),
+		).where(where),
+	]);
+
+	return {
+		data,
+		total: aggregate[0]?.total ?? 0,
+		totalValue: reportingKpiTotalValue(params.kpi, aggregate[0]?.totalValue),
 	};
 }
 

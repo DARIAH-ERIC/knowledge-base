@@ -124,7 +124,6 @@ catalog:
   react-aria-components: ^1.19.0
   react-dom: ^19.2.8
   react-schemaorg: ^2.0.1
-  recharts: ^3.10.1
   rehype-parse: ^9.0.1
   remark-parse: ^11.0.0
   remark-stringify: ^11.0.0
