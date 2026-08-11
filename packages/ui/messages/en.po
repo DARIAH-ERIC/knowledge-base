@@ -88,6 +88,11 @@ msgctxt "ui"
 msgid "hBhV8k"
 msgstr "Open options"
 
+#: lib/breadcrumbs.tsx:35
+msgctxt "ui"
+msgid "ByoZDD"
+msgstr "Breadcrumbs"
+
 #: lib/calendar.tsx:103
 msgctxt "ui"
 msgid "8mRNBD"

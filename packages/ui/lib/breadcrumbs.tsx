@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRightIcon } from "@heroicons/react/24/solid";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, createContext, use } from "react";
 import {
 	Breadcrumb,
@@ -26,12 +27,17 @@ export function Breadcrumbs<T extends object>({
 	className,
 	...props
 }: Readonly<BreadcrumbsProps<T> & BreadcrumbsContextProps>): ReactNode {
+	const t = useExtracted("ui");
+
 	return (
 		<BreadcrumbsProvider value={{ separator: props.separator }}>
-			<BreadcrumbsPrimitive
-				{...props}
-				className={twMerge("flex items-center gap-2 min-inline-0", className)}
-			/>
+			{/* Breadcrumbs render an `ol`, so they need a navigation landmark of their own. */}
+			<nav aria-label={t("Breadcrumbs")} className="flex min-inline-0" data-slot="breadcrumbs">
+				<BreadcrumbsPrimitive
+					{...props}
+					className={twMerge("flex items-center gap-2 min-inline-0", className)}
+				/>
+			</nav>
 		</BreadcrumbsProvider>
 	);
 }
