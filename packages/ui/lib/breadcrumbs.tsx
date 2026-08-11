@@ -28,17 +28,27 @@ export function Breadcrumbs<T extends object>({
 }: Readonly<BreadcrumbsProps<T> & BreadcrumbsContextProps>): ReactNode {
 	return (
 		<BreadcrumbsProvider value={{ separator: props.separator }}>
-			<BreadcrumbsPrimitive {...props} className={twMerge("flex items-center gap-2", className)} />
+			<BreadcrumbsPrimitive
+				{...props}
+				className={twMerge("flex items-center gap-2 min-inline-0", className)}
+			/>
 		</BreadcrumbsProvider>
 	);
 }
 
 export interface BreadcrumbsItemProps extends BreadcrumbProps, BreadcrumbsContextProps {
 	href?: string;
+	/**
+	 * Allow the label to shrink and be truncated with an ellipsis when horizontal space runs out.
+	 * Items are never wrapped, so this should be set on items with arbitrary-length labels (e.g.
+	 * entity names), while items with short, known labels keep their intrinsic size.
+	 */
+	isTruncated?: boolean;
 }
 
 export function BreadcrumbsItem({
 	href,
+	isTruncated = false,
 	separator = true,
 	className,
 	...props
@@ -49,16 +59,32 @@ export function BreadcrumbsItem({
 
 	return (
 		<Breadcrumb
-			className={cx("flex items-center gap-2 text-sm", className)}
+			className={cx(
+				"flex items-center gap-2 text-sm whitespace-nowrap",
+				isTruncated ? "shrink min-inline-0" : "shrink-0",
+				className,
+			)}
 			data-slot="breadcrumb-item"
 			{...props}
 		>
 			{({ isCurrent }) => (
 				<Fragment>
 					{href != null ? (
-						<Link href={href as string} {...props} />
+						<Link
+							{...props}
+							className={isTruncated ? "truncate min-inline-0" : undefined}
+							href={href as string}
+						/>
 					) : (
-						<span className="cursor-default text-muted-fg">{props.children as ReactNode}</span>
+						<span
+							className={twMerge(
+								"cursor-default text-muted-fg",
+								isTruncated && "truncate min-inline-0",
+							)}
+							data-slot="breadcrumb-label"
+						>
+							{props.children as ReactNode}
+						</span>
 					)}
 					{!isCurrent && effectiveSeparator !== false && <Separator separator={separatorValue} />}
 				</Fragment>

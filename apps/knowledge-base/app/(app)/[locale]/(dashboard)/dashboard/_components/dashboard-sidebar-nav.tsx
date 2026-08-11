@@ -26,12 +26,12 @@ export function DashboardSidebarNav(props: Readonly<DashboardSidebarNavProps>): 
 
 	return (
 		<SidebarNav className="border-be bg-sidebar">
-			<span className="flex items-center gap-x-4">
-				<SidebarTrigger className="-mx-2" />
-				<Separator className="block-6" orientation="vertical" />
+			<span className="flex items-center gap-x-4 min-inline-0">
+				<SidebarTrigger className="-mx-2 shrink-0" />
+				<Separator className="shrink-0 block-6" orientation="vertical" />
 				{breadcrumbs}
 			</span>
-			<div className="ms-auto flex items-center gap-x-2">
+			<div className="ms-auto flex shrink-0 items-center gap-x-2">
 				{isMobile ? (
 					<Fragment>
 						<Button
