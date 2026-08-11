@@ -18,6 +18,7 @@ import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { RelationTypeSuffix } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-type-suffix";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { ImpactCaseStudyContributor } from "@/lib/data/article-contributors";
+import { getEntityDetailHref } from "@/lib/entity-detail-href";
 import { formatRoleType } from "@/lib/format-role-type";
 
 interface ImpactCaseStudyDetailsProps {
@@ -149,6 +150,10 @@ export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsPro
 									showSource={false}
 									source={impactCaseStudy.title}
 									target={contributor.personName}
+									targetHref={getEntityDetailHref({
+										entityType: "persons",
+										slug: contributor.personSlug,
+									})}
 								/>
 							))}
 						</ul>

@@ -225,6 +225,55 @@ export class WebsiteSpotlightArticlesPage {
 	}
 
 	// ---------------------------------------------------------------------------
+	// Edit page — contributors tab
+	// ---------------------------------------------------------------------------
+
+	async goToContributorsTab(): Promise<void> {
+		await this.page.getByRole("tab", { name: "Contributors" }).click();
+	}
+
+	contributorsTable(): Locator {
+		return this.page.getByRole("grid", { name: "contributors" });
+	}
+
+	private async selectContributorPerson(personName: string): Promise<void> {
+		await this.page.getByRole("button", { name: "No person selected" }).click();
+		// `fill` rather than typing into the auto-focused field: `AsyncSelect` keeps its search text in
+		// component state, which closing the popover does not reset.
+		const search = this.page
+			.getByRole("dialog", { name: "No person selected" })
+			.getByRole("searchbox");
+		await search.fill(personName);
+		await search.press("Enter");
+		const option = this.page.getByRole("option", { name: personName });
+		await option.waitFor({ state: "visible" });
+		await option.click();
+		// Wait for the selection to commit — a click landing mid-refresh leaves the field empty, so the
+		// submit fails client validation and fires no POST.
+		await this.page
+			.getByRole("button", { name: "No person selected" })
+			.waitFor({ state: "hidden" });
+	}
+
+	private async selectContributorRole(role: string): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText("Role", { exact: true }) });
+		await control.locator("button").click();
+		await this.page.getByRole("option", { name: role, exact: true }).click();
+	}
+
+	/** Adds a contributor from the edit page's contributors tab and waits for the row to appear. */
+	async addContributor(personName: string, role: string): Promise<void> {
+		await this.selectContributorPerson(personName);
+		await this.selectContributorRole(role);
+		await this.page.getByRole("button", { name: "Add contributor", exact: true }).click();
+		await expect(
+			this.contributorsTable().getByRole("row").filter({ hasText: personName }),
+		).toBeVisible();
+	}
+
+	// ---------------------------------------------------------------------------
 	// List page helpers
 	// ---------------------------------------------------------------------------
 
@@ -283,6 +332,22 @@ export class WebsiteSpotlightArticlesPage {
 
 	detailsPublishedWithDraftChangesBadge(): Locator {
 		return this.page.getByText("Published with draft changes");
+	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — contributors
+	// ---------------------------------------------------------------------------
+
+	detailsContributors(): Locator {
+		return this.page.locator('dt:has-text("Contributors") + dd');
+	}
+
+	detailsContributor(personName: string): Locator {
+		return this.detailsContributors().getByRole("listitem").filter({ hasText: personName });
+	}
+
+	detailsContributorLink(personName: string): Locator {
+		return this.detailsContributors().getByRole("link", { name: personName });
 	}
 
 	// ---------------------------------------------------------------------------

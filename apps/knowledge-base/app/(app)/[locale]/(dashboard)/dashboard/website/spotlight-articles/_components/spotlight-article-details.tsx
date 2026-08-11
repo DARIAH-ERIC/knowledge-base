@@ -14,11 +14,16 @@ import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { FeaturedImageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/featured-image-details";
+import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
 import { RelationTypeSuffix } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-type-suffix";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import type { SpotlightArticleContributor } from "@/lib/data/article-contributors";
+import { getEntityDetailHref } from "@/lib/entity-detail-href";
+import { formatRoleType } from "@/lib/format-role-type";
 
 interface SpotlightArticleDetailsProps {
 	contentBlocks: Array<ContentBlock>;
+	contributors: Array<SpotlightArticleContributor>;
 	documentId: string;
 	hasDraft: boolean;
 	isPublished: boolean;
@@ -40,6 +45,7 @@ interface SpotlightArticleDetailsProps {
 export function SpotlightArticleDetails(props: Readonly<SpotlightArticleDetailsProps>): ReactNode {
 	const {
 		contentBlocks,
+		contributors,
 		documentId,
 		hasDraft,
 		isPublished,
@@ -128,6 +134,27 @@ export function SpotlightArticleDetails(props: Readonly<SpotlightArticleDetailsP
 									<span className="font-medium">{relatedResource.name}</span>
 									<RelationTypeSuffix type={relatedResource.description} />
 								</li>
+							))}
+						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Contributors")}</DescriptionTerm>
+				<DescriptionDetails>
+					{contributors.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{contributors.map((contributor) => (
+								<RelationStatement
+									key={contributor.personId}
+									relation={formatRoleType(contributor.role)}
+									showSource={false}
+									source={spotlightArticle.title}
+									target={contributor.personName}
+									targetHref={getEntityDetailHref({
+										entityType: "persons",
+										slug: contributor.personSlug,
+									})}
+								/>
 							))}
 						</ul>
 					) : null}
