@@ -1,5 +1,5 @@
 import type { JSONContent } from "@tiptap/core";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 
 function renderText(node: JSONContent, key: number): ReactNode {
@@ -22,15 +22,36 @@ function renderText(node: JSONContent, key: number): ReactNode {
 	return <span key={key}>{element}</span>;
 }
 
-function renderNode(node: JSONContent, key: number, isInline: boolean): ReactNode {
+/**
+ * The editor's own marker: an empty `<sup>`, which the `footnotes` CSS counter numbers from its
+ * place in the document. Matches `FootnoteNode`'s `renderHTML`, so a preview inside an editor shows
+ * the same number the editor does.
+ *
+ * A marker is an atom with no content, so it has to be handled before the transparent fallback
+ * below — which would otherwise render it as nothing at all.
+ */
+function renderFootnoteMarker(): ReactNode {
+	return <sup data-footnote="" />;
+}
+
+interface RenderContext {
+	isInline: boolean;
+	renderFootnote: (props: { node: JSONContent }) => ReactNode;
+}
+
+function renderNode(node: JSONContent, key: number, context: RenderContext): ReactNode {
 	if (node.type === "text") {
 		return renderText(node, key);
 	}
 
-	const children = (node.content ?? []).map((child, index) => renderNode(child, index, isInline));
+	if (node.type === "footnote") {
+		return <Fragment key={key}>{context.renderFootnote({ node })}</Fragment>;
+	}
+
+	const children = (node.content ?? []).map((child, index) => renderNode(child, index, context));
 
 	if (node.type === "paragraph") {
-		return isInline ? <span key={key}>{children}</span> : <p key={key}>{children}</p>;
+		return context.isInline ? <span key={key}>{children}</span> : <p key={key}>{children}</p>;
 	}
 
 	// `doc` and any unexpected wrapper node: render children transparently.
@@ -47,6 +68,14 @@ interface InlineRichTextRendererProps {
 	 * by dropping the block boxes.
 	 */
 	isInline?: boolean;
+	/**
+	 * How a footnote marker is drawn. Defaults to the editor's markup, an empty `<sup>` numbered by
+	 * the `footnotes` CSS counter — right for a preview that sits under a counter root.
+	 *
+	 * Read paths that have already walked the document (`numberFootnotes`) pass their own, to anchor
+	 * each marker to its note: a counter can show a number but cannot put one in an `id`.
+	 */
+	renderFootnote?: (props: { node: JSONContent }) => ReactNode;
 }
 
 /**
@@ -56,13 +85,14 @@ interface InlineRichTextRendererProps {
  * lists/tables don't each mount a Tiptap editor.
  */
 export function InlineRichTextRenderer(props: Readonly<InlineRichTextRendererProps>): ReactNode {
-	const { content, className, isInline = false } = props;
+	const { content, className, isInline = false, renderFootnote = renderFootnoteMarker } = props;
 
 	const Element = isInline ? "span" : "div";
+	const context = { isInline, renderFootnote };
 
 	return (
 		<Element className={twMerge("richtext richtext-sm", className)}>
-			{(content.content ?? []).map((node, index) => renderNode(node, index, isInline))}
+			{(content.content ?? []).map((node, index) => renderNode(node, index, context))}
 		</Element>
 	);
 }

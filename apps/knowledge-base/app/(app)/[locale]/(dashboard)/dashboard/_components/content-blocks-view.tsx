@@ -234,7 +234,14 @@ function CaptionFigcaption({
 		 * the `figcaption` is overridden before it reaches the text. The element keeps the spacing.
 		 */
 		<figcaption className={twMerge("mbs-2", className)}>
-			<InlineRichTextRenderer className="text-xs text-muted-fg" content={caption!} />
+			{/* A caption takes footnotes where its article does, and its markers are numbered by the same
+			    walk as the prose (`numberFootnotes` reaches node attributes), so they anchor the same way
+			    — otherwise a caption's marker would be the one number on the page that links nowhere. */}
+			<InlineRichTextRenderer
+				className="text-xs text-muted-fg"
+				content={caption!}
+				renderFootnote={renderFootnoteNode}
+			/>
 		</figcaption>
 	);
 }
