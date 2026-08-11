@@ -575,6 +575,11 @@
 			color: inherit;
 		}
 
+		/** Links carry their own weight, which would otherwise un-bold them inside bold text. */
+		&:where(strong a, thead th a) {
+			font-weight: inherit;
+		}
+
 		&:where(blockquote strong) {
 			color: inherit;
 		}
