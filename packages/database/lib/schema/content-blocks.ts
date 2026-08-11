@@ -168,6 +168,12 @@ export const galleryContentBlocks = p.snakeCase.table("content_blocks_type_galle
 		.primaryKey()
 		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	layout: p.text("layout", { enum: galleryLayoutEnum }).notNull().default("grid"),
+	/**
+	 * A caption for the gallery as a whole — what the set of images shows — alongside the per-item
+	 * captions that credit each one. No `caption_mode` here, unlike every image placement: the
+	 * gallery is not a placement of any one asset, so there is nothing for it to inherit from.
+	 */
+	caption: p.jsonb("caption").$type<JSONContent>(),
 	...f.timestamps(),
 });
 
@@ -214,12 +220,19 @@ export const GalleryContentBlockItemUpdateSchema = createUpdateSchema(galleryCon
  * How an `image` block sits in the content column. A deliberately closed vocabulary — not free-form
  * width/alignment — so authors pick a named layout rather than arbitrary geometry:
  *
- * - `default`: centred, content-column width (the historical behaviour, and the column default);
- * - `wide`/`full`: centred but broken out wider than the text column / to the viewport edge;
+ * - `default`: content-column width (the historical behaviour, and the column default);
+ * - `wide`/`full`: broken out wider than the text column / to the viewport edge;
  * - `float-start`/`float-end`: pulled to the inline-start/-end at a constrained width, with the
  *   following text wrapping around it (what WordPress `alignleft`/`alignright` expressed). This is
  *   presentational float; for an image _semantically bound_ to a passage of text, use `media_text`
  *   instead.
+ *
+ * Each names the _slot_ the block claims, never the size the image is drawn at: an image narrower
+ * than its slot renders at its natural width, centred, and is never upscaled to fill. imgproxy does
+ * not enlarge, so a stretched small source gains no detail and only renders soft — which is why
+ * "centred" is an invariant of every layout here rather than a layout of its own. A renderer that
+ * wants to cap explicitly rather than lean on `width: auto` gets the intrinsic width from the
+ * asset's `width` (null for vectors, and for assets not yet backfilled).
  */
 export const imageLayoutEnum = ["default", "wide", "full", "float-start", "float-end"] as const;
 

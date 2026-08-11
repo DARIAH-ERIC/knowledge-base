@@ -107,6 +107,8 @@ export const MediaTextContentBlockSchema = v.object({
 export const GalleryContentBlockSchema = v.object({
 	type: v.literal("gallery"),
 	layout: v.picklist(schema.galleryLayoutEnum),
+	/** The gallery's caption, describing the set. Each item carries its own image's caption. */
+	caption: v.nullable(v.any()),
 	items: v.array(
 		v.object({
 			image: v.object({
@@ -195,6 +197,7 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			mediaTextLicenseName: mediaTextLicenses.name,
 			mediaTextLicenseUrl: mediaTextLicenses.url,
 			galleryLayout: schema.galleryContentBlocks.layout,
+			galleryCaption: schema.galleryContentBlocks.caption,
 		})
 		.from(schema.fields)
 		.innerJoin(
@@ -456,6 +459,7 @@ function normalizeRow(row: {
 	mediaTextLicenseName: string | null;
 	mediaTextLicenseUrl: string | null;
 	galleryLayout: (typeof schema.galleryLayoutEnum)[number] | null;
+	galleryCaption: JSONContent | null;
 }): ContentBlock {
 	switch (row.blockType) {
 		case "callout": {
@@ -592,7 +596,12 @@ function normalizeRow(row: {
 		case "gallery": {
 			// Items are attached by `getGalleryItems` once every block is known, so one query serves the
 			// whole entity rather than one per gallery.
-			return { type: "gallery", layout: row.galleryLayout ?? "grid", items: [] };
+			return {
+				type: "gallery",
+				layout: row.galleryLayout ?? "grid",
+				caption: row.galleryCaption,
+				items: [],
+			};
 		}
 		default: {
 			throw new Error(`Unknown content block type: ${row.blockType}`);

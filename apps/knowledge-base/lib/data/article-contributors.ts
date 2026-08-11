@@ -85,9 +85,14 @@ export async function getImpactCaseStudyContributors(documentId: string) {
 		.select({
 			personId: schema.impactCaseStudiesToPersons.personDocumentId,
 			personName: schema.persons.name,
+			personSlug: schema.entities.slug,
 			role: schema.impactCaseStudiesToPersons.role,
 		})
 		.from(schema.impactCaseStudiesToPersons)
+		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, schema.impactCaseStudiesToPersons.personDocumentId),
+		)
 		.innerJoin(
 			schema.documentLifecycle,
 			eq(schema.documentLifecycle.documentId, schema.impactCaseStudiesToPersons.personDocumentId),
@@ -96,7 +101,8 @@ export async function getImpactCaseStudyContributors(documentId: string) {
 			schema.persons,
 			sql`${schema.persons.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 		)
-		.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId, documentId));
+		.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId, documentId))
+		.orderBy(schema.persons.sortName);
 }
 
 export type ImpactCaseStudyContributor = Awaited<
@@ -112,9 +118,14 @@ export async function getSpotlightArticleContributors(documentId: string) {
 		.select({
 			personId: schema.spotlightArticlesToPersons.personDocumentId,
 			personName: schema.persons.name,
+			personSlug: schema.entities.slug,
 			role: schema.spotlightArticlesToPersons.role,
 		})
 		.from(schema.spotlightArticlesToPersons)
+		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, schema.spotlightArticlesToPersons.personDocumentId),
+		)
 		.innerJoin(
 			schema.documentLifecycle,
 			eq(schema.documentLifecycle.documentId, schema.spotlightArticlesToPersons.personDocumentId),
@@ -123,7 +134,8 @@ export async function getSpotlightArticleContributors(documentId: string) {
 			schema.persons,
 			sql`${schema.persons.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 		)
-		.where(eq(schema.spotlightArticlesToPersons.spotlightArticleDocumentId, documentId));
+		.where(eq(schema.spotlightArticlesToPersons.spotlightArticleDocumentId, documentId))
+		.orderBy(schema.persons.sortName);
 }
 
 export type SpotlightArticleContributor = Awaited<

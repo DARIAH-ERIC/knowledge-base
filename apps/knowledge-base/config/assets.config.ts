@@ -24,8 +24,16 @@ export const imageSizeLimit = 20 * 1024 * 1024; /** 20 MB */
  */
 export const imageMaxResolution = 50 * 1_000_000; /** 50 megapixels */
 
+/**
+ * The one rendition the dashboard requests for every image it shows: media library tiles, asset
+ * cards, and content-block previews.
+ *
+ * Deliberately no `enlarge` — the rest of the codebase treats "imgproxy does not enlarge" as an
+ * invariant, and `ContentBlocksView` leans on it to draw an image at its natural width. Upscaling
+ * here made every source report 600px, so that guard could only ever cap at the column. Tiles that
+ * want a filled box are `object-cover` in a fixed frame and fill it through CSS anyway.
+ */
 export const imageGridOptions: ImageUrlOptions = {
-	enlarge: 1,
 	gravity: { type: "no" },
 	resizing_type: "fit",
 	width: 600,

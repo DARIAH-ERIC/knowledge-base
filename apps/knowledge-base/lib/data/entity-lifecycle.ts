@@ -240,7 +240,10 @@ async function cloneTypedContentBlock(
 
 		case "gallery": {
 			const [source] = await tx
-				.select({ layout: schema.galleryContentBlocks.layout })
+				.select({
+					layout: schema.galleryContentBlocks.layout,
+					caption: schema.galleryContentBlocks.caption,
+				})
 				.from(schema.galleryContentBlocks)
 				.where(eq(schema.galleryContentBlocks.id, sourceBlockId))
 				.limit(1);

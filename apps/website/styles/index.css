@@ -557,6 +557,11 @@
 			color: inherit;
 		}
 
+		/** Links carry their own weight, which would otherwise un-bold them inside bold text. */
+		&:where(strong a, thead th a) {
+			font-weight: inherit;
+		}
+
 		&:where(blockquote strong) {
 			color: inherit;
 		}
@@ -646,15 +651,6 @@
 			color: var(--richtext-quotes);
 			font-weight: 500;
 			font-style: italic;
-			quotes: "\201C" "\201D" "\2018" "\2019";
-		}
-
-		&:where(blockquote p:first-of-type)::before {
-			content: open-quote;
-		}
-
-		&:where(blockquote p:last-of-type)::after {
-			content: close-quote;
 		}
 
 		&:where(h1) {
@@ -817,6 +813,21 @@
 			font-size: 0.875em;
 			line-height: 1.7142857;
 			text-align: left;
+		}
+
+		/**
+		 * A table's caption is its label, in the same voice a figure's caption speaks in — and in the
+		 * same place, under what it describes.
+		 *
+		 * Only the box moves. The element stays the table's first child, which is what HTML asks for and
+		 * what makes it the table's accessible name; `caption-side` is what a reader sees.
+		 */
+		&:where(caption) {
+			margin-top: 0.8571429em;
+			caption-side: bottom;
+			color: var(--richtext-captions);
+			line-height: 1.4285714;
+			text-align: start;
 		}
 
 		&:where(thead) {

@@ -447,6 +447,9 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 				return {
 					id,
 					layout: "carousel",
+					caption: plainTextToRichText(
+						f.helpers.maybe(() => f.lorem.sentence(), { probability: 0.5 }),
+					),
 				};
 			});
 

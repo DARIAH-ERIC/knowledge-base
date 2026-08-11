@@ -12,10 +12,10 @@ import { withTransaction } from "~/test/lib/with-transaction";
 
 /**
  * The `gallery` block is the only content block whose payload is one-to-many, so it is the only one
- * whose items are fetched separately and stitched back on. These tests pin the two things that can
- * silently break as a result: that items come back in their stored order rather than the
- * database's, and that a gallery next to other blocks disturbs neither their order nor their
- * contents.
+ * whose items are fetched separately and stitched back on. These tests pin what can silently break
+ * as a result: that items come back in their stored order rather than the database's, that a
+ * gallery next to other blocks disturbs neither their order nor their contents, and that the
+ * gallery's own caption — read from the block row, not the item query — survives the stitching.
  */
 
 function paragraph(text: string): JSONContent {
@@ -50,7 +50,12 @@ async function seedNewsItemWithBlocks(
 	db: Database,
 	blocks: Array<
 		| { type: "rich_text"; content: JSONContent }
-		| { type: "gallery"; layout?: "carousel" | "grid"; items: Array<GalleryItemSeed> }
+		| {
+				type: "gallery";
+				layout?: "carousel" | "grid";
+				caption?: JSONContent;
+				items: Array<GalleryItemSeed>;
+		  }
 	>,
 ) {
 	const [status, type, image] = await Promise.all([
@@ -106,7 +111,7 @@ async function seedNewsItemWithBlocks(
 
 		await db
 			.insert(schema.galleryContentBlocks)
-			.values({ id: blockId, layout: block.layout ?? "grid" });
+			.values({ id: blockId, layout: block.layout ?? "grid", caption: block.caption });
 		await db.insert(schema.galleryContentBlockItems).values(
 			block.items.map((item, itemPosition) => {
 				return {
@@ -228,6 +233,55 @@ describe("gallery content blocks", () => {
 				"from the item",
 			]);
 			expect(items.map((item) => item.captionSource)).toStrictEqual(["asset", "block"]);
+		});
+	});
+
+	it("should serve the gallery's own caption beside its items'", async () => {
+		await withTransaction(async (db) => {
+			const assetId = await seedAsset(db, "only.jpg");
+
+			const { slug } = await seedNewsItemWithBlocks(db, [
+				{
+					type: "gallery",
+					caption: paragraph("what the set shows"),
+					items: [{ assetId, caption: paragraph("what this image shows") }],
+				},
+			]);
+
+			const client = createTestClient(db);
+			const response = await client.news.slugs[":slug"].$get({ param: { slug } });
+
+			expect(response.status).toBe(200);
+
+			const body = (await response.json()) as {
+				content: Array<{ caption?: unknown; items?: Array<{ caption: unknown }> }>;
+			};
+			const [block] = body.content;
+
+			// The two are distinct: one describes the gallery, the other credits an image in it.
+			expect(captionText(block?.caption)).toBe("what the set shows");
+			expect(block?.items?.map((item) => captionText(item.caption))).toStrictEqual([
+				"what this image shows",
+			]);
+		});
+	});
+
+	it("should serve a null caption for a gallery that has none", async () => {
+		await withTransaction(async (db) => {
+			const assetId = await seedAsset(db, "only.jpg");
+
+			const { slug } = await seedNewsItemWithBlocks(db, [
+				{ type: "gallery", items: [{ assetId }] },
+			]);
+
+			const client = createTestClient(db);
+			const response = await client.news.slugs[":slug"].$get({ param: { slug } });
+
+			expect(response.status).toBe(200);
+
+			const body = (await response.json()) as { content: Array<{ caption?: unknown }> };
+
+			expect(body.content[0]?.caption).toBeNull();
 		});
 	});
 });

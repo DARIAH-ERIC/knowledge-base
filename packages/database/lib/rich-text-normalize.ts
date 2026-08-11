@@ -70,6 +70,66 @@ function stripImportedHtmlAttributesFromNode(node: JSONContent): JSONContent {
 	return cleanedNode;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
+}
+
+/**
+ * Whether a value is a richtext document. Captions and footnote notes are stored as documents of
+ * their own inside a node's attributes — `{ type: "doc", … }` is what marks one out.
+ */
+function isRichTextDocument(value: unknown): value is JSONContent {
+	return isRecord(value) && value.type === "doc";
+}
+
+/**
+ * Normalises the documents nested in a node's attributes: an image, gallery, media or table
+ * caption, and the note a footnote marker carries.
+ *
+ * These sit outside the content walk — the walk follows `content`, and a caption is not part of the
+ * document it captions — so without this they kept every oddity the surrounding prose had cleaned
+ * away: an imported `target`/`rel` on a link, a non-breaking space, a spacer paragraph.
+ *
+ * Recognised by shape rather than by a list of attribute names, so a caption arriving on a new kind
+ * of block is covered by the day it exists, and so the captions a gallery keeps in an array of item
+ * objects need no case of their own.
+ *
+ * Values are rebuilt only where something below them changed, keeping the structural identity the
+ * caller's no-op diff depends on.
+ */
+function normalizeAttributeValue(value: unknown): unknown {
+	if (isRichTextDocument(value)) {
+		/* A nested document is cleaned by the same walk as the one holding it — a caption is prose,
+		   written in the same editors, so it is normalised by the same rules. */
+		return cleanNode(value) ?? { type: "doc", content: [] };
+	}
+
+	if (Array.isArray(value)) {
+		const items = value.map((item) => normalizeAttributeValue(item));
+		return items.some((item, index) => item !== value[index]) ? items : value;
+	}
+
+	if (isRecord(value)) {
+		const entries = Object.entries(value).map(
+			([key, item]) => [key, normalizeAttributeValue(item)] as const,
+		);
+
+		return entries.some(([key, item]) => item !== value[key]) ? Object.fromEntries(entries) : value;
+	}
+
+	return value;
+}
+
+function normalizeNestedDocuments(node: JSONContent): JSONContent {
+	if (node.attrs == null) {
+		return node;
+	}
+
+	const attrs = normalizeAttributeValue(node.attrs) as JSONContent["attrs"];
+
+	return attrs === node.attrs ? node : { ...node, attrs };
+}
+
 function marksKey(node: JSONContent): string {
 	return JSON.stringify(node.marks ?? []);
 }
@@ -174,7 +234,7 @@ const KEEP_PLACEHOLDER_WHEN_EMPTY = new Set(["tableCell", "tableHeader"]);
  * or heading, or a list/list-item/blockquote that cleaning has left with no content.
  */
 function cleanNode(node: JSONContent): JSONContent | null {
-	const cleanedNode = stripImportedHtmlAttributesFromNode(node);
+	const cleanedNode = normalizeNestedDocuments(stripImportedHtmlAttributesFromNode(node));
 
 	if (cleanedNode.type === "text") {
 		return { ...cleanedNode, text: (cleanedNode.text ?? "").replace(NON_BREAKING_SPACE, " ") };

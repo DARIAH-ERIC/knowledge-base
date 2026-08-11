@@ -1070,6 +1070,7 @@ test.describe("website news admin", () => {
 		const below = `Below the gallery ${randomUUID()}`;
 		const firstCaption = `First gallery caption ${randomUUID()}`;
 		const secondCaption = `Second gallery caption ${randomUUID()}`;
+		const galleryCaption = `Whole gallery caption ${randomUUID()}`;
 
 		await newsPage.gotoCreate();
 		await newsPage.fillTitle(title);
@@ -1082,6 +1083,7 @@ test.describe("website news admin", () => {
 			layout: "Carousel",
 			assetLabel: "E2E Test Asset",
 			captions: [firstCaption, secondCaption],
+			galleryCaption,
 			/** Promote the second item, so stored order differs from the order it was picked in. */
 			moveEarlier: 2,
 		});
@@ -1098,6 +1100,8 @@ test.describe("website news admin", () => {
 			"rich_text",
 		]);
 		expect(contentBlocks[1]).toMatchObject({ galleryLayout: "carousel" });
+		/** The gallery's own caption is stored beside its items', not in place of one of them. */
+		expect(JSON.stringify(contentBlocks[1]!.galleryCaption)).toContain(galleryCaption);
 		expect(captionsInOrder(contentBlocks[1]!.galleryItems)).toStrictEqual([
 			expect.stringContaining(secondCaption),
 			expect.stringContaining(firstCaption),
@@ -1115,6 +1119,7 @@ test.describe("website news admin", () => {
 			"rich_text",
 		]);
 		expect(contentBlocks[1]).toMatchObject({ galleryLayout: "carousel" });
+		expect(JSON.stringify(contentBlocks[1]!.galleryCaption)).toContain(galleryCaption);
 		expect(captionsInOrder(contentBlocks[1]!.galleryItems)).toStrictEqual([
 			expect.stringContaining(secondCaption),
 			expect.stringContaining(firstCaption),

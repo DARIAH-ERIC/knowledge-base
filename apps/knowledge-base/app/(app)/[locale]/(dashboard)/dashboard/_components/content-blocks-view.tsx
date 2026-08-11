@@ -178,12 +178,54 @@ function renderHeadingNode({
 	return <Heading id={id}>{children}</Heading>;
 }
 
+/**
+ * A table, with its caption. The node's own `renderHTML` can only flatten the caption to text — a
+ * DOM output spec has nowhere to render richtext JSON — so the formatting an author gave it, and
+ * any footnote it cites, are assembled here instead, from the `caption` attribute the table
+ * carries.
+ *
+ * The row group is written out here too: overriding the mapping replaces the whole element, and the
+ * rendered rows arrive as bare children.
+ */
+function renderTableNode({
+	node,
+	children,
+}: Readonly<{
+	node: { attrs?: Record<string, unknown> | null };
+	children?: ReactNode | Array<ReactNode>;
+}>): ReactNode {
+	const caption = node.attrs?.caption as JSONContent | null | undefined;
+
+	return (
+		<table>
+			{/* A caption names its table for a screen reader, which is the whole reason it is a
+			    `<caption>` rather than a paragraph above the table. Its footnote markers are numbered by
+			    the same walk as the prose (`numberFootnotes` reaches node attributes), so they anchor
+			    like every other marker on the page. */}
+			{!isEmptyRichTextDocument(caption) ? (
+				<caption>
+					{/* The type is set on the renderer rather than on the `<caption>`, for the same reason
+					    `CaptionFigcaption` does it: the renderer emits its own `richtext` wrapper, which
+					    re-declares colour and size. The element keeps the spacing. */}
+					<InlineRichTextRenderer
+						className="text-sm text-muted-fg"
+						content={caption!}
+						renderFootnote={renderFootnoteNode}
+					/>
+				</caption>
+			) : null}
+			<tbody>{children}</tbody>
+		</table>
+	);
+}
+
 const richTextRenderOptions = {
 	markMapping: { link: renderLinkMark },
 	nodeMapping: {
 		buttonLink: renderButtonLinkNode,
 		footnote: renderFootnoteNode,
 		heading: renderHeadingNode,
+		table: renderTableNode,
 	},
 };
 
@@ -234,7 +276,14 @@ function CaptionFigcaption({
 		 * the `figcaption` is overridden before it reaches the text. The element keeps the spacing.
 		 */
 		<figcaption className={twMerge("mbs-2", className)}>
-			<InlineRichTextRenderer className="text-xs text-muted-fg" content={caption!} />
+			{/* A caption takes footnotes where its article does, and its markers are numbered by the same
+			    walk as the prose (`numberFootnotes` reaches node attributes), so they anchor the same way
+			    — otherwise a caption's marker would be the one number on the page that links nowhere. */}
+			<InlineRichTextRenderer
+				className="text-xs text-muted-fg"
+				content={caption!}
+				renderFootnote={renderFootnoteNode}
+			/>
 		</figcaption>
 	);
 }
@@ -443,13 +492,14 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 		case "gallery": {
 			const layout = contentBlock.content?.layout ?? "grid";
 			const items = contentBlock.content?.items ?? [];
+			const galleryCaption = contentBlock.content?.caption;
 
 			if (items.length === 0) {
 				return null;
 			}
 
-			if (layout === "carousel") {
-				return (
+			const images =
+				layout === "carousel" ? (
 					<div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pbe-2">
 						{items.map((item, idx) => {
 							if (item.imageUrl == null || item.imageUrl === "") {
@@ -470,30 +520,41 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							);
 						})}
 					</div>
+				) : (
+					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{items.map((item, idx) => {
+							if (item.imageUrl == null || item.imageUrl === "") {
+								return null;
+							}
+
+							const { caption } = resolveGalleryItemCaption(item);
+
+							return (
+								<figure key={idx}>
+									<img
+										alt={toPlainText(caption)}
+										className="aspect-4/3 rounded-lg object-cover inline-full"
+										src={item.imageUrl}
+									/>
+									<CaptionFigcaption caption={caption} />
+								</figure>
+							);
+						})}
+					</div>
 				);
+
+			// Only a captioned gallery becomes a figure of its own — the item figures nest inside it,
+			// which is what makes the outer caption read as the set's rather than any one image's. An
+			// uncaptioned gallery keeps its bare grid, so its spacing does not shift.
+			if (isEmptyRichTextDocument(galleryCaption)) {
+				return images;
 			}
 
 			return (
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{items.map((item, idx) => {
-						if (item.imageUrl == null || item.imageUrl === "") {
-							return null;
-						}
-
-						const { caption } = resolveGalleryItemCaption(item);
-
-						return (
-							<figure key={idx}>
-								<img
-									alt={toPlainText(caption)}
-									className="aspect-4/3 rounded-lg object-cover inline-full"
-									src={item.imageUrl}
-								/>
-								<CaptionFigcaption caption={caption} />
-							</figure>
-						);
-					})}
-				</div>
+				<figure className={blockFigurePadding}>
+					{images}
+					<CaptionFigcaption caption={galleryCaption} />
+				</figure>
 			);
 		}
 
@@ -564,7 +625,8 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			// enough (`@lg` ≈ 32rem): a constrained image pulled aside with the following block's text
 			// wrapping, natural aspect ratio so portrait images show in full, and gap on the text side.
 			// In a narrower column it spans the full width so text never wraps in a cramped column.
-			// `wide`/`full` break out past the text column; `default` fills the column.
+			// `wide`/`full` break out past the text column; `default` takes the column. These are the
+			// slot the block claims, not the size the image is drawn at — see below.
 			const figureClassName = {
 				"float-start": "mbe-4 @lg:mbe-2 @lg:me-6 @lg:float-start @lg:inline-[min(18rem,45%)]",
 				"float-end": "mbe-4 @lg:mbe-2 @lg:ms-6 @lg:float-end @lg:inline-[min(18rem,45%)]",
@@ -573,9 +635,19 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 				default: blockFigurePadding,
 			}[layout];
 
+			// The layout picks the slot; the image is drawn at its natural width inside it and centred,
+			// never upscaled to fill. imgproxy does not enlarge, so a source narrower than the slot has
+			// no more detail to give and stretching it only renders it soft — an author who wants a
+			// bigger image needs a bigger upload, not a wider box. The `figcaption` keeps the slot's
+			// width rather than tracking the image: deriving it would need the asset's intrinsic width,
+			// which this preview's block shape does not carry.
 			return (
 				<figure className={figureClassName}>
-					<img alt={contentBlock.content?.alt ?? ""} src={imageUrl} />
+					<img
+						alt={contentBlock.content?.alt ?? ""}
+						className="ms-auto me-auto inline-auto max-inline-full"
+						src={imageUrl}
+					/>
 					<CaptionFigcaption caption={caption} />
 				</figure>
 			);

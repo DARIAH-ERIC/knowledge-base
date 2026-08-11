@@ -1,5 +1,6 @@
 import { collectFootnotes, toPlainText } from "@dariah-eric/ui/rich-text";
-import { createRichTextExtensions, withoutFootnotes } from "@dariah-eric/ui/rich-text-editor";
+import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
+import { withoutFootnotes } from "@dariah-eric/ui/rich-text-footnote";
 import { type JSONContent, getSchema } from "@tiptap/core";
 import { generateHTML, generateJSON } from "@tiptap/html";
 import { renderToHTMLString } from "@tiptap/static-renderer";

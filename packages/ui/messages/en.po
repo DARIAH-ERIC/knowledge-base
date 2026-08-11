@@ -84,6 +84,11 @@ msgctxt "ui"
 msgid "hBhV8k"
 msgstr "Open options"
 
+#: lib/breadcrumbs.tsx
+msgctxt "ui"
+msgid "ByoZDD"
+msgstr "Breadcrumbs"
+
 #: lib/calendar.tsx
 msgctxt "ui"
 msgid "8mRNBD"
@@ -184,6 +189,12 @@ msgctxt "ui"
 msgid "EWw_tK"
 msgstr "Apply"
 
+#: lib/inline-rich-text-editor.tsx
+#: lib/rich-text-actions.tsx
+msgctxt "ui"
+msgid "fhp4gl"
+msgstr "Footnote"
+
 #: lib/pagination.tsx
 msgctxt "ui"
 msgid "ZATT08"
@@ -280,11 +291,6 @@ msgstr "Gallery"
 msgctxt "ui"
 msgid "KP63fg"
 msgstr "Button"
-
-#: lib/rich-text-actions.tsx
-msgctxt "ui"
-msgid "fhp4gl"
-msgstr "Footnote"
 
 #: lib/rich-text-editor.tsx
 msgctxt "ui"
