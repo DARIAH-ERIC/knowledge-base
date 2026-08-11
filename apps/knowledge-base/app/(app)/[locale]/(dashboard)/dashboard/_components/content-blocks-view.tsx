@@ -178,12 +178,54 @@ function renderHeadingNode({
 	return <Heading id={id}>{children}</Heading>;
 }
 
+/**
+ * A table, with its caption. The node's own `renderHTML` can only flatten the caption to text — a
+ * DOM output spec has nowhere to render richtext JSON — so the formatting an author gave it, and
+ * any footnote it cites, are assembled here instead, from the `caption` attribute the table
+ * carries.
+ *
+ * The row group is written out here too: overriding the mapping replaces the whole element, and the
+ * rendered rows arrive as bare children.
+ */
+function renderTableNode({
+	node,
+	children,
+}: Readonly<{
+	node: { attrs?: Record<string, unknown> | null };
+	children?: ReactNode | Array<ReactNode>;
+}>): ReactNode {
+	const caption = node.attrs?.caption as JSONContent | null | undefined;
+
+	return (
+		<table>
+			{/* A caption names its table for a screen reader, which is the whole reason it is a
+			    `<caption>` rather than a paragraph above the table. Its footnote markers are numbered by
+			    the same walk as the prose (`numberFootnotes` reaches node attributes), so they anchor
+			    like every other marker on the page. */}
+			{!isEmptyRichTextDocument(caption) ? (
+				<caption>
+					{/* The type is set on the renderer rather than on the `<caption>`, for the same reason
+					    `CaptionFigcaption` does it: the renderer emits its own `richtext` wrapper, which
+					    re-declares colour and size. The element keeps the spacing. */}
+					<InlineRichTextRenderer
+						className="text-sm text-muted-fg"
+						content={caption!}
+						renderFootnote={renderFootnoteNode}
+					/>
+				</caption>
+			) : null}
+			<tbody>{children}</tbody>
+		</table>
+	);
+}
+
 const richTextRenderOptions = {
 	markMapping: { link: renderLinkMark },
 	nodeMapping: {
 		buttonLink: renderButtonLinkNode,
 		footnote: renderFootnoteNode,
 		heading: renderHeadingNode,
+		table: renderTableNode,
 	},
 };
 

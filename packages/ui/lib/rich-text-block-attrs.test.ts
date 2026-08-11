@@ -3,6 +3,7 @@ import { assert, describe, test } from "vitest";
 
 import {
 	type GalleryItemAttrs,
+	captionFromElementText,
 	normalizeButtonLinkVariant,
 	normalizeCalloutIntent,
 	normalizeGalleryItems,
@@ -64,6 +65,29 @@ describe("caption attribute", () => {
 		const truncated = JSON.stringify(caption("A caption")).slice(0, 20);
 
 		assert.strictEqual(parseCaptionAttr(truncated), null);
+	});
+});
+
+/**
+ * A `<caption>` written elsewhere — an imported or pasted table — is the one caption that never
+ * arrives as JSON, so it is read as text instead of being dropped.
+ */
+describe("caption from a foreign element", () => {
+	test("reads the element's text as a caption document", () => {
+		assert.deepEqual(captionFromElementText("A caption"), caption("A caption"));
+	});
+
+	test("trims the whitespace that markup indentation leaves behind", () => {
+		assert.deepEqual(captionFromElementText("\n\t A caption \n"), caption("A caption"));
+	});
+
+	test.each([
+		["missing", undefined],
+		["null", null],
+		["empty", ""],
+		["whitespace-only", "   "],
+	])("reads a %s element as no caption", (_label, value) => {
+		assert.strictEqual(captionFromElementText(value), null);
 	});
 });
 
