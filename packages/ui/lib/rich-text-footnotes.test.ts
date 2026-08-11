@@ -1,7 +1,7 @@
 import { type JSONContent, getSchema } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 
-import { collectFootnotes, numberFootnotes } from "@/lib/rich-text";
+import { collectFootnotes, numberFootnotes, toPlainText } from "@/lib/rich-text";
 import { createRichTextExtensions } from "@/lib/rich-text-editor";
 
 function note(text: string): JSONContent {
@@ -161,5 +161,82 @@ describe("the footnote node's `number` attribute", () => {
 
 	it("defaults to nothing, so the editor's own markers stay counter-numbered", () => {
 		expect(schema.nodes.footnote!.create({ content: note("a note") }).attrs.number).toBeNull();
+	});
+});
+
+/**
+ * A caption is not prose: it lives in a node's `attrs`, which the walk reaches only because it
+ * visits every value. That makes the number a caption's marker gets a consequence of key order
+ * rather than of anything the schema states, so it is worth pinning down.
+ */
+describe("footnotes in captions", () => {
+	it("numbers a figure caption at the figure's place in the flow", () => {
+		const numbered = numberFootnotes({
+			type: "doc",
+			content: [
+				paragraph(footnote("before the figure")),
+				{
+					type: "assetImage",
+					attrs: {
+						imageKey: "photo",
+						assetCaption: null,
+						caption: { type: "doc", content: [paragraph(footnote("the caption"))] },
+						captionMode: "override",
+					},
+				},
+				paragraph(footnote("after the figure")),
+			],
+		});
+
+		expect(collectFootnotes(numbered).map((content) => toPlainText(content))).toStrictEqual([
+			"before the figure",
+			"the caption",
+			"after the figure",
+		]);
+		expect(numbersIn(numbered)).toStrictEqual([1, 2, 3]);
+	});
+
+	it("numbers a media block's caption before the prose beside it", () => {
+		// `getJSON` emits `{ type, attrs, content }`, so the caption in `attrs` is reached first. The
+		// figure reads as preceding the passage bound to it, so this is the order a reader wants —
+		// but it follows from key order, not from anything that says so.
+		const numbered = numberFootnotes({
+			type: "mediaTextBlock",
+			attrs: {
+				imageKey: "portrait",
+				caption: { type: "doc", content: [paragraph(footnote("the caption"))] },
+			},
+			content: [paragraph(footnote("the body"))],
+		});
+
+		expect(collectFootnotes(numbered).map((content) => toPlainText(content))).toStrictEqual([
+			"the caption",
+			"the body",
+		]);
+	});
+
+	it("keeps an inherited asset caption out of the count", () => {
+		// `assetCaption` is a copy of the asset's own caption, carried on the node so a placement can
+		// preview what it inherits. It is not this document's text: a marker in it would number a note
+		// the article never wrote, in every article placing that image. Asset captions are therefore
+		// guarded at the point they are written; this pins what breaks if that guard ever lapses.
+		const numbered = numberFootnotes({
+			type: "doc",
+			content: [
+				{
+					type: "assetImage",
+					attrs: {
+						imageKey: "photo",
+						assetCaption: { type: "doc", content: [paragraph(footnote("from the asset"))] },
+						caption: null,
+						captionMode: "hidden",
+					},
+				},
+			],
+		});
+
+		expect(collectFootnotes(numbered).map((content) => toPlainText(content))).toStrictEqual([
+			"from the asset",
+		]);
 	});
 });

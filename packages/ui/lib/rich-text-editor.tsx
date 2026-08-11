@@ -6,13 +6,11 @@ import {
 	placeholderValueKindLabels,
 	placeholderValueKindsEnum,
 } from "@dariah-eric/database/placeholder-values";
-import { Extension, type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
+import { type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
 import { TableKit } from "@tiptap/extension-table/kit";
 import { Typography } from "@tiptap/extension-typography";
-import { Fragment, type Node as ProseMirrorNode, Slice } from "@tiptap/pm/model";
-import { Plugin, PluginKey } from "@tiptap/pm/state";
 import {
 	EditorContent,
 	NodeViewContent,
@@ -66,12 +64,7 @@ import {
 } from "@/lib/menu";
 import { Note } from "@/lib/note";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
-import {
-	collectFootnotes,
-	formatPlaceholderValue,
-	isEmptyRichTextDocument,
-	toPlainText,
-} from "@/lib/rich-text";
+import { collectFootnotes, formatPlaceholderValue, isEmptyRichTextDocument } from "@/lib/rich-text";
 import {
 	type RichTextInsertableBlock,
 	selectRichTextActiveState,
@@ -97,6 +90,8 @@ import {
 	serializeCaptionAttr,
 	serializeGalleryItemsAttr,
 } from "@/lib/rich-text-block-attrs";
+import { FootnotePasteGuard } from "@/lib/rich-text-footnote";
+import { FootnoteNode, inlineFootnoteExtensions } from "@/lib/rich-text-footnote-node";
 import {
 	type SlashCommandHandlers,
 	SlashCommandMenu,
@@ -313,6 +308,10 @@ function getEmbedUrl(url: string): string {
 	return url;
 }
 
+interface EmbedNodeViewProps extends NodeViewProps {
+	hasFootnotes?: boolean;
+}
+
 function EmbedNodeView({
 	editor,
 	getPos,
@@ -320,7 +319,8 @@ function EmbedNodeView({
 	selected,
 	updateAttributes,
 	deleteNode,
-}: Readonly<NodeViewProps>): ReactNode {
+	hasFootnotes = false,
+}: Readonly<EmbedNodeViewProps>): ReactNode {
 	const url = node.attrs.url as string | null;
 	const title = node.attrs.title as string | null;
 	const caption = node.attrs.caption as JSONContent | null;
@@ -409,6 +409,7 @@ function EmbedNodeView({
 							<InlineRichTextEditor
 								aria-label="Caption"
 								content={caption ?? undefined}
+								extensions={hasFootnotes ? inlineFootnoteExtensions : undefined}
 								onChange={setCaptionJson}
 							/>
 						</div>
@@ -505,53 +506,57 @@ function EmbedNodeView({
  * Block-level embed node (YouTube, iframes). Stores url/title/caption and renders an inline editing
  * UI via a React NodeView.
  */
-export const EmbedNode = Node.create({
-	name: "embedBlock",
-	group: "block",
-	atom: true,
-	draggable: true,
-	selectable: true,
+function createEmbedNode(hasFootnotes = false): Node {
+	return Node.create({
+		name: "embedBlock",
+		group: "block",
+		atom: true,
+		draggable: true,
+		selectable: true,
 
-	addAttributes() {
-		return {
-			url: { default: null },
-			title: { default: null },
-			caption: { default: null },
-		};
-	},
+		addAttributes() {
+			return {
+				url: { default: null },
+				title: { default: null },
+				caption: { default: null },
+			};
+		},
 
-	parseHTML() {
-		return [
-			{
-				tag: "div[data-embed-block]",
-				getAttrs(dom) {
-					const el = dom;
-					return {
-						url: el.dataset.url,
-						title: el.dataset.title,
-						caption: parseCaptionAttr(el.dataset.caption),
-					};
+		parseHTML() {
+			return [
+				{
+					tag: "div[data-embed-block]",
+					getAttrs(dom) {
+						const el = dom;
+						return {
+							url: el.dataset.url,
+							title: el.dataset.title,
+							caption: parseCaptionAttr(el.dataset.caption),
+						};
+					},
 				},
-			},
-		];
-	},
+			];
+		},
 
-	renderHTML({ node }) {
-		return [
-			"div",
-			{
-				"data-embed-block": "",
-				"data-url": node.attrs.url as string | null,
-				"data-title": node.attrs.title as string | null,
-				"data-caption": serializeCaptionAttr(node.attrs.caption as JSONContent | null),
-			},
-		];
-	},
+		renderHTML({ node }) {
+			return [
+				"div",
+				{
+					"data-embed-block": "",
+					"data-url": node.attrs.url as string | null,
+					"data-title": node.attrs.title as string | null,
+					"data-caption": serializeCaptionAttr(node.attrs.caption as JSONContent | null),
+				},
+			];
+		},
 
-	addNodeView() {
-		return ReactNodeViewRenderer(EmbedNodeView);
-	},
-});
+		addNodeView() {
+			return ReactNodeViewRenderer((props) => (
+				<EmbedNodeView {...props} hasFootnotes={hasFootnotes} />
+			));
+		},
+	});
+}
 
 function CalloutNodeView({
 	editor,
@@ -1099,242 +1104,8 @@ export const PlaceholderValueNode = Node.create({
 	},
 });
 
-/**
- * Inline footnote: a marker in the prose which carries its own note text.
- *
- * The note lives in the marker's `content` attribute. Prior art splits two ways: the ProseMirror
- * footnote example keeps the note as the marker's node _content_, edited through a popup
- * sub-editor, while `buttondown/tiptap-footnotes` puts a `footnotes` list at the end of the
- * document and links the two by uuid.
- *
- * The list is out because a document here is split into content blocks on save
- * (`splitDocumentToBlocks` in the app): a trailing list would land in whichever block happened to
- * be last while its markers stayed behind in the others. It also needs a plugin to renumber, to
- * strip orphans and to re-key pasted references, none of which can go wrong if there is nothing to
- * keep in sync. An attribute rather than node content keeps the note out of the editable flow, so a
- * caption editor can own it.
- *
- * Either way marker and note move, copy and delete as one: a note can never be orphaned, and a
- * marker can never point at a note that is gone — exactly the failure the hand-numbered `[1]`/`[2]`
- * references in the migrated WordPress case studies show.
- *
- * No number is stored. Markers number themselves from document order through a CSS counter (see the
- * `footnotes` utility in the stylesheet), so inserting one renumbers the rest for free; read paths
- * that build their own list (the dashboard preview, the public site) number it the same way, by
- * walking the document.
- */
-function FootnoteNodeView({
-	editor,
-	getPos,
-	node,
-	selected,
-	updateAttributes,
-	deleteNode,
-}: Readonly<NodeViewProps>): ReactNode {
-	const content = node.attrs.content as JSONContent | null;
-
-	const [isOpen, setIsOpen] = useState(content == null && editor.isEditable);
-	const [contentInput, setContentInput] = useState<JSONContent | null>(content);
-
-	const text = toPlainText(content);
-
-	if (!editor.isEditable) {
-		return <NodeViewWrapper as="sup" data-footnote="" />;
-	}
-
-	function selectNode() {
-		const pos = getPos();
-		if (typeof pos === "number") {
-			editor.commands.setNodeSelection(pos);
-		}
-	}
-
-	function handleApply() {
-		if (isEmptyRichTextDocument(contentInput)) {
-			return;
-		}
-		updateAttributes({ content: contentInput });
-		setIsOpen(false);
-	}
-
-	function handleOpenChange(open: boolean) {
-		if (open) {
-			selectNode();
-			setContentInput(content);
-			setIsOpen(true);
-			return;
-		}
-		// A marker whose note was never written points at nothing, so dismissing it removes it rather
-		// than leaving an empty number in the text.
-		if (content == null) {
-			deleteNode();
-			return;
-		}
-		setIsOpen(false);
-	}
-
-	return (
-		<NodeViewWrapper as="span" className="inline align-baseline" contentEditable={false}>
-			<Popover isOpen={isOpen} onOpenChange={handleOpenChange}>
-				<Tooltip>
-					<PopoverTrigger
-						/* The number itself is the CSS counter's `::before`, so it sits inside the trigger and
-						   the whole marker — number included — is what opens the note. */
-						aria-label={text !== "" ? `Footnote: ${text}` : "Footnote"}
-						className={twMerge(
-							"cursor-pointer align-super text-[0.75em] font-medium text-primary underline decoration-dotted underline-offset-2",
-							selected && "bg-primary-subtle/50",
-						)}
-						data-footnote=""
-					/>
-					{text !== "" ? <TooltipContent inverse={true}>{text}</TooltipContent> : null}
-				</Tooltip>
-				<PopoverContent className="p-3">
-					<form
-						className="flex flex-col gap-2 inline-72"
-						onSubmit={(e) => {
-							e.preventDefault();
-							handleApply();
-						}}
-					>
-						<div className="flex flex-col gap-y-1">
-							<span className="text-sm/6 font-medium">{"Note"}</span>
-							<InlineRichTextEditor
-								aria-label="Footnote text"
-								content={contentInput ?? undefined}
-								onChange={setContentInput}
-							/>
-						</div>
-						<div className="flex gap-2">
-							<Button
-								className="flex-1"
-								intent="primary"
-								isDisabled={isEmptyRichTextDocument(contentInput)}
-								size="sm"
-								type="submit"
-							>
-								{"Apply"}
-							</Button>
-							<Button intent="outline" onPress={deleteNode} size="sm" type="button">
-								{"Remove"}
-							</Button>
-						</div>
-					</form>
-				</PopoverContent>
-			</Popover>
-		</NodeViewWrapper>
-	);
-}
-
-export const FootnoteNode = Node.create({
-	name: "footnote",
-	group: "inline",
-	inline: true,
-	atom: true,
-	selectable: true,
-	draggable: false,
-
-	addAttributes() {
-		return {
-			/** The note itself, as the constrained `{ doc > paragraph }` richtext captions also use. */
-			content: { default: null },
-			/**
-			 * The marker's place in the document, attached by read paths (`numberFootnotes`) so a
-			 * renderer can anchor a marker to its note. Never authored and never serialised: the editor
-			 * numbers its markers from the `footnotes` CSS counter instead, which is what lets an
-			 * insertion renumber the rest for free.
-			 */
-			number: {
-				default: null,
-				parseHTML: () => null,
-				renderHTML: () => {
-					return {};
-				},
-			},
-		};
-	},
-
-	parseHTML() {
-		return [
-			{
-				tag: "sup[data-footnote]",
-				getAttrs(dom) {
-					return { content: parseCaptionAttr(dom.dataset.content) };
-				},
-			},
-		];
-	},
-
-	renderHTML({ node }) {
-		// The marker has no text of its own: its number comes from the `footnotes` CSS counter, and
-		// whoever renders the note list walks the document rather than reading it back out of here.
-		//
-		// The empty string child is what closes the tag. Serialized without one this is `<sup/>`, and
-		// HTML has no self-closing syntax for `sup`: a parser reads that as an *open* tag and
-		// superscripts the rest of the paragraph.
-		return [
-			"sup",
-			mergeAttributes({
-				"data-footnote": "",
-				"data-content": serializeCaptionAttr(node.attrs.content as JSONContent | null),
-			}),
-			"",
-		];
-	},
-
-	addNodeView() {
-		return ReactNodeViewRenderer(FootnoteNodeView);
-	},
-});
-
-/** A fragment with every footnote marker dropped, at any depth. */
-export function withoutFootnotes(fragment: Fragment): Fragment {
-	const nodes: Array<ProseMirrorNode> = [];
-
-	fragment.forEach((node) => {
-		if (node.type.name === "footnote") {
-			return;
-		}
-		// Text nodes hold a string rather than a fragment, so they are taken as they are; everything
-		// else is rebuilt around its filtered content.
-		nodes.push(node.isText ? node : node.copy(withoutFootnotes(node.content)));
-	});
-
-	return Fragment.fromArray(nodes);
-}
-
-/**
- * Drops footnotes out of pasted content, for the editors that do not offer them.
- *
- * Whether a field takes footnotes is a decision about the kind of text it holds — a case study
- * cites its evidence, a person's biography does not — and hiding the insert action only covers the
- * way an author would add one deliberately. Copying a paragraph across from a case study would
- * otherwise carry its markers into a field whose readers have nowhere to read them.
- *
- * A guard rather than a smaller schema: the node stays in every editor's schema, so a document that
- * already holds footnotes still opens (and still renders them) in a field where the feature was
- * since turned off, instead of failing on an unknown node type.
- */
-const FootnotePasteGuard = Extension.create({
-	name: "footnotePasteGuard",
-
-	addProseMirrorPlugins() {
-		return [
-			new Plugin({
-				key: new PluginKey("footnotePasteGuard"),
-				props: {
-					transformPasted(slice) {
-						// Footnotes are inline atoms inside textblocks, so dropping them leaves the block
-						// structure — and with it the slice's open depths — untouched.
-						return new Slice(withoutFootnotes(slice.content), slice.openStart, slice.openEnd);
-					},
-				},
-			}),
-		];
-	},
-});
-
 interface AssetImageNodeViewProps extends NodeViewProps {
+	hasFootnotes?: boolean;
 	renderImagePicker?: ImagePickerRenderer;
 	renderAssetMetadata?: AssetMetadataRenderer;
 }
@@ -1348,6 +1119,7 @@ function AssetImageNodeView({
 	deleteNode,
 	renderImagePicker,
 	renderAssetMetadata,
+	hasFootnotes = false,
 }: Readonly<AssetImageNodeViewProps>): ReactNode {
 	const imageKey = node.attrs.imageKey as string | null;
 	const imageUrl = node.attrs.imageUrl as string | null;
@@ -1525,6 +1297,7 @@ function AssetImageNodeView({
 							<InlineRichTextEditor
 								aria-label="Custom caption"
 								content={captionJson ?? undefined}
+								extensions={hasFootnotes ? inlineFootnoteExtensions : undefined}
 								onChange={setCaptionJson}
 							/>
 						) : null}
@@ -1618,6 +1391,7 @@ function AssetImageNodeView({
 function createAssetImageNode(
 	renderImagePicker?: ImagePickerRenderer,
 	renderAssetMetadata?: AssetMetadataRenderer,
+	hasFootnotes = false,
 ): Node {
 	return Node.create({
 		name: "assetImage",
@@ -1688,6 +1462,7 @@ function createAssetImageNode(
 			return ReactNodeViewRenderer((props) => (
 				<AssetImageNodeView
 					{...props}
+					hasFootnotes={hasFootnotes}
 					renderAssetMetadata={renderAssetMetadata}
 					renderImagePicker={renderImagePicker}
 				/>
@@ -1697,6 +1472,7 @@ function createAssetImageNode(
 }
 
 interface MediaTextNodeViewProps extends NodeViewProps {
+	hasFootnotes?: boolean;
 	renderImagePicker?: ImagePickerRenderer;
 	renderAssetMetadata?: AssetMetadataRenderer;
 }
@@ -1716,6 +1492,7 @@ function MediaTextNodeView({
 	deleteNode,
 	renderImagePicker,
 	renderAssetMetadata,
+	hasFootnotes = false,
 }: Readonly<MediaTextNodeViewProps>): ReactNode {
 	const imageKey = node.attrs.imageKey as string | null;
 	const imageUrl = node.attrs.imageUrl as string | null;
@@ -1814,6 +1591,7 @@ function MediaTextNodeView({
 							<InlineRichTextEditor
 								aria-label="Custom caption"
 								content={captionInput ?? undefined}
+								extensions={hasFootnotes ? inlineFootnoteExtensions : undefined}
 								onChange={setCaptionInput}
 							/>
 						) : null}
@@ -1924,6 +1702,7 @@ function MediaTextNodeView({
 function createMediaTextNode(
 	renderImagePicker?: ImagePickerRenderer,
 	renderAssetMetadata?: AssetMetadataRenderer,
+	hasFootnotes = false,
 ): Node {
 	return Node.create({
 		name: "mediaTextBlock",
@@ -2001,6 +1780,7 @@ function createMediaTextNode(
 			return ReactNodeViewRenderer((props) => (
 				<MediaTextNodeView
 					{...props}
+					hasFootnotes={hasFootnotes}
 					renderAssetMetadata={renderAssetMetadata}
 					renderImagePicker={renderImagePicker}
 				/>
@@ -2010,6 +1790,7 @@ function createMediaTextNode(
 }
 
 interface GalleryNodeViewProps extends NodeViewProps {
+	hasFootnotes?: boolean;
 	renderImagePicker?: ImagePickerRenderer;
 	renderAssetMetadata?: AssetMetadataRenderer;
 }
@@ -2030,6 +1811,7 @@ function GalleryNodeView({
 	deleteNode,
 	renderImagePicker,
 	renderAssetMetadata,
+	hasFootnotes = false,
 }: Readonly<GalleryNodeViewProps>): ReactNode {
 	const layout = normalizeGalleryLayout(node.attrs.layout);
 	const items = useMemo(() => normalizeGalleryItems(node.attrs.items), [node.attrs.items]);
@@ -2212,6 +1994,7 @@ function GalleryNodeView({
 									<InlineRichTextEditor
 										aria-label={`Custom caption for image ${String(index + 1)}`}
 										content={item.caption ?? undefined}
+										extensions={hasFootnotes ? inlineFootnoteExtensions : undefined}
 										onChange={(caption) => {
 											updateItem(index, { caption });
 										}}
@@ -2352,6 +2135,7 @@ function GalleryNodeView({
 function createGalleryNode(
 	renderImagePicker?: ImagePickerRenderer,
 	renderAssetMetadata?: AssetMetadataRenderer,
+	hasFootnotes = false,
 ): Node {
 	return Node.create({
 		name: "galleryBlock",
@@ -2396,6 +2180,7 @@ function createGalleryNode(
 			return ReactNodeViewRenderer((props) => (
 				<GalleryNodeView
 					{...props}
+					hasFootnotes={hasFootnotes}
 					renderAssetMetadata={renderAssetMetadata}
 					renderImagePicker={renderImagePicker}
 				/>
@@ -2483,6 +2268,14 @@ const LinkWithTargets = Link.extend({
 });
 
 interface CreateRichTextExtensionsOptions {
+	/**
+	 * Whether the caption editors on the block nodes offer footnotes. Follows the field's own opt-in:
+	 * a caption cites the same evidence its article does, so the two are one decision.
+	 *
+	 * `FootnoteNode` is in the schema either way — see {@link FootnotePasteGuard} — so this only
+	 * decides what a caption editor offers, never what it can open.
+	 */
+	hasFootnotes?: boolean;
 	renderImagePicker?: ImagePickerRenderer;
 	renderAssetMetadata?: AssetMetadataRenderer;
 	/**
@@ -2537,10 +2330,22 @@ export function createRichTextExtensions(
 		TableKit.configure({ table: { resizable: false } }),
 		LinkWithTargets,
 		Image,
-		createAssetImageNode(options?.renderImagePicker, options?.renderAssetMetadata),
-		createMediaTextNode(options?.renderImagePicker, options?.renderAssetMetadata),
-		createGalleryNode(options?.renderImagePicker, options?.renderAssetMetadata),
-		EmbedNode,
+		createAssetImageNode(
+			options?.renderImagePicker,
+			options?.renderAssetMetadata,
+			options?.hasFootnotes,
+		),
+		createMediaTextNode(
+			options?.renderImagePicker,
+			options?.renderAssetMetadata,
+			options?.hasFootnotes,
+		),
+		createGalleryNode(
+			options?.renderImagePicker,
+			options?.renderAssetMetadata,
+			options?.hasFootnotes,
+		),
+		createEmbedNode(options?.hasFootnotes),
 		CalloutNode,
 		ButtonLinkNode,
 		PlaceholderValueNode,
@@ -2584,6 +2389,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 	const extensions = useMemo(
 		() => [
 			...createRichTextExtensions({
+				hasFootnotes,
 				renderImagePicker,
 				renderAssetMetadata,
 				slashCommandHandlersRef: isEditable ? slashCommandHandlersRef : undefined,

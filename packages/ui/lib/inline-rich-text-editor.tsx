@@ -3,7 +3,7 @@
 import type { Extensions, JSONContent } from "@tiptap/core";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
-import { BoldIcon, ItalicIcon, LinkIcon } from "lucide-react";
+import { BoldIcon, ItalicIcon, LinkIcon, SuperscriptIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
@@ -11,6 +11,7 @@ import { twMerge } from "tailwind-merge";
 import { Button } from "@/lib/button";
 import { Input } from "@/lib/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
+import { FootnotePasteGuard } from "@/lib/rich-text-footnote";
 import { RichTextEditorToolbarButton } from "@/lib/rich-text-toolbar-button";
 import { Tooltip, TooltipContent } from "@/lib/tooltip";
 
@@ -18,10 +19,28 @@ interface InlineRichTextEditorProps {
 	"aria-label"?: string;
 	className?: string;
 	content?: JSONContent;
+	/**
+	 * Extensions on top of the inline set — today only `FootnoteNode`, for the captions that carry a
+	 * citation apparatus.
+	 *
+	 * Passed in rather than switched on by a flag, so that this module never imports the footnote
+	 * node. The node's own note is written with this editor, and a note that could hold a footnote
+	 * would break the one thing the read paths rely on: that walking a document finds every marker
+	 * exactly once, in reading order. Here the note editor simply passes nothing, and nesting is
+	 * impossible rather than merely discouraged.
+	 *
+	 * Pass a stable reference — a module-level constant. The schema is rebuilt whenever this array
+	 * changes identity, and that pushes `setOptions` through the live editor, so an inline literal
+	 * would do so on every render.
+	 */
+	extensions?: Extensions;
 	isEditable?: boolean;
 	name?: string;
 	onChange?: (content: JSONContent) => void;
 }
+
+/** Stable default, so the schema is not rebuilt on every render of a caller that passes none. */
+const noExtensions: Extensions = [];
 
 function normalizeInitialContent(content: JSONContent | undefined): JSONContent | undefined {
 	if (content == null) {
@@ -41,8 +60,14 @@ function normalizeInitialContent(content: JSONContent | undefined): JSONContent 
  * block, horizontal rule, hard break) is disabled so captions stay a single line of formatted text,
  * and the output JSON matches the `{ doc > paragraph > text }` shape used everywhere captions are
  * rendered.
+ *
+ * `extensions` widens that set — see {@link InlineRichTextEditorProps.extensions}. Whatever it does
+ * not bring in is also refused by paste, the same opt-in the block editor applies: hiding an action
+ * only covers the way an author would use it deliberately.
  */
-export function createInlineRichTextExtensions(): Extensions {
+export function createInlineRichTextExtensions(extensions: Extensions = []): Extensions {
+	const hasFootnotes = extensions.some((extension) => extension.name === "footnote");
+
 	return [
 		StarterKit.configure({
 			heading: false,
@@ -60,17 +85,32 @@ export function createInlineRichTextExtensions(): Extensions {
 				defaultProtocol: "https",
 			},
 		}),
+		...(hasFootnotes ? [] : [FootnotePasteGuard]),
+		...extensions,
 	];
 }
 
 export function InlineRichTextEditor(props: Readonly<InlineRichTextEditorProps>): ReactNode {
-	const { "aria-label": ariaLabel, className, content, isEditable = true, name, onChange } = props;
+	const {
+		"aria-label": ariaLabel,
+		className,
+		content,
+		extensions: extraExtensions = noExtensions,
+		isEditable = true,
+		name,
+		onChange,
+	} = props;
 
 	const t = useExtracted("ui");
 
 	const initialContent = useMemo(() => normalizeInitialContent(content), [content]);
 
-	const extensions = useMemo(() => createInlineRichTextExtensions(), []);
+	const extensions = useMemo(
+		() => createInlineRichTextExtensions(extraExtensions),
+		[extraExtensions],
+	);
+
+	const hasFootnotes = extraExtensions.some((extension) => extension.name === "footnote");
 
 	const editor = useEditor({
 		extensions,
@@ -249,6 +289,21 @@ export function InlineRichTextEditor(props: Readonly<InlineRichTextEditorProps>)
 							</form>
 						</PopoverContent>
 					</Popover>
+					{hasFootnotes ? (
+						<RichTextEditorToolbarButton
+							aria-label={t("Footnote")}
+							icon={SuperscriptIcon}
+							onClick={() => {
+								editor
+									.chain()
+									.focus()
+									// Inserted empty: the node view opens its own note editor as it mounts, and
+									// removes the marker again if it is dismissed without a note.
+									.insertContent({ type: "footnote", attrs: { content: null } })
+									.run();
+							}}
+						/>
+					) : null}
 				</div>
 			) : null}
 			{name != null && (
