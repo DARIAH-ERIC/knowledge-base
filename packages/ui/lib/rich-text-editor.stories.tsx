@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { JSONContent } from "@tiptap/core";
-import { fn } from "storybook/test";
+import { expect, fn } from "storybook/test";
 
 import { RichTextEditor, RichTextRenderer } from "./rich-text-editor";
 
@@ -100,6 +100,47 @@ const footnoteContent: JSONContent = {
 	],
 };
 
+function cell(type: "tableCell" | "tableHeader", text: string): JSONContent {
+	return { type, content: [{ type: "paragraph", content: [{ type: "text", text }] }] };
+}
+
+const tableContent: JSONContent = {
+	type: "doc",
+	content: [
+		{
+			type: "table",
+			attrs: {
+				caption: {
+					type: "doc",
+					content: [
+						{
+							type: "paragraph",
+							content: [
+								{ type: "text", text: "Table 1: ", marks: [{ type: "bold" }] },
+								{ type: "text", text: "hackathon participants per year" },
+							],
+						},
+					],
+				},
+			},
+			content: [
+				{
+					type: "tableRow",
+					content: [cell("tableHeader", "Year"), cell("tableHeader", "Participants")],
+				},
+				{
+					type: "tableRow",
+					content: [cell("tableCell", "2015"), cell("tableCell", "42")],
+				},
+				{
+					type: "tableRow",
+					content: [cell("tableCell", "2016"), cell("tableCell", "58")],
+				},
+			],
+		},
+	],
+};
+
 const meta = {
 	title: "Components/RichTextEditor",
 	component: RichTextEditor,
@@ -169,6 +210,33 @@ export const WithFootnotes: Story = {
 	args: {
 		content: footnoteContent,
 		blocks: ["footnote"],
+	},
+	render(props) {
+		return (
+			<div className="inline-160">
+				<RichTextEditor {...props} />
+			</div>
+		);
+	},
+};
+
+/**
+ * A table's caption is stored on the table rather than in it — `prosemirror-tables` reads a table's
+ * children as its rows — and assembled into a real `<caption>` element by this node view and by the
+ * read paths, so a screen reader announces it as the table's name. It takes the same formatting the
+ * image captions do: bold, italic, links and, where the field offers them, footnotes.
+ */
+export const WithTableCaption: Story = {
+	args: {
+		content: tableContent,
+	},
+	async play({ canvas }) {
+		const table = canvas.getByRole("table");
+
+		// The caption has to be the table's first child to name it, and the row group is appended by
+		// the node view renderer itself — so the order is worth asserting rather than assuming.
+		await expect(table.firstElementChild?.tagName).toBe("CAPTION");
+		await expect(table).toHaveAccessibleName("Table 1: hackathon participants per year");
 	},
 	render(props) {
 		return (

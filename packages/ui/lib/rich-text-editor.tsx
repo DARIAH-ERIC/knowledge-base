@@ -9,6 +9,7 @@ import {
 import { type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
+import { Table } from "@tiptap/extension-table";
 import { TableKit } from "@tiptap/extension-table/kit";
 import { Typography } from "@tiptap/extension-typography";
 import {
@@ -64,7 +65,12 @@ import {
 } from "@/lib/menu";
 import { Note } from "@/lib/note";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
-import { collectFootnotes, formatPlaceholderValue, isEmptyRichTextDocument } from "@/lib/rich-text";
+import {
+	collectFootnotes,
+	formatPlaceholderValue,
+	isEmptyRichTextDocument,
+	toPlainText,
+} from "@/lib/rich-text";
 import {
 	type RichTextInsertableBlock,
 	selectRichTextActiveState,
@@ -78,6 +84,7 @@ import {
 	type ImageCaptionMode,
 	type ImageLayout,
 	type MediaTextSide,
+	captionFromElementText,
 	normalizeButtonLinkVariant,
 	normalizeCalloutIntent,
 	normalizeGalleryItems,
@@ -2189,6 +2196,207 @@ function createGalleryNode(
 	});
 }
 
+interface TableNodeViewProps extends NodeViewProps {
+	hasFootnotes?: boolean;
+}
+
+/**
+ * A table's caption, edited in place. Everything else about the table is ordinary document content
+ * rendered through the row group below.
+ *
+ * The caption lives in an attribute rather than in the table's content, because
+ * `prosemirror-tables` reads a table's children positionally — `TableMap` takes `childCount` for
+ * the row count and each child as a row — so a caption node inside the table would shift every row
+ * index and corrupt the column map the cell commands depend on. Kept in `attrs`, it is invisible to
+ * all of that, and only this node view and the read paths ever assemble the `<caption>` element.
+ *
+ * Committed on Apply rather than per keystroke, like the other caption editors here: a nested
+ * `InlineRichTextEditor` writing to `updateAttributes` on every character would dispatch a
+ * transaction into the outer editor and fight it for focus.
+ */
+function TableNodeView({
+	editor,
+	node,
+	updateAttributes,
+	hasFootnotes = false,
+}: Readonly<TableNodeViewProps>): ReactNode {
+	const caption = node.attrs.caption as JSONContent | null;
+
+	const captionRef = useRef<HTMLElement>(null);
+	const [isEditing, setIsEditing] = useState(false);
+	const [captionInput, setCaptionInput] = useState<JSONContent | null>(caption);
+
+	/*
+	 * A caption has to be the table's first child to name it. The row group is appended by the node
+	 * view renderer itself, and for a document that already holds tables when the editor mounts that
+	 * happens before React renders this element — leaving `<table><tbody><caption>`, which browsers
+	 * still lay out above the table but which no longer reads as the table's caption in markup.
+	 */
+	useLayoutEffect(() => {
+		const element = captionRef.current;
+		const table = element?.parentElement;
+
+		if (element != null && table != null && table.firstElementChild !== element) {
+			table.prepend(element);
+		}
+	});
+
+	function startEditing() {
+		setCaptionInput(caption);
+		setIsEditing(true);
+	}
+
+	return (
+		/*
+		 * The caption is chrome, not content: ProseMirror must not treat it as editable text or as a
+		 * second content hole. The editor nested inside it opts back in, the same way the media and
+		 * embed panels do.
+		 */
+		<NodeViewWrapper
+			as="caption"
+			className="select-none **:[[contenteditable]]:select-text"
+			contentEditable={false}
+			ref={captionRef}
+		>
+			{isEditing && editor.isEditable ? (
+				<div className="flex flex-col gap-y-2 pbe-2 text-start">
+					<InlineRichTextEditor
+						aria-label="Table caption"
+						content={captionInput ?? undefined}
+						extensions={hasFootnotes ? inlineFootnoteExtensions : undefined}
+						onChange={setCaptionInput}
+					/>
+					<div className="flex items-center gap-x-2">
+						<Button
+							intent="primary"
+							onPress={() => {
+								updateAttributes({
+									caption: isEmptyRichTextDocument(captionInput) ? null : captionInput,
+								});
+								setIsEditing(false);
+							}}
+							size="sm"
+							type="button"
+						>
+							{"Apply"}
+						</Button>
+						<Button
+							intent="outline"
+							onPress={() => {
+								setCaptionInput(caption);
+								setIsEditing(false);
+							}}
+							size="sm"
+							type="button"
+						>
+							{"Cancel"}
+						</Button>
+						{!isEmptyRichTextDocument(caption) ? (
+							<Button
+								intent="outline"
+								onPress={() => {
+									updateAttributes({ caption: null });
+									setCaptionInput(null);
+									setIsEditing(false);
+								}}
+								size="sm"
+								type="button"
+							>
+								{"Remove caption"}
+							</Button>
+						) : null}
+					</div>
+				</div>
+			) : !isEmptyRichTextDocument(caption) ? (
+				<div className="group flex items-start gap-x-2 text-start">
+					{/* The renderer declares its own richtext scale, which would otherwise override the
+					    caption styling the surrounding prose gives this element. */}
+					<InlineRichTextRenderer className="flex-1 text-sm text-muted-fg" content={caption!} />
+					{editor.isEditable ? (
+						<button
+							aria-label="Edit table caption"
+							className="rounded-sm p-1 text-muted-fg opacity-0 transition-opacity group-hover:opacity-100 hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							onClick={startEditing}
+							type="button"
+						>
+							<PencilIcon className="block-3.5 inline-3.5" />
+						</button>
+					) : null}
+				</div>
+			) : editor.isEditable ? (
+				<button
+					className="rounded-sm text-sm text-muted-fg underline decoration-dotted underline-offset-2 hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					onClick={startEditing}
+					type="button"
+				>
+					{"Add caption"}
+				</button>
+			) : null}
+		</NodeViewWrapper>
+	);
+}
+
+/**
+ * The stock table node, given a `caption` attribute — see {@link TableNodeView} for why the caption
+ * is an attribute and not part of the table's content.
+ *
+ * Copy/paste carries the caption as JSON in `data-caption`, the same way the image and embed blocks
+ * carry theirs, so a table pasted from one document into another keeps its formatting and
+ * footnotes. The `<caption>` element `renderHTML` writes alongside it is the semantic one — the
+ * flattened text, because a DOM output spec has nowhere to render richtext JSON — and doubles as
+ * the parse fallback for tables that come from anywhere else (the WordPress import, a paste out of
+ * a word processor), where a caption used to be dropped on the floor.
+ */
+function createTableNode(hasFootnotes = false): Node {
+	return Table.extend({
+		addAttributes() {
+			return {
+				...this.parent?.(),
+				caption: {
+					default: null,
+					parseHTML: (element) =>
+						parseCaptionAttr(element.dataset.caption) ??
+						captionFromElementText(element.querySelector(":scope > caption")?.textContent),
+					renderHTML: (attributes) => {
+						const caption = attributes.caption as JSONContent | null;
+						return caption == null ? {} : { "data-caption": serializeCaptionAttr(caption) };
+					},
+				},
+			};
+		},
+
+		/**
+		 * Replaces the stock rendering rather than extending it: that one carries a `colgroup` and an
+		 * inline width for the column resizing this editor turns off (`resizable: false`), so nothing
+		 * of it is wanted here beyond the row group.
+		 */
+		renderHTML({ node, HTMLAttributes }) {
+			const caption = node.attrs.caption as JSONContent | null;
+			const captionText = isEmptyRichTextDocument(caption) ? "" : toPlainText(caption).trim();
+
+			// The caption's text is a child rather than the spec's second element: an output spec puts
+			// attributes there, and the static renderer refuses a string in that position.
+			return captionText === ""
+				? ["table", mergeAttributes(HTMLAttributes), ["tbody", 0]]
+				: ["table", mergeAttributes(HTMLAttributes), ["caption", {}, captionText], ["tbody", 0]];
+		},
+
+		/**
+		 * `as`/`contentDOMElementTag` put the node view's own elements on the table: the renderer's
+		 * element is the `<table>`, the wrapper the `<caption>`, and the content hole the `<tbody>` —
+		 * so the editor's markup is the markup a reader gets, rather than a table wrapped in divs.
+		 */
+		addNodeView() {
+			return ReactNodeViewRenderer(
+				(props: NodeViewProps) => <TableNodeView {...props} hasFootnotes={hasFootnotes} />,
+				{ as: "table", contentDOMElementTag: "tbody" },
+			);
+		},
+		// Tables carry data, not layout: column widths are left to the stylesheet, so no `colwidth`
+		// attributes are ever written.
+	}).configure({ resizable: false });
+}
+
 /**
  * The built-in `link` mark, widened so a link can point at one of our own assets instead of a typed
  * url — see `link-targets.ts` in `@dariah-eric/database` for the model and the read-time
@@ -2323,11 +2531,14 @@ export function createRichTextExtensions(
 			superscriptTwo: false,
 			superscriptThree: false,
 		}),
-		// Tables carry data, not layout: column widths are left to the stylesheet (`resizable: false`,
-		// so no `colwidth` attributes are ever written) and cells hold ordinary block content. Without
-		// these node types a pasted or imported `<table>` is silently flattened into one paragraph of
-		// run-together cell text — which is exactly what the WordPress migration produced.
-		TableKit.configure({ table: { resizable: false } }),
+		// Cells hold ordinary block content. Without these node types a pasted or imported `<table>` is
+		// silently flattened into one paragraph of run-together cell text — which is exactly what the
+		// WordPress migration produced.
+		//
+		// The kit's own table node is left out for the captioned one below; the rest of it (rows,
+		// cells, header cells) is unchanged.
+		TableKit.configure({ table: false }),
+		createTableNode(options?.hasFootnotes),
 		LinkWithTargets,
 		Image,
 		createAssetImageNode(

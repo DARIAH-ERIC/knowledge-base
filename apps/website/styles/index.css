@@ -833,6 +833,15 @@
 			text-align: left;
 		}
 
+		/** A table's caption is its label, in the same voice a figure's caption speaks in. */
+		&:where(caption) {
+			margin-bottom: 0.5714286em;
+			caption-side: top;
+			color: var(--richtext-captions);
+			line-height: 1.4285714;
+			text-align: start;
+		}
+
 		&:where(thead) {
 			border-bottom-width: 1px;
 			border-bottom-color: var(--richtext-th-borders);

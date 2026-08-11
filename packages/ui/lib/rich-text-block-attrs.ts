@@ -84,6 +84,28 @@ export function parseCaptionAttr(value: string | null | undefined): JSONContent 
 }
 
 /**
+ * A caption written by something other than this editor — a `<caption>` element on an imported or
+ * pasted table — as a caption document.
+ *
+ * Text only. The formatting a foreign caption carries would have to be parsed against the caption
+ * editor's own schema to survive a round-trip, and reaching for that here would mean parsing HTML
+ * inside an attribute parser. Captions authored here travel as JSON in `data-caption` and never
+ * take this path; this is what keeps an imported caption from being dropped entirely.
+ */
+export function captionFromElementText(text: string | null | undefined): JSONContent | null {
+	const trimmed = text?.trim();
+
+	if (trimmed == null || trimmed === "") {
+		return null;
+	}
+
+	return {
+		type: "doc",
+		content: [{ type: "paragraph", content: [{ type: "text", text: trimmed }] }],
+	};
+}
+
+/**
  * One image of a gallery node. `alt` and `assetCaption` are copies of the asset's own metadata,
  * kept beside the key for rendering and for an `inherit` caption; only the key is persisted.
  */
