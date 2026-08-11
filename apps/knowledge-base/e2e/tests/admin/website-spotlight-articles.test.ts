@@ -16,6 +16,7 @@ test.describe("website spotlight articles admin", () => {
 
 	test.afterAll(async ({ db }, testInfo) => {
 		await db.cleanupWorkerSpotlightArticles(testInfo.workerIndex);
+		await db.cleanupWorkerPersons(testInfo.workerIndex);
 	});
 
 	test("should create a spotlight article", async ({ createWebsiteSpotlightArticlesPage, db }) => {
@@ -132,6 +133,76 @@ test.describe("website spotlight articles admin", () => {
 		await spotlightArticlesPage.submitForm();
 
 		expect(await db.getSpotlightArticleContentBlocksByTitle(title)).toHaveLength(0);
+	});
+
+	test("should show contributors on the details screen", async ({
+		createWebsiteSpotlightArticlesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const spotlightArticlesPage = createWebsiteSpotlightArticlesPage(workerIndex);
+
+		/**
+		 * Two contributors whose insertion order is the reverse of their sort order, so the assertion
+		 * below pins the `sortName` ordering rather than passing on insertion order by accident.
+		 */
+		const lastPerson = {
+			name: `${spotlightArticlesPage.workerPrefix} Zeta Contributor ${randomUUID()}`,
+			slug: `e2e-spotlight-contributor-zeta-${randomUUID()}`,
+		};
+		const firstPerson = {
+			name: `${spotlightArticlesPage.workerPrefix} Alpha Contributor ${randomUUID()}`,
+			slug: `e2e-spotlight-contributor-alpha-${randomUUID()}`,
+		};
+		await db.createPublishedPerson({
+			name: lastPerson.name,
+			sortName: `${spotlightArticlesPage.workerPrefix} Zzz ${randomUUID()}`,
+			slug: lastPerson.slug,
+		});
+		await db.createPublishedPerson({
+			name: firstPerson.name,
+			sortName: `${spotlightArticlesPage.workerPrefix} Aaa ${randomUUID()}`,
+			slug: firstPerson.slug,
+		});
+
+		const title = `${spotlightArticlesPage.workerPrefix} Contributors ${randomUUID()}`;
+		await spotlightArticlesPage.gotoCreate();
+		await spotlightArticlesPage.fillTitle(title);
+		await spotlightArticlesPage.fillSummary("E2E spotlight article with contributors");
+		await spotlightArticlesPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await spotlightArticlesPage.submitForm();
+
+		await spotlightArticlesPage.searchByTitle(title);
+		await spotlightArticlesPage.gotoDetailsFromList(title);
+
+		// The row is rendered even with no contributors, so its absence would fail here rather than
+		// silently passing the assertions below.
+		await expect(spotlightArticlesPage.detailsContributors()).toBeEmpty();
+
+		await spotlightArticlesPage.gotoEditFromDetails();
+		await spotlightArticlesPage.goToContributorsTab();
+		await spotlightArticlesPage.addContributor(lastPerson.name, "Author");
+		await spotlightArticlesPage.addContributor(firstPerson.name, "Editor");
+
+		await spotlightArticlesPage.goto();
+		await spotlightArticlesPage.searchByTitle(title);
+		await spotlightArticlesPage.gotoDetailsFromList(title);
+
+		const contributors = spotlightArticlesPage.detailsContributors().getByRole("listitem");
+		await expect(contributors).toHaveCount(2);
+		await expect(contributors.nth(0)).toContainText(firstPerson.name);
+		await expect(contributors.nth(1)).toContainText(lastPerson.name);
+
+		await expect(spotlightArticlesPage.detailsContributor(lastPerson.name)).toContainText("author");
+		await expect(spotlightArticlesPage.detailsContributor(firstPerson.name)).toContainText(
+			"editor",
+		);
+
+		// The link proves the person's slug was resolved from the contributor edge, not just the name.
+		await expect(spotlightArticlesPage.detailsContributorLink(firstPerson.name)).toHaveAttribute(
+			"href",
+			new RegExp(`/dashboard/administrator/persons/${firstPerson.slug}/details$`),
+		);
 	});
 
 	test("should delete a spotlight article", async ({ createWebsiteSpotlightArticlesPage, db }) => {

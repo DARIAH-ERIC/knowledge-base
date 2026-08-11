@@ -3149,6 +3149,15 @@ export class DatabaseService {
 				.delete(schema.personsToOrganisationalUnits)
 				.where(eq(schema.personsToOrganisationalUnits.personDocumentId, documentId));
 
+			// Article contributor edges point at the person *document*, so they outlive the version and
+			// would block the document delete if the article cleanup has not already cleared them.
+			await tx
+				.delete(schema.spotlightArticlesToPersons)
+				.where(eq(schema.spotlightArticlesToPersons.personDocumentId, documentId));
+			await tx
+				.delete(schema.impactCaseStudiesToPersons)
+				.where(eq(schema.impactCaseStudiesToPersons.personDocumentId, documentId));
+
 			await tx.delete(schema.persons).where(eq(schema.persons.id, versionId));
 			await this.deleteDocumentVersionTail(tx, versionId, documentId);
 		});
