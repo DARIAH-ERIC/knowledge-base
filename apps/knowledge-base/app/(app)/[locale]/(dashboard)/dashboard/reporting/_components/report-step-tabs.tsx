@@ -17,6 +17,11 @@ export interface ReportStep {
 
 interface ReportStepTabsProps {
 	"aria-label": string;
+	/**
+	 * Route of a tab switch that is still in flight, if the caller drives its navigation through a
+	 * transition. Selecting it ahead of the commit is what makes a slow tab feel answered.
+	 */
+	pendingPath?: string | null;
 	steps: ReadonlyArray<ReportStep>;
 }
 
@@ -29,15 +34,19 @@ function stepPath(step: ReportStep): string {
  * derived from the current pathname (longest matching prefix, so an index/"Details" tab whose href
  * is a prefix of the others does not steal the selection). Selection survives refresh and is
  * deep-linkable because each tab _is_ a route.
+ *
+ * A caller that navigates inside a transition can pass {@link ReportStepTabsProps.pendingPath} to
+ * have the destination selected while the route is still loading.
  */
 export function ReportStepTabs(props: Readonly<ReportStepTabsProps>): ReactNode {
-	const { "aria-label": ariaLabel, steps } = props;
+	const { "aria-label": ariaLabel, pendingPath, steps } = props;
 
 	const pathname = usePathname();
 
+	const currentPath = pendingPath ?? pathname;
 	const active = steps
 		.toSorted((a, b) => stepPath(b).length - stepPath(a).length)
-		.find((step) => pathname === stepPath(step) || pathname.startsWith(`${stepPath(step)}/`));
+		.find((step) => currentPath === stepPath(step) || currentPath.startsWith(`${stepPath(step)}/`));
 	const selectedStep = active ?? steps[0];
 	const selectedKey = selectedStep != null ? stepPath(selectedStep) : undefined;
 

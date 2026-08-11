@@ -1,7 +1,5 @@
 "use client";
 
-import { ColumnChart } from "@dariah-eric/ui/column-chart";
-import { LineChart } from "@dariah-eric/ui/line-chart";
 import {
 	Table,
 	TableBody,
@@ -35,36 +33,6 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 
 	const t = useExtracted();
 	const format = useFormatter();
-
-	// The summary rows are newest-first; a chart's x-axis has to run forwards in time.
-	const chronologicalCampaigns = data.campaignSummaries.toReversed();
-	const campaignYears = chronologicalCampaigns.map((item) => String(item.year));
-	const projectContributionSeries = [
-		{
-			key: "project-contributions",
-			label: t("Project contributions"),
-			values: chronologicalCampaigns.map((item) => item.totalProjectContributions),
-		},
-	];
-	// Drop statuses that are empty across every year — with the status filter applied, only one
-	// segment survives, and a legend listing the other two would promise marks that aren't drawn.
-	const reportStatusSeries = [
-		{
-			key: "draft",
-			label: t("Draft"),
-			values: chronologicalCampaigns.map((item) => item.countryDraftCount),
-		},
-		{
-			key: "submitted",
-			label: t("Submitted"),
-			values: chronologicalCampaigns.map((item) => item.countrySubmittedCount),
-		},
-		{
-			key: "accepted",
-			label: t("Accepted"),
-			values: chronologicalCampaigns.map((item) => item.countryAcceptedCount),
-		},
-	].filter((series) => series.values.some((value) => value > 0));
 
 	/**
 	 * What the project-contributions sum is made of.
@@ -176,42 +144,6 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 						{t("Compare report volumes, workflow status, and aggregate activity by campaign year.")}
 					</p>
 				</div>
-
-				{/*
-				 * The charts and the table below them are the same numbers. That pairing is deliberate:
-				 * it is what lets the charts stay unlabelled and lightweight, since no value is ever
-				 * reachable only by hovering.
-				 *
-				 * They are hidden when a single campaign year is in scope — a trend line through one
-				 * point states nothing the tiles above have not already said.
-				 */}
-				{chronologicalCampaigns.length > 1 && (
-					<div className="grid gap-4 xl:grid-cols-2">
-						<div className="flex flex-col gap-y-3 rounded-lg border bg-bg p-4">
-							<h3 className="text-sm font-medium text-fg">{t("Country reports by status")}</h3>
-							<ColumnChart
-								aria-label="country reports by status per campaign year"
-								categories={campaignYears}
-								formatValue={(value) => format.number(value)}
-								// Draft → submitted → accepted is a progression, so the colour carries the
-								// order. Identity hues here would hide it.
-								palette="ordinal"
-								series={reportStatusSeries}
-								stacked={true}
-							/>
-						</div>
-
-						<div className="flex flex-col gap-y-3 rounded-lg border bg-bg p-4">
-							<h3 className="text-sm font-medium text-fg">{t("Project contributions by year")}</h3>
-							<LineChart
-								aria-label="reported project contributions per campaign year"
-								categories={campaignYears}
-								formatValue={(value) => format.number(value, eurFormat)}
-								series={projectContributionSeries}
-							/>
-						</div>
-					</div>
-				)}
 
 				<Table
 					aria-label="campaign summary"
