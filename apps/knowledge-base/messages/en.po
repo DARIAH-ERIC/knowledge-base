@@ -5638,12 +5638,16 @@ msgid "qOk9AI"
 msgstr "Search by project"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
-msgid "_k6tlf"
-msgstr "{count} contributions"
+msgid "-Jmsdl"
+msgstr "{count} reported entries"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
-msgid "Eigc8S"
-msgstr "Total {amount}"
+msgid "CxahkP"
+msgstr "{count} country–project pairs"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
+msgid "TOkrjI"
+msgstr "Total {amount}, counting each pair once"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
 msgid "_0TOL5"

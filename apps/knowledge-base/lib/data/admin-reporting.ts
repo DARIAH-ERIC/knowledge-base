@@ -5,6 +5,7 @@ import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
+import { hasDariahCommissionedEvent } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/calculate-operational-cost";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
@@ -61,10 +62,17 @@ export interface ReportingStatisticsOverview {
 	totalContributors: number;
 	totalCountryEvents: number;
 	totalWorkingGroupEvents: number;
-	/** Summed `amount_euros`. Includes every report status unless the status filter narrows it. */
+	/**
+	 * Each country's contribution to each project, counted once across the whole range in scope.
+	 *
+	 * Countries re-report a project every campaign year it runs, entering the whole-duration amount
+	 * each time, so adding the rows up would multiply the same money by the number of years. Where
+	 * the amount changed between years, the most recent report wins. Includes every report status
+	 * unless the status filter narrows it.
+	 */
 	totalProjectContributions: number;
 	/**
-	 * How many contribution rows and how many country reports are behind
+	 * How many distinct country–project pairs, and how many country reports, are behind
 	 * {@link totalProjectContributions}. Only country reports carry project contributions — working
 	 * groups do not report projects at all — so these two say what the sum is actually made of.
 	 */
@@ -481,17 +489,23 @@ export async function getReportingStatisticsForAdmin(
 				columns: {
 					id: true,
 					status: true,
+					countryDocumentId: true,
 					totalContributors: true,
 					smallEvents: true,
 					mediumEvents: true,
 					largeEvents: true,
 					veryLargeEvents: true,
+					dariahCommissionedEvent: true,
 				},
 				with: {
 					country: { columns: { name: true } },
-					institutions: { columns: { id: true } },
+					// The document id, not the row id: an institution is captured once per representation
+					// type, so the rows over-count it. See the `institutions` tally below.
+					institutions: { columns: { organisationalUnitDocumentId: true } },
 					serviceKpis: { columns: { serviceId: true } },
-					projectContributions: { columns: { amountEuros: true } },
+					// The project id too, so a contribution repeated across campaign years can be
+					// recognised as the same one. See `latestContributionPerProject`.
+					projectContributions: { columns: { amountEuros: true, projectDocumentId: true } },
 				},
 			},
 			workingGroupReports: {
@@ -554,6 +568,21 @@ export async function getReportingStatisticsForAdmin(
 	> = [];
 	const workingGroupYearSummaries: Array<ReportingStatisticsWorkingGroupYearSummary> = [];
 
+	/**
+	 * The most recently reported contribution for each (country, project) pair.
+	 *
+	 * Under the current reporting forms a country re-reports a project in every campaign year it
+	 * runs, and each time enters the contribution for the project's _whole duration_ — not the part
+	 * falling in that year. Adding the rows up therefore multiplies the same money by however many
+	 * years the project was active. Any total spanning more than one campaign year has to count each
+	 * pair once.
+	 *
+	 * Where the reported amount changed between years the latest one wins: it is the country's most
+	 * recent word on that project. Within a single campaign year there is nothing to collapse, since
+	 * a country files one report per campaign and a report holds a project at most once.
+	 */
+	const latestContributionPerProject = new Map<string, { amountEuros: number; year: number }>();
+
 	for (const campaign of filteredCampaigns) {
 		let countryDraftCount = 0;
 		let countrySubmittedCount = 0;
@@ -584,17 +613,40 @@ export async function getReportingStatisticsForAdmin(
 			}
 
 			const contributors = report.totalContributors ?? 0;
+			// A DARIAH-commissioned event is captured by title rather than as a count, and counts as one
+			// event — the same way the report's own operational-cost breakdown counts it. Leaving it out
+			// made the dashboard disagree with every individual report it summarises.
 			const events =
 				(report.smallEvents ?? 0) +
 				(report.mediumEvents ?? 0) +
 				(report.largeEvents ?? 0) +
-				(report.veryLargeEvents ?? 0);
-			const institutions = report.institutions.length;
+				(report.veryLargeEvents ?? 0) +
+				(hasDariahCommissionedEvent(report.dariahCommissionedEvent) ? 1 : 0);
+			// Distinct institutions, not rows: one institution can be captured once per representation
+			// type, and the report summary groups them the same way before displaying them.
+			const institutions = new Set(
+				report.institutions.map((institution) => institution.organisationalUnitDocumentId),
+			).size;
 			const services = new Set(report.serviceKpis.map((serviceKpi) => serviceKpi.serviceId)).size;
+			// Per campaign year this is a straight sum — a report holds each project at most once, so
+			// there is nothing to collapse. It reads as "the whole-duration value of the projects this
+			// country had running that year", not as money spent in that year.
 			const projectContributions = report.projectContributions.reduce(
 				(sum, contribution) => sum + contribution.amountEuros,
 				0,
 			);
+
+			for (const contribution of report.projectContributions) {
+				const key = `${report.countryDocumentId}:${contribution.projectDocumentId}`;
+				const seen = latestContributionPerProject.get(key);
+
+				if (seen == null || campaign.year > seen.year) {
+					latestContributionPerProject.set(key, {
+						amountEuros: contribution.amountEuros,
+						year: campaign.year,
+					});
+				}
+			}
 
 			totalContributors += contributors;
 			totalCountryEvents += events;
@@ -602,7 +654,6 @@ export async function getReportingStatisticsForAdmin(
 			totalServices += services;
 			totalProjectContributions += projectContributions;
 
-			overview.totalProjectContributionCount += report.projectContributions.length;
 			if (report.projectContributions.length > 0) {
 				overview.countryReportsWithProjectContributions += 1;
 			}
@@ -648,7 +699,9 @@ export async function getReportingStatisticsForAdmin(
 		overview.totalContributors += totalContributors;
 		overview.totalCountryEvents += totalCountryEvents;
 		overview.totalWorkingGroupEvents += totalWorkingGroupEvents;
-		overview.totalProjectContributions += totalProjectContributions;
+		// `totalProjectContributions` is deliberately *not* accumulated per campaign here — summing the
+		// yearly figures would re-add the same whole-duration amounts. It is set once, after the loop,
+		// from the deduplicated pairs.
 
 		campaignSummaries.push({
 			id: campaign.id,
@@ -682,6 +735,14 @@ export async function getReportingStatisticsForAdmin(
 			socialMediaAccounts,
 		});
 	}
+
+	// Each (country, project) once, at its most recently reported amount — see
+	// `latestContributionPerProject`. With a single campaign year in scope this is identical to the
+	// per-year sum, because nothing repeats inside one year.
+	for (const contribution of latestContributionPerProject.values()) {
+		overview.totalProjectContributions += contribution.amountEuros;
+	}
+	overview.totalProjectContributionCount = latestContributionPerProject.size;
 
 	const countryRowsByName = new Map<string, Array<(typeof countryTrendBaseRows)[number]>>();
 
@@ -798,8 +859,15 @@ export interface ReportingProjectContributionRow {
 
 export interface ReportingProjectContributionsData {
 	data: Array<ReportingProjectContributionRow>;
+	/** Reported entries in the filtered set — the rows the table lists, one per campaign year. */
 	total: number;
-	/** Sum over the whole filtered set, not just the current page. */
+	/** Distinct country–project pairs behind those entries. */
+	totalPairs: number;
+	/**
+	 * Sum over the whole filtered set, counting each country–project pair once at its most recently
+	 * reported amount. Adding the listed rows up instead would multiply a project's contribution by
+	 * the number of campaign years it was reported in.
+	 */
 	totalAmountEuros: number;
 }
 
@@ -888,6 +956,26 @@ export async function getReportingProjectContributionsForAdmin(
 		project: direction(schema.projects.name),
 	}[sort];
 
+	/**
+	 * The filtered rows, each ranked within its (country, project) pair with the newest campaign year
+	 * first. A window function cannot sit inside an aggregate, so the ranking has to happen one level
+	 * down and the totals are then taken over this.
+	 */
+	const rankedContributions = withContributionJoins(
+		db
+			.select({
+				amountEuros: schema.countryReportProjectContributions.amountEuros,
+				pairRank:
+					sql<number>`ROW_NUMBER() OVER (PARTITION BY ${schema.countryReports.countryDocumentId}, ${schema.countryReportProjectContributions.projectDocumentId} ORDER BY ${schema.reportingCampaigns.year} DESC)`.as(
+						"pair_rank",
+					),
+			})
+			.from(schema.countryReportProjectContributions)
+			.$dynamic(),
+	)
+		.where(where)
+		.as("ranked_contributions");
+
 	const [data, aggregate] = await Promise.all([
 		withContributionJoins(
 			db
@@ -914,21 +1002,21 @@ export async function getReportingProjectContributionsForAdmin(
 			)
 			.limit(limit)
 			.offset(offset),
-		withContributionJoins(
-			db
-				.select({
-					total: count(),
-					// `SUM` over `numeric` comes back as a string; cast so the caller gets a number.
-					totalAmountEuros: sql<number>`COALESCE(SUM(${schema.countryReportProjectContributions.amountEuros}), 0)::float8`,
-				})
-				.from(schema.countryReportProjectContributions)
-				.$dynamic(),
-		).where(where),
+		db
+			.select({
+				total: count(),
+				// A pair's newest row carries its current amount; the rest are the same money re-reported.
+				// `SUM` over `numeric` comes back as a string, hence the cast.
+				totalAmountEuros: sql<number>`COALESCE(SUM(${rankedContributions.amountEuros}) FILTER (WHERE ${rankedContributions.pairRank} = 1), 0)::float8`,
+				totalPairs: sql<number>`COUNT(*) FILTER (WHERE ${rankedContributions.pairRank} = 1)`,
+			})
+			.from(rankedContributions),
 	]);
 
 	return {
 		data,
 		total: aggregate[0]?.total ?? 0,
+		totalPairs: aggregate[0]?.totalPairs ?? 0,
 		totalAmountEuros: aggregate[0]?.totalAmountEuros ?? 0,
 	};
 }
