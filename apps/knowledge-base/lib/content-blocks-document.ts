@@ -80,6 +80,8 @@ interface GalleryBlock {
 	type: "gallery";
 	content?: {
 		layout?: GalleryLayout;
+		/** The gallery's own caption — what the set shows — as opposed to an item's image credit. */
+		caption?: JSONContent | null;
 		items?: Array<{
 			imageKey?: string;
 			imageUrl?: string;
@@ -134,6 +136,7 @@ export function mergeBlocksToDocument(blocks: Array<MergeableBlock>): JSONConten
 				type: "galleryBlock",
 				attrs: {
 					layout: normalizeGalleryLayout(block.content?.layout),
+					caption: block.content?.caption ?? null,
 					items: (block.content?.items ?? []).map((item) => {
 						return {
 							imageKey: item.imageKey ?? null,
@@ -250,6 +253,7 @@ export function splitDocumentToBlocks(doc: JSONContent): Array<ContentBlockInput
 				type: "gallery",
 				content: {
 					layout: normalizeGalleryLayout(node.attrs?.layout),
+					caption: (node.attrs?.caption as JSONContent | null | undefined) ?? undefined,
 					items: items.map((item) => {
 						const caption = (item.caption as JSONContent | null | undefined) ?? undefined;
 						return {

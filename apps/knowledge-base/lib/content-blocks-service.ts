@@ -252,14 +252,17 @@ export async function upsertTypedContentBlock(
 
 		case "gallery": {
 			const layout = block.content?.layout ?? "grid";
+			const galleryCaption = block.content?.caption ?? null;
 			const galleryItems = await createGalleryItems(tx, blockId, block.content?.items);
 
 			if (isNew) {
-				await tx.insert(schema.galleryContentBlocks).values({ id: blockId, layout });
+				await tx
+					.insert(schema.galleryContentBlocks)
+					.values({ id: blockId, layout, caption: galleryCaption });
 			} else {
 				await tx
 					.update(schema.galleryContentBlocks)
-					.set({ layout })
+					.set({ layout, caption: galleryCaption })
 					.where(eq(schema.galleryContentBlocks.id, blockId));
 				await tx
 					.delete(schema.galleryContentBlockItems)
@@ -489,6 +492,7 @@ export async function getEntityContentBlocks(
 				id: schema.galleryContentBlocks.id,
 				position: schema.contentBlocks.position,
 				layout: schema.galleryContentBlocks.layout,
+				caption: schema.galleryContentBlocks.caption,
 				imageKey: schema.assets.key,
 				imageId: schema.assets.id,
 				imageLabel: schema.assets.label,
@@ -660,6 +664,7 @@ export async function getEntityContentBlocks(
 						type: "gallery" as const,
 						content: {
 							layout: row.layout,
+							caption: row.caption ?? undefined,
 							items: [],
 						},
 					});

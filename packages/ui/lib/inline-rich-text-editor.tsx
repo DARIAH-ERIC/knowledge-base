@@ -1,6 +1,8 @@
 "use client";
 
-import type { Extensions, JSONContent } from "@tiptap/core";
+import { Extension, type Extensions, type JSONContent } from "@tiptap/core";
+import { Fragment, type Node as ProseMirrorNode, type Schema, Slice } from "@tiptap/pm/model";
+import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { BoldIcon, ItalicIcon, LinkIcon, SuperscriptIcon } from "lucide-react";
@@ -55,6 +57,89 @@ function normalizeInitialContent(content: JSONContent | undefined): JSONContent 
 }
 
 /**
+ * The inline content of a fragment, with each block's content run onto the same line.
+ *
+ * Blocks are separated by a space rather than concatenated, so two pasted paragraphs read as two
+ * sentences instead of colliding into one word. The separator carries no marks of its own: a space
+ * inheriting the link before it would quietly extend that link past its text.
+ */
+function toInlineFragment(fragment: Fragment, schema: Schema): Fragment {
+	const nodes: Array<ProseMirrorNode> = [];
+
+	function endsWithSpace(): boolean {
+		// oxlint-disable-next-line prefer-at
+		const last = nodes[nodes.length - 1];
+		return last == null || (last.isText && /\s$/.test(last.text ?? ""));
+	}
+
+	fragment.forEach((node) => {
+		// Text and inline atoms (a footnote marker, where the field takes them) carry over as they are.
+		if (node.isInline) {
+			nodes.push(node);
+			return;
+		}
+
+		const inline = toInlineFragment(node.content, schema);
+
+		if (inline.childCount === 0) {
+			return;
+		}
+
+		if (!endsWithSpace() && !/^\s/.test(inline.child(0).text ?? "")) {
+			nodes.push(schema.text(" "));
+		}
+
+		inline.forEach((child) => {
+			nodes.push(child);
+		});
+	});
+
+	return Fragment.fromArray(nodes);
+}
+
+/**
+ * A pasted slice as one line of inline content, ready to merge into the paragraph holding the
+ * cursor — which is what a plain-text paste does too. See {@link SingleLinePasteGuard}.
+ *
+ * Both depths are closed: nothing here opens a block, because nothing here is one any more.
+ */
+export function flattenPastedSlice(slice: Slice, schema: Schema): Slice {
+	return new Slice(toInlineFragment(slice.content, schema), 0, 0);
+}
+
+/**
+ * Flattens pasted content to a single line.
+ *
+ * The editor swallows Enter (see `handleKeyDown`) so a caption stays one line, and every read path
+ * relies on that: the caption renderers walk a `{ doc > paragraph > text }` document, and a caption
+ * is flattened to plain text wherever an element cannot hold richtext. Paste is the one way around
+ * the key handler — the schema accepts as many paragraphs as the clipboard holds, and pasting two
+ * of them left a caption no renderer expects.
+ *
+ * A guard rather than a narrower schema (as with {@link FootnotePasteGuard}): a caption that was
+ * stored with several paragraphs before this existed still opens and still renders, instead of
+ * failing to parse.
+ */
+const SingleLinePasteGuard = Extension.create({
+	name: "singleLinePasteGuard",
+
+	addProseMirrorPlugins() {
+		return [
+			new Plugin({
+				key: new PluginKey("singleLinePasteGuard"),
+				props: {
+					transformPasted(slice, view) {
+						/* The slice arrives already parsed against this editor's schema, so nothing here has
+						   to consider a node the schema refuses. */
+						return flattenPastedSlice(slice, view.state.schema);
+					},
+				},
+			}),
+		];
+	},
+});
+
+/**
  * Extension set for the inline caption editor: a single paragraph carrying only bold, italic and
  * link marks. Everything block-producing that StarterKit ships (headings, lists, blockquote, code
  * block, horizontal rule, hard break) is disabled so captions stay a single line of formatted text,
@@ -80,11 +165,23 @@ export function createInlineRichTextExtensions(extensions: Extensions = []): Ext
 			strike: false,
 			code: false,
 			hardBreak: false,
+			/**
+			 * `target`/`rel` are nulled against the extension's `_blank` / `noopener noreferrer nofollow`
+			 * defaults, the same way the block editor nulls them (see `LinkWithTargets`): whether a link
+			 * opens in a new tab is the reader's call, and the default applied to `#fragment` and
+			 * `mailto:` links too.
+			 *
+			 * These are _declared attributes_ defaulting to this option, so the stock ones had every
+			 * caption link storing them. Nulled one by one rather than `HTMLAttributes: {}`, because
+			 * `configure` deep-merges.
+			 */
 			link: {
 				openOnClick: false,
 				defaultProtocol: "https",
+				HTMLAttributes: { target: null, rel: null },
 			},
 		}),
+		SingleLinePasteGuard,
 		...(hasFootnotes ? [] : [FootnotePasteGuard]),
 		...extensions,
 	];

@@ -154,6 +154,8 @@ interface GalleryContentBlockItem {
 	position?: number;
 	content?: {
 		layout?: "carousel" | "grid";
+		/** The gallery's own caption — what the set shows — as opposed to an item's image credit. */
+		caption?: JSONContent | null;
 		items?: Array<{
 			imageKey?: string;
 			imageUrl?: string;

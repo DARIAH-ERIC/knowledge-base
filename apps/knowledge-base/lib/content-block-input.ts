@@ -83,6 +83,7 @@ export const ContentBlockInputSchema = v.union([
 		content: v.optional(
 			v.object({
 				layout: v.optional(v.picklist(["carousel", "grid"] as const)),
+				caption: v.optional(v.nullable(v.custom<JSONContent>(() => true))),
 				items: v.optional(
 					v.array(
 						v.object({

@@ -1,6 +1,40 @@
 import { randomUUID } from "node:crypto";
 
+import type { JSONContent } from "@tiptap/core";
+
 import { expect, test } from "@/e2e/lib/test";
+
+/** The first node of a kind anywhere in a stored document, for assertions that name one node. */
+function findNode(doc: JSONContent, type: string): JSONContent | undefined {
+	if (doc.type === type) {
+		return doc;
+	}
+
+	for (const child of doc.content ?? []) {
+		const found = findNode(child, type);
+		if (found != null) {
+			return found;
+		}
+	}
+
+	return undefined;
+}
+
+/** The marks on the text run holding `text`, so an assertion names one run rather than the document. */
+function marksOn(doc: JSONContent, text: string): Array<{ type: string; attrs?: JSONContent }> {
+	if (doc.type === "text" && doc.text?.includes(text) === true) {
+		return doc.marks ?? [];
+	}
+
+	for (const child of doc.content ?? []) {
+		const found = marksOn(child, text);
+		if (found.length > 0) {
+			return found;
+		}
+	}
+
+	return [];
+}
 
 test.describe("website spotlight articles admin", () => {
 	/**
@@ -203,6 +237,83 @@ test.describe("website spotlight articles admin", () => {
 			"href",
 			new RegExp(`/dashboard/administrator/persons/${firstPerson.slug}/details$`),
 		);
+	});
+
+	/**
+	 * A table's caption is stored on the table node rather than inside it — `prosemirror-tables`
+	 * reads a table's children as its rows — which puts it on the same footing as the image and embed
+	 * captions: a richtext document living in an attribute, outside the document walk that carries
+	 * everything else. Attributes are exactly what the image `layout` regression lost on a load/save
+	 * cycle, so the round trip is the point of this test, not the authoring.
+	 *
+	 * Spotlight articles rather than news, because footnotes are enabled here — and a caption takes
+	 * footnotes wherever its article does.
+	 */
+	test("should preserve a table caption's formatting, link and footnote across an edit round trip", async ({
+		createWebsiteSpotlightArticlesPage,
+		db,
+	}) => {
+		const spotlightArticlesPage = createWebsiteSpotlightArticlesPage(test.info().workerIndex);
+
+		const title = `${spotlightArticlesPage.workerPrefix} Table Caption ${randomUUID()}`;
+		const headers: [string, string] = [`Term ${randomUUID()}`, `Meaning ${randomUUID()}`];
+		const boldPrefix = `Table 1 ${randomUUID()}:`;
+		const linkText = `the report ${randomUUID()}`;
+		const linkUrl = "https://example.com/report";
+		const footnote = `Figures as of 2026 ${randomUUID()}`;
+
+		await spotlightArticlesPage.gotoCreate();
+		await spotlightArticlesPage.fillTitle(title);
+		await spotlightArticlesPage.fillSummary("E2E test spotlight article with a captioned table");
+		await spotlightArticlesPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await spotlightArticlesPage.addContentBlock(`Caption intro ${randomUUID()}`);
+
+		await spotlightArticlesPage.insertTableAtEnd(headers);
+		await spotlightArticlesPage.addTableCaption({ boldPrefix, linkText, linkUrl, footnote });
+		await spotlightArticlesPage.expectTableCaption({ boldPrefix, linkText, linkUrl });
+
+		await spotlightArticlesPage.submitForm();
+
+		const assertStoredCaption = async () => {
+			const contentBlocks = await db.getSpotlightArticleContentBlocksByTitle(title);
+			expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text"]);
+
+			const stored = contentBlocks[0]!.content as JSONContent;
+			const table = findNode(stored, "table");
+			expect(table).toBeDefined();
+			expect(JSON.stringify(table)).toContain(headers[0]);
+
+			/**
+			 * Asserted on the stored document rather than on rendered markup: the `<caption>` a reader
+			 * gets is assembled from this attribute, and a caption flattened to the plain text that
+			 * `renderHTML` writes would still render as a caption while having lost every mark in it.
+			 */
+			const caption = table?.attrs?.caption as JSONContent | null | undefined;
+			expect(caption).toBeDefined();
+
+			expect(marksOn(caption!, boldPrefix).map(({ type }) => type)).toContain("bold");
+
+			const link = marksOn(caption!, linkText).find(({ type }) => type === "link");
+			expect(link?.attrs).toMatchObject({ href: linkUrl });
+
+			/** A marker keeps its note in an attribute of its own, so the note is what proves it kept. */
+			const marker = findNode(caption!, "footnote");
+			expect(JSON.stringify(marker?.attrs?.content)).toContain(footnote);
+		};
+
+		await assertStoredCaption();
+
+		/** Re-open and save untouched: the half of the round trip that dropped image `layout`. */
+		await spotlightArticlesPage.searchByTitle(title);
+		await spotlightArticlesPage.gotoDetailsFromList(title);
+		await spotlightArticlesPage.gotoEditFromDetails();
+
+		/** The editor rebuilds the caption from the stored attribute, marks and marker included. */
+		await spotlightArticlesPage.expectTableCaption({ boldPrefix, linkText, linkUrl });
+
+		await spotlightArticlesPage.submitForm();
+
+		await assertStoredCaption();
 	});
 
 	test("should delete a spotlight article", async ({ createWebsiteSpotlightArticlesPage, db }) => {

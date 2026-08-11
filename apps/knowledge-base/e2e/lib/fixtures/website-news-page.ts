@@ -944,6 +944,8 @@ export class WebsiteNewsPage {
 		layout: string;
 		assetLabel: string;
 		captions: Array<string>;
+		/** The gallery's own caption, describing the set rather than any one image. */
+		galleryCaption?: string;
 		/** 1-based index of the item to move one place earlier, as the panel labels them. */
 		moveEarlier?: number;
 	}): Promise<void> {
@@ -952,6 +954,10 @@ export class WebsiteNewsPage {
 		const block = this.galleryBlock();
 		await expect(block).toBeVisible();
 		await block.getByRole("radio", { name: options.layout, exact: true }).click();
+
+		if (options.galleryCaption != null) {
+			await block.getByRole("textbox", { name: "Gallery caption" }).fill(options.galleryCaption);
+		}
 
 		/** `renderImagePicker` is the toolbar-shaped picker, so the trigger reads "Insert image". */
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
@@ -994,6 +1000,7 @@ export class WebsiteNewsPage {
 		layout: string;
 		assetLabel: string;
 		captions: Array<string>;
+		galleryCaption?: string;
 		moveEarlier?: number;
 	}): Promise<void> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
@@ -1010,6 +1017,7 @@ export class WebsiteNewsPage {
 			layout: options.layout,
 			assetLabel: options.assetLabel,
 			captions: options.captions,
+			galleryCaption: options.galleryCaption,
 			moveEarlier: options.moveEarlier,
 		});
 
