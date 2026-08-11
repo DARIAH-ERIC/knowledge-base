@@ -1981,14 +1981,6 @@ function GalleryNodeView({
 									</Button>
 								</div>
 							</div>
-							{item.imageUrl != null ? (
-								<img
-									alt={item.alt ?? ""}
-									className="block object-contain inline-full max-block-40"
-									draggable={false}
-									src={item.imageUrl}
-								/>
-							) : null}
 							{renderAssetMetadata != null && item.imageKey != null
 								? renderAssetMetadata({
 										imageKey: item.imageKey,
