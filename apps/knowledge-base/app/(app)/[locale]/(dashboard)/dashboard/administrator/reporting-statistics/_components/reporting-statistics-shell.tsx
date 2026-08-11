@@ -5,7 +5,7 @@ import { Label } from "@dariah-eric/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useOptimistic, useTransition } from "react";
-import type { Key } from "react-aria-components";
+import { RouterProvider as AriaRouterProvider, type Key } from "react-aria-components";
 
 import {
 	Header,
@@ -79,6 +79,11 @@ export function ReportingStatisticsShell(
 		status: searchParams.get("status") ?? "",
 	};
 	const [optimisticFilters, setOptimisticFilters] = useOptimistic(filters);
+	/**
+	 * The tab a switch is heading for, or `null` when none is in flight. Passthrough `null` means
+	 * React drops it again as soon as the navigation commits and `pathname` tells the truth.
+	 */
+	const [pendingPath, setPendingPath] = useOptimistic<string | null>(null);
 
 	/**
 	 * Carry the shared filters across a tab switch, but nothing tab-local.
@@ -121,6 +126,27 @@ export function ReportingStatisticsShell(
 			path: `${basePath}/social-media`,
 		},
 	];
+
+	/**
+	 * Run a tab switch through the same transition the filters use, so the pending badge and the
+	 * dimmed results report it exactly as they report a filter change. Without this the tab's own
+	 * navigation is not a transition this component can see, and a slow tab sat there looking idle.
+	 *
+	 * React-aria drives tab-link navigation through the nearest `navigate` (it `preventDefault`s the
+	 * native click), so wrapping the provider around the tab bar is the one chokepoint. Scoping it to
+	 * the tabs leaves every other link on the page alone.
+	 */
+	function navigateToTab(...args: Parameters<typeof router.push>): void {
+		const [href] = args;
+		// react-aria hands `navigate` a plain string; the object form is next-intl's typed-href API.
+		const path = typeof href === "string" ? href.split("?")[0] : href.pathname;
+
+		startTransition(() => {
+			// Select the clicked tab right away; the pathname only catches up when the route commits.
+			setPendingPath(path ?? null);
+			router.push(...args);
+		});
+	}
 
 	/** Sync the filters to the search params, refetching the active tab's data server-side. */
 	function applyFilters(next: StatisticsFilterValues) {
@@ -168,7 +194,13 @@ export function ReportingStatisticsShell(
 			</Header>
 
 			<div className="flex flex-col gap-y-8 px-(--layout-padding)">
-				<ReportStepTabs aria-label={t("Statistics views")} steps={steps} />
+				<AriaRouterProvider navigate={navigateToTab}>
+					<ReportStepTabs
+						aria-label={t("Statistics views")}
+						pendingPath={pendingPath}
+						steps={steps}
+					/>
+				</AriaRouterProvider>
 
 				<section className="rounded-lg border bg-bg p-4">
 					<div className="grid gap-4 md:grid-cols-[minmax(0,12rem)_minmax(0,16rem)_minmax(0,12rem)_auto]">
@@ -244,9 +276,10 @@ export function ReportingStatisticsShell(
 				</p>
 
 				{/*
-				 * Dim the results while the new data is fetched. The fade only kicks in after a short
-				 * delay so a quick response never flashes; on the way back the delay is 0 so it snaps
-				 * to full opacity immediately.
+				 * Dim the results while the new data is fetched, whether that fetch was started by a
+				 * filter or by a tab switch. The fade only kicks in after a short delay so a quick
+				 * response never flashes; on the way back the delay is 0 so it snaps to full opacity
+				 * immediately.
 				 */}
 				<div
 					className={

@@ -2056,7 +2056,6 @@ msgstr "Published"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option-item.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
 msgid "W6nwjo"
 msgstr "Draft"
@@ -5664,22 +5663,6 @@ msgid "IG3dPW"
 msgstr "No matching project contributions were found."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx
-msgid "4Al3hI"
-msgstr "Project contributions"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
-msgid "raexxM"
-msgstr "Submitted"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
-msgid "aFyFm0"
-msgstr "Accepted"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 msgid "E3WVSO"
 msgstr "1 contribution from 1 country report"
 
@@ -5712,20 +5695,18 @@ msgid "zip4dp"
 msgstr "{country} country, {workingGroups} working group"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx
+msgid "4Al3hI"
+msgstr "Project contributions"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 msgid "BtlstO"
 msgstr "Campaign summary"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 msgid "mJeMRv"
 msgstr "Compare report volumes, workflow status, and aggregate activity by campaign year."
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
-msgid "LuLuiW"
-msgstr "Country reports by status"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
-msgid "0p1gMG"
-msgstr "Project contributions by year"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-comments-section.tsx
@@ -5842,6 +5823,14 @@ msgstr "Report status"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
 msgid "fvK8Qi"
 msgstr "All statuses"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
+msgid "raexxM"
+msgstr "Submitted"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
+msgid "aFyFm0"
+msgstr "Accepted"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
 msgid "jm_spn"
