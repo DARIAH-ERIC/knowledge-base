@@ -317,4 +317,170 @@ describe("normalizeRichTextDocument", () => {
 		const once = normalizeRichTextDocument(input);
 		expect(normalizeRichTextDocument(once)).toStrictEqual(once);
 	});
+
+	/**
+	 * A caption, and the note a footnote carries, are documents of their own kept in an attribute —
+	 * outside the `content` walk, and so outside every cleanup above until now. They are written in
+	 * the same editors and pasted into from the same sources, so they collect the same oddities.
+	 */
+	describe("documents nested in attributes", () => {
+		function caption(text: string): JSONContent {
+			return doc({ type: "paragraph", content: [{ type: "text", text }] });
+		}
+
+		it("cleans an image caption the way it cleans prose", () => {
+			const input = doc({
+				type: "assetImage",
+				attrs: {
+					imageKey: "images/one.jpg",
+					caption: doc(
+						{ type: "paragraph" },
+						{ type: "paragraph", content: [{ type: "text", text: "A caption " }] },
+					),
+				},
+			});
+
+			expect(normalizeRichTextDocument(input)).toStrictEqual(
+				doc({
+					type: "assetImage",
+					attrs: { imageKey: "images/one.jpg", caption: caption("A caption") },
+				}),
+			);
+		});
+
+		it("strips imported link attributes inside a caption", () => {
+			const input = doc({
+				type: "assetImage",
+				attrs: {
+					caption: doc({
+						type: "paragraph",
+						content: [
+							{
+								type: "text",
+								marks: [
+									{
+										type: "link",
+										attrs: {
+											href: "https://example.com",
+											target: "_blank",
+											rel: "noopener noreferrer nofollow",
+										},
+									},
+								],
+								text: "the report",
+							},
+						],
+					}),
+				},
+			});
+
+			expect(normalizeRichTextDocument(input)).toStrictEqual(
+				doc({
+					type: "assetImage",
+					attrs: {
+						caption: doc({
+							type: "paragraph",
+							content: [
+								{
+									type: "text",
+									marks: [{ type: "link", attrs: { href: "https://example.com" } }],
+									text: "the report",
+								},
+							],
+						}),
+					},
+				}),
+			);
+		});
+
+		it("reaches the captions a gallery keeps in an array of items", () => {
+			const input = doc({
+				type: "galleryBlock",
+				attrs: {
+					items: [
+						{ imageKey: "images/one.jpg", caption: caption("First item") },
+						{ imageKey: "images/two.jpg", caption: caption("Second item") },
+					],
+				},
+			});
+
+			expect(normalizeRichTextDocument(input)).toStrictEqual(
+				doc({
+					type: "galleryBlock",
+					attrs: {
+						items: [
+							{ imageKey: "images/one.jpg", caption: caption("First item") },
+							{ imageKey: "images/two.jpg", caption: caption("Second item") },
+						],
+					},
+				}),
+			);
+		});
+
+		it("reaches a footnote's note, and a footnote inside a caption", () => {
+			const input = doc({
+				type: "assetImage",
+				attrs: {
+					caption: doc({
+						type: "paragraph",
+						content: [
+							{ type: "text", text: "cited" },
+							{ type: "footnote", attrs: { content: caption("The source") } },
+						],
+					}),
+				},
+			});
+
+			expect(normalizeRichTextDocument(input)).toStrictEqual(
+				doc({
+					type: "assetImage",
+					attrs: {
+						caption: doc({
+							type: "paragraph",
+							content: [
+								{ type: "text", text: "cited" },
+								{ type: "footnote", attrs: { content: caption("The source") } },
+							],
+						}),
+					},
+				}),
+			);
+		});
+
+		it("empties a caption that held nothing but a spacer", () => {
+			const input = doc({ type: "assetImage", attrs: { caption: doc({ type: "paragraph" }) } });
+
+			expect(normalizeRichTextDocument(input)).toStrictEqual(
+				doc({ type: "assetImage", attrs: { caption: { type: "doc", content: [] } } }),
+			);
+		});
+
+		it("leaves a caption without oddities structurally unchanged", () => {
+			const input = doc({
+				type: "assetImage",
+				attrs: { alt: "One", caption: caption("A caption"), captionMode: "override" },
+			});
+
+			expect(normalizeRichTextDocument(input)).toStrictEqual(input);
+		});
+
+		it("leaves an attribute that is not a document alone", () => {
+			const input = doc({
+				type: "assetImage",
+				attrs: { imageKey: "images/one.jpg", caption: null, layout: "wide" },
+			});
+
+			expect(normalizeRichTextDocument(input)).toStrictEqual(input);
+		});
+
+		it("is idempotent over nested documents", () => {
+			const input = doc({
+				type: "assetImage",
+				attrs: { caption: caption("A caption ") },
+			});
+			const once = normalizeRichTextDocument(input);
+
+			expect(normalizeRichTextDocument(once)).toStrictEqual(once);
+		});
+	});
 });
