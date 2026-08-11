@@ -2259,7 +2259,8 @@ function TableNodeView({
 			ref={captionRef}
 		>
 			{isEditing && editor.isEditable ? (
-				<div className="flex flex-col gap-y-2 pbe-2 text-start">
+				/* No padding of its own: the caption box already sits clear of the table above it. */
+				<div className="flex flex-col gap-y-2 text-start">
 					<InlineRichTextEditor
 						aria-label="Table caption"
 						content={captionInput ?? undefined}
