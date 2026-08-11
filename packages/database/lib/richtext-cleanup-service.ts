@@ -119,6 +119,7 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 			accordionItems: schema.accordionContentBlocks.items,
 			calloutContent: schema.calloutContentBlocks.content,
 			embedCaption: schema.embedContentBlocks.caption,
+			galleryCaption: schema.galleryContentBlocks.caption,
 			heroCaption: schema.heroContentBlocks.caption,
 			imageCaption: schema.imageContentBlocks.caption,
 			mediaTextContent: schema.mediaTextContentBlocks.content,
@@ -157,6 +158,11 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 			eq(schema.calloutContentBlocks.id, schema.contentBlocks.id),
 		)
 		.leftJoin(schema.embedContentBlocks, eq(schema.embedContentBlocks.id, schema.contentBlocks.id))
+		// Only the gallery's own row — its items are one-to-many and are fetched separately below.
+		.leftJoin(
+			schema.galleryContentBlocks,
+			eq(schema.galleryContentBlocks.id, schema.contentBlocks.id),
+		)
 		.leftJoin(schema.heroContentBlocks, eq(schema.heroContentBlocks.id, schema.contentBlocks.id))
 		.leftJoin(schema.imageContentBlocks, eq(schema.imageContentBlocks.id, schema.contentBlocks.id))
 		.leftJoin(
@@ -308,6 +314,9 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 			}
 
 			case "gallery": {
+				// The gallery's own caption lives on its row; its items' captions in a row each.
+				const { changed, values } = normalizeColumns({ caption: row.galleryCaption });
+
 				const items = galleryItemsByBlockId.get(contentBlockId) ?? [];
 				const movedItems = items.flatMap((item) => {
 					if (item.caption == null) {
@@ -321,7 +330,14 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 						: [{ id: item.id, caption }];
 				});
 
-				pushCleanup("gallery", movedItems.length > 0, async (tx) => {
+				pushCleanup("gallery", changed || movedItems.length > 0, async (tx) => {
+					if (changed) {
+						await tx
+							.update(schema.galleryContentBlocks)
+							.set(values)
+							.where(eq(schema.galleryContentBlocks.id, contentBlockId));
+					}
+
 					for (const item of movedItems) {
 						await tx
 							.update(schema.galleryContentBlockItems)

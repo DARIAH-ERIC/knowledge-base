@@ -168,6 +168,12 @@ export const galleryContentBlocks = p.snakeCase.table("content_blocks_type_galle
 		.primaryKey()
 		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	layout: p.text("layout", { enum: galleryLayoutEnum }).notNull().default("grid"),
+	/**
+	 * A caption for the gallery as a whole — what the set of images shows — alongside the per-item
+	 * captions that credit each one. No `caption_mode` here, unlike every image placement: the
+	 * gallery is not a placement of any one asset, so there is nothing for it to inherit from.
+	 */
+	caption: p.jsonb("caption").$type<JSONContent>(),
 	...f.timestamps(),
 });
 

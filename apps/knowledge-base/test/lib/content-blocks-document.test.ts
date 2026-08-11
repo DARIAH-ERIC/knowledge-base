@@ -70,6 +70,7 @@ const blocks = {
 		type: "gallery",
 		content: {
 			layout: "carousel",
+			caption: caption("Workshop, day one."),
 			items: [
 				{
 					imageKey: "images/one.jpg",
@@ -190,6 +191,32 @@ describe("gallery items", () => {
 				},
 			],
 		});
+	});
+
+	// The gallery's caption describes the set; an item's credits one image. Nothing in the seam may
+	// let one stand in for the other, in either direction.
+	it("keeps the gallery's own caption apart from its items'", () => {
+		const doc = mergeBlocksToDocument([blocks.gallery]);
+
+		expect(doc.content![0]!.attrs).toMatchObject({ caption: caption("Workshop, day one.") });
+
+		const [result] = splitDocumentToBlocks(doc);
+		const content = (result as Extract<typeof result, { type: "gallery" }>).content;
+
+		expect(content?.caption).toEqual(caption("Workshop, day one."));
+		expect(content?.items?.map((item) => item.caption)).toEqual([
+			caption("First."),
+			caption("Second."),
+		]);
+	});
+
+	it("leaves an uncaptioned gallery without one", () => {
+		const doc = mergeBlocksToDocument([
+			{ type: "gallery", content: { items: [{ imageKey: "images/one.jpg" }] } },
+		]);
+
+		expect(doc.content![0]!.attrs).toMatchObject({ caption: null });
+		expect(splitDocumentToBlocks(doc)[0]?.content).toMatchObject({ caption: undefined });
 	});
 
 	it("falls back to the grid layout for an unknown stored value", () => {
