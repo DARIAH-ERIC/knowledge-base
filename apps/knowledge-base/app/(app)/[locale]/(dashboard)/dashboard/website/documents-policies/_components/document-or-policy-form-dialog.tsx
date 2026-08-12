@@ -26,6 +26,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
 import { createDocumentOrPolicyFromDialogAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy-from-dialog.action";
 import { updateDocumentOrPolicyDetailsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.action";
+import { documentMimeTypes } from "@/config/assets.config";
 
 export interface DocumentOrPolicyDialogItem {
 	id: string;
@@ -78,6 +79,7 @@ function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): React
 
 	const picker = (
 		<MediaLibraryDialog
+			acceptedFileTypes={documentMimeTypes}
 			defaultPrefix="documents"
 			initialAssets={initialAssets}
 			onSelect={(key, url, asset) => {

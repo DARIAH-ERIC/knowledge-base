@@ -300,7 +300,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 			setPendingFile(null);
 			setPendingFileUrl(null);
 			setUploadError(
-				t("The selected image is too large. Choose an image smaller than {size}.", {
+				t("The selected file is too large. Choose a file smaller than {size}.", {
 					size: formatFileSize(imageSizeLimit),
 				}),
 			);
@@ -600,11 +600,14 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 											</Button>
 										</FileTrigger>
 
-										{pendingFileUrl != null ? (
-											<img
-												alt={t("Preview")}
-												className="rounded-sm block-24 inline-auto max-inline-full"
+										{pendingFileUrl != null && pendingFile != null ? (
+											<AssetPreview
+												alt={pendingFile.name}
+												className="rounded-sm block-24 inline-24"
+												imageClassName="object-contain"
+												mimeType={pendingFile.type}
 												src={pendingFileUrl}
+												storageKey={pendingFile.name}
 											/>
 										) : null}
 									</div>
