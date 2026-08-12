@@ -38,6 +38,10 @@ import { FileTrigger, type Selection } from "react-aria-components";
 import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
 import { CaptionField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
+import {
+	EditAssetMetadataDialog,
+	type SavedAssetMetadata,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog";
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
 import { imageMimeTypes, imageSizeLimit, mediaLibraryPageSize } from "@/config/assets.config";
 import { formatDimensions } from "@/lib/format-dimensions";
@@ -68,6 +72,17 @@ interface MediaLibraryDialogProps<T extends AssetPrefix> {
 type ActiveTab = "select" | "upload";
 
 type AssetsLayout = "grid" | "list";
+
+function EditMetadataTrigger(props: Readonly<{ open: () => void }>): ReactNode {
+	const { open } = props;
+	const t = useExtracted();
+
+	return (
+		<Button intent="outline" onPress={open}>
+			{t("Edit metadata")}
+		</Button>
+	);
+}
 
 interface LicenseOption {
 	id: string;
@@ -364,6 +379,18 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		});
 		resetUploadTab();
 		setIsOpen(false);
+	}
+
+	function handleMetadataSaved(saved: SavedAssetMetadata) {
+		if (selectedAsset == null) {
+			return;
+		}
+
+		const updatedAsset = { ...selectedAsset, ...saved };
+		setSelectedAsset(updatedAsset);
+		setDisplayedAssets((assets) =>
+			assets.map((asset) => (asset.key === updatedAsset.key ? updatedAsset : asset)),
+		);
 	}
 
 	const isPending = isUploading || isFetching;
@@ -675,6 +702,26 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 									<ArrowDownTrayIcon aria-hidden={true} className="block-4 inline-4" />
 									{t("Download original")}
 								</a>
+							) : null}
+
+							{selectedAsset?.id != null ? (
+								<EditAssetMetadataDialog
+									asset={{
+										id: selectedAsset.id,
+										key: selectedAsset.key,
+										label: selectedAsset.label,
+										alt: selectedAsset.alt ?? null,
+										caption: selectedAsset.caption ?? null,
+										licenseId: selectedAsset.licenseId ?? null,
+										mimeType: selectedAsset.mimeType ?? "",
+										width: selectedAsset.width,
+										height: selectedAsset.height,
+										url: selectedAsset.url,
+									}}
+									licenses={licenseOptions}
+									onSuccess={handleMetadataSaved}
+									trigger={EditMetadataTrigger}
+								/>
 							) : null}
 
 							<Button isDisabled={selectedAsset == null} onPress={handleConfirm}>
