@@ -3,7 +3,7 @@
 import { isNonEmptyString } from "@acdh-oeaw/lib";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import type { AssetPrefix } from "@dariah-eric/storage/config";
-import { Button } from "@dariah-eric/ui/button";
+import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Label } from "@dariah-eric/ui/field";
 import { GridList, GridListItem } from "@dariah-eric/ui/grid-list";
 import { Input } from "@dariah-eric/ui/input";
@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/u
 import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
-import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+import { ArrowDownTrayIcon, ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import cn from "clsx/lite";
 import { useExtracted } from "next-intl";
 import {
@@ -665,9 +665,22 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 					<ModalClose>{t("Cancel")}</ModalClose>
 
 					{activeTab === "select" ? (
-						<Button isDisabled={selectedAsset == null} onPress={handleConfirm}>
-							{t("Select")}
-						</Button>
+						<Fragment>
+							{selectedAsset != null ? (
+								<a
+									className={buttonStyles({ intent: "outline" })}
+									download={true}
+									href={`/api/assets/download?key=${encodeURIComponent(selectedAsset.key)}`}
+								>
+									<ArrowDownTrayIcon aria-hidden={true} className="block-4 inline-4" />
+									{t("Download original")}
+								</a>
+							) : null}
+
+							<Button isDisabled={selectedAsset == null} onPress={handleConfirm}>
+								{t("Select")}
+							</Button>
+						</Fragment>
 					) : (
 						<Button
 							form="upload-form"
