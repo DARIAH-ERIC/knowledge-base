@@ -35,6 +35,22 @@ export class AssetsPage {
 		return this.page.getByRole("listitem").filter({ hasText: label });
 	}
 
+	async openUploadAssetDialog(): Promise<Locator> {
+		await this.goto();
+		await this.page.getByRole("button", { name: "Upload asset" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Upload asset" });
+		await dialog.waitFor({ state: "visible" });
+		return dialog;
+	}
+
+	async selectUploadPrefix(dialog: Locator, prefix: string): Promise<void> {
+		const prefixControl = dialog
+			.locator('[data-slot="control"]')
+			.filter({ has: dialog.getByText("Prefix", { exact: true }) });
+		await prefixControl.locator("button").click();
+		await this.page.getByRole("option", { name: prefix, exact: true }).click();
+	}
+
 	// ---------------------------------------------------------------------------
 	// Media library dialog (embedded in forms, backed by `/api/assets`)
 	// ---------------------------------------------------------------------------

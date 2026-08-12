@@ -469,6 +469,12 @@ export class WebsiteNewsPage {
 		await this.chooseInsert("Link to document");
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("tab", { name: "Upload" }).click();
+		await expect(dialog.locator('input[type="file"]')).toHaveAttribute(
+			"accept",
+			/application\/pdf/,
+		);
+		await dialog.getByRole("tab", { name: "Select" }).click();
 		const asset = dialog.getByRole("gridcell", { name: assetLabel });
 		await expect(asset).toHaveCount(1);
 		await asset.click();

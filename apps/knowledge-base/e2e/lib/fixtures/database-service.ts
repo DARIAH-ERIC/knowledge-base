@@ -278,10 +278,12 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
-	async getAssetByLabel(label: string): Promise<{ id: string; key: string } | null> {
+	async getAssetByLabel(
+		label: string,
+	): Promise<{ id: string; key: string; mimeType: string } | null> {
 		const asset = await this.db.query.assets.findFirst({
 			where: { label },
-			columns: { id: true, key: true },
+			columns: { id: true, key: true, mimeType: true },
 		});
 
 		return asset ?? null;

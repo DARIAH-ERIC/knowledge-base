@@ -92,6 +92,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	} = props;
 
 	const t = useExtracted();
+	const acceptsNonImageFiles = acceptedFileTypes.some((mimeType) => !mimeType.startsWith("image/"));
 
 	const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(false);
 	const isOpen = controlledIsOpen ?? uncontrolledIsOpen;
@@ -300,9 +301,13 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 			setPendingFile(null);
 			setPendingFileUrl(null);
 			setUploadError(
-				t("The selected file is too large. Choose a file smaller than {size}.", {
-					size: formatFileSize(imageSizeLimit),
-				}),
+				acceptsNonImageFiles
+					? t("The selected file is too large. Choose a file smaller than {size}.", {
+							size: formatFileSize(imageSizeLimit),
+						})
+					: t("The selected image is too large. Choose an image smaller than {size}.", {
+							size: formatFileSize(imageSizeLimit),
+						}),
 			);
 			return;
 		}
@@ -378,7 +383,11 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 
 			<ModalContent isOpen={isOpen} onOpenChange={handleOpenChange} size="3xl">
 				<ModalHeader
-					description={t("Select an existing image or upload a new one.")}
+					description={
+						acceptsNonImageFiles
+							? t("Select an existing file or upload a new one.")
+							: t("Select an existing image or upload a new one.")
+					}
 					title={t("Media library")}
 				/>
 
