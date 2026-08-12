@@ -279,6 +279,11 @@ msgstr "Callout"
 
 #: ../../packages/ui/lib/rich-text-actions.tsx
 msgctxt "ui"
+msgid "ryK3qR"
+msgstr "Accordion"
+
+#: ../../packages/ui/lib/rich-text-actions.tsx
+msgctxt "ui"
 msgid "1EqXlD"
 msgstr "Media and text"
 
@@ -1090,6 +1095,10 @@ msgid "ryK3qR"
 msgstr "Accordion"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx
+msgid "vr2_VP"
+msgstr "Accordion panel"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx
 msgid "fErjHU"
 msgstr "Callout"
 
@@ -1401,16 +1410,6 @@ msgstr "URL"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx
 msgid "DysEL3"
 msgstr "Add CTA"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx
-msgid "5ujeDa"
-msgstr "Item"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx
-msgid "KDO3hW"
-msgstr "Add item"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-edit-form.tsx
@@ -7481,6 +7480,11 @@ msgstr "Manage website metadata."
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx
 msgid "b1yuz5"
 msgstr "Edit item"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx
+msgid "KDO3hW"
+msgstr "Add item"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx
 msgid "6SmI_u"

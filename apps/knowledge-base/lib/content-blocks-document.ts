@@ -58,8 +58,19 @@ interface CalloutBlock {
 	content?: {
 		intent?: "neutral" | "info" | "warning" | "danger" | "success";
 		title?: string;
-		content?: JSONContent;
 	};
+	children?: Array<MergeableBlock>;
+}
+
+interface AccordionBlock {
+	type: "accordion";
+	children?: Array<AccordionItemBlock>;
+}
+
+interface AccordionItemBlock {
+	type: "accordion_item";
+	content?: { title?: string };
+	children?: Array<MergeableBlock>;
 }
 
 interface MediaTextBlock {
@@ -102,15 +113,32 @@ export type MergeableBlock =
 	| ImageBlock
 	| EmbedBlock
 	| CalloutBlock
+	| AccordionBlock
 	| MediaTextBlock
 	| GalleryBlock;
 
 /**
- * Merges an ordered sequence of inline content blocks into a single Tiptap document. Typed blocks
- * become custom top-level nodes; rich_text blocks contribute their child nodes directly. The result
- * is used as the initial content of the unified editor.
+ * Merges an ordered sequence of content blocks into a single Tiptap document. Typed blocks become
+ * custom nodes; rich_text blocks contribute their child nodes directly. The result is used as the
+ * content of the unified editor.
+ *
+ * Containers recurse: a callout's children are merged into its node's content the same way a
+ * field's blocks are merged into the document, so a body made of a paragraph, an image and another
+ * paragraph arrives as three nodes inside one callout — and the image is an `assetImage` node
+ * again, which is how it can be edited in place.
  */
 export function mergeBlocksToDocument(blocks: Array<MergeableBlock>): JSONContent {
+	const nodes = mergeBlocksToNodes(blocks);
+
+	if (nodes.length === 0) {
+		nodes.push({ type: "paragraph" });
+	}
+
+	return { type: "doc", content: nodes };
+}
+
+/** The nodes one level of blocks becomes — the document's children, or a container's. */
+function mergeBlocksToNodes(blocks: Array<MergeableBlock>): Array<JSONContent> {
 	const nodes: Array<JSONContent> = [];
 
 	for (const block of blocks) {
@@ -175,33 +203,66 @@ export function mergeBlocksToDocument(blocks: Array<MergeableBlock>): JSONConten
 					caption: block.content?.caption ?? null,
 				},
 			});
+		} else if (block.type === "accordion") {
+			const items = (block.children ?? []).map((item) => {
+				const body = mergeBlocksToNodes(item.children ?? []);
+
+				return {
+					type: "accordionItem",
+					attrs: { title: item.content?.title ?? "" },
+					// A panel's content spec requires at least one block, so an empty one opens with a
+					// paragraph rather than a node the schema would refuse.
+					content: body.length > 0 ? body : [{ type: "paragraph" }],
+				};
+			});
+
+			// Same reasoning one level up: an accordion with no panels is not a valid node.
+			nodes.push({
+				type: "accordionBlock",
+				content:
+					items.length > 0
+						? items
+						: [
+								{
+									type: "accordionItem",
+									attrs: { title: "" },
+									content: [{ type: "paragraph" }],
+								},
+							],
+			});
 		} else {
+			const body = mergeBlocksToNodes(block.children ?? []);
+
 			nodes.push({
 				type: "calloutBlock",
 				attrs: {
 					intent: block.content?.intent ?? "info",
 					title: block.content?.title ?? null,
-					content: block.content?.content ?? null,
 				},
+				content: body.length > 0 ? body : [{ type: "paragraph" }],
 			});
 		}
 	}
 
-	if (nodes.length === 0) {
-		nodes.push({ type: "paragraph" });
-	}
-
-	return { type: "doc", content: nodes };
+	return nodes;
 }
 
 /**
- * Splits a unified Tiptap document back into an ordered array of ContentBlockInputs. Custom
- * top-level nodes become their corresponding typed blocks; runs of other nodes become rich_text
- * blocks. All produced blocks are treated as new (no `id` / `position`) so the server will delete
- * the old blocks and re-insert.
+ * Splits a unified Tiptap document back into an ordered array of ContentBlockInputs. Custom nodes
+ * become their corresponding typed blocks; runs of other nodes become rich_text blocks. All
+ * produced blocks are treated as new (no `id` / `position`) so the server will delete the old
+ * blocks and re-insert.
+ *
+ * Containers recurse into their own children, and this is where the tree earns its keep: an image
+ * inside a callout is split out exactly like an image at the top level, so it is stored as an
+ * `image` block with a real reference to its asset rather than as a key inside somebody's
+ * document.
  */
 export function splitDocumentToBlocks(doc: JSONContent): Array<ContentBlockInput> {
-	const nodes = doc.content ?? [];
+	return splitNodesToBlocks(doc.content ?? []);
+}
+
+function splitNodesToBlocks(nodes: Array<JSONContent>): Array<ContentBlockInput> {
 	const blocks: Array<ContentBlockInput> = [];
 	let richTextRun: Array<JSONContent> = [];
 
@@ -321,9 +382,33 @@ export function splitDocumentToBlocks(doc: JSONContent): Array<ContentBlockInput
 									| "success"
 									| undefined) ?? "info"),
 					title: (node.attrs?.title as string | null | undefined) ?? undefined,
-					content: (node.attrs?.content as JSONContent | null | undefined) ?? undefined,
 				},
+				children: splitNodesToBlocks(node.content ?? []) as CalloutChildren,
 			});
+		} else if (node.type === "accordionBlock") {
+			const items = (node.content ?? []).flatMap((item) => {
+				if (item.type !== "accordionItem") {
+					return [];
+				}
+
+				return [
+					{
+						id: crypto.randomUUID(),
+						type: "accordion_item" as const,
+						content: { title: ((item.attrs?.title as string | null | undefined) ?? "").trim() },
+						children: splitNodesToBlocks(item.content ?? []) as CalloutChildren,
+					},
+				];
+			});
+
+			// An accordion with no panels left is not something an author can see or delete, and there is
+			// no prose in it to rescue — the panels' bodies went with them. Same call as an empty gallery.
+			if (items.length === 0) {
+				continue;
+			}
+
+			flushRichText();
+			blocks.push({ id: crypto.randomUUID(), type: "accordion", children: items });
 		} else {
 			richTextRun.push(node);
 		}
@@ -333,3 +418,9 @@ export function splitDocumentToBlocks(doc: JSONContent): Array<ContentBlockInput
 
 	return blocks;
 }
+
+/**
+ * A container's body, as the input schema types it. The cast is safe by construction: the editor's
+ * schema keeps containers out of `block`, so nothing a container holds can itself be one.
+ */
+type CalloutChildren = Extract<ContentBlockInput, { type: "callout" }>["children"];

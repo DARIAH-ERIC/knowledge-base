@@ -199,7 +199,7 @@ async function getPlainTextFieldContentByVersionId(
 			blockType: schema.contentBlockTypes.type,
 			richTextContent: schema.richTextContentBlocks.content,
 			calloutTitle: schema.calloutContentBlocks.title,
-			calloutContent: schema.calloutContentBlocks.content,
+			accordionItemTitle: schema.accordionItemContentBlocks.title,
 		})
 		.from(schema.fields)
 		.innerJoin(
@@ -219,13 +219,24 @@ async function getPlainTextFieldContentByVersionId(
 			schema.calloutContentBlocks,
 			eq(schema.calloutContentBlocks.id, schema.contentBlocks.id),
 		)
+		.leftJoin(
+			schema.accordionItemContentBlocks,
+			eq(schema.accordionItemContentBlocks.id, schema.contentBlocks.id),
+		)
 		.where(
 			and(
 				inArray(schema.fields.entityVersionId, versionIds),
 				eq(schema.entityTypesFieldsNames.fieldName, fieldName),
-				inArray(schema.contentBlockTypes.type, ["rich_text", "callout"]),
+				// A container's prose is its `rich_text` children, which these types already cover
+				// wherever in the tree they sit; the container types are here only for the text they hold
+				// themselves — a callout's heading, an accordion panel's summary.
+				inArray(schema.contentBlockTypes.type, ["rich_text", "callout", "accordion_item"]),
 			),
 		)
+		// `position` orders blocks among their siblings, so a nested body sorts by its own position
+		// rather than its container's. Only the order of the parts within the indexed blob depends on
+		// this — every part is indexed either way — so it is left as the one cheap ordering rather than
+		// reconstructed into document order with a recursive query.
 		.orderBy(schema.fields.entityVersionId, schema.contentBlocks.position);
 
 	// Attach current placeholder-value data before flattening so the indexed text contains the
@@ -241,10 +252,10 @@ async function getPlainTextFieldContentByVersionId(
 	for (const row of annotatedRows) {
 		const content =
 			row.blockType === "callout"
-				? [row.calloutTitle, toPlainText(row.calloutContent)]
-						.filter((part): part is string => part != null && part.length > 0)
-						.join(" ")
-				: toPlainText(row.richTextContent);
+				? (row.calloutTitle ?? "")
+				: row.blockType === "accordion_item"
+					? (row.accordionItemTitle ?? "")
+					: toPlainText(row.richTextContent);
 
 		if (content.length === 0) {
 			continue;

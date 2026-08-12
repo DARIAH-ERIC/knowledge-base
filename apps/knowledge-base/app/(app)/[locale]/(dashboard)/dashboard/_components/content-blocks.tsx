@@ -127,8 +127,9 @@ interface CalloutContentBlockItem {
 	content?: {
 		intent?: "neutral" | "info" | "warning" | "danger" | "success";
 		title?: string;
-		content?: JSONContent;
 	};
+	/** The callout's body: flow content, each piece a block with its own storage. */
+	children?: Array<NestableContentBlock>;
 }
 
 interface HeroContentBlockItem {
@@ -171,9 +172,15 @@ interface AccordionContentBlockItem {
 	id: Key;
 	type: "accordion";
 	position?: number;
-	content?: {
-		items?: Array<{ title: string; content?: JSONContent }>;
-	};
+	children?: Array<AccordionItemContentBlockItem>;
+}
+
+interface AccordionItemContentBlockItem {
+	id: Key;
+	type: "accordion_item";
+	position?: number;
+	content?: { title?: string };
+	children?: Array<NestableContentBlock>;
 }
 
 interface MediaTextContentBlockItem {
@@ -192,16 +199,21 @@ interface MediaTextContentBlockItem {
 	};
 }
 
-export type ContentBlock =
+/** The blocks a container may hold — see `allowedChildBlockTypes` in `@dariah-eric/database`. */
+type NestableContentBlock =
 	| RichTextContentBlockItem
 	| ImageContentBlockItem
 	| EmbedContentBlockItem
+	| GalleryContentBlockItem
+	| MediaTextContentBlockItem;
+
+export type ContentBlock =
+	| NestableContentBlock
 	| CalloutContentBlockItem
 	| DataContentBlockItem
-	| GalleryContentBlockItem
 	| HeroContentBlockItem
 	| AccordionContentBlockItem
-	| MediaTextContentBlockItem;
+	| AccordionItemContentBlockItem;
 
 interface UnifiedContentBlockItem {
 	id: Key;
@@ -211,7 +223,26 @@ interface UnifiedContentBlockItem {
 
 type ContentBlockListItem = ContentBlock | UnifiedContentBlockItem;
 
+/**
+ * The items the list edits through a panel of their own. Everything else is a node inside a
+ * `unified_content` document, so it never reaches the list — and a container's children never do
+ * either, since the container carries them.
+ */
+type PanelContentBlockItem = Extract<
+	ContentBlockListItem,
+	{ type: "data" | "hero" | "unified_content" }
+>;
+
+/**
+ * The block types the unified editor owns. Everything here is edited as a node inside one document
+ * rather than as a panel of its own, which is also what makes it splittable: on save each node
+ * becomes the block it stands for, so an image is an `image` block wherever an author put it.
+ *
+ * Nested types (`accordion_item`, and anything inside a container) are not listed: they never reach
+ * the list as items of their own, because their container carries them.
+ */
 const UNIFIED_BLOCK_TYPES = new Set<ContentBlock["type"]>([
+	"accordion",
 	"rich_text",
 	"image",
 	"embed",
@@ -388,7 +419,7 @@ interface ContentBlockItemProps {
 	item: ContentBlockListItem;
 	onDelete: () => void;
 	onReorder: (sourceIdStr: string, targetId: Key, position: "before" | "after") => void;
-	onUpdate: (content: NonNullable<ContentBlockListItem["content"]>) => void;
+	onUpdate: (content: NonNullable<PanelContentBlockItem["content"]>) => void;
 	onKeyboardReorder: (e: KeyboardEvent<HTMLButtonElement>, id: Key) => void;
 }
 
@@ -460,6 +491,7 @@ function ContentBlockItem({
 
 	const contentBlockTypeNames: Record<ContentBlockTypes["type"] | "unified_content", string> = {
 		accordion: t("Accordion"),
+		accordion_item: t("Accordion panel"),
 		callout: t("Callout"),
 		data: t("Data"),
 		embed: t("Embed"),
@@ -473,6 +505,7 @@ function ContentBlockItem({
 
 	const contentBlockTypeIcons: Record<ContentBlockTypes["type"] | "unified_content", ReactNode> = {
 		accordion: <ListBulletIcon className="shrink-0 block-4 inline-4" />,
+		accordion_item: <ListBulletIcon className="shrink-0 block-4 inline-4" />,
 		callout: <InformationCircleIcon className="shrink-0 block-4 inline-4" />,
 		data: <Square3Stack3DIcon className="shrink-0 block-4 inline-4" />,
 		embed: <CodeBracketSquareIcon className="shrink-0 block-4 inline-4" />,
@@ -605,7 +638,7 @@ interface ContentBlockPanelProps {
 	hasFootnotes: boolean;
 	initialAssets?: Array<MediaLibraryAsset>;
 	item: ContentBlockListItem;
-	onChange: (content: NonNullable<ContentBlockListItem["content"]>) => void;
+	onChange: (content: NonNullable<PanelContentBlockItem["content"]>) => void;
 }
 
 function ContentBlockPanel({
@@ -615,16 +648,13 @@ function ContentBlockPanel({
 	onChange,
 }: Readonly<ContentBlockPanelProps>): ReactNode {
 	switch (item.type) {
-		case "accordion": {
-			return (
-				<AccordionContentBlockPanel initialAssets={initialAssets} item={item} onChange={onChange} />
-			);
-		}
-
 		// These are in `UNIFIED_BLOCK_TYPES`, so they only ever exist as nodes inside a unified
 		// document and never reach the list as items of their own — they are edited through their
-		// node views in the richtext editor. The cases remain because the types stay in
-		// `ContentBlock`: that is the shape the server hands us before merging.
+		// node views in the richtext editor. `accordion_item` never appears at this level at all: it
+		// only exists inside an accordion. The cases remain because the types stay in `ContentBlock`:
+		// that is the shape the server hands us before merging.
+		case "accordion":
+		case "accordion_item":
 		case "callout":
 		case "embed":
 		case "gallery":
@@ -656,6 +686,7 @@ function ContentBlockPanel({
 					blocks={[
 						"embed",
 						"callout",
+						"accordion",
 						"mediaText",
 						"gallery",
 						"buttonLink",
@@ -1040,108 +1071,6 @@ function HeroContentBlockPanel({
 	);
 }
 
-interface AccordionContentBlockPanelProps {
-	initialAssets?: Array<MediaLibraryAsset>;
-	item: AccordionContentBlockItem;
-	onChange: (content: NonNullable<AccordionContentBlockItem["content"]>) => void;
-}
-
-function AccordionContentBlockPanel({
-	initialAssets,
-	item,
-	onChange,
-}: Readonly<AccordionContentBlockPanelProps>): ReactNode {
-	const t = useExtracted();
-
-	const items = item.content?.items ?? [];
-
-	return (
-		<div className="flex flex-col gap-y-4">
-			{items.map((accordionItem, idx) => (
-				<div key={idx} className="flex flex-col gap-y-3 rounded-lg border border-border p-3">
-					<div className="flex items-center justify-between">
-						<span className="text-sm font-medium">
-							{t("Item")} {idx + 1}
-						</span>
-						<Button
-							intent="outline"
-							onPress={() => {
-								const next = items.filter((_, i) => i !== idx);
-								onChange({ ...item.content, items: next });
-							}}
-							size="sm"
-						>
-							<TrashIcon className="block-4 inline-4" />
-						</Button>
-					</div>
-					<TextField
-						isRequired={true}
-						onChange={(value) => {
-							const next = items.map((it, i) => (i === idx ? { ...it, title: value } : it));
-							onChange({ ...item.content, items: next });
-						}}
-						value={accordionItem.title}
-					>
-						<Label>{t("Title")}</Label>
-						<Input />
-					</TextField>
-					<div className="flex flex-col gap-y-1">
-						<Label>{t("Content")}</Label>
-						{/* The editor is a contenteditable, not a form control, so the `Label` above is not
-						    programmatically associated with it — name it explicitly. */}
-						<RichTextEditor
-							aria-label={t("Content")}
-							className="inline-full"
-							content={accordionItem.content}
-							onChange={(content: JSONContent) => {
-								const next = items.map((it, i) => (i === idx ? { ...it, content } : it));
-								onChange({ ...item.content, items: next });
-							}}
-							renderAssetMetadata={({ imageKey, onMetadataChange }) => (
-								<BlockAssetMetadata assetKey={imageKey} onMetadataChange={onMetadataChange} />
-							)}
-							renderImagePicker={
-								initialAssets != null
-									? (insert) => (
-											<MediaLibraryDialog
-												defaultPrefix="images"
-												initialAssets={initialAssets}
-												onSelect={(key, url, asset) => {
-													insert(key, url, asset);
-												}}
-												prefixes={["avatars", "images", "logos"]}
-												trigger={({ open }) => (
-													<RichTextEditorToolbarButton
-														aria-label="Insert image"
-														icon={ImageIcon}
-														onClick={open}
-													/>
-												)}
-											/>
-										)
-									: undefined
-							}
-						/>
-					</div>
-				</div>
-			))}
-			<Button
-				intent="secondary"
-				onPress={() => {
-					onChange({
-						...item.content,
-						items: [...items, { title: "", content: undefined }],
-					});
-				}}
-				size="sm"
-			>
-				<PlusIcon className="block-4 inline-4" />
-				{t("Add item")}
-			</Button>
-		</div>
-	);
-}
-
 interface ContentBlockMenuProps {
 	onAdd: (type: ContentBlockListItem["type"]) => void;
 }
@@ -1153,7 +1082,6 @@ const MENU_BLOCK_TYPES: Array<{
 	{ type: "unified_content", icon: <PencilSquareIcon /> },
 	{ type: "data", icon: <Square3Stack3DIcon /> },
 	{ type: "hero", icon: <RectangleGroupIcon /> },
-	{ type: "accordion", icon: <ListBulletIcon /> },
 ];
 
 export function ContentBlockMenu({ onAdd }: Readonly<ContentBlockMenuProps>): ReactNode {
@@ -1161,6 +1089,7 @@ export function ContentBlockMenu({ onAdd }: Readonly<ContentBlockMenuProps>): Re
 
 	const contentBlockTypeNames: Record<ContentBlockListItem["type"], string> = {
 		accordion: t("Accordion"),
+		accordion_item: t("Accordion panel"),
 		callout: t("Callout"),
 		data: t("Data"),
 		embed: t("Embed"),

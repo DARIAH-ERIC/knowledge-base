@@ -11,20 +11,27 @@ import * as schema from "./schema";
  * Shared by the `@dariah-eric/maintenance` cli and the admin dashboard, so both normalise
  * identically.
  *
- * Every block that stores richtext is covered, wherever it keeps it: the prose of a `rich_text`,
- * `callout`, `media_text` or `accordion` block, and the captions on `image`, `media_text`, `embed`,
- * `hero` and `gallery` blocks. A caption is written in the same editor as the prose around it, and
- * pasted into from the same sources, so it collects the same oddities — and, being a document of
- * its own, it was the half this service never reached.
+ * Every block that stores richtext is covered, wherever it keeps it: the prose of a `rich_text` or
+ * `media_text` block, and the captions on `image`, `media_text`, `embed`, `hero` and `gallery`
+ * blocks. A caption is written in the same editor as the prose around it, and pasted into from the
+ * same sources, so it collects the same oddities — and, being a document of its own, it was the
+ * half this service never reached.
+ *
+ * Container blocks (`callout`, `accordion`, `accordion_item`) need no case of their own: their
+ * prose is their children, so it is reached as the `rich_text` blocks it is stored as, wherever in
+ * the tree those sit.
  *
  * The one richtext outside a content block is an asset's own caption, edited in the media library.
  * Its findings would not be content blocks, so they are not reported here.
  */
 
-/** Which content blocks hold richtext; `data` is the only block type that holds none. */
+/**
+ * Which content blocks hold richtext of their own. `data` holds none, and the container types hold
+ * only their children (plus, for an `accordion_item`, a plain-text title).
+ */
 export type RichTextCleanupBlockType = Exclude<
 	(typeof schema.contentBlockTypesEnum)[number],
-	"data"
+	"accordion" | "accordion_item" | "callout" | "data"
 >;
 
 /** JSON-serializable so findings can cross a server/client boundary. */
@@ -61,11 +68,6 @@ function stableStringify(value: unknown): string {
 			.join(",")}}`;
 	}
 	return JSON.stringify(value);
-}
-
-interface AccordionItem {
-	title: string;
-	content: JSONContent;
 }
 
 /**
@@ -116,8 +118,6 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 			blockType: schema.contentBlockTypes.type,
 			position: schema.contentBlocks.position,
 			richTextContent: schema.richTextContentBlocks.content,
-			accordionItems: schema.accordionContentBlocks.items,
-			calloutContent: schema.calloutContentBlocks.content,
 			embedCaption: schema.embedContentBlocks.caption,
 			galleryCaption: schema.galleryContentBlocks.caption,
 			heroCaption: schema.heroContentBlocks.caption,
@@ -148,14 +148,6 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 		.leftJoin(
 			schema.richTextContentBlocks,
 			eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
-		)
-		.leftJoin(
-			schema.accordionContentBlocks,
-			eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
-		)
-		.leftJoin(
-			schema.calloutContentBlocks,
-			eq(schema.calloutContentBlocks.id, schema.contentBlocks.id),
 		)
 		.leftJoin(schema.embedContentBlocks, eq(schema.embedContentBlocks.id, schema.contentBlocks.id))
 		// Only the gallery's own row — its items are one-to-many and are fetched separately below.
@@ -230,18 +222,6 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 				break;
 			}
 
-			case "callout": {
-				const { changed, values } = normalizeColumns({ content: row.calloutContent });
-
-				pushCleanup("callout", changed, (tx) =>
-					tx
-						.update(schema.calloutContentBlocks)
-						.set(values)
-						.where(eq(schema.calloutContentBlocks.id, contentBlockId)),
-				);
-				break;
-			}
-
 			case "media_text": {
 				const { changed, values } = normalizeColumns({
 					content: row.mediaTextContent,
@@ -293,26 +273,6 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 				break;
 			}
 
-			case "accordion": {
-				const items = (row.accordionItems ?? []) as Array<AccordionItem>;
-				const normalizedItems = items.map((item) => {
-					return { ...item, content: normalizeRichTextDocument(item.content) };
-				});
-
-				const changed = items.some(
-					(item, index) =>
-						stableStringify(item.content) !== stableStringify(normalizedItems[index]!.content),
-				);
-
-				pushCleanup("accordion", changed, (tx) =>
-					tx
-						.update(schema.accordionContentBlocks)
-						.set({ items: normalizedItems })
-						.where(eq(schema.accordionContentBlocks.id, contentBlockId)),
-				);
-				break;
-			}
-
 			case "gallery": {
 				// The gallery's own caption lives on its row; its items' captions in a row each.
 				const { changed, values } = normalizeColumns({ caption: row.galleryCaption });
@@ -348,9 +308,14 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 				break;
 			}
 
-			// A `data` block holds no richtext: it stores the ids of the entities it lists. Matched by
+			// Blocks with no richtext of their own: `data` stores the ids of the entities it lists, and a
+			// container's prose is its children, each reached as the `rich_text` block it is. An
+			// `accordion_item`'s title is plain text, so there is no document to normalise. Matched by
 			// name rather than left to a default, so a new block type is a type error here until
 			// somebody decides whether it carries richtext.
+			case "accordion":
+			case "accordion_item":
+			case "callout":
 			case "data": {
 				break;
 			}

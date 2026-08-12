@@ -2,6 +2,7 @@ import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/databas
 import type { JSONContent } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 
+import type { ContentBlockInput } from "@/lib/content-block-input";
 import { mergeBlocksToDocument, splitDocumentToBlocks } from "@/lib/content-blocks-document";
 
 const assetCaption: JSONContent = {
@@ -59,7 +60,7 @@ describe("image content-block document conversion", () => {
 			captionMode: "inherit",
 		});
 
-		expect(splitDocumentToBlocks(document)[0]?.content).toMatchObject({
+		expect(contentOf(splitDocumentToBlocks(document)[0])).toMatchObject({
 			alt: "Alternative text",
 			assetCaption,
 			caption: blockCaption,
@@ -79,6 +80,11 @@ describe("image content-block document conversion", () => {
 	});
 });
 
+/** The `content` of a produced block; a container carries none, since its body is its children. */
+function contentOf(block: ContentBlockInput | undefined): unknown {
+	return block != null && "content" in block ? block.content : undefined;
+}
+
 describe("callout content-block document conversion", () => {
 	it("keeps callouts inline while round-tripping them as separate blocks", () => {
 		const content: JSONContent = {
@@ -87,7 +93,11 @@ describe("callout content-block document conversion", () => {
 		};
 		const document = mergeBlocksToDocument([
 			{ type: "rich_text", content: blockCaption },
-			{ type: "callout", content: { intent: "warning", title: "Important", content } },
+			{
+				type: "callout",
+				content: { intent: "warning", title: "Important" },
+				children: [{ type: "rich_text", content }],
+			},
 			{ type: "rich_text", content: assetCaption },
 		]);
 
@@ -101,11 +111,15 @@ describe("callout content-block document conversion", () => {
 			"callout",
 			"rich_text",
 		]);
-		expect(splitDocumentToBlocks(document)[1]?.content).toStrictEqual({
-			intent: "warning",
-			title: "Important",
-			content,
-		});
+		const callout = splitDocumentToBlocks(document)[1];
+
+		expect(contentOf(callout)).toStrictEqual({ intent: "warning", title: "Important" });
+		// The body is the callout's children now, and it survives as the block it was written as.
+		expect(
+			(callout as Extract<typeof callout, { type: "callout" }>).children?.map(
+				(child) => child.type,
+			),
+		).toStrictEqual(["rich_text"]);
 	});
 
 	it("normalizes the legacy default intent to neutral", () => {
@@ -114,12 +128,13 @@ describe("callout content-block document conversion", () => {
 			content: [
 				{
 					type: "calloutBlock",
-					attrs: { intent: "default", title: null, content: blockCaption },
+					attrs: { intent: "default", title: null },
+					content: blockCaption.content,
 				},
 			],
 		});
 
-		expect(blocks[0]?.content).toMatchObject({ intent: "neutral" });
+		expect(contentOf(blocks[0])).toMatchObject({ intent: "neutral" });
 	});
 });
 

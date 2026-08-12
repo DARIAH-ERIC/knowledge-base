@@ -288,6 +288,20 @@ async function applyCandidates(candidates: Array<Candidate>): Promise<number> {
 		.limit(1);
 	assert(accordionType, "Missing `accordion` content block type.");
 
+	const [accordionItemType] = await db
+		.select({ id: schema.contentBlockTypes.id })
+		.from(schema.contentBlockTypes)
+		.where(eq(schema.contentBlockTypes.type, "accordion_item"))
+		.limit(1);
+	assert(accordionItemType, "Missing `accordion_item` content block type.");
+
+	const [richTextType] = await db
+		.select({ id: schema.contentBlockTypes.id })
+		.from(schema.contentBlockTypes)
+		.where(eq(schema.contentBlockTypes.type, "rich_text"))
+		.limit(1);
+	assert(richTextType, "Missing `rich_text` content block type.");
+
 	let applied = 0;
 
 	for (const candidate of candidates) {
@@ -302,9 +316,43 @@ async function applyCandidates(candidates: Array<Candidate>): Promise<number> {
 				.returning({ id: schema.contentBlocks.id });
 			assert(block);
 
-			await tx
-				.insert(schema.accordionContentBlocks)
-				.values({ id: block.id, items: candidate.items });
+			await tx.insert(schema.accordionContentBlocks).values({ id: block.id });
+
+			// A panel is a block holding blocks, so each parsed item becomes an `accordion_item` with
+			// its body as a `rich_text` child — the same shape the editor writes.
+			for (const [position, item] of candidate.items.entries()) {
+				const insertedItem: Array<{ id: string }> = await tx
+					.insert(schema.contentBlocks)
+					.values({
+						fieldId: candidate.fieldId,
+						typeId: accordionItemType.id,
+						parentBlockId: block.id,
+						position,
+					})
+					.returning({ id: schema.contentBlocks.id });
+				const itemBlock: { id: string } | undefined = insertedItem[0];
+				assert(itemBlock);
+
+				await tx
+					.insert(schema.accordionItemContentBlocks)
+					.values({ id: itemBlock.id, title: item.title });
+
+				const insertedBody: Array<{ id: string }> = await tx
+					.insert(schema.contentBlocks)
+					.values({
+						fieldId: candidate.fieldId,
+						typeId: richTextType.id,
+						parentBlockId: itemBlock.id,
+						position: 0,
+					})
+					.returning({ id: schema.contentBlocks.id });
+				const bodyBlock: { id: string } | undefined = insertedBody[0];
+				assert(bodyBlock);
+
+				await tx
+					.insert(schema.richTextContentBlocks)
+					.values({ id: bodyBlock.id, content: item.content });
+			}
 
 			applied += 1;
 		});

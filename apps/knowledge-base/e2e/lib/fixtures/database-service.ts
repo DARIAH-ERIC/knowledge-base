@@ -289,7 +289,9 @@ export class DatabaseService {
 
 	async getNewsContentBlocksByTitle(title: string): Promise<
 		Array<{
-			accordionItems: unknown;
+			accordionItemTitle: string | null;
+			blockId: string;
+			parentBlockId: string | null;
 			calloutIntent: string | null;
 			calloutTitle: string | null;
 			content: unknown;
@@ -321,10 +323,12 @@ export class DatabaseService {
 
 		const rows = await this.db
 			.select({
-				accordionItems: schema.accordionContentBlocks.items,
+				accordionItemTitle: schema.accordionItemContentBlocks.title,
+				blockId: schema.contentBlocks.id,
+				parentBlockId: schema.contentBlocks.parentBlockId,
 				calloutIntent: schema.calloutContentBlocks.intent,
 				calloutTitle: schema.calloutContentBlocks.title,
-				content: sql<unknown>`coalesce(${schema.richTextContentBlocks.content}, ${schema.calloutContentBlocks.content}, ${schema.mediaTextContentBlocks.content})`,
+				content: sql<unknown>`coalesce(${schema.richTextContentBlocks.content}, ${schema.mediaTextContentBlocks.content})`,
 				dataLimit: schema.dataContentBlocks.limit,
 				embedTitle: schema.embedContentBlocks.title,
 				embedUrl: schema.embedContentBlocks.url,
@@ -371,6 +375,10 @@ export class DatabaseService {
 			.leftJoin(
 				schema.calloutContentBlocks,
 				eq(schema.calloutContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(
+				schema.accordionItemContentBlocks,
+				eq(schema.accordionItemContentBlocks.id, schema.contentBlocks.id),
 			)
 			.leftJoin(
 				schema.imageContentBlocks,

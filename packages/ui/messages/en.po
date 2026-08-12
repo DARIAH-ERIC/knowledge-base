@@ -279,6 +279,11 @@ msgstr "Callout"
 
 #: lib/rich-text-actions.tsx
 msgctxt "ui"
+msgid "ryK3qR"
+msgstr "Accordion"
+
+#: lib/rich-text-actions.tsx
+msgctxt "ui"
 msgid "1EqXlD"
 msgstr "Media and text"
 

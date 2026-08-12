@@ -36,8 +36,9 @@ import { writeTsvReport } from "../lib/tsv-report";
  * matches, and is reported as skipped for a human rather than silently overwritten with newer
  * WordPress content. A restored table has no flattened run left to find, so re-running is a no-op.
  *
- * Both `rich_text` blocks and `accordion` item bodies are scanned; the migration parsed accordion
- * bodies through the same code path, so tables inside them were flattened the same way.
+ * Every `rich_text` block is scanned, accordion panel bodies included — a panel's body is a
+ * `rich_text` block of its own. The migration parsed accordion bodies through the same code path,
+ * so tables inside them were flattened the same way.
  *
  * @example
  * 	pnpm run data:backfill:tables-from-wordpress
@@ -219,16 +220,15 @@ function parseTable(tableHtml: string): WordPressTable | undefined {
 }
 
 /**
- * One editable node list: either a `rich_text` block's document, or one item body inside an
- * `accordion` block. Both were produced by the same migration code path, so both can hold a
- * flattened table.
+ * One editable node list: a `rich_text` block's document.
+ *
+ * That covers accordion panel bodies too — a panel's body is a `rich_text` block of its own, at its
+ * own place in the tree — so a flattened table inside one is found the same way as anywhere else,
+ * with no second shape to walk.
  */
 interface Target {
 	key: string;
-	blockKind: "accordion" | "rich_text";
 	blockId: string;
-	/** Only set for `accordion` targets. */
-	itemIndex?: number;
 	nodes: Array<RtNode>;
 }
 
@@ -241,14 +241,9 @@ interface EntityVersion {
 	targets: Array<Target>;
 }
 
-interface AccordionItem {
-	title: string;
-	content?: { content?: Array<RtNode> | null } | null;
-}
-
 /**
- * Entities' `rich_text` and `accordion` content blocks for the given types, one entry per lifecycle
- * version. Keyed by `type/slug`, since slugs are only unique per entity type.
+ * Entities' `rich_text` content blocks for the given types, one entry per lifecycle version. Keyed
+ * by `type/slug`, since slugs are only unique per entity type.
  */
 async function findTargets(
 	entityTypes: Array<EntityType>,
@@ -263,7 +258,6 @@ async function findTargets(
 			blockId: schema.contentBlocks.id,
 			position: schema.contentBlocks.position,
 			richTextContent: schema.richTextContentBlocks.content,
-			accordionItems: schema.accordionContentBlocks.items,
 		})
 		.from(schema.entities)
 		.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
@@ -279,10 +273,7 @@ async function findTargets(
 			schema.richTextContentBlocks,
 			eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
 		)
-		.leftJoin(
-			schema.accordionContentBlocks,
-			eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
-		)
+
 		.where(
 			and(
 				inArray(schema.entityTypes.type, entityTypes),
@@ -306,23 +297,9 @@ async function findTargets(
 			if (row.richTextContent != null) {
 				version.targets.push({
 					key: `rich_text:${row.blockId}`,
-					blockKind: "rich_text",
 					blockId: row.blockId,
 					nodes: (row.richTextContent as { content?: Array<RtNode> | null }).content ?? [],
 				});
-				return;
-			}
-
-			if (row.accordionItems != null) {
-				for (const [itemIndex, item] of (row.accordionItems as Array<AccordionItem>).entries()) {
-					version.targets.push({
-						key: `accordion:${row.blockId}:${String(itemIndex)}`,
-						blockKind: "accordion",
-						blockId: row.blockId,
-						itemIndex,
-						nodes: item.content?.content ?? [],
-					});
-				}
 			}
 		},
 	});
@@ -474,9 +451,7 @@ const reportColumns = [
 	"entity_slug",
 	"entity_document_id",
 	"entity_version_status",
-	"block_kind",
 	"block_id",
-	"accordion_item_index",
 	"start_index",
 	"flattened_nodes",
 	"table_rows",
@@ -493,9 +468,7 @@ async function writeReport(updates: Array<TargetUpdate>): Promise<void> {
 				update.entitySlug,
 				update.entityDocumentId,
 				update.status,
-				update.target.blockKind,
 				update.target.blockId,
-				update.target.itemIndex != null ? String(update.target.itemIndex) : "",
 				String(replacement.startIndex),
 				String(replacement.runLength),
 				String(replacement.rows),
@@ -523,68 +496,31 @@ async function applyUpdates(updates: Array<TargetUpdate>): Promise<number> {
 
 			const stale = (): void => {
 				log.warn(
-					`Skipping ${update.entityType}/${update.entitySlug} (${update.status}): ${update.target.blockKind} block changed since the report was generated.`,
+					`Skipping ${update.entityType}/${update.entitySlug} (${update.status}): rich_text block changed since the report was generated.`,
 				);
 			};
 
-			if (update.target.blockKind === "rich_text") {
-				const [current] = await tx
-					.select({ content: schema.richTextContentBlocks.content })
-					.from(schema.richTextContentBlocks)
-					.where(eq(schema.richTextContentBlocks.id, update.target.blockId))
-					.limit(1);
-
-				const nodes =
-					(current?.content as { content?: Array<RtNode> | null } | null)?.content ?? [];
-				if (!isUnchanged(nodes)) {
-					stale();
-					return;
-				}
-
-				await tx
-					.update(schema.richTextContentBlocks)
-					.set({
-						content: {
-							type: "doc",
-							content: applyReplacements(nodes, update.replacements),
-						} as JSONContent,
-					})
-					.where(eq(schema.richTextContentBlocks.id, update.target.blockId));
-
-				applied += update.replacements.length;
-				return;
-			}
-
 			const [current] = await tx
-				.select({ items: schema.accordionContentBlocks.items })
-				.from(schema.accordionContentBlocks)
-				.where(eq(schema.accordionContentBlocks.id, update.target.blockId))
+				.select({ content: schema.richTextContentBlocks.content })
+				.from(schema.richTextContentBlocks)
+				.where(eq(schema.richTextContentBlocks.id, update.target.blockId))
 				.limit(1);
 
-			const items = (current?.items as Array<AccordionItem> | null) ?? [];
-			const itemIndex = update.target.itemIndex!;
-			const item = items[itemIndex];
-			const nodes = item?.content?.content ?? [];
-
-			if (item == null || !isUnchanged(nodes)) {
+			const nodes = (current?.content as { content?: Array<RtNode> | null } | null)?.content ?? [];
+			if (!isUnchanged(nodes)) {
 				stale();
 				return;
 			}
 
-			const nextItems = items.map((current, index) => {
-				if (index !== itemIndex) {
-					return current;
-				}
-				return {
-					...current,
-					content: { type: "doc", content: applyReplacements(nodes, update.replacements) },
-				};
-			});
-
 			await tx
-				.update(schema.accordionContentBlocks)
-				.set({ items: nextItems })
-				.where(eq(schema.accordionContentBlocks.id, update.target.blockId));
+				.update(schema.richTextContentBlocks)
+				.set({
+					content: {
+						type: "doc",
+						content: applyReplacements(nodes, update.replacements),
+					} as JSONContent,
+				})
+				.where(eq(schema.richTextContentBlocks.id, update.target.blockId));
 
 			applied += update.replacements.length;
 		});
@@ -602,7 +538,7 @@ async function main(): Promise<void> {
 		fetchAll(wordPressApiBaseUrl, "pages"),
 	]);
 
-	log.info("Loading migrated rich_text and accordion content blocks…");
+	log.info("Loading migrated rich_text content blocks…");
 	const entitiesByKey = await findTargets([
 		"news",
 		"pages",
@@ -623,7 +559,7 @@ async function main(): Promise<void> {
 	for (const update of updates) {
 		for (const replacement of update.replacements) {
 			log.info(
-				`  ${update.entityType}/${update.entitySlug} (${update.status}, ${update.target.blockKind}): ${String(replacement.rows)} row(s) from ${String(replacement.runLength)} node(s) — "${replacement.preview}…"`,
+				`  ${update.entityType}/${update.entitySlug} (${update.status}): ${String(replacement.rows)} row(s) from ${String(replacement.runLength)} node(s) — "${replacement.preview}…"`,
 			);
 		}
 	}

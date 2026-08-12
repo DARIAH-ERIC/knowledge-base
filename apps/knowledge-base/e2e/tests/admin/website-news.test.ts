@@ -316,20 +316,21 @@ test.describe("website news admin", () => {
 		await newsPage.addContentWithCallout({ above, below, body: calloutBody, title: calloutTitle });
 		await newsPage.submitForm();
 
+		// A callout is a container, so the query returns its body as a block of its own. The document's
+		// own sequence is the blocks with no parent; the body hangs off the callout.
 		let contentBlocks = await db.getNewsContentBlocksByTitle(title);
-		expect(contentBlocks.map(({ type }) => type)).toStrictEqual([
-			"rich_text",
-			"callout",
-			"rich_text",
-		]);
-		expect(contentBlocks.map(({ position }) => position)).toStrictEqual([0, 1, 2]);
-		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(above);
-		expect(contentBlocks[1]).toMatchObject({
-			calloutIntent: "warning",
-			calloutTitle,
-		});
-		expect(JSON.stringify(contentBlocks[1]!.content)).toContain(calloutBody);
-		expect(JSON.stringify(contentBlocks[2]!.content)).toContain(below);
+		let topLevel = contentBlocks.filter((block) => block.parentBlockId == null);
+		expect(topLevel.map(({ type }) => type)).toStrictEqual(["rich_text", "callout", "rich_text"]);
+		expect(topLevel.map(({ position }) => position)).toStrictEqual([0, 1, 2]);
+		expect(JSON.stringify(topLevel[0]!.content)).toContain(above);
+		expect(topLevel[1]).toMatchObject({ calloutIntent: "warning", calloutTitle });
+		expect(JSON.stringify(topLevel[2]!.content)).toContain(below);
+
+		let calloutBodyBlock = contentBlocks.find(
+			(block) => block.parentBlockId === topLevel[1]!.blockId,
+		);
+		expect(calloutBodyBlock?.type).toBe("rich_text");
+		expect(JSON.stringify(calloutBodyBlock?.content)).toContain(calloutBody);
 
 		await newsPage.searchByTitle(title);
 		await newsPage.gotoDetailsFromList(title);
@@ -345,15 +346,17 @@ test.describe("website news admin", () => {
 		await newsPage.submitForm();
 
 		contentBlocks = await db.getNewsContentBlocksByTitle(title);
-		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["callout", "rich_text"]);
-		expect(contentBlocks.map(({ position }) => position)).toStrictEqual([0, 1]);
-		expect(contentBlocks[0]).toMatchObject({
-			calloutIntent: "warning",
-			calloutTitle,
-		});
-		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(calloutBody);
-		expect(JSON.stringify(contentBlocks[1]!.content)).toContain(above);
-		expect(JSON.stringify(contentBlocks[1]!.content)).toContain(below);
+		topLevel = contentBlocks.filter((block) => block.parentBlockId == null);
+		expect(topLevel.map(({ type }) => type)).toStrictEqual(["callout", "rich_text"]);
+		expect(topLevel.map(({ position }) => position)).toStrictEqual([0, 1]);
+		expect(topLevel[0]).toMatchObject({ calloutIntent: "warning", calloutTitle });
+		expect(JSON.stringify(topLevel[1]!.content)).toContain(above);
+		expect(JSON.stringify(topLevel[1]!.content)).toContain(below);
+
+		// Dragging the callout moves its body with it — the body is part of the block, not a sibling
+		// that could be left behind.
+		calloutBodyBlock = contentBlocks.find((block) => block.parentBlockId === topLevel[0]!.blockId);
+		expect(JSON.stringify(calloutBodyBlock?.content)).toContain(calloutBody);
 
 		await newsPage.searchByTitle(title);
 		await newsPage.gotoDetailsFromList(title);
@@ -640,15 +643,21 @@ test.describe("website news admin", () => {
 		await newsPage.submitForm();
 
 		const contentBlocks = await db.getNewsContentBlocksByTitle(title);
-		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text", "callout"]);
-		expect(contentBlocks[1]).toMatchObject({ calloutTitle });
-		expect(JSON.stringify(contentBlocks[1]!.content)).toContain(calloutBody);
+		const topLevel = contentBlocks.filter((block) => block.parentBlockId == null);
+		expect(topLevel.map(({ type }) => type)).toStrictEqual(["rich_text", "callout"]);
+		expect(topLevel[1]).toMatchObject({ calloutTitle });
+
+		// The callout's body is its child, so it is found through the callout rather than beside it.
+		const calloutBodyBlock = contentBlocks.find(
+			(block) => block.parentBlockId === topLevel[1]!.blockId,
+		);
+		expect(JSON.stringify(calloutBodyBlock?.content)).toContain(calloutBody);
 
 		/**
 		 * The point of the test: the `/callout` the author typed is consumed by the command, not left
 		 * behind as literal text in the paragraph above it.
 		 */
-		const richText = JSON.stringify(contentBlocks[0]!.content);
+		const richText = JSON.stringify(topLevel[0]!.content);
 		expect(richText).toContain(above);
 		expect(richText).not.toContain("/callout");
 		expect(richText).not.toContain("/head");
@@ -972,6 +981,24 @@ test.describe("website news admin", () => {
 		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["rich_text", "media_text"]);
 		expect(contentBlocks[1]).toMatchObject({ mediaTextSide: "end" });
 		expect(JSON.stringify(contentBlocks[1]!.content)).toContain(bio);
+
+		/**
+		 * A `media_text` block has a content hole, so ProseMirror does not mark it draggable — the
+		 * editor has to, and for a long time nothing did, which left the block impossible to move.
+		 * Dragging it above the prose proves the attribute is there and that the block's own text
+		 * travels with it.
+		 */
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoDetailsFromList(title);
+		await newsPage.gotoEditFromDetails();
+		await newsPage.dragMediaTextBeforeText(above);
+		await newsPage.submitForm();
+
+		contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["media_text", "rich_text"]);
+		expect(contentBlocks.map(({ position }) => position)).toStrictEqual([0, 1]);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(bio);
+		expect(JSON.stringify(contentBlocks[1]!.content)).toContain(above);
 	});
 
 	test("should save an inline embed block with its title and caption", async ({
@@ -1012,7 +1039,7 @@ test.describe("website news admin", () => {
 	});
 
 	/**
-	 * The three block types that stay out of the unified document. They had no e2e coverage at all,
+	 * The two block types that stay out of the unified document. They had no e2e coverage at all,
 	 * because "Content" was the only entry ever chosen from the Add block menu — so nothing verified
 	 * that adding, saving or re-loading them works.
 	 */
@@ -1025,8 +1052,6 @@ test.describe("website news admin", () => {
 		const heroTitle = `Hero title ${randomUUID()}`;
 		const heroEyebrow = `Hero eyebrow ${randomUUID()}`;
 		const cta = { label: `Apply now ${randomUUID()}`, url: "https://example.com/apply" };
-		const accordionTitle = `Accordion item ${randomUUID()}`;
-		const accordionBody = `Accordion body ${randomUUID()}`;
 
 		await newsPage.gotoCreate();
 		await newsPage.fillTitle(title);
@@ -1040,18 +1065,72 @@ test.describe("website news admin", () => {
 			assetLabel: "E2E Test Asset",
 			cta,
 		});
-		await newsPage.addAccordionBlock({ title: accordionTitle, body: accordionBody });
 		await newsPage.submitForm();
 
 		const contentBlocks = await db.getNewsContentBlocksByTitle(title);
-		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["data", "hero", "accordion"]);
-		expect(contentBlocks.map(({ position }) => position)).toStrictEqual([0, 1, 2]);
+		expect(contentBlocks.map(({ type }) => type)).toStrictEqual(["data", "hero"]);
+		expect(contentBlocks.map(({ position }) => position)).toStrictEqual([0, 1]);
 
 		expect(contentBlocks[0]).toMatchObject({ dataLimit: 3 });
 		expect(contentBlocks[1]).toMatchObject({ heroTitle, heroEyebrow });
 		expect(JSON.stringify(contentBlocks[1]!.heroCtas)).toContain(cta.url);
-		expect(JSON.stringify(contentBlocks[2]!.accordionItems)).toContain(accordionTitle);
-		expect(JSON.stringify(contentBlocks[2]!.accordionItems)).toContain(accordionBody);
+	});
+
+	/**
+	 * An accordion is a tree: the block, a panel beneath it, and the panel's body beneath that. What
+	 * this proves is the thing the whole nesting change is for — a panel's prose is stored as a
+	 * `rich_text` block with a real place in the tree, so anything else an author puts in a panel is
+	 * stored as the block it is too, with the references that come with it.
+	 */
+	test("should save an accordion as a tree of blocks", async ({ createWebsiteNewsPage, db }) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Accordion ${randomUUID()}`;
+		const intro = `Intro ${randomUUID()}`;
+		const accordionTitle = `Accordion item ${randomUUID()}`;
+		const accordionBody = `Accordion body ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item with an accordion");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+
+		await newsPage.addContentWithAccordion({
+			intro,
+			title: accordionTitle,
+			body: accordionBody,
+		});
+		await newsPage.submitForm();
+
+		const contentBlocks = await db.getNewsContentBlocksByTitle(title);
+
+		// Addressed by type rather than by position: `position` orders siblings, so once blocks nest
+		// there is no single sequence to index into.
+		expect(contentBlocks.map(({ type }) => type).toSorted()).toStrictEqual([
+			"accordion",
+			"accordion_item",
+			"rich_text",
+			"rich_text",
+		]);
+
+		const accordion = contentBlocks.find((block) => block.type === "accordion");
+		const item = contentBlocks.find((block) => block.type === "accordion_item");
+		const introBlock = contentBlocks.find(
+			(block) => block.type === "rich_text" && block.parentBlockId == null,
+		);
+		const body = contentBlocks.find(
+			(block) => block.type === "rich_text" && block.parentBlockId != null,
+		);
+
+		expect(introBlock).toBeDefined();
+		expect(JSON.stringify(introBlock?.content)).toContain(intro);
+		expect(item?.accordionItemTitle).toBe(accordionTitle);
+		expect(JSON.stringify(body?.content)).toContain(accordionBody);
+
+		// The panel hangs off the accordion, and its body off the panel — the shape the read path, the
+		// clone and the public API all walk.
+		expect(accordion?.parentBlockId).toBeNull();
+		expect(item?.parentBlockId).toBe(accordion?.blockId);
+		expect(body?.parentBlockId).toBe(item?.blockId);
 	});
 
 	/**

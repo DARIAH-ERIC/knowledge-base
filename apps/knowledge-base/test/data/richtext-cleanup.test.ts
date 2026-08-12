@@ -85,6 +85,7 @@ async function addBlock(
 	fieldId: string,
 	type: schema.ContentBlockTypes["type"],
 	position: number,
+	parentBlockId: string | null = null,
 ): Promise<string> {
 	const blockType = await tx.query.contentBlockTypes.findFirst({
 		where: { type },
@@ -94,7 +95,7 @@ async function addBlock(
 
 	const [block] = await tx
 		.insert(schema.contentBlocks)
-		.values({ fieldId, typeId: blockType.id, position })
+		.values({ fieldId, typeId: blockType.id, position, parentBlockId })
 		.returning({ id: schema.contentBlocks.id });
 	assert(block);
 
@@ -112,10 +113,14 @@ describe("richtext cleanup", () => {
 				.insert(schema.richTextContentBlocks)
 				.values({ id: richTextId, content: untidy("Prose") });
 
+			// A callout's body is a `rich_text` child, so untidy prose inside one is reported as the
+			// nested block it is stored as — not as the callout.
 			const calloutId = await addBlock(tx, fieldId, "callout", 1);
+			await tx.insert(schema.calloutContentBlocks).values({ id: calloutId, intent: "info" });
+			const calloutBodyId = await addBlock(tx, fieldId, "rich_text", 0, calloutId);
 			await tx
-				.insert(schema.calloutContentBlocks)
-				.values({ id: calloutId, intent: "info", content: untidy("Callout") });
+				.insert(schema.richTextContentBlocks)
+				.values({ id: calloutBodyId, content: untidy("Callout") });
 
 			const imageId = await addBlock(tx, fieldId, "image", 2);
 			await tx
@@ -152,11 +157,17 @@ describe("richtext cleanup", () => {
 				caption: untidy("Gallery caption"),
 			});
 
+			// Two levels down, and found the same way: an accordion holds panels, a panel holds blocks.
 			const accordionId = await addBlock(tx, fieldId, "accordion", 7);
-			await tx.insert(schema.accordionContentBlocks).values({
-				id: accordionId,
-				items: [{ title: "An item", content: untidy("Accordion prose") }],
-			});
+			await tx.insert(schema.accordionContentBlocks).values({ id: accordionId });
+			const accordionItemId = await addBlock(tx, fieldId, "accordion_item", 0, accordionId);
+			await tx
+				.insert(schema.accordionItemContentBlocks)
+				.values({ id: accordionItemId, title: "An item" });
+			const accordionBodyId = await addBlock(tx, fieldId, "rich_text", 0, accordionItemId);
+			await tx
+				.insert(schema.richTextContentBlocks)
+				.values({ id: accordionBodyId, content: untidy("Accordion prose") });
 
 			/** A block already tidy must not be reported, or "needs cleanup" means nothing. */
 			const cleanId = await addBlock(tx, fieldId, "image", 8);
@@ -168,13 +179,13 @@ describe("richtext cleanup", () => {
 			const found = new Map(blocks.map((block) => [block.contentBlockId, block.blockType]));
 
 			expect(found.get(richTextId)).toBe("rich_text");
-			expect(found.get(calloutId)).toBe("callout");
+			expect(found.get(calloutBodyId)).toBe("rich_text");
 			expect(found.get(imageId)).toBe("image");
 			expect(found.get(embedId)).toBe("embed");
 			expect(found.get(mediaTextId)).toBe("media_text");
 			expect(found.get(heroId)).toBe("hero");
 			expect(found.get(galleryId)).toBe("gallery");
-			expect(found.get(accordionId)).toBe("accordion");
+			expect(found.get(accordionBodyId)).toBe("rich_text");
 			expect(found.has(cleanId)).toBe(false);
 		});
 	});

@@ -1,10 +1,9 @@
 "use server";
 
-import { assert, keyBy } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
 import { UpdateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy.schema";
-import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
 import {
 	ensureDraftVersion,
@@ -13,9 +12,12 @@ import {
 	touchVersion,
 	updateDraftDocumentSlug,
 } from "@/lib/data/entity-lifecycle";
-import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
-import { db } from "@/lib/db";
-import { eq, inArray, isNull } from "@/lib/db/sql";
+import {
+	deleteFieldContentBlocks,
+	ensureEntityVersionField,
+	insertContentBlockTree,
+} from "@/lib/data/entity-version-fields";
+import { eq, isNull } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -89,39 +91,9 @@ export const updateDocumentOrPolicyAction = createMutationAction<
 
 		const contentField = await ensureEntityVersionField(tx, draftVersionId, "description");
 
-		const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-		const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
+		await deleteFieldContentBlocks(tx, contentField.id);
 
-		const existingBlocks = await tx.query.contentBlocks.findMany({
-			where: { fieldId: contentField.id },
-			columns: { id: true },
-		});
-
-		if (existingBlocks.length > 0) {
-			await tx.delete(schema.contentBlocks).where(
-				inArray(
-					schema.contentBlocks.id,
-					existingBlocks.map((b) => b.id),
-				),
-			);
-		}
-
-		await Promise.all(
-			input.contentBlocks.map(async (contentBlock, index) => {
-				const [added] = await tx
-					.insert(schema.contentBlocks)
-					.values({
-						fieldId: contentField.id,
-						typeId: contentBlockTypesByType[contentBlock.type].id,
-						position: index,
-					})
-					.returning({ id: schema.contentBlocks.id });
-
-				assert(added);
-
-				await upsertTypedContentBlock(tx, contentBlock, added.id, true);
-			}),
-		);
+		await insertContentBlockTree(tx, contentField.id, input.contentBlocks);
 
 		await touchVersion(tx, draftVersionId);
 
