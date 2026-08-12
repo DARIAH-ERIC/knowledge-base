@@ -67,6 +67,7 @@ import {
 	type SelectedImage,
 	SelectedImageCard,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
+import { documentMimeTypes } from "@/config/assets.config";
 import {
 	type MergeableBlock,
 	mergeBlocksToDocument,
@@ -737,6 +738,7 @@ function ContentBlockPanel({
 						initialAssets != null
 							? ({ isOpen, onOpenChange, select, current }) => (
 									<MediaLibraryDialog
+										acceptedFileTypes={documentMimeTypes}
 										defaultPrefix="documents"
 										initialAssets={initialAssets}
 										isOpen={isOpen}

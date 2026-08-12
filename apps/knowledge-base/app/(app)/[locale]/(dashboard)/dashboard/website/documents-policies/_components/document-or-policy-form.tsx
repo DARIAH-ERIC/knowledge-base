@@ -24,6 +24,7 @@ import {
 	type SelectedImage,
 	SelectedImageCard,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
+import { documentMimeTypes } from "@/config/assets.config";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface DocumentOrPolicyFormProps {
@@ -58,6 +59,7 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 
 	const picker = (
 		<MediaLibraryDialog
+			acceptedFileTypes={documentMimeTypes}
 			defaultPrefix="documents"
 			initialAssets={initialAssets}
 			onSelect={(key, url, asset) => {

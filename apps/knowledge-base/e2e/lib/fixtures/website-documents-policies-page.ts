@@ -94,6 +94,24 @@ export class WebsiteDocumentsPoliciesPage {
 		await expect(this.page.locator('input[name="documentKey"]')).not.toHaveValue("");
 	}
 
+	async uploadDocumentFromMediaLibrary(
+		file: { buffer: Buffer; mimeType: string; name: string },
+		label: string,
+	): Promise<void> {
+		await this.page.getByRole("button", { name: /^(Select|Change) document$/ }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("tab", { name: "Upload" }).click();
+		const fileInput = dialog.locator('input[type="file"]');
+		await expect(fileInput).toHaveAttribute("accept", /application\/pdf/);
+		await fileInput.setInputFiles(file);
+		await dialog.getByLabel("Label").fill(label);
+		await dialog.getByRole("button", { name: "Upload" }).click();
+		await dialog.waitFor({ state: "hidden" });
+		await this.page.getByText(label, { exact: true }).waitFor({ state: "visible" });
+		await expect(this.page.locator('input[name="documentKey"]')).not.toHaveValue("");
+	}
+
 	async clearDatePicker(label: string): Promise<void> {
 		await clearDateSegments(this.page, label);
 	}

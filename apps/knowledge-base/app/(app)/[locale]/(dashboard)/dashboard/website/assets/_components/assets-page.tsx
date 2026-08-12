@@ -158,8 +158,8 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 				<div className="flex flex-1 items-center justify-center py-16">
 					<p className="text-center text-sm text-muted-fg">
 						{search.inputValue !== "" || selectedPrefix !== "all"
-							? t("No images match your filters.")
-							: t("No images found. Upload one to get started.")}
+							? t("No assets match your filters.")
+							: t("No assets found. Upload one to get started.")}
 					</p>
 				</div>
 			) : layout === "grid" ? (

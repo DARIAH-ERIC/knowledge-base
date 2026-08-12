@@ -244,7 +244,13 @@ interface UploadAssetParams {
 export async function uploadAsset(params: UploadAssetParams) {
 	const { file, licenseId, prefix, label, alt, caption } = params;
 
-	const { input, size, dimensions } = await prepareImageForUpload(file);
+	const { input, size, dimensions } = file.type.startsWith("image/")
+		? await prepareImageForUpload(file)
+		: {
+				input: Readable.fromWeb(file.stream() as ReadableStream),
+				size: file.size,
+				dimensions: null,
+			};
 	const metadata = { "content-type": file.type, name: file.name };
 
 	const { key } = (await s3.upload({ input, prefix, metadata, size })).unwrap();

@@ -62,7 +62,7 @@ export const uploadImageAction = createServerAction<
 		revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
 
 		return createActionStateSuccess({
-			message: t("Successfully uploaded image."),
+			message: t("Successfully uploaded file."),
 			data: {
 				id,
 				key,

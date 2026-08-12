@@ -8,6 +8,23 @@ export const imageMimeTypes = [
 	"image/svg+xml",
 ] as const;
 
+/** File types that may be stored in the `documents` asset collection. */
+export const documentMimeTypes = [
+	...imageMimeTypes,
+	"application/pdf",
+	"application/msword",
+	"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+	"application/vnd.ms-excel",
+	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	"application/vnd.ms-powerpoint",
+	"application/vnd.openxmlformats-officedocument.presentationml.presentation",
+	"application/vnd.oasis.opendocument.presentation",
+	"application/vnd.oasis.opendocument.spreadsheet",
+	"application/vnd.oasis.opendocument.text",
+	"text/csv",
+	"text/plain",
+] as const;
+
 export const mediaLibraryPageSize = 20;
 
 /** Must be less than `serverActions.bodySizeLimit` in `next.config.ts`. */
