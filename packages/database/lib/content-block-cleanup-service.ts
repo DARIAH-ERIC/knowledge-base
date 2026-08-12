@@ -12,7 +12,8 @@ import * as schema from "./schema";
  * - A `rich_text` block whose document has no meaningful content (empty paragraphs, stray hard
  *   breaks, whitespace) — wherever in the tree it sits, including the body of a callout or an
  *   accordion panel;
- * - A container block (`callout`, `accordion`, `accordion_item`) left with no children at all.
+ * - A container block (`callout`, `accordion`, `accordion_item`) left with no children and no visible
+ *   title of its own.
  *
  * The two converge over successive runs rather than in one pass: emptying a callout's only child
  * makes the callout itself empty, which the next run reports. That is deliberate — each run only
@@ -76,18 +77,22 @@ async function getRichTextBlocks(db: Database | Transaction): Promise<Array<Rich
 const containerBlockTypes = ["accordion", "accordion_item", "callout"] as const;
 
 /**
- * Container blocks with nothing in them — an accordion with no panels, a callout with no body. The
- * left join is to the children themselves, so "no children" is the absence of a joined row rather
- * than a count.
+ * Container blocks with nothing in them — an accordion with no panels, or an untitled callout or
+ * panel with no body. The left join is to the children themselves, so "no children" is the absence
+ * of a joined row rather than a count. The typed joins protect titles that render independently of
+ * child content.
  */
 async function getEmptyContainerBlocks(
 	db: Database | Transaction,
 ): Promise<Array<EmptyContentBlock>> {
 	const childContentBlocks = alias(schema.contentBlocks, "child_content_blocks");
 
-	return db
+	const rows = await db
 		.select({
 			contentBlockId: schema.contentBlocks.id,
+			blockType: schema.contentBlockTypes.type,
+			calloutTitle: schema.calloutContentBlocks.title,
+			accordionItemTitle: schema.accordionItemContentBlocks.title,
 			position: schema.contentBlocks.position,
 			entityId: schema.entities.id,
 			entityLabel: schema.entities.label,
@@ -110,6 +115,14 @@ async function getEmptyContainerBlocks(
 		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
 		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+		.leftJoin(
+			schema.calloutContentBlocks,
+			eq(schema.calloutContentBlocks.id, schema.contentBlocks.id),
+		)
+		.leftJoin(
+			schema.accordionItemContentBlocks,
+			eq(schema.accordionItemContentBlocks.id, schema.contentBlocks.id),
+		)
 		.leftJoin(childContentBlocks, eq(childContentBlocks.parentBlockId, schema.contentBlocks.id))
 		.where(
 			and(
@@ -117,6 +130,14 @@ async function getEmptyContainerBlocks(
 				isNull(childContentBlocks.id),
 			),
 		);
+
+	return rows.flatMap(
+		({ blockType, calloutTitle, accordionItemTitle, ...block }): Array<EmptyContentBlock> => {
+			const title = blockType === "callout" ? calloutTitle : accordionItemTitle;
+
+			return title?.trim() ? [] : [block];
+		},
+	);
 }
 
 export async function findEmptyContentBlocks(

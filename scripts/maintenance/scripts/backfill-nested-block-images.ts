@@ -2,9 +2,9 @@ import { assert, log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { and, eq, inArray, isNotNull } from "@dariah-eric/database/sql";
-import type { JSONContent } from "@tiptap/core";
 
 import { env } from "../config/env.config";
+import { type SplitPart, planCandidateRewrite, splitBody } from "../lib/nested-block-images";
 
 /**
  * Splits the images out of container bodies, so an image inside a callout or an accordion panel is
@@ -45,74 +45,6 @@ const db = createDatabaseService({
 	},
 	logger: false,
 }).unwrap();
-
-/** What one nested body becomes: the blocks to write in its place, in order. */
-type SplitPart =
-	| { kind: "rich_text"; content: JSONContent }
-	| {
-			kind: "image";
-			imageKey: string;
-			caption: JSONContent | null;
-			captionMode: "hidden" | "inherit" | "override";
-			layout: "default" | "wide" | "full" | "float-start" | "float-end";
-	  };
-
-const imageLayouts = new Set(["default", "wide", "full", "float-start", "float-end"]);
-
-function normalizeImageLayout(value: unknown): SplitPart extends { layout: infer T } ? T : never {
-	return (imageLayouts.has(value as string) ? value : "default") as never;
-}
-
-function normalizeCaptionMode(
-	value: unknown,
-	caption: JSONContent | null,
-): "hidden" | "inherit" | "override" {
-	if (value === "hidden" || value === "inherit" || value === "override") {
-		return value;
-	}
-
-	return caption != null ? "override" : "inherit";
-}
-
-/**
- * One stored body, split at its top-level `assetImage` nodes. Mirrors `splitDocumentToBlocks` in
- * the dashboard: runs of other nodes stay together as prose, an image becomes a part of its own.
- */
-function splitBody(content: JSONContent): Array<SplitPart> {
-	const parts: Array<SplitPart> = [];
-	let run: Array<JSONContent> = [];
-
-	function flush() {
-		if (run.length > 0) {
-			parts.push({ kind: "rich_text", content: { type: "doc", content: run } });
-			run = [];
-		}
-	}
-
-	for (const node of content.content ?? []) {
-		const imageKey = node.type === "assetImage" ? (node.attrs?.imageKey as unknown) : null;
-
-		if (typeof imageKey !== "string" || imageKey === "") {
-			run.push(node);
-			continue;
-		}
-
-		const caption = (node.attrs?.caption as JSONContent | null | undefined) ?? null;
-
-		flush();
-		parts.push({
-			kind: "image",
-			imageKey,
-			caption,
-			captionMode: normalizeCaptionMode(node.attrs?.captionMode, caption),
-			layout: normalizeImageLayout(node.attrs?.layout),
-		});
-	}
-
-	flush();
-
-	return parts;
-}
 
 interface Candidate {
 	contentBlockId: string;
@@ -190,18 +122,7 @@ async function applyCandidate(
 	typeIds: { image: string; richText: string },
 	assetIdsByKey: Map<string, string>,
 ): Promise<{ written: number; unresolvedKeys: Array<string> }> {
-	const unresolvedKeys: Array<string> = [];
-
-	// A part whose asset cannot be found folds back into the prose it came from, so the author's
-	// document is never made worse than it already is.
-	const resolved = candidate.parts.filter((part) => {
-		if (part.kind === "image" && !assetIdsByKey.has(part.imageKey)) {
-			unresolvedKeys.push(part.imageKey);
-			return false;
-		}
-
-		return true;
-	});
+	const { parts: resolved, unresolvedKeys } = planCandidateRewrite(candidate.parts, assetIdsByKey);
 
 	if (!resolved.some((part) => part.kind === "image")) {
 		return { written: 0, unresolvedKeys };

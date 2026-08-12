@@ -33,6 +33,7 @@
 		"format:fix": "oxfmt --write",
 		"lint:check": "oxlint --report-unused-disable-directives --type-aware --type-check",
 		"lint:fix": "oxlint --fix --report-unused-disable-directives --type-aware --type-check",
+		"test": "vitest run",
 		"types:check": "tsc --noEmit"
 	},
 	"devDependencies": {
@@ -54,7 +55,8 @@
 		"sharp": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:",
-		"valibot": "catalog:"
+		"valibot": "catalog:",
+		"vitest": "catalog:"
 	},
 	"engines": {
 		"node": "24.x"

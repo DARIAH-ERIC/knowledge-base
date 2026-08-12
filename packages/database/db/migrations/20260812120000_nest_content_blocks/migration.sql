@@ -46,21 +46,46 @@ CREATE TABLE IF NOT EXISTS "content_blocks_type_accordion_item" (
 
 -- Ids are generated up front rather than left to the column default, so the child rows can be
 -- inserted by id in later statements instead of correlated back to what a RETURNING clause emitted.
-CREATE TEMPORARY TABLE "nest_content_blocks_callouts" AS
-SELECT
-	UUIDV7() AS "body_block_id",
-	cb."id" AS "callout_block_id",
-	cb."field_id" AS "field_id",
-	c."content" AS "content"
-FROM "content_blocks" cb
-JOIN "content_blocks_type_callout" c ON c."id" = cb."id"
--- An empty body is not carried over: it would become a block holding one blank paragraph, which the
--- write path deletes on the next save anyway. jsonb equality ignores key order, so the canonical
--- empty document matches however its keys happen to be stored.
-WHERE jsonb_typeof(c."content") = 'object'
-	AND c."content" <> '{"type":"doc","content":[{"type":"paragraph"}]}'::jsonb
-	AND c."content" <> '{"type":"doc","content":[]}'::jsonb
-	AND c."content" <> '{"type":"doc"}'::jsonb;
+CREATE TEMPORARY TABLE "nest_content_blocks_callouts" (
+	"body_block_id" uuid NOT NULL,
+	"callout_block_id" uuid NOT NULL,
+	"field_id" uuid NOT NULL,
+	"content" jsonb NOT NULL
+);
+
+--> statement-breakpoint
+
+-- `dev:services:setup` pushes the current schema before replaying migrations, so the legacy column
+-- can already be absent. Dynamic SQL keeps PostgreSQL from resolving the missing column unless the
+-- legacy shape is actually present.
+DO $migration$
+BEGIN
+	IF EXISTS (
+		SELECT 1
+		FROM information_schema.columns
+		WHERE table_schema = current_schema()
+			AND table_name = 'content_blocks_type_callout'
+			AND column_name = 'content'
+	) THEN
+		EXECUTE $sql$
+			INSERT INTO "nest_content_blocks_callouts"
+			SELECT
+				UUIDV7(),
+				cb."id",
+				cb."field_id",
+				c."content"
+			FROM "content_blocks" cb
+			JOIN "content_blocks_type_callout" c ON c."id" = cb."id"
+			-- An empty body is not carried over: it would become a block holding one blank paragraph,
+			-- which the write path deletes on the next save anyway. jsonb equality ignores key order.
+			WHERE jsonb_typeof(c."content") = 'object'
+				AND c."content" <> '{"type":"doc","content":[{"type":"paragraph"}]}'::jsonb
+				AND c."content" <> '{"type":"doc","content":[]}'::jsonb
+				AND c."content" <> '{"type":"doc"}'::jsonb
+		$sql$;
+	END IF;
+END
+$migration$;
 
 --> statement-breakpoint
 
@@ -92,20 +117,46 @@ ALTER TABLE "content_blocks_type_callout"
 
 -- One row per stored accordion panel, carrying both the id its `accordion_item` block will get and
 -- the id the block holding its body will get.
-CREATE TEMPORARY TABLE "nest_content_blocks_accordion_items" AS
-SELECT
-	UUIDV7() AS "item_block_id",
-	UUIDV7() AS "body_block_id",
-	cb."id" AS "accordion_block_id",
-	cb."field_id" AS "field_id",
-	(item.ordinality - 1)::integer AS "position",
-	COALESCE(item.value ->> 'title', '') AS "title",
-	item.value -> 'content' AS "content"
-FROM "content_blocks" cb
-JOIN "content_blocks_type_accordion" a ON a."id" = cb."id"
-CROSS JOIN LATERAL jsonb_array_elements(
-	CASE WHEN jsonb_typeof(a."items") = 'array' THEN a."items" ELSE '[]'::jsonb END
-) WITH ORDINALITY AS item(value, ordinality);
+CREATE TEMPORARY TABLE "nest_content_blocks_accordion_items" (
+	"item_block_id" uuid NOT NULL,
+	"body_block_id" uuid NOT NULL,
+	"accordion_block_id" uuid NOT NULL,
+	"field_id" uuid NOT NULL,
+	"position" integer NOT NULL,
+	"title" text NOT NULL,
+	"content" jsonb
+);
+
+--> statement-breakpoint
+
+DO $migration$
+BEGIN
+	IF EXISTS (
+		SELECT 1
+		FROM information_schema.columns
+		WHERE table_schema = current_schema()
+			AND table_name = 'content_blocks_type_accordion'
+			AND column_name = 'items'
+	) THEN
+		EXECUTE $sql$
+			INSERT INTO "nest_content_blocks_accordion_items"
+			SELECT
+				UUIDV7(),
+				UUIDV7(),
+				cb."id",
+				cb."field_id",
+				(item.ordinality - 1)::integer,
+				COALESCE(item.value ->> 'title', ''),
+				item.value -> 'content'
+			FROM "content_blocks" cb
+			JOIN "content_blocks_type_accordion" a ON a."id" = cb."id"
+			CROSS JOIN LATERAL jsonb_array_elements(
+				CASE WHEN jsonb_typeof(a."items") = 'array' THEN a."items" ELSE '[]'::jsonb END
+			) WITH ORDINALITY AS item(value, ordinality)
+		$sql$;
+	END IF;
+END
+$migration$;
 
 --> statement-breakpoint
 
