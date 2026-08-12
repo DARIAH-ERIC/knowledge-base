@@ -1907,7 +1907,10 @@ async function main() {
 					limit: 3,
 					selectedIds: null,
 				});
-				await upsertById(tx, schema.accordionContentBlocks, { id: accordionBlockId });
+				await tx
+					.insert(schema.accordionContentBlocks)
+					.values({ id: accordionBlockId })
+					.onConflictDoNothing();
 				await upsertById(tx, schema.accordionItemContentBlocks, {
 					id: accordionItemBlockId,
 					title: `${field.fieldName} Question`,
