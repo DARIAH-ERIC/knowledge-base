@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@acdh-oeaw/lib";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
@@ -135,7 +136,7 @@ async function getEmptyContainerBlocks(
 		({ blockType, calloutTitle, accordionItemTitle, ...block }): Array<EmptyContentBlock> => {
 			const title = blockType === "callout" ? calloutTitle : accordionItemTitle;
 
-			return title?.trim() ? [] : [block];
+			return isNonEmptyString(title?.trim()) ? [] : [block];
 		},
 	);
 }
