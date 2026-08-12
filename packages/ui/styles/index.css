@@ -1814,11 +1814,46 @@
 		--sidebar-border: oklch(90.2% 0.01 258.338deg);
 		--sidebar-ring: oklch(58.8% 0.158 241.966deg);
 
-		--chart-1: oklch(58.8% 0.158 241.966deg);
-		--chart-2: oklch(68.5% 0.169 237.323deg);
-		--chart-3: oklch(74.6% 0.16 232.661deg);
-		--chart-4: oklch(82.8% 0.111 230.318deg);
-		--chart-5: oklch(90.1% 0.058 230.902deg);
+		/**
+		 * Data-visualisation palette. Two distinct jobs, never interchangeable:
+		 *
+		 * `--chart-series-*` encodes *identity* (which series). Eight fixed hues assigned in this
+		 * order and never cycled — the order is what keeps neighbouring series apart under
+		 * colour-vision deficiency, so it is not cosmetic. A ninth series is not a new hue: fold the
+		 * tail into "Other" or facet into small multiples.
+		 *
+		 * `--chart-ordinal-*` encodes *position in a sequence* (draft → submitted → accepted, size
+		 * tiers, funnel stages). One hue, monotone lightness, so the reader sees the order in the
+		 * colour. Never use it for nominal categories — that spends the identity channel
+		 * re-encoding what bar length already shows.
+		 *
+		 * Both sets are measured, not eyeballed, against this theme's own `--bg` (#ffffff light,
+		 * #090f1c dark): lightness band, chroma floor, protanopia/deuteranopia separation, and
+		 * contrast. Series slots 3, 4, and 5 sit below 3:1 on the light surface, which is legal only
+		 * because every chart in this codebase ships beside its table — keep that pairing. Re-run the
+		 * validator before changing any value here; do not hand-pick a step.
+		 *
+		 * These are deliberately *not* re-exported as Tailwind `--color-*` aliases. The chart
+		 * components pick a slot at runtime, so the variable name never appears literally in the
+		 * source, and Tailwind only emits an alias it can see used — the alias would be dropped and
+		 * the marks would paint with nothing. Referenced as raw `var(--chart-…)` instead.
+		 */
+		--chart-series-1: oklch(57.5% 0.163 255.532deg);
+		--chart-series-2: oklch(67.1% 0.175 40.642deg);
+		--chart-series-3: oklch(66.9% 0.141 162.111deg);
+		--chart-series-4: oklch(76.4% 0.161 75.116deg);
+		--chart-series-5: oklch(71.6% 0.141 357.389deg);
+		--chart-series-6: oklch(52.9% 0.18 142.495deg);
+		--chart-series-7: oklch(43.3% 0.167 283.624deg);
+		--chart-series-8: oklch(62.3% 0.191 24.912deg);
+
+		--chart-ordinal-1: oklch(72% 0.115 241.748deg);
+		--chart-ordinal-2: oklch(59.3% 0.151 245.368deg);
+		--chart-ordinal-3: oklch(43.1% 0.12 249.315deg);
+
+		/* Chrome: recessive by design — the data is the only thing allowed to be loud. */
+		--chart-grid: var(--border);
+		--chart-axis: var(--muted-fg);
 
 		--radius-lg: 0.5rem;
 		--radius-xs: calc(var(--radius-lg) * 0.25);
@@ -1914,11 +1949,29 @@
 		--sidebar-border: oklch(27.8% 0.033 256.848deg);
 		--sidebar-ring: oklch(58.8% 0.158 241.966deg);
 
-		--chart-1: oklch(50% 0.134 242.749deg);
-		--chart-2: oklch(68.5% 0.169 237.323deg);
-		--chart-3: oklch(74.6% 0.16 232.661deg);
-		--chart-4: oklch(82.8% 0.111 230.318deg);
-		--chart-5: oklch(90.1% 0.058 230.902deg);
+		/**
+		 * The same eight hues and the same ordinal ramp, re-stepped for the dark surface — a
+		 * selected dark palette, not an automatic inversion of the light one. Every step was
+		 * re-validated against the dark `--bg`; all eight series slots clear 3:1 there.
+		 *
+		 * The ordinal ramp reverses direction on purpose: the *last* step stays the most prominent
+		 * one in both modes, so "accepted" reads as the strongest segment whichever theme is active.
+		 */
+		--chart-series-1: oklch(62.2% 0.161 255.053deg);
+		--chart-series-2: oklch(62.2% 0.173 40.112deg);
+		--chart-series-3: oklch(62.1% 0.128 163.115deg);
+		--chart-series-4: oklch(67% 0.143 73.227deg);
+		--chart-series-5: oklch(62.2% 0.171 0.838deg);
+		--chart-series-6: oklch(52.9% 0.18 142.495deg);
+		--chart-series-7: oklch(67% 0.145 286.827deg);
+		--chart-series-8: oklch(66.9% 0.159 22.307deg);
+
+		--chart-ordinal-1: oklch(44.8% 0.123 248.917deg);
+		--chart-ordinal-2: oklch(60.5% 0.151 244.705deg);
+		--chart-ordinal-3: oklch(75.9% 0.125 241.788deg);
+
+		--chart-grid: var(--border);
+		--chart-axis: var(--muted-fg);
 	}
 }
 
@@ -2008,12 +2061,6 @@
 	--color-sidebar-accent-fg: var(--sidebar-accent-fg);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
-
-	--color-chart-1: var(--chart-1);
-	--color-chart-2: var(--chart-2);
-	--color-chart-3: var(--chart-3);
-	--color-chart-4: var(--chart-4);
-	--color-chart-5: var(--chart-5);
 
 	--radius-xs: var(--radius-xs);
 	--radius-sm: var(--radius-sm);

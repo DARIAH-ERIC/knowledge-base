@@ -3,9 +3,13 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ReportingStatisticsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page";
+import { ReportingStatisticsShell } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell";
 import { getStatisticsFilters } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_lib/statistics-filters";
 import { assertAdminPageAccess } from "@/lib/auth/session";
-import { getReportingStatisticsForAdmin } from "@/lib/data/admin-reporting";
+import {
+	getReportingStatisticsFilterOptionsForAdmin,
+	getReportingStatisticsForAdmin,
+} from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorReportingStatisticsPageProps extends PageProps<"/[locale]/dashboard/administrator/reporting-statistics"> {}
@@ -29,7 +33,14 @@ export default async function DashboardAdministratorReportingStatisticsPage(
 	const { searchParams } = props;
 	const rawSearchParams = await searchParams;
 	const { user } = await assertAdminPageAccess();
-	const data = await getReportingStatisticsForAdmin(user, getStatisticsFilters(rawSearchParams));
+	const [filterOptions, data] = await Promise.all([
+		getReportingStatisticsFilterOptionsForAdmin(user),
+		getReportingStatisticsForAdmin(user, getStatisticsFilters(rawSearchParams)),
+	]);
 
-	return <ReportingStatisticsPage data={data} />;
+	return (
+		<ReportingStatisticsShell filterOptions={filterOptions}>
+			<ReportingStatisticsPage data={data} />
+		</ReportingStatisticsShell>
+	);
 }

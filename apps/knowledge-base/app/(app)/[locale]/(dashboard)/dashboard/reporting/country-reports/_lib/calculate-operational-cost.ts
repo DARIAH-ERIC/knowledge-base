@@ -77,6 +77,17 @@ export function getOperationalCostServiceSize(
 		.find((candidate) => visits >= (candidate.visitsThreshold ?? 0));
 }
 
+/**
+ * Whether the report names a DARIAH-commissioned event.
+ *
+ * The events form captures this one by title rather than as a count, so "did it happen" is "is the
+ * title filled in". Exported because the reporting statistics have to arrive at the same event
+ * total as this calculation — when the two disagreed, the dashboard silently under-reported.
+ */
+export function hasDariahCommissionedEvent(title: string | null | undefined): boolean {
+	return title != null && title !== "";
+}
+
 function formatServiceSize(serviceSize: string): string {
 	return serviceSize
 		.replaceAll("_", " ")
@@ -173,7 +184,7 @@ export function calculateOperationalCost(input: OperationalCostInput): Operation
 		lines,
 		"events-dariah-commissioned",
 		"DARIAH commissioned event",
-		input.dariahCommissionedEvent == null || input.dariahCommissionedEvent === "" ? 0 : 1,
+		hasDariahCommissionedEvent(input.dariahCommissionedEvent) ? 1 : 0,
 		eventAmounts.get("dariah_commissioned"),
 		{ showQuantity: false },
 	);

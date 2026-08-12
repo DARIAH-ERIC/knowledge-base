@@ -34,6 +34,37 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 	const t = useExtracted();
 	const format = useFormatter();
 
+	/**
+	 * What the project-contributions sum is made of.
+	 *
+	 * Four whole messages rather than one ICU plural: `t()` types its values as `string`, so a
+	 * `{count, plural, …}` argument never resolves as a number and the pattern renders verbatim.
+	 * Whole sentences rather than concatenated fragments, so a translator can reorder them.
+	 */
+	function projectContributionsSubtitle(): string {
+		const count = data.overview.totalProjectContributionCount;
+		const reports = data.overview.countryReportsWithProjectContributions;
+
+		if (count === 1 && reports === 1) {
+			return t("1 contribution from 1 country report");
+		}
+
+		if (count === 1) {
+			return t("1 contribution from {reports} country reports", {
+				reports: format.number(reports),
+			});
+		}
+
+		if (reports === 1) {
+			return t("{count} contributions from 1 country report", { count: format.number(count) });
+		}
+
+		return t("{count} contributions from {reports} country reports", {
+			count: format.number(count),
+			reports: format.number(reports),
+		});
+	}
+
 	/** Render a delta with an explicit sign, or an em dash when the value is unavailable. */
 	function formatSignedNumber(
 		value: number | null,
@@ -97,11 +128,12 @@ export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageP
 					<p className="mbs-2 text-2xl font-semibold text-fg">
 						{format.number(data.overview.totalProjectContributions, eurFormat)}
 					</p>
-					<p className="mbs-1 text-sm text-muted-fg">
-						{t("{count} working group reports", {
-							count: format.number(data.overview.totalWorkingGroupReports),
-						})}
-					</p>
+					{/*
+					 * What the sum is made of. Only country reports carry project contributions, so the
+					 * subtitle counts those — the working-group report total that used to sit here had
+					 * nothing to do with the figure above it.
+					 */}
+					<p className="mbs-1 text-sm text-muted-fg">{projectContributionsSubtitle()}</p>
 				</div>
 			</section>
 

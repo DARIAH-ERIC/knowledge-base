@@ -1450,6 +1450,7 @@ msgstr "Role"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx
@@ -1854,6 +1855,7 @@ msgstr "SSHOC services"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-comments-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
@@ -2725,6 +2727,7 @@ msgstr "Relations"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaign-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx
@@ -3265,6 +3268,7 @@ msgstr "Link social media accounts to this country."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/country-membership-check.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
@@ -5032,6 +5036,7 @@ msgid "aH4De2"
 msgstr "Source"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/web-addresses-check.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
 msgid "GufXy5"
 msgstr "Value"
 
@@ -5480,6 +5485,7 @@ msgstr "Settings"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-comments-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
@@ -5509,6 +5515,7 @@ msgstr "Enter the campaign details."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaign-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 msgid "IFo1oo"
@@ -5598,6 +5605,30 @@ msgstr "Administrator dashboard - New reporting campaign"
 msgid "LStJV2"
 msgstr "Administrator dashboard - Reporting campaigns"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
+msgid "QVgyk9"
+msgstr "KPI"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
+msgid "r1E04r"
+msgstr "All KPIs"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
+msgid "DzjZRH"
+msgstr "{count} reported values"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
+msgid "v_Ra9I"
+msgstr "Total {value}"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
+msgid "jSKp4x"
+msgstr "Select a single KPI to see a total — categories do not add up."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
+msgid "opMkDM"
+msgstr "No matching reported values were found."
+
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
 msgid "BpUBz_"
 msgstr "Reported project contributions"
@@ -5611,12 +5642,16 @@ msgid "qOk9AI"
 msgstr "Search by project"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
-msgid "_k6tlf"
-msgstr "{count} contributions"
+msgid "-Jmsdl"
+msgstr "{count} reported entries"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
-msgid "Eigc8S"
-msgstr "Total {amount}"
+msgid "CxahkP"
+msgstr "{count} country–project pairs"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
+msgid "TOkrjI"
+msgstr "Total {amount}, counting each pair once"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
 msgid "_0TOL5"
@@ -5625,6 +5660,22 @@ msgstr "Amount"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
 msgid "IG3dPW"
 msgstr "No matching project contributions were found."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
+msgid "E3WVSO"
+msgstr "1 contribution from 1 country report"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
+msgid "cv5NOX"
+msgstr "1 contribution from {reports} country reports"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
+msgid "T9Qh7X"
+msgstr "{count} contributions from 1 country report"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
+msgid "07jrlL"
+msgstr "{count} contributions from {reports} country reports"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 msgid "4zbhwL"
@@ -5647,10 +5698,6 @@ msgstr "{country} country, {workingGroups} working group"
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx
 msgid "4Al3hI"
 msgstr "Project contributions"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
-msgid "WH0KJQ"
-msgstr "{count} working group reports"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 msgid "BtlstO"
@@ -5792,6 +5839,10 @@ msgstr "Reset"
 msgid "2s4GWd"
 msgstr "Loading results…"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
+msgid "S8snIe"
+msgstr "Updating"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/page.tsx
 msgid "KriuFt"
 msgstr "Administrator dashboard - Reporting statistics"
@@ -5799,6 +5850,49 @@ msgstr "Administrator dashboard - Reporting statistics"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/projects/page.tsx
 msgid "fZIhor"
 msgstr "Administrator dashboard - Reported project contributions"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/services/page.tsx
+msgid "XEd54C"
+msgstr "Administrator dashboard - Reported service KPIs"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/services/page.tsx
+msgid "crYopk"
+msgstr "See which country reported which service in which campaign year, and the values behind each KPI."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/services/page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
+msgid "n7yYXG"
+msgstr "Service"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/services/page.tsx
+msgid "iRxN4D"
+msgstr "Search by service"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/services/page.tsx
+msgid "8LqvKA"
+msgstr "Reported service KPIs"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/social-media/page.tsx
+msgid "s_FfiA"
+msgstr "Administrator dashboard - Reported social media KPIs"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/social-media/page.tsx
+msgid "eSC42X"
+msgstr "See which country reported which social media account in which campaign year, and the values behind each KPI."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/social-media/page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
+msgid "TwyMau"
+msgstr "Account"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/social-media/page.tsx
+msgid "2GpHYB"
+msgstr "Search by account"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/social-media/page.tsx
+msgid "KvdTxD"
+msgstr "Reported social media KPIs"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-create-form.tsx
 msgid "YiX7qE"
@@ -6555,10 +6649,6 @@ msgstr "Add metric"
 msgid "P_oSs1"
 msgstr "Add an existing service"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
-msgid "n7yYXG"
-msgstr "Service"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
 msgid "Z4VSlt"
 msgstr "The social media accounts this report covers. Add the relevant metrics per account — you only need to fill in the numbers you have."
@@ -6570,11 +6660,6 @@ msgstr "No social media accounts added yet."
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
 msgid "c4Bnfs"
 msgstr "Add an existing account"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
-msgid "TwyMau"
-msgstr "Account"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
 msgid "6BK1pe"

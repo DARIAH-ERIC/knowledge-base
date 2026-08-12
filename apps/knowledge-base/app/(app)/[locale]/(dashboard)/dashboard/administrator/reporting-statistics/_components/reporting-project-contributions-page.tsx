@@ -81,13 +81,23 @@ export function ReportingProjectContributionsPage(
 				{/*
 				 * Totals cover the whole filtered set, not just the current page — the sum is the number
 				 * most readers come here for, and a per-page subtotal would quietly mislead.
+				 *
+				 * The entry count and the pair count differ on purpose. A country re-reports a project
+				 * every year it runs, entering the whole-duration amount each time, so the table lists
+				 * more entries than there are actual contributions. The total counts each pair once; the
+				 * caption says so, because otherwise the numbers look like they disagree.
 				 */}
 				<div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 rounded-lg border bg-bg p-4">
 					<p className="text-sm text-muted-fg">
-						{t("{count} contributions", { count: format.number(contributions.total) })}
+						{t("{count} reported entries", { count: format.number(contributions.total) })}
 					</p>
 					<p className="text-sm text-muted-fg">
-						{t("Total {amount}", {
+						{t("{count} country–project pairs", {
+							count: format.number(contributions.totalPairs),
+						})}
+					</p>
+					<p className="text-sm text-muted-fg">
+						{t("Total {amount}, counting each pair once", {
 							amount: format.number(contributions.totalAmountEuros, eurFormat),
 						})}
 					</p>
