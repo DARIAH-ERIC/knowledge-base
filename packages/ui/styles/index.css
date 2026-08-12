@@ -136,6 +136,7 @@
 		color: var(--color-text-strong);
 		font-family: var(--font-body);
 		overflow-wrap: break-word;
+		scrollbar-gutter: stable;
 		font-synthesis: none;
 		text-rendering: optimizelegibility;
 		-moz-osx-font-smoothing: grayscale;
