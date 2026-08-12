@@ -2265,13 +2265,20 @@ msgstr "Loading"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx
+msgid "JO_m1X"
+msgstr "The selected file is too large. Choose a file smaller than {size}."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
 msgid "Fl1BuZ"
 msgstr "The selected image is too large. Choose an image smaller than {size}."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
 msgid "6nAe2O"
 msgstr "Select image"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
+msgid "k158Hd"
+msgstr "Select an existing file or upload a new one."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
 msgid "ciJ33H"
@@ -2314,6 +2321,7 @@ msgid "rEooS9"
 msgstr "No assets found for your search."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx
 msgid "n0m_x_"
 msgstr "No assets found. Upload one to get started."
 
@@ -2328,11 +2336,6 @@ msgstr "Next"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
 msgid "ylLD-l"
 msgstr "Choose file..."
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
-msgid "TJo5E6"
-msgstr "Preview"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx
@@ -7002,12 +7005,8 @@ msgid "sCpvlY"
 msgstr "All prefixes"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx
-msgid "0GuJv0"
-msgstr "No images match your filters."
-
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx
-msgid "vC8XBw"
-msgstr "No images found. Upload one to get started."
+msgid "0nCIOP"
+msgstr "No assets match your filters."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx
 msgid "hXURkq"
@@ -7027,37 +7026,32 @@ msgid "DAQ44c"
 msgstr "Describe the image for accessibility"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx
-msgid "vMUomP"
-msgstr "Upload image"
+msgid "IKdCiO"
+msgstr "Upload asset"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
-msgid "EQZvEB"
-msgstr "Upload a new image to the media library."
-
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
-msgid "gyrIEl"
-msgstr "File"
+msgid "IWtpYt"
+msgstr "Upload a new file to the media library."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
 msgid "ci7V7t"
 msgstr "Prefix"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
+msgid "gyrIEl"
+msgstr "File"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
 msgid "vHHtee"
 msgstr "Defaults to file name"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx
-msgid "FKUPrI"
-msgstr "Select an image to upload"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/update-asset-metadata.action.ts
 msgid "PfxmKo"
 msgstr "Asset metadata saved."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action.ts
-msgid "KY78v9"
-msgstr "Successfully uploaded image."
+msgid "l_MfIS"
+msgstr "Successfully uploaded file."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/page.tsx
 msgid "TBCsZj"

@@ -44,10 +44,7 @@ export class AssetsPage {
 	}
 
 	async selectUploadPrefix(dialog: Locator, prefix: string): Promise<void> {
-		const prefixControl = dialog
-			.locator('[data-slot="control"]')
-			.filter({ has: dialog.getByText("Prefix", { exact: true }) });
-		await prefixControl.locator("button").click();
+		await dialog.getByRole("button", { name: /Prefix/ }).click();
 		await this.page.getByRole("option", { name: prefix, exact: true }).click();
 	}
 
