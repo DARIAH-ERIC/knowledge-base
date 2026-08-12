@@ -126,7 +126,6 @@ async function cloneTypedContentBlock(
 				.select({
 					intent: schema.calloutContentBlocks.intent,
 					title: schema.calloutContentBlocks.title,
-					content: schema.calloutContentBlocks.content,
 				})
 				.from(schema.calloutContentBlocks)
 				.where(eq(schema.calloutContentBlocks.id, sourceBlockId))
@@ -225,16 +224,31 @@ async function cloneTypedContentBlock(
 			break;
 		}
 
+		// An accordion is nothing but its panels, and a panel nothing but a title and its blocks — the
+		// children are cloned by the walk in `cloneVersionContent`, not from here.
 		case "accordion": {
 			const [source] = await tx
-				.select({ items: schema.accordionContentBlocks.items })
+				.select({ id: schema.accordionContentBlocks.id })
 				.from(schema.accordionContentBlocks)
 				.where(eq(schema.accordionContentBlocks.id, sourceBlockId))
 				.limit(1);
 			if (source == null) {
 				return;
 			}
-			await tx.insert(schema.accordionContentBlocks).values({ id: targetBlockId, ...source });
+			await tx.insert(schema.accordionContentBlocks).values({ id: targetBlockId });
+			break;
+		}
+
+		case "accordion_item": {
+			const [source] = await tx
+				.select({ title: schema.accordionItemContentBlocks.title })
+				.from(schema.accordionItemContentBlocks)
+				.where(eq(schema.accordionItemContentBlocks.id, sourceBlockId))
+				.limit(1);
+			if (source == null) {
+				return;
+			}
+			await tx.insert(schema.accordionItemContentBlocks).values({ id: targetBlockId, ...source });
 			break;
 		}
 
@@ -318,11 +332,15 @@ export async function cloneVersionContent(
 			.returning({ id: schema.fields.id });
 		assert(targetField);
 
+		// The field's whole tree in one query — a nested block carries the same `field_id` as the
+		// container it sits in — then walked top-down, because a child's `parent_block_id` has to name
+		// the copy of its container rather than the original.
 		const blocks = await tx
 			.select({
 				id: schema.contentBlocks.id,
 				typeId: schema.contentBlocks.typeId,
 				typeName: schema.contentBlockTypes.type,
+				parentBlockId: schema.contentBlocks.parentBlockId,
 				position: schema.contentBlocks.position,
 			})
 			.from(schema.contentBlocks)
@@ -333,16 +351,38 @@ export async function cloneVersionContent(
 			.where(eq(schema.contentBlocks.fieldId, sourceField.id))
 			.orderBy(asc(schema.contentBlocks.position));
 
+		const blocksByParent = new Map<string | null, typeof blocks>();
 		for (const block of blocks) {
-			const inserted: Array<{ id: string }> = await tx
-				.insert(schema.contentBlocks)
-				.values({ fieldId: targetField.id, typeId: block.typeId, position: block.position })
-				.returning({ id: schema.contentBlocks.id });
-			const targetBlock: { id: string } | undefined = inserted[0];
-			assert(targetBlock);
-
-			await cloneTypedContentBlock(tx, block.id, targetBlock.id, block.typeName);
+			const siblings = blocksByParent.get(block.parentBlockId) ?? [];
+			siblings.push(block);
+			blocksByParent.set(block.parentBlockId, siblings);
 		}
+
+		const targetFieldId = targetField.id;
+
+		async function cloneLevel(
+			sourceParentBlockId: string | null,
+			targetParentBlockId: string | null,
+		): Promise<void> {
+			for (const block of blocksByParent.get(sourceParentBlockId) ?? []) {
+				const inserted: Array<{ id: string }> = await tx
+					.insert(schema.contentBlocks)
+					.values({
+						fieldId: targetFieldId,
+						typeId: block.typeId,
+						parentBlockId: targetParentBlockId,
+						position: block.position,
+					})
+					.returning({ id: schema.contentBlocks.id });
+				const targetBlock: { id: string } | undefined = inserted[0];
+				assert(targetBlock);
+
+				await cloneTypedContentBlock(tx, block.id, targetBlock.id, block.typeName);
+				await cloneLevel(block.id, targetBlock.id);
+			}
+		}
+
+		await cloneLevel(null, null);
 	}
 }
 

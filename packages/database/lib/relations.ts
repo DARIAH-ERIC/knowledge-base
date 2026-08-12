@@ -108,6 +108,20 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.accordionContentBlocks.id,
 				optional: true,
 			}),
+			accordionItemContentBlock: r.one.accordionItemContentBlocks({
+				from: r.contentBlocks.id,
+				to: r.accordionItemContentBlocks.id,
+				optional: true,
+			}),
+			parent: r.one.contentBlocks({
+				from: r.contentBlocks.parentBlockId,
+				to: r.contentBlocks.id,
+				optional: true,
+			}),
+			children: r.many.contentBlocks({
+				from: r.contentBlocks.id,
+				to: r.contentBlocks.parentBlockId,
+			}),
 		},
 		calloutContentBlocks: {
 			contentBlock: r.one.contentBlocks({
@@ -503,6 +517,13 @@ export const relations = defineRelations(schema, (r) => {
 		accordionContentBlocks: {
 			contentBlock: r.one.contentBlocks({
 				from: r.accordionContentBlocks.id,
+				to: r.contentBlocks.id,
+				optional: false,
+			}),
+		},
+		accordionItemContentBlocks: {
+			contentBlock: r.one.contentBlocks({
+				from: r.accordionItemContentBlocks.id,
 				to: r.contentBlocks.id,
 				optional: false,
 			}),

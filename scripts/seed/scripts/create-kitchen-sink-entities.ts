@@ -1822,6 +1822,29 @@ async function main() {
 					),
 					position: 5,
 				},
+				// An accordion holds panels, and a panel holds blocks — so the kitchen sink seeds the whole
+				// subtree, which is also what makes it a fixture for nesting rather than only for the
+				// accordion itself.
+				{
+					id: createId(`block:${field.id}:accordion-item`),
+					fieldId: field.id,
+					parentBlockId: createId(`block:${field.id}:accordion`),
+					typeId: assertLookupId(
+						contentBlockTypeIds.get("accordion_item"),
+						'Missing content block type "accordion_item".',
+					),
+					position: 0,
+				},
+				{
+					id: createId(`block:${field.id}:accordion-item-body`),
+					fieldId: field.id,
+					parentBlockId: createId(`block:${field.id}:accordion-item`),
+					typeId: assertLookupId(
+						contentBlockTypeIds.get("rich_text"),
+						'Missing content block type "rich_text".',
+					),
+					position: 0,
+				},
 				{
 					id: createId(`block:${field.id}:rich-text`),
 					fieldId: field.id,
@@ -1849,6 +1872,8 @@ async function main() {
 				const embedBlockId = createId(`block:${field.id}:embed`);
 				const dataBlockId = createId(`block:${field.id}:data`);
 				const accordionBlockId = createId(`block:${field.id}:accordion`);
+				const accordionItemBlockId = createId(`block:${field.id}:accordion-item`);
+				const accordionItemBodyBlockId = createId(`block:${field.id}:accordion-item-body`);
 				const richTextBlockId = createId(`block:${field.id}:rich-text`);
 
 				await upsertById(tx, schema.heroContentBlocks, {
@@ -1882,27 +1907,14 @@ async function main() {
 					limit: 3,
 					selectedIds: null,
 				});
-				await upsertById(tx, schema.accordionContentBlocks, {
-					id: accordionBlockId,
-					items: [
-						{
-							title: `${field.fieldName} Question`,
-							content: {
-								type: "doc",
-								content: [
-									{
-										type: "paragraph",
-										content: [
-											{
-												type: "text",
-												text: `Accordion answer for ${field.fieldName}.`,
-											},
-										],
-									},
-								],
-							},
-						},
-					],
+				await upsertById(tx, schema.accordionContentBlocks, { id: accordionBlockId });
+				await upsertById(tx, schema.accordionItemContentBlocks, {
+					id: accordionItemBlockId,
+					title: `${field.fieldName} Question`,
+				});
+				await upsertById(tx, schema.richTextContentBlocks, {
+					id: accordionItemBodyBlockId,
+					content: plainTextToRichText(`Accordion answer for ${field.fieldName}.`),
 				});
 				await upsertById(tx, schema.richTextContentBlocks, {
 					id: richTextBlockId,

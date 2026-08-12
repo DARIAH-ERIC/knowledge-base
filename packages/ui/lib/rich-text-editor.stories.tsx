@@ -158,6 +158,83 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+/**
+ * One document holding every block the schema marks `draggable`, each with enough attributes to
+ * render in its resting state rather than with its settings panel open. Used by
+ * {@link DraggableBlocks}.
+ *
+ * The image URL is an inline SVG data URI so the story needs no network and no storage: what is
+ * being asserted is the node view's drag wiring, not that a real asset loads.
+ */
+const placeholderImageUrl =
+	"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='3'/>";
+
+const draggableBlocksContent: JSONContent = {
+	type: "doc",
+	content: [
+		{ type: "paragraph", content: [{ type: "text", text: "Prose before the blocks." }] },
+		{
+			type: "assetImage",
+			attrs: {
+				imageKey: "images/example.jpg",
+				imageUrl: placeholderImageUrl,
+				alt: "An example image",
+				captionMode: "inherit",
+				layout: "default",
+			},
+		},
+		{
+			type: "embedBlock",
+			attrs: {
+				url: "https://www.youtube.com/watch?v=abc123",
+				title: "Recording of the session",
+				caption: null,
+			},
+		},
+		{
+			type: "galleryBlock",
+			attrs: {
+				layout: "grid",
+				caption: null,
+				items: [
+					{
+						imageKey: "images/one.jpg",
+						imageUrl: placeholderImageUrl,
+						alt: "First",
+						captionMode: "inherit",
+					},
+				],
+			},
+		},
+		{
+			type: "calloutBlock",
+			attrs: { intent: "info", title: "Take care" },
+			content: [{ type: "paragraph", content: [{ type: "text", text: "A callout body." }] }],
+		},
+		{
+			type: "mediaTextBlock",
+			attrs: {
+				imageKey: "images/ada.jpg",
+				imageUrl: placeholderImageUrl,
+				alt: "Ada Lovelace",
+				captionMode: "inherit",
+				side: "start",
+			},
+			content: [{ type: "paragraph", content: [{ type: "text", text: "A short biography." }] }],
+		},
+		{
+			type: "accordionBlock",
+			content: [
+				{
+					type: "accordionItem",
+					attrs: { title: "A question" },
+					content: [{ type: "paragraph", content: [{ type: "text", text: "An answer." }] }],
+				},
+			],
+		},
+	],
+};
+
 export const Default: Story = {
 	args: {},
 	render(props) {
@@ -269,6 +346,82 @@ export const Renderer: Story = {
 		return (
 			<div className="inline-160">
 				<RichTextRenderer content={content!} />
+			</div>
+		);
+	},
+};
+
+/**
+ * Every node the schema marks `draggable` must actually carry the attribute the browser needs.
+ *
+ * ProseMirror sets `draggable` on a node's DOM only when the node has no content hole, so the seven
+ * draggable blocks are served by two different mechanisms: `BlockNodeSurface` for the atoms, and
+ * `useContainerDraggable` for the four that hold content. Miss either and the browser fires no
+ * `dragstart`, tiptap's `data-drag-handle` handling never runs, and the block simply cannot be
+ * moved — which is how `mediaTextBlock` went a long time without being draggable at all.
+ *
+ * The check is per block rather than a count, so a failure names the one that regressed, and it
+ * walks up from a stable element inside each block rather than asserting where the attribute sits —
+ * the two mechanisms put it in the same place, but that is ProseMirror's business, not this
+ * test's.
+ *
+ * Every block here is given enough attributes to render in its resting state: a block whose
+ * settings panel opens on mount is deliberately _not_ draggable while the author is filling in the
+ * form.
+ */
+export const DraggableBlocks: Story = {
+	/**
+	 * Reported, not enforced. Every story in this file trips the same three findings, and all three
+	 * belong to the editor rather than to any block here: the `textbox` root carries an
+	 * `aria-expanded` that role does not allow and has no accessible name of its own, and two toolbar
+	 * controls miss the contrast threshold. Failing this story on them would tie a drag regression
+	 * test to unrelated a11y debt; `"todo"` keeps the findings visible until that is fixed properly.
+	 */
+	parameters: { a11y: { test: "todo" } },
+	args: {
+		blocks: ["accordion", "callout", "embed", "gallery", "mediaText"],
+		content: draggableBlocksContent,
+	},
+	async play({ canvas }) {
+		/** The nearest ancestor the browser would start a drag from, walking up from inside the block. */
+		function dragRootOf(element: Element | null): Element | null {
+			return element?.closest('[draggable="true"]') ?? null;
+		}
+
+		const byLabel = [
+			"Image block",
+			"Embed block",
+			"Gallery block",
+			"Callout block",
+			"Accordion block",
+			"Media with text block",
+		];
+
+		for (const label of byLabel) {
+			await expect(
+				dragRootOf(canvas.getByLabelText(label)),
+				`${label} is not draggable`,
+			).not.toBeNull();
+		}
+
+		// An accordion panel has no label of its own — it is named by the title field inside it — so it
+		// is reached through its body instead.
+		const panelBody = canvas
+			.getByLabelText("Accordion block")
+			.querySelector("[data-accordion-item-content]");
+		await expect(dragRootOf(panelBody), "accordion panel is not draggable").not.toBeNull();
+
+		// The panel's drag root must be the panel, not the accordion around it: dragging a panel
+		// reorders it within its accordion, and if the two collapsed onto one element a panel drag
+		// would pick up the whole block.
+		await expect(dragRootOf(panelBody)).not.toBe(
+			dragRootOf(canvas.getByLabelText("Accordion block")),
+		);
+	},
+	render(props) {
+		return (
+			<div className="inline-160">
+				<RichTextEditor {...props} />
 			</div>
 		);
 	},

@@ -241,13 +241,15 @@ function rewriteDocumentLinks<T>(value: T, assetKeys: ReadonlyMap<string, string
 
 /** One rich-text-bearing column of one content block. */
 interface Target {
-	table: "accordion" | "callout" | "media_text" | "rich_text";
+	table: "media_text" | "rich_text";
 	blockId: string;
 	content: unknown;
 }
 
 async function findTargets(): Promise<Array<Target>> {
-	const [richText, callout, mediaText, accordion] = await Promise.all([
+	// Two tables, not four: a callout's body and an accordion panel's body are `rich_text` blocks of
+	// their own now, so they arrive with everything else stored that way.
+	const [richText, mediaText] = await Promise.all([
 		db
 			.select({
 				blockId: schema.richTextContentBlocks.id,
@@ -256,36 +258,18 @@ async function findTargets(): Promise<Array<Target>> {
 			.from(schema.richTextContentBlocks),
 		db
 			.select({
-				blockId: schema.calloutContentBlocks.id,
-				content: schema.calloutContentBlocks.content,
-			})
-			.from(schema.calloutContentBlocks),
-		db
-			.select({
 				blockId: schema.mediaTextContentBlocks.id,
 				content: schema.mediaTextContentBlocks.content,
 			})
 			.from(schema.mediaTextContentBlocks),
-		db
-			.select({
-				blockId: schema.accordionContentBlocks.id,
-				content: schema.accordionContentBlocks.items,
-			})
-			.from(schema.accordionContentBlocks),
 	]);
 
 	return [
 		...richText.map((row): Target => {
 			return { table: "rich_text", ...row };
 		}),
-		...callout.map((row): Target => {
-			return { table: "callout", ...row };
-		}),
 		...mediaText.map((row): Target => {
 			return { table: "media_text", ...row };
-		}),
-		...accordion.map((row): Target => {
-			return { table: "accordion", ...row };
 		}),
 	];
 }
@@ -489,25 +473,11 @@ async function main(): Promise<void> {
 					.where(eq(schema.richTextContentBlocks.id, target.blockId));
 				break;
 			}
-			case "callout": {
-				await db
-					.update(schema.calloutContentBlocks)
-					.set({ content: next as never })
-					.where(eq(schema.calloutContentBlocks.id, target.blockId));
-				break;
-			}
 			case "media_text": {
 				await db
 					.update(schema.mediaTextContentBlocks)
 					.set({ content: next as never })
 					.where(eq(schema.mediaTextContentBlocks.id, target.blockId));
-				break;
-			}
-			case "accordion": {
-				await db
-					.update(schema.accordionContentBlocks)
-					.set({ items: next })
-					.where(eq(schema.accordionContentBlocks.id, target.blockId));
 				break;
 			}
 		}

@@ -38,6 +38,7 @@ import { canInsertBlock } from "@/lib/rich-text-slash-menu";
  * nodes, one per kind, so the toolbar renders it as a submenu rather than through this registry.
  */
 export type RichTextInsertableBlock =
+	| "accordion"
 	| "buttonLink"
 	| "callout"
 	| "embed"
@@ -346,7 +347,41 @@ export function useRichTextActions({
 						.focus()
 						.insertContent({
 							type: "calloutBlock",
-							attrs: { intent: "info", title: null, content: null },
+							attrs: { intent: "info", title: null },
+							// A callout is a container now, so it is inserted with a body to type into rather
+							// than as an empty atom whose panel opens on mount.
+							content: [{ type: "paragraph" }],
+						})
+						.run();
+				},
+			});
+		}
+
+		if (blocks.includes("accordion")) {
+			actions.push({
+				id: "accordion",
+				group: "insert",
+				label: t("Accordion"),
+				keywords: ["faq", "disclosure", "panel", "collapse"],
+				icon: ListIcon,
+				isAvailable() {
+					return canInsertBlock(editor, "accordionBlock");
+				},
+				run() {
+					editor
+						.chain()
+						.focus()
+						.insertContent({
+							type: "accordionBlock",
+							// One panel to start: an accordion's content spec requires at least one, and an
+							// author adding the block wants somewhere to type immediately.
+							content: [
+								{
+									type: "accordionItem",
+									attrs: { title: "" },
+									content: [{ type: "paragraph" }],
+								},
+							],
 						})
 						.run();
 				},

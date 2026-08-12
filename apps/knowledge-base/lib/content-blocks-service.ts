@@ -132,15 +132,12 @@ export async function upsertTypedContentBlock(
 		case "callout": {
 			const intent = block.content?.intent ?? "info";
 			const title = block.content?.title?.trim() ?? null;
-			const content = cleanRequiredBody(block.content?.content);
 			if (isNew) {
-				await tx
-					.insert(schema.calloutContentBlocks)
-					.values({ id: blockId, intent, title, content });
+				await tx.insert(schema.calloutContentBlocks).values({ id: blockId, intent, title });
 			} else {
 				await tx
 					.update(schema.calloutContentBlocks)
-					.set({ intent, title, content })
+					.set({ intent, title })
 					.where(eq(schema.calloutContentBlocks.id, blockId));
 			}
 			break;
@@ -315,23 +312,25 @@ export async function upsertTypedContentBlock(
 			break;
 		}
 
+		// An accordion is its panels, and a panel is its blocks: both are written by the caller walking
+		// the tree, so there is nothing here but the row that makes the block exist. The insert is
+		// conditional only because a re-saved block keeps its row.
 		case "accordion": {
-			// An accordion item's body is `v.any()` in the input schema, so it needs narrowing before it
-			// can be treated as a rich-text document.
-			const items = (block.content?.items ?? []).map((item) => {
-				const itemContent = item.content as JSONContent | null | undefined;
-
-				return itemContent == null
-					? item
-					: { ...item, content: withoutBlankParagraphs(itemContent) };
-			});
 			if (isNew) {
-				await tx.insert(schema.accordionContentBlocks).values({ id: blockId, items });
+				await tx.insert(schema.accordionContentBlocks).values({ id: blockId });
+			}
+			break;
+		}
+
+		case "accordion_item": {
+			const title = block.content?.title?.trim() ?? "";
+			if (isNew) {
+				await tx.insert(schema.accordionItemContentBlocks).values({ id: blockId, title });
 			} else {
 				await tx
-					.update(schema.accordionContentBlocks)
-					.set({ items })
-					.where(eq(schema.accordionContentBlocks.id, blockId));
+					.update(schema.accordionItemContentBlocks)
+					.set({ title })
+					.where(eq(schema.accordionItemContentBlocks.id, blockId));
 			}
 			break;
 		}
@@ -372,6 +371,51 @@ export async function upsertTypedContentBlock(
 	}
 }
 
+/** A read row before nesting: a block, plus the container it belongs to. */
+type FlatContentBlock = ContentBlock & { parentBlockId: string | null };
+
+/**
+ * Assembles the flat rows into the tree the editor and the previews read, roots first and each
+ * level in `position` order.
+ *
+ * The queries above fetch a whole field at once — nested blocks carry the same `field_id`, so they
+ * arrive in the same result — which is why this is a grouping pass rather than a second round of
+ * queries per container.
+ *
+ * A block whose parent is missing from the set is treated as a root. That cannot happen for a whole
+ * field, since a child's parent is by construction in the same field; it is a safeguard for the
+ * partial reads (`fieldName`) and for data that predates a rule, and it keeps a block visible and
+ * editable rather than silently dropping it.
+ */
+function nestContentBlocks(flat: Array<FlatContentBlock>): Array<ContentBlock> {
+	const byParent = new Map<string, Array<FlatContentBlock>>();
+	const ids = new Set(flat.map((block) => String(block.id)));
+
+	for (const block of flat) {
+		if (block.parentBlockId == null || !ids.has(block.parentBlockId)) {
+			continue;
+		}
+
+		const siblings = byParent.get(block.parentBlockId) ?? [];
+		siblings.push(block);
+		byParent.set(block.parentBlockId, siblings);
+	}
+
+	function build(blocks: Array<FlatContentBlock>): Array<ContentBlock> {
+		return blocks
+			.toSorted((a, b) => (a.position ?? 0) - (b.position ?? 0))
+			.map(({ parentBlockId: _parentBlockId, ...block }) => {
+				const children = byParent.get(String(block.id));
+
+				return children == null ? block : ({ ...block, children: build(children) } as ContentBlock);
+			});
+	}
+
+	return build(
+		flat.filter((block) => block.parentBlockId == null || !ids.has(block.parentBlockId)),
+	);
+}
+
 export async function getEntityContentBlocks(
 	entityVersionId: string,
 	fieldName?: string,
@@ -394,15 +438,16 @@ export async function getEntityContentBlocks(
 		galleryContentBlockRows,
 		heroContentBlockRows,
 		accordionContentBlockRows,
+		accordionItemContentBlockRows,
 		mediaTextContentBlockRows,
 	] = await Promise.all([
 		db
 			.select({
 				id: schema.calloutContentBlocks.id,
 				position: schema.contentBlocks.position,
+				parentBlockId: schema.contentBlocks.parentBlockId,
 				intent: schema.calloutContentBlocks.intent,
 				title: schema.calloutContentBlocks.title,
-				content: schema.calloutContentBlocks.content,
 			})
 			.from(schema.calloutContentBlocks)
 			.innerJoin(schema.contentBlocks, eq(schema.calloutContentBlocks.id, schema.contentBlocks.id))
@@ -418,6 +463,7 @@ export async function getEntityContentBlocks(
 				id: schema.richTextContentBlocks.id,
 				content: sql<JSONContent | undefined>`${schema.richTextContentBlocks.content}`,
 				position: schema.contentBlocks.position,
+				parentBlockId: schema.contentBlocks.parentBlockId,
 			})
 			.from(schema.richTextContentBlocks)
 			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
@@ -432,6 +478,7 @@ export async function getEntityContentBlocks(
 			.select({
 				id: schema.imageContentBlocks.id,
 				position: schema.contentBlocks.position,
+				parentBlockId: schema.contentBlocks.parentBlockId,
 				imageKey: schema.assets.key,
 				alt: schema.assets.alt,
 				assetCaption: schema.assets.caption,
@@ -453,6 +500,7 @@ export async function getEntityContentBlocks(
 			.select({
 				id: schema.embedContentBlocks.id,
 				position: schema.contentBlocks.position,
+				parentBlockId: schema.contentBlocks.parentBlockId,
 				url: schema.embedContentBlocks.url,
 				title: schema.embedContentBlocks.title,
 				caption: schema.embedContentBlocks.caption,
@@ -470,6 +518,7 @@ export async function getEntityContentBlocks(
 			.select({
 				id: schema.dataContentBlocks.id,
 				position: schema.contentBlocks.position,
+				parentBlockId: schema.contentBlocks.parentBlockId,
 				dataType: schema.dataContentBlockTypes.type,
 				limit: schema.dataContentBlocks.limit,
 				selectedIds: schema.dataContentBlocks.selectedIds,
@@ -491,6 +540,7 @@ export async function getEntityContentBlocks(
 			.select({
 				id: schema.galleryContentBlocks.id,
 				position: schema.contentBlocks.position,
+				parentBlockId: schema.contentBlocks.parentBlockId,
 				layout: schema.galleryContentBlocks.layout,
 				caption: schema.galleryContentBlocks.caption,
 				imageKey: schema.assets.key,
@@ -524,6 +574,7 @@ export async function getEntityContentBlocks(
 			.select({
 				id: schema.heroContentBlocks.id,
 				position: schema.contentBlocks.position,
+				parentBlockId: schema.contentBlocks.parentBlockId,
 				title: schema.heroContentBlocks.title,
 				eyebrow: schema.heroContentBlocks.eyebrow,
 				imageKey: schema.assets.key,
@@ -554,7 +605,7 @@ export async function getEntityContentBlocks(
 			.select({
 				id: schema.accordionContentBlocks.id,
 				position: schema.contentBlocks.position,
-				items: schema.accordionContentBlocks.items,
+				parentBlockId: schema.contentBlocks.parentBlockId,
 			})
 			.from(schema.accordionContentBlocks)
 			.innerJoin(
@@ -570,8 +621,28 @@ export async function getEntityContentBlocks(
 			.orderBy(schema.contentBlocks.position),
 		db
 			.select({
+				id: schema.accordionItemContentBlocks.id,
+				position: schema.contentBlocks.position,
+				parentBlockId: schema.contentBlocks.parentBlockId,
+				title: schema.accordionItemContentBlocks.title,
+			})
+			.from(schema.accordionItemContentBlocks)
+			.innerJoin(
+				schema.contentBlocks,
+				eq(schema.accordionItemContentBlocks.id, schema.contentBlocks.id),
+			)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(contentBlocksWhere)
+			.orderBy(schema.contentBlocks.position),
+		db
+			.select({
 				id: schema.mediaTextContentBlocks.id,
 				position: schema.contentBlocks.position,
+				parentBlockId: schema.contentBlocks.parentBlockId,
 				imageKey: schema.assets.key,
 				alt: schema.assets.alt,
 				assetCaption: schema.assets.caption,
@@ -604,6 +675,7 @@ export async function getEntityContentBlocks(
 		return {
 			id: row.id,
 			position: row.position,
+			parentBlockId: row.parentBlockId,
 			type: "image" as const,
 			content: {
 				imageKey: row.imageKey,
@@ -621,11 +693,11 @@ export async function getEntityContentBlocks(
 		return {
 			id: row.id,
 			position: row.position,
+			parentBlockId: row.parentBlockId,
 			type: "callout" as const,
 			content: {
 				intent: row.intent,
 				title: row.title ?? undefined,
-				content: row.content,
 			},
 		};
 	});
@@ -634,6 +706,7 @@ export async function getEntityContentBlocks(
 		return {
 			id: row.id,
 			position: row.position,
+			parentBlockId: row.parentBlockId,
 			type: "embed" as const,
 			content: { url: row.url, title: row.title, caption: row.caption ?? undefined },
 		};
@@ -643,6 +716,7 @@ export async function getEntityContentBlocks(
 		return {
 			id: row.id,
 			position: row.position,
+			parentBlockId: row.parentBlockId,
 			type: "data" as const,
 			content: {
 				dataType: row.dataType,
@@ -661,6 +735,7 @@ export async function getEntityContentBlocks(
 					map.set(row.id, {
 						id: row.id,
 						position: row.position,
+						parentBlockId: row.parentBlockId,
 						type: "gallery" as const,
 						content: {
 							layout: row.layout,
@@ -686,7 +761,7 @@ export async function getEntityContentBlocks(
 				}
 
 				return map;
-			}, new Map<string, Extract<ContentBlock, { type: "gallery" }>>())
+			}, new Map<string, Extract<FlatContentBlock, { type: "gallery" }>>())
 			.values(),
 	);
 
@@ -699,6 +774,7 @@ export async function getEntityContentBlocks(
 		return {
 			id: row.id,
 			position: row.position,
+			parentBlockId: row.parentBlockId,
 			type: "hero" as const,
 			content: {
 				title: row.title,
@@ -717,10 +793,18 @@ export async function getEntityContentBlocks(
 		return {
 			id: row.id,
 			position: row.position,
+			parentBlockId: row.parentBlockId,
 			type: "accordion" as const,
-			content: {
-				items: row.items as Array<{ title: string; content?: JSONContent }> | undefined,
-			},
+		};
+	});
+
+	const accordionItemContentBlocks = accordionItemContentBlockRows.map((row) => {
+		return {
+			id: row.id,
+			position: row.position,
+			parentBlockId: row.parentBlockId,
+			type: "accordion_item" as const,
+			content: { title: row.title },
 		};
 	});
 
@@ -733,6 +817,7 @@ export async function getEntityContentBlocks(
 		return {
 			id: row.id,
 			position: row.position,
+			parentBlockId: row.parentBlockId,
 			type: "media_text" as const,
 			content: {
 				imageKey: row.imageKey,
@@ -747,7 +832,7 @@ export async function getEntityContentBlocks(
 		};
 	});
 
-	return [
+	return nestContentBlocks([
 		...calloutContentBlocks,
 		...richTextContentBlocks.map((row) => {
 			return { ...row, type: "rich_text" as const };
@@ -758,8 +843,9 @@ export async function getEntityContentBlocks(
 		...galleryContentBlocks,
 		...heroContentBlocks,
 		...accordionContentBlocks,
+		...accordionItemContentBlocks,
 		...mediaTextContentBlocks,
-	].toSorted((a, b) => (a.position ?? 0) - (b.position ?? 0));
+	]);
 }
 
 /**

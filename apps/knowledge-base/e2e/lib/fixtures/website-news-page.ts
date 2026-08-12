@@ -715,7 +715,13 @@ export class WebsiteNewsPage {
 		await expect(editor.locator("th")).toHaveCount(expected.headerCells);
 	}
 
-	/** Fill the callout node view that a slash command or the toolbar just inserted. */
+	/**
+	 * Fill the callout node view that a slash command or the toolbar just inserted.
+	 *
+	 * Two steps, because a callout is a container: its style and title are settings, committed
+	 * through the panel behind the pencil, while its body is ordinary document content typed straight
+	 * into the block — the same way the prose around it is.
+	 */
 	async fillInlineCallout(options: {
 		title: string;
 		body: string;
@@ -723,12 +729,29 @@ export class WebsiteNewsPage {
 	}): Promise<void> {
 		const callout = this.page.getByLabel("Callout block", { exact: true });
 		await expect(callout).toBeVisible();
+
+		await callout.getByRole("button", { name: "Edit callout" }).click();
 		if (options.intent != null) {
 			await callout.getByText(options.intent, { exact: true }).click();
 		}
 		await callout.getByRole("textbox", { name: "Title (optional)" }).fill(options.title);
-		await callout.getByRole("textbox", { name: "Callout content" }).fill(options.body);
 		await callout.getByRole("button", { name: "Apply" }).click();
+
+		await callout.locator("[data-callout-content]").click();
+		await this.page.keyboard.type(options.body);
+	}
+
+	/**
+	 * Fill the accordion node view that a slash command or the toolbar just inserted. It arrives with
+	 * one empty panel, so there is a title field and a body to type into without adding anything.
+	 */
+	async fillInlineAccordion(options: { title: string; body: string }): Promise<void> {
+		const accordion = this.page.getByLabel("Accordion block", { exact: true });
+		await expect(accordion).toBeVisible();
+
+		await accordion.getByRole("textbox", { name: "Panel title" }).fill(options.title);
+		await accordion.locator("[data-accordion-item-content]").first().click();
+		await this.page.keyboard.type(options.body);
 	}
 
 	/**
@@ -1066,22 +1089,50 @@ export class WebsiteNewsPage {
 		await panel.getByRole("textbox", { name: "URL" }).fill(options.cta.url);
 	}
 
-	async addAccordionBlock(options: { title: string; body: string }): Promise<void> {
-		const panel = await this.addBlock("Accordion");
-		await panel.getByRole("button", { name: "Add item" }).click();
-		await panel.getByRole("textbox", { name: "Title" }).fill(options.title);
-		await panel.getByRole("textbox", { name: "Content" }).fill(options.body);
+	/**
+	 * An accordion is a node in the unified document now, so it is inserted from inside the editor
+	 * rather than chosen from the Add block menu.
+	 */
+	async addContentWithAccordion(options: {
+		intro: string;
+		title: string;
+		body: string;
+	}): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.waitForMenuToClose();
+
+		const editor = this.contentBlockEditor();
+		await editor.fill(options.intro);
+		await editor.press("End");
+		await this.chooseInsert("Accordion");
+
+		await this.fillInlineAccordion({ title: options.title, body: options.body });
 	}
 
-	async dragCalloutBeforeText(text: string): Promise<void> {
+	/**
+	 * Drags a container block above the paragraph holding `text`, and waits until it has actually
+	 * moved there.
+	 *
+	 * Grabs the block's `data-drag-handle`, never the block as a whole: a container's body is
+	 * editable prose, so making the whole thing the handle would mean a drag starting in the text
+	 * moved the block instead of selecting words. Each container puts the handle on its chrome — the
+	 * controls corner of a callout, the image column of a `media_text` block.
+	 */
+	async dragBlockBeforeText(blockLabel: string, text: string): Promise<void> {
 		const editor = this.contentBlockEditor();
-		const callout = this.page.getByLabel("Callout block", { exact: true });
-		const dragHandle = callout.locator("xpath=..");
-		const nodeView = dragHandle.locator("xpath=..");
+		const block = this.page.getByLabel(blockLabel, { exact: true });
+		const dragHandle = block.locator("[data-drag-handle]").first();
 		const targetParagraph = editor.locator("p").filter({ hasText: text });
 
-		await expect(dragHandle).toHaveAttribute("data-drag-handle", "");
-		await expect(nodeView).toHaveAttribute("draggable", "true");
+		/**
+		 * The node-view container outside `NodeViewWrapper` carries `draggable`. A node with a content
+		 * hole does not get it from ProseMirror — only atoms do — so this asserts the editor put it
+		 * there itself; without it the browser fires no `dragstart` and the block cannot be moved at
+		 * all.
+		 */
+		await expect(block.locator("xpath=..")).toHaveAttribute("draggable", "true");
+		await block.hover();
 		await dragHandle.scrollIntoViewIfNeeded();
 		const sourceBox = await dragHandle.boundingBox();
 		const targetBox = await targetParagraph.boundingBox();
@@ -1112,21 +1163,35 @@ export class WebsiteNewsPage {
 
 		await expect
 			.poll(async () => {
-				const [nextCalloutBox, nextTargetBox] = await Promise.all([
-					callout.boundingBox(),
+				const [nextBlockBox, nextTargetBox] = await Promise.all([
+					block.boundingBox(),
 					targetParagraph.boundingBox(),
 				]);
-				return (
-					nextCalloutBox != null && nextTargetBox != null && nextCalloutBox.y < nextTargetBox.y
-				);
+				return nextBlockBox != null && nextTargetBox != null && nextBlockBox.y < nextTargetBox.y;
 			})
 			.toBe(true);
 	}
 
+	async dragCalloutBeforeText(text: string): Promise<void> {
+		await this.dragBlockBeforeText("Callout block", text);
+	}
+
+	async dragMediaTextBeforeText(text: string): Promise<void> {
+		await this.dragBlockBeforeText("Media with text block", text);
+	}
+
+	/**
+	 * Pointer editing in and around a callout: a caret in the settings panel's title field, and
+	 * word-selection in the body.
+	 *
+	 * The two are reached differently, which is the point. The title is a setting, behind the pencil.
+	 * The body is ordinary document content, so double-clicking a word selects it exactly as it would
+	 * in the prose outside — there is no panel to open first, and nothing to apply afterwards.
+	 */
 	async expectCalloutPointerEditing(title: string, selectedWord: string): Promise<void> {
 		const callout = this.page.getByLabel("Callout block", { exact: true });
-		await callout.dblclick();
 
+		await callout.getByRole("button", { name: "Edit callout" }).click();
 		const titleInput = callout.getByRole("textbox", { name: "Title (optional)" });
 		await titleInput.click({ position: { x: 8, y: 12 } });
 		const titleSelection = await titleInput.evaluate((element: HTMLInputElement) => {
@@ -1138,17 +1203,16 @@ export class WebsiteNewsPage {
 		expect(titleSelection.start).toBe(titleSelection.end);
 		expect(titleSelection.start).not.toBeNull();
 		expect(titleSelection.start!).toBeLessThan(title.length);
+		await callout.getByRole("button", { name: "Cancel" }).click();
 
-		const contentEditor = callout.getByRole("textbox", { name: "Callout content" });
-		await contentEditor
+		const body = callout.locator("[data-callout-content]");
+		await body
 			.locator("p")
 			.first()
 			.dblclick({ position: { x: 28, y: 10 } });
 		await expect
-			.poll(async () => contentEditor.evaluate(() => window.getSelection()?.toString() ?? ""))
+			.poll(async () => body.evaluate(() => window.getSelection()?.toString() ?? ""))
 			.toBe(selectedWord);
-
-		await callout.getByRole("button", { name: "Cancel" }).click();
 	}
 
 	async updateContentBlockText(text: string): Promise<void> {

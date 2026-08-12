@@ -36,13 +36,6 @@ export const RichTextContentBlockSchema = v.object({
 	),
 });
 
-export const CalloutContentBlockSchema = v.object({
-	type: v.literal("callout"),
-	intent: v.picklist(schema.calloutIntentsEnum),
-	title: v.nullable(v.string()),
-	content: v.any(),
-});
-
 export const EmbedContentBlockSchema = v.object({
 	type: v.literal("embed"),
 	/** The URL as entered by the editor. */
@@ -86,11 +79,6 @@ export const HeroContentBlockSchema = v.object({
 	ctas: v.nullable(v.array(v.object({ label: v.string(), url: v.string() }))),
 });
 
-export const AccordionContentBlockSchema = v.object({
-	type: v.literal("accordion"),
-	items: v.array(v.object({ title: v.string(), content: v.optional(v.any()) })),
-});
-
 export const MediaTextContentBlockSchema = v.object({
 	type: v.literal("media_text"),
 	image: v.object({
@@ -122,6 +110,57 @@ export const GalleryContentBlockSchema = v.object({
 	),
 });
 
+/**
+ * The blocks a container may hold. A finite list rather than a recursive reference to the union
+ * below, because the nesting rules make it finite: a callout and an accordion panel hold flow
+ * content, and no container holds another (see `allowedChildBlockTypes` in
+ * `@dariah-eric/database`).
+ */
+export const NestedContentBlockSchema = v.union([
+	RichTextContentBlockSchema,
+	ImageContentBlockSchema,
+	EmbedContentBlockSchema,
+	GalleryContentBlockSchema,
+	MediaTextContentBlockSchema,
+]);
+
+export const CalloutContentBlockSchema = v.object({
+	type: v.literal("callout"),
+	intent: v.picklist(schema.calloutIntentsEnum),
+	title: v.nullable(v.string()),
+	/**
+	 * The callout's body, as blocks. An image here is an `image` block exactly like one in the page
+	 * itself — same resolved url, alt text and licence — rather than a node a consumer would have to
+	 * resolve on its own.
+	 */
+	blocks: v.array(NestedContentBlockSchema),
+	// The description rather than a JSDoc `@deprecated`: this is what reaches the OpenAPI document,
+	// which is where a consumer of this field would read it.
+	content: v.pipe(
+		v.nullable(v.any()),
+		v.description(
+			"Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in `blocks` and nowhere else, so a renderer still reading this field silently drops them. Read `blocks` instead.",
+		),
+	),
+});
+
+export const AccordionContentBlockSchema = v.object({
+	type: v.literal("accordion"),
+	items: v.array(
+		v.object({
+			title: v.string(),
+			/** The panel's body, as blocks — see {@link CalloutContentBlockSchema}'s `blocks`. */
+			blocks: v.array(NestedContentBlockSchema),
+			content: v.pipe(
+				v.nullable(v.any()),
+				v.description(
+					"Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read `blocks` instead.",
+				),
+			),
+		}),
+	),
+});
+
 export const ContentBlockSchema = v.union([
 	RichTextContentBlockSchema,
 	CalloutContentBlockSchema,
@@ -135,6 +174,36 @@ export const ContentBlockSchema = v.union([
 ]);
 
 export type ContentBlock = v.InferOutput<typeof ContentBlockSchema>;
+
+export type NestedContentBlock = v.InferOutput<typeof NestedContentBlockSchema>;
+
+/**
+ * An accordion panel as it comes out of the query, before it is folded into its accordion's
+ * `items`. Never part of the payload: a panel is a block in the database because that is what lets
+ * it hold blocks, but a consumer only ever sees the accordion.
+ */
+interface AccordionItemRow {
+	type: "accordion_item";
+}
+
+type NormalizedBlock = ContentBlock | AccordionItemRow;
+
+/**
+ * The prose of a container's body as one document, for the deprecated `content` fields.
+ *
+ * Only `rich_text` children contribute — an image or an embed has no richtext to merge — so this
+ * reproduces exactly what the field held before bodies became blocks, and nothing more. That is the
+ * point: a consumer still reading it sees what it always saw, and gets the rest from `blocks`.
+ */
+function flattenRichTextBlocks(blocks: Array<NestedContentBlock>): JSONContent | null {
+	const content = blocks.flatMap((block) =>
+		block.type === "rich_text"
+			? ((block.content as JSONContent | null | undefined)?.content ?? [])
+			: [],
+	);
+
+	return content.length === 0 ? null : { type: "doc", content };
+}
 
 type GalleryContentBlock = Extract<ContentBlock, { type: "gallery" }>;
 type GalleryItem = GalleryContentBlock["items"][number];
@@ -154,9 +223,9 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			fieldName: schema.entityTypesFieldsNames.fieldName,
 			blockId: schema.contentBlocks.id,
 			blockType: schema.contentBlockTypes.type,
+			parentBlockId: schema.contentBlocks.parentBlockId,
 			calloutIntent: schema.calloutContentBlocks.intent,
 			calloutTitle: schema.calloutContentBlocks.title,
-			calloutContent: schema.calloutContentBlocks.content,
 			richTextContent: schema.richTextContentBlocks.content,
 			embedUrl: schema.embedContentBlocks.url,
 			embedCaption: schema.embedContentBlocks.caption,
@@ -184,7 +253,7 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			heroCaption: schema.heroContentBlocks.caption,
 			heroCaptionMode: schema.heroContentBlocks.captionMode,
 			heroCtas: schema.heroContentBlocks.ctas,
-			accordionItems: schema.accordionContentBlocks.items,
+			accordionItemTitle: schema.accordionItemContentBlocks.title,
 			mediaTextSide: schema.mediaTextContentBlocks.side,
 			mediaTextContent: schema.mediaTextContentBlocks.content,
 			mediaTextCaption: schema.mediaTextContentBlocks.caption,
@@ -234,6 +303,10 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
 		)
 		.leftJoin(
+			schema.accordionItemContentBlocks,
+			eq(schema.accordionItemContentBlocks.id, schema.contentBlocks.id),
+		)
+		.leftJoin(
 			schema.mediaTextContentBlocks,
 			eq(schema.mediaTextContentBlocks.id, schema.contentBlocks.id),
 		)
@@ -251,6 +324,12 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 	// Group rows by field, preserving position order (already sorted by ORDER BY)
 	const fieldMap = new Map<string, { name: string; blocks: Array<ContentBlock> }>();
 	const galleryBlocks = new Map<string, GalleryContentBlock>();
+	// Every block by id, and the ids of the children each one owns — the two things the nesting pass
+	// below needs. Rows arrive in `position` order, and a container's children carry the same
+	// `field_id`, so a child is always in this same result and always after its siblings.
+	const blocksById = new Map<string, NormalizedBlock>();
+	const childIdsByParent = new Map<string, Array<string>>();
+	const accordionItemTitles = new Map<string, string>();
 
 	for (const row of rows) {
 		if (!fieldMap.has(row.fieldId)) {
@@ -262,7 +341,24 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			galleryBlocks.set(row.blockId, block);
 		}
 
-		fieldMap.get(row.fieldId)!.blocks.push(block);
+		blocksById.set(row.blockId, block);
+
+		if (row.blockType === "accordion_item") {
+			accordionItemTitles.set(row.blockId, row.accordionItemTitle ?? "");
+		}
+
+		if (row.parentBlockId != null) {
+			const siblings = childIdsByParent.get(row.parentBlockId) ?? [];
+			siblings.push(row.blockId);
+			childIdsByParent.set(row.parentBlockId, siblings);
+			continue;
+		}
+
+		// A panel with no accordion is not something the payload can express; it is dropped rather than
+		// surfaced as a block of its own. Cannot happen for a well-formed field.
+		if (block.type !== "accordion_item") {
+			fieldMap.get(row.fieldId)!.blocks.push(block);
+		}
 	}
 
 	// Filled in before the annotation passes below, so an item's caption gets the same link and
@@ -271,6 +367,46 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 		const itemsByBlock = await getGalleryItems(db, [...galleryBlocks.keys()]);
 		for (const [blockId, block] of galleryBlocks) {
 			block.items = itemsByBlock.get(blockId) ?? [];
+		}
+	}
+
+	// Children are attached after the gallery items above, so a gallery nested in a callout arrives
+	// with its items already in place.
+	for (const [parentId, childIds] of childIdsByParent) {
+		const parent = blocksById.get(parentId);
+		if (parent == null) {
+			continue;
+		}
+
+		if (parent.type === "callout") {
+			parent.blocks = childIds.flatMap((childId) => {
+				const child = blocksById.get(childId);
+				return child == null ? [] : [child as NestedContentBlock];
+			});
+			parent.content = flattenRichTextBlocks(parent.blocks);
+			continue;
+		}
+
+		if (parent.type === "accordion") {
+			parent.items = childIds.flatMap((childId) => {
+				const item = blocksById.get(childId);
+				if (item?.type !== "accordion_item") {
+					return [];
+				}
+
+				const blocks = (childIdsByParent.get(childId) ?? []).flatMap((grandChildId) => {
+					const child = blocksById.get(grandChildId);
+					return child == null ? [] : [child as NestedContentBlock];
+				});
+
+				return [
+					{
+						title: accordionItemTitles.get(childId) ?? "",
+						blocks,
+						content: flattenRichTextBlocks(blocks),
+					},
+				];
+			});
 		}
 	}
 
@@ -418,7 +554,6 @@ function normalizeRow(row: {
 	blockType: string;
 	calloutIntent: (typeof schema.calloutIntentsEnum)[number] | null;
 	calloutTitle: string | null;
-	calloutContent: JSONContent | null;
 	richTextContent: unknown;
 	embedUrl: string | null;
 	embedCaption: JSONContent | null;
@@ -446,7 +581,7 @@ function normalizeRow(row: {
 	heroLicenseName: string | null;
 	heroLicenseUrl: string | null;
 	heroCtas: unknown;
-	accordionItems: unknown;
+	accordionItemTitle: string | null;
 	mediaTextSide: (typeof schema.mediaTextSideEnum)[number] | null;
 	mediaTextContent: JSONContent | null;
 	mediaTextCaption: JSONContent | null;
@@ -460,14 +595,17 @@ function normalizeRow(row: {
 	mediaTextLicenseUrl: string | null;
 	galleryLayout: (typeof schema.galleryLayoutEnum)[number] | null;
 	galleryCaption: JSONContent | null;
-}): ContentBlock {
+}): NormalizedBlock {
 	switch (row.blockType) {
 		case "callout": {
+			// `blocks` and the deprecated `content` are both filled in by the nesting pass, once the
+			// children this block owns are known.
 			return {
 				type: "callout",
 				intent: row.calloutIntent!,
 				title: row.calloutTitle,
-				content: row.calloutContent,
+				blocks: [],
+				content: null,
 			};
 		}
 		case "rich_text": {
@@ -556,11 +694,13 @@ function normalizeRow(row: {
 				ctas: row.heroCtas as Array<{ label: string; url: string }> | null,
 			};
 		}
+		// Panels are its children, attached by the nesting pass.
 		case "accordion": {
-			return {
-				type: "accordion",
-				items: (row.accordionItems as Array<{ title: string; content?: unknown }> | null) ?? [],
-			};
+			return { type: "accordion", items: [] };
+		}
+		// Folded into its accordion's `items` by that same pass; never reaches the payload.
+		case "accordion_item": {
+			return { type: "accordion_item" };
 		}
 		case "media_text": {
 			const assetImage = generateImageUrl(

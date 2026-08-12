@@ -106,7 +106,7 @@ type LinkCleanupAction = "review" | "rewrite";
 
 export interface RichTextLinkCleanupFinding {
 	contentBlockId: string;
-	blockType: "rich_text" | "accordion";
+	blockType: "rich_text";
 	entityId: string;
 	entityType: string;
 	entityLabel: string | null;
@@ -126,11 +126,6 @@ export interface RichTextLinkCleanupResult {
 	total: number;
 	rewriteTotal: number;
 	reviewTotal: number;
-}
-
-interface AccordionItem {
-	title: string;
-	content: JSONContent;
 }
 
 interface LinkRewrite {
@@ -166,10 +161,8 @@ interface BlockCleanup {
 	>;
 	rewrites: Array<LinkRewrite>;
 	reviews: Array<LinkReview>;
-	/** For `rich_text` blocks: the rewritten document to write. */
+	/** The rewritten document to write back. */
 	richText?: JSONContent;
-	/** For `accordion` blocks: the rewritten items to write. */
-	items?: Array<AccordionItem>;
 }
 
 function normalizePathname(pathname: string): string {
@@ -484,7 +477,6 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 			contentBlockId: schema.contentBlocks.id,
 			position: schema.contentBlocks.position,
 			richTextContent: schema.richTextContentBlocks.content,
-			accordionItems: schema.accordionContentBlocks.items,
 			entityId: schema.entities.id,
 			entityLabel: schema.entities.label,
 			entitySlug: schema.entities.slug,
@@ -502,13 +494,9 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
 		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
-		.leftJoin(
+		.innerJoin(
 			schema.richTextContentBlocks,
 			eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
-		)
-		.leftJoin(
-			schema.accordionContentBlocks,
-			eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
 		);
 
 	const cleanups: Array<BlockCleanup> = [];
@@ -525,40 +513,14 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 			position: row.position,
 		};
 
-		if (row.richTextContent != null) {
-			const cleanup = cleanRichTextLinksInDocument(row.richTextContent, context);
-			cleanups.push({
-				block: { ...base, blockType: "rich_text" },
-				rewrites: cleanup.rewrites,
-				reviews: cleanup.reviews,
-				richText: cleanup.content,
-			});
-		} else if (row.accordionItems != null) {
-			const items = row.accordionItems as Array<AccordionItem>;
-			const rewrites: Array<LinkRewrite> = [];
-			const reviews: Array<LinkReview> = [];
-			const normalizedItems = items.map((item, index) => {
-				const cleanup = cleanRichTextLinksInDocument(item.content, context);
-				rewrites.push(
-					...cleanup.rewrites.map((rewrite) => {
-						return { ...rewrite, location: `items[${String(index)}].${rewrite.location}` };
-					}),
-				);
-				reviews.push(
-					...cleanup.reviews.map((review) => {
-						return { ...review, location: `items[${String(index)}].${review.location}` };
-					}),
-				);
-				return { ...item, content: cleanup.content };
-			});
+		const cleanup = cleanRichTextLinksInDocument(row.richTextContent, context);
 
-			cleanups.push({
-				block: { ...base, blockType: "accordion" },
-				rewrites,
-				reviews,
-				items: normalizedItems,
-			});
-		}
+		cleanups.push({
+			block: { ...base, blockType: "rich_text" },
+			rewrites: cleanup.rewrites,
+			reviews: cleanup.reviews,
+			richText: cleanup.content,
+		});
 	}
 
 	return cleanups;
@@ -652,17 +614,10 @@ export async function cleanRichTextLinks(
 
 	await db.transaction(async (tx) => {
 		for (const cleanup of applicable) {
-			if (cleanup.block.blockType === "rich_text") {
-				await tx
-					.update(schema.richTextContentBlocks)
-					.set({ content: cleanup.richText! })
-					.where(eq(schema.richTextContentBlocks.id, cleanup.block.contentBlockId));
-			} else {
-				await tx
-					.update(schema.accordionContentBlocks)
-					.set({ items: cleanup.items! })
-					.where(eq(schema.accordionContentBlocks.id, cleanup.block.contentBlockId));
-			}
+			await tx
+				.update(schema.richTextContentBlocks)
+				.set({ content: cleanup.richText! })
+				.where(eq(schema.richTextContentBlocks.id, cleanup.block.contentBlockId));
 		}
 
 		await tx.insert(schema.auditLogs).values(

@@ -4,7 +4,7 @@ import { request } from "@dariah-eric/request";
 
 import { env } from "@/config/env.config";
 import { db } from "@/lib/db";
-import { eq, or, sql } from "@/lib/db/sql";
+import { eq, sql } from "@/lib/db/sql";
 
 export type WebhookEntityType =
 	| "dariah-projects"
@@ -70,21 +70,9 @@ async function getPlaceholderValueEmbeddingWebhookTypes(): Promise<Set<WebhookEn
 			schema.richTextContentBlocks,
 			eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
 		)
-		.leftJoin(
-			schema.calloutContentBlocks,
-			eq(schema.calloutContentBlocks.id, schema.contentBlocks.id),
-		)
-		.leftJoin(
-			schema.accordionContentBlocks,
-			eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
-		)
-		.where(
-			or(
-				sql`${schema.richTextContentBlocks.content}::text LIKE ${marker}`,
-				sql`${schema.calloutContentBlocks.content}::text LIKE ${marker}`,
-				sql`${schema.accordionContentBlocks.items}::text LIKE ${marker}`,
-			),
-		);
+		// Every document that can hold a placeholder node is a `rich_text` block now, wherever in the
+		// tree it sits: a callout's body and an accordion panel's body are blocks of that type too.
+		.where(sql`${schema.richTextContentBlocks.content}::text LIKE ${marker}`);
 
 	const types = new Set<WebhookEntityType>();
 	for (const row of rows) {

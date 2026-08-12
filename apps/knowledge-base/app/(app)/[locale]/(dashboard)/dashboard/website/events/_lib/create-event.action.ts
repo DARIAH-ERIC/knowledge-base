@@ -1,15 +1,14 @@
 "use server";
 
-import { assert, keyBy } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
 import { CreateEventActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/create-event.schema";
 import { normalizeEventDuration } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/event-duration";
-import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-lifecycle";
+import { insertContentBlockTree } from "@/lib/data/entity-version-fields";
 import { eventsLifecycleAdapter } from "@/lib/data/events.lifecycle-adapter";
 import { filterToPublishedDocumentIds } from "@/lib/data/relations";
-import { db } from "@/lib/db";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -86,23 +85,7 @@ export const createEventAction = createMutationAction({
 			.returning({ id: schema.fields.id });
 		assert(contentField);
 
-		const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-		const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
-
-		await Promise.all(
-			input.contentBlocks.map(async (contentBlock, index) => {
-				const [added] = await tx
-					.insert(schema.contentBlocks)
-					.values({
-						fieldId: contentField.id,
-						typeId: contentBlockTypesByType[contentBlock.type].id,
-						position: index,
-					})
-					.returning({ id: schema.contentBlocks.id });
-				assert(added);
-				await upsertTypedContentBlock(tx, contentBlock, added.id, true);
-			}),
-		);
+		await insertContentBlockTree(tx, contentField.id, input.contentBlocks);
 
 		if (shouldSaveAndPublish(formData)) {
 			await publishVersion(tx, documentId, eventsLifecycleAdapter);

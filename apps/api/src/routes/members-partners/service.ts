@@ -176,8 +176,10 @@ function mapPersonContributors(
 
 function hasContent(block: ContentBlock): boolean {
 	switch (block.type) {
+		// A container has content when it holds any — the deprecated flattened `content` would miss a
+		// callout whose body is nothing but an image.
 		case "callout": {
-			return (block.title?.trim().length ?? 0) > 0 || hasRichTextContent(block.content);
+			return (block.title?.trim().length ?? 0) > 0 || block.blocks.some(hasContent);
 		}
 		case "rich_text": {
 			return hasRichTextContent(block.content);
@@ -185,7 +187,11 @@ function hasContent(block: ContentBlock): boolean {
 		case "media_text": {
 			return hasRichTextContent(block.content);
 		}
-		case "accordion":
+		case "accordion": {
+			return block.items.some(
+				(item) => item.title.trim().length > 0 || item.blocks.some(hasContent),
+			);
+		}
 		case "gallery": {
 			return block.items.length > 0;
 		}

@@ -1,6 +1,7 @@
 import type { JSONContent } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 
+import type { ContentBlockInput } from "@/lib/content-block-input";
 import {
 	type MergeableBlock,
 	mergeBlocksToDocument,
@@ -47,11 +48,13 @@ const blocks = {
 	},
 	callout: {
 		type: "callout",
-		content: {
-			intent: "warning",
-			title: "Deadline moved",
-			content: caption("The call now closes in March."),
-		},
+		content: { intent: "warning", title: "Deadline moved" },
+		children: [
+			{
+				type: "rich_text",
+				content: { type: "doc", content: [paragraph("The call closes in March.")] },
+			},
+		],
 	},
 	media_text: {
 		type: "media_text",
@@ -89,13 +92,23 @@ const blocks = {
 	},
 } satisfies Record<string, MergeableBlock>;
 
+/**
+ * The `content` of a produced block. A container carries none — its body is its children — so the
+ * assertions below reach for it through this rather than narrowing at every call site.
+ */
+function contentOf(block: ContentBlockInput | undefined): unknown {
+	return block != null && "content" in block ? block.content : undefined;
+}
+
 describe("merge/split round trip", () => {
 	for (const [name, block] of Object.entries<MergeableBlock>(blocks)) {
 		it(`preserves every stored field of a ${name} block`, () => {
 			const [result] = splitDocumentToBlocks(mergeBlocksToDocument([block]));
 
 			expect(result?.type).toBe(block.type);
-			expect(result?.content).toMatchObject(block.content!);
+			if ("content" in block && block.content != null) {
+				expect(contentOf(result)).toMatchObject(block.content);
+			}
 		});
 	}
 
@@ -125,7 +138,7 @@ describe("image layout", () => {
 
 		const [result] = splitDocumentToBlocks(mergeBlocksToDocument([stored]));
 
-		expect(result?.content).toMatchObject({ layout: "float-end" });
+		expect(contentOf(result)).toMatchObject({ layout: "float-end" });
 	});
 
 	it("falls back to the default layout for an unknown stored value", () => {
@@ -134,7 +147,7 @@ describe("image layout", () => {
 			content: [{ type: "assetImage", attrs: { imageKey: "images/a.jpg", layout: "centre" } }],
 		};
 
-		expect(splitDocumentToBlocks(doc)[0]?.content).toMatchObject({ layout: "default" });
+		expect(contentOf(splitDocumentToBlocks(doc)[0])).toMatchObject({ layout: "default" });
 	});
 });
 
@@ -180,7 +193,7 @@ describe("gallery items", () => {
 
 		const [result] = splitDocumentToBlocks(doc);
 
-		expect(result?.content).toEqual({
+		expect(contentOf(result)).toEqual({
 			layout: "grid",
 			items: [
 				{
@@ -216,7 +229,7 @@ describe("gallery items", () => {
 		]);
 
 		expect(doc.content![0]!.attrs).toMatchObject({ caption: null });
-		expect(splitDocumentToBlocks(doc)[0]?.content).toMatchObject({ caption: undefined });
+		expect(contentOf(splitDocumentToBlocks(doc)[0])).toMatchObject({ caption: undefined });
 	});
 
 	it("falls back to the grid layout for an unknown stored value", () => {
@@ -230,7 +243,7 @@ describe("gallery items", () => {
 			],
 		};
 
-		expect(splitDocumentToBlocks(doc)[0]?.content).toMatchObject({ layout: "grid" });
+		expect(contentOf(splitDocumentToBlocks(doc)[0])).toMatchObject({ layout: "grid" });
 	});
 });
 
@@ -292,7 +305,7 @@ describe("richtext features inside a unified document", () => {
 		const [result] = splitDocumentToBlocks(mergeBlocksToDocument([block]));
 
 		expect(result?.type).toBe("rich_text");
-		expect(result?.content).toEqual({ type: "doc", content: richTextNodes });
+		expect(contentOf(result)).toEqual({ type: "doc", content: richTextNodes });
 	});
 });
 
@@ -317,7 +330,7 @@ describe("blocks that cannot be stored", () => {
 
 		expect(blocks).toHaveLength(1);
 		expect(blocks[0]!.type).toBe("rich_text");
-		expect(blocks[0]!.content).toEqual({
+		expect(contentOf(blocks[0])).toEqual({
 			type: "doc",
 			content: [paragraph("Before."), paragraph("Orphaned bio."), paragraph("After.")],
 		});
@@ -339,7 +352,7 @@ describe("blocks that cannot be stored", () => {
 		const blocks = splitDocumentToBlocks(doc);
 
 		expect(blocks).toHaveLength(1);
-		expect(blocks[0]!.content).toEqual({
+		expect(contentOf(blocks[0])).toEqual({
 			type: "doc",
 			content: [paragraph("Before."), paragraph("After.")],
 		});
@@ -356,7 +369,7 @@ describe("blocks that cannot be stored", () => {
 			],
 		};
 
-		expect(splitDocumentToBlocks(doc)[0]?.content).toMatchObject({
+		expect(contentOf(splitDocumentToBlocks(doc)[0])).toMatchObject({
 			items: [{ imageKey: "images/one.jpg" }],
 		});
 	});

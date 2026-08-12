@@ -1,6 +1,6 @@
 import type { JSONContent } from "@tiptap/core";
 import { and, eq, inArray, isNotNull } from "drizzle-orm";
-import type { PgColumn } from "drizzle-orm/pg-core";
+import { type PgColumn, alias } from "drizzle-orm/pg-core";
 
 import type { Database, Transaction } from "./index";
 import * as schema from "./schema";
@@ -1675,7 +1675,11 @@ export interface HeadingHierarchyFinding {
 	fieldName: string;
 	/** Lifecycle status of the owning entity version (e.g. `draft`, `published`). */
 	status: string;
-	blockType: "rich_text" | "accordion";
+	/**
+	 * Where the offending outline lives: the field's own prose, or the body of a container block —
+	 * which is validated on its own rather than as part of the page's outline.
+	 */
+	blockType: "rich_text" | "accordion" | "callout";
 	/** Position of the offending content block within its field. */
 	position: number;
 	contentBlockId: string;
@@ -1691,16 +1695,15 @@ export interface HeadingHierarchyCheckResult {
 	errors: Array<string>;
 }
 
+const parentContentBlocks = alias(schema.contentBlocks, "parent_content_blocks");
+const parentContentBlockTypes = alias(schema.contentBlockTypes, "parent_content_block_types");
+
 /** One content block worth of headings, tagged with the block it came from. */
 interface TaggedHeadings {
 	headings: Array<HeadingOccurrence>;
-	blockType: "rich_text" | "accordion";
+	blockType: "rich_text" | "accordion" | "callout";
 	contentBlockId: string;
 	position: number;
-}
-
-interface AccordionItemContent {
-	content: JSONContent;
 }
 
 function describeHeadingViolation(violation: HeadingHierarchyViolation): string {
@@ -1766,8 +1769,9 @@ export async function checkHeadingHierarchy(
 			.select({
 				contentBlockId: schema.contentBlocks.id,
 				position: schema.contentBlocks.position,
+				parentBlockId: schema.contentBlocks.parentBlockId,
+				parentBlockType: parentContentBlockTypes.type,
 				richTextContent: schema.richTextContentBlocks.content,
-				accordionItems: schema.accordionContentBlocks.items,
 				entityVersionId: schema.entityVersions.id,
 				entityId: schema.entities.id,
 				entityLabel: schema.entities.label,
@@ -1790,9 +1794,11 @@ export async function checkHeadingHierarchy(
 				schema.richTextContentBlocks,
 				eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
 			)
+			// The container a nested body belongs to, so a finding can name what it was found in.
+			.leftJoin(parentContentBlocks, eq(parentContentBlocks.id, schema.contentBlocks.parentBlockId))
 			.leftJoin(
-				schema.accordionContentBlocks,
-				eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
+				parentContentBlockTypes,
+				eq(parentContentBlockTypes.id, parentContentBlocks.typeId),
 			);
 
 		// Per field (an entity version's rich-text field), the sequence of headings to validate as one
@@ -1801,8 +1807,13 @@ export async function checkHeadingHierarchy(
 			string,
 			{ meta: HeadingHierarchyMeta; sequences: Array<TaggedHeadings> }
 		>();
-		// Accordion bodies are self-contained documents, each validated on its own.
-		const accordionOutlines: Array<{ meta: HeadingHierarchyMeta; sequence: TaggedHeadings }> = [];
+		// A container's body is a self-contained document, validated on its own rather than as part of
+		// the page outline — an accordion panel opens at "h2" of its own accord. Keyed by the container
+		// so several blocks in one panel still read as one outline.
+		const containerOutlines = new Map<
+			string,
+			{ meta: HeadingHierarchyMeta; sequences: Array<TaggedHeadings> }
+		>();
 
 		for (const row of rows) {
 			const meta: HeadingHierarchyMeta = {
@@ -1814,37 +1825,42 @@ export async function checkHeadingHierarchy(
 				status: row.status,
 			};
 
-			if (row.richTextContent != null) {
+			if (row.richTextContent == null) {
+				continue;
+			}
+
+			const headings = collectHeadings(row.richTextContent);
+
+			if (row.parentBlockId == null) {
 				const key = `${row.entityVersionId}:${row.fieldName}`;
 				const field = richTextFields.get(key) ?? { meta, sequences: [] };
 				field.sequences.push({
-					headings: collectHeadings(row.richTextContent),
+					headings,
 					blockType: "rich_text",
 					contentBlockId: row.contentBlockId,
 					position: row.position,
 				});
 				richTextFields.set(key, field);
-			} else if (row.accordionItems != null) {
-				const items = row.accordionItems as Array<AccordionItemContent>;
-				for (const item of items) {
-					accordionOutlines.push({
-						meta,
-						sequence: {
-							headings: collectHeadings(item.content),
-							blockType: "accordion",
-							contentBlockId: row.contentBlockId,
-							position: row.position,
-						},
-					});
-				}
+				continue;
 			}
+
+			const outline = containerOutlines.get(row.parentBlockId) ?? { meta, sequences: [] };
+			outline.sequences.push({
+				headings,
+				// A panel's body hangs off its `accordion_item`, so the accordion itself is one step
+				// further up; either way the finding names the container an editor would recognise.
+				blockType: row.parentBlockType === "callout" ? "callout" : "accordion",
+				contentBlockId: row.contentBlockId,
+				position: row.position,
+			});
+			containerOutlines.set(row.parentBlockId, outline);
 		}
 
 		for (const field of richTextFields.values()) {
 			addFindings(field.meta, field.sequences);
 		}
-		for (const outline of accordionOutlines) {
-			addFindings(outline.meta, [outline.sequence]);
+		for (const outline of containerOutlines.values()) {
+			addFindings(outline.meta, outline.sequences);
 		}
 	} catch (error) {
 		// oxlint-disable-next-line unicorn/no-instanceof-builtins

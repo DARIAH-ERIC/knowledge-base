@@ -398,36 +398,35 @@ interface ContentBlockViewProps {
 function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): ReactNode {
 	switch (contentBlock.type) {
 		case "callout": {
-			const content = contentBlock.content?.content;
 			const intent = contentBlock.content?.intent ?? "info";
 			const title = contentBlock.content?.title;
-			if (content == null) {
-				return null;
-			}
+			const children = contentBlock.children ?? [];
 
 			return (
 				<aside aria-label={title ?? `${intent} callout`}>
 					<Note intent={intent === "neutral" ? "default" : intent}>
 						{title != null ? <strong className="mbe-1 block">{title}</strong> : null}
-						<InlineRichTextRenderer content={content} />
+						{children.map((child) => (
+							<ContentBlockView key={String(child.id)} contentBlock={child} />
+						))}
 					</Note>
 				</aside>
 			);
 		}
 
 		case "accordion": {
-			const items = contentBlock.content?.items;
+			const items = contentBlock.children ?? [];
 
-			if (!items || items.length === 0) {
+			if (items.length === 0) {
 				return null;
 			}
 
 			return (
 				<div className="flex flex-col divide-y divide-border rounded-lg border border-border">
-					{items.map((accordionItem, idx) => (
-						<details key={idx} className="group px-4">
+					{items.map((item) => (
+						<details key={String(item.id)} className="group px-4">
 							<summary className="flex cursor-pointer items-center justify-between py-3 text-sm font-medium">
-								{accordionItem.title}
+								{item.content?.title}
 								<svg
 									className="shrink-0 transition-transform block-4 inline-4 group-open:rotate-180"
 									fill="none"
@@ -442,19 +441,21 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 									/>
 								</svg>
 							</summary>
-							{accordionItem.content != null && (
-								<div className="richtext richtext-sm pbe-3">
-									{renderToReactElement({
-										content: accordionItem.content,
-										extensions: richTextExtensions,
-										options: richTextRenderOptions,
-									})}
-								</div>
-							)}
+							<div className="pbe-3">
+								{(item.children ?? []).map((child) => (
+									<ContentBlockView key={String(child.id)} contentBlock={child} />
+								))}
+							</div>
 						</details>
 					))}
 				</div>
 			);
+		}
+
+		// Only ever rendered through its accordion, which reads the title into the summary and the
+		// children into the panel. Matched by name so a new block type is a type error here.
+		case "accordion_item": {
+			return null;
 		}
 
 		case "data": {

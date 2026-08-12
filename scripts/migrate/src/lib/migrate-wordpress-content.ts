@@ -426,10 +426,46 @@ export function createWordPressContentMigrator(
 					break;
 				}
 
+				// An accordion is its panels, and a panel is its blocks: each parsed item becomes an
+				// `accordion_item` child carrying its body as a `rich_text` grandchild, which is the same
+				// shape the editor writes.
 				case "accordion": {
-					await tx
-						.insert(schema.accordionContentBlocks)
-						.values({ id: contentBlock.id, items: block.items });
+					await tx.insert(schema.accordionContentBlocks).values({ id: contentBlock.id });
+
+					for (const [itemPosition, item] of block.items.entries()) {
+						const insertedItem: Array<{ id: string }> = await tx
+							.insert(schema.contentBlocks)
+							.values({
+								position: itemPosition,
+								fieldId,
+								parentBlockId: contentBlock.id,
+								typeId: contentBlockTypes["accordion_item"]!.id,
+							})
+							.returning({ id: schema.contentBlocks.id });
+						const itemBlock: { id: string } | undefined = insertedItem[0];
+						assert(itemBlock);
+
+						await tx
+							.insert(schema.accordionItemContentBlocks)
+							.values({ id: itemBlock.id, title: item.title });
+
+						const insertedBody: Array<{ id: string }> = await tx
+							.insert(schema.contentBlocks)
+							.values({
+								position: 0,
+								fieldId,
+								parentBlockId: itemBlock.id,
+								typeId: contentBlockTypes["rich_text"]!.id,
+							})
+							.returning({ id: schema.contentBlocks.id });
+						const bodyBlock: { id: string } | undefined = insertedBody[0];
+						assert(bodyBlock);
+
+						await tx
+							.insert(schema.richTextContentBlocks)
+							.values({ id: bodyBlock.id, content: item.content });
+					}
+
 					break;
 				}
 

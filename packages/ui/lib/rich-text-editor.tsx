@@ -40,6 +40,7 @@ import {
 	type ReactNode,
 	type RefObject,
 	useCallback,
+	useEffect,
 	useId,
 	useLayoutEffect,
 	useMemo,
@@ -565,9 +566,125 @@ function createEmbedNode(hasFootnotes = false): Node {
 	});
 }
 
+/**
+ * Marks a container node's DOM as draggable, and hands back the ref to put on its
+ * `NodeViewWrapper`.
+ *
+ * ProseMirror sets `draggable` itself only for nodes with no content hole (see `NodeViewDesc`), so
+ * a container — whose body is editable prose — never gets it. Without the attribute the browser
+ * fires no `dragstart`, tiptap's `data-drag-handle` handling never runs, and the block cannot be
+ * moved at all. The same reason `BlockNodeSurface` sets it for the atoms it wraps.
+ *
+ * Cleared while the node is not draggable — a read-only editor, or a settings panel the author is
+ * filling in — so a drag can never start from a form.
+ */
+function useContainerDraggable(isDraggable: boolean): RefObject<HTMLDivElement | null> {
+	const wrapperRef = useRef<HTMLDivElement>(null);
+
+	useLayoutEffect(() => {
+		const nodeViewContainer = wrapperRef.current?.parentElement;
+		if (nodeViewContainer == null) {
+			return;
+		}
+
+		if (isDraggable) {
+			nodeViewContainer.setAttribute("draggable", "true");
+		} else {
+			nodeViewContainer.removeAttribute("draggable");
+		}
+	}, [isDraggable]);
+
+	return wrapperRef;
+}
+
+/**
+ * The settings a callout carries beside its body: how loudly it speaks, and what it is called. Both
+ * are committed on Apply rather than per keystroke — writing straight to `updateAttributes` would
+ * dispatch a transaction into the outer editor on every character.
+ */
+function CalloutSettings({
+	intent,
+	onApply,
+	onCancel,
+	title,
+}: Readonly<{
+	intent: CalloutIntent;
+	onApply: (values: { intent: CalloutIntent; title: string | null }) => void;
+	onCancel: () => void;
+	title: string | null;
+}>): ReactNode {
+	const [intentInput, setIntentInput] = useState<CalloutIntent>(intent);
+	const [titleInput, setTitleInput] = useState(title ?? "");
+	const titleInputId = useId();
+
+	return (
+		<div
+			className="flex flex-col gap-y-3 border border-input bg-bg p-4 select-none [&_input]:select-text"
+			contentEditable={false}
+		>
+			<div className="flex flex-col gap-y-1">
+				<span className="text-sm/6 font-medium">{"Style"}</span>
+				<ToggleGroup
+					aria-label="Callout style"
+					disallowEmptySelection={true}
+					onSelectionChange={(keys) => {
+						const nextIntent = [...keys][0] as CalloutIntent | undefined;
+						if (nextIntent != null) {
+							setIntentInput(nextIntent);
+						}
+					}}
+					selectedKeys={[intentInput]}
+					size="sm"
+				>
+					<ToggleGroupItem id="neutral">{"Neutral"}</ToggleGroupItem>
+					<ToggleGroupItem id="info">{"Info"}</ToggleGroupItem>
+					<ToggleGroupItem id="warning">{"Warning"}</ToggleGroupItem>
+					<ToggleGroupItem id="danger">{"Danger"}</ToggleGroupItem>
+					<ToggleGroupItem id="success">{"Success"}</ToggleGroupItem>
+				</ToggleGroup>
+			</div>
+			<div className="flex flex-col gap-y-1">
+				<label className="text-sm/6 font-medium" htmlFor={titleInputId}>
+					{"Title (optional)"}
+				</label>
+				<Input
+					id={titleInputId}
+					onChange={(event) => {
+						setTitleInput(event.target.value);
+					}}
+					value={titleInput}
+				/>
+			</div>
+			<div className={blockPanelFooterClassName}>
+				<Button
+					intent="primary"
+					onPress={() => {
+						onApply({ intent: intentInput, title: titleInput.trim() || null });
+					}}
+					size="sm"
+					type="button"
+				>
+					{"Apply"}
+				</Button>
+				<Button intent="outline" onPress={onCancel} size="sm" type="button">
+					{"Cancel"}
+				</Button>
+			</div>
+		</div>
+	);
+}
+
+/**
+ * A callout as the author edits it: framing that belongs to the block, wrapped around a body that
+ * is ordinary document content.
+ *
+ * The body is a real content hole (`NodeViewContent`), not a document tucked into an attribute, so
+ * everything the surrounding editor can do works inside a callout too — including dropping in an
+ * image, which becomes an `image` block of its own on save and keeps a real reference to its
+ * asset.
+ */
 function CalloutNodeView({
 	editor,
-	getPos,
 	node,
 	selected,
 	updateAttributes,
@@ -575,160 +692,94 @@ function CalloutNodeView({
 }: Readonly<NodeViewProps>): ReactNode {
 	const intent = normalizeCalloutIntent(node.attrs.intent);
 	const title = node.attrs.title as string | null;
-	const content = node.attrs.content as JSONContent | null;
-	const [isEditing, setIsEditing] = useState(content == null && editor.isEditable);
-	const [intentInput, setIntentInput] = useState<CalloutIntent>(intent);
-	const [titleInput, setTitleInput] = useState(title ?? "");
-	const [contentInput, setContentInput] = useState<JSONContent | null>(content);
-	const titleInputId = useId();
-
-	function selectNode() {
-		const pos = getPos();
-		if (typeof pos === "number") {
-			editor.commands.setNodeSelection(pos);
-		}
-	}
-
-	function resetInputs() {
-		setIntentInput(intent);
-		setTitleInput(title ?? "");
-		setContentInput(content);
-	}
+	const [isEditing, setIsEditing] = useState(false);
+	const wrapperRef = useContainerDraggable(editor.isEditable && !isEditing);
 
 	return (
-		<BlockNodeSurface
-			className="border-transparent"
-			isEditable={editor.isEditable}
-			isEditing={isEditing}
-			isSelected={selected}
-			label="Callout block"
-			onDoubleClick={() => {
-				selectNode();
-				resetInputs();
-				setIsEditing(true);
-			}}
+		<NodeViewWrapper
+			ref={wrapperRef}
+			// A named group so the settings panel and the callout it configures read as one thing —
+			// and so a test can address the block rather than whatever its current title happens to be.
+			aria-label="Callout block"
+			role="group"
 		>
 			{isEditing ? (
-				<div className="flex flex-col gap-y-3 border border-input bg-bg p-4 select-none **:[[contenteditable]]:select-text [&_input]:select-text">
-					<div className="flex flex-col gap-y-1">
-						<span className="text-sm/6 font-medium">{"Style"}</span>
-						<ToggleGroup
-							aria-label="Callout style"
-							disallowEmptySelection={true}
-							onSelectionChange={(keys) => {
-								const nextIntent = [...keys][0] as CalloutIntent | undefined;
-								if (nextIntent != null) {
-									setIntentInput(nextIntent);
-								}
+				<CalloutSettings
+					intent={intent}
+					onApply={(values) => {
+						updateAttributes(values);
+						setIsEditing(false);
+					}}
+					onCancel={() => {
+						setIsEditing(false);
+					}}
+					title={title}
+				/>
+			) : null}
+			<aside
+				aria-label={title ?? `${intent} callout`}
+				className={twMerge(
+					"group relative my-2 rounded-lg transition-shadow",
+					selected && "ring-2 ring-primary/20",
+				)}
+			>
+				<Note intent={intent === "neutral" ? "default" : intent}>
+					{title != null ? (
+						<strong className="mbe-1 block" contentEditable={false}>
+							{title}
+						</strong>
+					) : null}
+					<NodeViewContent data-callout-content="" />
+				</Note>
+				{editor.isEditable && !isEditing ? (
+					// Chrome, not content: `contentEditable={false}` keeps ProseMirror from treating the
+					// controls as part of the body, and the drag handle lives here so dragging the block
+					// never competes with selecting the prose inside it.
+					<div
+						className="absolute inset-e-2 inset-bs-2 flex gap-x-1 opacity-0 transition-opacity group-hover:opacity-100"
+						contentEditable={false}
+						data-drag-handle=""
+					>
+						<button
+							aria-label="Edit callout"
+							className="rounded-sm bg-bg/90 p-1 text-muted-fg shadow-sm hover:text-fg"
+							onClick={() => {
+								setIsEditing(true);
 							}}
-							selectedKeys={[intentInput]}
-							size="sm"
-						>
-							<ToggleGroupItem id="neutral">{"Neutral"}</ToggleGroupItem>
-							<ToggleGroupItem id="info">{"Info"}</ToggleGroupItem>
-							<ToggleGroupItem id="warning">{"Warning"}</ToggleGroupItem>
-							<ToggleGroupItem id="danger">{"Danger"}</ToggleGroupItem>
-							<ToggleGroupItem id="success">{"Success"}</ToggleGroupItem>
-						</ToggleGroup>
-					</div>
-					<div className="flex flex-col gap-y-1">
-						<label className="text-sm/6 font-medium" htmlFor={titleInputId}>
-							{"Title (optional)"}
-						</label>
-						<Input
-							id={titleInputId}
-							onChange={(event) => {
-								setTitleInput(event.target.value);
-							}}
-							value={titleInput}
-						/>
-					</div>
-					<div className="flex flex-col gap-y-1">
-						<span className="text-sm/6 font-medium">{"Content"}</span>
-						<InlineRichTextEditor
-							aria-label="Callout content"
-							content={contentInput ?? undefined}
-							onChange={setContentInput}
-						/>
-					</div>
-					<div className={blockPanelFooterClassName}>
-						<Button
-							intent="primary"
-							onPress={() => {
-								updateAttributes({
-									intent: intentInput,
-									title: titleInput.trim() || null,
-									content: contentInput ?? { type: "doc", content: [{ type: "paragraph" }] },
-								});
-								setIsEditing(false);
-							}}
-							size="sm"
 							type="button"
 						>
-							{"Apply"}
-						</Button>
-						{content != null ? (
-							<Button
-								intent="outline"
-								onPress={() => {
-									setIsEditing(false);
-								}}
-								size="sm"
-								type="button"
-							>
-								{"Cancel"}
-							</Button>
-						) : (
-							<Button intent="outline" onPress={deleteNode} size="sm" type="button">
-								{"Remove"}
-							</Button>
-						)}
+							<PencilIcon className="block-3.5 inline-3.5" />
+						</button>
+						<button
+							aria-label="Remove callout"
+							className="rounded-sm bg-bg/90 p-1 text-muted-fg shadow-sm hover:text-danger"
+							onClick={deleteNode}
+							type="button"
+						>
+							<Trash2Icon className="block-3.5 inline-3.5" />
+						</button>
 					</div>
-				</div>
-			) : (
-				<aside aria-label={title ?? `${intent} callout`} className="group relative">
-					<Note intent={intent === "neutral" ? "default" : intent}>
-						{title != null ? <strong className="mbe-1 block">{title}</strong> : null}
-						{content != null ? <InlineRichTextRenderer content={content} /> : null}
-					</Note>
-					{editor.isEditable ? (
-						<div className="absolute inset-e-2 inset-bs-2 flex gap-x-1 opacity-0 transition-opacity group-hover:opacity-100">
-							<button
-								aria-label="Edit callout"
-								className="rounded-sm bg-bg/90 p-1 text-muted-fg shadow-sm hover:text-fg"
-								onClick={() => {
-									selectNode();
-									resetInputs();
-									setIsEditing(true);
-								}}
-								type="button"
-							>
-								<PencilIcon className="block-3.5 inline-3.5" />
-							</button>
-							<button
-								aria-label="Remove callout"
-								className="rounded-sm bg-bg/90 p-1 text-muted-fg shadow-sm hover:text-danger"
-								onClick={deleteNode}
-								type="button"
-							>
-								<Trash2Icon className="block-3.5 inline-3.5" />
-							</button>
-						</div>
-					) : null}
-				</aside>
-			)}
-		</BlockNodeSurface>
+				) : null}
+			</aside>
+		</NodeViewWrapper>
 	);
 }
 
 export const CalloutNode = Node.create({
 	name: "calloutBlock",
-	group: "block",
-	atom: true,
+	// `container`, not `block`: a container's content spec accepts `block+`, so keeping containers out
+	// of that group is what makes a callout inside a callout — or inside an accordion panel —
+	// impossible in the schema rather than merely discouraged. The document node accepts both groups.
+	group: "container",
+	content: "block+",
+	// `defining` keeps the callout when its content is replaced by a paste; `isolating` stops
+	// backspace at the start of the body from lifting the prose out into the block above.
+	defining: true,
+	isolating: true,
 	draggable: true,
 	selectable: true,
 	addAttributes() {
-		return { intent: { default: "info" }, title: { default: null }, content: { default: null } };
+		return { intent: { default: "info" }, title: { default: null } };
 	},
 	parseHTML() {
 		return [
@@ -738,7 +789,6 @@ export const CalloutNode = Node.create({
 					return {
 						intent: normalizeCalloutIntent(dom.dataset.intent),
 						title: dom.dataset.title ?? null,
-						content: parseCaptionAttr(dom.dataset.content),
 					};
 				},
 			},
@@ -748,7 +798,6 @@ export const CalloutNode = Node.create({
 					return {
 						intent: normalizeCalloutIntent(dom.dataset.intent),
 						title: dom.dataset.title ?? null,
-						content: parseCaptionAttr(dom.dataset.content),
 					};
 				},
 			},
@@ -763,13 +812,180 @@ export const CalloutNode = Node.create({
 				"data-callout-block": "",
 				"data-intent": node.attrs.intent as string,
 				"data-title": node.attrs.title as string | null,
-				"data-content": serializeCaptionAttr(node.attrs.content as JSONContent | null),
 			},
+			0,
 		];
 	},
 	addNodeView() {
 		return ReactNodeViewRenderer(CalloutNodeView);
 	},
+});
+
+/** One panel of an accordion: a summary the author types, and a body of ordinary blocks. */
+function AccordionItemNodeView({
+	editor,
+	node,
+	updateAttributes,
+	deleteNode,
+}: Readonly<NodeViewProps>): ReactNode {
+	const title = node.attrs.title as string;
+	const [titleInput, setTitleInput] = useState(title);
+	const wrapperRef = useContainerDraggable(editor.isEditable);
+
+	// The attribute is the source of truth; the input only holds keystrokes until they are committed.
+	// Re-seeding on change is what makes undo, redo and a collaborator's edit show up in the field
+	// instead of leaving it stranded on what was typed here.
+	useEffect(() => {
+		setTitleInput(title);
+	}, [title]);
+
+	function commitTitle() {
+		const next = titleInput.trim();
+		if (next !== title) {
+			updateAttributes({ title: next });
+		}
+	}
+
+	return (
+		<NodeViewWrapper ref={wrapperRef}>
+			<div className="border-be border-border p-4 last:border-be-0">
+				{/* Chrome, not content — and the drag handle, so a panel can be reordered without the
+				    gesture competing with selecting its prose. */}
+				<div
+					className="flex items-center gap-x-2"
+					contentEditable={false}
+					data-drag-handle={editor.isEditable ? "" : undefined}
+				>
+					{editor.isEditable ? (
+						<>
+							<Input
+								aria-label="Panel title"
+								className="flex-1"
+								onBlur={commitTitle}
+								onChange={(event) => {
+									setTitleInput(event.target.value);
+								}}
+								placeholder="Panel title"
+								value={titleInput}
+							/>
+							<button
+								aria-label="Remove panel"
+								className="rounded-sm p-1 text-muted-fg hover:text-danger"
+								onClick={deleteNode}
+								type="button"
+							>
+								<Trash2Icon className="block-4 inline-4" />
+							</button>
+						</>
+					) : (
+						<strong className="text-sm font-medium">{title}</strong>
+					)}
+				</div>
+				<NodeViewContent className="mbs-2" data-accordion-item-content="" />
+			</div>
+		</NodeViewWrapper>
+	);
+}
+
+export const AccordionItemNode = Node.create({
+	name: "accordionItem",
+	// In no group at all: an item is only ever reachable through `accordionBlock`'s content spec, so
+	// it cannot be dropped into a document — or into a callout — on its own.
+	content: "block+",
+	defining: true,
+	isolating: true,
+	draggable: true,
+	selectable: true,
+	addAttributes() {
+		return { title: { default: "" } };
+	},
+	parseHTML() {
+		return [
+			{
+				tag: "div[data-accordion-item]",
+				getAttrs(dom) {
+					return { title: dom.dataset.title ?? "" };
+				},
+			},
+		];
+	},
+	renderHTML({ node }) {
+		return ["div", { "data-accordion-item": "", "data-title": node.attrs.title as string }, 0];
+	},
+	addNodeView() {
+		return ReactNodeViewRenderer(AccordionItemNodeView);
+	},
+});
+
+function AccordionNodeView({ editor, getPos, node }: Readonly<NodeViewProps>): ReactNode {
+	const wrapperRef = useContainerDraggable(editor.isEditable);
+
+	function addItem() {
+		const pos = getPos();
+		if (typeof pos !== "number") {
+			return;
+		}
+
+		// Just inside the accordion's closing token, so the panel lands after the ones already there.
+		editor
+			.chain()
+			.focus()
+			.insertContentAt(pos + node.nodeSize - 1, {
+				type: "accordionItem",
+				attrs: { title: "" },
+				content: [{ type: "paragraph" }],
+			})
+			.run();
+	}
+
+	return (
+		<NodeViewWrapper ref={wrapperRef} aria-label="Accordion block" role="group">
+			<div className="my-2 rounded-lg border border-border">
+				<NodeViewContent />
+				{editor.isEditable ? (
+					<div className="border-bs border-border p-2" contentEditable={false}>
+						<Button intent="outline" onPress={addItem} size="sm" type="button">
+							<PlusIcon className="block-4 inline-4" />
+							{"Add panel"}
+						</Button>
+					</div>
+				) : null}
+			</div>
+		</NodeViewWrapper>
+	);
+}
+
+export const AccordionNode = Node.create({
+	name: "accordionBlock",
+	group: "container",
+	content: "accordionItem+",
+	defining: true,
+	isolating: true,
+	draggable: true,
+	selectable: true,
+	parseHTML() {
+		return [{ tag: "div[data-accordion-block]" }];
+	},
+	renderHTML() {
+		return ["div", { "data-accordion-block": "" }, 0];
+	},
+	addNodeView() {
+		return ReactNodeViewRenderer(AccordionNodeView);
+	},
+});
+
+/**
+ * The document, widened to take containers as well as ordinary blocks.
+ *
+ * StarterKit's own `doc` accepts `block+`, and containers are deliberately not in that group (see
+ * {@link CalloutNode}) — so without this a callout could not sit at the top level either. Naming
+ * both groups here is what draws the line in the schema: containers are legal in a document, and
+ * nowhere else.
+ */
+const DocumentWithContainers = Node.create({
+	name: "doc",
+	topNode: true,
+	content: "(block | container)+",
 });
 
 /**
@@ -1514,6 +1730,7 @@ function MediaTextNodeView({
 	const [isEditing, setIsEditing] = useState(imageKey == null && editor.isEditable);
 	const [captionModeInput, setCaptionModeInput] = useState<ImageCaptionMode>(captionMode);
 	const [captionInput, setCaptionInput] = useState<JSONContent | null>(caption);
+	const wrapperRef = useContainerDraggable(editor.isEditable && !isEditing);
 
 	const resolvedCaption = resolveImageCaption(captionMode, caption, assetCaption);
 
@@ -1524,6 +1741,7 @@ function MediaTextNodeView({
 
 	return (
 		<NodeViewWrapper
+			ref={wrapperRef}
 			aria-label="Media with text block"
 			className={twMerge(
 				"my-2 overflow-clip rounded-lg border border-input bg-bg transition-shadow",
@@ -2529,7 +2747,10 @@ export function createRichTextExtensions(
 		StarterKit.configure({
 			heading: { levels: [2, 3, 4] },
 			link: false,
+			// Replaced by `DocumentWithContainers` below, which widens the top level to take containers.
+			document: false,
 		}),
+		DocumentWithContainers,
 		// Normalise typography as authors type. Keep the unambiguous substitutions (smart
 		// quotes/apostrophes, `--` → em dash, `...` → ellipsis) and disable the rest, which corrupt
 		// legitimate technical/academic text — e.g. `(c)` as a list marker → ©, `1/2` → ½, `->` → →,
@@ -2579,6 +2800,8 @@ export function createRichTextExtensions(
 		),
 		createEmbedNode(options?.hasFootnotes),
 		CalloutNode,
+		AccordionNode,
+		AccordionItemNode,
 		ButtonLinkNode,
 		PlaceholderValueNode,
 		FootnoteNode,

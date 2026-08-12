@@ -1,14 +1,26 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 import type { Database, Transaction } from "./index";
 import { isEmptyRichTextDocument } from "./rich-text";
 import * as schema from "./schema";
 
 /**
- * Detects and removes semantically empty `rich_text` content blocks — blocks whose document has no
- * meaningful content (empty paragraphs, stray hard breaks, whitespace). Accordion items are
- * intentionally left alone. Shared by the `@dariah-eric/maintenance` cli and the admin dashboard,
- * so both use the exact same definition of "empty".
+ * Detects and removes semantically empty content blocks. Two things count as empty, and both are a
+ * block that would render as nothing:
+ *
+ * - A `rich_text` block whose document has no meaningful content (empty paragraphs, stray hard
+ *   breaks, whitespace) — wherever in the tree it sits, including the body of a callout or an
+ *   accordion panel;
+ * - A container block (`callout`, `accordion`, `accordion_item`) left with no children at all.
+ *
+ * The two converge over successive runs rather than in one pass: emptying a callout's only child
+ * makes the callout itself empty, which the next run reports. That is deliberate — each run only
+ * deletes what is provably empty at the time it looks, so nothing is removed on the strength of a
+ * deletion that has not happened yet.
+ *
+ * Shared by the `@dariah-eric/maintenance` cli and the admin dashboard, so both use the exact same
+ * definition of "empty".
  */
 
 /** JSON-serializable so findings can cross a server/client boundary. */
@@ -60,23 +72,75 @@ async function getRichTextBlocks(db: Database | Transaction): Promise<Array<Rich
 		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId));
 }
 
+/** The block types that hold their content as children rather than in a column of their own. */
+const containerBlockTypes = ["accordion", "accordion_item", "callout"] as const;
+
+/**
+ * Container blocks with nothing in them — an accordion with no panels, a callout with no body. The
+ * left join is to the children themselves, so "no children" is the absence of a joined row rather
+ * than a count.
+ */
+async function getEmptyContainerBlocks(
+	db: Database | Transaction,
+): Promise<Array<EmptyContentBlock>> {
+	const childContentBlocks = alias(schema.contentBlocks, "child_content_blocks");
+
+	return db
+		.select({
+			contentBlockId: schema.contentBlocks.id,
+			position: schema.contentBlocks.position,
+			entityId: schema.entities.id,
+			entityLabel: schema.entities.label,
+			entitySlug: schema.entities.slug,
+			entityType: schema.entityTypes.type,
+			fieldName: schema.entityTypesFieldsNames.fieldName,
+			status: schema.entityStatus.type,
+		})
+		.from(schema.contentBlocks)
+		.innerJoin(
+			schema.contentBlockTypes,
+			eq(schema.contentBlockTypes.id, schema.contentBlocks.typeId),
+		)
+		.innerJoin(schema.fields, eq(schema.fields.id, schema.contentBlocks.fieldId))
+		.innerJoin(
+			schema.entityTypesFieldsNames,
+			eq(schema.entityTypesFieldsNames.id, schema.fields.fieldNameId),
+		)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.fields.entityVersionId))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+		.leftJoin(childContentBlocks, eq(childContentBlocks.parentBlockId, schema.contentBlocks.id))
+		.where(
+			and(
+				inArray(schema.contentBlockTypes.type, [...containerBlockTypes]),
+				isNull(childContentBlocks.id),
+			),
+		);
+}
+
 export async function findEmptyContentBlocks(
 	db: Database | Transaction,
 ): Promise<EmptyContentBlocksResult> {
-	const rows = await getRichTextBlocks(db);
+	const [rows, emptyContainers] = await Promise.all([
+		getRichTextBlocks(db),
+		getEmptyContainerBlocks(db),
+	]);
 
-	const blocks = rows
-		.filter((row) => isEmptyRichTextDocument(row.content))
-		.map(({ content: _content, ...block }): EmptyContentBlock => block)
-		.toSorted(
-			(a, b) =>
-				a.entityType.localeCompare(b.entityType) ||
-				(a.entityLabel ?? a.entitySlug).localeCompare(b.entityLabel ?? b.entitySlug) ||
-				a.status.localeCompare(b.status) ||
-				a.fieldName.localeCompare(b.fieldName) ||
-				a.position - b.position ||
-				a.contentBlockId.localeCompare(b.contentBlockId),
-		);
+	const blocks = [
+		...rows
+			.filter((row) => isEmptyRichTextDocument(row.content))
+			.map(({ content: _content, ...block }): EmptyContentBlock => block),
+		...emptyContainers,
+	].toSorted(
+		(a, b) =>
+			a.entityType.localeCompare(b.entityType) ||
+			(a.entityLabel ?? a.entitySlug).localeCompare(b.entityLabel ?? b.entitySlug) ||
+			a.status.localeCompare(b.status) ||
+			a.fieldName.localeCompare(b.fieldName) ||
+			a.position - b.position ||
+			a.contentBlockId.localeCompare(b.contentBlockId),
+	);
 
 	return { blocks, total: blocks.length };
 }
@@ -95,7 +159,8 @@ export interface DeleteEmptyContentBlocksResult {
 /**
  * Deletes the given content blocks, but only those which are _still_ empty at call time — the empty
  * set is recomputed here rather than trusting the caller's ids, so a block edited to have content
- * in the meantime is protected. Deleting the `content_blocks` row cascades to its `rich_text` row.
+ * in the meantime is protected. Deleting the `content_blocks` row cascades to its typed row — and,
+ * for a container, to its subtree, though a container only reaches this list once it has none.
  */
 export async function deleteEmptyContentBlocks(
 	db: Database | Transaction,

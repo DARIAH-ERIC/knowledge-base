@@ -65,11 +65,6 @@ function printDryRunChange(source: string, before: JSONContent, after: JSONConte
 	);
 }
 
-interface AccordionItem {
-	title: string;
-	content: JSONContent;
-}
-
 interface ContentBlockOwner {
 	entityId: string;
 	entityLabel: string | null;
@@ -137,7 +132,6 @@ async function main() {
 	const hardBreaks: Array<{ source: string; text: string }> = [];
 	const changedEntities: Array<string> = [];
 	let richTextChanged = 0;
-	let accordionChanged = 0;
 	const contentBlockOwners = new Map<string, ContentBlockOwner>();
 
 	if (isDryRun) {
@@ -199,48 +193,6 @@ async function main() {
 		}
 	}
 
-	const accordionBlocks = await db.query.accordionContentBlocks.findMany({
-		columns: { id: true, items: true },
-	});
-
-	for (const block of accordionBlocks) {
-		const items = block.items as Array<AccordionItem>;
-
-		const cleanedItems = items.map((item, index) => {
-			const cleaned = cleanTiptapDoc(item.content);
-			for (const issue of findOverExtendedLinks(cleaned)) {
-				linkIssues.push({ source: `accordion:${block.id}`, text: linkLine(issue) });
-			}
-			for (const hardBreak of findMidTextHardBreaks(cleaned)) {
-				hardBreaks.push({ source: `accordion:${block.id}`, text: hardBreak.text });
-			}
-			if (isDryRun && changed(item.content, cleaned)) {
-				printDryRunChange(`accordion:${block.id}:item:${String(index)}`, item.content, cleaned);
-			}
-			return { ...item, content: cleaned };
-		});
-
-		const blockChanged = cleanedItems.some((item, index) =>
-			changed(items[index]!.content, item.content),
-		);
-
-		if (!blockChanged) {
-			continue;
-		}
-
-		accordionChanged += 1;
-		if (isDryRun) {
-			changedEntities.push(
-				formatChangedEntity(contentBlockOwners.get(block.id), "accordion", block.id),
-			);
-		} else {
-			await db
-				.update(schema.accordionContentBlocks)
-				.set({ items: cleanedItems })
-				.where(eq(schema.accordionContentBlocks.id, block.id));
-		}
-	}
-
 	await writeReport(linkReportFilePath, linkIssues);
 	await writeReport(hardBreakReportFilePath, hardBreaks);
 	if (isDryRun) {
@@ -248,9 +200,9 @@ async function main() {
 	}
 
 	log.success(
-		`${isDryRun ? "[dry run] Would clean" : "Cleaned"} ${String(richTextChanged)} rich_text block(s) and ${String(
-			accordionChanged,
-		)} accordion block(s).`,
+		// Accordion panel bodies are `rich_text` blocks of their own, so they are counted above along
+		// with everything else stored that way.
+		`${isDryRun ? "[dry run] Would clean" : "Cleaned"} ${String(richTextChanged)} rich_text block(s).`,
 	);
 	log.info(
 		`Over-extended links: ${String(linkIssues.length)}${
