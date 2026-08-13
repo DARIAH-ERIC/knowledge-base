@@ -42,7 +42,7 @@ export function WebAddressesCheck(props: Readonly<WebAddressesCheckProps>): Reac
 			...finding,
 			// A record can appear more than once (e.g. draft and published), so include the index for a
 			// stable key.
-			id: `${finding.source}:${finding.entitySlug ?? finding.socialMediaId ?? finding.recordLabel}:${String(index)}`,
+			id: `${finding.source}:${finding.entitySlug ?? finding.socialMediaId ?? finding.workingGroupReportId ?? finding.recordLabel}:${String(index)}`,
 		};
 	});
 
@@ -83,12 +83,16 @@ export function WebAddressesCheck(props: Readonly<WebAddressesCheckProps>): Reac
 						const href =
 							finding.socialMediaId != null
 								? `/dashboard/administrator/social-media/${finding.socialMediaId}/edit`
-								: finding.entityType != null && finding.entitySlug != null
-									? getEntityDetailHref({
-											entityType: finding.entityType,
-											slug: finding.entitySlug,
-										})
-									: null;
+								: // Reports are not entities, so they are linked by id — straight to the step the
+									// value lives on, which for an event url is the report's events form.
+									finding.workingGroupReportId != null
+									? `/dashboard/administrator/working-group-reports/${finding.workingGroupReportId}/edit/events`
+									: finding.entityType != null && finding.entitySlug != null
+										? getEntityDetailHref({
+												entityType: finding.entityType,
+												slug: finding.entitySlug,
+											})
+										: null;
 
 						return (
 							<TableRow id={finding.id}>

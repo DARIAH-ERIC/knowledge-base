@@ -6,7 +6,7 @@ import { createActionStateError, createActionStateSuccess } from "@dariah-eric/n
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
-import { CreateSocialMediaSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.schema";
+import { CreateSocialMediaSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/_lib/create-social-media.schema";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -19,7 +19,14 @@ export interface CreatedSocialMedia {
 	type: { type: string };
 }
 
-/** Uses createServerAction because the success response carries typed data. */
+/**
+ * Creates a `social_media` row from the inline modal in an entity form's social media section, so
+ * the new record can be selected without leaving the form. Distinct from the identically named
+ * action under `administrator/social-media/_lib`, which backs the standalone admin form and
+ * redirects instead of returning the created row.
+ *
+ * Uses createServerAction because the success response carries typed data.
+ */
 export const createSocialMediaAction = createServerAction<CreatedSocialMedia>(
 	{ requireAdmin: true },
 	async function createSocialMediaAction(_state, formData, { user }) {

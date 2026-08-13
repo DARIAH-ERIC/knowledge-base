@@ -12,6 +12,7 @@ import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getPersonArticles } from "@/lib/data/article-contributors";
 import { getPersonContributions } from "@/lib/data/contributions";
 import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
+import { getPersonSocialMedia } from "@/lib/data/person-social-media";
 import {
 	selectedImageColumns,
 	selectedImageWith,
@@ -109,10 +110,11 @@ export default async function DashboardAdministratorPersonDetailsPage(
 		notFound();
 	}
 
-	const [contributions, articles, biographyContentBlocks] = await Promise.all([
+	const [contributions, articles, biographyContentBlocks, socialMedia] = await Promise.all([
 		getPersonContributions(documentId),
 		getPersonArticles(documentId),
 		getResolvedEntityContentBlocks(versionId, "biography"),
+		getPersonSocialMedia(db, versionId),
 	]);
 
 	const image = person.image != null ? toSelectedImage(person.image, imageGridOptions) : null;
@@ -125,6 +127,7 @@ export default async function DashboardAdministratorPersonDetailsPage(
 			documentId={documentId}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
+			socialMedia={socialMedia}
 			person={{ ...person, biographyContentBlocks, image }}
 			publishAction={publishPersonAction}
 			selectedVersion={selectedVersion}

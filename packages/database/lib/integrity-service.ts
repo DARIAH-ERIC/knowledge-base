@@ -2540,6 +2540,7 @@ export async function checkDuplicateEntities(
 /** Which column set a finding came from — groups findings and drives the dashboard's link. */
 export type WebAddressSource =
 	| "social_media"
+	| "person_social_media_url"
 	| "event_website"
 	| "opportunity_website"
 	| "document_policy_url"
@@ -2639,6 +2640,11 @@ export interface WebAddressFinding {
 	status: string | null;
 	/** For social-media records: the row id, so the dashboard can link to its edit page. */
 	socialMediaId: string | null;
+	/**
+	 * For working-group-report records: the owning report id, so the dashboard can link to the report
+	 * step the value lives on. Reports are not entities, so they have no slug to link by.
+	 */
+	workingGroupReportId: string | null;
 }
 
 export interface WebAddressCheckResult {
@@ -2656,6 +2662,7 @@ type WebAddressFindingMeta = Pick<
 	| "entityType"
 	| "entitySlug"
 	| "socialMediaId"
+	| "workingGroupReportId"
 	| "status"
 >;
 
@@ -2700,6 +2707,7 @@ function buildEntityColumnFindings(
 			entitySlug: row.slug,
 			status: row.status,
 			socialMediaId: null,
+			workingGroupReportId: null,
 		});
 		if (finding != null) {
 			findings.push(finding);
@@ -2788,12 +2796,52 @@ async function checkSocialMediaUrls(db: Database | Transaction): Promise<Array<W
 			entitySlug: null,
 			status: null,
 			socialMediaId: row.id,
+			workingGroupReportId: null,
 		});
 		if (finding != null) {
 			findings.push(finding);
 		}
 	}
 	return findings;
+}
+
+/**
+ * A person's own social media. The write path validates these with `v.url()`, so what this catches
+ * in practice is an `http` scheme — which passes validation — plus anything written outside the
+ * form.
+ */
+async function checkPersonSocialMediaUrls(
+	db: Database | Transaction,
+): Promise<Array<WebAddressFinding>> {
+	const rows = await db
+		.select({
+			value: schema.personSocialMedia.url,
+			label: schema.personSocialMedia.label,
+			entityType: schema.entityTypes.type,
+			slug: schema.entities.slug,
+			entityLabel: schema.entities.label,
+			status: schema.entityStatus.type,
+		})
+		.from(schema.personSocialMedia)
+		.innerJoin(schema.persons, eq(schema.persons.id, schema.personSocialMedia.personId))
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.persons.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId));
+
+	// The row's own label is only a display name for the entry, so the person is what identifies the
+	// finding — with the entry's label appended when it has one.
+	return buildEntityColumnFindings(
+		rows.map((row) => {
+			const person = row.entityLabel ?? row.slug;
+			return {
+				...row,
+				label: row.label == null ? person : `${person} — ${row.label}`,
+			};
+		}),
+		"person_social_media_url",
+		"Person social media",
+	);
 }
 
 async function checkLicenseUrls(db: Database | Transaction): Promise<Array<WebAddressFinding>> {
@@ -2811,6 +2859,7 @@ async function checkLicenseUrls(db: Database | Transaction): Promise<Array<WebAd
 			entitySlug: null,
 			status: null,
 			socialMediaId: null,
+			workingGroupReportId: null,
 		});
 		if (finding != null) {
 			findings.push(finding);
@@ -2849,6 +2898,7 @@ async function checkEmbedBlockUrls(db: Database | Transaction): Promise<Array<We
 			entitySlug: row.slug,
 			status: row.status,
 			socialMediaId: null,
+			workingGroupReportId: null,
 		});
 		if (finding != null) {
 			findings.push(finding);
@@ -2864,6 +2914,7 @@ async function checkWorkingGroupReportEventUrls(
 		.select({
 			title: schema.workingGroupReportEvents.title,
 			url: schema.workingGroupReportEvents.url,
+			workingGroupReportId: schema.workingGroupReportEvents.workingGroupReportId,
 		})
 		.from(schema.workingGroupReportEvents)
 		.where(isNotNull(schema.workingGroupReportEvents.url));
@@ -2881,6 +2932,7 @@ async function checkWorkingGroupReportEventUrls(
 			entitySlug: null,
 			status: null,
 			socialMediaId: null,
+			workingGroupReportId: row.workingGroupReportId,
 		});
 		if (finding != null) {
 			findings.push(finding);
@@ -2897,6 +2949,7 @@ export async function checkWebAddresses(
 
 	const sources: Array<() => Promise<Array<WebAddressFinding>>> = [
 		() => checkSocialMediaUrls(db),
+		() => checkPersonSocialMediaUrls(db),
 		() => checkEventWebsites(db),
 		() => checkOpportunityWebsites(db),
 		() => checkDocumentPolicyUrls(db),

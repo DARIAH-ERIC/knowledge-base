@@ -14,6 +14,35 @@ import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, eq, inArray, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
+export interface PersonSocialMedia {
+	type: (typeof schema.personSocialMediaTypesEnum)[number];
+	url: string;
+	label: string | null;
+}
+
+/**
+ * A person's own social media, in their stored order. Unlike an organisational unit's social media
+ * these are rows owned by the person version rather than entries in the shared `social_media`
+ * table, so `position` is a column on the row itself and there is no junction to order by.
+ */
+export const personSocialMediaQuery = {
+	columns: { url: true, label: true },
+	with: { type: { columns: { type: true } } },
+	orderBy: { position: "asc" },
+} as const;
+
+export function mapPersonSocialMedia(
+	entries: Array<{ type: { type: string }; url: string; label: string | null }>,
+): Array<PersonSocialMedia> {
+	return entries.map((entry) => {
+		return {
+			label: entry.label,
+			type: entry.type.type as PersonSocialMedia["type"],
+			url: entry.url,
+		};
+	});
+}
+
 export interface PersonPosition {
 	role: (typeof schema.personRoleTypesEnum)[number];
 	/** Optional free-text note describing the person↔org relation. */
