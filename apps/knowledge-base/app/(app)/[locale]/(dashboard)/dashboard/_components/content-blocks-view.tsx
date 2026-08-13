@@ -510,10 +510,13 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							const { caption } = resolveGalleryItemCaption(item);
 
 							return (
-								<figure key={idx} className="shrink-0 snap-start inline-[min(20rem,80vw)]">
+								// The slide is a cap, not a fixed width: it takes the image's natural width up
+								// to `min(20rem, 80vw)`, so a narrow source makes a narrow slide rather than
+								// being stretched across an oversized one.
+								<figure key={idx} className="shrink-0 snap-start max-inline-[min(20rem,80vw)]">
 									<img
 										alt={toPlainText(caption)}
-										className="aspect-4/3 rounded-lg object-cover inline-full"
+										className="ms-auto me-auto rounded-lg inline-auto max-block-96 max-inline-full"
 										src={item.imageUrl}
 									/>
 									<CaptionFigcaption caption={caption} />
@@ -522,7 +525,19 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 						})}
 					</div>
 				) : (
-					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					// The track minimum is derived from the content column, not picked: the reading
+					// surfaces cap it at `--breakpoint-md` (48rem), so two tracks plus the 1rem gap
+					// leave 23.5rem each. 22.5rem takes that ceiling with slack, so 2-up survives a
+					// column a couple of rem short of the cap instead of collapsing to 1-up right at
+					// it. That also puts the gallery at most 2-up in a reading column — a 3-up row
+					// would need a 15rem minimum, which is a thumbnail, not a gallery image.
+					//
+					// `auto-fill`, not `auto-fit`: an empty track keeps its width, so a two-image
+					// gallery still reads as the first two cells of a grid instead of two images
+					// marooned in half-width tracks. The `min(…, 100%)` guard keeps the track from
+					// overflowing a column narrower than the minimum — the dashboard detail views
+					// render this inside a description list, well under the reading width.
+					<div className="grid grid-cols-[repeat(auto-fill,minmax(min(22.5rem,100%),1fr))] items-start gap-4">
 						{items.map((item, idx) => {
 							if (item.imageUrl == null || item.imageUrl === "") {
 								return null;
@@ -532,9 +547,13 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 
 							return (
 								<figure key={idx}>
+									{/* Same rule as the `image` block: drawn at its natural width inside the track
+									    and centred, never upscaled to fill — imgproxy does not enlarge, so a source
+									    narrower than the track has no more detail to give. The block cap keeps a
+									    portrait source from towering over its row-mates. */}
 									<img
 										alt={toPlainText(caption)}
-										className="aspect-4/3 rounded-lg object-cover inline-full"
+										className="ms-auto me-auto rounded-lg inline-auto max-block-96 max-inline-full"
 										src={item.imageUrl}
 									/>
 									<CaptionFigcaption caption={caption} />

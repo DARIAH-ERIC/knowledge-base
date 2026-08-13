@@ -2314,7 +2314,7 @@ function GalleryNodeView({
 								"grid list-none gap-2 p-2",
 								layout === "carousel"
 									? "auto-cols-[minmax(8rem,1fr)] grid-flow-col overflow-x-auto"
-									: "grid-cols-2 sm:grid-cols-3",
+									: "grid-cols-[repeat(auto-fill,minmax(min(10rem,100%),1fr))]",
 							)}
 						>
 							{items.map((item, index) => {
