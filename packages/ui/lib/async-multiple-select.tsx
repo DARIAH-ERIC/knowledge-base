@@ -203,6 +203,9 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 						}
 					>
 						<TagList
+							// Tags are rebuilt only when the selection changes, because the collection caches a row
+							// against the item it was built from — a caller swapping `renderTag` needs to say so.
+							dependencies={[renderTag]}
 							items={resolvedSelectedItems}
 							renderEmptyState={() => (
 								<i className="ps-2 text-sm text-muted-fg not-italic">
@@ -269,6 +272,9 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 										"max-block-72 [&::-webkit-scrollbar]:block-2! [&::-webkit-scrollbar]:inline-2!",
 										isPending ? "opacity-50" : undefined,
 									)}
+									// Options survive between fetches as the same objects, so a caller that swaps its
+									// `renderItem` would otherwise keep the markup the previous one produced.
+									dependencies={[renderOption]}
 									items={displayedItems}
 									onSelectionChange={(keys) => {
 										if (keys === "all") {

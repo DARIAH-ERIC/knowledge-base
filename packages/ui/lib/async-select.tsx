@@ -199,6 +199,9 @@ function AsyncSelectInner<T extends AsyncOption>(
 										"max-block-72 [&::-webkit-scrollbar]:block-2! [&::-webkit-scrollbar]:inline-2!",
 										isPending ? "opacity-50" : undefined,
 									)}
+									// Options survive between fetches as the same objects, so a caller that swaps its
+									// `renderItem` would otherwise keep the markup the previous one produced.
+									dependencies={[renderOption]}
 									items={displayedItems}
 									onSelectionChange={(keys) => {
 										if (keys === "all") {

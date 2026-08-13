@@ -209,6 +209,12 @@ function AsyncListSelectInner<T extends AsyncOption>(
 				<GridList
 					aria-label={ariaLabel}
 					className="inline-full min-inline-56"
+					// The caching the `remove` handler works around above (see `valueRef`) governs
+					// everything a row renders, not just its handlers: `resolvedSelectedItems` holds the
+					// same objects until the selection changes, so without naming them here a row would
+					// keep the remove button of a field that has since been disabled, or the markup of a
+					// superseded `renderSelectedItem`.
+					dependencies={[isDisabled, renderSelectedItem]}
 					dragAndDropHooks={isOrderable && !isDisabled ? dragAndDropHooks : undefined}
 					items={resolvedSelectedItems}
 				>
@@ -288,6 +294,9 @@ function AsyncListSelectInner<T extends AsyncOption>(
 										"flex-1 inline-full max-block-none min-block-0 [&::-webkit-scrollbar]:block-2! [&::-webkit-scrollbar]:inline-2!",
 										isPending ? "opacity-50" : undefined,
 									)}
+									// Options survive between fetches as the same objects, so a caller that swaps its
+									// `renderItem` would otherwise keep the markup the previous one produced.
+									dependencies={[renderOption]}
 									disabledKeys={disabledOptionKeys}
 									items={displayedItems}
 									onSelectionChange={(keys) => {
