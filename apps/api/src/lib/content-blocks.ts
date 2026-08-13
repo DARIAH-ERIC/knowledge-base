@@ -134,14 +134,6 @@ export const CalloutContentBlockSchema = v.object({
 	 * resolve on its own.
 	 */
 	blocks: v.array(NestedContentBlockSchema),
-	// The description rather than a JSDoc `@deprecated`: this is what reaches the OpenAPI document,
-	// which is where a consumer of this field would read it.
-	content: v.pipe(
-		v.nullable(v.any()),
-		v.description(
-			"Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in `blocks` and nowhere else, so a renderer still reading this field silently drops them. Read `blocks` instead.",
-		),
-	),
 });
 
 export const AccordionContentBlockSchema = v.object({
@@ -151,12 +143,6 @@ export const AccordionContentBlockSchema = v.object({
 			title: v.string(),
 			/** The panel's body, as blocks — see {@link CalloutContentBlockSchema}'s `blocks`. */
 			blocks: v.array(NestedContentBlockSchema),
-			content: v.pipe(
-				v.nullable(v.any()),
-				v.description(
-					"Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read `blocks` instead.",
-				),
-			),
 		}),
 	),
 });
@@ -187,23 +173,6 @@ interface AccordionItemRow {
 }
 
 type NormalizedBlock = ContentBlock | AccordionItemRow;
-
-/**
- * The prose of a container's body as one document, for the deprecated `content` fields.
- *
- * Only `rich_text` children contribute — an image or an embed has no richtext to merge — so this
- * reproduces exactly what the field held before bodies became blocks, and nothing more. That is the
- * point: a consumer still reading it sees what it always saw, and gets the rest from `blocks`.
- */
-function flattenRichTextBlocks(blocks: Array<NestedContentBlock>): JSONContent | null {
-	const content = blocks.flatMap((block) =>
-		block.type === "rich_text"
-			? ((block.content as JSONContent | null | undefined)?.content ?? [])
-			: [],
-	);
-
-	return content.length === 0 ? null : { type: "doc", content };
-}
 
 type GalleryContentBlock = Extract<ContentBlock, { type: "gallery" }>;
 type GalleryItem = GalleryContentBlock["items"][number];
@@ -383,7 +352,6 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 				const child = blocksById.get(childId);
 				return child == null ? [] : [child as NestedContentBlock];
 			});
-			parent.content = flattenRichTextBlocks(parent.blocks);
 			continue;
 		}
 
@@ -399,13 +367,7 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 					return child == null ? [] : [child as NestedContentBlock];
 				});
 
-				return [
-					{
-						title: accordionItemTitles.get(childId) ?? "",
-						blocks,
-						content: flattenRichTextBlocks(blocks),
-					},
-				];
+				return [{ title: accordionItemTitles.get(childId) ?? "", blocks }];
 			});
 		}
 	}
@@ -598,14 +560,12 @@ function normalizeRow(row: {
 }): NormalizedBlock {
 	switch (row.blockType) {
 		case "callout": {
-			// `blocks` and the deprecated `content` are both filled in by the nesting pass, once the
-			// children this block owns are known.
+			// `blocks` is filled in by the nesting pass, once the children this block owns are known.
 			return {
 				type: "callout",
 				intent: row.calloutIntent!,
 				title: row.calloutTitle,
 				blocks: [],
-				content: null,
 			};
 		}
 		case "rich_text": {

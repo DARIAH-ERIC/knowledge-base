@@ -176,8 +176,8 @@ function mapPersonContributors(
 
 function hasContent(block: ContentBlock): boolean {
 	switch (block.type) {
-		// A container has content when it holds any — the deprecated flattened `content` would miss a
-		// callout whose body is nothing but an image.
+		// A container has content when it holds any: a callout whose body is nothing but an image
+		// counts just as much as one holding prose.
 		case "callout": {
 			return (block.title?.trim().length ?? 0) > 0 || block.blocks.some(hasContent);
 		}

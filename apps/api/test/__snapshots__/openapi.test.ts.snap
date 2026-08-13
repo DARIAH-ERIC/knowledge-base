@@ -891,15 +891,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -929,7 +920,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -1564,15 +1554,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -1580,7 +1561,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -2522,15 +2502,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -2560,7 +2531,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -3195,15 +3165,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -3211,7 +3172,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -4446,15 +4406,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -4484,7 +4435,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -5119,15 +5069,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -5135,7 +5076,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -6183,15 +6123,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -6221,7 +6152,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -6856,15 +6786,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -6872,7 +6793,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -8120,15 +8040,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -8158,7 +8069,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -8793,15 +8703,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -8809,7 +8710,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -10834,15 +10734,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -10872,7 +10763,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -11507,15 +11397,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -11523,7 +11404,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -13172,15 +13052,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -13210,7 +13081,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -13845,15 +13715,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -13861,7 +13722,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -15182,15 +15042,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -15220,7 +15071,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -15855,15 +15705,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -15871,7 +15712,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -17593,15 +17433,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -17631,7 +17462,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -18266,15 +18096,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -18282,7 +18103,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -19262,15 +19082,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -19300,7 +19111,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -19935,15 +19745,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -19951,7 +19752,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -21135,15 +20935,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -21173,7 +20964,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -21808,15 +21598,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -21824,7 +21605,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -22805,15 +22585,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -22843,7 +22614,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -23478,15 +23248,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -23494,7 +23255,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -24671,15 +24431,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -24709,7 +24460,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -25344,15 +25094,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -25360,7 +25101,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -26955,15 +26695,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -26993,7 +26724,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -27628,15 +27358,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -27644,7 +27365,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
@@ -28983,15 +28703,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       },
                       "type": "array",
                     },
-                    "content": {
-                      "anyOf": [
-                        {},
-                        {
-                          "type": "null",
-                        },
-                      ],
-                      "description": "Deprecated. The body as one richtext document, for consumers written before it became blocks. Only the prose is here: an image or embed in the body appears in \`blocks\` and nowhere else, so a renderer still reading this field silently drops them. Read \`blocks\` instead.",
-                    },
                     "intent": {
                       "enum": [
                         "neutral",
@@ -29021,7 +28732,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "intent",
                     "title",
                     "blocks",
-                    "content",
                   ],
                   "type": "object",
                 },
@@ -29656,15 +29366,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                             },
                             "type": "array",
                           },
-                          "content": {
-                            "anyOf": [
-                              {},
-                              {
-                                "type": "null",
-                              },
-                            ],
-                            "description": "Deprecated. The panel body as one richtext document, for consumers written before it became blocks. Prose only; read \`blocks\` instead.",
-                          },
                           "title": {
                             "type": "string",
                           },
@@ -29672,7 +29373,6 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "required": [
                           "title",
                           "blocks",
-                          "content",
                         ],
                         "type": "object",
                       },
