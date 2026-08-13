@@ -466,6 +466,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "duration": {
+                      "properties": {
+                        "end": {
+                          "description": "Absent for an open-ended position",
+                          "format": "date-time",
+                          "type": "string",
+                        },
+                        "start": {
+                          "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                          "format": "date-time",
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "start",
+                      ],
+                      "type": "object",
+                    },
                     "entity": {
                       "$ref": "#/components/schemas/EntityRef",
                     },
@@ -489,6 +507,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "role",
                     "description",
                     "entity",
+                    "duration",
                   ],
                   "type": "object",
                 },
@@ -12058,6 +12077,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                               },
                             ],
                           },
+                          "duration": {
+                            "properties": {
+                              "end": {
+                                "description": "Absent for an open-ended position",
+                                "format": "date-time",
+                                "type": "string",
+                              },
+                              "start": {
+                                "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                                "format": "date-time",
+                                "type": "string",
+                              },
+                            },
+                            "required": [
+                              "start",
+                            ],
+                            "type": "object",
+                          },
                           "entity": {
                             "$ref": "#/components/schemas/EntityRef",
                           },
@@ -12081,6 +12118,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "role",
                           "description",
                           "entity",
+                          "duration",
                         ],
                         "type": "object",
                       },
@@ -12604,6 +12642,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                               },
                             ],
                           },
+                          "duration": {
+                            "properties": {
+                              "end": {
+                                "description": "Absent for an open-ended position",
+                                "format": "date-time",
+                                "type": "string",
+                              },
+                              "start": {
+                                "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                                "format": "date-time",
+                                "type": "string",
+                              },
+                            },
+                            "required": [
+                              "start",
+                            ],
+                            "type": "object",
+                          },
                           "entity": {
                             "$ref": "#/components/schemas/EntityRef",
                           },
@@ -12627,6 +12683,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "role",
                           "description",
                           "entity",
+                          "duration",
                         ],
                         "type": "object",
                       },
@@ -14197,6 +14254,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                               },
                             ],
                           },
+                          "duration": {
+                            "properties": {
+                              "end": {
+                                "description": "Absent for an open-ended position",
+                                "format": "date-time",
+                                "type": "string",
+                              },
+                              "start": {
+                                "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                                "format": "date-time",
+                                "type": "string",
+                              },
+                            },
+                            "required": [
+                              "start",
+                            ],
+                            "type": "object",
+                          },
                           "entity": {
                             "$ref": "#/components/schemas/EntityRef",
                           },
@@ -14220,6 +14295,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "role",
                           "description",
                           "entity",
+                          "duration",
                         ],
                         "type": "object",
                       },
@@ -23735,6 +23811,73 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             ],
             "type": "object",
           },
+          "formerPositions": {
+            "anyOf": [
+              {
+                "items": {
+                  "properties": {
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "null",
+                        },
+                      ],
+                    },
+                    "duration": {
+                      "properties": {
+                        "end": {
+                          "description": "Absent for an open-ended position",
+                          "format": "date-time",
+                          "type": "string",
+                        },
+                        "start": {
+                          "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                          "format": "date-time",
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "start",
+                      ],
+                      "type": "object",
+                    },
+                    "entity": {
+                      "$ref": "#/components/schemas/EntityRef",
+                    },
+                    "role": {
+                      "enum": [
+                        "is_affiliated_with",
+                        "is_chair_of",
+                        "is_vice_chair_of",
+                        "is_member_of",
+                        "is_contact_for",
+                        "national_coordinator",
+                        "national_coordinator_deputy",
+                        "national_coordination_staff",
+                        "national_representative",
+                        "national_representative_deputy",
+                      ],
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "role",
+                    "description",
+                    "entity",
+                    "duration",
+                  ],
+                  "type": "object",
+                },
+                "type": "array",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "id": {
             "format": "uuid",
             "type": "string",
@@ -23858,6 +24001,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "duration": {
+                      "properties": {
+                        "end": {
+                          "description": "Absent for an open-ended position",
+                          "format": "date-time",
+                          "type": "string",
+                        },
+                        "start": {
+                          "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                          "format": "date-time",
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "start",
+                      ],
+                      "type": "object",
+                    },
                     "entity": {
                       "$ref": "#/components/schemas/EntityRef",
                     },
@@ -23881,6 +24042,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "role",
                     "description",
                     "entity",
+                    "duration",
                   ],
                   "type": "object",
                 },
@@ -23906,6 +24068,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "email",
           "orcid",
           "positions",
+          "formerPositions",
           "image",
           "entity",
           "publishedAt",
@@ -24192,6 +24355,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         },
                       ],
                     },
+                    "duration": {
+                      "properties": {
+                        "end": {
+                          "description": "Absent for an open-ended position",
+                          "format": "date-time",
+                          "type": "string",
+                        },
+                        "start": {
+                          "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                          "format": "date-time",
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "start",
+                      ],
+                      "type": "object",
+                    },
                     "entity": {
                       "$ref": "#/components/schemas/EntityRef",
                     },
@@ -24215,6 +24396,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "role",
                     "description",
                     "entity",
+                    "duration",
                   ],
                   "type": "object",
                 },
@@ -27980,6 +28162,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                               },
                             ],
                           },
+                          "duration": {
+                            "properties": {
+                              "end": {
+                                "description": "Absent for an open-ended position",
+                                "format": "date-time",
+                                "type": "string",
+                              },
+                              "start": {
+                                "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                                "format": "date-time",
+                                "type": "string",
+                              },
+                            },
+                            "required": [
+                              "start",
+                            ],
+                            "type": "object",
+                          },
                           "entity": {
                             "$ref": "#/components/schemas/EntityRef",
                           },
@@ -28003,6 +28203,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "role",
                           "description",
                           "entity",
+                          "duration",
                         ],
                         "type": "object",
                       },
@@ -28555,6 +28756,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                               },
                             ],
                           },
+                          "duration": {
+                            "properties": {
+                              "end": {
+                                "description": "Absent for an open-ended position",
+                                "format": "date-time",
+                                "type": "string",
+                              },
+                              "start": {
+                                "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                                "format": "date-time",
+                                "type": "string",
+                              },
+                            },
+                            "required": [
+                              "start",
+                            ],
+                            "type": "object",
+                          },
                           "entity": {
                             "$ref": "#/components/schemas/EntityRef",
                           },
@@ -28578,6 +28797,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           "role",
                           "description",
                           "entity",
+                          "duration",
                         ],
                         "type": "object",
                       },

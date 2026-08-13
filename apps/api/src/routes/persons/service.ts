@@ -132,13 +132,17 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 		return null;
 	}
 
-	const positions = await getPersonPositions(db, [item.id]);
+	const [positions, formerPositions] = await Promise.all([
+		getPersonPositions(db, [item.id]),
+		getPersonPositions(db, [item.id], { when: "former" }),
+	]);
 
 	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 
 	return {
 		...flattenEntityVersion(item),
 		positions: positions.get(item.id) ?? null,
+		formerPositions: formerPositions.get(item.id) ?? null,
 		image,
 		...fields,
 		articles,
@@ -250,11 +254,11 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 		return null;
 	}
 
-	const positions = await getPersonPositions(db, [item.id]);
-
 	const image = generateImageUrl(withResolvedCaption(item.image, item), imageWidth.featured);
 
-	const [fields, articles] = await Promise.all([
+	const [positions, formerPositions, fields, articles] = await Promise.all([
+		getPersonPositions(db, [item.id]),
+		getPersonPositions(db, [item.id], { when: "former" }),
 		getContentBlocks(db, item.id),
 		getPersonArticles(db, item.id),
 	]);
@@ -262,6 +266,7 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 	return {
 		...flattenEntityVersion(item),
 		positions: positions.get(item.id) ?? null,
+		formerPositions: formerPositions.get(item.id) ?? null,
 		image,
 		...fields,
 		articles,

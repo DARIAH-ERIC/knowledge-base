@@ -116,8 +116,9 @@ export const EntityRefSchema = v.pipe(
 export type EntityRef = v.InferOutput<typeof EntityRefSchema>;
 
 /**
- * A person's current roles in organisational units — a relation, so the role and its note sit
- * alongside a reference to the unit itself.
+ * A person's roles in organisational units — a relation, so the role, its note and the period it is
+ * held for sit alongside a reference to the unit itself. Whether a list holds current or former
+ * roles is carried by the field it is returned in, not by the items.
  */
 export const PersonPositionsSchema = v.nullable(
 	v.array(
@@ -125,6 +126,13 @@ export const PersonPositionsSchema = v.nullable(
 			role: v.picklist(schema.personRoleTypesEnum),
 			description: v.nullable(v.string()),
 			entity: EntityRefSchema,
+			duration: v.object({
+				start: CalendarDateSchema,
+				end: v.pipe(
+					v.optional(CalendarDateSchema),
+					v.description("Absent for an open-ended position"),
+				),
+			}),
 		}),
 	),
 );

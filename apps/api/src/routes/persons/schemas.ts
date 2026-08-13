@@ -57,6 +57,11 @@ export const PersonSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
 		positions: PersonPositionsSchema,
+		/**
+		 * Roles the person no longer holds, only ever returned on the person detail endpoints — every
+		 * other endpoint embedding a person shows current positions alone.
+		 */
+		formerPositions: PersonPositionsSchema,
 		image: v.nullable(ImageSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),

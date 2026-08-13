@@ -139,6 +139,99 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 }
 
 /**
+ * Seeds two relations to `personEntityId` that have already ended — a senior role held long ago and
+ * a minor one held more recently — plus an org unit for each.
+ */
+async function seedFormerPositions(db: Database, personEntityId: string) {
+	const [status, organisationalUnitType, institutionType, affiliatedRoleType, coordinatorRoleType] =
+		await Promise.all([
+			db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+			db.query.entityTypes.findFirst({
+				columns: { id: true },
+				where: { type: "organisational_units" },
+			}),
+			db.query.organisationalUnitTypes.findFirst({
+				columns: { id: true },
+				where: { type: "institution" },
+			}),
+			db.query.personRoleTypes.findFirst({
+				columns: { id: true },
+				where: { type: "is_affiliated_with" },
+			}),
+			db.query.personRoleTypes.findFirst({
+				columns: { id: true },
+				where: { type: "national_coordinator" },
+			}),
+		]);
+
+	assert(status, "No entity status in database.");
+	assert(organisationalUnitType, "No organisational unit entity type in database.");
+	assert(institutionType, "No institution type in database.");
+	assert(affiliatedRoleType, "No affiliated role type in database.");
+	assert(coordinatorRoleType, "No national coordinator role type in database.");
+
+	const statusId = status.id;
+	const unitEntityTypeId = organisationalUnitType.id;
+	const unitTypeId = institutionType.id;
+
+	function createUnit() {
+		const versionId = uuidv7();
+		const entityId = uuidv7();
+		const name = f.company.name();
+
+		return {
+			entity: { id: entityId, slug: slugify(name), typeId: unitEntityTypeId },
+			version: { id: versionId, entityId, statusId },
+			organisationalUnit: {
+				id: versionId,
+				name,
+				summary: f.lorem.paragraph(),
+				typeId: unitTypeId,
+			},
+		};
+	}
+
+	const coordinatorUnit = createUnit();
+	const affiliationUnit = createUnit();
+	const units = [coordinatorUnit, affiliationUnit];
+
+	await db.insert(schema.entities).values(units.map((unit) => unit.entity));
+	await db.insert(schema.entityVersions).values(units.map((unit) => unit.version));
+	await db.insert(schema.organisationalUnits).values(units.map((unit) => unit.organisationalUnit));
+
+	const coordinatorDuration = {
+		start: new Date("2015-01-01T00:00:00.000Z"),
+		end: new Date("2018-12-31T00:00:00.000Z"),
+	};
+	const affiliationDuration = {
+		start: new Date("2019-01-01T00:00:00.000Z"),
+		end: new Date("2022-12-31T00:00:00.000Z"),
+	};
+
+	await db.insert(schema.personsToOrganisationalUnits).values([
+		{
+			personDocumentId: personEntityId,
+			organisationalUnitDocumentId: coordinatorUnit.entity.id,
+			roleTypeId: coordinatorRoleType.id,
+			duration: coordinatorDuration,
+			description: null,
+		},
+		{
+			personDocumentId: personEntityId,
+			organisationalUnitDocumentId: affiliationUnit.entity.id,
+			roleTypeId: affiliatedRoleType.id,
+			duration: affiliationDuration,
+			description: null,
+		},
+	]);
+
+	return {
+		coordinator: { unit: coordinatorUnit, duration: coordinatorDuration },
+		affiliation: { unit: affiliationUnit, duration: affiliationDuration },
+	};
+}
+
+/**
  * Seeds one published spotlight article, one published impact case study, and one _draft_ spotlight
  * article, all crediting `personEntityId` (a document id).
  */
@@ -285,6 +378,37 @@ describe("persons", () => {
 				expect(data.offset).toBe(offset);
 			});
 		});
+
+		it("should return only current positions", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(1);
+				await seed(db, items);
+
+				const item = items.at(0)!;
+				await seedFormerPositions(db, item.entity.id);
+
+				const response = await client.persons.$get({
+					query: { limit: "10", offset: "0" },
+				});
+
+				expect(response.status).toBe(200);
+
+				const data = await response.json();
+
+				const person = data.data.find((entry) => entry.id === item.version.id);
+
+				// Former positions are exclusive to the detail endpoints — everywhere a person is
+				// embedded, only roles held today are surfaced.
+				expect(person?.positions).toEqual([
+					expect.objectContaining({
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						entity: expect.objectContaining({ id: item.affiliation.entity.id }),
+					}),
+				]);
+			});
+		});
 	});
 
 	describe("GET /api/persons/:id", () => {
@@ -384,6 +508,82 @@ describe("persons", () => {
 					},
 					role: "editor",
 				});
+			});
+		});
+
+		it("should return former positions, by role first and most recent first within a role", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(1);
+				await seed(db, items);
+
+				const item = items.at(0)!;
+				const { coordinator, affiliation } = await seedFormerPositions(db, item.entity.id);
+
+				const response = await client.persons[":id"].$get({
+					param: { id: item.version.id },
+				});
+
+				expect(response.status).toBe(200);
+
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as Person;
+
+				// The senior role comes first even though it ended earlier than the affiliation.
+				expect(data.formerPositions).toEqual([
+					expect.objectContaining({
+						role: "national_coordinator",
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						entity: expect.objectContaining({ id: coordinator.unit.entity.id }),
+						duration: {
+							start: coordinator.duration.start.toISOString(),
+							end: coordinator.duration.end.toISOString(),
+						},
+					}),
+					expect.objectContaining({
+						role: "is_affiliated_with",
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						entity: expect.objectContaining({ id: affiliation.unit.entity.id }),
+						duration: {
+							start: affiliation.duration.start.toISOString(),
+							end: affiliation.duration.end.toISOString(),
+						},
+					}),
+				]);
+
+				// The ongoing affiliation is current, so it stays out of `formerPositions` — and the two
+				// ended relations stay out of `positions`.
+				expect(data.positions).toEqual([
+					expect.objectContaining({
+						role: "is_affiliated_with",
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						entity: expect.objectContaining({ id: item.affiliation.entity.id }),
+						// An open-ended position has no `end`.
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						duration: { start: expect.any(String) },
+					}),
+				]);
+			});
+		});
+
+		it("should return null former positions when the person has none", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(1);
+				await seed(db, items);
+
+				const response = await client.persons[":id"].$get({
+					param: { id: items.at(0)!.version.id },
+				});
+
+				expect(response.status).toBe(200);
+
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as Person;
+
+				expect(data.formerPositions).toBeNull();
 			});
 		});
 

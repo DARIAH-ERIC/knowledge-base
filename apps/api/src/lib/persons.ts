@@ -2,6 +2,7 @@ import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
+import { serializeDateRange } from "@/lib/date-range";
 import { type Image, generateImageUrl, toImageAsset, withResolvedCaption } from "@/lib/images";
 import { resolveDocumentId } from "@/lib/relations";
 import type { EntityRef, PublicRelatedEntityType } from "@/lib/schemas";
@@ -20,11 +21,17 @@ export interface PersonPosition {
 	description: string | null;
 	/** The organisational unit the role is held in. */
 	entity: EntityRef;
+	/**
+	 * The period the role is (or was) held for, day granularity. `end` is absent for an open-ended
+	 * position, which — for a current position — is the common case.
+	 */
+	duration: { start: string; end?: string };
 }
 
 // Positions are surfaced in a fixed hierarchy of relation types so the order is consistent across
 // endpoints: national-consortium roles first, then governance-body roles by seniority, affiliation
-// last. The org-unit name is the tiebreaker within a role.
+// last. A senior role held long ago outranks a minor current one, so the duration only breaks ties
+// within a role, and the org-unit name only breaks ties within a duration.
 const positionRolePriority: Record<(typeof schema.personRoleTypesEnum)[number], number> = {
 	national_coordinator: 0,
 	national_coordinator_deputy: 1,
@@ -43,17 +50,53 @@ function comparePositions(a: PersonPosition, b: PersonPosition): number {
 	if (byRole !== 0) {
 		return byRole;
 	}
+
+	// Most recent first. An open-ended position outranks one that is scheduled to end, then later end
+	// dates, then later start dates. Timestamps are ISO-8601 UTC, so they sort lexicographically.
+	if (a.duration.end == null || b.duration.end == null) {
+		if (a.duration.end != null) {
+			return 1;
+		}
+		if (b.duration.end != null) {
+			return -1;
+		}
+	} else {
+		const byEnd = b.duration.end.localeCompare(a.duration.end);
+		if (byEnd !== 0) {
+			return byEnd;
+		}
+	}
+
+	const byStart = b.duration.start.localeCompare(a.duration.start);
+	if (byStart !== 0) {
+		return byStart;
+	}
+
 	return (a.entity.label ?? "").localeCompare(b.entity.label ?? "");
 }
 
+export type PersonPositionPeriod = "current" | "former";
+
+interface GetPersonPositionsOptions {
+	/**
+	 * Which relations to return, relative to now. The two sets are disjoint, so a caller wanting both
+	 * calls this twice. Defaults to `current` — embedded person references (article credits, body
+	 * memberships) only ever show what a person holds today.
+	 */
+	when?: PersonPositionPeriod;
+}
+
 /**
- * A person's _current_ relations to organisational units (`persons_to_organisational_units`).
- * Distinct from article credits — see `contributors` on the article endpoints.
+ * A person's relations to organisational units (`persons_to_organisational_units`), current by
+ * default. Distinct from article credits — see `contributors` on the article endpoints.
  */
 export async function getPersonPositions(
 	db: Database | Transaction,
 	personIds: Array<string>,
+	options: GetPersonPositionsOptions = {},
 ): Promise<Map<string, Array<PersonPosition> | null>> {
+	const { when = "current" } = options;
+
 	const positions = new Map<string, Array<PersonPosition> | null>();
 
 	for (const personId of personIds) {
@@ -72,6 +115,14 @@ export async function getPersonPositions(
 		"organisational_unit_document_lifecycle",
 	);
 
+	// `@>` is "contains now"; `<<` is "strictly left of", i.e. every instant of the duration precedes
+	// now. The two are disjoint even for a duration whose (inclusive) upper bound is exactly now, so
+	// no relation is ever both current and former.
+	const durationFilter =
+		when === "current"
+			? sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`
+			: sql`${schema.personsToOrganisationalUnits.duration} << TSTZRANGE(NOW()::TIMESTAMPTZ, NULL)`;
+
 	const rows = await db
 		.select({
 			personId: personEntityVersions.id,
@@ -81,6 +132,7 @@ export async function getPersonPositions(
 			unitDocumentId: schema.entities.id,
 			type: schema.organisationalUnitTypes.type,
 			description: schema.personsToOrganisationalUnits.description,
+			duration: schema.personsToOrganisationalUnits.duration,
 		})
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(
@@ -110,12 +162,7 @@ export async function getPersonPositions(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 		)
-		.where(
-			and(
-				inArray(personEntityVersions.id, personIds),
-				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
-			),
-		);
+		.where(and(inArray(personEntityVersions.id, personIds), durationFilter));
 
 	// Institutions and national consortia have no page of their own — they are surfaced on their
 	// country's members-and-partners page — so their country is resolved in one extra query.
@@ -133,6 +180,7 @@ export async function getPersonPositions(
 		items.push({
 			role: row.role,
 			description: row.description,
+			duration: serializeDateRange(row.duration),
 			entity: {
 				id: row.unitDocumentId,
 				type: row.type,
