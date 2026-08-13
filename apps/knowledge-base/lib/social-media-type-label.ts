@@ -1,18 +1,28 @@
 /**
- * Human-readable labels for social media account types, used in the social media picker (list +
- * tags) and on read-only detail pages.
+ * Human-readable labels for social media account types, used in the outreach social media picker
+ * (list + tags), in the person social media editor, and on read-only detail pages.
+ *
+ * Keyed by the raw type token rather than by either enum, so it serves both `social_media_types`
+ * and `person_social_media_types` — the two vocabularies are separate tables but agree on the
+ * spelling of the platforms they share.
  */
 
 const socialMediaTypeLabels: Record<string, string> = {
+	academia_edu: "Academia.edu",
 	bluesky: "Bluesky",
 	facebook: "Facebook",
+	github: "GitHub",
+	gitlab: "GitLab",
+	google_scholar: "Google Scholar",
 	instagram: "Instagram",
 	linkedin: "LinkedIn",
 	mastodon: "Mastodon",
+	researchgate: "ResearchGate",
 	twitter: "Twitter",
 	vimeo: "Vimeo",
 	website: "Website",
 	youtube: "YouTube",
+	zenodo: "Zenodo",
 	other: "Other",
 };
 

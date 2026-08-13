@@ -6,6 +6,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { CreatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.schema";
 import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-lifecycle";
 import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
+import { syncPersonSocialMedia } from "@/lib/data/person-social-media";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
@@ -51,6 +52,8 @@ export const createPersonAction = createMutationAction({
 			orcid: input.orcid,
 			sortName: input.sortName,
 		});
+
+		await syncPersonSocialMedia(tx, versionId, input.socialMedia);
 
 		await replaceEntityVersionFieldContentBlocks(
 			tx,

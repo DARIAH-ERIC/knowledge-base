@@ -23817,6 +23817,12 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "format": "date-time",
             "type": "string",
           },
+          "socialMedia": {
+            "items": {
+              "$ref": "#/components/schemas/PersonSocialMedia",
+            },
+            "type": "array",
+          },
           "sortName": {
             "type": "string",
           },
@@ -23832,6 +23838,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "image",
           "entity",
           "publishedAt",
+          "socialMedia",
           "articles",
         ],
         "type": "object",
@@ -24171,6 +24178,12 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "format": "date-time",
             "type": "string",
           },
+          "socialMedia": {
+            "items": {
+              "$ref": "#/components/schemas/PersonSocialMedia",
+            },
+            "type": "array",
+          },
           "sortName": {
             "type": "string",
           },
@@ -24185,6 +24198,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "image",
           "entity",
           "publishedAt",
+          "socialMedia",
         ],
         "type": "object",
       },
@@ -24226,6 +24240,48 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "$ref": "#/components/schemas/PersonSlug",
         },
         "type": "array",
+      },
+      "PersonSocialMedia": {
+        "description": "Social media account owned by a person",
+        "properties": {
+          "label": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "type": {
+            "enum": [
+              "academia_edu",
+              "bluesky",
+              "github",
+              "gitlab",
+              "google_scholar",
+              "linkedin",
+              "mastodon",
+              "researchgate",
+              "twitter",
+              "website",
+              "youtube",
+              "zenodo",
+              "other",
+            ],
+            "type": "string",
+          },
+          "url": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "url",
+          "label",
+          "type",
+        ],
+        "type": "object",
       },
       "Project": {
         "description": "Project",

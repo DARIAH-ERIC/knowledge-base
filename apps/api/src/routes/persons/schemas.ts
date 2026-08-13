@@ -10,6 +10,22 @@ import {
 	PersonPositionsSchema,
 } from "@/lib/schemas";
 
+/**
+ * A person's own social media entry, e.g. a personal website or a Bluesky profile. Distinct from
+ * the social media of an organisational unit: those are shared outreach channels that reports track
+ * KPIs for, while these belong to the person alone.
+ */
+export const PersonSocialMediaSchema = v.pipe(
+	v.object({
+		...v.pick(schema.PersonSocialMediaSelectSchema, ["url", "label"]).entries,
+		type: v.picklist(schema.personSocialMediaTypesEnum),
+	}),
+	v.description("Social media account owned by a person"),
+	v.metadata({ ref: "PersonSocialMedia" }),
+);
+
+export type PersonSocialMedia = v.InferOutput<typeof PersonSocialMediaSchema>;
+
 export const PersonBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
@@ -17,6 +33,7 @@ export const PersonBaseSchema = v.pipe(
 		image: v.nullable(ImageSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
+		socialMedia: v.array(PersonSocialMediaSchema),
 	}),
 	v.description("Person"),
 	v.metadata({ ref: "PersonBase" }),
@@ -65,6 +82,7 @@ export const PersonSchema = v.pipe(
 		image: v.nullable(ImageSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
+		socialMedia: v.array(PersonSocialMediaSchema),
 		biography: v.optional(v.array(ContentBlockSchema), []),
 		articles: v.array(PersonArticleSchema),
 	}),

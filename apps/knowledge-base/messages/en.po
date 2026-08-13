@@ -593,13 +593,13 @@ msgstr "Too many requests."
 #: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts
 #: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/_lib/create-delegated-person.action.ts
+#: app/(app)/[locale]/(dashboard)/dashboard/_lib/create-social-media.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/_lib/update-delegated-person.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-unit-relation.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-unit-relation.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/upsert-project-partner.action.ts
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/create-delegated-institution.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/create-delegated-unit-relation.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/update-delegated-institution.action.ts
@@ -1395,6 +1395,7 @@ msgstr "Label"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx
@@ -1448,6 +1449,7 @@ msgstr "Role"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/heading-hierarchy-check.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/richtext-cleanup.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
@@ -1851,6 +1853,8 @@ msgstr "SSHOC services"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav.tsx
@@ -2263,6 +2267,12 @@ msgid "iFsDVR"
 msgstr "Loading"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx
+msgid "4GyDYS"
+msgstr "Edit metadata"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
 msgid "JO_m1X"
 msgstr "The selected file is too large. Choose a file smaller than {size}."
@@ -2347,6 +2357,11 @@ msgstr "License"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
 msgid "KWv6Ra"
 msgstr "No license"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card.tsx
+msgid "5Dh2Di"
+msgstr "Download original"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
@@ -2592,15 +2607,6 @@ msgstr "Summary"
 msgid "bzBBY-"
 msgstr "Edit the details of the selected entry."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx
-msgid "4GyDYS"
-msgstr "Edit metadata"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card.tsx
-msgid "5Dh2Di"
-msgstr "Download original"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 msgid "Ak3MsC"
@@ -2768,6 +2774,10 @@ msgstr "No relations."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx
 msgid "-tLBBi"
 msgstr "Add relation"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_lib/create-social-media.action.ts
+msgid "O166c7"
+msgstr "Invalid social media type."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/(index)/page.tsx
 msgid "msSyC_"
@@ -5150,6 +5160,38 @@ msgstr "Enter the personal and contact details related to the person."
 msgid "DixDH-"
 msgstr "Add a short biography."
 
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
+msgid "8vdkkv"
+msgstr "Add the person's own website and social media profiles."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
+msgid "CY1FvB"
+msgstr "No social media added"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
+msgid "snh6R6"
+msgstr "Label (optional)"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx
+msgid "wmFdws"
+msgstr "Move up"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx
+msgid "H_r5m6"
+msgstr "Move down"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
+msgid "9s1k_O"
+msgstr "Remove entry"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
+msgid "9YgNeh"
+msgstr "Add entry"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx
 msgid "ArVBPN"
 msgstr "Manage all persons in the DARIAH knowledge base."
@@ -5311,10 +5353,6 @@ msgstr "project"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx
 msgid "peNQYs"
 msgstr "Could not delete project. Please try again."
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.action.ts
-msgid "O166c7"
-msgstr "Invalid social media type."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/[slug]/details/page.tsx
 msgid "BKqkq3"
@@ -7130,16 +7168,6 @@ msgstr "Update the document group title."
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx
 msgid "Z_1udv"
 msgstr "Edit group"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx
-msgid "wmFdws"
-msgstr "Move up"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx
-msgid "H_r5m6"
-msgstr "Move down"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx
 msgid "JZ4bGN"

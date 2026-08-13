@@ -473,6 +473,22 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.persons.imageId,
 				to: r.assets.id,
 			}),
+			socialMedia: r.many.personSocialMedia({
+				from: r.persons.id,
+				to: r.personSocialMedia.personId,
+			}),
+		},
+		personSocialMedia: {
+			person: r.one.persons({
+				from: r.personSocialMedia.personId,
+				to: r.persons.id,
+				optional: false,
+			}),
+			type: r.one.personSocialMediaTypes({
+				from: r.personSocialMedia.typeId,
+				to: r.personSocialMediaTypes.id,
+				optional: false,
+			}),
 		},
 		personsToOrganisationalUnits: {
 			personEntity: r.one.entities({

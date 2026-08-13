@@ -9,10 +9,10 @@ import { env } from "../config/env.config";
 
 /**
  * Checks that stored web addresses are well-formed: every URL-bearing column (event and opportunity
- * websites, document/policy links, license URLs, social-media links, embed blocks, and
- * working-group report events) should hold a valid `https` URL — a plain `http` URL is flagged as
- * insecure, and a value with no scheme or one that does not parse is flagged as invalid. A
- * social-media entry may instead be an email address.
+ * websites, document/policy links, license URLs, social-media links, person social media, embed
+ * blocks, and working-group report events) should hold a valid `https` URL — a plain `http` URL is
+ * flagged as insecure, and a value with no scheme or one that does not parse is flagged as invalid.
+ * A social-media entry may instead be an email address.
  *
  * The check logic lives in `@dariah-eric/database/integrity-service`, shared with the admin
  * dashboard's maintenance page. Read-only; findings are printed and written to a tsv report. Exits
@@ -50,6 +50,7 @@ async function writeReport(findings: Array<WebAddressFinding>): Promise<void> {
 		"entity_slug",
 		"status",
 		"social_media_id",
+		"working_group_report_id",
 		"value",
 		"detail",
 	] as const;
@@ -63,6 +64,7 @@ async function writeReport(findings: Array<WebAddressFinding>): Promise<void> {
 			finding.entitySlug ?? "",
 			finding.status ?? "",
 			finding.socialMediaId ?? "",
+			finding.workingGroupReportId ?? "",
 			finding.value,
 			finding.detail,
 		]

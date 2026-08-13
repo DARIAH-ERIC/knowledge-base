@@ -30,7 +30,7 @@ import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_compone
 import {
 	type CreatedSocialMedia,
 	createSocialMediaAction,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.action";
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_lib/create-social-media.action";
 import { LocaleLink } from "@/lib/navigation/navigation";
 import { getSocialMediaTypeLabel } from "@/lib/social-media-type-label";
 

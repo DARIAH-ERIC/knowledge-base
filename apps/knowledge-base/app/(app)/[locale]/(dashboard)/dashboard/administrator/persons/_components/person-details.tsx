@@ -18,10 +18,12 @@ import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { PersonArticle } from "@/lib/data/article-contributors";
 import type { PersonContribution } from "@/lib/data/contributions";
+import type { PersonSocialMediaEntry } from "@/lib/data/person-social-media";
 import { getEntityDetailHref, getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
 import { getEntityTypeLabel } from "@/lib/entity-type-label";
 import { getOrcidUrl } from "@/lib/external-identifier-url";
 import { formatRoleType } from "@/lib/format-role-type";
+import { getSocialMediaTypeLabel } from "@/lib/social-media-type-label";
 
 interface PersonDetailsProps {
 	documentId: string;
@@ -38,6 +40,7 @@ interface PersonDetailsProps {
 		image: SelectedImage | null;
 	};
 	contributions: Array<PersonContribution>;
+	socialMedia: Array<PersonSocialMediaEntry>;
 	/** Read-only lens: the edge is owned by the article, so it is not editable from here. */
 	articles: Array<PersonArticle>;
 	publishAction: (documentId: string) => Promise<unknown>;
@@ -51,6 +54,7 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 		documentId,
 		hasDraft,
 		isPublished,
+		socialMedia,
 		person,
 		publishAction,
 		discardDraftAction,
@@ -102,6 +106,22 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 					) : (
 						person.orcid
 					)}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Social media")}</DescriptionTerm>
+				<DescriptionDetails>
+					{socialMedia.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{socialMedia.map((entry) => (
+								<li key={entry.url}>
+									<span className="text-muted-fg">{getSocialMediaTypeLabel(entry.type)}</span>{" "}
+									<a className="underline" href={entry.url} rel="noreferrer" target="_blank">
+										{entry.label ?? entry.url}
+									</a>
+								</li>
+							))}
+						</ul>
+					) : null}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>

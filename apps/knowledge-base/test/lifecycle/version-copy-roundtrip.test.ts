@@ -37,6 +37,7 @@ interface Refs {
 	projectScopeId: string;
 	opportunitySourceId: string;
 	documentPolicyGroupId: string;
+	personSocialMediaTypeId: string;
 }
 
 async function resolveRefs(tx: Transaction): Promise<Refs> {
@@ -67,12 +68,19 @@ async function resolveRefs(tx: Transaction): Promise<Refs> {
 		.returning({ id: schema.documentPolicyGroups.id });
 	assert(documentPolicyGroup);
 
+	const [personSocialMediaType] = await tx
+		.select({ id: schema.personSocialMediaTypes.id })
+		.from(schema.personSocialMediaTypes)
+		.limit(1);
+	assert(personSocialMediaType, "No person social media type found — seed lookup data first.");
+
 	return {
 		assetId: asset.id,
 		organisationalUnitTypeId: organisationalUnitType.id,
 		projectScopeId: projectScope.id,
 		opportunitySourceId: opportunitySource.id,
 		documentPolicyGroupId: documentPolicyGroup.id,
+		personSocialMediaTypeId: personSocialMediaType.id,
 	};
 }
 
@@ -95,6 +103,13 @@ interface RoundtripCase {
 	seed: (tx: Transaction, versionId: string, refs: Refs) => Promise<Record<string, unknown>>;
 	/** Read the subtype row for a version, stripped to its copyable columns. */
 	read: (tx: Transaction, versionId: string) => Promise<Record<string, unknown> | undefined>;
+	/**
+	 * Adapters that own version-scoped child rows (rather than just the subtype row) copy those in
+	 * `cloneSubtype` too, so they get their own seed/read pair. Unlike the subtype row there is no
+	 * column-coverage assertion for children — `readChildren` decides what "carried forward" means.
+	 */
+	seedChildren?: (tx: Transaction, versionId: string, refs: Refs) => Promise<unknown>;
+	readChildren?: (tx: Transaction, versionId: string) => Promise<unknown>;
 }
 
 const duration = {
@@ -379,6 +394,35 @@ const cases: Array<RoundtripCase> = [
 				.limit(1);
 			return row == null ? undefined : subtypePayload(row);
 		},
+		async seedChildren(tx, versionId, refs) {
+			const values = [
+				{
+					typeId: refs.personSocialMediaTypeId,
+					url: f.internet.url(),
+					label: f.internet.username(),
+					position: 0,
+				},
+				{ typeId: refs.personSocialMediaTypeId, url: f.internet.url(), label: null, position: 1 },
+			];
+			await tx.insert(schema.personSocialMedia).values(
+				values.map((value) => {
+					return { personId: versionId, ...value };
+				}),
+			);
+			return values;
+		},
+		async readChildren(tx, versionId) {
+			return tx
+				.select({
+					typeId: schema.personSocialMedia.typeId,
+					url: schema.personSocialMedia.url,
+					label: schema.personSocialMedia.label,
+					position: schema.personSocialMedia.position,
+				})
+				.from(schema.personSocialMedia)
+				.where(eq(schema.personSocialMedia.personId, versionId))
+				.orderBy(schema.personSocialMedia.position);
+		},
 	},
 	{
 		entityType: "organisational_units",
@@ -471,14 +515,23 @@ describe("lifecycle adapter version copy round-trip", () => {
 				// the copy assertions below (and never silently skipped).
 				expect(Object.keys(written).toSorted()).toEqual(copyableColumnNames(testCase.table));
 
+				const writtenChildren = await testCase.seedChildren?.(tx, versionId, refs);
+
 				// First publish: no published version yet → cloneSubtype.
 				const publishedId = await publishVersion(tx, documentId, testCase.adapter);
 				expect(await testCase.read(tx, publishedId)).toEqual(written);
+				if (testCase.readChildren != null) {
+					expect(await testCase.readChildren(tx, publishedId)).toEqual(writtenChildren);
+				}
 
 				// Republish: published version already exists → replaceSubtype (or wipeSubtype+cloneSubtype).
 				const republishedId = await publishVersion(tx, documentId, testCase.adapter);
 				expect(republishedId).toBe(publishedId);
 				expect(await testCase.read(tx, republishedId)).toEqual(written);
+				if (testCase.readChildren != null) {
+					// Republishing must not leave the previous copy behind alongside the new one.
+					expect(await testCase.readChildren(tx, republishedId)).toEqual(writtenChildren);
+				}
 			});
 		});
 	}

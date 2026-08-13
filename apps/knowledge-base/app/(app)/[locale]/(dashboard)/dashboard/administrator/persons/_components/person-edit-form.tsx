@@ -21,6 +21,7 @@ import { discardPersonDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { publishPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/publish-person.action";
 import { updatePersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.action";
 import type { ContributionRoleOption, PersonContribution } from "@/lib/data/contributions";
+import type { PersonSocialMediaEntry } from "@/lib/data/person-social-media";
 
 interface PersonEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
@@ -30,6 +31,7 @@ interface PersonEditFormProps {
 	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
 		biographyContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
+		socialMedia?: Array<PersonSocialMediaEntry>;
 	} & {
 		image: SelectedImage | null;
 		imageCaption?: JSONContent | null;

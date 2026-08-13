@@ -24,6 +24,8 @@ import {
 	type SelectedImage,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import { RichTextContentBlocksField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-content-blocks-field";
+import { PersonSocialMediaFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields";
+import type { PersonSocialMediaEntry } from "@/lib/data/person-social-media";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface PersonFormProps {
@@ -31,6 +33,7 @@ interface PersonFormProps {
 	person?: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
 		biographyContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
+		socialMedia?: Array<PersonSocialMediaEntry>;
 	} & {
 		image: SelectedImage | null;
 		imageCaption?: JSONContent | null;
@@ -83,6 +86,10 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 
 					<EntitySlugField isPublished={isPublished} slug={person?.entityVersion.entity.slug} />
 				</FormSection>
+
+				<Separator className="my-6" />
+
+				<PersonSocialMediaFields initialSocialMedia={person?.socialMedia} />
 
 				<Separator className="my-6" />
 

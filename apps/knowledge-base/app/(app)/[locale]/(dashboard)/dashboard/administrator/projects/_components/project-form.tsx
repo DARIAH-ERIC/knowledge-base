@@ -45,7 +45,7 @@ import { RichTextContentBlocksField } from "@/app/(app)/[locale]/(dashboard)/das
 import {
 	type CreatedSocialMedia,
 	createSocialMediaAction,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.action";
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_lib/create-social-media.action";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 async function fetchSocialMediaOptionsPage(

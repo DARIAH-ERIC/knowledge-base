@@ -12,6 +12,7 @@ import {
 	updateDraftDocumentSlug,
 } from "@/lib/data/entity-lifecycle";
 import { replaceEntityVersionFieldContentBlocks } from "@/lib/data/entity-version-fields";
+import { syncPersonSocialMedia } from "@/lib/data/person-social-media";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { eq } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
@@ -58,6 +59,8 @@ export const updatePersonAction = createMutationAction({
 				sortName: input.sortName,
 			})
 			.where(eq(schema.persons.id, draftVersionId));
+
+		await syncPersonSocialMedia(tx, draftVersionId, input.socialMedia);
 
 		await replaceEntityVersionFieldContentBlocks(
 			tx,

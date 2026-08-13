@@ -3171,6 +3171,11 @@ export class DatabaseService {
 				.delete(schema.impactCaseStudiesToPersons)
 				.where(eq(schema.impactCaseStudiesToPersons.personDocumentId, documentId));
 
+			// Version-scoped and subtype-owned, so it has to go before the persons row it references.
+			await tx
+				.delete(schema.personSocialMedia)
+				.where(eq(schema.personSocialMedia.personId, versionId));
+
 			await tx.delete(schema.persons).where(eq(schema.persons.id, versionId));
 			await this.deleteDocumentVersionTail(tx, versionId, documentId);
 		});
@@ -3222,6 +3227,9 @@ export class DatabaseService {
 				await tx
 					.delete(schema.personsToOrganisationalUnits)
 					.where(eq(schema.personsToOrganisationalUnits.personDocumentId, documentId));
+				await tx
+					.delete(schema.personSocialMedia)
+					.where(eq(schema.personSocialMedia.personId, version.id));
 				await tx.delete(schema.persons).where(eq(schema.persons.id, version.id));
 				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
 			}

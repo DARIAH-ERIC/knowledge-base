@@ -5,7 +5,12 @@ import * as schema from "@dariah-eric/database/schema";
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl, imageAssetColumns, withResolvedCaption } from "@/lib/images";
-import { getPersonArticles, getPersonPositions } from "@/lib/persons";
+import {
+	getPersonArticles,
+	getPersonPositions,
+	mapPersonSocialMedia,
+	personSocialMediaQuery,
+} from "@/lib/persons";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -48,6 +53,7 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 					},
 				},
 				image: imageAssetColumns,
+				socialMedia: personSocialMediaQuery,
 			},
 			orderBy(t, { desc, sql }) {
 				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
@@ -78,6 +84,7 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 			...flattenEntityVersion(item),
 			positions: positions.get(item.id) ?? null,
 			image,
+			socialMedia: mapPersonSocialMedia(item.socialMedia),
 		};
 	});
 
@@ -122,6 +129,7 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 					},
 				},
 				image: imageAssetColumns,
+				socialMedia: personSocialMediaQuery,
 			},
 		}),
 		getContentBlocks(db, id),
@@ -144,6 +152,7 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 		positions: positions.get(item.id) ?? null,
 		formerPositions: formerPositions.get(item.id) ?? null,
 		image,
+		socialMedia: mapPersonSocialMedia(item.socialMedia),
 		...fields,
 		articles,
 	};
@@ -247,6 +256,7 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 				},
 			},
 			image: imageAssetColumns,
+			socialMedia: personSocialMediaQuery,
 		},
 	});
 
@@ -268,6 +278,7 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 		positions: positions.get(item.id) ?? null,
 		formerPositions: formerPositions.get(item.id) ?? null,
 		image,
+		socialMedia: mapPersonSocialMedia(item.socialMedia),
 		...fields,
 		articles,
 	};

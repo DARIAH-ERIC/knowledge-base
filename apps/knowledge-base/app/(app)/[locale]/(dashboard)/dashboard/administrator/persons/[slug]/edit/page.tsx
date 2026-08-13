@@ -10,6 +10,7 @@ import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { getContributionRoleOptions, getPersonContributions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
+import { getPersonSocialMedia } from "@/lib/data/person-social-media";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import {
 	selectedImageColumns,
@@ -103,11 +104,13 @@ export default async function DashboardAdministratorEditPersonPage(
 		notFound();
 	}
 
-	const [contributions, contributionRoleOptions, biographyContentBlocks] = await Promise.all([
-		getPersonContributions(documentId),
-		getContributionRoleOptions(),
-		getEntityContentBlocks(person.id, "biography"),
-	]);
+	const [contributions, contributionRoleOptions, biographyContentBlocks, socialMedia] =
+		await Promise.all([
+			getPersonContributions(documentId),
+			getContributionRoleOptions(),
+			getEntityContentBlocks(person.id, "biography"),
+			getPersonSocialMedia(db, person.id),
+		]);
 
 	const image = person.image != null ? toSelectedImage(person.image, imageGridOptions) : null;
 
@@ -119,7 +122,7 @@ export default async function DashboardAdministratorEditPersonPage(
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			isPublished={publishedId != null}
-			person={{ ...person, biographyContentBlocks, image }}
+			person={{ ...person, biographyContentBlocks, image, socialMedia }}
 		/>
 	);
 }
