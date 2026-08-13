@@ -485,6 +485,17 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 								</div>
 							) : (
 								<div className="relative flex-1 overflow-y-auto">
+									{/*
+									    Both layouts render a `GridList` in the same place, so React keeps one instance
+									    across a switch — and a collection caches each row's markup against the item it
+									    was built from, which does not change when only the layout does. Naming the
+									    layout as a dependency invalidates that cache; without it the rows keep the
+									    markup of the layout that built them until the next fetch replaces the items,
+									    which is why paging or switching prefix "fixed" it. (In development the cache
+									    is keyed by the render function's source too, so this only shows in a build.)
+									    Anything else a row reads from outside its own asset belongs here for the same
+									    reason — the licences a row names are fetched separately from the assets.
+									*/}
 									{layout === "grid" ? (
 										<GridList
 											aria-label={t("Media library")}
@@ -492,6 +503,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 												"grid grid-cols-[repeat(auto-fill,minmax(min(8rem,100%),1fr))] gap-3",
 												isPending && "opacity-50",
 											)}
+											dependencies={[layout]}
 											items={displayedAssets}
 											layout="grid"
 											onSelectionChange={handleSelectionChange}
@@ -524,6 +536,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 										<GridList
 											aria-label={t("Media library")}
 											className={cn("flex flex-col gap-2", isPending && "opacity-50")}
+											dependencies={[layout, licenseOptions]}
 											items={displayedAssets}
 											onSelectionChange={handleSelectionChange}
 											selectedKeys={selectedKeys}

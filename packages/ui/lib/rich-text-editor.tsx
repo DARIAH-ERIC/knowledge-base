@@ -724,12 +724,20 @@ function CalloutNodeView({
 				)}
 			>
 				<Note intent={intent === "neutral" ? "default" : intent}>
+					{/*
+					    Both colours are restated because the editor sits inside a `richtext` container and the
+					    preview does not, which otherwise inverts the pair: there the title is the only part of a
+					    callout outside a `richtext` element (so it takes the note's intent colour) and the body
+					    the only part inside one (so it takes the richtext body colour), while here the container
+					    reaches the title's `strong` — painting it in the prose bold colour — and leaves the body
+					    to inherit the note's.
+					*/}
 					{title != null ? (
-						<strong className="mbe-1 block" contentEditable={false}>
+						<strong className="mbe-1 block text-current" contentEditable={false}>
 							{title}
 						</strong>
 					) : null}
-					<NodeViewContent data-callout-content="" />
+					<NodeViewContent className="text-(--richtext-body)" data-callout-content="" />
 				</Note>
 				{editor.isEditable && !isEditing ? (
 					// Chrome, not content: `contentEditable={false}` keeps ProseMirror from treating the
