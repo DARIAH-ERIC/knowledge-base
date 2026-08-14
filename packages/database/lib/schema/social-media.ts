@@ -17,6 +17,7 @@ import { uuidv7 } from "../functions";
 export const socialMediaTypesEnum = [
 	"bluesky",
 	"facebook",
+	"flickr",
 	"instagram",
 	"linkedin",
 	"mastodon",

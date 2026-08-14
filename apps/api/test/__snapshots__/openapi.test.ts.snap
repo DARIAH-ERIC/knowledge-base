@@ -2058,6 +2058,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "enum": [
                     "bluesky",
                     "facebook",
+                    "flickr",
                     "instagram",
                     "linkedin",
                     "mastodon",
@@ -3942,6 +3943,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "enum": [
                     "bluesky",
                     "facebook",
+                    "flickr",
                     "instagram",
                     "linkedin",
                     "mastodon",
@@ -4037,6 +4039,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "enum": [
               "bluesky",
               "facebook",
+              "flickr",
               "instagram",
               "linkedin",
               "mastodon",
@@ -12143,6 +12146,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "enum": [
                     "bluesky",
                     "facebook",
+                    "flickr",
                     "instagram",
                     "linkedin",
                     "mastodon",
@@ -12653,6 +12657,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "enum": [
                     "bluesky",
                     "facebook",
+                    "flickr",
                     "instagram",
                     "linkedin",
                     "mastodon",
@@ -16296,6 +16301,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "enum": [
                     "bluesky",
                     "facebook",
+                    "flickr",
                     "instagram",
                     "linkedin",
                     "mastodon",
@@ -16587,6 +16593,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "enum": [
                     "bluesky",
                     "facebook",
+                    "flickr",
                     "instagram",
                     "linkedin",
                     "mastodon",
@@ -26033,6 +26040,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "enum": [
                     "bluesky",
                     "facebook",
+                    "flickr",
                     "instagram",
                     "linkedin",
                     "mastodon",
@@ -26129,6 +26137,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "enum": [
               "bluesky",
               "facebook",
+              "flickr",
               "instagram",
               "linkedin",
               "mastodon",
@@ -26535,6 +26544,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "enum": [
               "bluesky",
               "facebook",
+              "flickr",
               "instagram",
               "linkedin",
               "mastodon",
@@ -30137,6 +30147,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "enum": [
                     "bluesky",
                     "facebook",
+                    "flickr",
                     "instagram",
                     "linkedin",
                     "mastodon",
@@ -30430,6 +30441,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "enum": [
                     "bluesky",
                     "facebook",
+                    "flickr",
                     "instagram",
                     "linkedin",
                     "mastodon",

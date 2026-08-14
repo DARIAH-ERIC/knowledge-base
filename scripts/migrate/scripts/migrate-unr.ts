@@ -93,6 +93,7 @@ const SOCIAL_MEDIA_DOMAINS: Record<SocialMediaType, Array<string>> = {
 	bluesky: ["bsky.app"],
 	twitter: ["twitter.com", "x.com"],
 	facebook: ["facebook.com"],
+	flickr: ["flickr.com"],
 	instagram: ["instagram.com"],
 	linkedin: ["linkedin.com"],
 	mastodon: ["mastodon.social"],

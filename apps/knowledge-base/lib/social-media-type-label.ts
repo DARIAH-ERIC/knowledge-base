@@ -11,6 +11,7 @@ const socialMediaTypeLabels: Record<string, string> = {
 	academia_edu: "Academia.edu",
 	bluesky: "Bluesky",
 	facebook: "Facebook",
+	flickr: "Flickr",
 	github: "GitHub",
 	gitlab: "GitLab",
 	google_scholar: "Google Scholar",
