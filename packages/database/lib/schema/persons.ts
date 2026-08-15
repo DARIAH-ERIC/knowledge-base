@@ -76,6 +76,8 @@ export const personSocialMediaTypesEnum = [
 	"github",
 	"gitlab",
 	"google_scholar",
+	"humanities_commons",
+	"hypotheses",
 	"linkedin",
 	"mastodon",
 	"researchgate",

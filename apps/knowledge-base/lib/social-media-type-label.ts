@@ -15,6 +15,8 @@ const socialMediaTypeLabels: Record<string, string> = {
 	github: "GitHub",
 	gitlab: "GitLab",
 	google_scholar: "Google Scholar",
+	humanities_commons: "Humanities Commons",
+	hypotheses: "Hypotheses",
 	instagram: "Instagram",
 	linkedin: "LinkedIn",
 	mastodon: "Mastodon",

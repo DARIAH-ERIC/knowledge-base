@@ -24268,6 +24268,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "github",
               "gitlab",
               "google_scholar",
+              "humanities_commons",
+              "hypotheses",
               "linkedin",
               "mastodon",
               "researchgate",
