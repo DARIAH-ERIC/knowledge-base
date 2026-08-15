@@ -106,6 +106,27 @@ export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsPro
 					/>
 				</DescriptionDetails>
 
+				<DescriptionTerm>{t("Contributors")}</DescriptionTerm>
+				<DescriptionDetails>
+					{contributors.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{contributors.map((contributor) => (
+								<RelationStatement
+									key={contributor.personId}
+									relation={formatRoleType(contributor.role)}
+									showSource={false}
+									source={impactCaseStudy.title}
+									target={contributor.personName}
+									targetHref={getEntityDetailHref({
+										entityType: "persons",
+										slug: contributor.personSlug,
+									})}
+								/>
+							))}
+						</ul>
+					) : null}
+				</DescriptionDetails>
+
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>
 				<DescriptionDetails>
 					<ContentBlocksView contentBlocks={contentBlocks} />
@@ -134,27 +155,6 @@ export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsPro
 									<span className="font-medium">{relatedResource.name}</span>
 									<RelationTypeSuffix type={relatedResource.description} />
 								</li>
-							))}
-						</ul>
-					) : null}
-				</DescriptionDetails>
-
-				<DescriptionTerm>{t("Contributors")}</DescriptionTerm>
-				<DescriptionDetails>
-					{contributors.length > 0 ? (
-						<ul className="flex flex-col gap-1">
-							{contributors.map((contributor) => (
-								<RelationStatement
-									key={contributor.personId}
-									relation={formatRoleType(contributor.role)}
-									showSource={false}
-									source={impactCaseStudy.title}
-									target={contributor.personName}
-									targetHref={getEntityDetailHref({
-										entityType: "persons",
-										slug: contributor.personSlug,
-									})}
-								/>
 							))}
 						</ul>
 					) : null}
