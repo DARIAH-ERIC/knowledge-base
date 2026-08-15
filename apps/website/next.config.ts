@@ -53,6 +53,10 @@ const config: Config = {
 				loaders: ["null-loader"],
 				as: "*.js",
 			},
+			"*.css": {
+				loaders: ["@tailwindcss/turbopack"],
+				as: "*.css",
+			},
 		},
 	},
 	// typedRoutes: true,

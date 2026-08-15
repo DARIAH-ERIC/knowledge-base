@@ -97,7 +97,7 @@
 		"@faker-js/faker": "catalog:",
 		"@playwright/test": "catalog:",
 		"@react-aria/optimize-locales-plugin": "catalog:",
-		"@tailwindcss/postcss": "catalog:",
+		"@tailwindcss/turbopack": "catalog:",
 		"@types/node": "catalog:",
 		"@types/nodemailer": "catalog:",
 		"@types/pdfkit": "catalog:",
@@ -125,10 +125,5 @@
 	},
 	"engines": {
 		"node": "24.x"
-	},
-	"postcss": {
-		"plugins": {
-			"@tailwindcss/postcss": {}
-		}
 	}
 }

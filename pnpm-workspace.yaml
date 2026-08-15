@@ -19,18 +19,18 @@ catalog:
   "@acdh-oeaw/tsconfig": ^1.5.1
   "@acdh-oeaw/tsconfig-lib": ^1.3.0
   "@chromatic-com/storybook": ^5.3.0
-  "@dotenvx/dotenvx": ^2.20.1
+  "@dotenvx/dotenvx": ^2.21.0
   "@faker-js/faker": ^10.5.0
   "@fontsource-variable/fira-code": ^5.3.0
   "@fontsource-variable/inter": ^5.3.0
   "@heroicons/react": ^2.2.0
-  "@hono/node-server": ^2.1.0
+  "@hono/node-server": ^2.1.1
   "@hono/standard-validator": ^0.4.0
   "@hono/swagger-ui": ^0.6.1
   "@imgproxy/imgproxy-js-core": ^1.7.0
   "@imgproxy/imgproxy-node": ^1.1.0
   "@internationalized/date": ^3.12.2
-  "@node-rs/argon2": ^2.0.2
+  "@node-rs/argon2": ^2.1.0
   "@opentelemetry/exporter-trace-otlp-proto": ^0.221.0
   "@opentelemetry/instrumentation-http": ^0.221.0
   "@opentelemetry/sdk-node": ^0.221.0
@@ -42,27 +42,27 @@ catalog:
   "@playwright/test": ^1.62.1
   "@react-aria/optimize-locales-plugin": ^2.0.0
   "@react-aria/utils": ^3.34.1
-  "@sentry/nextjs": ^10.69.0
-  "@sentry/node": ^10.69.0
+  "@sentry/nextjs": ^10.70.0
+  "@sentry/node": ^10.70.0
   "@sindresorhus/slugify": ^3.0.0
-  "@storybook/addon-a11y": ^10.5.7
-  "@storybook/addon-docs": ^10.5.7
-  "@storybook/addon-themes": ^10.5.7
-  "@storybook/addon-vitest": ^10.5.7
-  "@storybook/react-vite": ^10.5.7
-  "@tailwindcss/postcss": ^4.3.3
+  "@storybook/addon-a11y": ^10.5.8
+  "@storybook/addon-docs": ^10.5.8
+  "@storybook/addon-themes": ^10.5.8
+  "@storybook/addon-vitest": ^10.5.8
+  "@storybook/react-vite": ^10.5.8
+  '@tailwindcss/turbopack': ^4.3.3
   "@tailwindcss/vite": ^4.3.3
-  "@tiptap/core": ^3.29.2
-  "@tiptap/extension-image": ^3.29.2
-  "@tiptap/extension-link": ^3.29.2
-  "@tiptap/extension-table": ^3.29.2
-  "@tiptap/extension-typography": ^3.29.2
-  "@tiptap/html": ^3.29.2
-  "@tiptap/pm": ^3.29.2
-  "@tiptap/react": ^3.29.2
-  "@tiptap/starter-kit": ^3.29.2
-  "@tiptap/static-renderer": ^3.29.2
-  "@turbo/gen": ^2.10.9
+  "@tiptap/core": ^3.30.1
+  "@tiptap/extension-image": ^3.30.1
+  "@tiptap/extension-link": ^3.30.1
+  "@tiptap/extension-table": ^3.30.1
+  "@tiptap/extension-typography": ^3.30.1
+  "@tiptap/html": ^3.30.1
+  "@tiptap/pm": ^3.30.1
+  "@tiptap/react": ^3.30.1
+  "@tiptap/starter-kit": ^3.30.1
+  "@tiptap/static-renderer": ^3.30.1
+  "@turbo/gen": ^2.10.10
   "@types/node": ^24.13.3
   "@types/nodemailer": ^8.0.1
   '@types/pdfkit': ^0.17.6
@@ -78,7 +78,7 @@ catalog:
   axe-core: ^4.13.0
   axe-playwright: ^2.2.2
   babel-plugin-react-compiler: ^1.0.0
-  better-result: ^3.0.0
+  better-result: ^3.0.1
   client-only: ^0.0.1
   clsx: ^2.1.1
   concurrently: ^10.0.4
@@ -90,35 +90,35 @@ catalog:
   eslint-plugin-better-tailwindcss: ^4.7.0
   eslint-plugin-drizzle: rc
   eslint-plugin-playwright: ^2.11.0
-  eslint-plugin-regexp: ^3.1.1
-  eslint-plugin-storybook: ^10.5.7
-  eslint-plugin-turbo: ^2.10.9
+  eslint-plugin-regexp: ^3.2.0
+  eslint-plugin-storybook: ^10.5.8
+  eslint-plugin-turbo: ^2.10.10
   hast-util-to-text: ^4.0.2
-  hono: ^4.13.1
+  hono: ^4.13.2
   hono-openapi: ^1.3.1
   hono-pino: ^0.10.3
   hono-rate-limiter: ^0.5.3
   is-in-ci: ^2.0.0
   is-network-error: ^1.3.1
   lefthook: ^2.1.10
-  lucide-react: ^1.30.0
+  lucide-react: ^1.31.0
   minio: ^8.0.7
-  motion: ^13.0.0
-  next: ^16.3.0
-  next-intl: ^4.13.5
+  motion: ^13.1.0
+  next: ^16.3.1
+  next-intl: ^4.13.6
   nodemailer: ^9.0.5
   npm-run-all2: ^9.0.3
   null-loader: ^4.0.1
   openapi-types: ^12.1.3
-  oxfmt: ^0.62.0
-  oxlint: ^1.77.0
+  oxfmt: ^0.63.0
+  oxlint: ^1.78.0
   oxlint-tsgolint: ^7.0.2001
   pdfkit: ^0.19.1
-  pg: ^8.22.0
+  pg: ^8.23.0
   pino: ^10.3.1
   pino-pretty: ^13.1.3
   playwright: ^1.62.1
-  po-parser: ^2.1.1
+  po-parser: ^2.2.0
   react: ^19.2.8
   react-aria: ^3.51.0
   react-aria-components: ^1.19.0
@@ -131,8 +131,8 @@ catalog:
   server-nodejs-only: ^0.0.1
   server-only: ^0.0.1
   sharp: ^0.35.3
-  sonner: ^2.0.7
-  storybook: ^10.5.7
+  sonner: ^2.0.8
+  storybook: ^10.5.8
   storybook-next-intl: ^10.1.3
   strip-markdown: ^6.0.0
   stylelint: ^17.14.1
@@ -142,8 +142,8 @@ catalog:
   tailwindcss: ^4.3.3
   tailwindcss-react-aria-components: ^2.2.0
   tsdown: ^0.22.14
-  tsx: ^4.23.11
-  turbo: ^2.10.9
+  tsx: ^4.23.12
+  turbo: ^2.10.10
   tw-animate-css: ^1.4.0
   typescript: ^7.0.2
   typesense: ^3.0.6
