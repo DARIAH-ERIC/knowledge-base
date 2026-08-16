@@ -1,3 +1,4 @@
+import { optimizeReactAriaLocales } from "@dariah-eric/configs/nextjs/react-aria-optimize-locales";
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig as Config } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
@@ -7,6 +8,9 @@ import createNextIntlPlugin from "next-intl/plugin";
  * `--experimental-next-config-strip-types` next.js cli option.
  */
 import { env } from "./config/env.config.ts";
+import { languages } from "./lib/i18n/locales.ts";
+
+const localeOptimization = optimizeReactAriaLocales({ locales: languages });
 
 const config: Config = {
 	allowedDevOrigins: ["127.0.0.1"],
@@ -39,24 +43,11 @@ const config: Config = {
 	reactCompiler: true,
 	turbopack: {
 		rules: {
-			/** @see {@link https://github.com/vercel/next.js/discussions/77721#discussioncomment-14576268} */
-			"*": {
-				condition: {
-					all: [
-						"foreign",
-						"browser",
-						{
-							path: /(@react-stately|@react-aria|@react-spectrum|react-aria-components)\/.*\/[a-z]{2}-[A-Z]{2}/,
-						},
-					],
-				},
-				loaders: ["null-loader"],
-				as: "*.js",
-			},
 			"*.css": {
 				loaders: ["@tailwindcss/turbopack"],
 				as: "*.css",
 			},
+			...localeOptimization.rules,
 		},
 	},
 	// typedRoutes: true,
