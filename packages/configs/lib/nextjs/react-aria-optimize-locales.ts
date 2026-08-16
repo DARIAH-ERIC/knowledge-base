@@ -24,14 +24,40 @@ const reactAriaPackages = [
 
 const localeExtensions = ["json", "mjs", "js", "cjs"] as const;
 
-interface Options {
-	/** Locales retained in server bundles. */
+export interface ReactAriaLocaleOptions {
 	locales: ReadonlyArray<string>;
 }
 
+type TurbopackBuiltinCondition =
+	| "browser"
+	| "foreign"
+	| "development"
+	| "production"
+	| "node"
+	| "edge-light";
+
+export type ReactAriaLocaleCondition =
+	| { all: Array<ReactAriaLocaleCondition> }
+	| { any: Array<ReactAriaLocaleCondition> }
+	| { not: ReactAriaLocaleCondition }
+	| TurbopackBuiltinCondition
+	| {
+			path?: string | RegExp;
+			content?: RegExp;
+			query?: string | RegExp;
+			contentType?: string | RegExp;
+	  };
+
+export interface ReactAriaLocaleRule {
+	condition?: ReactAriaLocaleCondition;
+	locales: ReadonlyArray<string>;
+}
+
+export type ReactAriaLocaleRules = readonly [ReactAriaLocaleRule, ...Array<ReactAriaLocaleRule>];
+
 interface TurbopackRule {
 	as: "*.js";
-	condition: "browser" | { not: "browser" };
+	condition?: ReactAriaLocaleCondition;
 	loaders: Array<{
 		loader: string;
 		options: {
@@ -40,43 +66,60 @@ interface TurbopackRule {
 	}>;
 }
 
+interface Result {
+	rules: Record<string, Array<TurbopackRule>>;
+}
+
+function isLocaleRules(
+	input: Readonly<ReactAriaLocaleOptions> | ReactAriaLocaleRules,
+): input is ReactAriaLocaleRules {
+	return Array.isArray(input);
+}
+
 /**
  * Creates Turbopack rules which remove unused React Aria locale modules.
  *
- * Browser bundles omit all locale modules, so the app must render React Aria's
- * `LocalizedStringProvider` on the server. Server bundles retain the configured locales. A language
- * without a region retains all of its regional variants, e.g. `en` retains `en-US`.
+ * Pass an object to retain the same locales in all builds, or an array to configure locales for
+ * different Turbopack conditions. A language without a region retains all of its regional variants,
+ * e.g. `en` retains `en-US`.
  *
  * @see {@link https://github.com/stefanprobst/react-aria-optimize-locales-turbopack}
  */
-export function optimizeReactAriaLocales(options: Readonly<Options>): {
-	rules: Record<string, Array<TurbopackRule>>;
-} {
-	if (!Array.isArray(options.locales)) {
-		throw new TypeError("locales must be an array.");
+export function optimizeReactAriaLocales(
+	input: Readonly<ReactAriaLocaleOptions> | ReactAriaLocaleRules,
+): Result {
+	const localeRules: ReadonlyArray<ReactAriaLocaleRule> = isLocaleRules(input)
+		? input
+		: [{ locales: input.locales }];
+	if (localeRules.length === 0) {
+		throw new TypeError("At least one locale rule is required.");
 	}
-
-	const locales: ReadonlyArray<string> = options.locales;
-	const normalizedLocales = locales.map((locale) => new Intl.Locale(locale).toString());
 	const loader = fileURLToPath(
 		new URL("./react-aria-optimize-locales-loader.cjs", import.meta.url),
 	);
+	const configurations = localeRules.map((localeRule, index): TurbopackRule => {
+		if (!Array.isArray(localeRule.locales)) {
+			throw new TypeError(`localeRules[${index}].locales must be an array.`);
+		}
+
+		const locales: ReadonlyArray<string> = localeRule.locales;
+		const normalizedLocales = locales.map((locale) => new Intl.Locale(locale).toString());
+		const configuration: TurbopackRule = {
+			loaders: [{ loader, options: { locales: normalizedLocales } }],
+			as: "*.js",
+		};
+
+		if (localeRule.condition != null) {
+			configuration.condition = localeRule.condition;
+		}
+
+		return configuration;
+	});
 	const rules: Record<string, Array<TurbopackRule>> = {};
 
 	for (const packageName of reactAriaPackages) {
 		for (const extension of localeExtensions) {
-			rules[`**/${packageName}/**/??-??.${extension}`] = [
-				{
-					condition: "browser",
-					loaders: [{ loader, options: { locales: [] } }],
-					as: "*.js",
-				},
-				{
-					condition: { not: "browser" },
-					loaders: [{ loader, options: { locales: normalizedLocales } }],
-					as: "*.js",
-				},
-			];
+			rules[`**/${packageName}/**/??-??.${extension}`] = configurations;
 		}
 	}
 

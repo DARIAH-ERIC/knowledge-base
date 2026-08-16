@@ -10,7 +10,10 @@ import createNextIntlPlugin from "next-intl/plugin";
 import { env } from "./config/env.config.ts";
 import { languages } from "./lib/i18n/locales.ts";
 
-const localeOptimization = optimizeReactAriaLocales({ locales: languages });
+const localeOptimization = optimizeReactAriaLocales([
+	{ condition: "browser", locales: [] },
+	{ condition: { not: "browser" }, locales: languages },
+]);
 
 const config: Config = {
 	allowedDevOrigins: ["127.0.0.1"],
