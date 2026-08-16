@@ -25,11 +25,13 @@ const reactAriaPackages = [
 const localeExtensions = ["json", "mjs", "js", "cjs"] as const;
 
 interface Options {
+	/** Locales retained in server bundles. */
 	locales: ReadonlyArray<string>;
 }
 
 interface TurbopackRule {
 	as: "*.js";
+	condition: "browser" | { not: "browser" };
 	loaders: Array<{
 		loader: string;
 		options: {
@@ -41,34 +43,40 @@ interface TurbopackRule {
 /**
  * Creates Turbopack rules which remove unused React Aria locale modules.
  *
- * A language without a region retains all of its regional variants, e.g. `en` retains `en-US`.
+ * Browser bundles omit all locale modules, so the app must render React Aria's
+ * `LocalizedStringProvider` on the server. Server bundles retain the configured locales. A language
+ * without a region retains all of its regional variants, e.g. `en` retains `en-US`.
  *
  * @see {@link https://github.com/stefanprobst/react-aria-optimize-locales-turbopack}
  */
 export function optimizeReactAriaLocales(options: Readonly<Options>): {
-	rules: Record<string, TurbopackRule>;
+	rules: Record<string, Array<TurbopackRule>>;
 } {
 	if (!Array.isArray(options.locales)) {
 		throw new TypeError("locales must be an array.");
 	}
 
-	const locales = options.locales.map((locale) => new Intl.Locale(locale).toString());
+	const locales: ReadonlyArray<string> = options.locales;
+	const normalizedLocales = locales.map((locale) => new Intl.Locale(locale).toString());
 	const loader = fileURLToPath(
 		new URL("./react-aria-optimize-locales-loader.cjs", import.meta.url),
 	);
-	const rules: Record<string, TurbopackRule> = {};
+	const rules: Record<string, Array<TurbopackRule>> = {};
 
 	for (const packageName of reactAriaPackages) {
 		for (const extension of localeExtensions) {
-			rules[`**/${packageName}/**/??-??.${extension}`] = {
-				loaders: [
-					{
-						loader,
-						options: { locales },
-					},
-				],
-				as: "*.js",
-			};
+			rules[`**/${packageName}/**/??-??.${extension}`] = [
+				{
+					condition: "browser",
+					loaders: [{ loader, options: { locales: [] } }],
+					as: "*.js",
+				},
+				{
+					condition: { not: "browser" },
+					loaders: [{ loader, options: { locales: normalizedLocales } }],
+					as: "*.js",
+				},
+			];
 		}
 	}
 
