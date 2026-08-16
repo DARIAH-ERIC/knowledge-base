@@ -55,10 +55,10 @@ test.describe("website impact case studies admin", () => {
 		await impactCaseStudiesPage.gotoDetailsFromList(title);
 		await expectDetailsTermsInOrder(impactCaseStudiesPage.page, [
 			"Image",
+			"Contributors",
 			"Content",
 			"Related entities",
 			"Related resources",
-			"Contributors",
 		]);
 	});
 
