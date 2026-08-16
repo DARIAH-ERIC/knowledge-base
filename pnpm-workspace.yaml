@@ -164,6 +164,17 @@ engineStrict: true
 
 minimumReleaseAge: 1440
 
+# next.js 16.3.1 bumped its `@swc/helpers` dependency from 0.5.15 to 0.5.23. Since 0.5.17,
+# `@swc/helpers` declares a `module-sync` export condition, so `require("@swc/helpers/_/*")` - which
+# is what the next.js server bundle does - resolves to `./esm/*.js`, while turbopack output file
+# tracing only copies `./cjs/*.cjs` into `.next/standalone`. The standalone server then crashes on
+# startup with `Cannot find module '.../@swc/helpers/esm/_interop_require_default.js'`.
+# Can be removed once the upstream fix is released.
+# @see {@link https://github.com/vercel/next.js/issues/97358}
+# @see {@link https://github.com/vercel/next.js/pull/97372}
+overrides:
+  next>@swc/helpers: 0.5.15
+
 patchedDependencies:
   next: patches/next.patch
 
