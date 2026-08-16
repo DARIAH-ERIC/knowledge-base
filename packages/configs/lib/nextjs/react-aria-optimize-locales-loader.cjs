@@ -19,12 +19,12 @@ module.exports = function reactAriaOptimizeLocalesLoader(source) {
 
 	if (match != null) {
 		const locale = new Intl.Locale(match[0]);
-		const isIncluded = includedLocales.some((includedLocale) => {
-			return (
+		const isIncluded = includedLocales.some((includedLocale) => 
+			(
 				locale.language === includedLocale.language &&
 				(includedLocale.region == null || locale.region === includedLocale.region)
-			);
-		});
+			)
+		);
 
 		if (!isIncluded) {
 			return "export default undefined;";
