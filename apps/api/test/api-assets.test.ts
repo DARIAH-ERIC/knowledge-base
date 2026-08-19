@@ -269,7 +269,7 @@ describe("assets", () => {
 		/** The `Location` of a successful variant request, asserted to be a redirect on the way. */
 		async function getVariantLocation(
 			db: Database,
-			params: { name: string; w: number; ar?: "1x1" | "3x2" | "16x9" | "21x9" },
+			params: { name: string; w?: number; ar?: "1x1" | "3x2" | "16x9" | "21x9" },
 		) {
 			const { name, w, ar } = params;
 
@@ -277,7 +277,7 @@ describe("assets", () => {
 				":name"
 			].image[":version"].$get({
 				param: { prefix: "images", name, version: "v1" },
-				query: { w: String(w), ...(ar != null ? { ar } : {}) },
+				query: { ...(w != null ? { w: String(w) } : {}), ...(ar != null ? { ar } : {}) },
 			});
 
 			expect(response.status).toBe(302);
@@ -365,13 +365,35 @@ describe("assets", () => {
 			});
 		});
 
-		it("should refuse a request with no width at all", async () => {
+		/**
+		 * The rendition a vector has, and the only one it has: imgproxy skips processing for an svg
+		 * source, so every rung would redirect to the same bytes under a different url. Consumers that
+		 * cannot size an image — `next/image` with `unoptimized`, a "view full size" link — fetch the
+		 * `srcUrl` bare and land here.
+		 */
+		it("should serve the source as stored when no width is asked for", async () => {
+			await withTransaction(async (db) => {
+				const name = uuidv7();
+				const source = await getVariantLocation(db, { name });
+				const scaled = await getVariantLocation(db, { name, w: 1280 });
+
+				expect(source.response.status).toBe(302);
+				// No processing options at all, so the signed url carries only the encoded source.
+				expect(new URL(source.location).pathname.split("/").filter(Boolean)).toHaveLength(2);
+				expect(source.location).not.toBe(scaled.location);
+			});
+		});
+
+		it("should refuse an aspect ratio with no width to crop against", async () => {
 			await withTransaction(async (db) => {
 				const response = await createTestClient(db, createMockStorage()).assets[":prefix"][
 					":name"
 				].image[":version"].$get({
+					// A crop needs a target height, and the width is the only thing to derive one from.
+					// Ignoring the ratio instead would serve an uncropped image that looks like a cropped
+					// one until it is on the page in the wrong shape.
 					param: { prefix: "images", name: uuidv7(), version: "v1" },
-					query: {} as unknown as { w: string },
+					query: { ar: "16x9" } as unknown as { w: string },
 				});
 
 				expect(response.status).toBe(400);
