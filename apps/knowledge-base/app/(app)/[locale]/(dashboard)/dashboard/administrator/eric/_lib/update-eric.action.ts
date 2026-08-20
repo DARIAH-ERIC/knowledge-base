@@ -56,6 +56,7 @@ export const updateEricAction = createMutationAction({
 			.update(schema.organisationalUnits)
 			.set({
 				acronym: input.acronym,
+				email: input.email,
 				imageId,
 				name: input.name,
 				ror: input.ror,

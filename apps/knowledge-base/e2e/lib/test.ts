@@ -8,6 +8,7 @@ import { type AccessibilityScanner, createAccessibilityScanner } from "@/e2e/lib
 import { AdminCountriesPage } from "@/e2e/lib/fixtures/admin-countries-page";
 import { AdminCountryReportsPage } from "@/e2e/lib/fixtures/admin-country-reports-page";
 import { AdminDocumentationPagesPage } from "@/e2e/lib/fixtures/admin-documentation-pages-page";
+import { AdminEricPage } from "@/e2e/lib/fixtures/admin-eric-page";
 import { AdminFeaturedItemsPage } from "@/e2e/lib/fixtures/admin-featured-items-page";
 import { AdminGovernanceBodiesPage } from "@/e2e/lib/fixtures/admin-governance-bodies-page";
 import { AdminInstitutionsPage } from "@/e2e/lib/fixtures/admin-institutions-page";
@@ -51,6 +52,7 @@ interface TestFixtures {
 	createAdminCountriesPage: (workerIndex: number) => AdminCountriesPage;
 	createAdminCountryReportsPage: (workerIndex: number) => AdminCountryReportsPage;
 	createAdminDocumentationPagesPage: (workerIndex: number) => AdminDocumentationPagesPage;
+	createAdminEricPage: () => AdminEricPage;
 	createAdminGovernanceBodiesPage: (workerIndex: number) => AdminGovernanceBodiesPage;
 	createAdminInstitutionsPage: (workerIndex: number) => AdminInstitutionsPage;
 	createAdminInternalPagesPage: () => AdminInternalPagesPage;
@@ -164,6 +166,10 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 
 	async createAdminDocumentationPagesPage({ page }, use) {
 		await use((workerIndex: number) => new AdminDocumentationPagesPage(page, workerIndex));
+	},
+
+	async createAdminEricPage({ page }, use) {
+		await use(() => new AdminEricPage(page));
 	},
 
 	async createAdminGovernanceBodiesPage({ page }, use) {

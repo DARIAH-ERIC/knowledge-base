@@ -519,11 +519,73 @@ export class DatabaseService {
 		return this.getOrganisationalUnitDescriptionByVersionId(country.id);
 	}
 
+	/**
+	 * The DARIAH ERIC's draft version — what `updateEricAction` writes to. The ERIC is a singleton
+	 * seeded by migration, so there is nothing to look up by name.
+	 */
+	async getEricDraft(): Promise<{
+		documentId: string;
+		email: string | null;
+		id: string;
+		name: string;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				documentId: schema.entityVersions.entityId,
+				email: schema.organisationalUnits.email,
+				id: schema.organisationalUnits.id,
+				name: schema.organisationalUnits.name,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(eq(schema.organisationalUnitTypes.type, "eric"), eq(schema.entityStatus.type, "draft")),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	/**
+	 * Clear the email on every ERIC version. The ERIC is shared state that no worker prefix isolates,
+	 * so the suite that edits it has to put it back.
+	 */
+	async resetEricEmail(): Promise<void> {
+		const rows = await this.db
+			.select({ id: schema.organisationalUnits.id })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(eq(schema.organisationalUnitTypes.type, "eric"));
+
+		if (rows.length === 0) {
+			return;
+		}
+
+		await this.db
+			.update(schema.organisationalUnits)
+			.set({ email: null })
+			.where(
+				inArray(
+					schema.organisationalUnits.id,
+					rows.map((row) => row.id),
+				),
+			);
+	}
+
 	async getGovernanceBodyByName(name: string): Promise<{
 		acronym: string | null;
 		documentId: string;
 		id: string;
 		imageId: string | null;
+		mailingList: string | null;
 		name: string;
 		summary: string | null;
 	} | null> {
@@ -533,6 +595,7 @@ export class DatabaseService {
 				documentId: schema.entityVersions.entityId,
 				id: schema.organisationalUnits.id,
 				imageId: schema.organisationalUnits.imageId,
+				mailingList: schema.organisationalUnits.mailingList,
 				name: schema.organisationalUnits.name,
 				summary: schema.organisationalUnits.summary,
 			})

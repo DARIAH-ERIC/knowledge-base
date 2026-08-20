@@ -498,6 +498,8 @@ msgid "isGKnz"
 msgstr "Documentation"
 
 #: app/(app)/[locale]/_components/user-menu.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx
 #: app/(app)/[locale]/(default)/_components/default-footer.tsx
 #: app/(app)/[locale]/(default)/contact/page.tsx
@@ -527,6 +529,8 @@ msgstr "Sign out"
 #: app/(app)/[locale]/(auth)/auth/forgot-password/_components/forgot-password-form.tsx
 #: app/(app)/[locale]/(auth)/auth/sign-in/_components/sign-in-form.tsx
 #: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx
@@ -3598,6 +3602,10 @@ msgid "35x3Rk"
 msgstr "Enter the DARIAH ERIC details."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-form.tsx
+msgid "fIxNO9"
+msgstr "Public contact details for DARIAH ERIC."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-form.tsx
 msgid "zchjEY"
 msgstr "Link social media accounts to DARIAH ERIC."
 
@@ -3633,6 +3641,13 @@ msgstr "Could not delete governance body. Please try again."
 msgid "4F6AI_"
 msgstr "New governance body"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx
+msgid "KLtrTn"
+msgstr "Mailing list"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-edit-form.tsx
 msgid "HUryC8"
 msgstr "Edit governance body"
@@ -3640,6 +3655,10 @@ msgstr "Edit governance body"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx
 msgid "br5bnQ"
 msgstr "Enter the governance body details."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx
+msgid "0SZmfn"
+msgstr "Internal contact details for this governance body. These are not included in public API responses."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx
 msgid "TDbdaM"
@@ -6248,11 +6267,6 @@ msgstr "Administrator dashboard - Working group reports"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-create-form.tsx
 msgid "tUJyne"
 msgstr "New working group"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx
-msgid "KLtrTn"
-msgstr "Mailing list"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-edit-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/edit/_components/delegated-working-group-edit-form.tsx

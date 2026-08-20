@@ -47,6 +47,10 @@ export class AdminGovernanceBodiesPage {
 		await this.page.getByLabel("Summary").fill(text);
 	}
 
+	async fillMailingList(mailingList: string): Promise<void> {
+		await this.page.getByLabel("Mailing list").fill(mailingList);
+	}
+
 	async selectTestImage(): Promise<void> {
 		await this.page.locator('input[name="imageKey"]').evaluate((input, value) => {
 			(input as HTMLInputElement).value = value;

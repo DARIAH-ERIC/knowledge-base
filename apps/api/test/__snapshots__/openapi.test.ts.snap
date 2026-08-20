@@ -18164,6 +18164,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "description": {
             "type": "string",
           },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "ogDescription": {
             "anyOf": [
               {
@@ -18194,6 +18204,76 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               },
             ],
           },
+          "socialMedia": {
+            "items": {
+              "properties": {
+                "duration": {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "end": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "start": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "start",
+                        "end",
+                      ],
+                      "type": "object",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
+                "id": {
+                  "format": "uuid",
+                  "type": "string",
+                },
+                "name": {
+                  "type": "string",
+                },
+                "type": {
+                  "enum": [
+                    "bluesky",
+                    "facebook",
+                    "flickr",
+                    "instagram",
+                    "linkedin",
+                    "mastodon",
+                    "twitter",
+                    "vimeo",
+                    "website",
+                    "youtube",
+                    "other",
+                  ],
+                  "type": "string",
+                },
+                "url": {
+                  "type": "string",
+                },
+              },
+              "required": [
+                "id",
+                "name",
+                "url",
+                "duration",
+                "type",
+              ],
+              "type": "object",
+            },
+            "type": "array",
+          },
           "title": {
             "type": "string",
           },
@@ -18204,6 +18284,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "ogTitle",
           "ogDescription",
           "ogImage",
+          "email",
+          "socialMedia",
         ],
         "type": "object",
       },

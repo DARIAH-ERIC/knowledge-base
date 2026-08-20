@@ -116,6 +116,54 @@ async function seedWorkingGroupChair(
 	return { chair, workingGroup };
 }
 
+function createGovernanceBody() {
+	const versionId = uuidv7();
+	const entityId = uuidv7();
+	const name = f.lorem.sentence();
+
+	return {
+		entity: { id: entityId, slug: slugify(name) },
+		version: { id: versionId, entityId },
+		organisationalUnit: {
+			id: versionId,
+			name,
+			summary: f.lorem.paragraph(),
+			mailingList: f.internet.email(),
+		},
+	};
+}
+
+async function seedGovernanceBody(db: Database, governanceBody = createGovernanceBody()) {
+	const [status, organisationalUnitEntityType, governanceBodyType] = await Promise.all([
+		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "organisational_units" },
+		}),
+		db.query.organisationalUnitTypes.findFirst({
+			columns: { id: true },
+			where: { type: "governance_body" },
+		}),
+	]);
+
+	assert(status, "No entity status in database.");
+	assert(organisationalUnitEntityType, "No organisational unit entity type in database.");
+	assert(governanceBodyType, "No governance_body type in database.");
+
+	await db
+		.insert(schema.entities)
+		.values({ ...governanceBody.entity, typeId: organisationalUnitEntityType.id });
+
+	await db.insert(schema.entityVersions).values({ ...governanceBody.version, statusId: status.id });
+
+	await db.insert(schema.organisationalUnits).values({
+		...governanceBody.organisationalUnit,
+		typeId: governanceBodyType.id,
+	});
+
+	return governanceBody;
+}
+
 describe("governance-bodies", () => {
 	describe("GET /api/governance-bodies", () => {
 		it("should include working groups with all working group chairs", async () => {
@@ -188,6 +236,42 @@ describe("governance-bodies", () => {
 				);
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
+			});
+		});
+	});
+
+	/**
+	 * A governance body's mailing list is internal: it is edited in the admin dashboard but must
+	 * never reach the public API, so neither the list nor the detail response may carry it.
+	 */
+	describe("mailing list", () => {
+		it("should not expose the mailing list of a governance body", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const governanceBody = await seedGovernanceBody(db);
+
+				const listResponse = await client["governance-bodies"].$get({
+					query: { limit: "100", offset: "0" },
+				});
+
+				expect(listResponse.status).toBe(200);
+				const list = (await listResponse.json()) as { data: Array<GovernanceBodyBase> };
+				const listed = list.data.find((item) => item.id === governanceBody.organisationalUnit.id);
+
+				expect(listed).toBeDefined();
+				expect(listed).not.toHaveProperty("mailingList");
+				expect(JSON.stringify(listed)).not.toContain(governanceBody.organisationalUnit.mailingList);
+
+				const detailResponse = await client["governance-bodies"].slugs[":slug"].$get({
+					param: { slug: governanceBody.entity.slug },
+				});
+
+				expect(detailResponse.status).toBe(200);
+				const detail = (await detailResponse.json()) as GovernanceBody;
+
+				expect(detail).toMatchObject({ id: governanceBody.organisationalUnit.id });
+				expect(detail).not.toHaveProperty("mailingList");
+				expect(JSON.stringify(detail)).not.toContain(governanceBody.organisationalUnit.mailingList);
 			});
 		});
 	});

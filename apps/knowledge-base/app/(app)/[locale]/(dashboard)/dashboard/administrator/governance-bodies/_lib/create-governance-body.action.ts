@@ -55,6 +55,7 @@ export const createGovernanceBodyAction = createMutationAction({
 			id: versionId,
 			acronym: input.acronym,
 			imageId,
+			mailingList: input.mailingList,
 			name: input.name,
 			summary: input.summary,
 			typeId: orgUnitType.id,

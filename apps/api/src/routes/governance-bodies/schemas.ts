@@ -24,6 +24,10 @@ const GovernanceBodyPersonSchema = v.object({
 	description: v.nullable(v.string()),
 });
 
+/**
+ * Public fields are picked explicitly, never spread: `organisational_units` also carries internal
+ * columns — notably `mailingList`, which is admin-only — that must not reach public responses.
+ */
 export const GovernanceBodyBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.OrganisationalUnitSelectSchema, [

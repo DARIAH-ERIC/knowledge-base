@@ -56,7 +56,13 @@ export const updateGovernanceBodyAction = createMutationAction({
 
 		await tx
 			.update(schema.organisationalUnits)
-			.set({ acronym: input.acronym, imageId, name: input.name, summary: input.summary })
+			.set({
+				acronym: input.acronym,
+				imageId,
+				mailingList: input.mailingList,
+				name: input.name,
+				summary: input.summary,
+			})
 			.where(eq(schema.organisationalUnits.id, draftVersionId));
 
 		await replaceEntityVersionFieldContentBlocks(

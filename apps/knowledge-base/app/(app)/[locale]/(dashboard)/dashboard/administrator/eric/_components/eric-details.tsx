@@ -31,7 +31,7 @@ interface EricDetailsProps {
 	selectedVersion: "draft" | "published";
 	eric: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "email" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
 		descriptionContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
@@ -140,6 +140,15 @@ export function EricDetails(props: Readonly<EricDetailsProps>): ReactNode {
 							key={selectedVersion}
 							contentBlocks={eric.descriptionContentBlocks}
 						/>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Email")}</DescriptionTerm>
+				<DescriptionDetails>
+					{eric.email != null ? (
+						<a className="underline" href={`mailto:${eric.email}`}>
+							{eric.email}
+						</a>
 					) : null}
 				</DescriptionDetails>
 
