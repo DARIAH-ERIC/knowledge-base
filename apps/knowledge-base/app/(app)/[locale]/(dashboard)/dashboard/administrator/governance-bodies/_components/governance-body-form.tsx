@@ -29,7 +29,10 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface GovernanceBodyFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
-	governanceBody?: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
+	governanceBody?: Pick<
+		schema.OrganisationalUnit,
+		"acronym" | "id" | "mailingList" | "name" | "summary"
+	> & {
 		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: SelectedImage | null };
@@ -136,6 +139,21 @@ export function GovernanceBodyForm(props: Readonly<GovernanceBodyFormProps>): Re
 						initialAssets={initialAssets}
 						name="description"
 					/>
+				</FormSection>
+
+				<Separator className="my-6" />
+
+				<FormSection
+					description={t(
+						"Internal contact details for this governance body. These are not included in public API responses.",
+					)}
+					title={t("Contact")}
+				>
+					<TextField defaultValue={governanceBody?.mailingList ?? undefined} name="mailingList">
+						<Label>{t("Mailing list")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
 				</FormSection>
 
 				<Separator className="my-6" />

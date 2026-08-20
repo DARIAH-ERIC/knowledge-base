@@ -30,7 +30,7 @@ interface EricFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	eric: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "email" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
 		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
@@ -148,6 +148,19 @@ export function EricForm(props: Readonly<EricFormProps>): ReactNode {
 						initialAssets={initialAssets}
 						name="description"
 					/>
+				</FormSection>
+
+				<Separator className="my-6" />
+
+				<FormSection
+					description={t("Public contact details for DARIAH ERIC.")}
+					title={t("Contact")}
+				>
+					<TextField defaultValue={eric.email ?? undefined} name="email" type="email">
+						<Label>{t("Email")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
 				</FormSection>
 
 				<Separator className="my-6" />

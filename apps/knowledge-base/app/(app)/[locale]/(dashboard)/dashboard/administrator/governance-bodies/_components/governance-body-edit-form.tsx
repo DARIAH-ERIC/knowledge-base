@@ -29,7 +29,10 @@ interface GovernanceBodyEditFormProps {
 	documentId: string;
 	hasDraftChanges: boolean;
 	isPublished: boolean;
-	governanceBody: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
+	governanceBody: Pick<
+		schema.OrganisationalUnit,
+		"acronym" | "id" | "mailingList" | "name" | "summary"
+	> & {
 		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: SelectedImage | null };

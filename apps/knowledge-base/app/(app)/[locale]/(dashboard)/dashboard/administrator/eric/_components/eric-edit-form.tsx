@@ -28,7 +28,7 @@ interface EricEditFormProps {
 	isPublished: boolean;
 	eric: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "email" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
 		descriptionContentBlocks?: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };

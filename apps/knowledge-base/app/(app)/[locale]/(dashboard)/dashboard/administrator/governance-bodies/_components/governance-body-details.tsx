@@ -26,7 +26,10 @@ interface GovernanceBodyDetailsProps {
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
-	governanceBody: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
+	governanceBody: Pick<
+		schema.OrganisationalUnit,
+		"acronym" | "id" | "mailingList" | "name" | "summary"
+	> & {
 		descriptionContentBlocks: Array<ContentBlock>;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
@@ -69,6 +72,8 @@ export function GovernanceBodyDetails(props: Readonly<GovernanceBodyDetailsProps
 	} = props;
 
 	const t = useExtracted();
+	const mailingListIsUrl =
+		governanceBody.mailingList != null && URL.canParse(governanceBody.mailingList);
 
 	return (
 		<Fragment>
@@ -120,6 +125,24 @@ export function GovernanceBodyDetails(props: Readonly<GovernanceBodyDetailsProps
 							key={selectedVersion}
 							contentBlocks={governanceBody.descriptionContentBlocks}
 						/>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Mailing list")}</DescriptionTerm>
+				<DescriptionDetails>
+					{governanceBody.mailingList != null ? (
+						<a
+							className="underline"
+							href={
+								mailingListIsUrl
+									? governanceBody.mailingList
+									: `mailto:${governanceBody.mailingList}`
+							}
+							rel={mailingListIsUrl ? "noreferrer" : undefined}
+							target={mailingListIsUrl ? "_blank" : undefined}
+						>
+							{governanceBody.mailingList}
+						</a>
 					) : null}
 				</DescriptionDetails>
 

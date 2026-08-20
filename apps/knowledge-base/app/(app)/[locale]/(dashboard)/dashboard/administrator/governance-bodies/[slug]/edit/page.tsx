@@ -95,6 +95,7 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 			columns: {
 				acronym: true,
 				id: true,
+				mailingList: true,
 				name: true,
 				summary: true,
 			},

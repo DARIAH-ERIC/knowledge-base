@@ -10,6 +10,13 @@ export const UpdateGovernanceBodyActionInputSchema = v.object({
 	...v.pick(OrganisationalUnitUpdateSchema, ["name", "summary"]).entries,
 	summary: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
+	mailingList: v.nullish(
+		v.union(
+			[v.pipe(v.string(), v.email()), v.pipe(v.string(), v.url())],
+			"Enter a valid email address or URL.",
+		),
+		null,
+	),
 	imageKey: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	descriptionContentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),

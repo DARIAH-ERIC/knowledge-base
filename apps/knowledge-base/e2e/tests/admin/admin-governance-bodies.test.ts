@@ -22,6 +22,7 @@ test.describe("governance bodies admin", () => {
 		const acronym = "E2EGB";
 		const summary = "E2E test governance body summary.";
 		const description = "E2E test governance body description.";
+		const mailingList = "https://lists.e2e.example.org/gb";
 		const socialMediaName = `${governanceBodiesPage.workerPrefix} Governance Social ${randomUUID()}`;
 		const socialMediaUrl = "https://example.com/governance-social";
 		const testAsset = await db.getTestAsset();
@@ -33,6 +34,7 @@ test.describe("governance bodies admin", () => {
 		await governanceBodiesPage.fillSummary(summary);
 		await governanceBodiesPage.selectTestImage();
 		await governanceBodiesPage.fillDescription(description);
+		await governanceBodiesPage.fillMailingList(mailingList);
 		await governanceBodiesPage.createSocialMediaInForm(socialMediaName, socialMediaUrl);
 
 		await governanceBodiesPage.submitForm();
@@ -42,7 +44,7 @@ test.describe("governance bodies admin", () => {
 
 		const created = await db.getGovernanceBodyByName(name);
 		expect(created).not.toBeNull();
-		expect(created).toMatchObject({ acronym, imageId: testAsset.id, name, summary });
+		expect(created).toMatchObject({ acronym, imageId: testAsset.id, mailingList, name, summary });
 		expect(JSON.stringify(await db.getGovernanceBodyDescriptionByName(name))).toContain(
 			description,
 		);
@@ -68,27 +70,33 @@ test.describe("governance bodies admin", () => {
 		await governanceBodiesPage.fillAcronym("E2EGBOLD");
 		await governanceBodiesPage.fillSummary("E2E test governance body to be edited.");
 		await governanceBodiesPage.fillDescription("Description for edit test.");
+		await governanceBodiesPage.fillMailingList("old-list@e2e.example.org");
 		await governanceBodiesPage.submitForm();
 
 		await governanceBodiesPage.searchByName(originalName);
 		const row = governanceBodiesPage.rowByName(originalName);
 		await expect(row).toBeVisible();
 
-		await row.getByRole("button", { name: "Open actions menu" }).click();
-		await Promise.all([
-			page.waitForURL("**/edit"),
-			page.getByRole("menuitem", { name: "Edit" }).click(),
-		]);
+		await governanceBodiesPage.gotoDetailsFromList(originalName);
+		await expect(page.getByRole("link", { name: "old-list@e2e.example.org" })).toHaveAttribute(
+			"href",
+			"mailto:old-list@e2e.example.org",
+		);
+		await governanceBodiesPage.gotoEditFromDetails();
 
 		const updatedName = `${governanceBodiesPage.workerPrefix} Updated ${randomUUID()}`;
 		const updatedAcronym = "E2EGBNEW";
 		const updatedSummary = "Updated E2E test governance body summary.";
 		const updatedDescription = "Updated E2E test governance body description.";
+		// Switch the mailing list from an email to a URL to exercise both branches of the
+		// email-or-URL validation.
+		const updatedMailingList = "https://lists.e2e.example.org/new-gb";
 
 		await page.getByLabel("Name", { exact: true }).fill(updatedName);
 		await governanceBodiesPage.fillAcronym(updatedAcronym);
 		await governanceBodiesPage.fillSummary(updatedSummary);
 		await governanceBodiesPage.selectTestImage();
+		await governanceBodiesPage.fillMailingList(updatedMailingList);
 		const descriptionEditor = page.getByRole("textbox", { name: "Description" });
 		await descriptionEditor.click();
 		await page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
@@ -98,6 +106,12 @@ test.describe("governance bodies admin", () => {
 
 		await governanceBodiesPage.searchByName(updatedName);
 		await expect(governanceBodiesPage.rowByName(updatedName)).toBeVisible();
+		await governanceBodiesPage.gotoDetailsFromList(updatedName);
+		await expect(page.getByRole("link", { name: updatedMailingList })).toHaveAttribute(
+			"href",
+			updatedMailingList,
+		);
+		await governanceBodiesPage.goto();
 		await governanceBodiesPage.searchByName(originalName);
 		await expect(governanceBodiesPage.rowByName(originalName)).toBeHidden();
 
@@ -106,6 +120,7 @@ test.describe("governance bodies admin", () => {
 		expect(updated).toMatchObject({
 			acronym: updatedAcronym,
 			imageId: testAsset.id,
+			mailingList: updatedMailingList,
 			name: updatedName,
 			summary: updatedSummary,
 		});
@@ -129,6 +144,7 @@ test.describe("governance bodies admin", () => {
 		await governanceBodiesPage.fillSummary("Optional governance body summary.");
 		await governanceBodiesPage.selectTestImage();
 		await governanceBodiesPage.fillDescription("Required description for clear test.");
+		await governanceBodiesPage.fillMailingList("https://lists.e2e.example.org/optional-gb");
 		await governanceBodiesPage.submitForm();
 
 		await governanceBodiesPage.searchByName(originalName);
@@ -143,11 +159,42 @@ test.describe("governance bodies admin", () => {
 		await page.getByLabel("Name", { exact: true }).fill(updatedName);
 		await governanceBodiesPage.fillAcronym("");
 		await governanceBodiesPage.fillSummary("");
+		await governanceBodiesPage.fillMailingList("");
 		await governanceBodiesPage.removeImage();
 		await governanceBodiesPage.submitForm();
 
 		const updated = await db.getGovernanceBodyByName(updatedName);
-		expect(updated).toMatchObject({ acronym: null, imageId: null, summary: null });
+		expect(updated).toMatchObject({
+			acronym: null,
+			imageId: null,
+			mailingList: null,
+			summary: null,
+		});
+	});
+
+	test("should reject a mailing list that is neither an email nor a URL", async ({
+		createAdminGovernanceBodiesPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const governanceBodiesPage = createAdminGovernanceBodiesPage(workerIndex);
+
+		const name = `${governanceBodiesPage.workerPrefix} Invalid Mailing List ${randomUUID()}`;
+
+		await governanceBodiesPage.gotoCreate();
+		await governanceBodiesPage.fillName(name);
+		await governanceBodiesPage.fillSummary("Governance body with an invalid mailing list.");
+		await governanceBodiesPage.fillDescription("Description for validation test.");
+		await governanceBodiesPage.fillMailingList("not-an-email-or-url");
+
+		// Mailing list is a plain text field (no client-side type), so the invalid value reaches the
+		// server action, which returns an error state with the inline field message.
+		await governanceBodiesPage.page
+			.getByRole("button", { name: /^Save(?! and publish\b).*$/ })
+			.click();
+
+		await expect(
+			governanceBodiesPage.page.getByText("Enter a valid email address or URL."),
+		).toBeVisible();
 	});
 
 	test("should manage person relations", async ({ createAdminGovernanceBodiesPage, db }) => {
