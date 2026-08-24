@@ -500,7 +500,40 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			}
 
 			const images =
-				layout === "carousel" ? (
+				layout === "logos" ? (
+					// A logo row is a list of marks to recognise, not a set of images to look at, so it
+					// is sized by height instead of by column: every logo gets the same optical weight,
+					// and the row wraps rather than reflowing into tracks. The cap is a maximum, not a
+					// height — a mark smaller than it stays at its natural size, since imgproxy does not
+					// enlarge and a stretched logo only renders soft.
+					//
+					// No plate behind the marks: they sit on the page background, so a logo authored in
+					// dark ink needs its own light backdrop baked in, the way the composite funder
+					// strips already carry one.
+					//
+					// Item captions credit an asset, and a caption under each mark would rebuild the
+					// grid this arrangement exists to avoid, so here they only reach `alt`. The
+					// gallery's own caption still renders below the row.
+					<ul className="flex list-none flex-wrap items-center justify-center gap-x-8 gap-y-6 p-0">
+						{items.map((item, idx) => {
+							if (item.imageUrl == null || item.imageUrl === "") {
+								return null;
+							}
+
+							const { caption } = resolveGalleryItemCaption(item);
+
+							return (
+								<li key={idx} className="flex items-center">
+									<img
+										alt={toPlainText(caption)}
+										className="inline-auto max-block-14 max-inline-full"
+										src={item.imageUrl}
+									/>
+								</li>
+							);
+						})}
+					</ul>
+				) : layout === "carousel" ? (
 					<div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pbe-2">
 						{items.map((item, idx) => {
 							if (item.imageUrl == null || item.imageUrl === "") {

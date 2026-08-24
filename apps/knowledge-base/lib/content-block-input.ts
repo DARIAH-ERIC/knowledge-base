@@ -54,7 +54,7 @@ const NestableContentBlockInputSchema = v.union([
 		position: v.optional(v.number()),
 		content: v.optional(
 			v.object({
-				layout: v.optional(v.picklist(["carousel", "grid"] as const)),
+				layout: v.optional(v.picklist(["carousel", "grid", "logos"] as const)),
 				caption: v.optional(v.nullable(v.custom<JSONContent>(() => true))),
 				items: v.optional(
 					v.array(
