@@ -12,6 +12,7 @@
 		"data:migrate:legacy-footnotes": "tsx ./scripts/convert-legacy-footnotes.ts",
 		"data:migrate:unr": "tsx ./scripts/migrate-unr.ts",
 		"data:migrate:wordpress": "tsx ./scripts/migrate-wordpress.ts",
+		"data:migrate:wordpress-event": "tsx ./scripts/migrate-wordpress-event.ts",
 		"data:migrate:wordpress-news-item": "tsx ./scripts/migrate-wordpress-news-item.ts",
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",

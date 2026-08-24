@@ -1,13 +1,18 @@
-import { assert, createUrl, createUrlSearchParams, keyBy, log } from "@acdh-oeaw/lib";
+import { assert, isNonEmptyString, keyBy, log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { createStorageService } from "@dariah-eric/storage";
 import { and, eq } from "drizzle-orm";
-import type { WP_REST_API_Categories, WP_REST_API_Post, WP_REST_API_Posts } from "wp-types";
 
 import { apiBaseUrl, placeholderImageUrl } from "../config/data-migration.config";
 import { env } from "../config/env.config";
-import { type WordPressData, getMediaById, parseWordPressGmt } from "../src/lib/get-wordpress-data";
+import {
+	type WordPressData,
+	getEventBySlug,
+	getEventDuration,
+	getMediaById,
+	parseWordPressGmt,
+} from "../src/lib/get-wordpress-data";
 import {
 	createWordPressContentMigrator,
 	normalizeWordPressSlug,
@@ -18,13 +23,15 @@ import {
 } from "../src/lib/migrate-wordpress-content";
 
 /**
- * The bulk `migrate-wordpress.ts` import already ran, but news keeps being published on the
- * WordPress site. This script migrates individual, freshly-published news items by their WordPress
- * slug — fetching them live (the bulk cache is stale) and inserting them with the exact same
- * entity/version/content shape as the bulk import. It is idempotent: a slug that already exists as
- * a news entity is skipped.
+ * The bulk `migrate-wordpress.ts` import already ran, but events keep being published on the
+ * WordPress site. This script migrates individual, freshly-published events by their WordPress
+ * slug
  *
- * Usage: `pnpm run data:migrate:wordpress-news-item <slug> [<slug> ...]`
+ * - Fetching them live (the bulk cache is stale) and inserting them with the exact same
+ *   entity/version/content shape as the bulk import. It is idempotent: a slug that already exists
+ *   as an event entity is skipped.
+ *
+ * Usage: `pnpm run data:migrate:wordpress-event <slug> [<slug> ...]`
  */
 
 const db = createDatabaseService({
@@ -54,43 +61,13 @@ const { upload, uploadFeaturedImage, migrateHtmlContent } = createWordPressConte
 	storage,
 );
 
-async function fetchJson<T>(url: URL): Promise<T> {
-	const response = await fetch(url);
-	assert(response.ok, `Request to "${url.href}" failed with status ${String(response.status)}.`);
-	return (await response.json()) as T;
-}
-
-async function getNewsCategoryId(): Promise<number> {
-	const url = createUrl({
-		baseUrl: apiBaseUrl,
-		pathname: "/wp-json/wp/v2/categories",
-		searchParams: createUrlSearchParams({ slug: "news" }),
-	});
-	const categories = await fetchJson<WP_REST_API_Categories>(url);
-	const news = categories[0];
-	assert(news, "Missing news category.");
-	return news.id;
-}
-
-async function getPostBySlug(slug: string): Promise<WP_REST_API_Post | null> {
-	const url = createUrl({
-		baseUrl: apiBaseUrl,
-		pathname: "/wp-json/wp/v2/posts",
-		searchParams: createUrlSearchParams({ slug, _embed: "author" }),
-	});
-	const posts = await fetchJson<WP_REST_API_Posts>(url);
-	return posts[0] ?? null;
-}
-
 async function main() {
 	const slugs = process.argv.slice(2).filter((slug) => slug.trim().length > 0);
 
 	assert(
 		slugs.length > 0,
-		"Provide at least one WordPress news slug: pnpm run data:migrate:wordpress-news-item <slug> [<slug> ...]",
+		"Provide at least one WordPress event slug: pnpm run data:migrate:wordpress-event <slug> [<slug> ...]",
 	);
-
-	const newsCategoryId = await getNewsCategoryId();
 
 	const status = await db.query.entityStatus.findMany();
 	const statusByType = keyBy(status, (item) => item.type);
@@ -108,50 +85,52 @@ async function main() {
 	const placeholderImageId = placeholderImage.id;
 
 	for (const slug of slugs) {
-		log.info(`Migrating news item "${slug}"...`);
+		log.info(`Migrating event "${slug}"...`);
 
-		const post = await getPostBySlug(slug);
+		const event = await getEventBySlug(apiBaseUrl, slug);
 
-		if (post == null) {
-			log.warn(`No WordPress post found for slug "${slug}". Skipping.`);
+		if (event == null) {
+			log.warn(`No WordPress event found for slug "${slug}". Skipping.`);
 			continue;
 		}
 
-		if (post.status !== "publish") {
-			log.warn(`News item "${slug}" has not been published (status "${post.status}"). Skipping.`);
+		if (event.status !== "publish") {
+			log.warn(`Event "${slug}" has not been published (status "${event.status}"). Skipping.`);
 			continue;
 		}
 
-		if (post.categories == null || !post.categories.includes(newsCategoryId)) {
-			log.warn(`Post "${slug}" is not in the news category. Skipping.`);
+		if (!isNonEmptyString(event.utc_start_date)) {
+			log.warn(`Event "${slug}" has no start date. Skipping.`);
 			continue;
 		}
 
-		const entitySlug = normalizeWordPressSlug(post.slug, toPlaintext(post.title.rendered));
+		const entitySlug = normalizeWordPressSlug(event.slug, toPlaintext(event.title));
 
 		const existing = await db
 			.select({ id: schema.entities.id })
 			.from(schema.entities)
 			.where(
-				and(eq(schema.entities.typeId, typesByType.news.id), eq(schema.entities.slug, entitySlug)),
+				and(
+					eq(schema.entities.typeId, typesByType.events.id),
+					eq(schema.entities.slug, entitySlug),
+				),
 			)
 			.limit(1);
 
 		if (existing.length > 0) {
-			log.warn(`A news entity with slug "${entitySlug}" already exists. Skipping.`);
+			log.warn(`An event entity with slug "${entitySlug}" already exists. Skipping.`);
 			continue;
 		}
 
 		let media: WordPressData["media"] = {};
-		let featuredMediaId: number | undefined =
-			post.featured_media !== 0 ? post.featured_media : undefined;
+		let featuredMediaId: number | undefined = event.image !== false ? event.image.id : undefined;
 
 		if (featuredMediaId != null) {
 			const attachment = await getMediaById(apiBaseUrl, featuredMediaId);
 			if (attachment != null) {
 				media = { [featuredMediaId]: attachment };
 			} else {
-				log.warn(`Missing featured image (news slug "${slug}").`);
+				log.warn(`Missing featured image (event slug "${slug}").`);
 				featuredMediaId = undefined;
 			}
 		}
@@ -161,9 +140,9 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: entitySlug,
-					typeId: typesByType.news.id,
-					createdAt: parseWordPressGmt(post.date_gmt),
-					updatedAt: parseWordPressGmt(post.modified_gmt),
+					typeId: typesByType.events.id,
+					createdAt: parseWordPressGmt(event.date_utc),
+					updatedAt: parseWordPressGmt(event.modified_utc),
 				})
 				.returning({ id: schema.entities.id });
 
@@ -186,26 +165,32 @@ async function main() {
 				assetsCache,
 				media,
 				featuredMediaId,
-				post.id,
+				event.id,
 			);
 
-			await tx.insert(schema.news).values({
+			await tx.insert(schema.events).values({
 				id,
-				title: toPlaintext(post.title.rendered),
-				summary: toSummary(post.excerpt.rendered),
+				title: toPlaintext(event.title),
+				summary: toSummary(event.description),
 				imageId: imageId ?? placeholderImageId,
-				publicationDate: parseWordPressGmt(post.date_gmt),
-				createdAt: parseWordPressGmt(post.date_gmt),
-				updatedAt: parseWordPressGmt(post.modified_gmt),
+				website: event.website,
+				location:
+					Array.isArray(event.venue) && event.venue.length === 0
+						? ""
+						: [event.venue.venue, event.venue.country].filter(isNonEmptyString).join(", "),
+				duration: getEventDuration(event),
+				isFullDay: event.all_day,
+				createdAt: parseWordPressGmt(event.date_utc),
+				updatedAt: parseWordPressGmt(event.modified_utc),
 			});
 
-			if (post.content.rendered.trim().length === 0) {
+			if (event.description.trim().length === 0) {
 				return;
 			}
 
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
-					entityTypeId: typesByType.news.id,
+					entityTypeId: typesByType.events.id,
 					fieldName: "content",
 				},
 			});
@@ -224,14 +209,14 @@ async function main() {
 
 			await migrateHtmlContent(
 				tx,
-				post.content.rendered,
+				event.description,
 				assetsCache,
 				field.id,
 				contentBlockTypesByType,
 			);
 		});
 
-		log.success(`Migrated news item "${slug}" (entity slug "${entitySlug}").`);
+		log.success(`Migrated event "${slug}" (entity slug "${entitySlug}").`);
 	}
 
 	await writeAssetsCacheData(assetsCache);
@@ -239,7 +224,7 @@ async function main() {
 
 main()
 	.catch((error: unknown) => {
-		log.error("Failed to migrate news item.", error);
+		log.error("Failed to migrate event.", error);
 		process.exitCode = 1;
 	})
 	// oxlint-disable-next-line typescript/no-misused-promises

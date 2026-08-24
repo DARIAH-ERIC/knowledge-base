@@ -15,16 +15,7 @@
 	"editor.rulers": [100],
 	"editor.stickyScroll.enabled": true,
 	"emmet.showExpandedAbbreviation": "never",
-	"eslint.enable": true,
-	"eslint.options": {
-		"flags": ["unstable_native_nodejs_ts_config"]
-	},
-	"eslint.validate": ["javascript", "typescript", "typescriptreact"],
-	"eslint.workingDirectories": [
-		{ "pattern": "./apps/*" },
-		{ "pattern": "./lib/*" },
-		{ "pattern": "./packages/*" }
-	],
+	"eslint.enable": false,
 	"files.associations": {
 		"*.css": "tailwindcss"
 	},
@@ -44,7 +35,7 @@
 	"js/ts.tsdk.promptToUseWorkspaceVersion": true,
 	"less.validate": false,
 	"mdx.server.enable": true,
-	"oxc.enable.oxfmt": true,
+	"oxc.enable": true,
 	"prettier.enable": false,
 	"scss.validate": false,
 	"search.exclude": {

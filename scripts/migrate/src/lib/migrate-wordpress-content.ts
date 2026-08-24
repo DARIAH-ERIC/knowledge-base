@@ -3,12 +3,19 @@ import { existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
-import { assert, isNonEmptyString, log, unreachable } from "@acdh-oeaw/lib";
+import {
+	assert,
+	createUrl,
+	createUrlSearchParams,
+	isNonEmptyString,
+	log,
+	unreachable,
+} from "@acdh-oeaw/lib";
 import { type Database, type Transaction, plainTextToRichText } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import type { StorageService } from "@dariah-eric/storage";
 import type { AssetPrefix } from "@dariah-eric/storage/config";
-import { buffer } from "@dariah-eric/storage/lib";
+import { type Dimensions, buffer, toDisplayDimensions } from "@dariah-eric/storage/lib";
 import slugify from "@sindresorhus/slugify";
 import type { JSONContent } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
@@ -17,9 +24,14 @@ import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
 import { toText } from "hast-util-to-text";
 import fromHtml from "rehype-parse";
+import sharp from "sharp";
 import { unified } from "unified";
 
-import { assetsCacheFilePath, assetsCacheFolderPath } from "../../config/data-migration.config";
+import {
+	apiBaseUrl,
+	assetsCacheFilePath,
+	assetsCacheFolderPath,
+} from "../../config/data-migration.config";
 import { cleanTiptapDoc } from "./clean-tiptap-content";
 import type { WordPressData } from "./get-wordpress-data";
 
@@ -66,6 +78,314 @@ export function toSummary(html: string): string {
 	return toPlaintext(html)
 		.replace(/\s*read more\s*$/i, "")
 		.trim();
+}
+
+/** What `buffer.getMetadata` measured on an image, which the storage service also takes verbatim. */
+type ImageMetadata = Awaited<ReturnType<typeof buffer.getMetadata>>;
+
+/**
+ * Maximum image resolution (total pixels) imgproxy will render. Must match `imageMaxResolution` in
+ * `apps/knowledge-base/config/assets.config.ts` and the `IMGPROXY_MAX_SRC_RESOLUTION` setting (in
+ * megapixels) of the imgproxy deployment.
+ */
+const imageMaxResolution = 50 * 1_000_000;
+
+/** Vector images have no raster resolution: nothing to clamp, and no meaningful dimensions. */
+const vectorImageFormat = "svg";
+
+/**
+ * How far a derivative's aspect ratio may drift from its original's before it counts as a crop
+ * rather than a downscale. WordPress rounds derivative dimensions to whole pixels, which moves the
+ * ratio by well under a percent even for the smallest sizes, while a hard crop moves it by tens.
+ */
+const aspectRatioTolerance = 0.02;
+
+/** A url ending in WordPress's `-<width>x<height>` derivative suffix, e.g. `…-612x612.webp`. */
+const derivativeUrlPattern = /-\d+x\d+\.[a-z0-9]+$/i;
+
+/** The fields of a WordPress media item this module reads; `wp-types` leaves `media_details` open. */
+interface WordPressMediaItem {
+	id: number;
+	source_url: string;
+	media_details?: {
+		width?: number;
+		height?: number;
+		sizes?: Record<string, { source_url?: string; width?: number; height?: number }>;
+	};
+}
+
+/** A WordPress media item's full size, paired with the derivative an `<img src>` pointed at. */
+export interface WordPressOriginal {
+	mediaId: number;
+	derivative: Dimensions;
+	full: Dimensions;
+	fullUrl: string;
+}
+
+/**
+ * Compared on host and path only: urls copied out of post markup may spell the host with or without
+ * `www.` and percent-encode non-ascii filenames that the media endpoint returns decoded.
+ */
+function normaliseImageUrl(value: string): string {
+	try {
+		const url = new URL(value);
+		return `${url.host.replace(/^www\./, "")}${decodeURIComponent(url.pathname)}`;
+	} catch {
+		return value;
+	}
+}
+
+function isSameAspectRatio(derivative: Dimensions, full: Dimensions): boolean {
+	const derivativeRatio = derivative.width / derivative.height;
+	const fullRatio = full.width / full.height;
+
+	return Math.abs(derivativeRatio - fullRatio) / fullRatio <= aspectRatioTolerance;
+}
+
+/**
+ * Every derivative url the given media items know about, mapped to the original they were cut from.
+ * A url two media items both claim maps to `null` — impossible to resolve, so never acted on.
+ */
+export function indexWordPressDerivatives(
+	media: Iterable<WordPressMediaItem>,
+): Map<string, WordPressOriginal | null> {
+	const index = new Map<string, WordPressOriginal | null>();
+
+	for (const item of media) {
+		const details = item.media_details;
+		const full =
+			details?.width != null && details.height != null
+				? { width: details.width, height: details.height }
+				: undefined;
+
+		if (full == null || details?.sizes == null) {
+			continue;
+		}
+
+		for (const size of Object.values(details.sizes)) {
+			if (size.source_url == null || size.width == null || size.height == null) {
+				continue;
+			}
+
+			const key = normaliseImageUrl(size.source_url);
+			const existing = index.get(key);
+
+			// The same file is often registered under several size names (`medium_large` and a theme's
+			// own square both land on 768×768); only a second *media item* is ambiguous.
+			if (existing !== undefined && existing?.mediaId !== item.id) {
+				index.set(key, null);
+				continue;
+			}
+
+			index.set(key, {
+				mediaId: item.id,
+				derivative: { width: size.width, height: size.height },
+				full,
+				fullUrl: item.source_url,
+			});
+		}
+	}
+
+	return index;
+}
+
+/**
+ * The url whose bytes should be stored for an `<img src>`, given what WordPress knows about it.
+ *
+ * WordPress renders an inline image at a theme size and writes that derivative into the post html
+ * (`<img src="…/atrium-summer-school-612x612.webp">`), offering the larger variants in `srcset`
+ * only. Storing the derivative leaves the image soft wherever this site renders it larger than
+ * WordPress did — the `featured` variant alone asks for 1600px — so the original is stored
+ * instead.
+ *
+ * Only a pure downscale is swapped out. WordPress hard-crops some sizes (`thumbnail` is a square
+ * cut out of the frame), so a derivative whose aspect ratio differs from its original was composed
+ * by the crop, and replacing it would change what the image shows rather than sharpen it.
+ */
+export function toFullResolutionUrl(url: URL, original: WordPressOriginal | null | undefined): URL {
+	if (original == null) {
+		return url;
+	}
+
+	if (original.full.width <= original.derivative.width) {
+		return url;
+	}
+
+	if (!isSameAspectRatio(original.derivative, original.full)) {
+		return url;
+	}
+
+	return new URL(original.fullUrl);
+}
+
+/**
+ * Derivatives indexed from media the caller already holds — the bulk migration's cached payload.
+ * Consulted first so a bulk run resolves against the same snapshot it migrates from.
+ */
+let seededDerivatives: Map<string, WordPressOriginal | null> | null = null;
+
+/** Every media item on the site, fetched once per process and only if a lookup misses. */
+let allDerivatives: Promise<Map<string, WordPressOriginal | null>> | null = null;
+
+/** Media items already searched for, so a url shared by several posts costs one request. */
+const searchedDerivatives = new Map<string, WordPressOriginal | null | undefined>();
+
+/**
+ * Hands the resolver the media the caller has already fetched, so it does not go back to WordPress
+ * for a list it is holding.
+ */
+export function seedWordPressMedia(media: WordPressData["media"]): void {
+	seededDerivatives = indexWordPressDerivatives(Object.values(media));
+}
+
+async function fetchMediaPage(searchParams: Record<string, number | string>) {
+	const url = createUrl({
+		baseUrl: apiBaseUrl,
+		pathname: "/wp-json/wp/v2/media",
+		searchParams: createUrlSearchParams(searchParams),
+	});
+
+	const response = await fetch(url);
+
+	if (!response.ok) {
+		return { items: [] as Array<WordPressMediaItem>, pages: 1 };
+	}
+
+	return {
+		items: (await response.json()) as Array<WordPressMediaItem>,
+		pages: Number(response.headers.get("X-WP-TotalPages") ?? 1),
+	};
+}
+
+/**
+ * Narrows the media library to the items whose title or filename resembles the derivative's, then
+ * lets the exact url match below decide. The filename is only ever used to _find_ candidates, never
+ * to construct the original's url: `paris-1200x565.png` is an original whose name happens to end in
+ * a size suffix, and asking WordPress for a file with the suffix stripped would 404.
+ */
+async function searchDerivative(url: URL): Promise<WordPressOriginal | null | undefined> {
+	const key = normaliseImageUrl(url.href);
+
+	if (searchedDerivatives.has(key)) {
+		return searchedDerivatives.get(key);
+	}
+
+	const filename = decodeURIComponent(url.pathname).split("/").pop() ?? "";
+	const search = filename.replace(/-\d+x\d+(\.[a-z0-9]+)$/i, "");
+
+	const { items } = await fetchMediaPage({ per_page: 100, search });
+	const original = indexWordPressDerivatives(items).get(key);
+
+	searchedDerivatives.set(key, original);
+
+	return original;
+}
+
+/** Fetches and indexes the whole media library — the fallback when a search comes up empty. */
+function getAllDerivatives(): Promise<Map<string, WordPressOriginal | null>> {
+	allDerivatives ??= (async () => {
+		log.info("Indexing the WordPress media library...");
+
+		const items: Array<WordPressMediaItem> = [];
+
+		const first = await fetchMediaPage({ per_page: 100 });
+		items.push(...first.items);
+
+		for (let page = 2; page <= first.pages; page++) {
+			const next = await fetchMediaPage({ per_page: 100, page });
+			items.push(...next.items);
+		}
+
+		return indexWordPressDerivatives(items);
+	})();
+
+	return allDerivatives;
+}
+
+/**
+ * Resolves an inline image url to the full-size original WordPress holds, so nothing has to be
+ * upgraded after the fact by `data:backfill:full-resolution-images`. A url that carries no
+ * derivative suffix is already an original and costs no request; one that does is looked up in the
+ * seeded media, then by search, then in the full media library, and left as it is when none of
+ * those knows it (an image hosted elsewhere, or one since deleted from the media library).
+ */
+export async function resolveFullResolutionUrl(url: URL): Promise<URL> {
+	if (!derivativeUrlPattern.test(decodeURIComponent(url.pathname))) {
+		return url;
+	}
+
+	const key = normaliseImageUrl(url.href);
+
+	const seeded = seededDerivatives?.get(key);
+	if (seeded !== undefined) {
+		return toFullResolutionUrl(url, seeded);
+	}
+
+	const searched = await searchDerivative(url);
+	if (searched !== undefined) {
+		return toFullResolutionUrl(url, searched);
+	}
+
+	const known = (await getAllDerivatives()).get(key);
+	if (known === undefined) {
+		log.warn(`No WordPress original found for "${url.href}". Storing it as it is.`);
+	}
+
+	return toFullResolutionUrl(url, known);
+}
+
+/**
+ * Downscales an image past imgproxy's source-resolution limit to fit within it, mirroring
+ * `prepareImageForUpload` in the dashboard: above the limit imgproxy refuses to render the image at
+ * all, and a handful of WordPress originals are 250MP scans. Anything within the limit is passed
+ * through untouched rather than re-encoded.
+ */
+async function clampToMaxResolution(
+	image: Buffer,
+	metadata: ImageMetadata,
+): Promise<{ image: Buffer; metadata: ImageMetadata }> {
+	const resolution = metadata.width * metadata.height;
+
+	if (
+		metadata.format === vectorImageFormat ||
+		!Number.isFinite(resolution) ||
+		resolution <= imageMaxResolution
+	) {
+		return { image, metadata };
+	}
+
+	const scale = Math.sqrt(imageMaxResolution / resolution);
+
+	const resized = await sharp(image)
+		/** Bake EXIF orientation into the pixels before we strip metadata during re-encoding. */
+		.rotate()
+		.resize({
+			fit: "inside",
+			height: Math.floor(metadata.height * scale),
+			width: Math.floor(metadata.width * scale),
+		})
+		.toBuffer();
+
+	// Measured rather than computed from `scale`: `.rotate()` has baked in the orientation by now,
+	// and `fit: "inside"` rounds to preserve the aspect ratio.
+	return { image: resized, metadata: await buffer.getMetadata(resized) };
+}
+
+/**
+ * The dimensions to record for a stored image, or `null` for a vector — which has no raster
+ * resolution, and whose `assets.width`/`assets.height` therefore have to stay null so consumers
+ * read them as "no upper bound" rather than as a `srcset` ceiling.
+ */
+function toStoredDimensions(metadata: ImageMetadata): Dimensions | null {
+	if (metadata.format === vectorImageFormat) {
+		return null;
+	}
+
+	return toDisplayDimensions({
+		width: metadata.width,
+		height: metadata.height,
+		orientation: metadata.orientation,
+	});
 }
 
 export type AssetsCache = Map<string, string>;
@@ -208,9 +528,11 @@ export function createWordPressContentMigrator(
 		caption?: string,
 		alt?: string,
 	) {
-		const { input, metadata } = await readCached(assetsCache, url);
+		const cached = await readCached(assetsCache, url);
+		const { image, metadata } = await clampToMaxResolution(cached.input, cached.metadata);
+		const dimensions = toStoredDimensions(metadata);
 
-		const { key } = (await storage.upload({ prefix, input, metadata })).unwrap();
+		const { key } = (await storage.upload({ prefix, input: image, metadata })).unwrap();
 
 		const [asset] = await db
 			.insert(schema.assets)
@@ -220,6 +542,9 @@ export function createWordPressContentMigrator(
 				mimeType: metadata["content-type"],
 				caption: caption === "Read more" ? null : plainTextToRichText(caption),
 				alt,
+				size: image.byteLength,
+				width: dimensions?.width,
+				height: dimensions?.height,
 			})
 			.returning({ id: schema.assets.id });
 
@@ -357,13 +682,18 @@ export function createWordPressContentMigrator(
 						richTextRun = [];
 					}
 					try {
+						/**
+						 * The original rather than the theme-sized derivative the post markup points at, and
+						 * labelled with the url its bytes actually came from.
+						 */
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+						const source = await resolveFullResolutionUrl(new URL(node.attrs.src));
+
 						const asset = await upload(
 							"images",
 							assetsCache,
-							// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-							new URL(node.attrs.src),
-							// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-							node.attrs.src,
+							source,
+							source.href,
 							undefined,
 							// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
 							typeof node.attrs.alt === "string" && node.attrs.alt !== ""
