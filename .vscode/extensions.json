@@ -1,7 +1,6 @@
 {
 	"recommendations": [
 		"bradlc.vscode-tailwindcss",
-		"dbaeumer.vscode-eslint",
 		"editorconfig.editorconfig",
 		"github.vscode-github-actions",
 		"matt-meyers.vscode-dbml",

@@ -29,6 +29,8 @@ import {
 	createWordPressContentMigrator,
 	normalizeWordPressSlug,
 	readAssetsCacheData,
+	resolveFullResolutionUrl,
+	seedWordPressMedia,
 	toPlaintext,
 	toSummary,
 	writeAssetsCacheData,
@@ -211,7 +213,11 @@ async function uploadListPageImage(
 	image: ListPageImageReference,
 ) {
 	const wpMedia = image.mediaId != null ? media[image.mediaId] : undefined;
-	const url = new URL(wpMedia?.source_url ?? image.imageUrl, apiBaseUrl);
+	// The markup this url was scraped from may name a theme-sized derivative rather than the media
+	// item itself, which the media library resolves back to its original.
+	const url = await resolveFullResolutionUrl(
+		new URL(wpMedia?.source_url ?? image.imageUrl, apiBaseUrl),
+	);
 	const label =
 		wpMedia != null ? toPlaintext(wpMedia.title.rendered).trim() : image.title || image.pageSlug;
 	const caption = wpMedia != null ? toPlaintext(wpMedia.caption.rendered).trim() : image.title;
@@ -436,6 +442,13 @@ async function main() {
 	log.info("Retrieving data from wordpress...");
 
 	const data = await getData();
+
+	/**
+	 * Inline images are stored at full resolution, which means resolving the theme-sized derivative
+	 * in the post markup to the media item it was cut from. That lookup is handed the media this run
+	 * already holds, so it resolves against the same snapshot everything else is migrated from.
+	 */
+	seedWordPressMedia(data.media);
 
 	const assetsCache = await readAssetsCacheData();
 	await fs.writeFile(projectMetadataConflictLogFilePath, "", { encoding: "utf-8" });

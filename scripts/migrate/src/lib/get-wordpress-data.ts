@@ -589,6 +589,26 @@ export function getEvents(baseUrl: string): Promise<Array<WP_Event>> {
 	return getAll(url, "x-tec-totalpages", (response) => response.events as Array<WP_Event>);
 }
 
+/**
+ * Fetches a single event live from The Events Calendar by its WordPress slug. Returns `null` when
+ * no event matches - the endpoint answers an unknown slug with `400 rest_invalid_param`, not
+ * `404`.
+ */
+export async function getEventBySlug(baseUrl: string, slug: string): Promise<WP_Event | null> {
+	const url = createUrl({
+		baseUrl,
+		pathname: `/wp-json/tribe/events/v1/events/by-slug/${encodeURIComponent(slug)}`,
+	});
+
+	const response = await fetch(url);
+
+	if (!response.ok) {
+		return null;
+	}
+
+	return (await response.json()) as WP_Event;
+}
+
 function getInitiatives(baseUrl: string): Promise<WP_REST_API_Posts> {
 	const url = createUrl({
 		baseUrl,
@@ -617,6 +637,22 @@ function getMedia(baseUrl: string): Promise<WP_REST_API_Attachments> {
 	});
 
 	return getAll(url);
+}
+
+/** Fetches a single media attachment live. Returns `null` when the attachment does not exist. */
+export async function getMediaById(
+	baseUrl: string,
+	id: number,
+): Promise<WP_REST_API_Attachment | null> {
+	const url = createUrl({ baseUrl, pathname: `/wp-json/wp/v2/media/${String(id)}` });
+
+	const response = await fetch(url);
+
+	if (!response.ok) {
+		return null;
+	}
+
+	return (await response.json()) as WP_REST_API_Attachment;
 }
 
 function getPages(baseUrl: string): Promise<WP_REST_API_Pages> {
