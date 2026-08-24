@@ -2022,6 +2022,20 @@ function createMediaTextNode(
 	});
 }
 
+/** How each arrangement lays its items out in the read view of the editor. */
+const galleryListClassName: Record<GalleryLayout, string> = {
+	carousel: "grid auto-cols-[minmax(8rem,1fr)] grid-flow-col overflow-x-auto",
+	grid: "grid grid-cols-[repeat(auto-fill,minmax(min(10rem,100%),1fr))]",
+	logos: "flex flex-wrap items-center justify-center gap-x-6",
+};
+
+/** What the block's footer calls each arrangement. */
+const galleryLayoutLabel: Record<GalleryLayout, string> = {
+	carousel: "Carousel",
+	grid: "Grid",
+	logos: "Logos",
+};
+
 interface GalleryNodeViewProps extends NodeViewProps {
 	hasFootnotes?: boolean;
 	renderImagePicker?: ImagePickerRenderer;
@@ -2144,7 +2158,18 @@ function GalleryNodeView({
 						>
 							<ToggleGroupItem id="grid">{"Grid"}</ToggleGroupItem>
 							<ToggleGroupItem id="carousel">{"Carousel"}</ToggleGroupItem>
+							<ToggleGroupItem id="logos">{"Logos"}</ToggleGroupItem>
 						</ToggleGroup>
+						{/* The item captions below stay editable in this layout — they still credit the asset
+						    and still reach the read view as alternative text — so say where they go, rather
+						    than hiding controls whose values survive a switch back to grid. */}
+						{layoutInput === "logos" ? (
+							<span className="text-xs text-muted-fg">
+								{
+									"Logos share one height and render without visible captions — an item's caption becomes its alternative text."
+								}
+							</span>
+						) : null}
 					</div>
 					{/* The gallery's own caption, describing the set. The per-item captions below credit the
 					    individual images, and follow the shared inherit/override/hide model; this one has no
@@ -2309,14 +2334,7 @@ function GalleryNodeView({
 			) : (
 				<div className="group">
 					<div className="relative">
-						<ul
-							className={cn(
-								"grid list-none gap-2 p-2",
-								layout === "carousel"
-									? "auto-cols-[minmax(8rem,1fr)] grid-flow-col overflow-x-auto"
-									: "grid-cols-[repeat(auto-fill,minmax(min(10rem,100%),1fr))]",
-							)}
-						>
+						<ul className={cn("list-none gap-2 p-2", galleryListClassName[layout])}>
 							{items.map((item, index) => {
 								const resolvedCaption = resolveImageCaption(
 									item.captionMode,
@@ -2324,14 +2342,36 @@ function GalleryNodeView({
 									item.assetCaption,
 								);
 
+								// A logo row is sized by height and carries no captions (see the read view), so
+								// it is drawn here the way it will render rather than as a tiled gallery item.
+								if (layout === "logos") {
+									return (
+										<li key={index} className="flex items-center">
+											<img
+												alt={item.alt ?? ""}
+												className="block inline-auto max-block-14 max-inline-full"
+												draggable={false}
+												src={item.imageUrl ?? ""}
+											/>
+										</li>
+									);
+								}
+
 								return (
 									<li key={index} className="flex flex-col gap-y-1">
-										<img
-											alt={item.alt ?? ""}
-											className="block aspect-video rounded-sm object-cover inline-full"
-											draggable={false}
-											src={item.imageUrl ?? ""}
-										/>
+										{/* A gallery mixes wide banners, portraits and transparent logos, so the tile
+										    bounds the image instead of cropping it: a fixed-ratio box keeps the grid
+										    rhythm and caps how much space a portrait can take, while the image inside
+										    is only ever scaled down — never upscaled, for the same reason the single
+										    image block draws at natural width. */}
+										<div className="flex aspect-video items-center justify-center overflow-hidden rounded-sm bg-muted p-1">
+											<img
+												alt={item.alt ?? ""}
+												className="block max-block-full max-inline-full"
+												draggable={false}
+												src={item.imageUrl ?? ""}
+											/>
+										</div>
 										{!isEmptyRichTextDocument(resolvedCaption) ? (
 											<InlineRichTextRenderer
 												className="text-xs text-muted-fg"
@@ -2374,7 +2414,7 @@ function GalleryNodeView({
 						/>
 					) : null}
 					<div className="border-bs border-border px-4 py-2 text-xs text-muted-fg">
-						{`${layout === "carousel" ? "Carousel" : "Grid"} · ${String(items.length)} ${items.length === 1 ? "image" : "images"}`}
+						{`${galleryLayoutLabel[layout]} · ${String(items.length)} ${items.length === 1 ? "image" : "images"}`}
 					</div>
 				</div>
 			)}

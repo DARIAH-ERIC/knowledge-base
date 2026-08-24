@@ -26,10 +26,10 @@ export function normalizeImageLayout(value: unknown): ImageLayout {
 }
 
 /** Mirrors `galleryLayoutEnum` in `@dariah-eric/database` — the stored column is a closed set. */
-export type GalleryLayout = "carousel" | "grid";
+export type GalleryLayout = "carousel" | "grid" | "logos";
 
 export function normalizeGalleryLayout(value: unknown): GalleryLayout {
-	return value === "carousel" ? "carousel" : "grid";
+	return value === "carousel" || value === "logos" ? value : "grid";
 }
 
 export type CalloutIntent = "neutral" | "info" | "warning" | "danger" | "success";

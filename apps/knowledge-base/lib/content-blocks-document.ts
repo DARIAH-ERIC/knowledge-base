@@ -13,10 +13,10 @@ function normalizeImageLayout(value: unknown): ImageLayout {
 }
 
 /** Mirrors `galleryLayoutEnum` in `@dariah-eric/database`. */
-type GalleryLayout = "carousel" | "grid";
+type GalleryLayout = "carousel" | "grid" | "logos";
 
 function normalizeGalleryLayout(value: unknown): GalleryLayout {
-	return value === "carousel" ? "carousel" : "grid";
+	return value === "carousel" || value === "logos" ? value : "grid";
 }
 
 /** A stored block predating `captionMode` is read as whichever mode its caption implies. */

@@ -224,8 +224,13 @@ export const EmbedContentBlockUpdateSchema = createUpdateSchema(embedContentBloc
 /**
  * How a gallery arranges its items. A column count is deliberately not modelled: the renderer picks
  * one from the item count and the viewport, so an author chooses an arrangement, not a geometry.
+ *
+ * `logos` is the odd one out: it arranges by height rather than by column, because a row of
+ * organiser or funder marks is a list of things to recognise, not a set of images to look at.
+ * Authors were building those out of `grid` galleries, where the track minimum is tuned for images
+ * and made two square logos tower over the prose around them.
  */
-export const galleryLayoutEnum = ["carousel", "grid"] as const;
+export const galleryLayoutEnum = ["carousel", "grid", "logos"] as const;
 
 export const galleryContentBlocks = p.snakeCase.table("content_blocks_type_gallery", {
 	id: p

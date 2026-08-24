@@ -168,6 +168,7 @@ describe("attribute normalizers", () => {
 	test.each([
 		["carousel", "carousel"],
 		["grid", "grid"],
+		["logos", "logos"],
 		["mosaic", "grid"],
 		[null, "grid"],
 	])("normalizes the gallery layout %s", (value, expected) => {
