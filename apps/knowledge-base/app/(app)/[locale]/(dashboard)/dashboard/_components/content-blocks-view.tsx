@@ -526,7 +526,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 								<li key={idx} className="flex items-center">
 									<img
 										alt={toPlainText(caption)}
-										className="inline-auto max-block-14 max-inline-full"
+										className="inline-auto max-block-24 max-inline-full"
 										src={item.imageUrl}
 									/>
 								</li>
