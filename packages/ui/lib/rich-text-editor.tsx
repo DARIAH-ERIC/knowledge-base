@@ -2349,7 +2349,7 @@ function GalleryNodeView({
 										<li key={index} className="flex items-center">
 											<img
 												alt={item.alt ?? ""}
-												className="block inline-auto max-block-14 max-inline-full"
+												className="block inline-auto max-block-24 max-inline-full"
 												draggable={false}
 												src={item.imageUrl ?? ""}
 											/>
