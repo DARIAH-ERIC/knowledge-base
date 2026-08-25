@@ -450,6 +450,7 @@ export function useChartGeometry(
 
 	// A filter change can shorten the category list while a band is hovered.
 	useEffect(() => {
+		// oxlint-disable-next-line react/set-state-in-effect
 		setActiveIndex(null);
 	}, [width]);
 
