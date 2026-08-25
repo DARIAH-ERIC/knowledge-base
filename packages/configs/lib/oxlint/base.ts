@@ -246,7 +246,7 @@ const config = defineConfig({
 		"no-object-constructor": "off",
 		"no-promise-executor-return": "off",
 		"no-prototype-builtins": "error",
-		"no-redeclare": "error",
+		"no-redeclare": "off",
 		"no-self-compare": "off",
 		"no-throw-literal": "off",
 		"no-useless-return": "off",
