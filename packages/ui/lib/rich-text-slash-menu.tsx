@@ -359,6 +359,7 @@ export function SlashCommandMenu(props: Readonly<SlashCommandMenuProps>): ReactN
 
 	useLayoutEffect(() => {
 		if (trigger == null) {
+			// oxlint-disable-next-line react/set-state-in-effect
 			setPosition(null);
 			return;
 		}

@@ -50,6 +50,7 @@ export function SheetContent({
 	role = "dialog",
 	closeButton = true,
 	isFloat = true,
+	// oxlint-disable-next-line no-unused-vars
 	overlay: _,
 	children,
 	...props

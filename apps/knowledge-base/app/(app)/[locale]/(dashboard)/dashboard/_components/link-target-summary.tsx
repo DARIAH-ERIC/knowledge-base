@@ -98,6 +98,7 @@ function EntityLinkTargetSummary({ entityId }: Readonly<{ entityId: string }>): 
 	useEffect(() => {
 		const controller = new AbortController();
 
+		// oxlint-disable-next-line react/set-state-in-effect
 		setIsPending(true);
 
 		async function resolveEntity() {

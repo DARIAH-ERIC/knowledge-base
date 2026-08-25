@@ -193,6 +193,7 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 	// The open appointments to choose from are only known once a person is picked.
 	useEffect(() => {
 		if (!isEndMode || person == null) {
+			// oxlint-disable-next-line react/set-state-in-effect
 			setAppointments(null);
 			return;
 		}

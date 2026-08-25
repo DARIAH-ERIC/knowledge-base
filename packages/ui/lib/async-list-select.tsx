@@ -166,6 +166,7 @@ function AsyncListSelectInner<T extends AsyncOption>(
 	// references stay stable, which would otherwise freeze an outdated `value` into this closure and
 	// resurrect previously-removed ids on the next removal.
 	const valueRef = useRef(value);
+	// oxlint-disable-next-line react/refs
 	valueRef.current = value;
 
 	const remove = useCallback(

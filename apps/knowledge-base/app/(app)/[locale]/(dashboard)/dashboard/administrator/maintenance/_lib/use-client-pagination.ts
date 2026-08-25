@@ -29,6 +29,7 @@ export function useClientPagination<T>(
 
 	useEffect(() => {
 		if (page > totalPages) {
+			// oxlint-disable-next-line react/set-state-in-effect
 			setPage(totalPages);
 		}
 	}, [page, totalPages]);

@@ -47,6 +47,7 @@ export function CommandPalette(props: Readonly<CommandPaletteProps>): ReactNode 
 
 	useEffect(() => {
 		if (!isOpen || query.length < 2) {
+			// oxlint-disable-next-line react/set-state-in-effect
 			setSearchResults([]);
 			setSearchError(null);
 			setIsSearching(false);

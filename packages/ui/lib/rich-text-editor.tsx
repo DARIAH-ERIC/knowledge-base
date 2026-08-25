@@ -844,6 +844,7 @@ function AccordionItemNodeView({
 	// Re-seeding on change is what makes undo, redo and a collaborator's edit show up in the field
 	// instead of leaving it stranded on what was typed here.
 	useEffect(() => {
+		// oxlint-disable-next-line react/set-state-in-effect react/no-deriving-state-in-effects
 		setTitleInput(title);
 	}, [title]);
 
@@ -2891,6 +2892,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const extensions = useMemo(
 		() => [
+			// oxlint-disable-next-line react/refs
 			...createRichTextExtensions({
 				hasFootnotes,
 				renderImagePicker,
@@ -2951,22 +2953,28 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		target: string;
 	} | null>(null);
 
-	const closePicker = useCallback((isOpen: boolean) => {
-		if (!isOpen) {
-			setOpenPicker(null);
-			setLinkRetarget(null);
-		}
-	}, []);
+	const closePicker = useCallback(
+		(isOpen: boolean) => {
+			if (!isOpen) {
+				setOpenPicker(null);
+				setLinkRetarget(null);
+			}
+		},
+		[setOpenPicker, setLinkRetarget],
+	);
 
 	const pickImage = useCallback(() => {
 		setOpenPicker("image");
-	}, []);
+	}, [setOpenPicker]);
 
 	/** Opens a target picker to link the selection to whatever is picked. */
-	const openTargetPicker = useCallback((kind: "document" | "entity") => {
-		setLinkRetarget(null);
-		setOpenPicker(kind);
-	}, []);
+	const openTargetPicker = useCallback(
+		(kind: "document" | "entity") => {
+			setLinkRetarget(null);
+			setOpenPicker(kind);
+		},
+		[setLinkRetarget, setOpenPicker],
+	);
 
 	const actions = useRichTextActions({
 		editor,
@@ -3220,11 +3228,14 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 	 * that offered it: the picker is a modal dialog, and the popover would sit under it and take the
 	 * selection restore with it when it closed.
 	 */
-	const retargetLink = useCallback((kind: "document" | "entity", target: string) => {
-		setLinkRetarget({ kind, target });
-		setIsLinkPopoverOpen(false);
-		setOpenPicker(kind);
-	}, []);
+	const retargetLink = useCallback(
+		(kind: "document" | "entity", target: string) => {
+			setLinkRetarget({ kind, target });
+			setIsLinkPopoverOpen(false);
+			setOpenPicker(kind);
+		},
+		[setLinkRetarget, setIsLinkPopoverOpen, setOpenPicker],
+	);
 
 	const insertImage = useCallback<InsertImage>(
 		(imageKey, imageUrl, asset) => {
@@ -3554,12 +3565,14 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						onOpenChange: closePicker,
 						select: insertImage,
 					})}
+					{/* oxlint-disable-next-line react/refs */}
 					{renderDocumentPicker?.({
 						isOpen: openPicker === "document",
 						onOpenChange: closePicker,
 						select: linkDocument,
 						current: linkRetarget?.kind === "document" ? linkRetarget.target : null,
 					})}
+					{/* oxlint-disable-next-line react/refs */}
 					{renderEntityPicker?.({
 						isOpen: openPicker === "entity",
 						onOpenChange: closePicker,
