@@ -4,10 +4,9 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 import { assert, isNonEmptyString, keyBy, log } from "@acdh-oeaw/lib";
-import { type Database, type Transaction, createDatabaseService } from "@dariah-eric/database";
+import { type Transaction, createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { createStorageService } from "@dariah-eric/storage";
-import type { AssetPrefix } from "@dariah-eric/storage/config";
 import slugify from "@sindresorhus/slugify";
 import { and, eq } from "drizzle-orm";
 
@@ -18,6 +17,7 @@ import {
 	placeholderImageUrl,
 } from "../config/data-migration.config";
 import { env } from "../config/env.config";
+import { documentIdOf } from "../src/lib/entity-versions";
 import {
 	type WordPressData,
 	getEventDuration,
@@ -25,16 +25,21 @@ import {
 	parseWordPressGmt,
 } from "../src/lib/get-wordpress-data";
 import {
-	type AssetsCache,
 	createWordPressContentMigrator,
 	normalizeWordPressSlug,
 	readAssetsCacheData,
-	resolveFullResolutionUrl,
 	seedWordPressMedia,
 	toPlaintext,
 	toSummary,
 	writeAssetsCacheData,
 } from "../src/lib/migrate-wordpress-content";
+import { createPersonResolver } from "../src/lib/persons";
+import { extractAuthorsFromHtml } from "../src/lib/wordpress-authors";
+import {
+	type ListPageImageReference,
+	extractListPageImageReferences,
+	uploadListPageImage,
+} from "../src/lib/wordpress-list-page-images";
 
 const db = createDatabaseService({
 	connection: {
@@ -46,135 +51,6 @@ const db = createDatabaseService({
 	},
 	logger: false,
 }).unwrap();
-
-/**
- * Relations and article contributors are now keyed by document id (`entities.id`). This import
- * builds entity _version_ ids, so resolve a version id to its document id before inserting into
- * those tables.
- */
-async function documentIdOf(executor: Database | Transaction, versionId: string): Promise<string> {
-	const [row] = await executor
-		.select({ entityId: schema.entityVersions.entityId })
-		.from(schema.entityVersions)
-		.where(eq(schema.entityVersions.id, versionId))
-		.limit(1);
-	assert(row, `No entity version found for id "${versionId}".`);
-	return row.entityId;
-}
-
-function extractAuthorsFromHtml(html: string): Array<string> {
-	const lines = toPlaintext(html)
-		.split(/\r?\n+/)
-		.map((line) => line.trim())
-		.filter((line) => line.length > 0)
-		.slice(0, 20);
-
-	const affiliations = [
-		"university",
-		"college",
-		"institute",
-		"institut",
-		"dariah",
-		"clariah",
-		"professor",
-		"assistant",
-		"associate",
-		"scientific",
-		"lecturer",
-		"research",
-		"department",
-		"school",
-		"faculty",
-		"centre",
-		"center",
-		"library",
-		"museum",
-		"archive",
-		"editor",
-		"editors",
-		"course editors",
-		"one of the course editors",
-		"followed by",
-	];
-
-	// oxlint-disable-next-line unicorn/consistent-function-scoping
-	const isLikelyName = (value: string): boolean => {
-		const parts = value.trim().split(/\s+/);
-
-		if (parts.length < 2 || parts.length > 5) {
-			return false;
-		}
-
-		return parts.every((part, index) => {
-			if (/^[A-Z]\.$/u.test(part)) {
-				return true;
-			}
-
-			if (index > 0 && /^(?:de|del|van|von|da|di|du|la|le|der|den)$/i.test(part)) {
-				return true;
-			}
-
-			return /^[A-Z][\p{L}'’.-]*$/u.test(part);
-		});
-	};
-
-	const cleanCandidate = (value: string): Array<string> => {
-		let candidate = value.trim().replaceAll(/\s+/g, " ");
-
-		if (candidate.length === 0) {
-			return [];
-		}
-
-		candidate = candidate.replace(/\s*\([^)]*\)\s*$/, "");
-		candidate = candidate.replace(/\s*\[[^\]]*\]\s*$/, "");
-		candidate = candidate.split(",")[0] ?? candidate;
-		candidate = candidate.split(" - ")[0] ?? candidate;
-		candidate = candidate.split(" – ")[0] ?? candidate;
-		candidate = candidate.split(" — ")[0] ?? candidate;
-		candidate = candidate.trim();
-
-		if (candidate.length === 0) {
-			return [];
-		}
-
-		const pieces = candidate.split(/[,;/&]|\sand\s/i);
-
-		return pieces
-			.map((piece) => piece.trim())
-			.filter((piece) => piece.length > 0)
-			.filter((piece) => {
-				const lower = piece.toLowerCase();
-
-				if (affiliations.some((marker) => lower.includes(marker))) {
-					return false;
-				}
-
-				return isLikelyName(piece);
-			});
-	};
-
-	for (let index = 0; index < lines.length; index += 1) {
-		const line = lines[index]!;
-		const bylineMatch = /^(?:written by|lead author|by)\s*:?\s*/i.exec(line);
-
-		if (bylineMatch != null) {
-			const authors = cleanCandidate(line.slice(bylineMatch[0].length));
-
-			if (authors.length > 0) {
-				return authors;
-			}
-
-			const continuation = lines.slice(index + 1, index + 4).join(" ");
-			const continuationAuthors = cleanCandidate(continuation);
-
-			if (continuationAuthors.length > 0) {
-				return continuationAuthors;
-			}
-		}
-	}
-
-	return [];
-}
 
 const deniedPageLinks = new Set([
 	"https://www.dariah.eu/about/documents-list/", // documents-policies
@@ -196,117 +72,6 @@ const { upload, uploadFeaturedImage, migrateHtmlContent } = createWordPressConte
 	db,
 	storage,
 );
-
-interface ListPageImageReference {
-	pageSlug: string;
-	pageHref: string;
-	imageUrl: string;
-	mediaId: number | null;
-	title: string;
-	alt: string | null;
-}
-
-async function uploadListPageImage(
-	prefix: AssetPrefix,
-	assetsCache: AssetsCache,
-	media: WordPressData["media"],
-	image: ListPageImageReference,
-) {
-	const wpMedia = image.mediaId != null ? media[image.mediaId] : undefined;
-	// The markup this url was scraped from may name a theme-sized derivative rather than the media
-	// item itself, which the media library resolves back to its original.
-	const url = await resolveFullResolutionUrl(
-		new URL(wpMedia?.source_url ?? image.imageUrl, apiBaseUrl),
-	);
-	const label =
-		wpMedia != null ? toPlaintext(wpMedia.title.rendered).trim() : image.title || image.pageSlug;
-	const caption = wpMedia != null ? toPlaintext(wpMedia.caption.rendered).trim() : image.title;
-	const alt = wpMedia?.alt_text ?? image.alt ?? undefined;
-	const asset = await upload(prefix, assetsCache, url, label, caption, alt);
-
-	assert(asset, `Missing list page image asset (${image.pageSlug}).`);
-
-	return asset.id;
-}
-
-function decodeHtmlAttribute(value: string): string {
-	return value
-		.replaceAll("&amp;", "&")
-		.replaceAll("&quot;", '"')
-		.replaceAll("&#039;", "'")
-		.replaceAll("&#8217;", "'");
-}
-
-function getHtmlAttribute(html: string, attribute: string): string | null {
-	const match = new RegExp(`\\s${attribute}="([^"]*)"`, "i").exec(html);
-	return match != null ? decodeHtmlAttribute(match[1]!) : null;
-}
-
-function getSlugFromWordPressHref(href: string): string | null {
-	try {
-		const url = new URL(href, apiBaseUrl);
-		const parts = url.pathname.split("/").filter((part) => part.length > 0);
-		return parts.at(-1) ?? null;
-	} catch {
-		return null;
-	}
-}
-
-function extractListPageImageReferences(
-	html: string,
-	expectedPathPrefix: string,
-): Map<string, ListPageImageReference> {
-	const images = new Map<string, ListPageImageReference>();
-	const figureRe = /<figure\b[\s\S]*?<\/figure>/gi;
-	let figureMatch: RegExpExecArray | null;
-
-	while ((figureMatch = figureRe.exec(html)) !== null) {
-		const figureHtml = figureMatch[0];
-		const hrefMatches = Array.from(figureHtml.matchAll(/<a\b[^>]*\shref="([^"]*)"[^>]*>/gi));
-		const href = hrefMatches
-			.map((match) => decodeHtmlAttribute(match[1]!))
-			.find((candidate) => {
-				try {
-					const url = new URL(candidate, apiBaseUrl);
-					return url.pathname.startsWith(expectedPathPrefix);
-				} catch {
-					return false;
-				}
-			});
-
-		if (href == null) {
-			continue;
-		}
-
-		const imageMatch = /<img\b[^>]*>/i.exec(figureHtml);
-		const imageHtml = imageMatch?.[0];
-		if (imageHtml == null) {
-			continue;
-		}
-
-		const imageUrl = getHtmlAttribute(imageHtml, "src") ?? getHtmlAttribute(imageHtml, "data-src");
-		const pageSlug = getSlugFromWordPressHref(href);
-		if (imageUrl == null || pageSlug == null || images.has(pageSlug)) {
-			continue;
-		}
-
-		const mediaIdMatch = /\bwp-image-(\d+)\b/i.exec(imageHtml);
-		const captionMatch = /<figcaption\b[^>]*>([\s\S]*?)<\/figcaption>/i.exec(figureHtml);
-		const title = captionMatch != null ? toPlaintext(captionMatch[1]!).trim() : pageSlug;
-		const alt = getHtmlAttribute(imageHtml, "alt");
-
-		images.set(pageSlug, {
-			pageSlug,
-			pageHref: href,
-			imageUrl: String(new URL(imageUrl, apiBaseUrl)),
-			mediaId: mediaIdMatch != null ? Number(mediaIdMatch[1]) : null,
-			title,
-			alt,
-		});
-	}
-
-	return images;
-}
 
 async function getData(): Promise<WordPressData> {
 	if (existsSync(cacheFilePath)) {
@@ -769,7 +534,13 @@ async function main() {
 
 			if (listPageImage != null) {
 				try {
-					imageId = await uploadListPageImage("images", assetsCache, data.media, listPageImage);
+					imageId = await uploadListPageImage(
+						upload,
+						"images",
+						assetsCache,
+						data.media,
+						listPageImage,
+					);
 				} catch {
 					log.warn(`Failed to migrate list page image (page id ${String(page.id)}).`);
 				}
@@ -1895,108 +1666,11 @@ async function main() {
 
 	log.info("Creating author relations for spotlight articles and impact case studies...");
 
-	// oxlint-disable-next-line unicorn/consistent-function-scoping
-	function normalizePersonName(name: string): string {
-		return name.trim().replaceAll(/\s+/g, " ").toLowerCase();
-	}
-
-	// oxlint-disable-next-line unicorn/consistent-function-scoping
-	function createSortName(name: string): string {
-		const parts = name.trim().split(/\s+/).filter(Boolean);
-
-		if (parts.length <= 1) {
-			return name;
-		}
-
-		const lastName = parts.at(-1)!;
-		const firstNames = parts.slice(0, -1).join(" ");
-
-		return `${lastName}, ${firstNames}`;
-	}
-
-	const personsByName = new Map<string, string>();
-	const existingPersons = await db.query.persons.findMany({
-		columns: {
-			id: true,
-			name: true,
-		},
+	const { ensurePersonByName } = await createPersonResolver(db, {
+		personEntityTypeId: typesByType.persons.id,
+		publishedStatusId: statusByType.published.id,
+		placeholderImageId,
 	});
-
-	for (const person of existingPersons) {
-		personsByName.set(normalizePersonName(person.name), person.id);
-	}
-
-	async function ensurePersonByName(authorName: string): Promise<string> {
-		const normalizedAuthorName = normalizePersonName(authorName);
-
-		const exact = personsByName.get(normalizedAuthorName);
-		if (exact != null) {
-			return exact;
-		}
-
-		for (const [name, dbId] of personsByName) {
-			if (normalizedAuthorName.includes(name)) {
-				return dbId;
-			}
-		}
-
-		const createdAt = new Date();
-
-		const personId = await db.transaction(async (tx) => {
-			let slug = slugify(authorName);
-			const slugExists = await tx.query.entities.findFirst({
-				where: {
-					typeId: typesByType.persons.id,
-					slug,
-				},
-				columns: {
-					id: true,
-				},
-			});
-
-			if (slugExists != null) {
-				slug = `${slug}-duplicate-${randomUUID()}`;
-			}
-
-			const [entity] = await tx
-				.insert(schema.entities)
-				.values({
-					slug,
-					typeId: typesByType.persons.id,
-					createdAt,
-					updatedAt: createdAt,
-				})
-				.returning({ id: schema.entities.id });
-
-			assert(entity);
-
-			const [version] = await tx
-				.insert(schema.entityVersions)
-				.values({
-					entityId: entity.id,
-					statusId: statusByType.published.id,
-				})
-				.returning({ id: schema.entityVersions.id });
-
-			assert(version);
-
-			await tx.insert(schema.persons).values({
-				id: version.id,
-				name: authorName,
-				sortName: createSortName(authorName),
-				imageId: placeholderImageId,
-				createdAt,
-				updatedAt: createdAt,
-			});
-
-			return version.id;
-		});
-
-		personsByName.set(normalizedAuthorName, personId);
-		log.info(`Created person "${authorName}" for author relation import.`);
-
-		return personId;
-	}
 
 	for (const [articleId, authorNames] of spotlightArticleIdToAuthorNames) {
 		for (const authorName of authorNames) {

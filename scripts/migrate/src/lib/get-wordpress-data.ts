@@ -665,6 +665,32 @@ function getPages(baseUrl: string): Promise<WP_REST_API_Pages> {
 	return getAll(url);
 }
 
+/**
+ * Fetches a single page live by its WordPress slug, bypassing the bulk cache. Returns `null` when
+ * no page matches — the collection endpoint answers an unknown slug with an empty array, not
+ * `404`.
+ */
+export async function getPageBySlug(
+	baseUrl: string,
+	slug: string,
+): Promise<WP_REST_API_Page | null> {
+	const url = createUrl({
+		baseUrl,
+		pathname: "/wp-json/wp/v2/pages",
+		searchParams: createUrlSearchParams({ slug, _embed: "author" }),
+	});
+
+	const response = await fetch(url);
+
+	if (!response.ok) {
+		return null;
+	}
+
+	const pages = (await response.json()) as WP_REST_API_Pages;
+
+	return pages[0] ?? null;
+}
+
 function getPeople(baseUrl: string): Promise<Array<Person>> {
 	const url = createUrl({
 		baseUrl,

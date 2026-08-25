@@ -14,8 +14,10 @@ import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { FeaturedImageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/featured-image-details";
+import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { RelationTypeSuffix } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-type-suffix";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import { getEntityDetailHref } from "@/lib/entity-detail-href";
 
 interface OpportunityDetailsProps {
 	contentBlocks: Array<ContentBlock>;
@@ -33,7 +35,14 @@ interface OpportunityDetailsProps {
 		image: SelectedImage;
 	};
 	publishAction: (documentId: string) => Promise<unknown>;
-	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedEntities: Array<{
+		id: string;
+		name: string;
+		description?: string;
+		slug: string;
+		entityType: string;
+		unitType: string | null;
+	}>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
@@ -119,7 +128,16 @@ export function OpportunityDetails(props: Readonly<OpportunityDetailsProps>): Re
 						<ul className="flex flex-col gap-1">
 							{selectedRelatedEntities.map((relatedEntity) => (
 								<li key={relatedEntity.id} className="text-sm">
-									<span className="font-medium">{relatedEntity.name}</span>
+									<RelationLink
+										className="font-medium"
+										href={getEntityDetailHref({
+											entityType: relatedEntity.entityType,
+											slug: relatedEntity.slug,
+											unitType: relatedEntity.unitType,
+										})}
+									>
+										{relatedEntity.name}
+									</RelationLink>
 									<RelationTypeSuffix type={relatedEntity.description} />
 								</li>
 							))}
