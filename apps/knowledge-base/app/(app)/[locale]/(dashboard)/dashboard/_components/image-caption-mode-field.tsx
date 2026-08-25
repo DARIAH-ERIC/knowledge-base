@@ -8,7 +8,7 @@ import { isEmptyRichTextDocument } from "@dariah-eric/ui/rich-text";
 import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, useState } from "react";
 
 interface ImageCaptionModeFieldProps {
 	/** The caption stored on the asset, previewed while inheriting. */
@@ -38,7 +38,8 @@ export function ImageCaptionModeField(props: Readonly<ImageCaptionModeFieldProps
 	 * The editor reads its content once, so it stays mounted while the author switches modes -
 	 * unmounting it would throw away what they typed - and keeps its initial value stable.
 	 */
-	const initialCaption = useRef(caption);
+	// oxlint-disable-next-line react/hook-use-state -- This is an immutable mount-time snapshot.
+	const [initialCaption] = useState(caption);
 
 	const hasAssetCaption = !isEmptyRichTextDocument(assetCaption);
 
@@ -84,7 +85,7 @@ export function ImageCaptionModeField(props: Readonly<ImageCaptionModeFieldProps
 			<div className={captionMode === "override" ? undefined : "hidden"}>
 				<InlineRichTextEditor
 					aria-label={t("Custom caption")}
-					content={initialCaption.current ?? undefined}
+					content={initialCaption ?? undefined}
 					onChange={(value) => {
 						onChange({
 							caption: isEmptyRichTextDocument(value) ? null : value,

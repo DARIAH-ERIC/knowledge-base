@@ -45,7 +45,9 @@ export function AdminTaskCard(props: Readonly<AdminTaskCardProps>): ReactNode {
 
 	const isRunning = latestJob?.status === "running";
 	const isStuck =
-		isRunning && Date.now() - latestJob.startedAt.getTime() > STUCK_RUNNING_THRESHOLD_MS;
+		isRunning &&
+		// oxlint-disable-next-line react/purity
+		Date.now() - latestJob.startedAt.getTime() > STUCK_RUNNING_THRESHOLD_MS;
 
 	return (
 		<Card className="block-full">

@@ -32,6 +32,7 @@ export function DraftFormSubmitButtons(props: Readonly<DraftFormSubmitButtonsPro
 
 	useEffect(() => {
 		if (!isPending) {
+			// oxlint-disable-next-line react/set-state-in-effect
 			setPendingIntent(null);
 		}
 	}, [isPending]);
