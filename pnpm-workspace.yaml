@@ -103,7 +103,7 @@ catalog:
   lucide-react: ^1.34.0
   minio: ^8.0.7
   motion: ^13.1.1
-  next: ^16.3.2
+  next: ^16.3.3
   next-intl: ^4.13.7
   nodemailer: ^9.0.5
   npm-run-all2: ^9.0.3
@@ -164,16 +164,19 @@ engineStrict: true
 
 minimumReleaseAge: 1440
 
-# next.js 16.3.1 bumped its `@swc/helpers` dependency from 0.5.15 to 0.5.23. Since 0.5.17,
-# `@swc/helpers` declares a `module-sync` export condition, so `require("@swc/helpers/_/*")` - which
-# is what the next.js server bundle does - resolves to `./esm/*.js`, while turbopack output file
-# tracing only copies `./cjs/*.cjs` into `.next/standalone`. The standalone server then crashes on
-# startup with `Cannot find module '.../@swc/helpers/esm/_interop_require_default.js'`.
-# Can be removed once the upstream fix is released.
-# @see {@link https://github.com/vercel/next.js/issues/97358}
-# @see {@link https://github.com/vercel/next.js/pull/97372}
-overrides:
-  next>@swc/helpers: 0.5.15
+minimumReleaseAgeExclude:
+  - react
+  - react-dom
+  - next
+  - '@next/env@16.3.3'
+  - '@next/swc-darwin-arm64@16.3.3'
+  - '@next/swc-darwin-x64@16.3.3'
+  - '@next/swc-linux-arm64-gnu@16.3.3'
+  - '@next/swc-linux-arm64-musl@16.3.3'
+  - '@next/swc-linux-x64-gnu@16.3.3'
+  - '@next/swc-linux-x64-musl@16.3.3'
+  - '@next/swc-win32-arm64-msvc@16.3.3'
+  - '@next/swc-win32-x64-msvc@16.3.3'
 
 patchedDependencies:
   next: patches/next.patch
