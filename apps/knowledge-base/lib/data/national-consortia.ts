@@ -154,8 +154,12 @@ export async function getNationalConsortia(
 	const query = q?.trim();
 	const consortiumType =
 		"national_consortium" as typeof schema.organisationalUnitTypes.$inferSelect.type;
-	const nameOrderBy =
-		dir === "desc" ? desc(schema.organisationalUnits.name) : schema.organisationalUnits.name;
+	// Units sharing a name would otherwise be ordered arbitrarily, and differently per query --
+	// enough to make a row appear on two paginated pages, or on none.
+	const nameOrderBy = [
+		dir === "desc" ? desc(schema.organisationalUnits.name) : schema.organisationalUnits.name,
+		schema.organisationalUnits.id,
+	];
 
 	if (query == null || query === "") {
 		const where = eq(schema.organisationalUnitTypes.type, consortiumType);
@@ -173,7 +177,7 @@ export async function getNationalConsortia(
 				eq(schema.documentLifecycle.documentId, schema.entities.id),
 			)
 			.where(and(versionPick, where))
-			.orderBy(nameOrderBy);
+			.orderBy(...nameOrderBy);
 
 		const [items, aggregate] = await Promise.all([
 			sort === "country" ? baseItemsQuery : baseItemsQuery.limit(limit).offset(offset),
@@ -338,7 +342,7 @@ export async function getNationalConsortia(
 				inArray(schema.organisationalUnits.id, matchedIds),
 			),
 		)
-		.orderBy(nameOrderBy);
+		.orderBy(...nameOrderBy);
 
 	if (sort !== "country") {
 		const pagedItems = orderedItems.slice(offset, offset + limit);

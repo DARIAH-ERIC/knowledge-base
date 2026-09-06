@@ -23,7 +23,10 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 	const query = q?.trim();
 	const where =
 		query != null && query !== "" ? matchesAllTerms(query, schema.opportunities.title) : undefined;
-	const orderBy =
+	// Ties on the sorted column are broken by name, then id: without a total order postgres is
+	// free to return tied rows differently per query, so a row can appear on two paginated pages
+	// -- or on none.
+	const orderBy = [
 		sort === "title"
 			? dir === "asc"
 				? schema.opportunities.title
@@ -34,7 +37,10 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 					: desc(schema.opportunitySources.source)
 				: dir === "asc"
 					? sql<Date>`lower(${schema.opportunities.duration})`
-					: desc(sql<Date>`lower(${schema.opportunities.duration})`);
+					: desc(sql<Date>`lower(${schema.opportunities.duration})`),
+		schema.opportunities.title,
+		schema.opportunities.id,
+	];
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 
@@ -67,7 +73,7 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 				eq(schema.documentLifecycle.documentId, schema.entities.id),
 			)
 			.where(and(sql`${schema.entityVersions.id} = ${pickedVersion}`, where))
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

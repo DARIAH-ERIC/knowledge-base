@@ -41,7 +41,10 @@ export async function getPersons(params: Readonly<GetPersonsParams>): Promise<Pe
 	const { limit, offset, q, sort = "name", dir = "asc" } = params;
 	const query = q?.trim();
 	const where = matchesAllTerms(query, schema.persons.name);
-	const orderBy =
+	// Ties on the sorted column are broken by name, then id: without a total order postgres is
+	// free to return tied rows differently per query, so a row can appear on two paginated pages
+	// -- or on none.
+	const orderBy = [
 		sort === "email"
 			? dir === "asc"
 				? sql`${schema.persons.email} ASC NULLS LAST`
@@ -52,7 +55,10 @@ export async function getPersons(params: Readonly<GetPersonsParams>): Promise<Pe
 					: sql`${schema.persons.orcid} DESC NULLS LAST`
 				: dir === "asc"
 					? schema.persons.sortName
-					: desc(schema.persons.sortName);
+					: desc(schema.persons.sortName),
+		schema.persons.sortName,
+		schema.persons.id,
+	];
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 	const versionPick = sql`${schema.entityVersions.id} = ${pickedVersion}`;
@@ -80,7 +86,7 @@ export async function getPersons(params: Readonly<GetPersonsParams>): Promise<Pe
 				eq(schema.documentLifecycle.documentId, schema.entities.id),
 			)
 			.where(and(versionPick, where))
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

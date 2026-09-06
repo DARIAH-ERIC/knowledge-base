@@ -89,7 +89,10 @@ export async function getInstitutionRelations(
 					),
 				)
 			: undefined;
-	const orderBy =
+	// Ties on the sorted column are broken by name, then id: without a total order postgres is
+	// free to return tied rows differently per query, so a row can appear on two paginated pages
+	// -- or on none.
+	const orderBy = [
 		sort === "statusType"
 			? dir === "asc"
 				? schema.organisationalUnitStatus.status
@@ -112,7 +115,11 @@ export async function getInstitutionRelations(
 								: sql`UPPER(${schema.organisationalUnitsRelations.duration}) DESC NULLS LAST`
 							: dir === "asc"
 								? schema.organisationalUnits.name
-								: desc(schema.organisationalUnits.name);
+								: desc(schema.organisationalUnits.name),
+		schema.organisationalUnits.name,
+		relatedOrganisationalUnits.name,
+		schema.organisationalUnitsRelations.id,
+	];
 
 	const [rows, aggregate] = await Promise.all([
 		db
@@ -166,7 +173,7 @@ export async function getInstitutionRelations(
 				eq(relatedOrganisationalUnitTypes.id, relatedOrganisationalUnits.typeId),
 			)
 			.where(where ?? baseWhere)
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

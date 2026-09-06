@@ -27,14 +27,20 @@ export async function getEvents(params: GetEventsParams) {
 	const { limit = 10, offset = 0, q, sort = "duration", dir = "desc" } = params;
 	const query = q?.trim();
 	const where = matchesAllTerms(query, schema.events.title);
-	const orderBy =
+	// Ties on the sorted column are broken by name, then id: without a total order postgres is
+	// free to return tied rows differently per query, so a row can appear on two paginated pages
+	// -- or on none.
+	const orderBy = [
 		sort === "title"
 			? dir === "asc"
 				? schema.events.title
 				: desc(schema.events.title)
 			: dir === "asc"
 				? sql<Date>`lower(${schema.events.duration})`
-				: desc(sql<Date>`lower(${schema.events.duration})`);
+				: desc(sql<Date>`lower(${schema.events.duration})`),
+		schema.events.title,
+		schema.events.id,
+	];
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 
@@ -63,7 +69,7 @@ export async function getEvents(params: GetEventsParams) {
 				eq(schema.documentLifecycle.documentId, schema.entities.id),
 			)
 			.where(and(sql`${schema.entityVersions.id} = ${pickedVersion}`, where))
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

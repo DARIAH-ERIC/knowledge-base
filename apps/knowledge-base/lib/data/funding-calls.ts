@@ -23,14 +23,20 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 	const query = q?.trim();
 	const where =
 		query != null && query !== "" ? matchesAllTerms(query, schema.fundingCalls.title) : undefined;
-	const orderBy =
+	// Ties on the sorted column are broken by name, then id: without a total order postgres is
+	// free to return tied rows differently per query, so a row can appear on two paginated pages
+	// -- or on none.
+	const orderBy = [
 		sort === "title"
 			? dir === "asc"
 				? schema.fundingCalls.title
 				: desc(schema.fundingCalls.title)
 			: dir === "asc"
 				? sql<Date>`lower(${schema.fundingCalls.duration})`
-				: desc(sql<Date>`lower(${schema.fundingCalls.duration})`);
+				: desc(sql<Date>`lower(${schema.fundingCalls.duration})`),
+		schema.fundingCalls.title,
+		schema.fundingCalls.id,
+	];
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 
@@ -56,7 +62,7 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 				eq(schema.documentLifecycle.documentId, schema.entities.id),
 			)
 			.where(and(sql`${schema.entityVersions.id} = ${pickedVersion}`, where))
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		db
