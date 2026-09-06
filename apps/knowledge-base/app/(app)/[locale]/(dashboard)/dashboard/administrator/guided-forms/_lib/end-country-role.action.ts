@@ -33,7 +33,7 @@ import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 export const endCountryRoleAction = createMutationAction({
 	schema: EndCountryRoleActionInputSchema,
 	requireAdmin: true,
-	audit: { action: "relation_end", subjectType: "end_contribution" },
+	audit: { action: "relation_end", subjectType: "contributions" },
 	revalidate: [
 		"/[locale]/dashboard/administrator/persons",
 		"/[locale]/dashboard/administrator/guided-forms",
@@ -72,7 +72,7 @@ export const endCountryRoleAction = createMutationAction({
 		await recordAuditEvent(tx, {
 			actorUserId: user.id,
 			action: "relation_end",
-			subjectType: "end_contribution",
+			subjectType: "contributions",
 			subjectId: appointment.id,
 			summary: { end: input.end, role: roleType, via: "wizard:country-role-end" },
 		});
@@ -95,7 +95,7 @@ export const endCountryRoleAction = createMutationAction({
 			await recordAuditEvent(tx, {
 				actorUserId: user.id,
 				action: "relation_end",
-				subjectType: "end_contribution",
+				subjectType: "contributions",
 				subjectId: counterpart.relationId,
 				summary: {
 					end: input.end,

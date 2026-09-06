@@ -32,7 +32,7 @@ const UpsertCountryReportServiceKpisSchema = v.object({
 export const upsertCountryReportServiceKpisAction = createMutationAction({
 	schema: UpsertCountryReportServiceKpisSchema,
 	requireAuth: true,
-	audit: { action: "update", subjectType: "country_report" },
+	audit: { action: "update", subjectType: "country_reports" },
 	revalidate: countryReportRevalidatePaths,
 
 	async preCheck({ input, ctx }) {

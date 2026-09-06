@@ -12,7 +12,7 @@ import { createMutationAction } from "@/lib/server/create-mutation-action";
 export const updateWorkingGroupReportDataAction = createMutationAction({
 	schema: UpdateWorkingGroupReportDataActionInputSchema,
 	requireAuth: true,
-	audit: { action: "update", subjectType: "working_group_report" },
+	audit: { action: "update", subjectType: "working_group_reports" },
 	revalidate: workingGroupReportRevalidatePaths,
 
 	async preCheck({ input, ctx }) {

@@ -112,7 +112,7 @@ export const createContributionAction = createServerAction(
 				await recordAuditEvent(tx, {
 					actorUserId: user?.id,
 					action: "create",
-					subjectType: "create_contribution",
+					subjectType: "contributions",
 					subjectId: row.id,
 					summary: getAuditSummaryFromFormData(formData),
 				});

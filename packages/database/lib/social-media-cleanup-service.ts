@@ -95,7 +95,10 @@ export async function deleteUnusedSocialMedia(
 					actorUserId,
 					subjectType: "social_media",
 					subjectId: item.id,
-					summary: { type: item.type, name: item.name, url: item.url },
+					// Snapshotted for the same reason as in the asset cleanup: the row is deleted in this
+					// very transaction, so nothing is left to resolve the label from on read.
+					subjectLabel: item.name,
+					summary: { type: item.type, url: item.url },
 				};
 			}),
 		);

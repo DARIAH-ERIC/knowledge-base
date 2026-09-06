@@ -210,9 +210,12 @@ export async function deleteUnusedAssets(
 			await tx.insert(schema.auditLogs).values({
 				action: "delete",
 				actorUserId,
-				subjectType: "asset",
+				subjectType: "assets",
 				subjectId: asset.id,
-				summary: { key: asset.key, label: asset.label, size: asset.size },
+				// Snapshotted, not left to be resolved on read: the assets row is gone by then, so the
+				// audit log would otherwise only be able to show the bare uuid.
+				subjectLabel: asset.label,
+				summary: { key: asset.key, size: asset.size },
 			});
 		});
 

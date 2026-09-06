@@ -45,7 +45,7 @@ export async function confirmCountryReportAction(formData: FormData): Promise<vo
 	await recordAuditEvent(db, {
 		actorUserId: user.id,
 		action: "update",
-		subjectType: "country_report",
+		subjectType: "country_reports",
 		subjectId: id,
 		summary: {
 			...getAuditSummaryFromFormData(formData),

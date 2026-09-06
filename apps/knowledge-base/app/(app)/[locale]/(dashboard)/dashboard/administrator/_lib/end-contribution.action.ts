@@ -36,7 +36,7 @@ export async function endContributionAction(id: string, end: Date): Promise<void
 	await recordAuditEvent(db, {
 		actorUserId: user.id,
 		action: "relation_end",
-		subjectType: "end_contribution",
+		subjectType: "contributions",
 		subjectId: id,
 		summary: { end },
 	});

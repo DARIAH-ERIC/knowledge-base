@@ -67,7 +67,7 @@ export const createDelegatedUnitRelationAction = createServerAction(
 				await recordAuditEvent(tx, {
 					actorUserId: user.id,
 					action: "create",
-					subjectType: "create_unit_relation",
+					subjectType: "unit_relations",
 					subjectId: inserted.id,
 					summary: getAuditSummaryFromFormData(formData),
 				});

@@ -13,7 +13,7 @@ import { createMutationAction } from "@/lib/server/create-mutation-action";
 export const createWorkingGroupReportSocialMediaAction = createMutationAction({
 	schema: CreateWorkingGroupReportSocialMediaActionInputSchema,
 	requireAuth: true,
-	audit: { action: "create", subjectType: "working_group_report" },
+	audit: { action: "create", subjectType: "working_group_reports" },
 	revalidate: workingGroupReportRevalidatePaths,
 
 	async preCheck({ input, ctx }) {

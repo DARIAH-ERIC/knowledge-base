@@ -49,7 +49,7 @@ export async function submitWorkingGroupReportAction(formData: FormData): Promis
 	await recordAuditEvent(db, {
 		actorUserId: user.id,
 		action: "update",
-		subjectType: "working_group_report",
+		subjectType: "working_group_reports",
 		subjectId: id,
 		summary: {
 			...getAuditSummaryFromFormData(formData),

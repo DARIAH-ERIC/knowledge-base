@@ -126,7 +126,7 @@ export const createCountryRoleAction = createMutationAction({
 			await recordAuditEvent(tx, {
 				actorUserId: user.id,
 				action: "create",
-				subjectType: "create_contribution",
+				subjectType: "contributions",
 				subjectId: id,
 				summary: {
 					role: input.roleType,
@@ -153,7 +153,7 @@ export const createCountryRoleAction = createMutationAction({
 			await recordAuditEvent(tx, {
 				actorUserId: user.id,
 				action: "update",
-				subjectType: "create_contribution",
+				subjectType: "contributions",
 				subjectId: counterpart.rowToWiden.id,
 				summary: {
 					rule: counterpart.rule,
@@ -172,7 +172,7 @@ export const createCountryRoleAction = createMutationAction({
 			await recordAuditEvent(tx, {
 				actorUserId: user.id,
 				action: "create",
-				subjectType: "create_contribution",
+				subjectType: "contributions",
 				subjectId: id,
 				summary: {
 					role: counterpart.createAsRoleType,

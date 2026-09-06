@@ -15,7 +15,7 @@ import { createMutationAction } from "@/lib/server/create-mutation-action";
 export const createCountryReportContributionAction = createMutationAction({
 	schema: CreateCountryReportContributionActionInputSchema,
 	requireAuth: true,
-	audit: { action: "create", subjectType: "country_report" },
+	audit: { action: "create", subjectType: "country_reports" },
 	revalidate: countryReportRevalidatePaths,
 
 	async preCheck({ input, ctx }) {

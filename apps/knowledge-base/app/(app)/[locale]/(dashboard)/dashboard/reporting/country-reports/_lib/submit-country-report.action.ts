@@ -49,7 +49,7 @@ export async function submitCountryReportAction(formData: FormData): Promise<voi
 	await recordAuditEvent(db, {
 		actorUserId: user.id,
 		action: "update",
-		subjectType: "country_report",
+		subjectType: "country_reports",
 		subjectId: id,
 		summary: {
 			...getAuditSummaryFromFormData(formData),
