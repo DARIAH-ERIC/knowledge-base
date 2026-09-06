@@ -55,7 +55,10 @@ export async function getServices(params: Readonly<GetServicesParams>): Promise<
 			? isNull(schema.services.sshocMarketplaceId)
 			: isNotNull(schema.services.sshocMarketplaceId),
 	);
-	const orderBy =
+	// Ties on the sorted column are broken by name, then id: without a total order postgres is
+	// free to return tied rows differently per query, so a row can appear on two paginated pages
+	// -- or on none.
+	const orderBy = [
 		sort === "type"
 			? dir === "asc"
 				? schema.serviceTypes.type
@@ -70,7 +73,10 @@ export async function getServices(params: Readonly<GetServicesParams>): Promise<
 						: sql`${schema.services.sshocMarketplaceId} DESC NULLS LAST`
 					: dir === "asc"
 						? schema.services.name
-						: desc(schema.services.name);
+						: desc(schema.services.name),
+		schema.services.name,
+		schema.services.id,
+	];
 
 	const [data, aggregate] = await Promise.all([
 		db
@@ -85,7 +91,7 @@ export async function getServices(params: Readonly<GetServicesParams>): Promise<
 			.innerJoin(schema.serviceTypes, eq(schema.services.typeId, schema.serviceTypes.id))
 			.innerJoin(schema.serviceStatuses, eq(schema.services.statusId, schema.serviceStatuses.id))
 			.where(where)
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

@@ -113,7 +113,7 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 			})
 			.from(schema.assets)
 			.where(where)
-			.orderBy(desc(schema.assets.updatedAt))
+			.orderBy(desc(schema.assets.updatedAt), schema.assets.label, schema.assets.id)
 			.limit(limit)
 			.offset(offset),
 		db.select({ total: count() }).from(schema.assets).where(where),
@@ -333,7 +333,7 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 			})
 			.from(schema.assets)
 			.where(where)
-			.orderBy(desc(schema.assets.updatedAt))
+			.orderBy(desc(schema.assets.updatedAt), schema.assets.label, schema.assets.id)
 			.limit(limit)
 			.offset(offset),
 		db.select({ total: count() }).from(schema.assets).where(where),

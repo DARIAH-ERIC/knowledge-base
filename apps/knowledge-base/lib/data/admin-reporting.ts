@@ -226,7 +226,7 @@ export async function getCountryReportsForAdmin(
 				sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 			)
 			.where(where)
-			.orderBy(primaryOrderBy, secondaryOrderBy)
+			.orderBy(primaryOrderBy, secondaryOrderBy, schema.countryReports.id)
 			.limit(limit)
 			.offset(offset),
 		db.select({ total: count() }).from(schema.countryReports).where(where),
@@ -358,7 +358,7 @@ export async function getWorkingGroupReportsForAdmin(
 				sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 			)
 			.where(where)
-			.orderBy(primaryOrderBy, secondaryOrderBy)
+			.orderBy(primaryOrderBy, secondaryOrderBy, schema.workingGroupReports.id)
 			.limit(limit)
 			.offset(offset),
 		db.select({ total: count() }).from(schema.workingGroupReports).where(where),
@@ -432,8 +432,11 @@ export async function getReportingCampaignsForAdmin(
 		query != null && query !== ""
 			? sql<boolean>`${schema.reportingCampaigns.year}::text ilike ${`%${query}%`}`
 			: undefined;
-	const orderBy =
-		dir === "asc" ? schema.reportingCampaigns.year : desc(schema.reportingCampaigns.year);
+	// Two campaigns can share a year, so the id makes the paginated order total.
+	const orderBy = [
+		dir === "asc" ? schema.reportingCampaigns.year : desc(schema.reportingCampaigns.year),
+		schema.reportingCampaigns.id,
+	];
 
 	const [campaigns, aggregate] = await Promise.all([
 		db
@@ -455,7 +458,7 @@ export async function getReportingCampaignsForAdmin(
 			)
 			.where(where)
 			.groupBy(schema.reportingCampaigns.id)
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		db.select({ total: count() }).from(schema.reportingCampaigns).where(where),

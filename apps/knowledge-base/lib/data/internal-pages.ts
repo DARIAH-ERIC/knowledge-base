@@ -20,14 +20,20 @@ export async function getInternalPages(params: GetInternalPagesParams) {
 	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
 	const query = q?.trim();
 	const searchWhere = matchesAllTerms(query, schema.internalPages.title);
-	const orderBy =
+	// Ties on the sorted column are broken by name, then id: without a total order postgres is
+	// free to return tied rows differently per query, so a row can appear on two paginated pages
+	// -- or on none.
+	const orderBy = [
 		sort === "title"
 			? dir === "asc"
 				? schema.internalPages.title
 				: desc(schema.internalPages.title)
 			: dir === "asc"
 				? schema.entityVersions.updatedAt
-				: desc(schema.entityVersions.updatedAt);
+				: desc(schema.entityVersions.updatedAt),
+		schema.internalPages.title,
+		schema.internalPages.id,
+	];
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 
@@ -49,7 +55,7 @@ export async function getInternalPages(params: GetInternalPagesParams) {
 				eq(schema.documentLifecycle.documentId, schema.entities.id),
 			)
 			.where(and(sql`${schema.entityVersions.id} = ${pickedVersion}`, searchWhere))
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

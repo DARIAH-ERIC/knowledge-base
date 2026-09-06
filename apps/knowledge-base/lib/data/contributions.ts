@@ -80,7 +80,10 @@ export async function getContributions(
 		schema.personRoleTypes.type,
 	);
 	const where = searchWhere;
-	const orderBy =
+	// Ties on the sorted column are broken by name, then id: without a total order postgres is
+	// free to return tied rows differently per query, so a row can appear on two paginated pages
+	// -- or on none.
+	const orderBy = [
 		sort === "roleType"
 			? dir === "asc"
 				? schema.personRoleTypes.type
@@ -103,7 +106,11 @@ export async function getContributions(
 								: sql`UPPER(${schema.personsToOrganisationalUnits.duration}) DESC NULLS LAST`
 							: dir === "asc"
 								? schema.persons.sortName
-								: desc(schema.persons.sortName);
+								: desc(schema.persons.sortName),
+		schema.persons.sortName,
+		schema.organisationalUnits.name,
+		schema.personsToOrganisationalUnits.id,
+	];
 
 	const [rows, aggregate] = await Promise.all([
 		db
@@ -153,7 +160,7 @@ export async function getContributions(
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 			)
 			.where(where)
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

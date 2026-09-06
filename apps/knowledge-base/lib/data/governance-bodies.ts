@@ -56,14 +56,20 @@ export async function getGovernanceBodies(
 				)
 			: eq(schema.organisationalUnitTypes.type, governanceBodyType);
 
-	const orderBy =
+	// Ties on the sorted column are broken by name, then id: without a total order postgres is
+	// free to return tied rows differently per query, so a row can appear on two paginated pages
+	// -- or on none.
+	const orderBy = [
 		sort === "acronym"
 			? dir === "asc"
 				? sql`${schema.organisationalUnits.acronym} ASC NULLS LAST`
 				: sql`${schema.organisationalUnits.acronym} DESC NULLS LAST`
 			: dir === "asc"
 				? schema.organisationalUnits.name
-				: desc(schema.organisationalUnits.name);
+				: desc(schema.organisationalUnits.name),
+		schema.organisationalUnits.name,
+		schema.organisationalUnits.id,
+	];
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 	const versionPick = sql`${schema.entityVersions.id} = ${pickedVersion}`;
@@ -94,7 +100,7 @@ export async function getGovernanceBodies(
 				eq(schema.documentLifecycle.documentId, schema.entities.id),
 			)
 			.where(and(versionPick, where))
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

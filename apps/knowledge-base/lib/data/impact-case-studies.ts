@@ -27,14 +27,20 @@ export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
 		query != null && query !== ""
 			? matchesAllTerms(query, schema.impactCaseStudies.title)
 			: undefined;
-	const orderBy =
+	// Ties on the sorted column are broken by name, then id: without a total order postgres is
+	// free to return tied rows differently per query, so a row can appear on two paginated pages
+	// -- or on none.
+	const orderBy = [
 		sort === "title"
 			? dir === "asc"
 				? schema.impactCaseStudies.title
 				: desc(schema.impactCaseStudies.title)
 			: dir === "asc"
 				? schema.impactCaseStudies.publicationDate
-				: desc(schema.impactCaseStudies.publicationDate);
+				: desc(schema.impactCaseStudies.publicationDate),
+		schema.impactCaseStudies.title,
+		schema.impactCaseStudies.id,
+	];
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 
@@ -61,7 +67,7 @@ export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
 				eq(schema.documentLifecycle.documentId, schema.entities.id),
 			)
 			.where(and(sql`${schema.entityVersions.id} = ${pickedVersion}`, where))
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

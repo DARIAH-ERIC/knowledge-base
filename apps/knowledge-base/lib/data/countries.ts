@@ -83,8 +83,12 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 					),
 				)
 			: eq(schema.organisationalUnitTypes.type, countryType);
-	const nameOrderBy =
-		dir === "desc" ? desc(schema.organisationalUnits.name) : schema.organisationalUnits.name;
+	// Units sharing a name would otherwise be ordered arbitrarily, and differently per query --
+	// enough to make a row appear on two paginated pages, or on none.
+	const nameOrderBy = [
+		dir === "desc" ? desc(schema.organisationalUnits.name) : schema.organisationalUnits.name,
+		schema.organisationalUnits.id,
+	];
 	const needsDerivedSort = sort === "status";
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
@@ -113,7 +117,7 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 			eq(schema.documentLifecycle.documentId, schema.entities.id),
 		)
 		.where(and(versionPick, where))
-		.orderBy(nameOrderBy);
+		.orderBy(...nameOrderBy);
 
 	const [items, aggregate, erics] = await Promise.all([
 		needsDerivedSort ? baseItemsQuery : baseItemsQuery.limit(limit).offset(offset),

@@ -639,7 +639,7 @@ export async function getAuditLogEntries(
 			})
 			.from(schema.auditLogs)
 			.where(where)
-			.orderBy(desc(schema.auditLogs.createdAt))
+			.orderBy(desc(schema.auditLogs.createdAt), desc(schema.auditLogs.id))
 			.limit(limit)
 			.offset(offset),
 		db.select({ total: count() }).from(schema.auditLogs).where(where),

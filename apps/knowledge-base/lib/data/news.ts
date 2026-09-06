@@ -26,14 +26,20 @@ export async function getNews(params: GetNewsParams, queryDb: Database | Transac
 	const { limit = 10, offset = 0, q, sort = "publicationDate", dir = "desc" } = params;
 	const query = q?.trim();
 	const where = matchesAllTerms(query, schema.news.title);
-	const orderBy =
+	// Ties on the sorted column are broken by name, then id: without a total order postgres is
+	// free to return tied rows differently per query, so a row can appear on two paginated pages
+	// -- or on none.
+	const orderBy = [
 		sort === "title"
 			? dir === "asc"
 				? schema.news.title
 				: desc(schema.news.title)
 			: dir === "asc"
 				? schema.news.publicationDate
-				: desc(schema.news.publicationDate);
+				: desc(schema.news.publicationDate),
+		schema.news.title,
+		schema.news.id,
+	];
 
 	// Pick the draft version when one exists, otherwise the published version — one row per
 	// document. The document_lifecycle view already collapses the two-version-per-document shape
@@ -63,7 +69,7 @@ export async function getNews(params: GetNewsParams, queryDb: Database | Transac
 				eq(schema.documentLifecycle.documentId, schema.entities.id),
 			)
 			.where(and(sql`${schema.entityVersions.id} = ${pickedVersion}`, where))
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		queryDb

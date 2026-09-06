@@ -45,7 +45,10 @@ export async function getProjects(params: Readonly<GetProjectsParams>): Promise<
 	const { limit, offset, q, sort = "name", dir = "asc" } = params;
 	const query = q?.trim();
 	const where = matchesAllTerms(query, schema.projects.name, schema.projects.acronym);
-	const orderBy =
+	// Ties on the sorted column are broken by name, then id: without a total order postgres is
+	// free to return tied rows differently per query, so a row can appear on two paginated pages
+	// -- or on none.
+	const orderBy = [
 		sort === "acronym"
 			? dir === "asc"
 				? sql`${schema.projects.acronym} ASC NULLS LAST`
@@ -60,7 +63,10 @@ export async function getProjects(params: Readonly<GetProjectsParams>): Promise<
 						: desc(schema.projectScopes.scope)
 					: dir === "asc"
 						? schema.projects.name
-						: desc(schema.projects.name);
+						: desc(schema.projects.name),
+		schema.projects.name,
+		schema.projects.id,
+	];
 
 	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
 	const versionPick = sql`${schema.entityVersions.id} = ${pickedVersion}`;
@@ -92,7 +98,7 @@ export async function getProjects(params: Readonly<GetProjectsParams>): Promise<
 				eq(schema.documentLifecycle.documentId, schema.entities.id),
 			)
 			.where(and(versionPick, where))
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		db
