@@ -35,7 +35,7 @@ export async function endDelegatedUnitRelationAction(id: string, end: Date): Pro
 	await recordAuditEvent(db, {
 		actorUserId: user.id,
 		action: "relation_end",
-		subjectType: "end_unit_relation",
+		subjectType: "unit_relations",
 		subjectId: id,
 		summary: { end },
 	});

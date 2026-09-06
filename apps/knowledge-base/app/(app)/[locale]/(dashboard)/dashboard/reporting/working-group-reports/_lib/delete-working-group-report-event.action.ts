@@ -40,7 +40,7 @@ export async function deleteWorkingGroupReportEventAction(formData: FormData): P
 	await recordAuditEvent(db, {
 		actorUserId: user.id,
 		action: "delete",
-		subjectType: "working_group_report",
+		subjectType: "working_group_reports",
 		subjectId: workingGroupReportId,
 		summary: getAuditSummaryFromFormData(formData),
 	});

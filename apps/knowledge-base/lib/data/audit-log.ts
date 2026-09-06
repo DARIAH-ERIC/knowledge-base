@@ -491,9 +491,11 @@ async function resolveProjectPartnerLabel(
 /**
  * Subject types whose id is an `entities.id` document id (resolved via the current version).
  * Includes the organisational-unit subtypes (`countries`, `institutions`, ...) — they all resolve
- * through `organisational_units.name` regardless of the discriminator carried in the subject type.
+ * through `organisational_units.name` regardless of the discriminator carried in the subject type —
+ * and the type-agnostic `entities`, used by the maintenance actions that operate on any entity.
  */
 const entityDocumentSubjectTypes = new Set([
+	"entities",
 	"news",
 	"events",
 	"pages",
@@ -507,6 +509,8 @@ const entityDocumentSubjectTypes = new Set([
 	"persons",
 	"projects",
 	"organisational_units",
+	// The ERIC itself is a single organisational-unit document, edited through its own screen.
+	"eric",
 	"countries",
 	"institutions",
 	"national_consortia",
@@ -541,8 +545,11 @@ export async function resolveAuditSubjectLabel(
 		case "assets": {
 			return resolveAssetLabel(client, subjectId);
 		}
+		// A screen comment is recorded against the report it belongs to, so its subject id is a report
+		// id too — that type only says which part of the report was commented on.
 		case "country_reports":
-		case "working_group_reports": {
+		case "working_group_reports":
+		case "report_screen_comment": {
 			return resolveReportLabel(client, subjectId);
 		}
 		case "reporting_campaigns": {
@@ -572,7 +579,10 @@ export async function resolveAuditSubjectLabel(
 		case "social_media": {
 			return resolveNamedRecordLabel(client, schema.socialMedia, subjectId);
 		}
-		case "internal_services": {
+		// Both live in `services`; the type only says which screen the change was made from. The bulk
+		// ingest records `subjectId: "all"`, which the uuid guard above already turns away.
+		case "internal_services":
+		case "sshoc_services": {
 			return resolveNamedRecordLabel(client, schema.services, subjectId);
 		}
 		case "navigation": {

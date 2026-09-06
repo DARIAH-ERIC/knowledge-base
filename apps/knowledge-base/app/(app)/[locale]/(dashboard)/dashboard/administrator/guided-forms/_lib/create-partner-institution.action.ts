@@ -170,7 +170,7 @@ export const createPartnerInstitutionAction = createMutationAction({
 			await recordAuditEvent(tx, {
 				actorUserId: user.id,
 				action: "create",
-				subjectType: "create_unit_relation",
+				subjectType: "unit_relations",
 				subjectId: row.id,
 				summary: {
 					status: relation.statusType,

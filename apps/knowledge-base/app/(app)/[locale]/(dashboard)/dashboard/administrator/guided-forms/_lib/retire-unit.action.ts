@@ -53,7 +53,7 @@ export const retireUnitAction = createMutationAction({
 				await recordAuditEvent(tx, {
 					actorUserId: user.id,
 					action: "relation_end",
-					subjectType: "end_unit_relation",
+					subjectType: "unit_relations",
 					subjectId: row.id,
 					summary: { end: input.end, via: "wizard:retire-unit" },
 				});
@@ -81,7 +81,7 @@ export const retireUnitAction = createMutationAction({
 				await recordAuditEvent(tx, {
 					actorUserId: user.id,
 					action: "relation_end",
-					subjectType: "end_contribution",
+					subjectType: "contributions",
 					subjectId: row.id,
 					summary: { end: input.end, via: "wizard:retire-unit" },
 				});

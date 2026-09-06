@@ -34,7 +34,7 @@ function getSuccessMessage(
 export const refreshCountryReportExternalResourceSnapshotAction = createMutationAction({
 	schema: RefreshCountryReportExternalResourceSnapshotActionInputSchema,
 	requireAuth: true,
-	audit: { action: "update", subjectType: "country_report" },
+	audit: { action: "update", subjectType: "country_reports" },
 	revalidate: countryReportRevalidatePaths,
 
 	async preCheck({ input, ctx }) {

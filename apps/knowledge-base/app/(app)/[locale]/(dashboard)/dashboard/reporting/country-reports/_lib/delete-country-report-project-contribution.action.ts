@@ -42,7 +42,7 @@ export async function deleteCountryReportProjectContributionAction(
 	await recordAuditEvent(db, {
 		actorUserId: user.id,
 		action: "delete",
-		subjectType: "country_report",
+		subjectType: "country_reports",
 		subjectId: countryReportId,
 		summary: getAuditSummaryFromFormData(formData),
 	});

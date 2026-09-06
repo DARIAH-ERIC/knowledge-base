@@ -45,7 +45,7 @@ export async function confirmWorkingGroupReportAction(formData: FormData): Promi
 	await recordAuditEvent(db, {
 		actorUserId: user.id,
 		action: "update",
-		subjectType: "working_group_report",
+		subjectType: "working_group_reports",
 		subjectId: id,
 		summary: {
 			...getAuditSummaryFromFormData(formData),
