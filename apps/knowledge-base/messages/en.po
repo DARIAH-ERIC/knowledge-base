@@ -7851,10 +7851,6 @@ msgstr "DARIAH Knowledge Base"
 msgid "yd-0BL"
 msgstr "Your central hub for everything DARIAH-related."
 
-#: app/(app)/[locale]/(default)/(index)/page.tsx
-msgid "rsNxxA"
-msgstr "Read documentation"
-
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx
 msgid "T7Ry38"
 msgstr "Message"

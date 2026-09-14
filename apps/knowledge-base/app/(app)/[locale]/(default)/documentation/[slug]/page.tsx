@@ -7,6 +7,7 @@ import {
 	documentationOverviewSlug,
 	getPublishedDocumentationPage,
 } from "@/app/(app)/[locale]/(default)/documentation/_lib/documentation-pages";
+import { assertAuthenticated } from "@/lib/auth/session";
 import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -30,6 +31,9 @@ export async function generateMetadata(
 ): Promise<Metadata> {
 	const { slug } = await props.params;
 
+	// Guarded here as well, so an anonymous request cannot tell a missing slug from an existing one.
+	await assertAuthenticated();
+
 	const page = await getDocumentationPage(slug);
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
@@ -43,6 +47,8 @@ export default async function DocumentationPage(
 	props: Readonly<DocumentationPageProps>,
 ): Promise<ReactNode> {
 	const { locale, slug } = await props.params;
+
+	await assertAuthenticated();
 
 	// The overview page is rendered by the index, which is the address the navigation and every
 	// other page link to. Serving it here as well would put the same content at two urls.
