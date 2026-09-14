@@ -10,6 +10,7 @@ import {
 	getPublishedDocumentationPage,
 	getPublishedDocumentationPages,
 } from "@/app/(app)/[locale]/(default)/documentation/_lib/documentation-pages";
+import { assertAuthenticated } from "@/lib/auth/session";
 import { getResolvedEntityContentBlocks } from "@/lib/content-blocks-service";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -19,6 +20,8 @@ export async function generateMetadata(
 	_props: Readonly<DocumentationPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
+	await assertAuthenticated();
+
 	const t = await getExtracted();
 
 	const overview = await getPublishedDocumentationPage(documentationOverviewSlug);
@@ -33,6 +36,8 @@ export async function generateMetadata(
 export default async function DocumentationPage(
 	_props: Readonly<DocumentationPageProps>,
 ): Promise<ReactNode> {
+	await assertAuthenticated();
+
 	const overview = await getPublishedDocumentationPage(documentationOverviewSlug);
 
 	if (overview != null) {

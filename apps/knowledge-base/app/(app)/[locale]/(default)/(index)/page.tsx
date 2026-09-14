@@ -44,14 +44,9 @@ export default async function IndexPage(_props: Readonly<IndexPageProps>): Promi
 						{t("Your central hub for everything DARIAH-related.")}
 					</p>
 				</div>
-				<div className="flex flex-col gap-3 sm:flex-row">
-					<ButtonLink className="min-inline-40" href={cta.href} size="lg">
-						{cta.label}
-					</ButtonLink>
-					<ButtonLink className="min-inline-40" href="/documentation" intent="outline" size="lg">
-						{t("Read documentation")}
-					</ButtonLink>
-				</div>
+				<ButtonLink className="min-inline-40" href={cta.href} size="lg">
+					{cta.label}
+				</ButtonLink>
 			</section>
 		</Main>
 	);

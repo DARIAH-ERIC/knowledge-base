@@ -6,6 +6,7 @@ import {
 	documentationOverviewSlug,
 	getPublishedDocumentationPages,
 } from "@/app/(app)/[locale]/(default)/documentation/_lib/documentation-pages";
+import { assertAuthenticated } from "@/lib/auth/session";
 
 interface DocumentationLayoutProps extends LayoutProps<"/[locale]/documentation"> {}
 
@@ -13,6 +14,9 @@ export default async function DocumentationLayout(
 	props: Readonly<DocumentationLayoutProps>,
 ): Promise<ReactNode> {
 	const { children } = props;
+
+	// Documentation is internal: the section is only reachable with a signed-in account.
+	await assertAuthenticated();
 
 	const t = await getExtracted();
 
