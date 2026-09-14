@@ -7839,10 +7839,6 @@ msgid "EFTSMc"
 msgstr "Main"
 
 #: app/(app)/[locale]/(default)/(index)/page.tsx
-msgid "Oeu69m"
-msgstr "Go to dashboard"
-
-#: app/(app)/[locale]/(default)/(index)/page.tsx
 #: app/(app)/[locale]/opengraph-image.tsx
 msgid "3umvLQ"
 msgstr "DARIAH Knowledge Base"
@@ -7850,6 +7846,14 @@ msgstr "DARIAH Knowledge Base"
 #: app/(app)/[locale]/(default)/(index)/page.tsx
 msgid "yd-0BL"
 msgstr "Your central hub for everything DARIAH-related."
+
+#: app/(app)/[locale]/(default)/(index)/page.tsx
+msgid "cADHCp"
+msgstr "Don't have an account? <link>Create one</link>"
+
+#: app/(app)/[locale]/(default)/(index)/page.tsx
+msgid "rTsm7N"
+msgstr "Access is limited to DARIAH members. <link>Get in touch</link> to request an account."
 
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx
 msgid "T7Ry38"
