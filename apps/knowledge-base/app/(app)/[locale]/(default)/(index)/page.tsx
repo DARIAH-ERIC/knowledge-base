@@ -44,7 +44,7 @@ export default async function IndexPage(_props: Readonly<IndexPageProps>): Promi
 		<Main className="container flex-1 px-8 py-12 xs:px-16">
 			<section className="flex flex-col items-center gap-y-8 py-16 sm:py-24">
 				<Avatar
-					className="dark:invert"
+					className="outline-none dark:invert"
 					isSquare={true}
 					size="2xl"
 					src="/assets/images/logo-dariah.svg"
