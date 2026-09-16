@@ -125,6 +125,12 @@ const anonymousPageSize = 25;
 const authenticatedPageSize = 100;
 
 /**
+ * Zenodo rejects requests sent with node's default `User-Agent: node` header with a 403, so we
+ * always identify ourselves with a custom user agent.
+ */
+const userAgent = "dariah-knowledge-base (https://github.com/DARIAH-ERIC/knowledge-base)";
+
+/**
  * Zenodo records search and community filtering:
  *
  * @see {@link https://developers.zenodo.org/}
@@ -166,7 +172,11 @@ export function createZenodoClient(params: CreateZenodoClientParams) {
 
 	const pageSize = apiKey != null ? authenticatedPageSize : anonymousPageSize;
 
-	const headers = apiKey != null ? { authorization: `Bearer ${apiKey}` } : undefined;
+	const headers: Record<string, string> = { "user-agent": userAgent };
+
+	if (apiKey != null) {
+		headers["authorization"] = `Bearer ${apiKey}`;
+	}
 
 	/** @see {@link https://developers.zenodo.org/} */
 	function listRecords(
