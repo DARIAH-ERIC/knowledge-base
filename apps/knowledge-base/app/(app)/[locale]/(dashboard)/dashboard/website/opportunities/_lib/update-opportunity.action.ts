@@ -97,6 +97,6 @@ export const updateOpportunityAction = createMutationAction({
 			return;
 		}
 		await syncWebsiteDocumentForEntity(result.subjectId);
-		await dispatchWebhook({ type: "opportunities" });
+		await dispatchWebhook({ tags: ["opportunities"] });
 	},
 });

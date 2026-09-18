@@ -1,7 +1,7 @@
 import { assert } from "@acdh-oeaw/lib";
-import { describeRoute } from "hono-openapi";
 
 import { createRouter } from "@/lib/factory";
+import { describeRoute } from "@/lib/openapi/describe-route";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, NOT_FOUND } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
@@ -17,6 +17,7 @@ export const router = createRouter()
 			summary: "Get events",
 			description: "Retrieve a paginated list of events",
 			operationId: "getEvents",
+			"x-cache-tags": ["events"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -52,6 +53,7 @@ export const router = createRouter()
 			summary: "Get event slugs",
 			description: "Retrieve a paginated list of event slugs",
 			operationId: "getEventSlugs",
+			"x-cache-tags": ["events"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -87,6 +89,7 @@ export const router = createRouter()
 			summary: "Get event by id",
 			description: "Retrieve an event by id",
 			operationId: "getEventById",
+			"x-cache-tags": ["events"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -127,6 +130,7 @@ export const router = createRouter()
 			summary: "Get event by slug",
 			description: "Retrieve an event by slug",
 			operationId: "getEventBySlug",
+			"x-cache-tags": ["events"],
 			responses: {
 				200: {
 					description: "Success response",

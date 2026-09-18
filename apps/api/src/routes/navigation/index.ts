@@ -1,7 +1,7 @@
 import { assert } from "@acdh-oeaw/lib";
-import { describeRoute } from "hono-openapi";
 
 import { createRouter } from "@/lib/factory";
+import { describeRoute } from "@/lib/openapi/describe-route";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
@@ -18,6 +18,24 @@ export const router = createRouter()
 			description:
 				"Retrieve navigation menus with their items. Optionally filter by menu name using the `menu` query parameter.",
 			operationId: "getNavigation",
+			// Navigation items resolve the slug, label and published state of the entity they link to,
+			// so a change to any linkable content type can change the navigation.
+			"x-cache-tags": [
+				"documents-policies",
+				"events",
+				"funding-calls",
+				"governance-bodies",
+				"impact-case-studies",
+				"members-partners",
+				"navigation",
+				"news",
+				"opportunities",
+				"pages",
+				"persons",
+				"projects",
+				"spotlight-articles",
+				"working-groups",
+			],
 			responses: {
 				200: {
 					description: "Success response",

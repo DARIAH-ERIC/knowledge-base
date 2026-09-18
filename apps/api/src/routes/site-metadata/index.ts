@@ -1,7 +1,7 @@
 import { assert } from "@acdh-oeaw/lib";
-import { describeRoute } from "hono-openapi";
 
 import { createRouter } from "@/lib/factory";
+import { describeRoute } from "@/lib/openapi/describe-route";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, NOT_FOUND } from "@/lib/openapi/responses";
 import { validate } from "@/lib/openapi/validator";
@@ -17,6 +17,7 @@ export const router = createRouter()
 			summary: "Get site metadata",
 			description: "Retrieve global site metadata",
 			operationId: "getSiteMetadata",
+			"x-cache-tags": ["members-partners", "site-metadata"],
 			responses: {
 				200: {
 					description: "Success response",

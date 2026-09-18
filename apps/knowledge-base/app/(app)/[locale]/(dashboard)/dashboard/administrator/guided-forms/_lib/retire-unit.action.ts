@@ -106,7 +106,6 @@ export const retireUnitAction = createMutationAction({
 	},
 
 	async postCommit() {
-		await dispatchWebhook({ type: "persons" });
-		await dispatchWebhook({ type: "members-partners" });
+		await dispatchWebhook({ tags: ["persons", "members-partners"] });
 	},
 });

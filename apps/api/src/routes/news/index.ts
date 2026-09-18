@@ -1,7 +1,7 @@
 import { assert } from "@acdh-oeaw/lib";
-import { describeRoute } from "hono-openapi";
 
 import { createRouter } from "@/lib/factory";
+import { describeRoute } from "@/lib/openapi/describe-route";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, NOT_FOUND } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
@@ -27,6 +27,7 @@ export const router = createRouter()
 			summary: "Get news",
 			description: "Retrieve a paginated list of news",
 			operationId: "getNews",
+			"x-cache-tags": ["news"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -62,6 +63,7 @@ export const router = createRouter()
 			summary: "Get news item slugs",
 			description: "Retrieve a paginated list of news item slugs",
 			operationId: "getNewsItemSlugs",
+			"x-cache-tags": ["news"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -97,6 +99,7 @@ export const router = createRouter()
 			summary: "Get news item by id",
 			description: "Retrieve an news item by id",
 			operationId: "getNewsItemById",
+			"x-cache-tags": ["news"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -137,6 +140,7 @@ export const router = createRouter()
 			summary: "Get news item by slug",
 			description: "Retrieve an news item by slug",
 			operationId: "getNewsItemBySlug",
+			"x-cache-tags": ["news"],
 			responses: {
 				200: {
 					description: "Success response",

@@ -1,7 +1,7 @@
 import { assert } from "@acdh-oeaw/lib";
-import { describeRoute } from "hono-openapi";
 
 import { createRouter } from "@/lib/factory";
+import { describeRoute } from "@/lib/openapi/describe-route";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, NOT_FOUND } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
@@ -27,6 +27,7 @@ export const router = createRouter()
 			summary: "Get members and partners",
 			description: "Retrieve a paginated list of members and partners",
 			operationId: "getMembersAndPartners",
+			"x-cache-tags": ["members-partners", "persons"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -62,6 +63,7 @@ export const router = createRouter()
 			summary: "Get member or partner slugs",
 			description: "Retrieve a paginated list of member or partner slugs",
 			operationId: "getMemberOrPartnerSlugs",
+			"x-cache-tags": ["members-partners", "persons"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -97,6 +99,7 @@ export const router = createRouter()
 			summary: "Get member or partner by id",
 			description: "Retrieve a member or partner by id",
 			operationId: "getMembersAndPartnersById",
+			"x-cache-tags": ["members-partners", "persons"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -137,6 +140,7 @@ export const router = createRouter()
 			summary: "Get member or partner by slug",
 			description: "Retrieve a member or partner by slug",
 			operationId: "getMemberOrPartnerBySlug",
+			"x-cache-tags": ["members-partners", "persons"],
 			responses: {
 				200: {
 					description: "Success response",

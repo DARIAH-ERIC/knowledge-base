@@ -1,7 +1,7 @@
 import { assert } from "@acdh-oeaw/lib";
-import { describeRoute } from "hono-openapi";
 
 import { createRouter } from "@/lib/factory";
+import { describeRoute } from "@/lib/openapi/describe-route";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST } from "@/lib/openapi/responses";
 import { validate } from "@/lib/openapi/validator";
@@ -17,6 +17,7 @@ export const router = createRouter()
 			summary: "Get featured entities",
 			description: "Retrieve the list of featured entities configured in site metadata",
 			operationId: "getFeaturedEntities",
+			"x-cache-tags": ["events", "featured-entities", "funding-calls", "news", "opportunities"],
 			responses: {
 				200: {
 					description: "Success response",

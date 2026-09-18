@@ -1,7 +1,7 @@
 import { assert } from "@acdh-oeaw/lib";
-import { describeRoute } from "hono-openapi";
 
 import { createRouter } from "@/lib/factory";
+import { describeRoute } from "@/lib/openapi/describe-route";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, NOT_FOUND } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
@@ -27,6 +27,15 @@ export const router = createRouter()
 			summary: "Get persons",
 			description: "Retrieve a paginated list of persons",
 			operationId: "getPersons",
+			// A person's payload embeds their positions and article contributions.
+			"x-cache-tags": [
+				"governance-bodies",
+				"impact-case-studies",
+				"members-partners",
+				"persons",
+				"spotlight-articles",
+				"working-groups",
+			],
 			responses: {
 				200: {
 					description: "Success response",
@@ -62,6 +71,15 @@ export const router = createRouter()
 			summary: "Get person slugs",
 			description: "Retrieve a paginated list of person slugs",
 			operationId: "getPersonSlugs",
+			// A person's payload embeds their positions and article contributions.
+			"x-cache-tags": [
+				"governance-bodies",
+				"impact-case-studies",
+				"members-partners",
+				"persons",
+				"spotlight-articles",
+				"working-groups",
+			],
 			responses: {
 				200: {
 					description: "Success response",
@@ -97,6 +115,15 @@ export const router = createRouter()
 			summary: "Get person by id",
 			description: "Retrieve a person by id",
 			operationId: "getPersonById",
+			// A person's payload embeds their positions and article contributions.
+			"x-cache-tags": [
+				"governance-bodies",
+				"impact-case-studies",
+				"members-partners",
+				"persons",
+				"spotlight-articles",
+				"working-groups",
+			],
 			responses: {
 				200: {
 					description: "Success response",
@@ -137,6 +164,15 @@ export const router = createRouter()
 			summary: "Get person by slug",
 			description: "Retrieve a person by slug",
 			operationId: "getPersonBySlug",
+			// A person's payload embeds their positions and article contributions.
+			"x-cache-tags": [
+				"governance-bodies",
+				"impact-case-studies",
+				"members-partners",
+				"persons",
+				"spotlight-articles",
+				"working-groups",
+			],
 			responses: {
 				200: {
 					description: "Success response",

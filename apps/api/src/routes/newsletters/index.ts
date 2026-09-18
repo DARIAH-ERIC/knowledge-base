@@ -1,8 +1,8 @@
-import { describeRoute } from "hono-openapi";
 import { rateLimiter } from "hono-rate-limiter";
 import { HTTPException } from "hono/http-exception";
 
 import { createRouter } from "@/lib/factory";
+import { describeRoute } from "@/lib/openapi/describe-route";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, UNAUTHORIZED } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
@@ -27,6 +27,7 @@ export const router = createRouter()
 			summary: "Get newsletters",
 			description: "Retrieve a paginated list of newsletter campaigns from Mailchimp",
 			operationId: "getNewsletters",
+			"x-cache-tags": [],
 			responses: {
 				200: {
 					description: "Success response",
@@ -59,6 +60,7 @@ export const router = createRouter()
 			summary: "Subscribe to newsletter",
 			description: "Subscribe an email address to the Mailchimp mailing list",
 			operationId: "subscribeToNewsletter",
+			"x-cache-tags": [],
 			requestBody: {
 				required: true,
 				content: {
