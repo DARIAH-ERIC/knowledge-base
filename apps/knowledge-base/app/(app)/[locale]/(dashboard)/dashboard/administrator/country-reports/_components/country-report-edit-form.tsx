@@ -58,7 +58,7 @@ export function CountryReportEditForm(props: Readonly<CountryReportEditFormProps
 					<Select
 						isRequired={true}
 						onChange={(key) => {
-							setSelectedStatus(String(key));
+							setSelectedStatus(key == null ? "" : String(key));
 						}}
 						value={selectedStatus || null}
 					>

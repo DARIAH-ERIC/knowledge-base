@@ -135,8 +135,7 @@ export function InternalDashboard(props: Readonly<InternalDashboardProps>): Reac
 						<Select
 							aria-label={t("Filter by action")}
 							onChange={(key) => {
-								const value = String(key);
-								search.setFilter("action", value === "all" ? "" : value);
+								search.setFilter("action", key == null || key === "all" ? "" : String(key));
 							}}
 							value={selectedAction}
 						>

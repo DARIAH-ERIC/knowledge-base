@@ -64,7 +64,7 @@ export function SocialMediaForm(props: Readonly<SocialMediaFormProps>): ReactNod
 					<Select
 						isRequired={true}
 						onChange={(key) => {
-							setSelectedType(String(key));
+							setSelectedType(key == null ? "" : String(key));
 						}}
 						value={selectedType || null}
 					>

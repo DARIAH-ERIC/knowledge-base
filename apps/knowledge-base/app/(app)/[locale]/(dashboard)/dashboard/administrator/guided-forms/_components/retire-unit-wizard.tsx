@@ -168,7 +168,7 @@ export function RetireUnitWizard(props: Readonly<RetireUnitWizardProps>): ReactN
 						<Select
 							isRequired={true}
 							onChange={(key) => {
-								setUnitType(String(key));
+								setUnitType(key == null ? "" : String(key));
 								setUnit(null);
 							}}
 							value={unitType}

@@ -279,7 +279,7 @@ function AddExistingAccountForm(props: Readonly<AddExistingAccountFormProps>): R
 				<Select
 					isRequired={true}
 					onChange={(key) => {
-						setSelectedId(String(key));
+						setSelectedId(key == null ? "" : String(key));
 					}}
 					value={selectedId || null}
 				>
@@ -351,7 +351,7 @@ function CreateAccountForm(props: Readonly<CreateAccountFormProps>): ReactNode {
 				<Select
 					isRequired={true}
 					onChange={(key) => {
-						setTypeId(String(key));
+						setTypeId(key == null ? "" : String(key));
 					}}
 					value={typeId || null}
 				>

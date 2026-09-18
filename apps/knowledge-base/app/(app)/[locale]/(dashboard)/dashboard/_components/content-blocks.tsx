@@ -810,6 +810,10 @@ function DataContentBlockPanel({
 		<div className="flex flex-col gap-y-4">
 			<Select
 				onChange={(key) => {
+					if (key == null) {
+						return;
+					}
+
 					onChange({
 						...item.content,
 						dataType: key as DataContentBlockType,

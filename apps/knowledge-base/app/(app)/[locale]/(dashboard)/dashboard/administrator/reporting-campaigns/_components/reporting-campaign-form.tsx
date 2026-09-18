@@ -56,7 +56,7 @@ export function ReportingCampaignForm(props: Readonly<ReportingCampaignFormProps
 					<Select
 						isRequired={true}
 						onChange={(key) => {
-							setSelectedStatus(String(key));
+							setSelectedStatus(key == null ? "" : String(key));
 						}}
 						value={selectedStatus || null}
 					>

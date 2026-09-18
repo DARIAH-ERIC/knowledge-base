@@ -405,7 +405,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 							isRequired={true}
 							onChange={(key) => {
 								setDialog((prev) => {
-									return { ...prev, roleId: String(key) };
+									return { ...prev, roleId: key == null ? null : String(key) };
 								});
 							}}
 							value={dialog.roleId}

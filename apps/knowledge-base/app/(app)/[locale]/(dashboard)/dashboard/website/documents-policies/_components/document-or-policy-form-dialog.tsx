@@ -122,7 +122,7 @@ function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): React
 
 				<Select
 					onChange={(key) => {
-						setSelectedGroupId(String(key === "none" ? "" : key));
+						setSelectedGroupId(key == null || key === "none" ? "" : String(key));
 					}}
 					value={selectedGroupId || "none"}
 				>

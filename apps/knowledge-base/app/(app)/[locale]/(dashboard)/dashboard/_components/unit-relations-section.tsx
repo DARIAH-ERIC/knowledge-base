@@ -353,7 +353,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 								<Select
 									isRequired={true}
 									onChange={(key) => {
-										setSelectedStatusId(String(key));
+										setSelectedStatusId(key == null ? null : String(key));
 										setSelectedUnitItem(null);
 									}}
 									value={selectedStatusId}
@@ -512,7 +512,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 						<Select
 							isRequired={true}
 							onChange={(key) => {
-								setEditStatusId(String(key));
+								setEditStatusId(key == null ? null : String(key));
 								setEditUnitItem(null);
 							}}
 							value={editStatusId}

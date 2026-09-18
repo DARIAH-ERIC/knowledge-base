@@ -46,7 +46,7 @@ export function ServiceStatusEditForm(props: Readonly<ServiceStatusEditFormProps
 					<Select
 						isRequired={true}
 						onChange={(key) => {
-							setSelectedStatusId(String(key));
+							setSelectedStatusId(key == null ? "" : String(key));
 						}}
 						value={selectedStatusId || null}
 					>

@@ -498,7 +498,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 								<Select
 									isRequired={true}
 									onChange={(key) => {
-										setSelectedRoleTypeId(String(key));
+										setSelectedRoleTypeId(key == null ? null : String(key));
 									}}
 									value={selectedRoleTypeId}
 								>
@@ -667,7 +667,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 						<Select
 							isRequired={true}
 							onChange={(key) => {
-								setEditRoleTypeId(String(key));
+								setEditRoleTypeId(key == null ? null : String(key));
 							}}
 							value={editRoleTypeId}
 						>

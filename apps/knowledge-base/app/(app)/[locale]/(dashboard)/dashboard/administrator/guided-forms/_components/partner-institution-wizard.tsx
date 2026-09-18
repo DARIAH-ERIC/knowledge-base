@@ -360,7 +360,7 @@ export function PartnerInstitutionWizard(
 						<Select
 							isRequired={true}
 							onChange={(key) => {
-								setStatusType(String(key) as PartnerInstitutionStatusType);
+								setStatusType(key == null ? null : (String(key) as PartnerInstitutionStatusType));
 							}}
 							value={statusType}
 						>

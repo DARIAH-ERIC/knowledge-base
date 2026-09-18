@@ -333,7 +333,7 @@ export function UnitProjectsSection(props: Readonly<UnitProjectsSectionProps>): 
 							isRequired={true}
 							onChange={(key) => {
 								setDialog((prev) => {
-									return { ...prev, roleId: String(key) };
+									return { ...prev, roleId: key == null ? null : String(key) };
 								});
 							}}
 							value={dialog.roleId}

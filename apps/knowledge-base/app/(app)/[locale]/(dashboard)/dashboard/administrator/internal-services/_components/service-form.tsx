@@ -117,7 +117,7 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 					<Select
 						isRequired={true}
 						onChange={(key) => {
-							setSelectedTypeId(String(key));
+							setSelectedTypeId(key == null ? "" : String(key));
 						}}
 						value={selectedTypeId || null}
 					>
@@ -136,7 +136,7 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 					<Select
 						isRequired={true}
 						onChange={(key) => {
-							setSelectedStatusId(String(key));
+							setSelectedStatusId(key == null ? "" : String(key));
 						}}
 						value={selectedStatusId || null}
 					>

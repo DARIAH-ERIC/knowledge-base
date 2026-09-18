@@ -102,8 +102,7 @@ export function ReportingKpisPage(props: Readonly<ReportingKpisPageProps>): Reac
 						 */}
 						<Select
 							onChange={(key) => {
-								const value = String(key);
-								search.setFilter("kpi", value === ALL_OPTION ? "" : value);
+								search.setFilter("kpi", key == null || key === ALL_OPTION ? "" : String(key));
 							}}
 							value={selectedKpi}
 						>

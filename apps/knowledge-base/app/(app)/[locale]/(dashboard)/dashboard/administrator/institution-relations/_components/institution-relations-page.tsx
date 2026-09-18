@@ -412,7 +412,7 @@ export function InstitutionRelationsPage(
 							isRequired={true}
 							onChange={(key) => {
 								setDialog((prev) => {
-									return { ...prev, statusId: String(key), relatedUnit: null };
+									return { ...prev, statusId: key == null ? null : String(key), relatedUnit: null };
 								});
 							}}
 							value={dialog.statusId}

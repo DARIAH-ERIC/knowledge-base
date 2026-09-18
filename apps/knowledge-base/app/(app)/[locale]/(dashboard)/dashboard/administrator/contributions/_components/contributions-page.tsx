@@ -442,7 +442,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 								setDialog((prev) => {
 									return {
 										...prev,
-										roleTypeId: String(key),
+										roleTypeId: key == null ? null : String(key),
 										organisationalUnit: null,
 									};
 								});

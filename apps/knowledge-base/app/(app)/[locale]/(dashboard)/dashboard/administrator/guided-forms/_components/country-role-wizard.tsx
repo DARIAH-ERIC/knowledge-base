@@ -448,7 +448,7 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 							<Select
 								isRequired={true}
 								onChange={(key) => {
-									setAppointmentId(String(key));
+									setAppointmentId(key == null ? null : String(key));
 								}}
 								value={appointmentId}
 							>
@@ -511,7 +511,7 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 						<Select
 							isRequired={true}
 							onChange={(key) => {
-								setRoleType(String(key) as CountryRoleType);
+								setRoleType(key == null ? null : (String(key) as CountryRoleType));
 								setCounterpartRoleType(null);
 							}}
 							value={roleType}
@@ -536,7 +536,7 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 						{counterpartRoleChoices.length > 1 ? (
 							<Select
 								onChange={(key) => {
-									setCounterpartRoleType(String(key) as PersonRoleType);
+									setCounterpartRoleType(key == null ? null : (String(key) as PersonRoleType));
 								}}
 								value={effectiveCounterpartRoleType}
 							>

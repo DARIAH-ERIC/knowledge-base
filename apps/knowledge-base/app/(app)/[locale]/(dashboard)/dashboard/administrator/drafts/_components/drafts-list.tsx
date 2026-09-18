@@ -90,7 +90,7 @@ export function DraftsList(props: Readonly<DraftsListProps>): ReactNode {
 						<Select
 							aria-label={t("Filter by type")}
 							onChange={(key) => {
-								setSelectedType(String(key));
+								setSelectedType(key == null ? "" : String(key));
 								table.setPage(1);
 							}}
 							value={selectedType}

@@ -94,7 +94,7 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 
 				<Select
 					onChange={(key) => {
-						setSelectedGroupId(String(key === "none" ? "" : key));
+						setSelectedGroupId(key == null || key === "none" ? "" : String(key));
 					}}
 					value={selectedGroupId || "none"}
 				>
