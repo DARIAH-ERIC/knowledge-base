@@ -29,6 +29,7 @@ export const router = createRouter()
 			operationId: "getPersons",
 			// A person's payload embeds their positions and article contributions.
 			"x-cache-tags": [
+				"assets",
 				"governance-bodies",
 				"impact-case-studies",
 				"members-partners",
@@ -73,6 +74,7 @@ export const router = createRouter()
 			operationId: "getPersonSlugs",
 			// A person's payload embeds their positions and article contributions.
 			"x-cache-tags": [
+				"assets",
 				"governance-bodies",
 				"impact-case-studies",
 				"members-partners",
@@ -117,6 +119,7 @@ export const router = createRouter()
 			operationId: "getPersonById",
 			// A person's payload embeds their positions and article contributions.
 			"x-cache-tags": [
+				"assets",
 				"governance-bodies",
 				"impact-case-studies",
 				"members-partners",
@@ -166,6 +169,7 @@ export const router = createRouter()
 			operationId: "getPersonBySlug",
 			// A person's payload embeds their positions and article contributions.
 			"x-cache-tags": [
+				"assets",
 				"governance-bodies",
 				"impact-case-studies",
 				"members-partners",

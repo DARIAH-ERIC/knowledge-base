@@ -17,7 +17,7 @@ export const router = createRouter()
 			summary: "Get events",
 			description: "Retrieve a paginated list of events",
 			operationId: "getEvents",
-			"x-cache-tags": ["events"],
+			"x-cache-tags": ["assets", "events"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -53,7 +53,7 @@ export const router = createRouter()
 			summary: "Get event slugs",
 			description: "Retrieve a paginated list of event slugs",
 			operationId: "getEventSlugs",
-			"x-cache-tags": ["events"],
+			"x-cache-tags": ["assets", "events"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -89,7 +89,7 @@ export const router = createRouter()
 			summary: "Get event by id",
 			description: "Retrieve an event by id",
 			operationId: "getEventById",
-			"x-cache-tags": ["events"],
+			"x-cache-tags": ["assets", "events"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -130,7 +130,7 @@ export const router = createRouter()
 			summary: "Get event by slug",
 			description: "Retrieve an event by slug",
 			operationId: "getEventBySlug",
-			"x-cache-tags": ["events"],
+			"x-cache-tags": ["assets", "events"],
 			responses: {
 				200: {
 					description: "Success response",

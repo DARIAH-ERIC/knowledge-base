@@ -7,6 +7,7 @@ import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function endUnitRelationAction(id: string, end: Date): Promise<void> {
 	const auditSession = await assertAdmin();
@@ -34,4 +35,5 @@ export async function endUnitRelationAction(id: string, end: Date): Promise<void
 	});
 
 	revalidatePath("/[locale]/dashboard/administrator", "layout");
+	await dispatchWebhook({ tags: ["members-partners", "working-groups"] });
 }

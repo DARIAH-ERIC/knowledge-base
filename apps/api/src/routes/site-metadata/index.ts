@@ -17,7 +17,7 @@ export const router = createRouter()
 			summary: "Get site metadata",
 			description: "Retrieve global site metadata",
 			operationId: "getSiteMetadata",
-			"x-cache-tags": ["members-partners", "site-metadata"],
+			"x-cache-tags": ["assets", "members-partners", "site-metadata", "social-media"],
 			responses: {
 				200: {
 					description: "Success response",

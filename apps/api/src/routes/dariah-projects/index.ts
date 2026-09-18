@@ -27,7 +27,7 @@ export const router = createRouter()
 			summary: "Get DARIAH projects",
 			description: "Retrieve a paginated list of DARIAH projects",
 			operationId: "getDariahProjects",
-			"x-cache-tags": ["projects"],
+			"x-cache-tags": ["assets", "projects", "social-media"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -63,7 +63,7 @@ export const router = createRouter()
 			summary: "Get DARIAH project slugs",
 			description: "Retrieve a paginated list of DARIAH project slugs",
 			operationId: "getDariahProjectSlugs",
-			"x-cache-tags": ["projects"],
+			"x-cache-tags": ["assets", "projects", "social-media"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -99,7 +99,7 @@ export const router = createRouter()
 			summary: "Get DARIAH project by id",
 			description: "Retrieve a DARIAH project by id",
 			operationId: "getDariahProjectById",
-			"x-cache-tags": ["projects"],
+			"x-cache-tags": ["assets", "projects", "social-media"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -140,7 +140,7 @@ export const router = createRouter()
 			summary: "Get DARIAH project by slug",
 			description: "Retrieve a DARIAH project by slug",
 			operationId: "getDariahProjectBySlug",
-			"x-cache-tags": ["projects"],
+			"x-cache-tags": ["assets", "projects", "social-media"],
 			responses: {
 				200: {
 					description: "Success response",
