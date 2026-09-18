@@ -17,7 +17,14 @@ export const router = createRouter()
 			summary: "Get featured entities",
 			description: "Retrieve the list of featured entities configured in site metadata",
 			operationId: "getFeaturedEntities",
-			"x-cache-tags": ["events", "featured-entities", "funding-calls", "news", "opportunities"],
+			"x-cache-tags": [
+				"assets",
+				"events",
+				"featured-entities",
+				"funding-calls",
+				"news",
+				"opportunities",
+			],
 			responses: {
 				200: {
 					description: "Success response",
