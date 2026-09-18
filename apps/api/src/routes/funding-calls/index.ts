@@ -1,7 +1,7 @@
 import { assert } from "@acdh-oeaw/lib";
-import { describeRoute } from "hono-openapi";
 
 import { createRouter } from "@/lib/factory";
+import { describeRoute } from "@/lib/openapi/describe-route";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, NOT_FOUND } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
@@ -27,6 +27,7 @@ export const router = createRouter()
 			summary: "Get funding calls",
 			description: "Retrieve a paginated list of funding calls",
 			operationId: "getFundingCalls",
+			"x-cache-tags": ["funding-calls"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -62,6 +63,7 @@ export const router = createRouter()
 			summary: "Get funding call slugs",
 			description: "Retrieve a paginated list of funding call slugs",
 			operationId: "getFundingCallSlugs",
+			"x-cache-tags": ["funding-calls"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -97,6 +99,7 @@ export const router = createRouter()
 			summary: "Get funding call by id",
 			description: "Retrieve a funding call by id",
 			operationId: "getFundingCallById",
+			"x-cache-tags": ["funding-calls"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -137,6 +140,7 @@ export const router = createRouter()
 			summary: "Get funding call by slug",
 			description: "Retrieve a funding call by slug",
 			operationId: "getFundingCallBySlug",
+			"x-cache-tags": ["funding-calls"],
 			responses: {
 				200: {
 					description: "Success response",

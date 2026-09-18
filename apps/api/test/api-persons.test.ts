@@ -18,11 +18,13 @@ function createItems(count: number) {
 			const entityId = uuidv7();
 			const assetId = uuidv7();
 			const name = f.person.fullName();
-			const slug = slugify(name);
+			// Generated names repeat across runs and against the kitchen-sink seed; the id keeps the
+			// `(type_id, slug)` unique constraint from tripping.
+			const slug = `${slugify(name)}-${entityId}`;
 			const affiliationVersionId = uuidv7();
 			const affiliationEntityId = uuidv7();
 			const affiliationName = f.company.name();
-			const affiliationSlug = slugify(affiliationName);
+			const affiliationSlug = `${slugify(affiliationName)}-${affiliationEntityId}`;
 
 			const entity = { id: entityId, slug };
 			const version = { id: versionId, entityId };
@@ -180,7 +182,7 @@ async function seedFormerPositions(db: Database, personEntityId: string) {
 		const name = f.company.name();
 
 		return {
-			entity: { id: entityId, slug: slugify(name), typeId: unitEntityTypeId },
+			entity: { id: entityId, slug: `${slugify(name)}-${entityId}`, typeId: unitEntityTypeId },
 			version: { id: versionId, entityId, statusId },
 			organisationalUnit: {
 				id: versionId,
@@ -262,7 +264,7 @@ async function seedContributions(db: Database, personEntityId: string) {
 		const title = f.lorem.sentence();
 
 		return {
-			entity: { id: entityId, slug: slugify(title), typeId },
+			entity: { id: entityId, slug: `${slugify(title)}-${entityId}`, typeId },
 			version: { id: versionId, entityId, statusId },
 			asset: {
 				id: assetId,

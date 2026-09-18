@@ -29,6 +29,7 @@
 		"@acdh-oeaw/color-schemes": "catalog:",
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/style-variants": "catalog:",
+		"@dariah-eric/cache-tags": "workspace:^",
 		"@dariah-eric/database": "workspace:^",
 		"@dariah-eric/email": "workspace:^",
 		"@dariah-eric/env": "workspace:^",
