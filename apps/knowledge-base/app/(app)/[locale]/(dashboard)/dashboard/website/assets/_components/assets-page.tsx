@@ -108,8 +108,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 						<Select
 							aria-label={t("Filter by prefix")}
 							onChange={(key) => {
-								const value = String(key);
-								search.setFilter("prefix", value === "all" ? "" : value);
+								search.setFilter("prefix", key == null || key === "all" ? "" : String(key));
 							}}
 							value={selectedPrefix}
 						>

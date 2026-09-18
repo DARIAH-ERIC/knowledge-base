@@ -57,7 +57,7 @@ export function WorkingGroupReportCreateForm(
 						<Select
 							isRequired={true}
 							onChange={(key) => {
-								setSelectedCampaignId(String(key));
+								setSelectedCampaignId(key == null ? "" : String(key));
 							}}
 							value={selectedCampaignId || null}
 						>
@@ -77,7 +77,7 @@ export function WorkingGroupReportCreateForm(
 						<Select
 							isRequired={true}
 							onChange={(key) => {
-								setSelectedWorkingGroupId(String(key));
+								setSelectedWorkingGroupId(key == null ? "" : String(key));
 							}}
 							value={selectedWorkingGroupId || null}
 						>
@@ -97,7 +97,7 @@ export function WorkingGroupReportCreateForm(
 						<Select
 							isRequired={true}
 							onChange={(key) => {
-								setSelectedStatus(String(key));
+								setSelectedStatus(key == null ? "" : String(key));
 							}}
 							value={selectedStatus || null}
 						>

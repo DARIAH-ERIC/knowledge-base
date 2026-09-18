@@ -101,7 +101,7 @@ export function CountryReportProjectsForm(
 						<Select
 							isRequired={true}
 							onChange={(key) => {
-								setSelectedProjectId(String(key));
+								setSelectedProjectId(key == null ? "" : String(key));
 							}}
 							value={selectedProjectId || null}
 						>

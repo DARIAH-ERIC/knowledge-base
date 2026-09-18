@@ -55,7 +55,7 @@ export function CountryReportCreateForm(props: Readonly<CountryReportCreateFormP
 						<Select
 							isRequired={true}
 							onChange={(key) => {
-								setSelectedCampaignId(String(key));
+								setSelectedCampaignId(key == null ? "" : String(key));
 							}}
 							value={selectedCampaignId || null}
 						>
@@ -75,7 +75,7 @@ export function CountryReportCreateForm(props: Readonly<CountryReportCreateFormP
 						<Select
 							isRequired={true}
 							onChange={(key) => {
-								setSelectedCountryId(String(key));
+								setSelectedCountryId(key == null ? "" : String(key));
 							}}
 							value={selectedCountryId || null}
 						>
@@ -95,7 +95,7 @@ export function CountryReportCreateForm(props: Readonly<CountryReportCreateFormP
 						<Select
 							isRequired={true}
 							onChange={(key) => {
-								setSelectedStatus(String(key));
+								setSelectedStatus(key == null ? "" : String(key));
 							}}
 							value={selectedStatus || null}
 						>

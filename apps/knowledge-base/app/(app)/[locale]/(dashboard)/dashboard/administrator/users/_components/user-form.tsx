@@ -121,7 +121,7 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 					<Select
 						isRequired={true}
 						onChange={(key) => {
-							setSelectedRole(String(key));
+							setSelectedRole(key == null ? "" : String(key));
 						}}
 						value={selectedRole}
 					>

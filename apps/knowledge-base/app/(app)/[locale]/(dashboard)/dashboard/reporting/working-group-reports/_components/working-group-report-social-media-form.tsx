@@ -79,7 +79,7 @@ export function WorkingGroupReportSocialMediaForm(
 						<Select
 							isRequired={true}
 							onChange={(key) => {
-								setSelectedId(String(key));
+								setSelectedId(key == null ? "" : String(key));
 							}}
 							value={selectedId || null}
 						>

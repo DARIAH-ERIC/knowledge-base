@@ -340,7 +340,7 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 							isRequired={true}
 							onChange={(key) => {
 								setDialog((prev) => {
-									return { ...prev, roleId: String(key) };
+									return { ...prev, roleId: key == null ? null : String(key) };
 								});
 							}}
 							value={dialog.roleId}

@@ -60,7 +60,7 @@ export function WorkingGroupReportEditForm(
 					<Select
 						isRequired={true}
 						onChange={(key) => {
-							setSelectedStatus(String(key));
+							setSelectedStatus(key == null ? "" : String(key));
 						}}
 						value={selectedStatus || null}
 					>

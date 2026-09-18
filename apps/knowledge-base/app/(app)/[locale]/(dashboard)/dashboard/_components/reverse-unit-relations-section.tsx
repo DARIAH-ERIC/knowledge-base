@@ -516,7 +516,7 @@ export function ReverseUnitRelationsSection(
 									<Select
 										isRequired={true}
 										onChange={(key) => {
-											setSelectedStatusId(String(key));
+											setSelectedStatusId(key == null ? null : String(key));
 										}}
 										value={selectedStatusId}
 									>
@@ -684,7 +684,7 @@ export function ReverseUnitRelationsSection(
 							<Select
 								isRequired={true}
 								onChange={(key) => {
-									setEditStatusId(String(key));
+									setEditStatusId(key == null ? null : String(key));
 								}}
 								value={editStatusId}
 							>

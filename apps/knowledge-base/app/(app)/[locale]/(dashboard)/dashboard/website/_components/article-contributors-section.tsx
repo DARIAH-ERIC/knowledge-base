@@ -185,7 +185,7 @@ export function ArticleContributorsSection(
 							<Select
 								isRequired={true}
 								onChange={(key) => {
-									setSelectedRole(String(key));
+									setSelectedRole(key == null ? null : String(key));
 								}}
 								value={selectedRole}
 							>
