@@ -3080,6 +3080,14 @@ msgid "_wJ5uS"
 msgstr "Could not delete person relation. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
+msgid "7L86Z5"
+msgstr "Member"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
+msgid "TLrvIO"
+msgstr "Observer"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
 msgid "zpAgR4"
 msgstr "Manage all countries in the DARIAH knowledge base."
 
@@ -3112,14 +3120,6 @@ msgid "wxFA74"
 msgstr "Membership"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
-msgid "7L86Z5"
-msgstr "Member"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
-msgid "TLrvIO"
-msgstr "Observer"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-page.tsx
@@ -3144,6 +3144,10 @@ msgstr "Observer"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx
 msgid "FgydNe"
 msgstr "View"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
+msgid "osq4q8"
+msgstr "Previously"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
 msgid "OUDdOB"
