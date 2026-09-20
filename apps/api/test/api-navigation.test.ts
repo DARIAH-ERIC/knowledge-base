@@ -179,7 +179,6 @@ describe("navigation", () => {
 								id: expect.any(String) as string,
 								type: "working_group",
 								slug,
-								label,
 								href: `/network/working-groups/${slug}`,
 							},
 						}),

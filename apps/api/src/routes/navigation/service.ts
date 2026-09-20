@@ -14,7 +14,7 @@ interface NavigationItem {
 	id: string;
 	label: string;
 	href: string | null;
-	entity: EntityRef | null;
+	entity: Omit<EntityRef, "label"> | null;
 	isExternal: boolean;
 	position: number;
 	parentId: string | null;
@@ -61,7 +61,6 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 			parentId: schema.navigationItems.parentId,
 			entityId: schema.entities.id,
 			entitySlug: schema.entities.slug,
-			entityLabel: schema.entities.label,
 			entityType: sql<string>`
 				CASE
 					WHEN ${schema.entityTypes.type} = 'organisational_units'
@@ -127,7 +126,6 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 							id: row.entityId,
 							type: row.entityType,
 							slug: row.entitySlug,
-							label: row.entityLabel ?? row.entitySlug,
 							href: getWebsiteHref(row.entityType, {
 								slug: row.entitySlug,
 								countrySlug: countrySlugs.get(row.entityId),

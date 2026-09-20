@@ -33,7 +33,7 @@ export const navigationItems = p.snakeCase.table(
 			.references((): AnyPgColumn => navigationItems.id, { onDelete: "cascade" }),
 		label: p.text("label").notNull(),
 		href: p.text("href"),
-		entityId: p.uuid("entity_id").references(() => entities.id, { onDelete: "set null" }),
+		entityId: p.uuid("entity_id").references(() => entities.id, { onDelete: "restrict" }),
 		isExternal: p.boolean("is_external").notNull().default(false),
 		position: p.integer("position").notNull().default(0),
 		...f.timestamps(),
