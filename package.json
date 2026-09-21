@@ -25,6 +25,7 @@
 		"data:migrate:wordpress-event": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"migrate\" run data:migrate:wordpress-event",
 		"data:migrate:wordpress-news-item": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"migrate\" run data:migrate:wordpress-news-item",
 		"data:migrate:wordpress-spotlight-article": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"migrate\" run data:migrate:wordpress-spotlight-article",
+		"data:move:job-opportunity-news": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"maintenance\" run data:move:job-opportunity-news",
 		"data:seed": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"seed\" run data:seed",
 		"data:seed:db": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"seed\" run data:seed:db",
 		"data:seed:kitchen-sink": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"seed\" run data:seed:kitchen-sink",

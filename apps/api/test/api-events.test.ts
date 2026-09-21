@@ -422,6 +422,170 @@ describe("events", () => {
 		});
 	});
 
+	describe("GET /api/events - anchor/direction", () => {
+		// Split date. Far-future years avoid interference from seed data.
+		const anchor = "2091-03-15";
+
+		function createTimeline() {
+			return {
+				// Ended the day before the anchor: past.
+				endedDayBefore: createItemWithDuration({
+					start: new Date("2091-03-10T00:00:00Z"),
+					end: new Date("2091-03-14T23:59:59Z"),
+				}),
+				past: createItemWithDuration({
+					start: new Date("2091-01-01T00:00:00Z"),
+					end: new Date("2091-01-10T00:00:00Z"),
+				}),
+				// Started before, ends after the anchor: upcoming (ongoing), never past.
+				spanning: createItemWithDuration({
+					start: new Date("2091-03-10T00:00:00Z"),
+					end: new Date("2091-03-20T00:00:00Z"),
+				}),
+				// Ends exactly on the anchor day: upcoming.
+				endsOnAnchor: createItemWithDuration({
+					start: new Date("2091-03-12T00:00:00Z"),
+					end: new Date("2091-03-15T00:00:00Z"),
+				}),
+				upcoming: createItemWithDuration({
+					start: new Date("2091-04-01T00:00:00Z"),
+					end: new Date("2091-04-02T00:00:00Z"),
+				}),
+				// Open-ended, even if it started long ago: upcoming.
+				openEnded: createItemWithDuration({ start: new Date("2091-01-05T00:00:00Z") }),
+			};
+		}
+
+		async function fetchAll(
+			client: ReturnType<typeof createTestClient>,
+			direction: "upcoming" | "past",
+		) {
+			const response = await client.events.$get({
+				query: { anchor, direction, limit: "100" },
+			});
+			expect(response.status).toBe(200);
+			return response.json();
+		}
+
+		it("upcoming: includes spanning, ending-on-anchor, future and open-ended events, sorted ascending", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const t = createTimeline();
+				await seed(db, Object.values(t));
+
+				const data = await fetchAll(client, "upcoming");
+				const ids = new Set(data.data.map((e) => e.id));
+
+				for (const item of [t.spanning, t.endsOnAnchor, t.upcoming, t.openEnded]) {
+					expect(ids.has(item.version.id)).toBe(true);
+				}
+				for (const item of [t.endedDayBefore, t.past]) {
+					expect(ids.has(item.version.id)).toBe(false);
+				}
+
+				const starts = data.data.map((e) => e.duration.start);
+				expect(starts.every((s, i) => i === 0 || s >= starts[i - 1]!)).toBe(true);
+			});
+		});
+
+		it("past: includes only events that ended before the anchor, sorted descending", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const t = createTimeline();
+				await seed(db, Object.values(t));
+
+				const data = await fetchAll(client, "past");
+				const ids = new Set(data.data.map((e) => e.id));
+
+				for (const item of [t.endedDayBefore, t.past]) {
+					expect(ids.has(item.version.id)).toBe(true);
+				}
+				for (const item of [t.spanning, t.endsOnAnchor, t.upcoming, t.openEnded]) {
+					expect(ids.has(item.version.id)).toBe(false);
+				}
+
+				const starts = data.data.map((e) => e.duration.start);
+				expect(starts.every((s, i) => i === 0 || s <= starts[i - 1]!)).toBe(true);
+			});
+		});
+
+		it("upcoming and past partition all events and total counts one side only", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const t = createTimeline();
+				await seed(db, Object.values(t));
+
+				const [all, upcoming, past] = await Promise.all([
+					client.events.$get({ query: { limit: "1" } }).then((r) => r.json()),
+					fetchAll(client, "upcoming"),
+					fetchAll(client, "past"),
+				]);
+
+				expect(upcoming.total).toBe(upcoming.data.length);
+				expect(past.total).toBe(past.data.length);
+				expect(upcoming.total + past.total).toBe(all.total);
+
+				const upcomingIds = new Set(upcoming.data.map((e) => e.id));
+				expect(past.data.every((e) => !upcomingIds.has(e.id))).toBe(true);
+			});
+		});
+
+		it("direction defaults to upcoming and matches from=anchor", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const t = createTimeline();
+				await seed(db, Object.values(t));
+
+				const [byAnchor, byFrom] = await Promise.all([
+					client.events.$get({ query: { anchor, limit: "100" } }).then((r) => r.json()),
+					client.events.$get({ query: { from: anchor, limit: "100" } }).then((r) => r.json()),
+				]);
+
+				expect(byAnchor.total).toBe(byFrom.total);
+				expect(byAnchor.data.map((e) => e.id)).toEqual(byFrom.data.map((e) => e.id));
+			});
+		});
+
+		it("returns 400 when window params (from/until) are combined with walk params (anchor/direction)", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const combinations = [
+					{ anchor, from: anchor },
+					{ anchor, until: anchor },
+					{ direction: "upcoming", from: anchor },
+					{ direction: "past", until: anchor },
+					{ anchor, direction: "past", from: anchor, until: anchor },
+				] as const;
+
+				const responses = await Promise.all(
+					combinations.map((query) => client.events.$get({ query })),
+				);
+
+				for (const response of responses) {
+					expect(response.status).toBe(400);
+				}
+			});
+		});
+
+		it("returns 400 for direction without anchor or with an unknown value", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const [noAnchor, unknown] = await Promise.all([
+					client.events.$get({ query: { direction: "past" } }),
+					client.events.$get({
+						// @ts-expect-error -- Intentionally invalid value.
+						query: { anchor, direction: "sideways" },
+					}),
+				]);
+
+				expect(noAnchor.status).toBe(400);
+				expect(unknown.status).toBe(400);
+			});
+		});
+	});
+
 	describe("GET /api/events - calendar month use case", () => {
 		// Target month: March 2091. Far-future year avoids seed data interference.
 
