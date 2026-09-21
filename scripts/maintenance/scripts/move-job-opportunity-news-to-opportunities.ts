@@ -20,6 +20,11 @@ import { env } from "../config/env.config";
  * timestamps. Opportunity-only fields are backfilled conservatively: source is `dariah`, website is
  * NULL, and duration starts at the former news publication date with no end date.
  *
+ * Slugs are unique per type, so a news item whose slug an opportunity already uses is renamed to
+ * the first free `<slug>-2`, `<slug>-3`, … — the same dedup suffix the CMS appends on create. The
+ * dry run lists every rename; a slug is a public URL segment, and nothing emits a redirect for the
+ * old one.
+ *
  * @example
  * 	pnpm run data:move:job-opportunity-news
  * 	pnpm run data:move:job-opportunity-news -- --apply
@@ -58,6 +63,19 @@ interface SlugConflict {
 	slug: string;
 	conflictingDocumentId: string;
 }
+
+interface SlugRename {
+	documentId: string;
+	slug: string;
+	newSlug: string;
+	conflictingDocumentId: string;
+}
+
+/** Matches `maxSlugAttempts` in the CMS's `insertDocumentWithFreeSlug`. */
+const maxSlugAttempts = 50;
+
+/** Matches `maxSlugLength` in the CMS: the longest URL segment the website build can handle. */
+const maxSlugLength = 246;
 
 /**
  * The news documents to move: those whose title matches `titlePattern`, or, when slugs are given,
@@ -151,6 +169,67 @@ async function findSlugConflicts(slugs: Array<string>): Promise<Array<SlugConfli
 	});
 }
 
+/**
+ * The slugs every opportunity uses that start with `base`, so a free `<base>-N` can be picked
+ * without a round trip per attempt.
+ */
+async function findOpportunitySlugsWithPrefix(base: string): Promise<Set<string>> {
+	const result = await db.execute<{ slug: string }>(sql`
+		SELECT "e"."slug"
+		FROM "entities" AS "e"
+		JOIN "entity_types" AS "et" ON "et"."id" = "e"."type_id"
+		WHERE "et"."type" = 'opportunities'
+			AND "e"."slug" LIKE ${`${base}-%`}
+	`);
+
+	return new Set(result.rows.map((row) => row.slug));
+}
+
+/**
+ * Picks a free `<slug>-N` for each conflicting document, the way the CMS deduplicates on create.
+ *
+ * A candidate is taken when an opportunity already uses it, or when another news document that is
+ * moving in the same run holds it — either as its own slug or as a rename picked earlier in this
+ * loop — since after the move they all share the opportunity slug space.
+ */
+async function resolveSlugRenames(
+	conflicts: Array<SlugConflict>,
+	candidates: Array<Candidate>,
+): Promise<Array<SlugRename>> {
+	const taken = new Set(candidates.map((candidate) => candidate.slug));
+	const renames: Array<SlugRename> = [];
+
+	for (const conflict of conflicts) {
+		const opportunitySlugs = await findOpportunitySlugsWithPrefix(conflict.slug);
+
+		let newSlug: string | null = null;
+		for (let attempt = 2; attempt <= maxSlugAttempts; attempt++) {
+			const candidate = `${conflict.slug}-${String(attempt)}`;
+			if (!opportunitySlugs.has(candidate) && !taken.has(candidate)) {
+				newSlug = candidate;
+				break;
+			}
+		}
+
+		if (newSlug == null) {
+			throw new Error(
+				`Could not find a free slug for news document ${conflict.documentId} (${conflict.slug}) within ${String(maxSlugAttempts)} attempts.`,
+			);
+		}
+
+		if (Buffer.byteLength(newSlug) > maxSlugLength) {
+			throw new Error(
+				`Renamed slug "${newSlug}" for news document ${conflict.documentId} exceeds ${String(maxSlugLength)} bytes.`,
+			);
+		}
+
+		taken.add(newSlug);
+		renames.push({ ...conflict, newSlug });
+	}
+
+	return renames;
+}
+
 async function assertRequiredLookupsExist(): Promise<void> {
 	const result = await db.execute<{
 		news_type_exists: boolean;
@@ -197,7 +276,24 @@ async function assertRequiredLookupsExist(): Promise<void> {
 	}
 }
 
-async function moveCandidates(slugs: Array<string>): Promise<{
+/**
+ * The renames as a relation, so the entity update can join them. `VALUES` needs at least one row,
+ * hence the empty relation when nothing is renamed.
+ */
+function slugRenames(renames: Array<SlugRename>): SQL {
+	if (renames.length === 0) {
+		return sql`SELECT NULL::uuid AS "document_id", NULL::text AS "slug" WHERE FALSE`;
+	}
+
+	const rows = renames.map((rename) => sql`(${rename.documentId}::uuid, ${rename.newSlug}::text)`);
+
+	return sql`SELECT * FROM (VALUES ${sql.join(rows, sql`, `)}) AS "v" ("document_id", "slug")`;
+}
+
+async function moveCandidates(
+	slugs: Array<string>,
+	renames: Array<SlugRename>,
+): Promise<{
 	movedVersions: number;
 	movedDocuments: number;
 	updatedFields: number;
@@ -210,6 +306,9 @@ async function moveCandidates(slugs: Array<string>): Promise<{
 		}>(sql`
 			WITH "target_documents" AS (
 				${targetDocuments(slugs)}
+			),
+			"slug_renames" AS (
+				${slugRenames(renames)}
 			),
 			"target_news" AS (
 				SELECT
@@ -292,9 +391,11 @@ async function moveCandidates(slugs: Array<string>): Promise<{
 				UPDATE "entities" AS "e"
 				SET
 					"type_id" = "opportunity_type"."id",
+					"slug" = COALESCE("slug_renames"."slug", "e"."slug"),
 					"updated_at" = NOW()
 				FROM
-					"complete_documents",
+					"complete_documents"
+					LEFT JOIN "slug_renames" ON "slug_renames"."document_id" = "complete_documents"."document_id",
 					"entity_types" AS "opportunity_type"
 				WHERE "e"."id" = "complete_documents"."document_id"
 					AND "opportunity_type"."type" = 'opportunities'
@@ -408,13 +509,11 @@ async function main(): Promise<void> {
 	}
 
 	const conflicts = await findSlugConflicts(slugs);
-	if (conflicts.length > 0) {
-		for (const conflict of conflicts) {
-			log.error(
-				`Slug conflict: news document ${conflict.documentId} (${conflict.slug}) conflicts with opportunity document ${conflict.conflictingDocumentId}.`,
-			);
-		}
-		throw new Error("Refusing to move job-opportunity news items because slug conflicts exist.");
+	const renames = await resolveSlugRenames(conflicts, candidates);
+	for (const rename of renames) {
+		log.warn(
+			`Slug conflict: news document ${rename.documentId} (${rename.slug}) conflicts with opportunity document ${rename.conflictingDocumentId}; will be renamed to "${rename.newSlug}".`,
+		);
 	}
 
 	if (!apply) {
@@ -422,10 +521,10 @@ async function main(): Promise<void> {
 		return;
 	}
 
-	const result = await moveCandidates(slugs);
+	const result = await moveCandidates(slugs, renames);
 
 	log.success(
-		`Moved ${String(result.movedVersions)} version(s) across ${String(result.movedDocuments)} document(s) from news to opportunities; remapped ${String(result.updatedFields)} content field(s).`,
+		`Moved ${String(result.movedVersions)} version(s) across ${String(result.movedDocuments)} document(s) from news to opportunities; renamed ${String(renames.length)} slug(s); remapped ${String(result.updatedFields)} content field(s).`,
 	);
 }
 

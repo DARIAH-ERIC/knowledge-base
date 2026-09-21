@@ -13,7 +13,7 @@ import {
 } from "@/lib/images";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
-import type { EventOrder } from "@/routes/events/schemas";
+import type { EventDirection } from "@/routes/events/schemas";
 import { type SQL, and, asc, count, desc, eq, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
@@ -32,8 +32,13 @@ interface GetEventsParams {
 	 * returned.
 	 */
 	until?: string;
-	/** Sort order by event start date. Defaults to "asc" when `from` is set, "desc" otherwise. */
-	order?: EventOrder;
+	/**
+	 * ISO date string (YYYY-MM-DD). Splits the timeline into two disjoint sides selected by
+	 * `direction`. Mutually exclusive with `from` / `until`.
+	 */
+	anchor?: string;
+	/** Which side of `anchor` to return. Defaults to "upcoming". */
+	direction?: EventDirection;
 }
 
 // Overlap condition: event overlaps [from, until] when
@@ -58,18 +63,44 @@ function durationOverlapsUntil(lower: SQL, until: string): SQL {
 	return sql`${lower} < ${exclusive}`;
 }
 
+// Anchor split: `upcoming` is exactly `durationOverlapsFrom(anchor)` (so it agrees with a plain
+// `from=anchor` query), and `past` is its strict complement. Open-ended events are never past.
+
+function durationEndedBefore(upper: SQL, anchor: string): SQL {
+	return sql`
+		(
+			${upper} IS NOT NULL
+			AND ${upper} < ${new Date(anchor)}
+		)
+	`;
+}
+
 export async function getEvents(db: Database | Transaction, params: GetEventsParams) {
-	const { limit = 10, offset = 0, from, until, order = from != null ? "asc" : "desc" } = params;
+	const { limit = 10, offset = 0, from, until, anchor, direction = "upcoming" } = params;
 
 	const lower = sql`LOWER(${schema.events.duration})`;
 	const upper = sql`UPPER(${schema.events.duration})`;
 
-	const rangeFilter = and(
-		from != null ? durationOverlapsFrom(upper, from) : undefined,
-		until != null ? durationOverlapsUntil(lower, until) : undefined,
-	);
+	let rangeFilter: SQL | undefined;
+	let order: "asc" | "desc";
 
-	const orderBy = order === "asc" ? asc(lower) : desc(lower);
+	if (anchor != null) {
+		rangeFilter =
+			direction === "upcoming"
+				? durationOverlapsFrom(upper, anchor)
+				: durationEndedBefore(upper, anchor);
+		order = direction === "upcoming" ? "asc" : "desc";
+	} else {
+		rangeFilter = and(
+			from != null ? durationOverlapsFrom(upper, from) : undefined,
+			until != null ? durationOverlapsUntil(lower, until) : undefined,
+		);
+		order = from != null ? "asc" : "desc";
+	}
+
+	// Secondary key on id keeps offset pagination stable when several events share a start date.
+	const orderBy =
+		order === "asc" ? [asc(lower), asc(schema.events.id)] : [desc(lower), desc(schema.events.id)];
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -108,7 +139,7 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 			.leftJoin(schema.assets, eq(schema.assets.id, schema.events.imageId))
 			.leftJoin(schema.licenses, eq(schema.licenses.id, schema.assets.licenseId))
 			.where(rangeFilter)
-			.orderBy(orderBy)
+			.orderBy(...orderBy)
 			.limit(limit)
 			.offset(offset),
 		db
