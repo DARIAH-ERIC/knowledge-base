@@ -10,6 +10,9 @@ interface ErrorMessages {
 	missingData: string;
 	missingPairedRelationUnit: string;
 	missingRelatedRecord: string;
+	navigationItemChildWithoutLink: string;
+	navigationItemInvalidParent: string;
+	navigationItemLinkWithChildren: string;
 	publishedSlugRename: string;
 	recordConflict: string;
 	relationEndBeforeStart: string;
@@ -36,6 +39,15 @@ export function getUserFacingErrorMessage(error: unknown, messages: ErrorMessage
 			}
 			case "missing-paired-relation-unit": {
 				return messages.missingPairedRelationUnit;
+			}
+			case "navigation-item-child-without-link": {
+				return messages.navigationItemChildWithoutLink;
+			}
+			case "navigation-item-invalid-parent": {
+				return messages.navigationItemInvalidParent;
+			}
+			case "navigation-item-link-with-children": {
+				return messages.navigationItemLinkWithChildren;
 			}
 			case "published-slug-rename": {
 				return messages.publishedSlugRename;

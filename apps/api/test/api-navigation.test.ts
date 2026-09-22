@@ -4,6 +4,7 @@ import { v7 as uuidv7 } from "uuid";
 import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
+import { eq } from "@/services/db/sql";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { withTransaction } from "~/test/lib/with-transaction";
 
@@ -16,6 +17,7 @@ async function seed(db: Database) {
 
 	const childItemId = uuidv7();
 	const childItemLabel = f.lorem.word();
+	const childItemHref = f.internet.url();
 
 	await db.insert(schema.navigationMenus).values({
 		id: menuId,
@@ -28,7 +30,7 @@ async function seed(db: Database) {
 			menuId,
 			parentId: null,
 			label: parentItemLabel,
-			href: f.internet.url(),
+			href: null,
 			position: 0,
 		},
 		{
@@ -36,12 +38,20 @@ async function seed(db: Database) {
 			menuId,
 			parentId: parentItemId,
 			label: childItemLabel,
-			href: null,
+			href: childItemHref,
 			position: 0,
 		},
 	]);
 
-	return { menuId, menuName, parentItemId, parentItemLabel, childItemId, childItemLabel };
+	return {
+		menuId,
+		menuName,
+		parentItemId,
+		parentItemLabel,
+		childItemId,
+		childItemLabel,
+		childItemHref,
+	};
 }
 
 async function seedWithWorkingGroupEntity(db: Database) {
@@ -111,7 +121,7 @@ describe("navigation", () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db);
 
-				const { menuName, parentItemLabel, childItemLabel } = await seed(db);
+				const { menuName, parentItemLabel, childItemLabel, childItemHref } = await seed(db);
 
 				const response = await client.navigation.$get({ query: {} });
 
@@ -126,11 +136,15 @@ describe("navigation", () => {
 							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 							items: expect.arrayContaining([
 								expect.objectContaining({
+									kind: "submenu",
 									label: parentItemLabel,
-									// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-									children: expect.arrayContaining([
-										expect.objectContaining({ label: childItemLabel }),
-									]),
+									children: [
+										expect.objectContaining({
+											kind: "link",
+											label: childItemLabel,
+											href: childItemHref,
+										}),
+									],
 								}),
 							]),
 						}),
@@ -174,7 +188,9 @@ describe("navigation", () => {
 				expect(data[0]!.items).toEqual(
 					expect.arrayContaining([
 						expect.objectContaining({
+							kind: "link",
 							label,
+							href: `/network/working-groups/${slug}`,
 							entity: {
 								id: expect.any(String) as string,
 								type: "working_group",
@@ -184,6 +200,88 @@ describe("navigation", () => {
 						}),
 					]),
 				);
+			});
+		});
+
+		it("should drop the href of an item that opens a dropdown", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const { menuName, parentItemId, parentItemLabel, childItemHref } = await seed(db);
+
+				// The cms no longer allows this, but rows predating that rule may still carry an href on
+				// an item with children.
+				await db
+					.update(schema.navigationItems)
+					.set({ href: f.internet.url() })
+					.where(eq(schema.navigationItems.id, parentItemId));
+
+				const response = await client.navigation.$get({ query: { menu: menuName } });
+
+				const data = await response.json();
+
+				expect(data[0]!.items).toEqual([
+					{
+						id: parentItemId,
+						label: parentItemLabel,
+						position: 0,
+						kind: "submenu",
+						children: [expect.objectContaining({ kind: "link", href: childItemHref }) as unknown],
+					},
+				]);
+			});
+		});
+
+		it("should not return items nested more than one level deep", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const { menuId, menuName, childItemId } = await seed(db);
+
+				const grandchildLabel = f.lorem.word();
+
+				await db.insert(schema.navigationItems).values({
+					id: uuidv7(),
+					menuId,
+					parentId: childItemId,
+					label: grandchildLabel,
+					href: f.internet.url(),
+					position: 0,
+				});
+
+				const response = await client.navigation.$get({ query: { menu: menuName } });
+
+				const data = await response.json();
+
+				expect(JSON.stringify(data)).not.toContain(grandchildLabel);
+			});
+		});
+
+		it("should omit an item that neither links anywhere nor holds children", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const menuId = uuidv7();
+				const menuName = f.word.noun();
+
+				await db.insert(schema.navigationMenus).values({ id: menuId, name: menuName });
+
+				await db.insert(schema.navigationItems).values({
+					id: uuidv7(),
+					menuId,
+					parentId: null,
+					label: f.lorem.word(),
+					href: null,
+					position: 0,
+				});
+
+				const response = await client.navigation.$get({ query: { menu: menuName } });
+
+				expect(response.status).toBe(200);
+
+				const data = await response.json();
+
+				expect(data[0]!.items).toEqual([]);
 			});
 		});
 

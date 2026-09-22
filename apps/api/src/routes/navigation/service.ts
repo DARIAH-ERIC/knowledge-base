@@ -8,9 +8,10 @@ import {
 	getWebsiteHref,
 } from "@/lib/website-routes";
 import type { Database, Transaction } from "@/middlewares/db";
+import type { NavigationItem, NavigationLink } from "@/routes/navigation/schemas";
 import { and, asc, eq, isNotNull, isNull, or, sql } from "@/services/db/sql";
 
-interface NavigationItem {
+interface NavigationItemRow {
 	id: string;
 	label: string;
 	href: string | null;
@@ -20,26 +21,73 @@ interface NavigationItem {
 	parentId: string | null;
 }
 
-interface NavigationItemWithChildren extends NavigationItem {
-	children: Array<NavigationItemWithChildren>;
+function byPosition(a: NavigationItemRow, b: NavigationItemRow): number {
+	return a.position - b.position;
 }
 
-function buildTree(
-	items: Array<NavigationItem>,
-	parentId: string | null,
-): Array<NavigationItemWithChildren> {
-	return (
-		items
-			.filter((item) => item.parentId === parentId)
-			// eslint-disable-next-line unicorn/no-array-sort
-			.sort((a, b) => a.position - b.position)
-			.map((item) => {
-				return {
-					...item,
-					children: buildTree(items, item.id),
-				};
-			})
-	);
+/**
+ * Resolves a row into a link, or null when it has no destination to offer: an item whose href was
+ * never set, or one pointing at an entity that has no page of its own. Neither can be rendered as a
+ * navigation link, so both are left out of the response rather than handed to consumers as an item
+ * they have to special-case.
+ */
+function toLink(item: NavigationItemRow): NavigationLink | null {
+	const entityHref = item.entity?.href ?? null;
+	const href = entityHref ?? item.href;
+
+	if (href == null || href.length === 0) {
+		return null;
+	}
+
+	const entity =
+		item.entity != null && entityHref != null ? { ...item.entity, href: entityHref } : null;
+
+	return {
+		id: item.id,
+		label: item.label,
+		position: item.position,
+		kind: "link",
+		href,
+		isExternal: item.isExternal,
+		entity,
+	};
+}
+
+/**
+ * Builds a menu's items: one level of links and dropdowns, no deeper.
+ *
+ * An item with children is a dropdown trigger, so its own href — which the cms does not allow it to
+ * have, but older rows may still carry — is dropped: a trigger cannot both navigate and open a
+ * submenu. Grandchildren are ignored for the same reason, since a link inside a dropdown has
+ * nowhere to open a further level.
+ */
+function buildItems(items: Array<NavigationItemRow>): Array<NavigationItem> {
+	return items
+		.filter((item) => item.parentId == null)
+		.toSorted(byPosition)
+		.flatMap((item): Array<NavigationItem> => {
+			const children = items
+				.filter((child) => child.parentId === item.id)
+				.toSorted(byPosition)
+				.map((child) => toLink(child))
+				.filter((child) => child != null);
+
+			if (children.length > 0) {
+				return [
+					{
+						id: item.id,
+						label: item.label,
+						position: item.position,
+						kind: "submenu" as const,
+						children,
+					},
+				];
+			}
+
+			const link = toLink(item);
+
+			return link != null ? [link] : [];
+		});
 }
 
 interface GetNavigationParams {
@@ -106,7 +154,7 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 		),
 	);
 
-	const menus = new Map<string, { id: string; name: string; items: Array<NavigationItem> }>();
+	const menus = new Map<string, { id: string; name: string; items: Array<NavigationItemRow> }>();
 
 	for (const row of rows) {
 		const item = menus.get(row.menuId) ?? { id: row.menuId, name: row.menuName, items: [] };
@@ -139,7 +187,6 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 	}
 
 	return [...menus.values()].map((m) => {
-		const tree = buildTree(m.items, null);
-		return { id: m.id, name: m.name, items: tree };
+		return { id: m.id, name: m.name, items: buildItems(m.items) };
 	});
 }

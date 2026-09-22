@@ -7550,6 +7550,14 @@ msgid "1qOuwm"
 msgstr "External URL"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx
+msgid "yKTCZ6"
+msgstr "This item opens a dropdown menu, so it cannot link anywhere itself. Remove its child items first to turn it into a link."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx
+msgid "bfmz7x"
+msgstr "Items inside a dropdown menu always link to a page or a url."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx
 msgid "rnrglH"
 msgstr "This item opens a dropdown menu. Add child items to it after saving."
 
@@ -7961,6 +7969,11 @@ msgstr "A user account is linked to this record. Update that user's linked perso
 
 #: lib/server/create-command-action.ts
 #: lib/server/create-server-action.ts
+msgid "ddbnQB"
+msgstr "This record is linked from a navigation menu. Remove the navigation link before deleting it."
+
+#: lib/server/create-command-action.ts
+#: lib/server/create-server-action.ts
 msgid "Ni9MxS"
 msgstr "An entity with this slug already exists."
 
@@ -7973,6 +7986,21 @@ msgstr "A record with these values already exists."
 #: lib/server/create-server-action.ts
 msgid "7XzbEI"
 msgstr "A related record no longer exists. Refresh the page and try again."
+
+#: lib/server/create-command-action.ts
+#: lib/server/create-server-action.ts
+msgid "XyyLog"
+msgstr "An item inside a dropdown must link to a page or a url."
+
+#: lib/server/create-command-action.ts
+#: lib/server/create-server-action.ts
+msgid "VB8ZZp"
+msgstr "Child items can only be added to a top-level item that does not link anywhere itself."
+
+#: lib/server/create-command-action.ts
+#: lib/server/create-server-action.ts
+msgid "JT_LLi"
+msgstr "This item opens a dropdown, so it cannot link anywhere itself. Remove its child items first."
 
 #: lib/server/create-command-action.ts
 #: lib/server/create-server-action.ts

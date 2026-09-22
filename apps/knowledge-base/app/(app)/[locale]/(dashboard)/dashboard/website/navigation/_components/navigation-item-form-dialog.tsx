@@ -47,18 +47,45 @@ interface NavigationItemFormProps {
 	item?: Pick<schema.NavigationItem, "id" | "label" | "href" | "entityId" | "isExternal"> | null;
 	menuId?: string;
 	parentId?: string | null;
+	/** Whether the edited item already holds children, which keeps it a dropdown trigger. */
+	hasChildren?: boolean;
+	/** Whether the item sits inside a dropdown, which means it has to link somewhere. */
+	isNested?: boolean;
 	entities: Array<EntityOption>;
 }
 
 function NavigationItemForm(props: Readonly<NavigationItemFormProps>): ReactNode {
-	const { onSuccess, item, menuId, parentId, entities } = props;
+	const {
+		onSuccess,
+		item,
+		menuId,
+		parentId,
+		hasChildren = false,
+		isNested = false,
+		entities,
+	} = props;
 
 	const t = useExtracted();
 
 	const isEditMode = item != null;
 
-	const initialLinkType: LinkType =
-		item?.entityId != null ? "internal" : item?.href != null ? "external" : "none";
+	/**
+	 * An item is either a link or a dropdown trigger, never both, and only a top-level item can be a
+	 * trigger. Both halves are enforced by the server action as well; here they just keep the
+	 * unavailable choice off the form.
+	 */
+	const canBeLink = !hasChildren;
+	const canBeTrigger = !isNested;
+
+	const initialLinkType: LinkType = hasChildren
+		? "none"
+		: item?.entityId != null
+			? "internal"
+			: item?.href != null
+				? "external"
+				: canBeTrigger
+					? "none"
+					: "external";
 	const [linkType, setLinkType] = useState<LinkType>(initialLinkType);
 
 	const initialEntityType =
@@ -108,39 +135,59 @@ function NavigationItemForm(props: Readonly<NavigationItemFormProps>): ReactNode
 				<Separator />
 
 				<div className="flex gap-x-2">
-					<Button
-						intent={linkType === "none" ? "primary" : "outline"}
-						onPress={() => {
-							setLinkType("none");
-						}}
-						size="sm"
-						type="button"
-					>
-						{t("Menu trigger")}
-					</Button>
-					<Button
-						intent={linkType === "external" ? "primary" : "outline"}
-						onPress={() => {
-							setLinkType("external");
-						}}
-						size="sm"
-						type="button"
-					>
-						{t("External URL")}
-					</Button>
-					<Button
-						intent={linkType === "internal" ? "primary" : "outline"}
-						onPress={() => {
-							setLinkType("internal");
-						}}
-						size="sm"
-						type="button"
-					>
-						{t("Internal page")}
-					</Button>
+					{canBeTrigger && (
+						<Button
+							intent={linkType === "none" ? "primary" : "outline"}
+							onPress={() => {
+								setLinkType("none");
+							}}
+							size="sm"
+							type="button"
+						>
+							{t("Menu trigger")}
+						</Button>
+					)}
+					{canBeLink && (
+						<Fragment>
+							<Button
+								intent={linkType === "external" ? "primary" : "outline"}
+								onPress={() => {
+									setLinkType("external");
+								}}
+								size="sm"
+								type="button"
+							>
+								{t("External URL")}
+							</Button>
+							<Button
+								intent={linkType === "internal" ? "primary" : "outline"}
+								onPress={() => {
+									setLinkType("internal");
+								}}
+								size="sm"
+								type="button"
+							>
+								{t("Internal page")}
+							</Button>
+						</Fragment>
+					)}
 				</div>
 
-				{linkType === "none" && (
+				{!canBeLink && (
+					<p className="text-sm text-muted-fg">
+						{t(
+							"This item opens a dropdown menu, so it cannot link anywhere itself. Remove its child items first to turn it into a link.",
+						)}
+					</p>
+				)}
+
+				{!canBeTrigger && (
+					<p className="text-sm text-muted-fg">
+						{t("Items inside a dropdown menu always link to a page or a url.")}
+					</p>
+				)}
+
+				{linkType === "none" && canBeLink && (
 					<p className="text-sm text-muted-fg">
 						{t("This item opens a dropdown menu. Add child items to it after saving.")}
 					</p>
@@ -233,13 +280,15 @@ interface NavigationItemFormDialogProps {
 	item?: Pick<schema.NavigationItem, "id" | "label" | "href" | "entityId" | "isExternal"> | null;
 	menuId?: string;
 	parentId?: string | null;
+	hasChildren?: boolean;
+	isNested?: boolean;
 	entities: Array<EntityOption>;
 }
 
 export function NavigationItemFormDialog(
 	props: Readonly<NavigationItemFormDialogProps>,
 ): ReactNode {
-	const { isOpen, onOpenChange, item, menuId, parentId, entities } = props;
+	const { isOpen, onOpenChange, item, menuId, parentId, hasChildren, isNested, entities } = props;
 
 	const [formKey, setFormKey] = useState(0);
 
@@ -255,6 +304,8 @@ export function NavigationItemFormDialog(
 			<NavigationItemForm
 				key={`${String(formKey)}-${item?.id ?? "new"}`}
 				entities={entities}
+				hasChildren={hasChildren}
+				isNested={isNested}
 				item={item}
 				menuId={menuId}
 				onSuccess={() => {
