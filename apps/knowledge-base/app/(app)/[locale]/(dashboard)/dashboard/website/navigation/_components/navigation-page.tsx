@@ -69,7 +69,7 @@ interface ItemRowProps {
 	isLast: boolean;
 	menuId: string;
 	entities: Array<EntityOption>;
-	onEditItem: (item: NavigationItemWithChildren) => void;
+	onEditItem: (item: TreeNode) => void;
 	onDeleteItem: (id: string) => void;
 	onAddChild: (parentId: string) => void;
 	onMoveItem: (id: string, direction: "up" | "down") => void;
@@ -81,6 +81,12 @@ function ItemRow(props: Readonly<ItemRowProps>): ReactNode {
 	const t = useExtracted();
 
 	const linkDescription = node.entityTitle ?? node.href ?? null;
+
+	/**
+	 * Only a top-level item that links nowhere itself can hold children: an item that both navigates
+	 * and opens a dropdown has no unambiguous behaviour, and the website renders one level only.
+	 */
+	const canHaveChildren = depth === 0 && node.href == null && node.entityId == null;
 
 	return (
 		<Fragment>
@@ -126,16 +132,18 @@ function ItemRow(props: Readonly<ItemRowProps>): ReactNode {
 						</Button>
 						<TooltipContent inverse={true}>{t("Move down")}</TooltipContent>
 					</Tooltip>
-					<Button
-						intent="plain"
-						onPress={() => {
-							onAddChild(node.id);
-						}}
-						size="sm"
-					>
-						<PlusIcon className="me-1 block-3.5 inline-3.5" />
-						{t("Add child")}
-					</Button>
+					{canHaveChildren && (
+						<Button
+							intent="plain"
+							onPress={() => {
+								onAddChild(node.id);
+							}}
+							size="sm"
+						>
+							<PlusIcon className="me-1 block-3.5 inline-3.5" />
+							{t("Add child")}
+						</Button>
+					)}
 					<Tooltip>
 						<Button
 							aria-label={t("Edit")}
@@ -203,7 +211,7 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 
 	const [itemDialogState, setItemDialogState] = useState<{
 		isOpen: boolean;
-		item?: NavigationItemWithChildren | null;
+		item?: TreeNode | null;
 		parentId?: string | null;
 	}>({ isOpen: false });
 
@@ -260,6 +268,8 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 
 			<NavigationItemFormDialog
 				entities={entities}
+				hasChildren={(itemDialogState.item?.children.length ?? 0) > 0}
+				isNested={(itemDialogState.item?.parentId ?? itemDialogState.parentId) != null}
 				isOpen={itemDialogState.isOpen}
 				item={itemDialogState.item}
 				menuId={menu.id}

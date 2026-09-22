@@ -12043,14 +12043,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "description": "Reference to an entity linked from a navigation item",
         "properties": {
           "href": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "null",
-              },
-            ],
+            "type": "string",
           },
           "id": {
             "format": "uuid",
@@ -12091,59 +12084,19 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "type": "object",
       },
       "NavigationItem": {
-        "description": "Navigation item",
-        "properties": {
-          "children": {
-            "items": {
-              "properties": {
-                "entity": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/NavigationEntityRef",
-                    },
-                    {
-                      "type": "null",
-                    },
-                  ],
-                },
-                "href": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                    },
-                    {
-                      "type": "null",
-                    },
-                  ],
-                },
-                "id": {
-                  "format": "uuid",
-                  "type": "string",
-                },
-                "isExternal": {
-                  "type": "boolean",
-                },
-                "label": {
-                  "type": "string",
-                },
-                "position": {
-                  "maximum": 2147483647,
-                  "minimum": -2147483648,
-                  "type": "integer",
-                },
-              },
-              "required": [
-                "id",
-                "label",
-                "href",
-                "isExternal",
-                "position",
-                "entity",
-              ],
-              "type": "object",
-            },
-            "type": "array",
+        "description": "Navigation item: either a link or a dropdown of links",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/NavigationLink",
           },
+          {
+            "$ref": "#/components/schemas/NavigationSubmenu",
+          },
+        ],
+      },
+      "NavigationLink": {
+        "description": "Navigation item linking to a page or an external url",
+        "properties": {
           "entity": {
             "anyOf": [
               {
@@ -12155,14 +12108,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             ],
           },
           "href": {
-            "anyOf": [
-              {
-                "type": "string",
-              },
-              {
-                "type": "null",
-              },
-            ],
+            "minLength": 1,
+            "type": "string",
           },
           "id": {
             "format": "uuid",
@@ -12170,6 +12117,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
           "isExternal": {
             "type": "boolean",
+          },
+          "kind": {
+            "const": "link",
           },
           "label": {
             "type": "string",
@@ -12183,11 +12133,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "required": [
           "id",
           "label",
+          "position",
+          "kind",
           "href",
           "isExternal",
-          "position",
           "entity",
-          "children",
         ],
         "type": "object",
       },
@@ -12221,6 +12171,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "$ref": "#/components/schemas/NavigationMenu",
         },
         "type": "array",
+      },
+      "NavigationSubmenu": {
+        "description": "Navigation item opening a dropdown of links",
+        "properties": {
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/NavigationLink",
+            },
+            "minItems": 1,
+            "type": "array",
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string",
+          },
+          "kind": {
+            "const": "submenu",
+          },
+          "label": {
+            "type": "string",
+          },
+          "position": {
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "type": "integer",
+          },
+        },
+        "required": [
+          "id",
+          "label",
+          "position",
+          "kind",
+          "children",
+        ],
+        "type": "object",
       },
       "NewsAnnouncement": {
         "description": "News item in the announcements feed",

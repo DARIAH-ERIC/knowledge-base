@@ -171,6 +171,15 @@ export function createCommandAction<
 				missingRelatedRecord: t(
 					"A related record no longer exists. Refresh the page and try again.",
 				),
+				navigationItemChildWithoutLink: t(
+					"An item inside a dropdown must link to a page or a url.",
+				),
+				navigationItemInvalidParent: t(
+					"Child items can only be added to a top-level item that does not link anywhere itself.",
+				),
+				navigationItemLinkWithChildren: t(
+					"This item opens a dropdown, so it cannot link anywhere itself. Remove its child items first.",
+				),
 				publishedSlugRename: t(
 					"This entity is published, so its address can only be changed by an administrator on the Maintenance page.",
 				),

@@ -39,12 +39,28 @@ export const navigationItems = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
+		/** An item links to a url or to an entity, never to both. */
 		p.check(
 			"navigation_items_link",
 			sql`
 					NOT (
 						${t.href} IS NOT NULL
 						AND ${t.entityId} IS NOT NULL
+					)
+				`,
+		),
+		/**
+		 * Only a top-level item may be a bare label: such an item exists to open a dropdown, which a
+		 * nested item has no room to do. Keeping children linkable is also what caps menus at one level
+		 * — a grandchild would have to hang off a child that is a dropdown trigger.
+		 */
+		p.check(
+			"navigation_items_child_link",
+			sql`
+					NOT (
+						${t.parentId} IS NOT NULL
+						AND ${t.href} IS NULL
+						AND ${t.entityId} IS NULL
 					)
 				`,
 		),
