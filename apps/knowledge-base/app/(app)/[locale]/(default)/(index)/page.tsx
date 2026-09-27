@@ -1,4 +1,3 @@
-import { Avatar } from "@dariah-eric/ui/avatar";
 import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { Text, TextLink } from "@dariah-eric/ui/text";
 import type { Metadata, ResolvingMetadata } from "next";
@@ -43,13 +42,6 @@ export default async function IndexPage(_props: Readonly<IndexPageProps>): Promi
 	return (
 		<Main className="container flex-1 px-8 py-12 xs:px-16">
 			<section className="flex flex-col items-center gap-y-8 py-16 sm:py-24">
-				<Avatar
-					className="outline-none dark:invert"
-					isSquare={true}
-					size="2xl"
-					src="/assets/images/logo-dariah.svg"
-				/>
-
 				<div className="flex flex-col items-center gap-y-4">
 					<h1 className="text-center text-4xl font-extrabold tracking-tight text-text-strong sm:text-5xl lg:text-6xl">
 						{t("DARIAH Knowledge Base")}

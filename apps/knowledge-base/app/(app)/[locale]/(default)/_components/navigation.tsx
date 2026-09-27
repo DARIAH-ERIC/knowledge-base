@@ -13,39 +13,11 @@ export function Navigation(props: Readonly<NavigationProps>): ReactNode {
 	const { label, navigation } = props;
 
 	return (
-		<nav aria-label={label} className="hidden lg:flex lg:gap-x-6">
+		<nav aria-label={label} className="flex">
 			<NavLink href={navigation.home.href} size="icon">
 				<span className="sr-only">{navigation.home.label}</span>
 				<Logo className="block-8 inline-auto" />
 			</NavLink>
-
-			<ul className="flex flex-wrap items-center">
-				{Object.entries(navigation).map(([id, item]) => {
-					switch (item.type) {
-						case "action": {
-							return <li key={id}></li>;
-						}
-
-						case "link": {
-							return (
-								<li key={id}>
-									<NavLink href={item.href} size="md">
-										{item.label}
-									</NavLink>
-								</li>
-							);
-						}
-
-						case "menu": {
-							return <li key={id}></li>;
-						}
-
-						case "separator": {
-							return <li key={id}></li>;
-						}
-					}
-				})}
-			</ul>
 		</nav>
 	);
 }
