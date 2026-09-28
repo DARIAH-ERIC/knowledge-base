@@ -3,6 +3,7 @@
 import { generateImageUrl, imageAssetColumns } from "@/lib/images";
 import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
+import { sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 const dariahEuSlug = "dariah-eu";
@@ -10,7 +11,8 @@ const dariahEuSlug = "dariah-eu";
 /**
  * DARIAH-EU's own contact details, which the site metadata carries because the ERIC has no entity
  * page and no endpoint of its own. Reads the published version only, and resolves to `null` while
- * the ERIC is draft-only.
+ * the ERIC is draft-only. Social media accounts whose duration has ended are left out; accounts
+ * without a duration are always included.
  */
 function getEricContactDetails(db: Database | Transaction) {
 	return db.query.organisationalUnits.findFirst({
@@ -33,6 +35,12 @@ function getEricContactDetails(db: Database | Transaction) {
 		with: {
 			socialMedia: {
 				...socialMediaByPosition,
+				where: {
+					// `<<` is "strictly left of", i.e. every instant of the duration precedes now.
+					RAW(t) {
+						return sql`(${t.duration} IS NULL OR NOT ${t.duration} << TSTZRANGE(NOW()::TIMESTAMPTZ, NULL))`;
+					},
+				},
 				columns: {
 					id: true,
 					name: true,
