@@ -244,8 +244,10 @@ async function seedPartnerInstitutions(
 	items: ReturnType<typeof createItems>,
 	relationStatus:
 		| "is_partner_institution_of"
+		| "is_cooperating_partner_of"
 		| "is_national_coordinating_institution_in"
 		| "is_national_representative_institution_in" = "is_partner_institution_of",
+	relationDuration?: { start: Date; end?: Date },
 ) {
 	const [status, entityType, institutionType, locatedInStatus, partnerInstitutionStatus] =
 		await Promise.all([
@@ -313,7 +315,7 @@ async function seedPartnerInstitutions(
 			unitDocumentId: institution.entity.id,
 			relatedUnitDocumentId: ericDocument.entityId,
 			status: partnerInstitutionStatus.id,
-			duration: { start },
+			duration: relationDuration ?? { start },
 		},
 	]);
 }
@@ -727,6 +729,115 @@ describe("members-partners", () => {
 				expect(data.data).toEqual(expect.arrayContaining([expect.objectContaining({ name })]));
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
+			});
+		});
+
+		it("should count current partner institutions for member countries", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(2);
+				await seed(db, items);
+				const umbrella = await getDariahEu(db);
+				const country = items[1]!;
+
+				const now = Date.now();
+				const day = 24 * 60 * 60 * 1000;
+
+				await seedPartnerInstitutions(db, umbrella.versionId, country.version.id, createItems(1));
+				await seedPartnerInstitutions(db, umbrella.versionId, country.version.id, createItems(1));
+				// ended partnership
+				await seedPartnerInstitutions(
+					db,
+					umbrella.versionId,
+					country.version.id,
+					createItems(1),
+					"is_partner_institution_of",
+					{ start: new Date(now - 10 * day), end: new Date(now - day) },
+				);
+				// other institution roles are not partner institutions
+				await seedPartnerInstitutions(
+					db,
+					umbrella.versionId,
+					country.version.id,
+					createItems(1),
+					"is_national_coordinating_institution_in",
+				);
+
+				const response = await client["members-partners"].$get({
+					query: { limit: "100" },
+				});
+
+				expect(response.status).toBe(200);
+				const data = await response.json();
+				const item = data.data.find((item) => item.id === country.version.id);
+
+				expect(item?.institutionsCount).toBe(2);
+			});
+		});
+
+		it("should count current cooperating partner institutions for cooperating partners", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const [status, entityType] = await Promise.all([
+					db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+					db.query.entityTypes.findFirst({
+						columns: { id: true },
+						where: { type: "organisational_units" },
+					}),
+				]);
+
+				assert(status);
+				assert(entityType);
+				const umbrella = await getDariahEu(db);
+
+				// country + institution as cooperating partner
+				const partnerItems = createItems(2);
+				await db.insert(schema.entities).values(
+					partnerItems.map((item) => {
+						return { ...item.entity, typeId: entityType.id };
+					}),
+				);
+				await db.insert(schema.entityVersions).values(
+					partnerItems.map((item) => {
+						return { ...item.version, statusId: status.id };
+					}),
+				);
+				await seedCooperatingPartner(db, umbrella.versionId, partnerItems);
+
+				const country = partnerItems[0]!;
+
+				const now = Date.now();
+				const day = 24 * 60 * 60 * 1000;
+
+				await seedPartnerInstitutions(
+					db,
+					umbrella.versionId,
+					country.version.id,
+					createItems(1),
+					"is_cooperating_partner_of",
+				);
+				// ended cooperation
+				await seedPartnerInstitutions(
+					db,
+					umbrella.versionId,
+					country.version.id,
+					createItems(1),
+					"is_cooperating_partner_of",
+					{ start: new Date(now - 10 * day), end: new Date(now - day) },
+				);
+
+				const response = await client["members-partners"].$get({
+					query: { limit: "100" },
+				});
+
+				expect(response.status).toBe(200);
+				const data = await response.json();
+				const item = data.data.find((item) => item.id === country.version.id);
+
+				expect(item?.status).toBe("is_cooperating_partner_of");
+				expect(item?.institutionsCount).toBe(2);
 			});
 		});
 
