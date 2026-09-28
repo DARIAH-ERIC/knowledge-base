@@ -106,8 +106,15 @@ export async function getMembersAndPartners(
 				nationalConsortium?.socialMedia,
 				mapSocialMedia(item.socialMedia),
 			);
+			const institutionsCount = await countInstitutionsByRelation(
+				db,
+				item.id,
+				item.status === "is_cooperating_partner_of"
+					? "is_cooperating_partner_of"
+					: "is_partner_institution_of",
+			);
 
-			return { ...flattenEntityVersion(item), image, socialMedia };
+			return { ...flattenEntityVersion(item), image, socialMedia, institutionsCount };
 		}),
 	);
 
@@ -429,6 +436,32 @@ async function getInstitutionsByRelation(
 			website,
 		};
 	});
+}
+
+async function countInstitutionsByRelation(
+	db: Database | Transaction,
+	countryId: schema.OrganisationalUnit["id"],
+	status: RelationStatus | Array<RelationStatus>,
+) {
+	// The relation filters join the unaliased organisational units tables in their subqueries, so the
+	// outer institution tables are aliased to keep the correlated id reference unambiguous.
+	const institution = alias(schema.organisationalUnits, "count_institution");
+	const institutionType = alias(schema.organisationalUnitTypes, "count_institution_type");
+
+	const aggregate = await db
+		.select({ total: count() })
+		.from(institution)
+		.innerJoin(schema.documentLifecycle, eq(schema.documentLifecycle.publishedId, institution.id))
+		.innerJoin(institutionType, eq(institution.typeId, institutionType.id))
+		.where(
+			and(
+				eq(institutionType.type, "institution"),
+				buildActiveRelationExistsFilter(db, institution.id, status, "eric"),
+				buildActiveRelationToUnitFilter(db, institution.id, "is_located_in", "country", countryId),
+			),
+		);
+
+	return aggregate.at(0)?.total ?? 0;
 }
 
 function getPartnerInstitutions(

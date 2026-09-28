@@ -11798,8 +11798,15 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
         ],
       },
-      "MemberOrPartnerBase": {
-        "description": "Member or partner",
+      "MemberOrPartnerList": {
+        "description": "List of members and partners",
+        "items": {
+          "$ref": "#/components/schemas/MemberOrPartnerListItem",
+        },
+        "type": "array",
+      },
+      "MemberOrPartnerListItem": {
+        "description": "Member or partner list item",
         "properties": {
           "entity": {
             "properties": {
@@ -11825,6 +11832,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "type": "null",
               },
             ],
+          },
+          "institutionsCount": {
+            "description": "Number of current partner institutions (members and observers) or cooperating partner institutions (cooperating partners)",
+            "minimum": 0,
+            "type": "integer",
           },
           "metadata": {
             "anyOf": [
@@ -11991,15 +12003,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "type",
           "status",
           "socialMedia",
+          "institutionsCount",
         ],
         "type": "object",
-      },
-      "MemberOrPartnerList": {
-        "description": "List of members and partners",
-        "items": {
-          "$ref": "#/components/schemas/MemberOrPartnerBase",
-        },
-        "type": "array",
       },
       "MemberOrPartnerSlug": {
         "description": "Member or partner slug",

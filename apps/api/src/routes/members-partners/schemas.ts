@@ -94,8 +94,26 @@ export const RelatedNationalConsortiumSchema = v.pipe(
 
 export type RelatedNationalConsortium = v.InferOutput<typeof RelatedNationalConsortiumSchema>;
 
+export const MemberOrPartnerListItemSchema = v.pipe(
+	v.object({
+		...MemberOrPartnerBaseSchema.entries,
+		institutionsCount: v.pipe(
+			v.number(),
+			v.integer(),
+			v.minValue(0),
+			v.description(
+				"Number of current partner institutions (members and observers) or cooperating partner institutions (cooperating partners)",
+			),
+		),
+	}),
+	v.description("Member or partner list item"),
+	v.metadata({ ref: "MemberOrPartnerListItem" }),
+);
+
+export type MemberOrPartnerListItem = v.InferOutput<typeof MemberOrPartnerListItemSchema>;
+
 export const MemberOrPartnerListSchema = v.pipe(
-	v.array(MemberOrPartnerBaseSchema),
+	v.array(MemberOrPartnerListItemSchema),
 	v.description("List of members and partners"),
 	v.metadata({ ref: "MemberOrPartnerList" }),
 );
