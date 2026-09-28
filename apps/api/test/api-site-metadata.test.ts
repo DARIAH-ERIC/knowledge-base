@@ -160,6 +160,72 @@ describe("site-metadata", () => {
 			});
 		});
 
+		it("should leave out social media accounts whose duration has ended", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				await seed(db);
+				await clearEricContactDetails(db);
+
+				const ericVersionId = await getPublishedEricVersionId(db);
+
+				const socialMediaType = await db.query.socialMediaTypes.findFirst({
+					columns: { id: true },
+					where: { type: "mastodon" },
+				});
+				assert(socialMediaType, "No mastodon social media type in database.");
+
+				const now = Date.now();
+				const day = 24 * 60 * 60 * 1000;
+
+				const ended = {
+					id: uuidv7(),
+					name: f.company.name(),
+					url: f.internet.url(),
+					duration: { start: new Date(now - 10 * day), end: new Date(now - day) },
+				};
+				const ongoing = {
+					id: uuidv7(),
+					name: f.company.name(),
+					url: f.internet.url(),
+					duration: { start: new Date(now - 10 * day), end: new Date(now + day) },
+				};
+				const openEnded = {
+					id: uuidv7(),
+					name: f.company.name(),
+					url: f.internet.url(),
+					duration: { start: new Date(now - 10 * day) },
+				};
+				const undated = { id: uuidv7(), name: f.company.name(), url: f.internet.url() };
+
+				const accounts = [ended, ongoing, openEnded, undated];
+
+				await db.insert(schema.socialMedia).values(
+					accounts.map((sm) => {
+						return { ...sm, typeId: socialMediaType.id };
+					}),
+				);
+				await db.insert(schema.organisationalUnitsToSocialMedia).values(
+					accounts.map((sm, position) => {
+						return { organisationalUnitId: ericVersionId, socialMediaId: sm.id, position };
+					}),
+				);
+
+				const response = await client["site-metadata"].$get();
+
+				expect(response.status).toBe(200);
+
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as SiteMetadata;
+
+				expect(data.socialMedia.map((sm) => sm.id)).toStrictEqual([
+					ongoing.id,
+					openEnded.id,
+					undated.id,
+				]);
+			});
+		});
+
 		it("should return no contact details when the ERIC has none", async () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db);
