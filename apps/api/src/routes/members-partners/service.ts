@@ -14,7 +14,7 @@ import {
 } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
-import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
+import { activeSocialMedia, mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { type SQLWrapper, alias, and, count, eq, exists, inArray, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -62,6 +62,7 @@ export async function getMembersAndPartners(
 				image: imageAssetColumns,
 				socialMedia: {
 					...socialMediaByPosition,
+					...activeSocialMedia,
 					columns: {
 						id: true,
 						name: true,
@@ -548,6 +549,7 @@ async function getNationalConsortium(
 			image: imageAssetColumns,
 			socialMedia: {
 				...socialMediaByPosition,
+				...activeSocialMedia,
 				columns: {
 					id: true,
 					name: true,
@@ -718,6 +720,7 @@ export async function getMemberOrPartnerById(
 				image: imageAssetColumns,
 				socialMedia: {
 					...socialMediaByPosition,
+					...activeSocialMedia,
 					columns: {
 						id: true,
 						name: true,
@@ -916,6 +919,7 @@ export async function getMemberOrPartnerBySlug(
 			image: imageAssetColumns,
 			socialMedia: {
 				...socialMediaByPosition,
+				...activeSocialMedia,
 				columns: {
 					id: true,
 					name: true,

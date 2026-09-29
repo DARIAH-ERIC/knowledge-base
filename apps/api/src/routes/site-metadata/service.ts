@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import { generateImageUrl, imageAssetColumns } from "@/lib/images";
-import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
+import { activeSocialMedia, mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
-import { sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 const dariahEuSlug = "dariah-eu";
@@ -35,12 +34,7 @@ function getEricContactDetails(db: Database | Transaction) {
 		with: {
 			socialMedia: {
 				...socialMediaByPosition,
-				where: {
-					// `<<` is "strictly left of", i.e. every instant of the duration precedes now.
-					RAW(t) {
-						return sql`(${t.duration} IS NULL OR NOT ${t.duration} << TSTZRANGE(NOW()::TIMESTAMPTZ, NULL))`;
-					},
-				},
+				...activeSocialMedia,
 				columns: {
 					id: true,
 					name: true,
