@@ -510,7 +510,7 @@ async function seedSocialMedia(
 	organisationalUnitId: string,
 	typeName: (typeof schema.socialMediaTypesEnum)[number],
 	url: string,
-	duration: { start: Date; end?: Date } | null = { start: f.date.past() },
+	duration?: { start: Date; end?: Date } | null,
 ) {
 	const type = await db.query.socialMediaTypes.findFirst({
 		columns: { id: true },
@@ -524,7 +524,7 @@ async function seedSocialMedia(
 		.values({
 			name: f.internet.displayName(),
 			url,
-			duration,
+			duration: duration === undefined ? { start: f.date.past() } : duration,
 			typeId: type.id,
 		})
 		.returning({
@@ -1415,13 +1415,9 @@ describe("members-partners", () => {
 				assert(listItem);
 
 				for (const data of [detailData, slugData, listItem]) {
-					expect(
-						data.socialMedia
-							.map((sm) => {
-								return sm.id;
-							})
-							.toSorted(),
-					).toStrictEqual([ongoing.id, openEnded.id, undated.id].toSorted());
+					expect(data.socialMedia.map((sm) => sm.id).toSorted()).toStrictEqual(
+						[ongoing.id, openEnded.id, undated.id].toSorted(),
+					);
 				}
 			});
 		});

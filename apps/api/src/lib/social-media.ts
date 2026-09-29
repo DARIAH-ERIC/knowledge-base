@@ -1,6 +1,6 @@
 import type * as schema from "@dariah-eric/database/schema";
 
-import { type asc, sql } from "@/services/db/sql";
+import { type SQL, type asc, sql } from "@/services/db/sql";
 
 /** Order a many-to-many social-media relation by its junction row. */
 export const socialMediaByPosition = {
@@ -19,7 +19,7 @@ export const socialMediaByPosition = {
 export const activeSocialMedia = {
 	where: {
 		// `<<` is "strictly left of", i.e. every instant of the duration precedes now.
-		RAW(t: typeof schema.socialMedia) {
+		RAW(t: typeof schema.socialMedia): SQL {
 			return sql`(${t.duration} IS NULL OR NOT ${t.duration} << TSTZRANGE(NOW()::TIMESTAMPTZ, NULL))`;
 		},
 	},
