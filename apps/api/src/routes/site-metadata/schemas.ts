@@ -20,7 +20,7 @@ export const SiteMetadataSchema = v.pipe(
 				...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
 				duration: v.nullable(
 					v.object({
-						start: v.string(),
+						start: v.nullable(v.string()),
 						end: v.nullable(v.string()),
 					}),
 				),

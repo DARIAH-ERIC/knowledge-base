@@ -15,14 +15,14 @@ export const socialMediaByPosition = {
 export function mapSocialMedia<
 	T extends {
 		type: { type: string };
-		duration: { start: Date; end?: Date | null } | null;
+		duration: { start?: Date | null; end?: Date | null } | null;
 	},
 >(
 	socialMedia: Array<T>,
 ): Array<
 	Omit<T, "type" | "duration"> & {
 		type: string;
-		duration: { start: string; end: string | null } | null;
+		duration: { start: string | null; end: string | null } | null;
 	}
 > {
 	return socialMedia.map((sm) => {
@@ -31,7 +31,7 @@ export function mapSocialMedia<
 			type: sm.type.type,
 			duration: sm.duration
 				? {
-						start: sm.duration.start.toISOString(),
+						start: sm.duration.start?.toISOString() ?? null,
 						end: sm.duration.end?.toISOString() ?? null,
 					}
 				: null,

@@ -63,7 +63,10 @@ export const createSocialMediaAction = createServerAction<CreatedSocialMedia>(
 					name,
 					url,
 					typeId: socialMediaType.id,
-					duration: duration?.start != null ? { start: duration.start, end: duration.end } : null,
+					duration:
+						duration?.start != null || duration?.end != null
+							? { start: duration.start, end: duration.end }
+							: null,
 				})
 				.returning({ id: schema.socialMedia.id });
 			assert(row);
