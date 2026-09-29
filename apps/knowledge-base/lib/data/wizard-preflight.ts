@@ -826,7 +826,7 @@ export async function getEndCountryRolePreflight(
 		end: input.end,
 	});
 
-	if (end <= appointment.duration.start) {
+	if (end < appointment.duration.start) {
 		warnings.push({
 			id: "end-before-start",
 			severity: "warning",
@@ -852,7 +852,7 @@ export async function getEndCountryRolePreflight(
 
 	// Ending a relation before it began would invert its period, which the database rejects outright.
 	// Report it instead, and leave that row alone.
-	if (counterpart.start >= end) {
+	if (counterpart.start > end) {
 		warnings.push({
 			id: `counterpart-starts-after-end:${counterpart.rule}`,
 			severity: "warning",

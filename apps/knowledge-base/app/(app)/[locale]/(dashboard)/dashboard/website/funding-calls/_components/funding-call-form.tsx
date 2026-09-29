@@ -134,6 +134,7 @@ export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNod
 					>
 						<Label>{t("End date")}</Label>
 						<DatePickerTrigger />
+						<FieldError />
 					</DatePicker>
 
 					<EntitySlugField
