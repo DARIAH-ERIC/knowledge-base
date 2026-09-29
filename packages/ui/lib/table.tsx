@@ -1,12 +1,13 @@
 "use client";
 
-import { ChevronDownIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { ChevronDownIcon, ChevronRightIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useExtracted } from "next-intl";
 import { type ReactNode, type Ref, createContext, use } from "react";
 import {
 	Button as AriaButton,
 	Cell as AriaCell,
 	type CellProps as AriaCellProps,
+	type CellRenderProps as AriaCellRenderProps,
 	Collection as AriaCollection,
 	Column as AriaColumn,
 	type ColumnProps as AriaColumnProps,
@@ -329,7 +330,7 @@ export interface TableCellProps extends AriaCellProps {
 }
 
 export function TableCell(props: Readonly<TableCellProps>): ReactNode {
-	const { className, ref, ...rest } = props;
+	const { children, className, ref, ...rest } = props;
 
 	const { allowResize, bleed, grid, striped } = useTableContext();
 
@@ -348,6 +349,64 @@ export function TableCell(props: Readonly<TableCellProps>): ReactNode {
 				),
 				className,
 			)}
-		/>
+		>
+			{(values) => {
+				const content = typeof children === "function" ? children(values) : children;
+
+				// Only tables that designate a `treeColumn` have tree-column cells; everything else renders as before.
+				if (!values.isTreeColumn) {
+					return content;
+				}
+
+				return (
+					<div className="flex items-center gap-1">
+						<TableRowExpandButton {...values} />
+						{content}
+					</div>
+				);
+			}}
+		</AriaCell>
+	);
+}
+
+type TableRowExpandButtonProps = Pick<
+	AriaCellRenderProps,
+	"hasChildItems" | "isExpanded" | "level"
+>;
+
+/**
+ * Chevron rendered in the tree column of every row of an expandable table. Rows without child rows
+ * get an equally sized spacer so the column's text stays aligned; nested rows are indented by their
+ * level.
+ */
+function TableRowExpandButton(props: Readonly<TableRowExpandButtonProps>): ReactNode {
+	const { hasChildItems, isExpanded, level } = props;
+
+	// Top-level rows report level 1; indent one step per nesting level below that.
+	const indent = Math.max(0, level - 1);
+
+	return (
+		<span
+			className="flex shrink-0 items-center"
+			style={indent > 0 ? { paddingInlineStart: `${String(indent)}rem` } : undefined}
+		>
+			{hasChildItems ? (
+				<AriaButton
+					className="grid place-content-center rounded-xs text-muted-fg outline-hidden block-5 inline-5 hover:text-fg focus-visible:ring focus-visible:ring-ring"
+					slot="chevron"
+				>
+					<ChevronRightIcon
+						aria-hidden={true}
+						className={twJoin(
+							"transition-transform duration-200 block-4 inline-4 rtl:rotate-180",
+							isExpanded && "rotate-90 rtl:rotate-90",
+						)}
+						data-slot="icon"
+					/>
+				</AriaButton>
+			) : (
+				<span aria-hidden={true} className="block block-5 inline-5" />
+			)}
+		</span>
 	);
 }
