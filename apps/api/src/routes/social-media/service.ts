@@ -8,7 +8,7 @@ import { count } from "@/services/db/sql";
 function mapItem<
 	T extends {
 		type: { type: string };
-		duration: { start: Date; end?: Date | null } | null;
+		duration: { start?: Date | null; end?: Date | null } | null;
 		organisationalUnits: Array<{ id: string; name: string; type: { type: string } }>;
 	},
 >(item: T) {
@@ -17,7 +17,7 @@ function mapItem<
 		type: item.type.type,
 		duration: item.duration
 			? {
-					start: item.duration.start.toISOString(),
+					start: item.duration.start?.toISOString() ?? null,
 					end: item.duration.end?.toISOString() ?? null,
 				}
 			: null,

@@ -1,6 +1,7 @@
 import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
+import * as v from "valibot";
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
@@ -49,7 +50,7 @@ export const socialMedia = p.snakeCase.table("social_media", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	name: p.text("name").notNull(),
 	url: p.text("url").notNull(),
-	duration: f.timestampRange("duration"),
+	duration: f.timestampRange("duration", { start: "optional" }),
 	typeId: p
 		.uuid("type_id")
 		.notNull()
@@ -60,12 +61,14 @@ export const socialMedia = p.snakeCase.table("social_media", {
 export type SocialMedia = typeof socialMedia.$inferSelect;
 export type SocialMediaInput = typeof socialMedia.$inferInsert;
 
+const SocialMediaDuration = v.nullable(f.timestampRangeSchema({ start: "optional" }));
+
 export const SocialMediaSelectSchema = createSelectSchema(socialMedia, {
-	duration: f.NullableTimestampRange,
+	duration: SocialMediaDuration,
 });
 export const SocialMediaInsertSchema = createInsertSchema(socialMedia, {
-	duration: f.NullableTimestampRange,
+	duration: SocialMediaDuration,
 });
 export const SocialMediaUpdateSchema = createUpdateSchema(socialMedia, {
-	duration: f.NullableTimestampRange,
+	duration: SocialMediaDuration,
 });

@@ -21,7 +21,7 @@ export const createSocialMediaAction = createMutationAction({
 		assert(socialMediaType, "Social media type not found.");
 
 		const durationValue =
-			input.duration?.start != null
+			input.duration?.start != null || input.duration?.end != null
 				? { start: input.duration.start, end: input.duration.end }
 				: null;
 

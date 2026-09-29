@@ -8,7 +8,7 @@ export const SocialMediaSchema = v.pipe(
 		...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
 		duration: v.nullable(
 			v.object({
-				start: CalendarDateSchema,
+				start: v.nullable(CalendarDateSchema),
 				end: v.nullable(CalendarDateSchema),
 			}),
 		),
