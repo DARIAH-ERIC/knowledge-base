@@ -510,6 +510,7 @@ async function seedSocialMedia(
 	organisationalUnitId: string,
 	typeName: (typeof schema.socialMediaTypesEnum)[number],
 	url: string,
+	duration: { start: Date; end?: Date } | null = { start: f.date.past() },
 ) {
 	const type = await db.query.socialMediaTypes.findFirst({
 		columns: { id: true },
@@ -523,7 +524,7 @@ async function seedSocialMedia(
 		.values({
 			name: f.internet.displayName(),
 			url,
-			duration: { start: f.date.past() },
+			duration,
 			typeId: type.id,
 		})
 		.returning({
@@ -1334,6 +1335,94 @@ describe("members-partners", () => {
 						url: countrySocialMedia.url,
 					}),
 				]);
+			});
+		});
+
+		it("should leave out social media accounts whose duration has ended", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(2);
+				const item = items.at(1)!;
+				await seed(db, items);
+
+				const nationalConsortium = await seedNationalConsortium(
+					db,
+					item.organisationalUnit.id,
+					createItems(1),
+				);
+
+				const now = Date.now();
+				const day = 24 * 60 * 60 * 1000;
+
+				/** The national consortium only has an ended account, so the country's accounts apply. */
+				await seedSocialMedia(
+					db,
+					nationalConsortium.organisationalUnit.id,
+					"mastodon",
+					"https://social.example/consortium-ended",
+					{ start: new Date(now - 10 * day), end: new Date(now - day) },
+				);
+
+				await seedSocialMedia(
+					db,
+					item.organisationalUnit.id,
+					"mastodon",
+					"https://social.example/country-ended",
+					{ start: new Date(now - 10 * day), end: new Date(now - day) },
+				);
+				const ongoing = await seedSocialMedia(
+					db,
+					item.organisationalUnit.id,
+					"mastodon",
+					"https://social.example/country-ongoing",
+					{ start: new Date(now - 10 * day), end: new Date(now + day) },
+				);
+				const openEnded = await seedSocialMedia(
+					db,
+					item.organisationalUnit.id,
+					"bluesky",
+					"https://social.example/country-open-ended",
+					{ start: new Date(now - 10 * day) },
+				);
+				const undated = await seedSocialMedia(
+					db,
+					item.organisationalUnit.id,
+					"website",
+					"https://social.example/country-undated",
+					null,
+				);
+
+				const detailResponse = await client["members-partners"][":id"].$get({
+					param: { id: item.version.id },
+				});
+				const slugResponse = await client["members-partners"].slugs[":slug"].$get({
+					param: { slug: item.entity.slug },
+				});
+
+				const listResponse = await client["members-partners"].$get({
+					query: { limit: "10", offset: "0" },
+				});
+
+				expect(detailResponse.status).toBe(200);
+				expect(slugResponse.status).toBe(200);
+				expect(listResponse.status).toBe(200);
+
+				const detailData = (await detailResponse.json()) as MemberOrPartner;
+				const slugData = (await slugResponse.json()) as MemberOrPartner;
+				const listData = (await listResponse.json()) as { data: Array<MemberOrPartnerBase> };
+				const listItem = listData.data.find((entry) => entry.id === item.version.id);
+				assert(listItem);
+
+				for (const data of [detailData, slugData, listItem]) {
+					expect(
+						data.socialMedia
+							.map((sm) => {
+								return sm.id;
+							})
+							.toSorted(),
+					).toStrictEqual([ongoing.id, openEnded.id, undated.id].toSorted());
+				}
 			});
 		});
 
