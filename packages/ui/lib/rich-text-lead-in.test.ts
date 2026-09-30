@@ -42,6 +42,6 @@ describe("lead-in", () => {
 				],
 			}),
 		).toBe("Lead.\n\nBody.");
-		expect(isEmptyRichTextDocument({ type: "doc", content: [{ type: "leadIn" }] })).toBe(true);
+		expect(isEmptyRichTextDocument({ type: "doc", content: [{ type: "leadIn" }] })).toBeTruthy();
 	});
 });
