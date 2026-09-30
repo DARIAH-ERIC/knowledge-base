@@ -72,6 +72,7 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 				title: true,
 				summary: true,
 				url: true,
+				linkUrl: true,
 				groupId: true,
 			},
 			with: {
@@ -106,20 +107,23 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 		notFound();
 	}
 
-	const document = images.generateSignedImageUrl({
-		key: documentOrPolicy.document.key,
-		options: imageGridOptions,
-	});
+	const document =
+		documentOrPolicy.document != null
+			? {
+					...documentOrPolicy.document,
+					url: images.generateSignedImageUrl({
+						key: documentOrPolicy.document.key,
+						options: imageGridOptions,
+					}).url,
+				}
+			: null;
 	const contentBlocks = await getEntityContentBlocks(documentOrPolicy.id, "description");
 
 	return (
 		<DocumentOrPolicyEditForm
 			contentBlocks={contentBlocks}
 			documentId={documentId}
-			documentOrPolicy={{
-				...documentOrPolicy,
-				document: { ...documentOrPolicy.document, url: document.url },
-			}}
+			documentOrPolicy={{ ...documentOrPolicy, document }}
 			groups={groups}
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}

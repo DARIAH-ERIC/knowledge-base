@@ -19,10 +19,10 @@ interface DocumentOrPolicyEditFormProps {
 	isPublished: boolean;
 	documentOrPolicy: Pick<
 		schema.DocumentOrPolicy,
-		"id" | "title" | "summary" | "url" | "groupId"
+		"id" | "title" | "summary" | "url" | "linkUrl" | "groupId"
 	> & {
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { document: { key: string; label: string; url: string } };
+	} & { document: { key: string; label: string; url: string } | null };
 	groups: Array<Pick<schema.DocumentPolicyGroup, "id" | "label">>;
 }
 

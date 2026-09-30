@@ -20,9 +20,12 @@ interface DocumentOrPolicyDetailsProps {
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
-	documentOrPolicy: Pick<schema.DocumentOrPolicy, "id" | "title" | "summary" | "url"> & {
+	documentOrPolicy: Pick<
+		schema.DocumentOrPolicy,
+		"id" | "title" | "summary" | "url" | "linkUrl"
+	> & {
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { document: { key: string; label: string; url: string; downloadUrl: string } };
+	} & { document: { key: string; label: string; url: string; downloadUrl: string } | null };
 	publishAction: (documentId: string) => Promise<void>;
 	discardDraftAction?: (documentId: string) => Promise<void>;
 }
@@ -77,16 +80,36 @@ export function DocumentOrPolicyDetails(props: Readonly<DocumentOrPolicyDetailsP
 					</>
 				) : null}
 
-				<DescriptionTerm>{t("Document")}</DescriptionTerm>
-				<DescriptionDetails>
-					<a
-						className="underline"
-						download={documentOrPolicy.document.label}
-						href={documentOrPolicy.document.downloadUrl}
-					>
-						{documentOrPolicy.document.label}
-					</a>
-				</DescriptionDetails>
+				{documentOrPolicy.document != null ? (
+					<>
+						<DescriptionTerm>{t("Document")}</DescriptionTerm>
+						<DescriptionDetails>
+							<a
+								className="underline"
+								download={documentOrPolicy.document.label}
+								href={documentOrPolicy.document.downloadUrl}
+							>
+								{documentOrPolicy.document.label}
+							</a>
+						</DescriptionDetails>
+					</>
+				) : null}
+
+				{documentOrPolicy.linkUrl != null ? (
+					<>
+						<DescriptionTerm>{t("External link")}</DescriptionTerm>
+						<DescriptionDetails>
+							<a
+								className="underline"
+								href={documentOrPolicy.linkUrl}
+								rel="noreferrer"
+								target="_blank"
+							>
+								{documentOrPolicy.linkUrl}
+							</a>
+						</DescriptionDetails>
+					</>
+				) : null}
 
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>
 				<DescriptionDetails>

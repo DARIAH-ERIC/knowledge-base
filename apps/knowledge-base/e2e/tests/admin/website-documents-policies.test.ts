@@ -118,6 +118,51 @@ test.describe("website documents-policies admin", () => {
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
 	});
 
+	test("should create an external link", async ({ createWebsiteDocumentsPoliciesPage, db }) => {
+		const workerIndex = test.info().workerIndex;
+		const docPoliciesPage = createWebsiteDocumentsPoliciesPage(workerIndex);
+
+		const title = `${docPoliciesPage.workerPrefix} Test Link ${randomUUID()}`;
+		const linkUrl = "https://example.com/external-policy";
+
+		await docPoliciesPage.gotoCreate();
+		await docPoliciesPage.fillTitle(title);
+		await docPoliciesPage.selectKind("External link");
+		await docPoliciesPage.fillLinkUrl(linkUrl);
+		await docPoliciesPage.submitForm();
+
+		await docPoliciesPage.searchByTitle(title);
+		await expect(docPoliciesPage.rowByTitle(title)).toBeVisible();
+
+		const created = await db.getDocumentOrPolicyByTitle(title);
+		expect(created).toMatchObject({ documentId: null, linkUrl, url: null });
+	});
+
+	test("should switch a document to an external link via inline dialog", async ({
+		createWebsiteDocumentsPoliciesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const docPoliciesPage = createWebsiteDocumentsPoliciesPage(workerIndex);
+
+		const title = `${docPoliciesPage.workerPrefix} Switch To Link ${randomUUID()}`;
+		const linkUrl = "https://example.com/switched-policy";
+
+		await docPoliciesPage.gotoCreate();
+		await docPoliciesPage.fillTitle(title);
+		await docPoliciesPage.fillUrl("https://example.com/doi");
+		await docPoliciesPage.selectDocumentFromMediaLibrary("E2E Test Document");
+		await docPoliciesPage.submitForm();
+
+		await docPoliciesPage.openEditDialog(title);
+		await docPoliciesPage.selectKind("External link");
+		await docPoliciesPage.fillLinkUrl(linkUrl);
+		await docPoliciesPage.submitEditDialog();
+
+		const updated = await db.getDocumentOrPolicyByTitle(title);
+		expect(updated).toMatchObject({ documentId: null, linkUrl, url: null });
+	});
+
 	test("should upload a PDF document", async ({ createWebsiteDocumentsPoliciesPage, db }) => {
 		const docPoliciesPage = createWebsiteDocumentsPoliciesPage(test.info().workerIndex);
 		const title = `${docPoliciesPage.workerPrefix} Uploaded PDF ${randomUUID()}`;
@@ -229,7 +274,7 @@ test.describe("website documents-policies admin", () => {
 		await expect(docPoliciesPage.rowByTitle(title)).toBeHidden();
 
 		// Source of truth: the entity document and its subtype rows are really gone.
-		expect(await db.entityDocumentExists(created!.documentId)).toBe(false);
+		expect(await db.entityDocumentExists(created!.entityId)).toBe(false);
 		expect(await db.getDocumentOrPolicyByTitle(title)).toBeNull();
 	});
 });

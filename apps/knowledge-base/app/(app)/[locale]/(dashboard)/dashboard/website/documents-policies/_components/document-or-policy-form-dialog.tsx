@@ -2,7 +2,7 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
+import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
@@ -19,22 +19,23 @@ import { useExtracted } from "next-intl";
 import { type ReactNode, useActionState, useState } from "react";
 
 import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
-import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import type { SelectedImage } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
 import {
-	type SelectedImage,
-	SelectedImageCard,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
+	DocumentOrPolicyKindToggle,
+	DocumentOrPolicyTargetField,
+	getDocumentOrPolicyKind,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-target-field";
 import { createDocumentOrPolicyFromDialogAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy-from-dialog.action";
 import { updateDocumentOrPolicyDetailsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.action";
-import { documentMimeTypes } from "@/config/assets.config";
 
 export interface DocumentOrPolicyDialogItem {
 	id: string;
 	title: string;
 	summary: string | null;
 	url: string | null;
+	linkUrl: string | null;
 	groupId: string | null;
-	document: SelectedImage;
+	document: SelectedImage | null;
 }
 
 interface DocumentOrPolicyFormProps {
@@ -75,21 +76,7 @@ function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): React
 		item?.groupId ?? initialGroupId ?? "",
 	);
 
-	const [documentKeyError, setDocumentKeyError] = useState(false);
-
-	const picker = (
-		<MediaLibraryDialog
-			acceptedFileTypes={documentMimeTypes}
-			defaultPrefix="documents"
-			initialAssets={initialAssets}
-			onSelect={(key, url, asset) => {
-				setSelectedDocument({ ...asset, key, url });
-				setDocumentKeyError(false);
-			}}
-			prefixes={["documents"]}
-			triggerLabel={selectedDocument != null ? t("Change document") : t("Select document")}
-		/>
-	);
+	const [kind, setKind] = useState(item != null ? getDocumentOrPolicyKind(item) : "document");
 
 	const title = isEditMode ? t("Edit document or policy") : t("New document or policy");
 
@@ -114,12 +101,6 @@ function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): React
 					<FieldError />
 				</TextField>
 
-				<TextField defaultValue={item?.url ?? undefined} name="url">
-					<Label>{t("URL")}</Label>
-					<Input placeholder="https://" />
-					<FieldError />
-				</TextField>
-
 				<Select
 					onChange={(key) => {
 						setSelectedGroupId(key == null || key === "none" ? "" : String(key));
@@ -140,38 +121,29 @@ function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): React
 				</Select>
 				{selectedGroupId ? <input name="groupId" type="hidden" value={selectedGroupId} /> : null}
 
-				<div>
-					<Label className="mbe-1.5 block text-sm font-medium">{t("Document")}</Label>
-					{selectedDocument != null ? (
-						<SelectedImageCard image={selectedDocument} onMetadataChange={setSelectedDocument}>
-							{picker}
-						</SelectedImageCard>
-					) : (
-						picker
-					)}
-					<input
-						aria-hidden={true}
-						className="sr-only"
-						name="documentKey"
-						onInvalid={(e) => {
-							e.preventDefault();
-							setDocumentKeyError(true);
-						}}
-						readOnly={true}
-						required={true}
-						tabIndex={-1}
-						value={selectedDocument?.key ?? ""}
-					/>
-					{documentKeyError ? (
-						<div className={fieldErrorStyles()}>{t("Please select a document.")}</div>
-					) : null}
-				</div>
+				<DocumentOrPolicyKindToggle kind={kind} onKindChange={setKind} />
+
+				<DocumentOrPolicyTargetField
+					defaultLinkUrl={item?.linkUrl}
+					initialAssets={initialAssets}
+					kind={kind}
+					onSelectedDocumentChange={setSelectedDocument}
+					selectedDocument={selectedDocument}
+				/>
+
+				{kind === "document" ? (
+					<TextField defaultValue={item?.url ?? undefined} name="url">
+						<Label>{t("URL")}</Label>
+						<Input placeholder="https://" />
+						<FieldError />
+					</TextField>
+				) : null}
 			</ModalBody>
 
 			<ModalFooter>
 				<ModalClose>{t("Cancel")}</ModalClose>
 				<DraftFormSubmitButtons
-					isDisabled={selectedDocument == null}
+					isDisabled={kind === "document" && selectedDocument == null}
 					isPending={isPending}
 					showSaveAndPublish={!isEditMode}
 				/>

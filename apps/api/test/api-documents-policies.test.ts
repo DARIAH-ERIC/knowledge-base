@@ -40,7 +40,11 @@ function createItems(count: number) {
 	return items;
 }
 
-async function seed(db: Database, items: ReturnType<typeof createItems>) {
+async function seed(
+	db: Database,
+	items: ReturnType<typeof createItems>,
+	target: { linkUrl: string } | null = null,
+) {
 	const [status, type, asset] = await Promise.all([
 		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
 		db.query.entityTypes.findFirst({
@@ -66,11 +70,15 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 		}),
 	);
 
-	await db.insert(schema.documentsPolicies).values(
-		items.map((item) => {
-			return { ...item.documentOrPolicy, documentId: asset.id };
-		}),
-	);
+	await db
+		.insert(schema.documentsPolicies)
+		.values(
+			items.map((item) =>
+				target != null
+					? { ...item.documentOrPolicy, url: null, documentId: null, linkUrl: target.linkUrl }
+					: { ...item.documentOrPolicy, documentId: asset.id },
+			),
+		);
 
 	await Promise.all(
 		items.map((item) => seedContentBlock(db, item.version.id, type.id, "description")),
@@ -297,7 +305,8 @@ describe("documents-policies", () => {
 
 				assert("description" in data);
 				expect(data.title).toBe(title);
-				expect(data.document.url).toContain(`/slugs/${slug}/document`);
+				expect(data.document?.url).toContain(`/slugs/${slug}/document`);
+				expect(data.link).toBeNull();
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});
@@ -324,6 +333,28 @@ describe("documents-policies", () => {
 				});
 
 				expect(response.status).toBe(404);
+			});
+		});
+
+		it("should return external link without document url", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const linkUrl = f.internet.url();
+				const items = createItems(1);
+				await seed(db, items, { linkUrl });
+
+				const response = await client["documents-policies"][":id"].$get({
+					param: { id: items[0]!.version.id },
+				});
+
+				expect(response.status).toBe(200);
+
+				const data = await response.json();
+
+				assert("link" in data);
+				expect(data.document).toBeNull();
+				expect(data.link).toStrictEqual({ url: linkUrl });
 			});
 		});
 	});
@@ -472,6 +503,21 @@ describe("documents-policies", () => {
 
 				expect(response.status).toBe(404);
 				expect(storageCalled).toBe(false);
+			});
+		});
+
+		it("should return 404 for an external link", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db, createMockStorage());
+
+				const items = createItems(1);
+				await seed(db, items, { linkUrl: f.internet.url() });
+
+				const response = await client["documents-policies"][":id"].document.$get({
+					param: { id: items[0]!.version.id },
+				});
+
+				expect(response.status).toBe(404);
 			});
 		});
 

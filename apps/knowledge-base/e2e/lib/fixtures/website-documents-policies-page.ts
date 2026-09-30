@@ -44,6 +44,14 @@ export class WebsiteDocumentsPoliciesPage {
 		await this.page.getByLabel("URL").fill(url);
 	}
 
+	async selectKind(kind: "Document" | "External link"): Promise<void> {
+		await this.page.getByRole("radio", { name: kind, exact: true }).click();
+	}
+
+	async fillLinkUrl(url: string): Promise<void> {
+		await this.page.getByLabel("Link", { exact: true }).fill(url);
+	}
+
 	async selectFirstGroup(): Promise<void> {
 		const groupControl = this.page
 			.locator('[data-slot="control"]')

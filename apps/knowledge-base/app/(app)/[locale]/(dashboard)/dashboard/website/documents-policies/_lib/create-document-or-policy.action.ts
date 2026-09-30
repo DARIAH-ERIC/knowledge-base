@@ -4,6 +4,7 @@ import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
 import { CreateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy.schema";
+import { resolveDocumentOrPolicyTarget } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/resolve-document-or-policy-target";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
 import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-lifecycle";
 import { ensureEntityVersionField, insertContentBlockTree } from "@/lib/data/entity-version-fields";
@@ -38,12 +39,7 @@ export const createDocumentOrPolicyAction = createMutationAction<
 			title: input.title,
 		});
 
-		const asset = await tx.query.assets.findFirst({
-			where: { key: input.documentKey },
-			columns: { id: true },
-		});
-
-		assert(asset);
+		const target = await resolveDocumentOrPolicyTarget(tx, input);
 
 		const siblings = await tx
 			.select({ id: schema.documentsPolicies.id })
@@ -56,10 +52,9 @@ export const createDocumentOrPolicyAction = createMutationAction<
 
 		await tx.insert(schema.documentsPolicies).values({
 			id: versionId,
-			documentId: asset.id,
+			...target,
 			title: input.title,
 			summary: input.summary,
-			url: input.url != null && input.url.length > 0 ? input.url : null,
 			groupId: input.groupId ?? null,
 			position: siblings.length,
 		});

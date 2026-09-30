@@ -97,7 +97,7 @@ export async function getDocumentOrPolicyById(params: GetDocumentOrPolicyByIdPar
 	const data = {
 		...rest,
 		entity: entityVersion.entity,
-		document: toSelectedImage(item.document, imageGridOptions),
+		document: item.document != null ? toSelectedImage(item.document, imageGridOptions) : null,
 	};
 
 	return data;

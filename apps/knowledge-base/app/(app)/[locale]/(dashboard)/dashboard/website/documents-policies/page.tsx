@@ -40,6 +40,7 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 				title: schema.documentsPolicies.title,
 				summary: schema.documentsPolicies.summary,
 				url: schema.documentsPolicies.url,
+				linkUrl: schema.documentsPolicies.linkUrl,
 				groupId: schema.documentsPolicies.groupId,
 				position: schema.documentsPolicies.position,
 				entityId: schema.entities.id,
@@ -102,7 +103,7 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 			.innerJoin(schema.entityVersions, eq(schema.documentsPolicies.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-			.innerJoin(schema.assets, eq(schema.documentsPolicies.documentId, schema.assets.id))
+			.leftJoin(schema.assets, eq(schema.documentsPolicies.documentId, schema.assets.id))
 			.where(latestEditableEntityVersionWhere())
 			.orderBy(asc(schema.documentsPolicies.position)),
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "documents" }),
@@ -111,7 +112,7 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 	const documentsShaped = documents.map(({ slug, entityId, document, ...rest }) => {
 		return {
 			...rest,
-			document: toSelectedImage(document, imageGridOptions),
+			document: document != null ? toSelectedImage(document, imageGridOptions) : null,
 			entityVersion: { entity: { id: entityId, slug } },
 		};
 	});

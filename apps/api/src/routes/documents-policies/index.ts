@@ -32,6 +32,22 @@ function documentUrl(slug: string) {
 	return new URL(`/api/v1/documents-policies/slugs/${slug}/document`, env.API_BASE_URL).href;
 }
 
+/**
+ * Replaces the stored target columns with what a client follows: a download url for an uploaded
+ * document, or the external link. Exactly one of `document` and `link` is set.
+ */
+function withTarget<
+	T extends { documentId: string | null; linkUrl: string | null; entity: { slug: string } },
+>(item: T) {
+	const { documentId, linkUrl, ...rest } = item;
+
+	return {
+		...rest,
+		document: documentId != null ? { url: documentUrl(item.entity.slug) } : null,
+		link: linkUrl != null ? { url: linkUrl } : null,
+	};
+}
+
 export const router = createRouter()
 	/** GET /api/documents-policies */
 	.get(
@@ -65,9 +81,7 @@ export const router = createRouter()
 
 			const data = {
 				...result,
-				data: result.data.map((item) => {
-					return { ...item, document: { url: documentUrl(item.entity.slug) } };
-				}),
+				data: result.data.map((item) => withTarget(item)),
 			};
 
 			const payload = await validate(GetDocumentsPolicies.ResponseSchema, data, 500);
@@ -104,14 +118,12 @@ export const router = createRouter()
 			const data = {
 				data: result.data.map((node) => {
 					if (node.type === "item") {
-						return { ...node, document: { url: documentUrl(node.entity.slug) } };
+						return withTarget(node);
 					}
 
 					return {
 						...node,
-						items: node.items.map((item) => {
-							return { ...item, document: { url: documentUrl(item.entity.slug) } };
-						}),
+						items: node.items.map((item) => withTarget(item)),
 					};
 				}),
 			};
@@ -193,7 +205,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const data = { ...result, document: { url: documentUrl(result.entity.slug) } };
+			const data = withTarget(result);
 
 			const payload = await validate(GetDocumentOrPolicyById.ResponseSchema, data, 500);
 
@@ -207,7 +219,8 @@ export const router = createRouter()
 		describeRoute({
 			tags: ["documents-policies"],
 			summary: "Download document or policy file",
-			description: "Stream the S3-stored file for a document or policy by id",
+			description:
+				"Stream the S3-stored file for a document or policy by id. Not found for an external link.",
 			operationId: "getDocumentOrPolicyFileById",
 			"x-cache-tags": ["documents-policies"],
 			responses: {
@@ -231,7 +244,7 @@ export const router = createRouter()
 
 			const item = await getDocumentOrPolicyDocument(db, { id });
 
-			if (item == null) {
+			if (item?.document == null) {
 				return c.notFound();
 			}
 
@@ -256,7 +269,8 @@ export const router = createRouter()
 		describeRoute({
 			tags: ["documents-policies"],
 			summary: "Download document or policy file by slug",
-			description: "Stream the S3-stored file for a document or policy by slug",
+			description:
+				"Stream the S3-stored file for a document or policy by slug. Not found for an external link.",
 			operationId: "getDocumentOrPolicyFileBySlug",
 			"x-cache-tags": ["documents-policies"],
 			responses: {
@@ -279,7 +293,7 @@ export const router = createRouter()
 
 			const item = await getDocumentOrPolicyDocumentBySlug(db, { slug });
 
-			if (item == null) {
+			if (item?.document == null) {
 				return c.notFound();
 			}
 
@@ -333,7 +347,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const data = { ...result, document: { url: documentUrl(result.entity.slug) } };
+			const data = withTarget(result);
 
 			const payload = await validate(GetDocumentOrPolicyBySlug.ResponseSchema, data, 500);
 

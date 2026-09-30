@@ -34,6 +34,8 @@ export async function getDocumentsPolicies(
 				title: true,
 				summary: true,
 				url: true,
+				documentId: true,
+				linkUrl: true,
 				position: true,
 			},
 			with: {
@@ -103,6 +105,8 @@ export async function getDocumentsPoliciesTree(db: Database | Transaction) {
 				title: true,
 				summary: true,
 				url: true,
+				documentId: true,
+				linkUrl: true,
 				groupId: true,
 				position: true,
 			},
@@ -194,6 +198,8 @@ export async function getDocumentOrPolicyById(
 				title: true,
 				summary: true,
 				url: true,
+				documentId: true,
+				linkUrl: true,
 			},
 			with: {
 				entityVersion: {
@@ -391,6 +397,8 @@ export async function getDocumentOrPolicyBySlug(
 			title: true,
 			summary: true,
 			url: true,
+			documentId: true,
+			linkUrl: true,
 		},
 		with: {
 			entityVersion: {

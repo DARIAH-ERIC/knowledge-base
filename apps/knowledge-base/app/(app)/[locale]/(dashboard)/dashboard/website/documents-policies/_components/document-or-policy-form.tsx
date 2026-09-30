@@ -2,7 +2,7 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
+import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { Input } from "@dariah-eric/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
@@ -19,12 +19,12 @@ import {
 import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import { EntitySlugField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-slug-field";
 import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import type { SelectedImage } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
 import {
-	type SelectedImage,
-	SelectedImageCard,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/selected-image-card";
-import { documentMimeTypes } from "@/config/assets.config";
+	DocumentOrPolicyKindToggle,
+	DocumentOrPolicyTargetField,
+	getDocumentOrPolicyKind,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-target-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface DocumentOrPolicyFormProps {
@@ -32,10 +32,10 @@ interface DocumentOrPolicyFormProps {
 	contentBlocks?: Array<ContentBlock>;
 	documentOrPolicy?: Pick<
 		schema.DocumentOrPolicy,
-		"id" | "title" | "summary" | "url" | "groupId"
+		"id" | "title" | "summary" | "url" | "linkUrl" | "groupId"
 	> & {
 		entityVersion: { entity: { id: string; slug: string } };
-	} & { document: SelectedImage };
+	} & { document: SelectedImage | null };
 	groups: Array<Pick<schema.DocumentPolicyGroup, "id" | "label">>;
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
@@ -55,20 +55,8 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 
 	const [selectedGroupId, setSelectedGroupId] = useState<string>(documentOrPolicy?.groupId ?? "");
 
-	const [documentKeyError, setDocumentKeyError] = useState(false);
-
-	const picker = (
-		<MediaLibraryDialog
-			acceptedFileTypes={documentMimeTypes}
-			defaultPrefix="documents"
-			initialAssets={initialAssets}
-			onSelect={(key, url, asset) => {
-				setSelectedDocument({ ...asset, key, url });
-				setDocumentKeyError(false);
-			}}
-			prefixes={["documents"]}
-			triggerLabel={selectedDocument != null ? t("Change document") : t("Select document")}
-		/>
+	const [kind, setKind] = useState(
+		documentOrPolicy != null ? getDocumentOrPolicyKind(documentOrPolicy) : "document",
 	);
 
 	return (
@@ -83,12 +71,6 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 				<TextField defaultValue={documentOrPolicy?.summary ?? undefined} name="summary">
 					<Label>{t("Summary")}</Label>
 					<TextArea rows={5} />
-					<FieldError />
-				</TextField>
-
-				<TextField defaultValue={documentOrPolicy?.url ?? undefined} name="url">
-					<Label>{t("URL")}</Label>
-					<Input placeholder="https://" />
 					<FieldError />
 				</TextField>
 
@@ -120,30 +102,26 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 
 			<Separator className="my-6" />
 
-			<FormSection description={t("Select or upload a document.")} title={t("Document")}>
-				{selectedDocument != null ? (
-					<SelectedImageCard image={selectedDocument} onMetadataChange={setSelectedDocument}>
-						{picker}
-					</SelectedImageCard>
-				) : (
-					picker
-				)}
+			<FormSection
+				description={t("Select or upload a document, or link to an external page.")}
+				title={t("Target")}
+			>
+				<DocumentOrPolicyKindToggle kind={kind} onKindChange={setKind} />
 
-				<input
-					aria-hidden={true}
-					className="sr-only"
-					name="documentKey"
-					onInvalid={(e) => {
-						e.preventDefault();
-						setDocumentKeyError(true);
-					}}
-					readOnly={true}
-					required={true}
-					tabIndex={-1}
-					value={selectedDocument?.key ?? ""}
+				<DocumentOrPolicyTargetField
+					defaultLinkUrl={documentOrPolicy?.linkUrl}
+					initialAssets={initialAssets}
+					kind={kind}
+					onSelectedDocumentChange={setSelectedDocument}
+					selectedDocument={selectedDocument}
 				/>
-				{documentKeyError ? (
-					<div className={fieldErrorStyles()}>{t("Please select a document.")}</div>
+
+				{kind === "document" ? (
+					<TextField defaultValue={documentOrPolicy?.url ?? undefined} name="url">
+						<Label>{t("URL")}</Label>
+						<Input placeholder="https://" />
+						<FieldError />
+					</TextField>
 				) : null}
 			</FormSection>
 
@@ -162,7 +140,7 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 
 			<EntityFormActions
 				entityName={t("Document or policy")}
-				isDisabled={selectedDocument == null}
+				isDisabled={kind === "document" && selectedDocument == null}
 				isPending={isPending}
 				state={state}
 			/>

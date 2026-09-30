@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import {
 	ChevronDownIcon,
 	ChevronUpIcon,
+	LinkIcon,
 	PencilSquareIcon,
 	PlusIcon,
 	TrashIcon,
@@ -34,12 +35,12 @@ import { moveDocumentPolicyGroupAction } from "@/app/(app)/[locale]/(dashboard)/
 
 type DocumentItem = Pick<
 	schema.DocumentOrPolicy,
-	"id" | "title" | "summary" | "url" | "groupId" | "position"
+	"id" | "title" | "summary" | "url" | "linkUrl" | "groupId" | "position"
 > & {
 	entityVersion: { entity: Pick<schema.Entity, "id" | "slug"> };
 	hasDraft: boolean;
 	isPublished: boolean;
-	document: SelectedImage;
+	document: SelectedImage | null;
 };
 
 interface GroupWithDocuments extends Pick<schema.DocumentPolicyGroup, "id" | "label" | "position"> {
@@ -71,6 +72,13 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 			<div className="flex flex-1 items-center gap-x-2 min-inline-0">
 				<EntityLifecycleStatusBadge hasDraft={item.hasDraft} isPublished={item.isPublished} />
 				<span className="text-sm font-medium">{item.title}</span>
+				{item.linkUrl != null ? (
+					<LinkIcon
+						aria-label={t("External link")}
+						className="shrink-0 text-muted-fg block-4 inline-4"
+						role="img"
+					/>
+				) : null}
 			</div>
 
 			<div className="flex shrink-0 items-center gap-x-1">

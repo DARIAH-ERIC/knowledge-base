@@ -4008,21 +4008,27 @@ export class DatabaseService {
 	}
 
 	async getDocumentOrPolicyByTitle(title: string): Promise<{
-		documentId: string;
+		/** The asset the item points to; `null` for an external link. */
+		documentId: string | null;
+		entityId: string;
 		groupId: string | null;
 		id: string;
+		linkUrl: string | null;
 		summary: string | null;
 		url: string | null;
 	} | null> {
 		const [row] = await this.db
 			.select({
 				documentId: schema.documentsPolicies.documentId,
+				entityId: schema.entityVersions.entityId,
 				groupId: schema.documentsPolicies.groupId,
 				id: schema.documentsPolicies.id,
+				linkUrl: schema.documentsPolicies.linkUrl,
 				summary: schema.documentsPolicies.summary,
 				url: schema.documentsPolicies.url,
 			})
 			.from(schema.documentsPolicies)
+			.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.documentsPolicies.id))
 			.where(eq(schema.documentsPolicies.title, title))
 			.limit(1);
 

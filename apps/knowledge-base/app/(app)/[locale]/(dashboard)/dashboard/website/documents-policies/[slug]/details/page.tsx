@@ -81,6 +81,7 @@ export default async function DashboardWebsiteDocumentOrPolicyDetailsPage(
 			title: true,
 			summary: true,
 			url: true,
+			linkUrl: true,
 		},
 		with: {
 			entityVersion: {
@@ -107,12 +108,17 @@ export default async function DashboardWebsiteDocumentOrPolicyDetailsPage(
 		notFound();
 	}
 
-	const document = images.generateSignedImageUrl({
-		key: documentOrPolicy.document.key,
-		options: imageGridOptions,
-	});
-
-	const downloadUrl = `/api/assets/download?key=${encodeURIComponent(documentOrPolicy.document.key)}`;
+	const document =
+		documentOrPolicy.document != null
+			? {
+					...documentOrPolicy.document,
+					url: images.generateSignedImageUrl({
+						key: documentOrPolicy.document.key,
+						options: imageGridOptions,
+					}).url,
+					downloadUrl: `/api/assets/download?key=${encodeURIComponent(documentOrPolicy.document.key)}`,
+				}
+			: null;
 
 	const contentBlocks = await getResolvedEntityContentBlocks(documentOrPolicy.id, "description");
 	const hasPublishableDraft = draftId != null && (publishedId == null || hasDraftChanges);
@@ -122,10 +128,7 @@ export default async function DashboardWebsiteDocumentOrPolicyDetailsPage(
 			contentBlocks={contentBlocks}
 			discardDraftAction={discardDocumentOrPolicyDraftAction}
 			documentId={doc.id}
-			documentOrPolicy={{
-				...documentOrPolicy,
-				document: { ...documentOrPolicy.document, url: document.url, downloadUrl },
-			}}
+			documentOrPolicy={{ ...documentOrPolicy, document }}
 			hasDraft={hasPublishableDraft}
 			isPublished={publishedId != null}
 			publishAction={publishDocumentOrPolicyAction}
