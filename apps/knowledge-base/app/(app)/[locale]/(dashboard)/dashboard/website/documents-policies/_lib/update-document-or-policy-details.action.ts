@@ -1,8 +1,8 @@
 "use server";
 
-import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
+import { resolveDocumentOrPolicyTarget } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/resolve-document-or-policy-target";
 import { UpdateDocumentOrPolicyDetailsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.schema";
 import { getDocumentIdForVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import { eq, isNull } from "@/lib/db/sql";
@@ -24,12 +24,7 @@ export const updateDocumentOrPolicyDetailsAction = createMutationAction<
 		const { publishedId } = await getDocumentVersions(tx, entityDocumentId);
 		const shouldSyncPublishedVersion = publishedId === input.id;
 
-		const asset = await tx.query.assets.findFirst({
-			where: { key: input.documentKey },
-			columns: { id: true },
-		});
-
-		assert(asset);
+		const target = await resolveDocumentOrPolicyTarget(tx, input);
 
 		const current = await tx.query.documentsPolicies.findFirst({
 			where: { id: input.id },
@@ -57,9 +52,8 @@ export const updateDocumentOrPolicyDetailsAction = createMutationAction<
 			.set({
 				title: input.title,
 				summary: input.summary,
-				url: input.url != null && input.url.length > 0 ? input.url : null,
 				groupId: newGroupId,
-				documentId: asset.id,
+				...target,
 				...(newPosition !== undefined ? { position: newPosition } : {}),
 			})
 			.where(eq(schema.documentsPolicies.id, input.id));

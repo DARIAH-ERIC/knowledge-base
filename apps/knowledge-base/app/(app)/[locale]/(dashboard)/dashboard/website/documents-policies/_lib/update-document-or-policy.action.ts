@@ -1,8 +1,8 @@
 "use server";
 
-import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
+import { resolveDocumentOrPolicyTarget } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/resolve-document-or-policy-target";
 import { UpdateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy.schema";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
 import {
@@ -49,12 +49,7 @@ export const updateDocumentOrPolicyAction = createMutationAction<
 			await updateDraftDocumentSlug(tx, input.documentId, requestedSlug);
 		}
 
-		const asset = await tx.query.assets.findFirst({
-			where: { key: input.documentKey },
-			columns: { id: true },
-		});
-
-		assert(asset);
+		const target = await resolveDocumentOrPolicyTarget(tx, input);
 
 		const current = await tx.query.documentsPolicies.findFirst({
 			where: { id: draftVersionId },
@@ -80,10 +75,9 @@ export const updateDocumentOrPolicyAction = createMutationAction<
 		await tx
 			.update(schema.documentsPolicies)
 			.set({
-				documentId: asset.id,
+				...target,
 				title: input.title,
 				summary: input.summary,
-				url: input.url != null && input.url.length > 0 ? input.url : null,
 				groupId: newGroupId,
 				...(newPosition !== undefined ? { position: newPosition } : {}),
 			})

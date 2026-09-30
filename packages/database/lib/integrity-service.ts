@@ -2544,6 +2544,7 @@ export type WebAddressSource =
 	| "event_website"
 	| "opportunity_website"
 	| "document_policy_url"
+	| "document_policy_link_url"
 	| "license_url"
 	| "embed_block_url"
 	| "working_group_report_event_url";
@@ -2777,6 +2778,31 @@ async function checkDocumentPolicyUrls(
 	return buildEntityColumnFindings(rows, "document_policy_url", "Document/policy link");
 }
 
+async function checkDocumentPolicyLinkUrls(
+	db: Database | Transaction,
+): Promise<Array<WebAddressFinding>> {
+	const rows = await db
+		.select({
+			value: schema.documentsPolicies.linkUrl,
+			entityType: schema.entityTypes.type,
+			slug: schema.entities.slug,
+			label: schema.entities.label,
+			status: schema.entityStatus.type,
+		})
+		.from(schema.documentsPolicies)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.documentsPolicies.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
+		.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+		.where(isNotNull(schema.documentsPolicies.linkUrl));
+
+	return buildEntityColumnFindings(
+		rows,
+		"document_policy_link_url",
+		"Document/policy external link",
+	);
+}
+
 async function checkSocialMediaUrls(db: Database | Transaction): Promise<Array<WebAddressFinding>> {
 	const rows = await db
 		.select({
@@ -2953,6 +2979,7 @@ export async function checkWebAddresses(
 		() => checkEventWebsites(db),
 		() => checkOpportunityWebsites(db),
 		() => checkDocumentPolicyUrls(db),
+		() => checkDocumentPolicyLinkUrls(db),
 		() => checkLicenseUrls(db),
 		() => checkEmbedBlockUrls(db),
 		() => checkWorkingGroupReportEventUrls(db),

@@ -49,7 +49,7 @@ export const relations = defineRelations(schema, (r) => {
 			document: r.one.assets({
 				from: r.documentsPolicies.documentId,
 				to: r.assets.id,
-				optional: false,
+				optional: true,
 			}),
 			group: r.one.documentPolicyGroups({
 				from: r.documentsPolicies.groupId,

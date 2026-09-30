@@ -15,7 +15,10 @@ export const DocumentOrPolicyBaseSchema = v.pipe(
 		...v.pick(schema.DocumentOrPolicySelectSchema, ["id", "title"]).entries,
 		summary: v.nullable(v.string()),
 		url: v.nullable(v.string()),
-		document: v.object({ url: v.string() }),
+		/** Download url of the uploaded file. `null` when the item is an external link. */
+		document: v.nullable(v.object({ url: v.string() })),
+		/** The external page the item points to. `null` when the item is an uploaded document. */
+		link: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		group: DocumentPolicyGroupSchema,
@@ -60,7 +63,10 @@ export const DocumentOrPolicySchema = v.pipe(
 		...v.pick(schema.DocumentOrPolicySelectSchema, ["id", "title"]).entries,
 		summary: v.nullable(v.string()),
 		url: v.nullable(v.string()),
-		document: v.object({ url: v.string() }),
+		/** Download url of the uploaded file. `null` when the item is an external link. */
+		document: v.nullable(v.object({ url: v.string() })),
+		/** The external page the item points to. `null` when the item is an uploaded document. */
+		link: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		description: v.optional(v.array(ContentBlockSchema), []),

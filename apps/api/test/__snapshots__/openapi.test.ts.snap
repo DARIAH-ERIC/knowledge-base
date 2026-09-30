@@ -3886,15 +3886,22 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "type": "array",
           },
           "document": {
-            "properties": {
-              "url": {
-                "type": "string",
+            "anyOf": [
+              {
+                "properties": {
+                  "url": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "url",
+                ],
+                "type": "object",
               },
-            },
-            "required": [
-              "url",
+              {
+                "type": "null",
+              },
             ],
-            "type": "object",
           },
           "entity": {
             "properties": {
@@ -3940,6 +3947,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "format": "uuid",
             "type": "string",
           },
+          "link": {
+            "anyOf": [
+              {
+                "properties": {
+                  "url": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "url",
+                ],
+                "type": "object",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "publishedAt": {
             "format": "date-time",
             "type": "string",
@@ -3974,6 +3999,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "summary",
           "url",
           "document",
+          "link",
           "entity",
           "publishedAt",
           "group",
@@ -3984,15 +4010,22 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "description": "Document or policy",
         "properties": {
           "document": {
-            "properties": {
-              "url": {
-                "type": "string",
+            "anyOf": [
+              {
+                "properties": {
+                  "url": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "url",
+                ],
+                "type": "object",
               },
-            },
-            "required": [
-              "url",
+              {
+                "type": "null",
+              },
             ],
-            "type": "object",
           },
           "entity": {
             "properties": {
@@ -4038,6 +4071,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "format": "uuid",
             "type": "string",
           },
+          "link": {
+            "anyOf": [
+              {
+                "properties": {
+                  "url": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "url",
+                ],
+                "type": "object",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "publishedAt": {
             "format": "date-time",
             "type": "string",
@@ -4072,6 +4123,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "summary",
           "url",
           "document",
+          "link",
           "entity",
           "publishedAt",
           "group",
@@ -4124,15 +4176,22 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             {
               "properties": {
                 "document": {
-                  "properties": {
-                    "url": {
-                      "type": "string",
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                      ],
+                      "type": "object",
                     },
-                  },
-                  "required": [
-                    "url",
+                    {
+                      "type": "null",
+                    },
                   ],
-                  "type": "object",
                 },
                 "entity": {
                   "properties": {
@@ -4148,6 +4207,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "id": {
                   "format": "uuid",
                   "type": "string",
+                },
+                "link": {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "url",
+                      ],
+                      "type": "object",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
                 },
                 "publishedAt": {
                   "format": "date-time",
@@ -4186,6 +4263,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "summary",
                 "url",
                 "document",
+                "link",
                 "entity",
                 "publishedAt",
                 "type",
@@ -4202,15 +4280,22 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "items": {
                     "properties": {
                       "document": {
-                        "properties": {
-                          "url": {
-                            "type": "string",
+                        "anyOf": [
+                          {
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                              },
+                            },
+                            "required": [
+                              "url",
+                            ],
+                            "type": "object",
                           },
-                        },
-                        "required": [
-                          "url",
+                          {
+                            "type": "null",
+                          },
                         ],
-                        "type": "object",
                       },
                       "entity": {
                         "properties": {
@@ -4226,6 +4311,24 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "id": {
                         "format": "uuid",
                         "type": "string",
+                      },
+                      "link": {
+                        "anyOf": [
+                          {
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                              },
+                            },
+                            "required": [
+                              "url",
+                            ],
+                            "type": "object",
+                          },
+                          {
+                            "type": "null",
+                          },
+                        ],
                       },
                       "publishedAt": {
                         "format": "date-time",
@@ -4264,6 +4367,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                       "summary",
                       "url",
                       "document",
+                      "link",
                       "entity",
                       "publishedAt",
                       "type",
@@ -22143,7 +22247,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
     },
     "/api/v1/documents-policies/slugs/{slug}/document": {
       "get": {
-        "description": "Stream the S3-stored file for a document or policy by slug",
+        "description": "Stream the S3-stored file for a document or policy by slug. Not found for an external link.",
         "operationId": "getDocumentOrPolicyFileBySlug",
         "parameters": [
           {
@@ -22255,7 +22359,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
     },
     "/api/v1/documents-policies/{id}/document": {
       "get": {
-        "description": "Stream the S3-stored file for a document or policy by id",
+        "description": "Stream the S3-stored file for a document or policy by id. Not found for an external link.",
         "operationId": "getDocumentOrPolicyFileById",
         "parameters": [
           {
