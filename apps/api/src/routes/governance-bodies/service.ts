@@ -86,6 +86,8 @@ function mapGovernanceBodyPerson(
 		imageKey: string | null;
 		imageWidth: number | null;
 		imageHeight: number | null;
+		imageAspectRatio: number | null;
+		imageMimeType: string | null;
 		imageAlt: string | null;
 		imageCaption: JSONContent | null;
 		personImageCaption: JSONContent | null;
@@ -113,6 +115,8 @@ function mapGovernanceBodyPerson(
 					caption: row.imageCaption,
 					width: row.imageWidth,
 					height: row.imageHeight,
+					aspectRatio: row.imageAspectRatio,
+					mimeType: row.imageMimeType!,
 					licenseName: row.licenseName,
 					licenseUrl: row.licenseUrl,
 				}),
@@ -148,6 +152,8 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			imageKey: schema.assets.key,
 			imageWidth: schema.assets.width,
 			imageHeight: schema.assets.height,
+			imageAspectRatio: schema.assets.aspectRatio,
+			imageMimeType: schema.assets.mimeType,
 			imageAlt: schema.assets.alt,
 			imageCaption: schema.assets.caption,
 			personImageCaption: schema.persons.imageCaption,
@@ -275,6 +281,8 @@ async function getActiveGovernanceBodyPersons(
 			imageKey: schema.assets.key,
 			imageWidth: schema.assets.width,
 			imageHeight: schema.assets.height,
+			imageAspectRatio: schema.assets.aspectRatio,
+			imageMimeType: schema.assets.mimeType,
 			imageAlt: schema.assets.alt,
 			imageCaption: schema.assets.caption,
 			personImageCaption: schema.persons.imageCaption,
