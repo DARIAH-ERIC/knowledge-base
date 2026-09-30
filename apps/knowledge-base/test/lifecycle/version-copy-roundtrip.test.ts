@@ -97,6 +97,8 @@ async function resolveRefs(tx: Transaction): Promise<Refs> {
  */
 interface RoundtripCase {
 	entityType: (typeof schema.entityTypesEnum)[number];
+	/** Tells apart several cases for one entity type, e.g. rows a check constraint splits in two. */
+	variant?: string;
 	table: PgTable;
 	adapter: EntityLifecycleAdapter;
 	/** Insert the source subtype row and return the copyable payload that was written. */
@@ -346,6 +348,7 @@ const cases: Array<RoundtripCase> = [
 	},
 	{
 		entityType: "documents_policies",
+		variant: "document",
 		table: schema.documentsPolicies,
 		adapter: documentsPoliciesLifecycleAdapter,
 		async seed(tx, versionId, refs) {
@@ -354,6 +357,34 @@ const cases: Array<RoundtripCase> = [
 				summary: f.lorem.paragraph(),
 				url: f.internet.url(),
 				documentId: refs.assetId,
+				linkUrl: null,
+				groupId: refs.documentPolicyGroupId,
+				position: 42,
+			};
+			await tx.insert(schema.documentsPolicies).values({ id: versionId, ...values });
+			return values;
+		},
+		async read(tx, versionId) {
+			const [row] = await tx
+				.select()
+				.from(schema.documentsPolicies)
+				.where(eq(schema.documentsPolicies.id, versionId))
+				.limit(1);
+			return row == null ? undefined : subtypePayload(row);
+		},
+	},
+	{
+		entityType: "documents_policies",
+		variant: "link",
+		table: schema.documentsPolicies,
+		adapter: documentsPoliciesLifecycleAdapter,
+		async seed(tx, versionId, refs) {
+			const values = {
+				title: f.lorem.sentence(),
+				summary: f.lorem.paragraph(),
+				url: null,
+				documentId: null,
+				linkUrl: f.internet.url(),
 				groupId: refs.documentPolicyGroupId,
 				position: 42,
 			};
@@ -496,7 +527,12 @@ function copyableColumnNames(table: PgTable): Array<string> {
 
 describe("lifecycle adapter version copy round-trip", () => {
 	for (const testCase of cases) {
-		it(`${testCase.entityType}: copies every subtype column forward on publish and republish`, async () => {
+		const name =
+			testCase.variant != null
+				? `${testCase.entityType} (${testCase.variant})`
+				: testCase.entityType;
+
+		it(`${name}: copies every subtype column forward on publish and republish`, async () => {
 			await withTransaction(async (tx) => {
 				const refs = await resolveRefs(tx);
 
