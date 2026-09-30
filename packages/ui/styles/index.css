@@ -473,11 +473,11 @@
 		}
 
 		&:where([class~="lead"]) {
-			margin-top: 1.2em;
-			margin-bottom: 1.2em;
+			margin-top: 1.3333333em;
+			margin-bottom: 1.3333333em;
 			color: var(--richtext-lead);
-			font-size: 1.25em;
-			line-height: 1.6;
+			font-size: 1.125em;
+			line-height: 1.5555556;
 		}
 
 		&:where(a) {
@@ -1002,10 +1002,10 @@
 		}
 
 		&:where([class~="lead"]) {
-			margin-top: 0.8888889em;
-			margin-bottom: 0.8888889em;
-			font-size: 1.2857143em;
-			line-height: 1.5555556;
+			margin-top: 1em;
+			margin-bottom: 1em;
+			font-size: 1.1428571em;
+			line-height: 1.5;
 		}
 
 		&:where(blockquote) {
@@ -1238,10 +1238,10 @@
 		}
 
 		&:where([class~="lead"]) {
-			margin-top: 1.2em;
-			margin-bottom: 1.2em;
-			font-size: 1.25em;
-			line-height: 1.6;
+			margin-top: 1.3333333em;
+			margin-bottom: 1.3333333em;
+			font-size: 1.125em;
+			line-height: 1.5555556;
 		}
 
 		&:where(blockquote) {
