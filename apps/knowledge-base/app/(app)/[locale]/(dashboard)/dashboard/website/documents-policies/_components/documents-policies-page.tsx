@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import {
 	ChevronDownIcon,
 	ChevronUpIcon,
+	DocumentTextIcon,
 	LinkIcon,
 	PencilSquareIcon,
 	PlusIcon,
@@ -129,7 +130,7 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 						className={buttonStyles({ intent: "plain", size: "sq-sm" })}
 						href={`/dashboard/website/documents-policies/${item.entityVersion.entity.slug}/edit`}
 					>
-						<span className="text-xs">{t("Content")}</span>
+						<DocumentTextIcon className="block-4 inline-4" />
 					</Link>
 					<TooltipContent inverse={true}>{t("Content")}</TooltipContent>
 				</Tooltip>
