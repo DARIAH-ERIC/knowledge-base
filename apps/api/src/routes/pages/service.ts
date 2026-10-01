@@ -98,6 +98,7 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 			columns: {
 				imageCaption: true,
 				imageCaptionMode: true,
+				showTableOfContents: true,
 				id: true,
 				publicationDate: true,
 				title: true,

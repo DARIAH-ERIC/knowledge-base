@@ -131,6 +131,7 @@ export async function getFundingCallById(
 			columns: {
 				imageCaption: true,
 				imageCaptionMode: true,
+				showTableOfContents: true,
 				id: true,
 				title: true,
 				summary: true,
