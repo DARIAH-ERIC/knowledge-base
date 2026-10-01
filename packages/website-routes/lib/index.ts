@@ -91,9 +91,7 @@ export type GetEntityHrefParams =
 	| { type: "institution" | "national-consortium"; countrySlug: string }
 	| { type: "page"; path: string };
 
-/**
- * Resolve an entity to its locale-less website href (leading slash, no origin).
- */
+/** Resolve an entity to its locale-less website href (leading slash, no origin). */
 export function getEntityHref(params: GetEntityHrefParams): string {
 	switch (params.type) {
 		case "news-item": {
