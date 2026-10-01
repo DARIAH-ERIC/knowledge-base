@@ -23,6 +23,7 @@ export const router = createRouter()
 				"documents-policies",
 				"events",
 				"funding-calls",
+				"governance-bodies",
 				"impact-case-studies",
 				"members-partners",
 				"news",

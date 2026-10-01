@@ -6,9 +6,7 @@
  * route folders under `app/(default)/…` and MUST be kept in sync with them (see
  * docs/website-url-resolution.md).
  *
- * Values are root-relative and locale-less; most are bare pathnames, but a type whose entity is
- * selected _within_ a page carries a query string (governance bodies) — hence "href", not
- * "pathname".
+ * Values are root-relative and locale-less pathnames.
  *
  * Pure, locale-less and zero-dependency by design, so the module can be published and consumed by
  * the website repo unchanged. Consumers are responsible for prepending the locale segment and
@@ -93,10 +91,7 @@ export type GetEntityHrefParams =
 	| { type: "institution" | "national-consortium"; countrySlug: string }
 	| { type: "page"; path: string };
 
-/**
- * Resolve an entity to its locale-less website href (leading slash, no origin, may carry a query
- * string).
- */
+/** Resolve an entity to its locale-less website href (leading slash, no origin). */
 export function getEntityHref(params: GetEntityHrefParams): string {
 	switch (params.type) {
 		case "news-item": {
@@ -127,9 +122,7 @@ export function getEntityHref(params: GetEntityHrefParams): string {
 			return `/network/working-groups/${params.slug}`;
 		}
 		case "governance-body": {
-			// Governance bodies have no page of their own: the organisation-and-governance page
-			// selects one via a query param.
-			return `/about/organisation-and-governance?selectedBody=${encodeURIComponent(params.slug)}`;
+			return `/about/organisation-and-governance/${params.slug}`;
 		}
 		case "country": {
 			return `/network/members-and-partners/${params.slug}`;
@@ -154,8 +147,8 @@ export function getEntityHref(params: GetEntityHrefParams): string {
 
 /**
  * Types that have a collection/overview (listing) page on the website. The rest have no listing of
- * their own: institutions/consortia are surfaced within the country listing, governance bodies and
- * regional hubs within a single CMS page, and `page`, `person` and `eric` have no collection
+ * their own: institutions/consortia are surfaced within the country listing, regional hubs and
+ * governance bodies are listed on a CMS page, and `page`, `person` and `eric` have no collection
  * (`eric` has no page at all).
  */
 export const listableEntityTypes = [

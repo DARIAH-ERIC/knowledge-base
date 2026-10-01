@@ -26,7 +26,7 @@ describe("getEntityHref", () => {
 		expect(getEntityHref({ type: "working-group", slug: "wg" })).toBe("/network/working-groups/wg");
 		expect(getEntityHref({ type: "country", slug: "at" })).toBe("/network/members-and-partners/at");
 		expect(getEntityHref({ type: "governance-body", slug: "board-of-directors" })).toBe(
-			"/about/organisation-and-governance?selectedBody=board-of-directors",
+			"/about/organisation-and-governance/board-of-directors",
 		);
 		expect(getEntityHref({ type: "regional-hub" })).toBe("/network/regional-hubs");
 		expect(getEntityHref({ type: "institution", countrySlug: "de" })).toBe(
@@ -41,12 +41,6 @@ describe("getEntityHref", () => {
 
 	it("returns locale-less, root-relative hrefs", () => {
 		expect(getEntityHref({ type: "news-item", slug: "x" })).toMatch(/^\/[^/]/u);
-	});
-
-	it("escapes slugs interpolated into a query string", () => {
-		expect(getEntityHref({ type: "governance-body", slug: "a&b c" })).toBe(
-			"/about/organisation-and-governance?selectedBody=a%26b%20c",
-		);
 	});
 });
 

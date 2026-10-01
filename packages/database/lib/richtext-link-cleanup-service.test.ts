@@ -140,7 +140,7 @@ describe("resolveLegacyDariahHref", () => {
 			resolveLegacyDariahHref("https://www.dariah.eu/about/organisation/board-of-directors.html"),
 		).toStrictEqual({
 			action: "rewrite",
-			href: "/about/organisation-and-governance",
+			href: "/about/organisation-and-governance/board-of-directors",
 			reason: "legacy_dariah_url",
 		});
 		expect(
@@ -421,13 +421,13 @@ describe("canonical website paths stay in sync with @dariah-eric/website-routes"
 
 	const listingPaths = listableEntityTypes.map((type) => getEntityListHref(type));
 
-	// Types with no detail page of their own (governance bodies, regional hubs, institutions,
-	// documents, pages) are covered by their listing or resolve to a query string, so they are
-	// deliberately absent here.
+	// Types with no detail page of their own (regional hubs, institutions, documents, pages) are
+	// covered by their listing, so they are deliberately absent here.
 	const detailPaths = [
 		getEntityHref({ type: "country", slug }),
 		getEntityHref({ type: "event", slug }),
 		getEntityHref({ type: "funding-call", slug }),
+		getEntityHref({ type: "governance-body", slug }),
 		getEntityHref({ type: "impact-case-study", slug }),
 		getEntityHref({ type: "news-item", slug }),
 		getEntityHref({ type: "opportunity", slug }),

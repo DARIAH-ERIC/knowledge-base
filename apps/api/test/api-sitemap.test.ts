@@ -117,6 +117,23 @@ async function seedWorkingGroup(db: Database, slug: string, params: SeedParams =
 	});
 }
 
+async function seedGovernanceBody(db: Database, slug: string, params: SeedParams = {}) {
+	const { versionId } = await seedDocument(db, "organisational_units", slug, params);
+
+	const type = await db.query.organisationalUnitTypes.findFirst({
+		columns: { id: true },
+		where: { type: "governance_body" },
+	});
+
+	assert(type, "No organisational unit type in database.");
+
+	await db.insert(schema.organisationalUnits).values({
+		id: versionId,
+		name: f.lorem.words(),
+		typeId: type.id,
+	});
+}
+
 function findEntry(entries: Array<SitemapEntry>, href: string) {
 	return entries.filter((entry) => entry.href === href);
 }
@@ -200,6 +217,38 @@ describe("sitemap", () => {
 						/** ... which is only as old as its newest document. */
 						lastModified: newer.toISOString(),
 					},
+				]);
+			});
+		});
+
+		it("should return a url per published governance body", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const slug = `governance-body-${uuidv7()}`;
+				const updatedAt = new Date("2030-01-02T03:04:05.000Z");
+				await seedGovernanceBody(db, slug, { updatedAt });
+
+				const draftSlug = `governance-body-${uuidv7()}`;
+				await seedGovernanceBody(db, draftSlug, { status: "draft" });
+
+				const response = await client.sitemap.$get();
+
+				expect(response.status).toBe(200);
+
+				const data = await response.json();
+
+				expect(findEntry(data.data, `/about/organisation-and-governance/${slug}`)).toEqual([
+					{
+						href: `/about/organisation-and-governance/${slug}`,
+						type: "governance_body",
+						lastModified: updatedAt.toISOString(),
+					},
+				]);
+				expect(findEntry(data.data, `/about/organisation-and-governance/${draftSlug}`)).toEqual([]);
+				/** The working groups governance body is synthesised by the api, not stored. */
+				expect(findEntry(data.data, "/about/organisation-and-governance/working-groups")).toEqual([
+					expect.objectContaining({ type: "governance_body" }),
 				]);
 			});
 		});
