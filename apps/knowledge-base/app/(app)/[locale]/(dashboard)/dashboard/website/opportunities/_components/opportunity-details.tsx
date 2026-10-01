@@ -27,7 +27,14 @@ interface OpportunityDetailsProps {
 	selectedVersion: "draft" | "published";
 	opportunity: Pick<
 		schema.Opportunity,
-		"id" | "duration" | "title" | "summary" | "website" | "imageCaption" | "imageCaptionMode"
+		| "id"
+		| "duration"
+		| "title"
+		| "summary"
+		| "website"
+		| "imageCaption"
+		| "imageCaptionMode"
+		| "showTableOfContents"
 	> & {
 		entityVersion: { entity: { id: string; slug: string } };
 		source: { id: string; source: string };
@@ -115,6 +122,11 @@ export function OpportunityDetails(props: Readonly<OpportunityDetailsProps>): Re
 						imageCaption={opportunity.imageCaption}
 						imageCaptionMode={opportunity.imageCaptionMode}
 					/>
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Table of contents")}</DescriptionTerm>
+				<DescriptionDetails>
+					{opportunity.showTableOfContents ? t("Yes") : t("No")}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>

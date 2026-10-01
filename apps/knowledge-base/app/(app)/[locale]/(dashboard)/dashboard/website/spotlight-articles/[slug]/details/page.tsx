@@ -97,6 +97,7 @@ export default async function DashboardWebsiteSpotlightArticleDetailsPage(
 		columns: {
 			imageCaption: true,
 			imageCaptionMode: true,
+			showTableOfContents: true,
 			id: true,
 			publicationDate: true,
 			title: true,

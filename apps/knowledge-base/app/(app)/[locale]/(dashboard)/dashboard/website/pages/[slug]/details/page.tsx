@@ -96,6 +96,7 @@ export default async function DashboardWebsitePageItemDetailsPage(
 		columns: {
 			imageCaption: true,
 			imageCaptionMode: true,
+			showTableOfContents: true,
 			id: true,
 			publicationDate: true,
 			title: true,

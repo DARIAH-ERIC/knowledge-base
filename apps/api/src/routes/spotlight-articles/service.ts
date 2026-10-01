@@ -196,6 +196,7 @@ export async function getSpotlightArticleById(
 			columns: {
 				imageCaption: true,
 				imageCaptionMode: true,
+				showTableOfContents: true,
 				id: true,
 				publicationDate: true,
 				title: true,
@@ -332,6 +333,7 @@ export async function getSpotlightArticleBySlug(
 		columns: {
 			imageCaption: true,
 			imageCaptionMode: true,
+			showTableOfContents: true,
 			id: true,
 			publicationDate: true,
 			title: true,

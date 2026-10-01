@@ -196,6 +196,7 @@ export async function getImpactCaseStudyById(
 			columns: {
 				imageCaption: true,
 				imageCaptionMode: true,
+				showTableOfContents: true,
 				id: true,
 				publicationDate: true,
 				title: true,
@@ -332,6 +333,7 @@ export async function getImpactCaseStudyBySlug(
 		columns: {
 			imageCaption: true,
 			imageCaptionMode: true,
+			showTableOfContents: true,
 			id: true,
 			publicationDate: true,
 			title: true,

@@ -75,6 +75,7 @@ export default async function DashboardWebsiteEditFundingCallPage(
 			id: true,
 			imageCaption: true,
 			imageCaptionMode: true,
+			showTableOfContents: true,
 			duration: true,
 			title: true,
 			summary: true,
