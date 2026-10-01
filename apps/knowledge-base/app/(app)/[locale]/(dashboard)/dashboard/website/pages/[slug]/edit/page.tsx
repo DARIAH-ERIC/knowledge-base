@@ -81,6 +81,7 @@ export default async function DashboardWebsiteEditPageItemPage(
 					summary: true,
 					imageCaption: true,
 					imageCaptionMode: true,
+					showTableOfContents: true,
 				},
 				with: {
 					entityVersion: {

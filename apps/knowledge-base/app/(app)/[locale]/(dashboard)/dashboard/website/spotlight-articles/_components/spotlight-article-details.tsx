@@ -31,7 +31,13 @@ interface SpotlightArticleDetailsProps {
 	selectedVersion: "draft" | "published";
 	spotlightArticle: Pick<
 		schema.SpotlightArticle,
-		"id" | "publicationDate" | "title" | "summary" | "imageCaption" | "imageCaptionMode"
+		| "id"
+		| "publicationDate"
+		| "title"
+		| "summary"
+		| "imageCaption"
+		| "imageCaptionMode"
+		| "showTableOfContents"
 	> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & {
@@ -133,6 +139,11 @@ export function SpotlightArticleDetails(props: Readonly<SpotlightArticleDetailsP
 							))}
 						</ul>
 					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Table of contents")}</DescriptionTerm>
+				<DescriptionDetails>
+					{spotlightArticle.showTableOfContents ? t("Yes") : t("No")}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>

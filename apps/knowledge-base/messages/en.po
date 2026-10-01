@@ -223,6 +223,11 @@ msgstr "Paragraph"
 
 #: ../../packages/ui/lib/rich-text-actions.tsx
 msgctxt "ui"
+msgid "2AISuA"
+msgstr "Lead-in"
+
+#: ../../packages/ui/lib/rich-text-actions.tsx
+msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
@@ -4186,11 +4191,21 @@ msgstr "DARIAH branding"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx
 msgid "a5msuh"
 msgstr "Yes"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx
 msgid "oUWADl"
 msgstr "No"
 
@@ -4421,6 +4436,34 @@ msgstr "not a member"
 msgid "j-hMBq"
 msgstr "is a member"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/duplicate-assets.tsx
+msgid "iFLovM"
+msgstr "No duplicate images found."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/duplicate-assets.tsx
+msgid "VBQ0VM"
+msgstr "Could not merge the duplicate images. Please try again."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/duplicate-assets.tsx
+msgid "tQM9Ud"
+msgstr "{count} groups of binary-identical images found."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/duplicate-assets.tsx
+msgid "0aMIVb"
+msgstr "{count} copies · {size} each · {references} references"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/duplicate-assets.tsx
+msgid "F_v4Gm"
+msgstr "Merging..."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/duplicate-assets.tsx
+msgid "UTU_zh"
+msgstr "Use selected image"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/duplicate-assets.tsx
+msgid "ke1Aps"
+msgstr "{count} references"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/duplicate-entity.tsx
 msgid "QDKJ5r"
 msgstr "Could not duplicate the entity. Please try again."
@@ -4633,6 +4676,10 @@ msgid "6boAFD"
 msgstr "Cleanup tasks"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx
+msgid "AE-sqH"
+msgstr "Duplicate images"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-assets-cleanup.tsx
 msgid "eUKwKz"
 msgstr "Unused assets"
@@ -4645,6 +4692,10 @@ msgstr "Unused social media"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx
 msgid "JEU8B5"
 msgstr "Rich-text normalisation"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx
+msgid "1vCev-"
+msgstr "Binary-identical images stored more than once. Choose the canonical copy and rewrite every database and rich-text reference to it. The other copies are kept until they are reviewed in Unused assets."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/maintenance-dashboard.tsx
 msgid "ZzEr58"
@@ -7384,6 +7435,15 @@ msgstr "Manage the news items featured on the landing page."
 msgid "fAjBRv"
 msgstr "New funding call"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx
+#: app/(app)/[locale]/(default)/documentation/_components/documentation-article.tsx
+msgid "gjyzc7"
+msgstr "Table of contents"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-edit.tsx
 msgid "Gf7cjh"
 msgstr "Edit funding call"
@@ -7391,6 +7451,14 @@ msgstr "Edit funding call"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx
 msgid "pJTTVP"
 msgstr "Enter the funding call details."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form.tsx
+msgid "ydlJPF"
+msgstr "Display table of contents"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx
 msgid "70IjCC"
@@ -7882,10 +7950,6 @@ msgstr "Failed to send message."
 #: app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action.ts
 msgid "hrWbQB"
 msgstr "Successfully sent message."
-
-#: app/(app)/[locale]/(default)/documentation/_components/documentation-article.tsx
-msgid "gjyzc7"
-msgstr "Table of contents"
 
 #: app/(app)/[locale]/(default)/documentation/(index)/page.tsx
 msgid "CbmDsw"

@@ -97,6 +97,7 @@ export default async function DashboardWebsiteImpactCaseStudyDetailsPage(
 		columns: {
 			imageCaption: true,
 			imageCaptionMode: true,
+			showTableOfContents: true,
 			id: true,
 			publicationDate: true,
 			title: true,

@@ -226,6 +226,7 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 		columns: {
 			imageCaption: true,
 			imageCaptionMode: true,
+			showTableOfContents: true,
 			id: true,
 			publicationDate: true,
 			title: true,

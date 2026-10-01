@@ -261,6 +261,7 @@ export async function getFundingCallBySlug(
 		columns: {
 			imageCaption: true,
 			imageCaptionMode: true,
+			showTableOfContents: true,
 			id: true,
 			title: true,
 			summary: true,
