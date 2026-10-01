@@ -6680,6 +6680,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             },
             "type": "array",
           },
+          "showTableOfContents": {
+            "type": "boolean",
+          },
           "summary": {
             "type": "string",
           },
@@ -6695,6 +6698,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "entity",
           "publishedAt",
           "image",
+          "showTableOfContents",
         ],
         "type": "object",
       },
@@ -10580,6 +10584,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             },
             "type": "array",
           },
+          "showTableOfContents": {
+            "type": "boolean",
+          },
           "summary": {
             "type": "string",
           },
@@ -10591,6 +10598,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "id",
           "title",
           "summary",
+          "showTableOfContents",
           "image",
           "contributors",
           "entity",
@@ -14567,6 +14575,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             },
             "type": "array",
           },
+          "showTableOfContents": {
+            "type": "boolean",
+          },
           "source": {
             "properties": {
               "id": {
@@ -14614,6 +14625,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "entity",
           "publishedAt",
           "image",
+          "showTableOfContents",
         ],
         "type": "object",
       },
@@ -15763,6 +15775,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             },
             "type": "array",
           },
+          "showTableOfContents": {
+            "type": "boolean",
+          },
           "summary": {
             "type": "string",
           },
@@ -15774,6 +15789,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "id",
           "title",
           "summary",
+          "showTableOfContents",
           "image",
           "entity",
           "publishedAt",
@@ -19963,6 +19979,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             },
             "type": "array",
           },
+          "showTableOfContents": {
+            "type": "boolean",
+          },
           "summary": {
             "type": "string",
           },
@@ -19974,6 +19993,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "id",
           "title",
           "summary",
+          "showTableOfContents",
           "image",
           "entity",
           "publishedAt",
