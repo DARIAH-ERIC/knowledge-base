@@ -1,4 +1,8 @@
-import { getEntityListHref, resolveInterimPagePath } from "@dariah-eric/website-routes";
+import {
+	getEntityHref,
+	getEntityListHref,
+	resolveInterimPagePath,
+} from "@dariah-eric/website-routes";
 import type { JSONContent } from "@tiptap/core";
 import { eq, inArray } from "drizzle-orm";
 
@@ -23,7 +27,10 @@ const exactLegacyPathMappings = new Map<string, string>([
 	["/about/history-of-dariah", "/about/dariah-in-a-nutshell"],
 	["/about/join-dariah", "/get-involved/join-dariah"],
 	["/about/mission-vision", "/about/dariah-in-a-nutshell"],
-	["/about/organisation/board-of-directors.html", "/about/organisation-and-governance"],
+	[
+		"/about/organisation/board-of-directors.html",
+		getEntityHref({ type: "governance-body", slug: "board-of-directors" }),
+	],
 	["/about/organisation.html", "/about/organisation-and-governance"],
 	["/about/organization-and-governance", "/about/organisation-and-governance"],
 	["/activities/dariah-theme", "/get-involved/funding-calls"],

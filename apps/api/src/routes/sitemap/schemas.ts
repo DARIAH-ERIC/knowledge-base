@@ -9,10 +9,8 @@ import type { PublicRelatedEntityType } from "@/lib/schemas";
  * - `eric` has no page at all.
  * - `institution` and `national_consortium` live on their country's page, which `country` already
  *   contributes.
- * - `regional_hub` and `governance_body` are surfaced within a single CMS page
- *   (`/network/regional-hubs` and `/about/organisation-and-governance`), which `pages` already
- *   contributes; governance bodies are selected there via a query param, and query-string variants
- *   of one page are not distinct documents.
+ * - `regional_hub` is surfaced within a single CMS page (`/network/regional-hubs`), which `pages`
+ *   already contributes.
  * - `documentation_pages` and `internal_pages` are not public at all.
  */
 export const sitemapEntityTypesEnum = [
@@ -20,6 +18,7 @@ export const sitemapEntityTypesEnum = [
 	"documents_policies",
 	"events",
 	"funding_calls",
+	"governance_body",
 	"impact_case_studies",
 	"news",
 	"opportunities",

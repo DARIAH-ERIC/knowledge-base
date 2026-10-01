@@ -4,6 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getWebsiteHref } from "@/lib/website-routes";
 import type { Database, Transaction } from "@/middlewares/db";
+import { hardcodedWorkingGroupsGovernanceBody } from "@/routes/governance-bodies/hardcoded-working-groups";
 import type { SitemapEntityType } from "@/routes/sitemap/schemas";
 import { and, eq, inArray, isNotNull } from "@/services/db/sql";
 
@@ -43,10 +44,11 @@ interface SitemapSource {
  * sitemap the consumer can assemble incorrectly.
  */
 export async function getSitemap(db: Database | Transaction) {
-	const [documents, workingGroups, countries] = await Promise.all([
+	const [documents, workingGroups, countries, governanceBodies] = await Promise.all([
 		getPublishedDocuments(db),
 		getPublishedWorkingGroups(db),
 		getPublishedCountries(db),
+		getPublishedGovernanceBodies(db),
 	]);
 
 	/**
@@ -56,7 +58,15 @@ export async function getSitemap(db: Database | Transaction) {
 	const entries = new Map<string, SitemapSource & { href: string }>();
 	let unresolved = 0;
 
-	for (const source of [...documents, ...workingGroups, ...countries]) {
+	const sources = [
+		...documents,
+		...workingGroups,
+		...countries,
+		...governanceBodies,
+		getWorkingGroupsGovernanceBody(workingGroups),
+	];
+
+	for (const source of sources) {
 		const href = getWebsiteHref(source.type, { slug: source.slug });
 
 		if (href == null) {
@@ -154,6 +164,65 @@ async function getPublishedWorkingGroups(
 			lastModified: item.entityVersion.updatedAt,
 		};
 	});
+}
+
+async function getPublishedGovernanceBodies(
+	db: Database | Transaction,
+): Promise<Array<SitemapSource>> {
+	const items = await db.query.organisationalUnits.findMany({
+		where: {
+			entityVersion: {
+				status: {
+					type: "published",
+				},
+			},
+			type: {
+				type: "governance_body",
+			},
+		},
+		columns: {
+			id: true,
+		},
+		with: {
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
+				},
+			},
+		},
+	});
+
+	return items.map((item) => {
+		return {
+			type: "governance_body",
+			slug: item.entityVersion.entity.slug,
+			lastModified: item.entityVersion.updatedAt,
+		};
+	});
+}
+
+/**
+ * The working groups governance body has no entity in the database (the api synthesises it), but it
+ * has a page of its own. It lists the working group chairs, so it is as old as its newest working
+ * group.
+ */
+function getWorkingGroupsGovernanceBody(workingGroups: Array<SitemapSource>): SitemapSource {
+	let lastModified = new Date(hardcodedWorkingGroupsGovernanceBody.publishedAt);
+
+	for (const workingGroup of workingGroups) {
+		if (workingGroup.lastModified > lastModified) {
+			lastModified = workingGroup.lastModified;
+		}
+	}
+
+	return {
+		type: "governance_body",
+		slug: hardcodedWorkingGroupsGovernanceBody.entity.slug,
+		lastModified,
+	};
 }
 
 /**
