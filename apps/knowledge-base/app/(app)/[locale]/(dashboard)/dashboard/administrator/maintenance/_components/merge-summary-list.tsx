@@ -5,95 +5,45 @@ import type { ReactNode } from "react";
 
 import type { MergeSummary, MergeSummaryTable } from "@/lib/data/merge-summary";
 
-function getTableLabel(t: ReturnType<typeof useExtracted>, table: MergeSummaryTable): string {
-	switch (table) {
-		case "country_report_contributions": {
-			return t("Country report contributors");
-		}
-		case "country_report_institutions": {
-			return t("Country report institutions");
-		}
-		case "country_report_project_contributions": {
-			return t("Country report project contributions");
-		}
-		case "country_report_service_kpis": {
-			return t("Country report service KPIs");
-		}
-		case "country_report_services": {
-			return t("Country report services");
-		}
-		case "country_report_social_media": {
-			return t("Country report social media");
-		}
-		case "country_report_social_media_kpis": {
-			return t("Country report social media KPIs");
-		}
-		case "country_reports": {
-			return t("Country reports");
-		}
-		case "entities_to_entities": {
-			return t("Related entities");
-		}
-		case "entities_to_resources": {
-			return t("Related resources");
-		}
-		case "impact_case_studies_to_persons": {
-			return t("Impact case study contributors");
-		}
-		case "navigation_items": {
-			return t("Navigation items");
-		}
-		case "organisational_units_to_social_media": {
-			return t("Organisational unit social media");
-		}
-		case "organisational_units_to_units": {
-			return t("Organisational unit relations");
-		}
-		case "persons_to_organisational_units": {
-			return t("Person relations (contributions)");
-		}
-		case "projects_to_organisational_units": {
-			return t("Project partners");
-		}
-		case "projects_to_social_media": {
-			return t("Project social media");
-		}
-		case "reporting_campaign_country_thresholds": {
-			return t("Reporting campaign country thresholds");
-		}
-		case "services_to_organisational_units": {
-			return t("Service organisational units");
-		}
-		case "services_to_social_media": {
-			return t("Service social media");
-		}
-		case "spotlight_articles_to_persons": {
-			return t("Spotlight article contributors");
-		}
-		case "users": {
-			return t("User accounts");
-		}
-		case "working_group_report_chairs": {
-			return t("Working group report chairs");
-		}
-		case "working_group_report_social_media": {
-			return t("Working group report social media");
-		}
-		case "working_group_reports": {
-			return t("Working group reports");
-		}
-	}
-}
-
 /** Lists what a successful merge re-pointed from the source onto the target. */
 export function MergeSummaryList(props: Readonly<{ summary: MergeSummary }>): ReactNode {
 	const { summary } = props;
 
 	const t = useExtracted();
 
+	// Built here rather than in a helper taking `t`: the i18n extractor only sees `t(...)` calls on a
+	// `useExtracted()` binding in scope.
+	const labels: Record<MergeSummaryTable, string> = {
+		country_report_contributions: t("Country report contributors"),
+		country_report_institutions: t("Country report institutions"),
+		country_report_project_contributions: t("Country report project contributions"),
+		country_report_service_kpis: t("Country report service KPIs"),
+		country_report_services: t("Country report services"),
+		country_report_social_media: t("Country report social media"),
+		country_report_social_media_kpis: t("Country report social media KPIs"),
+		country_reports: t("Country reports"),
+		entities_to_entities: t("Related entities"),
+		entities_to_resources: t("Related resources"),
+		impact_case_studies_to_persons: t("Impact case study contributors"),
+		navigation_items: t("Navigation items"),
+		organisational_units_to_social_media: t("Organisational unit social media"),
+		organisational_units_to_units: t("Organisational unit relations"),
+		persons_to_organisational_units: t("Person relations (contributions)"),
+		projects_to_organisational_units: t("Project partners"),
+		projects_to_social_media: t("Project social media"),
+		reporting_campaign_country_thresholds: t("Reporting campaign country thresholds"),
+		services_to_organisational_units: t("Service organisational units"),
+		services_to_social_media: t("Service social media"),
+		spotlight_articles_to_persons: t("Spotlight article contributors"),
+		users: t("User accounts"),
+		working_group_report_chairs: t("Working group report chairs"),
+		working_group_report_social_media: t("Working group report social media"),
+		working_group_reports: t("Working group reports"),
+	};
+
 	const entries = (Object.entries(summary) as Array<[MergeSummaryTable, number]>)
 		.map(([table, count]) => {
-			return { label: getTableLabel(t, table), count };
+			return { label: labels[table], count };
 		})
 		.toSorted((a, b) => a.label.localeCompare(b.label));
 

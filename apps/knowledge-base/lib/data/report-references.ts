@@ -1,7 +1,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import type { Transaction } from "@/lib/db";
-import { inArray } from "@/lib/db/sql";
+import { type SQLWrapper, inArray, sql } from "@/lib/db/sql";
 import { UserFacingError } from "@/lib/user-facing-error";
 
 /** A record that country or working group reports may point at. */
@@ -9,7 +9,8 @@ export type ReportReferenceTarget =
 	| { type: "contributions"; ids: ReadonlyArray<string> }
 	| { type: "document"; id: string }
 	| { type: "service"; id: string }
-	| { type: "social_media"; id: string };
+	| { type: "social_media"; id: string }
+	| { type: "working_group_report_question"; id: string };
 
 /**
  * Refuses to delete a record that a country or working group report points at, whatever the
@@ -32,100 +33,104 @@ async function isReferencedByReports(
 	tx: Transaction,
 	target: ReportReferenceTarget,
 ): Promise<boolean> {
+	const queries = getReportReferenceQueries(tx, target);
+	if (queries.length === 0) {
+		return false;
+	}
+
+	const result = await tx.execute<{ referenced: boolean }>(
+		sql`select ${sql.join(
+			queries.map((query) => sql`exists (${query})`),
+			sql` or `,
+		)} as referenced`,
+	);
+	return result.rows[0]?.referenced === true;
+}
+
+/** One query per report table that can point at `target`, selecting the rows that do. */
+function getReportReferenceQueries(
+	tx: Transaction,
+	target: ReportReferenceTarget,
+): Array<SQLWrapper> {
 	switch (target.type) {
 		case "contributions": {
 			if (target.ids.length === 0) {
-				return false;
+				return [];
 			}
 			const ids = [...target.ids];
-			return hasAny([
+			return [
 				tx
 					.select({ id: schema.countryReportContributions.id })
 					.from(schema.countryReportContributions)
-					.where(inArray(schema.countryReportContributions.personToOrgUnitId, ids))
-					.limit(1),
+					.where(inArray(schema.countryReportContributions.personToOrgUnitId, ids)),
 				tx
 					.select({ id: schema.workingGroupReportChairs.id })
 					.from(schema.workingGroupReportChairs)
-					.where(inArray(schema.workingGroupReportChairs.personToOrgUnitId, ids))
-					.limit(1),
-			]);
+					.where(inArray(schema.workingGroupReportChairs.personToOrgUnitId, ids)),
+			];
 		}
 
 		case "document": {
 			const ids = [target.id];
-			return hasAny([
+			return [
 				tx
 					.select({ id: schema.countryReports.id })
 					.from(schema.countryReports)
-					.where(inArray(schema.countryReports.countryDocumentId, ids))
-					.limit(1),
+					.where(inArray(schema.countryReports.countryDocumentId, ids)),
 				tx
 					.select({ id: schema.workingGroupReports.id })
 					.from(schema.workingGroupReports)
-					.where(inArray(schema.workingGroupReports.workingGroupDocumentId, ids))
-					.limit(1),
+					.where(inArray(schema.workingGroupReports.workingGroupDocumentId, ids)),
 				tx
 					.select({ id: schema.countryReportProjectContributions.id })
 					.from(schema.countryReportProjectContributions)
-					.where(inArray(schema.countryReportProjectContributions.projectDocumentId, ids))
-					.limit(1),
+					.where(inArray(schema.countryReportProjectContributions.projectDocumentId, ids)),
 				tx
 					.select({ id: schema.countryReportInstitutions.id })
 					.from(schema.countryReportInstitutions)
-					.where(inArray(schema.countryReportInstitutions.organisationalUnitDocumentId, ids))
-					.limit(1),
-			]);
+					.where(inArray(schema.countryReportInstitutions.organisationalUnitDocumentId, ids)),
+			];
 		}
 
 		case "service": {
 			const ids = [target.id];
-			return hasAny([
+			return [
 				tx
 					.select({ id: schema.countryReportServices.id })
 					.from(schema.countryReportServices)
-					.where(inArray(schema.countryReportServices.serviceId, ids))
-					.limit(1),
+					.where(inArray(schema.countryReportServices.serviceId, ids)),
 				tx
 					.select({ serviceId: schema.countryReportServiceKpis.serviceId })
 					.from(schema.countryReportServiceKpis)
-					.where(inArray(schema.countryReportServiceKpis.serviceId, ids))
-					.limit(1),
-			]);
+					.where(inArray(schema.countryReportServiceKpis.serviceId, ids)),
+			];
+		}
+
+		case "working_group_report_question": {
+			return [
+				tx
+					.select({ id: schema.workingGroupReportAnswers.id })
+					.from(schema.workingGroupReportAnswers)
+					.where(inArray(schema.workingGroupReportAnswers.questionId, [target.id])),
+			];
 		}
 
 		case "social_media": {
 			const ids = [target.id];
-			return hasAny([
+			return [
 				tx
 					.select({ id: schema.countryReportSocialMedia.id })
 					.from(schema.countryReportSocialMedia)
-					.where(inArray(schema.countryReportSocialMedia.socialMediaId, ids))
-					.limit(1),
+					.where(inArray(schema.countryReportSocialMedia.socialMediaId, ids)),
 				tx
 					.select({ socialMediaId: schema.countryReportSocialMediaKpis.socialMediaId })
 					.from(schema.countryReportSocialMediaKpis)
-					.where(inArray(schema.countryReportSocialMediaKpis.socialMediaId, ids))
-					.limit(1),
+					.where(inArray(schema.countryReportSocialMediaKpis.socialMediaId, ids)),
 				tx
 					.select({ id: schema.workingGroupReportSocialMedia.id })
 					.from(schema.workingGroupReportSocialMedia)
-					.where(inArray(schema.workingGroupReportSocialMedia.socialMediaId, ids))
-					.limit(1),
-			]);
+					.where(inArray(schema.workingGroupReportSocialMedia.socialMediaId, ids)),
+			];
 		}
 	}
-}
-
-/** Runs the (lazy) queries one after another on the transaction, stopping at the first hit. */
-async function hasAny(
-	queries: ReadonlyArray<PromiseLike<ReadonlyArray<unknown>>>,
-): Promise<boolean> {
-	for (const query of queries) {
-		const rows = await query;
-		if (rows.length > 0) {
-			return true;
-		}
-	}
-	return false;
 }

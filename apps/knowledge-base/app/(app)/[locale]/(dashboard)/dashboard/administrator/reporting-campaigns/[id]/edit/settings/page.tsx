@@ -1,10 +1,9 @@
-import { Button } from "@dariah-eric/ui/button";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
+import { CampaignStatusActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-status-action-form";
 import { ReportingCampaignEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaign-edit-form";
 import { closeReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/close-reporting-campaign.action";
 import { launchReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/launch-reporting-campaign.action";
@@ -57,29 +56,20 @@ export default async function DashboardAdministratorCampaignSettingsPage(
 
 				<div className="flex gap-x-3">
 					{campaign.status === "draft" && (
-						<ActionForm action={launchReportingCampaignAction}>
-							{(isPending) => (
-								<>
-									<input name="id" type="hidden" value={campaign.id} />
-									<Button isPending={isPending} type="submit">
-										{t("Launch campaign")}
-									</Button>
-								</>
-							)}
-						</ActionForm>
+						<CampaignStatusActionForm
+							action={launchReportingCampaignAction}
+							campaignId={campaign.id}
+							label={t("Launch campaign")}
+						/>
 					)}
 
 					{campaign.status === "open" && (
-						<ActionForm action={closeReportingCampaignAction}>
-							{(isPending) => (
-								<>
-									<input name="id" type="hidden" value={campaign.id} />
-									<Button isPending={isPending} intent="danger" type="submit">
-										{t("Close campaign")}
-									</Button>
-								</>
-							)}
-						</ActionForm>
+						<CampaignStatusActionForm
+							action={closeReportingCampaignAction}
+							campaignId={campaign.id}
+							intent="danger"
+							label={t("Close campaign")}
+						/>
 					)}
 
 					{campaign.status === "closed" && (

@@ -1,4 +1,5 @@
 import { type ActionState, isActionStateError } from "@dariah-eric/next-lib/actions";
+import { unstable_rethrow as rethrow } from "next/navigation";
 
 /**
  * Runs a server action from an event handler and returns the message to show when it fails, or null
@@ -7,6 +8,9 @@ import { type ActionState, isActionStateError } from "@dariah-eric/next-lib/acti
  * Covers both failure channels: a wrapped action (`createCommandAction` / `createServerAction`)
  * returns an error action state with a translated message, while an unwrapped one throws, and
  * Next.js redacts thrown server errors in production, so those fall back to `fallbackMessage`.
+ *
+ * An action that calls `redirect()` on success rejects with Next.js's redirect error, which is
+ * rethrown so the router can follow it instead of being reported as a failure.
  */
 export async function runAction(
 	action: () => Promise<unknown>,
@@ -19,7 +23,8 @@ export async function runAction(
 			return message ?? fallbackMessage;
 		}
 		return null;
-	} catch {
+	} catch (error) {
+		rethrow(error);
 		return fallbackMessage;
 	}
 }

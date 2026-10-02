@@ -3,6 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+import { assertNotReferencedByReports } from "@/lib/data/report-references";
 import { eq } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
@@ -20,6 +21,12 @@ export const deleteWorkingGroupReportQuestionAction = createMutationAction({
 		`/dashboard/administrator/reporting-campaigns/${input.campaignId}/edit/questions`,
 
 	async mutate(tx, input) {
+		// Answers record what a report said, so a question a report has answered stays.
+		await assertNotReferencedByReports(tx, {
+			type: "working_group_report_question",
+			id: input.id,
+		});
+
 		await tx
 			.delete(schema.workingGroupReportQuestions)
 			.where(eq(schema.workingGroupReportQuestions.id, input.id));

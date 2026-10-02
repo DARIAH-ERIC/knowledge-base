@@ -134,13 +134,6 @@ function formatUnitType(type: string): string {
 	return type.replaceAll("_", " ");
 }
 
-function formatLifecycleStatus(
-	status: "changed" | "new",
-	t: ReturnType<typeof useExtracted>,
-): string {
-	return status === "new" ? t("New") : t("Changed");
-}
-
 export function PersonRelationsSection(props: Readonly<PersonRelationsSectionProps>): ReactNode {
 	const {
 		organisationalUnitDocumentId,
@@ -437,7 +430,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 											<span>{formatRoleType(relation.roleType)}</span>
 											{relation.lifecycleStatus != null && (
 												<Badge intent={relation.lifecycleStatus === "new" ? "emerald" : "amber"}>
-													{formatLifecycleStatus(relation.lifecycleStatus, t)}
+													{relation.lifecycleStatus === "new" ? t("New") : t("Changed")}
 												</Badge>
 											)}
 										</div>

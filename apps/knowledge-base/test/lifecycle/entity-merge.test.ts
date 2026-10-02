@@ -246,7 +246,7 @@ describe("mergeEntities", () => {
 			]);
 
 			await expect(mergeEntities(tx, source, target)).rejects.toThrow(
-				"working_group_report_chairs contains conflicting frozen report roles",
+				"frozen-report-role-conflict",
 			);
 
 			expect(await tx.query.entities.findFirst({ where: { id: source } })).toBeDefined();
@@ -285,7 +285,7 @@ describe("mergeEntities", () => {
 			]);
 
 			await expect(mergeEntities(tx, source, target)).rejects.toThrow(
-				"country_report_contributions contains conflicting frozen report roles",
+				"frozen-report-role-conflict",
 			);
 
 			expect(await tx.query.entities.findFirst({ where: { id: source } })).toBeDefined();

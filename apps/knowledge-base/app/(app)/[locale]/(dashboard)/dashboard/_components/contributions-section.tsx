@@ -95,13 +95,6 @@ function formatRoleType(type: string): string {
 	return type.replaceAll("_", " ");
 }
 
-function formatLifecycleStatus(
-	status: "changed" | "new",
-	t: ReturnType<typeof useExtracted>,
-): string {
-	return status === "new" ? t("New") : t("Changed");
-}
-
 function formatRoleOptionLabel(option: ContributionRoleOption): string {
 	const allowedTypes = option.allowedUnitTypes.map(formatRoleType).join(", ");
 
@@ -280,7 +273,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 												<Badge
 													intent={contribution.lifecycleStatus === "new" ? "emerald" : "amber"}
 												>
-													{formatLifecycleStatus(contribution.lifecycleStatus, t)}
+													{contribution.lifecycleStatus === "new" ? t("New") : t("Changed")}
 												</Badge>
 											)}
 										</div>

@@ -10,8 +10,9 @@ import {
 } from "@/lib/data/lifecycle-adapters";
 import { type MergeSummary, addToMergeSummary } from "@/lib/data/merge-summary";
 import type { Transaction } from "@/lib/db";
-import { eq, inArray, sql } from "@/lib/db/sql";
+import { type SQL, eq, inArray, sql } from "@/lib/db/sql";
 import { assertSlugWithinMaxLength } from "@/lib/slug";
+import { UserFacingError } from "@/lib/user-facing-error";
 
 export interface EntityIdentity {
 	id: string;
@@ -312,6 +313,35 @@ const personRelationReportTables = [
 	},
 ] as const;
 
+type PersonRelationEndpoint = "organisational_unit_document_id" | "person_document_id";
+
+/**
+ * Each person↔org relation whose `endpoint` is `source` that duplicates one whose `endpoint` is
+ * `target`, paired with the one it duplicates. `endpoint` and `other` are trusted column names,
+ * never user input.
+ */
+function getDuplicatePersonRelations(
+	endpoint: PersonRelationEndpoint,
+	other: PersonRelationEndpoint,
+	source: string,
+	target: string,
+): SQL {
+	const endpointColumn = sql.identifier(endpoint);
+	const otherColumn = sql.identifier(other);
+
+	return sql`
+		select distinct on (s.id) s.id as source_id, t.id as target_id
+		from persons_to_organisational_units s
+		join persons_to_organisational_units t
+			on t.${endpointColumn} = ${target}
+			and t.${otherColumn} = s.${otherColumn}
+			and t.role_type_id = s.role_type_id
+			and t.duration && s.duration
+		where s.${endpointColumn} = ${source}
+		order by s.id, t.id
+	`;
+}
+
 /**
  * Re-point person↔org relations. These carry report children keyed by the relation row id
  * (`country_report_contributions` and `working_group_report_chairs`), so the rows must be updated
@@ -355,27 +385,15 @@ async function repointPersonsToOrganisationalUnits(
  */
 async function repointPersonRelationEndpoint(
 	tx: Transaction,
-	endpoint: "organisational_unit_document_id" | "person_document_id",
-	other: "organisational_unit_document_id" | "person_document_id",
+	endpoint: PersonRelationEndpoint,
+	other: PersonRelationEndpoint,
 	source: string,
 	target: string,
 	summary: MergeSummary,
 ): Promise<void> {
 	const endpointColumn = sql.identifier(endpoint);
-	const otherColumn = sql.identifier(other);
 
-	// Each source relation that duplicates a target relation, paired with the one it duplicates.
-	const duplicates = sql`
-		select distinct on (s.id) s.id as source_id, t.id as target_id
-		from persons_to_organisational_units s
-		join persons_to_organisational_units t
-			on t.${endpointColumn} = ${target}
-			and t.${otherColumn} = s.${otherColumn}
-			and t.role_type_id = s.role_type_id
-			and t.duration && s.duration
-		where s.${endpointColumn} = ${source}
-		order by s.id, t.id
-	`;
+	const duplicates = getDuplicatePersonRelations(endpoint, other, source, target);
 
 	for (const { table, report, frozenRole } of personRelationReportTables) {
 		const reportTable = sql.identifier(table);
@@ -442,64 +460,64 @@ async function repointPersonRelationEndpoint(
 	);
 }
 
+/** The `[endpoint, other]` columns of a person↔org relation that an entity of each type can be. */
+const personRelationEndpoints: Partial<
+	Record<AdaptedEntityType, [PersonRelationEndpoint, PersonRelationEndpoint]>
+> = {
+	organisational_units: ["organisational_unit_document_id", "person_document_id"],
+	persons: ["person_document_id", "organisational_unit_document_id"],
+};
+
 /**
  * Reject relation collisions whose report rows freeze different historical roles. The report
  * tables' unique keys do not allow both rows to point at the same surviving relation, so silently
  * choosing either row would discard report history.
+ *
+ * Only persons and organisational units are endpoints of person↔org relations, so merges of other
+ * types have nothing to check.
  */
 async function assertNoFrozenReportRoleConflicts(
 	tx: Transaction,
+	type: AdaptedEntityType,
 	source: string,
 	target: string,
 ): Promise<void> {
-	for (const [endpoint, other] of [
-		["person_document_id", "organisational_unit_document_id"],
-		["organisational_unit_document_id", "person_document_id"],
-	] as const) {
-		const endpointColumn = sql.identifier(endpoint);
-		const otherColumn = sql.identifier(other);
+	const endpoints = personRelationEndpoints[type];
+	if (endpoints == null) {
+		return;
+	}
 
-		for (const { table, report, frozenRole } of personRelationReportTables) {
-			const reportTable = sql.identifier(table);
-			const reportColumn = sql.identifier(report);
-			const frozenRoleColumn = sql.identifier(frozenRole);
-			const conflict = await tx.execute(sql`
-				with duplicates as (
-					select distinct on (s.id) s.id as source_id, t.id as target_id
-					from persons_to_organisational_units s
-					join persons_to_organisational_units t
-						on t.${endpointColumn} = ${target}
-						and t.${otherColumn} = s.${otherColumn}
-						and t.role_type_id = s.role_type_id
-						and t.duration && s.duration
-					where s.${endpointColumn} = ${source}
-					order by s.id, t.id
-				)
+	const duplicates = getDuplicatePersonRelations(...endpoints, source, target);
+
+	for (const { table, report, frozenRole } of personRelationReportTables) {
+		const reportTable = sql.identifier(table);
+		const reportColumn = sql.identifier(report);
+		const frozenRoleColumn = sql.identifier(frozenRole);
+		const conflict = await tx.execute(sql`
+			with duplicates as (${duplicates})
+			select 1
+			from ${reportTable} r
+			join duplicates d on r.person_to_org_unit_id = d.source_id
+			where exists (
 				select 1
-				from ${reportTable} r
-				join duplicates d on r.person_to_org_unit_id = d.source_id
-				where exists (
-					select 1
-					from ${reportTable} x
-					where x.${reportColumn} = r.${reportColumn}
-						and x.${frozenRoleColumn} is distinct from r.${frozenRoleColumn}
-						and (
-							x.person_to_org_unit_id = d.target_id
-							or (
-								x.id < r.id
-								and x.person_to_org_unit_id in (
-									select source_id from duplicates where target_id = d.target_id
-								)
+				from ${reportTable} x
+				where x.${reportColumn} = r.${reportColumn}
+					and x.${frozenRoleColumn} is distinct from r.${frozenRoleColumn}
+					and (
+						x.person_to_org_unit_id = d.target_id
+						or (
+							x.id < r.id
+							and x.person_to_org_unit_id in (
+								select source_id from duplicates where target_id = d.target_id
 							)
 						)
-				)
-				limit 1
-			`);
+					)
+			)
+			limit 1
+		`);
 
-			assert(
-				conflict.rowCount === 0,
-				`Cannot merge entities because ${table} contains conflicting frozen report roles.`,
-			);
+		if (conflict.rows.length > 0) {
+			throw new UserFacingError("frozen-report-role-conflict");
 		}
 	}
 }
@@ -589,10 +607,14 @@ async function repointInPlaceReferences(
 			.where(eq(schema.users.organisationalUnitDocumentId, source)),
 	);
 
-	await tx
-		.update(schema.navigationItems)
-		.set({ entityId: target })
-		.where(eq(schema.navigationItems.entityId, source));
+	addToMergeSummary(
+		summary,
+		"navigation_items",
+		await tx
+			.update(schema.navigationItems)
+			.set({ entityId: target })
+			.where(eq(schema.navigationItems.entityId, source)),
+	);
 }
 
 // ---------------------------------------------------------------------------
@@ -661,7 +683,7 @@ export async function mergeEntities(
 		source.type === target.type,
 		`Cannot merge entities of different types (${source.type} → ${target.type}).`,
 	);
-	await assertNoFrozenReportRoleConflicts(tx, sourceId, targetId);
+	await assertNoFrozenReportRoleConflicts(tx, source.type, sourceId, targetId);
 
 	const summary: MergeSummary = {};
 

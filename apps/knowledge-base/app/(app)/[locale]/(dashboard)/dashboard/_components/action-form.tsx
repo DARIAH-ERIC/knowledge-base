@@ -16,8 +16,9 @@ interface ActionFormProps {
 
 /**
  * A single-purpose form (hidden inputs + one submit button) for a wrapped server action, which
- * shows the action's error message below the button instead of failing silently. Usable from server
- * components, which can pass the server action straight in.
+ * shows the action's error message below the button instead of failing silently. `children` is a
+ * render function, which cannot cross the Server Component boundary, so a server component must
+ * render it through a small client wrapper (e.g. `ReportActionForm`).
  */
 export function ActionForm(props: Readonly<ActionFormProps>): ReactNode {
 	const { action, children, className } = props;

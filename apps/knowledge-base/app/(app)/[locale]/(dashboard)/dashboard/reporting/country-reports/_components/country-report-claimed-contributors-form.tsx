@@ -17,7 +17,7 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
-import { getCompensationRoleLabel } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels";
+import { useCompensationRoleLabel } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels";
 import type { CompensationRole } from "@/lib/data/report-contributions";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
@@ -52,6 +52,7 @@ export function CountryReportClaimedContributorsForm(
 	const { report, availableContributions, addAction, deleteAction } = props;
 
 	const t = useExtracted();
+	const getCompensationRoleLabel = useCompensationRoleLabel();
 	const [state, action, isPending] = useActionState(addAction, createActionStateInitial());
 	const [selectedId, setSelectedId] = useState<string>("");
 
@@ -69,7 +70,7 @@ export function CountryReportClaimedContributorsForm(
 			{report.contributions.length > 0 && (
 				<ul className="divide-y divide-border rounded-md border">
 					{report.contributions.map((contribution) => {
-						const roleLabel = getCompensationRoleLabel(t, contribution.compensationRole);
+						const roleLabel = getCompensationRoleLabel(contribution.compensationRole);
 
 						return (
 							<li
@@ -126,7 +127,7 @@ export function CountryReportClaimedContributorsForm(
 							<FieldError />
 							<SearchableSelectContent>
 								{availableContributions.map((candidate) => {
-									const roleLabel = getCompensationRoleLabel(t, candidate.compensationRole) ?? "";
+									const roleLabel = getCompensationRoleLabel(candidate.compensationRole) ?? "";
 									const label = `${candidate.personName} — ${roleLabel} (${candidate.organisationalUnitName})`;
 
 									return (

@@ -2,6 +2,7 @@
 export type UserFacingErrorKind =
 	| "admin-account-deletion-not-allowed"
 	| "document-linked-to-user"
+	| "frozen-report-role-conflict"
 	| "last-admin-manager"
 	| "missing-dariah-eric"
 	| "missing-paired-relation-unit"

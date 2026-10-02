@@ -1513,6 +1513,39 @@ msgstr "Until"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx
+msgid "bW7B87"
+msgstr "New"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx
+msgid "PLUzwy"
+msgstr "Changed"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-projects-section.tsx
@@ -1857,6 +1890,7 @@ msgid "UxTJRa"
 msgstr "Projects"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-edit-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx
@@ -1964,6 +1998,7 @@ msgstr "Statistics"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/reporting-overview-page.tsx
@@ -1973,6 +2008,7 @@ msgid "yOdVub"
 msgstr "Country reports"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx
@@ -2143,6 +2179,7 @@ msgstr "Link related entities to display on the website."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx
@@ -2177,6 +2214,7 @@ msgstr "Link related resources to display on the website."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx
@@ -3137,30 +3175,6 @@ msgid "zpAgR4"
 msgstr "Manage all countries in the DARIAH knowledge base."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx
-msgid "bW7B87"
-msgstr "New"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
 msgid "wxFA74"
 msgstr "Membership"
 
@@ -3734,6 +3748,11 @@ msgid "ZNy-Ii"
 msgstr "Administrator dashboard - Governance bodies"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
+#: app/(app)/[locale]/error-page.tsx
+msgid "FazwRl"
+msgstr "Try again"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
 msgid "IxCaD7"
 msgstr "Appointment to end"
 
@@ -3836,10 +3855,8 @@ msgid "cCivJ9"
 msgstr "Which appointment is ending, and when. The governance-body membership it pairs with is closed on the same date, and is shown on the next step."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx
-msgid "w2ax-i"
-msgstr "Could not check the change against the data-integrity rules. Please try again."
+msgid "l7JsdL"
+msgstr "Could not load the open appointments."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
 msgid "p_BS1u"
@@ -3867,6 +3884,10 @@ msgstr "No country selected"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
 msgid "nch9sj"
 msgstr "Role on the governance body"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
+msgid "BAQ7k_"
+msgstr "Could not check the change against the data-integrity rules."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx
@@ -3941,6 +3962,11 @@ msgstr "Located there from"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx
 msgid "eNw5OS"
 msgstr "How the institution relates to {eric}. Leave the end date empty while the relation is ongoing."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx
+msgid "w2ax-i"
+msgstr "Could not check the change against the data-integrity rules. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx
 msgid "gKmSCS"
@@ -4963,6 +4989,86 @@ msgid "97Wa0E"
 msgstr "Merge social-media accounts"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "9-4nRH"
+msgstr "Country report contributors"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "aLAPFs"
+msgstr "Country report institutions"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "etQ-o9"
+msgstr "Country report project contributions"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "EIsOWO"
+msgstr "Country report service KPIs"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "FTOKt0"
+msgstr "Country report services"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "Igs4tE"
+msgstr "Country report social media"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "7gVKlT"
+msgstr "Country report social media KPIs"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "rs-xDg"
+msgstr "Impact case study contributors"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "GETkrn"
+msgstr "Navigation items"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "ZF6SL0"
+msgstr "Organisational unit social media"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "XPeh3P"
+msgstr "Organisational unit relations"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "yW0E4y"
+msgstr "Person relations (contributions)"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "kmozAY"
+msgstr "Project social media"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "YpY1TB"
+msgstr "Reporting campaign country thresholds"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "uGXeSE"
+msgstr "Service organisational units"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "YP_7RG"
+msgstr "Service social media"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "UelI3c"
+msgstr "Spotlight article contributors"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "etosoQ"
+msgstr "User accounts"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "wGqVn1"
+msgstr "Working group report chairs"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "vCt1AI"
+msgstr "Working group report social media"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
 msgid "4LwQdu"
 msgstr "Nothing referred to the source, so nothing was re-pointed."
 
@@ -5525,6 +5631,7 @@ msgid "ihs3ng"
 msgstr "Contribution amounts"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-contribution-amounts-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels.ts
 msgid "VY1v4U"
 msgstr "National coordinator"
 
@@ -6298,8 +6405,7 @@ msgid "Rkewjs"
 msgstr "You cannot remove your own ability to manage admin accounts."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.action.ts
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "LCaXVG"
 msgstr "At least one admin user must be allowed to manage admin accounts."
 
@@ -6968,6 +7074,26 @@ msgstr "This account is already listed."
 msgid "RCzYOb"
 msgstr "Only a submitted report can be accepted. Refresh the page and try again."
 
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels.ts
+msgid "mjGMsh"
+msgstr "National coordinator (deputy)"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels.ts
+msgid "BJh-6B"
+msgstr "JRC chair"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels.ts
+msgid "bKR7q_"
+msgstr "NCC chair"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels.ts
+msgid "u_h7eD"
+msgstr "Working group chair"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels.ts
+msgid "S6Vz7m"
+msgstr "JRC member"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-contribution.action.ts
 msgid "NWtwEp"
 msgstr "This person is already listed as a contributor."
@@ -6987,6 +7113,21 @@ msgstr "A contribution for this project already exists."
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/refresh-country-report-contributions.action.ts
 msgid "WJ_4rD"
 msgstr "Coordinator contributors updated from current relations."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/refresh-country-report-external-resource-snapshot.action.ts
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/refresh-working-group-report-external-resource-snapshot.action.ts
+msgid "skJ1y0"
+msgstr "SSHOC resources snapshot refreshed."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/refresh-country-report-external-resource-snapshot.action.ts
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/refresh-working-group-report-external-resource-snapshot.action.ts
+msgid "Rf1KOs"
+msgstr "Zotero publications snapshot refreshed."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/refresh-country-report-external-resource-snapshot.action.ts
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/refresh-working-group-report-external-resource-snapshot.action.ts
+msgid "0zNkBu"
+msgstr "External resources snapshot refreshed."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/refresh-country-report-institutions.action.ts
 msgid "TsO0GL"
@@ -8061,10 +8202,6 @@ msgid "AAB4k2"
 msgstr "Recovery"
 
 #: app/(app)/[locale]/error-page.tsx
-msgid "FazwRl"
-msgstr "Try again"
-
-#: app/(app)/[locale]/error-page.tsx
 msgid "zADPwt"
 msgstr "System status"
 
@@ -8117,134 +8254,113 @@ msgstr "This SSHOC marketplace actor id is already assigned to another organisat
 
 #: lib/server/create-command-action.ts
 #: lib/server/create-server-action.ts
+msgid "lkI8_e"
+msgstr "Internal server error."
+
+#: lib/server/get-user-facing-error-message.ts
 msgid "cyzyjk"
 msgstr "A country or working group report refers to this record, so it cannot be deleted. Deleting it would change the report."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "S_uBod"
 msgstr "You are not allowed to delete admin accounts."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "LHCJID"
 msgstr "You cannot delete your own account."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "v71yRU"
 msgstr "This service is imported from the SSHOC Marketplace and cannot be deleted here."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "aca-RI"
 msgstr "A user account is linked to this record. Update that user's linked person or country before deleting it."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "ddbnQB"
 msgstr "This record is linked from a navigation menu. Remove the navigation link before deleting it."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "Ni9MxS"
 msgstr "An entity with this slug already exists."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
+msgid "K5nLfZ"
+msgstr "Both records are listed in the same report with different roles. Make the roles in that report match, then merge."
+
+#: lib/server/get-user-facing-error-message.ts
 msgid "WtzfWm"
 msgstr "A record with these values already exists."
 
-#: lib/server/create-command-action.ts
-msgid "6rdzji"
-msgstr "Other records still refer to this record, so it cannot be deleted."
-
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
-msgid "7XzbEI"
-msgstr "A related record no longer exists. Refresh the page and try again."
-
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
-msgid "XyyLog"
-msgstr "An item inside a dropdown must link to a page or a url."
-
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
-msgid "VB8ZZp"
-msgstr "Child items can only be added to a top-level item that does not link anywhere itself."
-
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
-msgid "JT_LLi"
-msgstr "This item opens a dropdown, so it cannot link anywhere itself. Remove its child items first."
-
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
-msgid "G5W8LK"
-msgstr "This entity is published, so its address can only be changed by an administrator on the Maintenance page."
-
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
-msgid "yXo2s3"
-msgstr "This record no longer exists. Refresh the page and try again."
-
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
-msgid "FhIASk"
-msgstr "This record conflicts with an existing record."
-
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "UxrCFa"
 msgstr "The DARIAH-EU organisational unit could not be found, so this relation cannot be recorded."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "pJL6Fh"
 msgstr "The governance body this role must also be recorded against could not be found."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
-msgid "Ib7Qkd"
-msgstr "The end date must be on or after the start of the relation."
-
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
-msgid "lNKpUQ"
-msgstr "This relation is not one this form can end, or it has already been ended. Refresh the page and try again."
-
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "6L0TeR"
 msgstr "This relation already exists during an overlapping period. Adjust the dates and try again."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
+msgid "Ib7Qkd"
+msgstr "The end date must be on or after the start of the relation."
+
+#: lib/server/get-user-facing-error-message.ts
+msgid "lNKpUQ"
+msgstr "This relation is not one this form can end, or it has already been ended. Refresh the page and try again."
+
+#: lib/server/get-user-facing-error-message.ts
+msgid "6rdzji"
+msgstr "Other records still refer to this record, so it cannot be deleted."
+
+#: lib/server/get-user-facing-error-message.ts
+msgid "7XzbEI"
+msgstr "A related record no longer exists. Refresh the page and try again."
+
+#: lib/server/get-user-facing-error-message.ts
+msgid "XyyLog"
+msgstr "An item inside a dropdown must link to a page or a url."
+
+#: lib/server/get-user-facing-error-message.ts
+msgid "VB8ZZp"
+msgstr "Child items can only be added to a top-level item that does not link anywhere itself."
+
+#: lib/server/get-user-facing-error-message.ts
+msgid "JT_LLi"
+msgstr "This item opens a dropdown, so it cannot link anywhere itself. Remove its child items first."
+
+#: lib/server/get-user-facing-error-message.ts
+msgid "G5W8LK"
+msgstr "This entity is published, so its address can only be changed by an administrator on the Maintenance page."
+
+#: lib/server/get-user-facing-error-message.ts
+msgid "yXo2s3"
+msgstr "This record no longer exists. Refresh the page and try again."
+
+#: lib/server/get-user-facing-error-message.ts
+msgid "FhIASk"
+msgstr "This record conflicts with an existing record."
+
+#: lib/server/get-user-facing-error-message.ts
 msgid "Hr85CO"
 msgstr "Both services have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "paaApZ"
 msgstr "This slug is too long to be used as a web address. Please shorten it."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "Jl3xT-"
 msgstr "Both accounts have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "qDy0wr"
 msgstr "The submitted data violates a data rule."
 
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgid "Bosjdo"
 msgstr "The submitted data is incomplete."
-
-#: lib/server/create-command-action.ts
-#: lib/server/create-server-action.ts
-msgid "lkI8_e"
-msgstr "Internal server error."
