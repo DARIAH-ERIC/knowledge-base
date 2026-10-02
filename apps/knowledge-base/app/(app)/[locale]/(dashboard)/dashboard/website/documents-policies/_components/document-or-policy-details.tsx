@@ -26,8 +26,8 @@ interface DocumentOrPolicyDetailsProps {
 	> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { document: { key: string; label: string; url: string; downloadUrl: string } | null };
-	publishAction: (documentId: string) => Promise<void>;
-	discardDraftAction?: (documentId: string) => Promise<void>;
+	publishAction: (documentId: string) => Promise<unknown>;
+	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
 
 export function DocumentOrPolicyDetails(props: Readonly<DocumentOrPolicyDetailsProps>): ReactNode {

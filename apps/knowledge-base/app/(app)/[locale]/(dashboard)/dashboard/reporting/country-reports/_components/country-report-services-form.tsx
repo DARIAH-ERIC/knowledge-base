@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/u
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
 import type {
 	AvailableReportService,
 	ReportServiceWithKpis,
@@ -31,7 +32,7 @@ interface CountryReportServicesFormProps {
 	kpiCategories: ReadonlyArray<ServiceKpiCategory>;
 	saveKpisAction: ServerAction;
 	addAction: ServerAction;
-	deleteAction: (formData: FormData) => Promise<void>;
+	deleteAction: ServerAction;
 }
 
 export function CountryReportServicesForm(
@@ -120,7 +121,7 @@ interface ServiceCardProps {
 	service: ReportServiceWithKpis;
 	reportId: string;
 	kpiCategories: ReadonlyArray<ServiceKpiCategory>;
-	deleteAction: (formData: FormData) => Promise<void>;
+	deleteAction: ServerAction;
 }
 
 interface MetricRow {
@@ -159,18 +160,23 @@ function ServiceCard(props: Readonly<ServiceCardProps>): ReactNode {
 		<div className="flex flex-col gap-y-4 rounded-md border border-border p-4">
 			<div className="flex items-start justify-between gap-x-4">
 				<p className="text-sm font-medium text-fg">{service.name}</p>
-				<form action={deleteAction}>
-					<input name="membershipId" type="hidden" value={service.membershipId} />
-					<input name="countryReportId" type="hidden" value={reportId} />
-					<Button
-						className="text-danger hover:bg-danger/10 hover:text-danger"
-						intent="plain"
-						size="sm"
-						type="submit"
-					>
-						{t("Remove service")}
-					</Button>
-				</form>
+				<ActionForm action={deleteAction}>
+					{(isPending) => (
+						<>
+							<input name="membershipId" type="hidden" value={service.membershipId} />
+							<input name="countryReportId" type="hidden" value={reportId} />
+							<Button
+								isPending={isPending}
+								className="text-danger hover:bg-danger/10 hover:text-danger"
+								intent="plain"
+								size="sm"
+								type="submit"
+							>
+								{t("Remove service")}
+							</Button>
+						</>
+					)}
+				</ActionForm>
 			</div>
 
 			{metrics.length > 0 && (

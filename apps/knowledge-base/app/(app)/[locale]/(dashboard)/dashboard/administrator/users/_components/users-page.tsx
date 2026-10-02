@@ -9,6 +9,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import { queue } from "@dariah-eric/ui/toast";
 import { PencilSquareIcon, TrashIcon, UserIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
@@ -30,6 +31,7 @@ import type { UsersResult } from "@/lib/data/users";
 import { getEntityDetailHref } from "@/lib/entity-detail-href";
 import { getEntityTypeLabel } from "@/lib/entity-type-label";
 import { useRouter } from "@/lib/navigation/navigation";
+import { runAction } from "@/lib/run-action";
 
 interface UsersPageProps {
 	currentUserCanManageAdmins: boolean;
@@ -160,7 +162,13 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 										isDisabled={item.id === currentUserId || item.role === "admin"}
 										onAction={() => {
 											startImpersonationTransition(async () => {
-												await startImpersonationAction(item.id);
+												const error = await runAction(
+													() => startImpersonationAction(item.id),
+													t("Could not sign in as this user. Please try again."),
+												);
+												if (error != null) {
+													queue.add({ title: error }, { timeout: 5000 });
+												}
 											});
 										}}
 									>
@@ -208,13 +216,16 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						try {
-							await deleteUserAction(id);
-							router.refresh();
-							setItemToDelete(null);
-						} catch {
-							setDeleteError(t("Could not delete user. Please try again."));
+						const error = await runAction(
+							() => deleteUserAction(id),
+							t("Could not delete user. Please try again."),
+						);
+						if (error != null) {
+							setDeleteError(error);
+							return;
 						}
+						router.refresh();
+						setItemToDelete(null);
 					});
 				}}
 			/>

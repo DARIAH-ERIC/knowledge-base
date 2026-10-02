@@ -181,6 +181,7 @@ export function createMutationAction<TSchema extends v.GenericSchema, TSuccessDa
 			requireAdmin: opts.requireAdmin,
 			requireAuth: opts.requireAuth,
 			requireNoImpersonation: opts.requireNoImpersonation,
+			isDelete: opts.audit.action === "delete",
 		},
 		async (state, formData, { user, realUser, isImpersonating }) => {
 			const locale = await getLocale();

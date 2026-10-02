@@ -2,6 +2,7 @@
 
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
+import { Button } from "@dariah-eric/ui/button";
 import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -19,6 +20,7 @@ import type { CalendarDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useEffect, useState, useTransition } from "react";
 
+import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
 import {
 	FormSection,
@@ -63,6 +65,9 @@ type PersonMode = "existing" | "new";
 
 /** Appointing someone, or ending an appointment — the two halves of the same paired rule. */
 type WizardMode = "end" | "start";
+
+/** The server checks the wizard runs before the final submit. */
+type PreflightCheck = "appointments" | "create" | "end";
 
 interface CountryRoleWizardProps {
 	roleTypes: ReadonlyArray<CountryRoleType>;
@@ -170,6 +175,14 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 
 	const [preflight, setPreflight] = useState<WizardPreflight | null>(null);
 	const [isPreflightPending, startPreflightTransition] = useTransition();
+	// Which server check failed, so each step only shows its own failure. Bumping a check's attempt
+	// re-runs only that check, which otherwise only re-runs when its inputs change.
+	const [failedPreflight, setFailedPreflight] = useState<PreflightCheck | null>(null);
+	const [preflightAttempts, setPreflightAttempts] = useState<Record<PreflightCheck, number>>({
+		appointments: 0,
+		create: 0,
+		end: 0,
+	});
 
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [isSubmitPending, startSubmitTransition] = useTransition();
@@ -199,11 +212,18 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 		}
 
 		startPreflightTransition(async () => {
-			const result = await openCountryRoleAppointmentsAction(person.id);
-			setAppointments(result);
-			setAppointmentId(result.length === 1 ? (result[0]?.id ?? null) : null);
+			setFailedPreflight(null);
+			try {
+				const result = await openCountryRoleAppointmentsAction(person.id);
+				setAppointments(result);
+				setAppointmentId(result.length === 1 ? (result[0]?.id ?? null) : null);
+			} catch {
+				setFailedPreflight("appointments");
+			}
 		});
-	}, [isEndMode, person]);
+		// The attempt counter is a dependency on purpose: bumping it re-runs a failed check.
+		// oxlint-disable-next-line react/exhaustive-effect-dependencies
+	}, [isEndMode, person, preflightAttempts.appointments]);
 
 	useEffect(() => {
 		if (!isReviewStep || !isEndMode || appointmentId == null || endDate == null) {
@@ -211,14 +231,21 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 		}
 
 		startPreflightTransition(async () => {
-			const result = await endCountryRolePreflightAction({
-				appointmentId,
-				end: endDate.toString(),
-			});
+			setFailedPreflight(null);
+			try {
+				const result = await endCountryRolePreflightAction({
+					appointmentId,
+					end: endDate.toString(),
+				});
 
-			setEndPreflight(result);
+				setEndPreflight(result);
+			} catch {
+				setFailedPreflight("end");
+			}
 		});
-	}, [appointmentId, endDate, isEndMode, isReviewStep]);
+		// The attempt counter is a dependency on purpose: bumping it re-runs a failed check.
+		// oxlint-disable-next-line react/exhaustive-effect-dependencies
+	}, [appointmentId, endDate, isEndMode, isReviewStep, preflightAttempts.end]);
 
 	useEffect(() => {
 		if (isEndMode || !isReviewStep || country == null || roleType == null || start == null) {
@@ -226,18 +253,23 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 		}
 
 		startPreflightTransition(async () => {
-			const result = await countryRolePreflightAction({
-				personDocumentId,
-				personName,
-				countryDocumentId: country.id,
-				roleType,
-				counterpartRoleType: effectiveCounterpartRoleType,
-				start: start.toString(),
-				end: end?.toString() ?? null,
-				lifecycle: "draft",
-			});
+			setFailedPreflight(null);
+			try {
+				const result = await countryRolePreflightAction({
+					personDocumentId,
+					personName,
+					countryDocumentId: country.id,
+					roleType,
+					counterpartRoleType: effectiveCounterpartRoleType,
+					start: start.toString(),
+					end: end?.toString() ?? null,
+					lifecycle: "draft",
+				});
 
-			setPreflight(result);
+				setPreflight(result);
+			} catch {
+				setFailedPreflight("create");
+			}
 		});
 	}, [
 		country,
@@ -247,9 +279,31 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 		isReviewStep,
 		personDocumentId,
 		personName,
+		// The attempt counter is a dependency on purpose: bumping it re-runs a failed check.
+		// oxlint-disable-next-line react/exhaustive-effect-dependencies
+		preflightAttempts.create,
 		roleType,
 		start,
 	]);
+
+	function renderPreflightError(check: PreflightCheck, message: string): ReactNode {
+		return (
+			<div className="flex flex-col items-start gap-y-2">
+				<ActionErrorAlert message={message} />
+				<Button
+					intent="secondary"
+					onPress={() => {
+						setPreflightAttempts((attempts) => {
+							return { ...attempts, [check]: attempts[check] + 1 };
+						});
+					}}
+					size="sm"
+				>
+					{t("Try again")}
+				</Button>
+			</div>
+		);
+	}
 
 	function formAction(formData: FormData) {
 		startSubmitTransition(async () => {
@@ -433,7 +487,9 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 						title={t("Appointment to end")}
 						variant="stacked"
 					>
-						{appointments == null ? (
+						{failedPreflight === "appointments" ? (
+							renderPreflightError("appointments", t("Could not load the open appointments."))
+						) : appointments == null ? (
 							<div className="flex items-center gap-x-2 text-sm text-muted-fg">
 								<ProgressCircle aria-label={t("Loading...")} isIndeterminate={true} />
 								{t("Loading appointments...")}
@@ -584,7 +640,12 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 					<input name="appointmentId" type="hidden" value={appointmentId ?? ""} />
 					<input name="end" type="hidden" value={endDate?.toString() ?? ""} />
 
-					{isPreflightPending || endPreflight == null ? (
+					{failedPreflight === "end" ? (
+						renderPreflightError(
+							"end",
+							t("Could not check the change against the data-integrity rules."),
+						)
+					) : isPreflightPending || endPreflight == null ? (
 						<div className="flex items-center gap-x-2 text-sm text-muted-fg">
 							<ProgressCircle aria-label={t("Checking...")} isIndeterminate={true} />
 							{t("Checking against the data-integrity rules...")}
@@ -651,7 +712,12 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 					<input name="start" type="hidden" value={start?.toString() ?? ""} />
 					<input name="end" type="hidden" value={end?.toString() ?? ""} />
 
-					{isPreflightPending || preflight == null ? (
+					{failedPreflight === "create" ? (
+						renderPreflightError(
+							"create",
+							t("Could not check the change against the data-integrity rules."),
+						)
+					) : isPreflightPending || preflight == null ? (
 						<div className="flex items-center gap-x-2 text-sm text-muted-fg">
 							<ProgressCircle aria-label={t("Checking...")} isIndeterminate={true} />
 							{t("Checking against the data-integrity rules...")}

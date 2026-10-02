@@ -1,6 +1,7 @@
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
+import { type MergeSummary, addToMergeSummary } from "@/lib/data/merge-summary";
 import type { Transaction } from "@/lib/db";
 import { eq, sql } from "@/lib/db/sql";
 import { UserFacingError } from "@/lib/user-facing-error";
@@ -17,6 +18,7 @@ export interface MergeSocialMediaResult {
 	targetId: string;
 	source: SocialMediaIdentity;
 	target: SocialMediaIdentity;
+	summary: MergeSummary;
 }
 
 /**
@@ -103,25 +105,34 @@ async function assertNoKpiConflicts(
  */
 async function repointLinks(
 	tx: Transaction,
-	table: string,
+	table: (typeof linkTables)[number]["table"],
 	ownerColumn: string,
 	source: string,
 	target: string,
+	summary: MergeSummary,
 ): Promise<void> {
 	const linkTable = sql.identifier(table);
 	const owner = sql.identifier(ownerColumn);
 
-	await tx.execute(sql`
+	addToMergeSummary(
+		summary,
+		table,
+		await tx.execute(sql`
 		delete from ${linkTable} src
 		where src.social_media_id = ${source} and exists (
 			select 1 from ${linkTable} tgt
 			where tgt.social_media_id = ${target} and tgt.${owner} = src.${owner}
 		)
-	`);
+	`),
+	);
 
-	await tx.execute(sql`
+	addToMergeSummary(
+		summary,
+		table,
+		await tx.execute(sql`
 		update ${linkTable} set social_media_id = ${target} where social_media_id = ${source}
-	`);
+	`),
+	);
 }
 
 /**
@@ -158,16 +169,22 @@ export async function mergeSocialMedia(
 
 	await assertNoKpiConflicts(tx, sourceId, targetId);
 
+	const summary: MergeSummary = {};
+
 	for (const { table, owner } of linkTables) {
-		await repointLinks(tx, table, owner, sourceId, targetId);
+		await repointLinks(tx, table, owner, sourceId, targetId, summary);
 	}
 
-	await tx
-		.update(schema.countryReportSocialMediaKpis)
-		.set({ socialMediaId: targetId })
-		.where(eq(schema.countryReportSocialMediaKpis.socialMediaId, sourceId));
+	addToMergeSummary(
+		summary,
+		"country_report_social_media_kpis",
+		await tx
+			.update(schema.countryReportSocialMediaKpis)
+			.set({ socialMediaId: targetId })
+			.where(eq(schema.countryReportSocialMediaKpis.socialMediaId, sourceId)),
+	);
 
 	await tx.delete(schema.socialMedia).where(eq(schema.socialMedia.id, sourceId));
 
-	return { sourceId, targetId, source, target };
+	return { sourceId, targetId, source, target, summary };
 }

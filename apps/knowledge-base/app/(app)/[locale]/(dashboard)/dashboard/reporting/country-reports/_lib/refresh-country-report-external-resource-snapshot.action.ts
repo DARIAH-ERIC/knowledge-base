@@ -11,10 +11,10 @@ import {
 import { countryReportRevalidatePaths } from "@/lib/data/reporting-urls";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-function getSuccessMessage(
-	t: Awaited<ReturnType<typeof getExtracted>>,
-	section: ReportExternalResourceSnapshotSection,
-): string {
+/** Binds `t` here rather than taking it, so the i18n extractor sees the `t(...)` calls. */
+async function getSuccessMessage(section: ReportExternalResourceSnapshotSection): Promise<string> {
+	const t = await getExtracted();
+
 	switch (section) {
 		case "country_sshoc_resources": {
 			return t("SSHOC resources snapshot refreshed.");
@@ -44,7 +44,6 @@ export const refreshCountryReportExternalResourceSnapshotAction = createMutation
 	},
 
 	async mutate(tx, input, ctx) {
-		const t = await getExtracted();
 		await refreshCountryExternalResourceSnapshot(tx, {
 			capturedByUserId: ctx.user.id,
 			countryReportId: input.countryReportId,
@@ -53,7 +52,7 @@ export const refreshCountryReportExternalResourceSnapshotAction = createMutation
 
 		return {
 			subjectId: input.countryReportId,
-			successMessage: getSuccessMessage(t, input.section),
+			successMessage: await getSuccessMessage(input.section),
 		};
 	},
 });

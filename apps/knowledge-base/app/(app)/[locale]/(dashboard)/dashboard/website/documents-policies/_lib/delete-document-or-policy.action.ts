@@ -1,38 +1,38 @@
 "use server";
 
-import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
 import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
-import { db } from "@/lib/db";
 import { eq, inArray, or } from "@/lib/db/sql";
 import {
 	deleteWebsiteDocument,
 	getWebsiteDocumentDescriptorByEntityId,
 } from "@/lib/search/website-index";
+import { createCommandAction } from "@/lib/server/create-command-action";
+import { UserFacingError } from "@/lib/user-facing-error";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function deleteDocumentOrPolicyAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const deleteDocumentOrPolicyAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "delete", subjectType: "documents_policies" },
+	revalidate: "/[locale]/dashboard/website/documents-policies",
 
-	// Snapshot the label before the transaction wipes the entity, so the audit log keeps it readable.
-	const subjectLabel = await resolveAuditSubjectLabel("documents_policies", documentId);
-
-	const descriptor = await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		const entity = await tx.query.entities.findFirst({
 			where: { id: documentId },
 			columns: { id: true },
 		});
 
-		assert(entity, "Document not found.");
+		if (entity == null) {
+			throw new UserFacingError("record-not-found");
+		}
 
-		const documentDescriptor = await getWebsiteDocumentDescriptorByEntityId(documentId);
+		// Snapshot the label before the entity is wiped, so the audit log keeps it readable.
+		const subjectLabel = await resolveAuditSubjectLabel("documents_policies", documentId, tx);
+
+		const descriptor = await getWebsiteDocumentDescriptorByEntityId(documentId);
 
 		const { draftId, publishedId } = await getDocumentVersions(tx, documentId);
 		const versionIds = [draftId, publishedId].filter((id): id is string => id != null);
@@ -75,25 +75,13 @@ export async function deleteDocumentOrPolicyAction(documentId: string): Promise<
 
 		await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
 
-		return documentDescriptor;
-	});
+		return { subjectId: documentId, subjectLabel, descriptor };
+	},
 
-	after(async () => {
-		if (descriptor != null) {
-			await deleteWebsiteDocument(descriptor);
+	async postCommit({ result }) {
+		if (result.descriptor != null) {
+			await deleteWebsiteDocument(result.descriptor);
 		}
-
 		await dispatchWebhook({ tags: ["documents-policies"] });
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession.user.id,
-		action: "delete",
-		subjectType: "documents_policies",
-		subjectId: documentId,
-		subjectLabel,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");
-}
+	},
+});

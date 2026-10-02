@@ -1,30 +1,22 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
-import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import { createCommandAction } from "@/lib/server/create-command-action";
 
-export async function deleteReportingCampaignAction(id: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const deleteReportingCampaignAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "delete", subjectType: "reporting_campaigns" },
+	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
 
-	// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
-	const subjectLabel = await resolveAuditSubjectLabel("reporting_campaigns", id);
+	async mutate(tx, [id]: [string]) {
+		// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
+		const subjectLabel = await resolveAuditSubjectLabel("reporting_campaigns", id, tx);
 
-	await db.delete(schema.reportingCampaigns).where(eq(schema.reportingCampaigns.id, id));
+		await tx.delete(schema.reportingCampaigns).where(eq(schema.reportingCampaigns.id, id));
 
-	await recordAuditEvent(db, {
-		actorUserId: auditSession.user.id,
-		action: "delete",
-		subjectType: "reporting_campaigns",
-		subjectId: id,
-		subjectLabel,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/administrator/reporting-campaigns", "layout");
-}
+		return { subjectId: id, subjectLabel };
+	},
+});

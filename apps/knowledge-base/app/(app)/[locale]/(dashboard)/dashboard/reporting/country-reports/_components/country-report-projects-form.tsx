@@ -13,6 +13,7 @@ import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
 import { LocaleLink } from "@/lib/navigation/navigation";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
@@ -33,7 +34,7 @@ interface CountryReportProjectsFormProps {
 	/** Admins get a link to the projects overview; coordinators do not (yet) have those screens. */
 	canManageRelations: boolean;
 	addAction: ServerAction;
-	deleteAction: (formData: FormData) => Promise<void>;
+	deleteAction: ServerAction;
 }
 
 export function CountryReportProjectsForm(
@@ -74,18 +75,23 @@ export function CountryReportProjectsForm(
 										{t("Total funding amount (EUR)")}: {contribution.amountEuros.toLocaleString()}
 									</p>
 								</div>
-								<form action={deleteAction}>
-									<input name="contributionId" type="hidden" value={contribution.id} />
-									<input name="countryReportId" type="hidden" value={report.id} />
-									<Button
-										className="text-danger hover:bg-danger/10 hover:text-danger"
-										intent="plain"
-										size="sm"
-										type="submit"
-									>
-										{t("Remove")}
-									</Button>
-								</form>
+								<ActionForm action={deleteAction}>
+									{(isPending) => (
+										<>
+											<input name="contributionId" type="hidden" value={contribution.id} />
+											<input name="countryReportId" type="hidden" value={report.id} />
+											<Button
+												isPending={isPending}
+												className="text-danger hover:bg-danger/10 hover:text-danger"
+												intent="plain"
+												size="sm"
+												type="submit"
+											>
+												{t("Remove")}
+											</Button>
+										</>
+									)}
+								</ActionForm>
 							</li>
 						))}
 					</ul>

@@ -1,21 +1,20 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
-import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
+import { createCommandAction } from "@/lib/server/create-command-action";
 
-export async function deleteCountryReportAction(id: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const deleteCountryReportAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "delete", subjectType: "country_reports" },
+	revalidate: "/[locale]/dashboard/administrator/country-reports",
 
-	// Snapshot the label while the report still exists, so the audit log doesn't fall back to the uuid.
-	const subjectLabel = await resolveAuditSubjectLabel("country_reports", id);
+	async mutate(tx, [id]: [string]) {
+		// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
+		const subjectLabel = await resolveAuditSubjectLabel("country_reports", id, tx);
 
-	await db.transaction(async (tx) => {
 		await tx
 			.delete(schema.reportScreenComments)
 			.where(
@@ -46,16 +45,7 @@ export async function deleteCountryReportAction(id: string): Promise<void> {
 			.delete(schema.countryReportInstitutions)
 			.where(eq(schema.countryReportInstitutions.countryReportId, id));
 		await tx.delete(schema.countryReports).where(eq(schema.countryReports.id, id));
-	});
 
-	await recordAuditEvent(db, {
-		actorUserId: auditSession.user.id,
-		action: "delete",
-		subjectType: "country_reports",
-		subjectId: id,
-		subjectLabel,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/administrator/country-reports", "layout");
-}
+		return { subjectId: id, subjectLabel };
+	},
+});

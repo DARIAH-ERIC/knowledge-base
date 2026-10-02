@@ -1,29 +1,25 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
 import { and, eq, isNull } from "@/lib/db/sql";
+import { createCommandAction } from "@/lib/server/create-command-action";
+import { UserFacingError } from "@/lib/user-facing-error";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function moveNavigationItemAction(
-	id: string,
-	direction: "up" | "down",
-): Promise<void> {
-	const auditSession = await assertAdmin();
+export const moveNavigationItemAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "navigation" },
+	revalidate: "/[locale]/dashboard/website/navigation",
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, [id, direction]: [string, "up" | "down"]) {
 		const item = await tx.query.navigationItems.findFirst({
 			where: { id },
 			columns: { id: true, position: true, menuId: true, parentId: true },
 		});
 
 		if (item == null) {
-			return;
+			throw new UserFacingError("record-not-found");
 		}
 
 		const siblings = await tx
@@ -43,12 +39,12 @@ export async function moveNavigationItemAction(
 		const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
 
 		if (targetIndex < 0 || targetIndex >= siblings.length) {
-			return;
+			return { subjectId: id, auditSummary: { direction } };
 		}
 
 		const target = siblings[targetIndex];
 		if (target == null) {
-			return;
+			return { subjectId: id, auditSummary: { direction } };
 		}
 
 		await tx
@@ -60,19 +56,11 @@ export async function moveNavigationItemAction(
 			.update(schema.navigationItems)
 			.set({ position: item.position })
 			.where(eq(schema.navigationItems.id, target.id));
-	});
 
-	after(async () => {
+		return { subjectId: id, auditSummary: { direction } };
+	},
+
+	async postCommit() {
 		await dispatchWebhook({ tags: ["navigation"] });
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession.user.id,
-		action: "update",
-		subjectType: "navigation",
-		subjectId: id,
-		summary: { direction },
-	});
-
-	revalidatePath("/[locale]/dashboard/website/navigation", "layout");
-}
+	},
+});

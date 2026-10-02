@@ -8,9 +8,11 @@ import {
 	getLifecycleAdapter,
 	hasLifecycleAdapter,
 } from "@/lib/data/lifecycle-adapters";
+import { type MergeSummary, addToMergeSummary } from "@/lib/data/merge-summary";
 import type { Transaction } from "@/lib/db";
-import { eq, inArray, sql } from "@/lib/db/sql";
+import { type SQL, eq, inArray, sql } from "@/lib/db/sql";
 import { assertSlugWithinMaxLength } from "@/lib/slug";
+import { UserFacingError } from "@/lib/user-facing-error";
 
 export interface EntityIdentity {
 	id: string;
@@ -26,6 +28,7 @@ export interface MergeEntitiesResult {
 	sourceId: string;
 	targetId: string;
 	type: AdaptedEntityType;
+	summary: MergeSummary;
 }
 
 async function loadMergeableEntity(tx: Transaction, documentId: string): Promise<EntityIdentity> {
@@ -90,6 +93,7 @@ async function repointEntitiesToEntities(
 	tx: Transaction,
 	source: string,
 	target: string,
+	summary: MergeSummary,
 ): Promise<void> {
 	// entity_id endpoint. Skip rows that would become a self-relation (target,target).
 	await tx.execute(sql`
@@ -99,7 +103,13 @@ async function repointEntitiesToEntities(
 		where entity_id = ${source} and related_entity_id not in (${source}, ${target})
 		on conflict do nothing
 	`);
-	await tx.delete(schema.entitiesToEntities).where(eq(schema.entitiesToEntities.entityId, source));
+	addToMergeSummary(
+		summary,
+		"entities_to_entities",
+		await tx
+			.delete(schema.entitiesToEntities)
+			.where(eq(schema.entitiesToEntities.entityId, source)),
+	);
 
 	// related_entity_id endpoint.
 	await tx.execute(sql`
@@ -109,15 +119,20 @@ async function repointEntitiesToEntities(
 		where related_entity_id = ${source} and entity_id not in (${source}, ${target})
 		on conflict do nothing
 	`);
-	await tx
-		.delete(schema.entitiesToEntities)
-		.where(eq(schema.entitiesToEntities.relatedEntityId, source));
+	addToMergeSummary(
+		summary,
+		"entities_to_entities",
+		await tx
+			.delete(schema.entitiesToEntities)
+			.where(eq(schema.entitiesToEntities.relatedEntityId, source)),
+	);
 }
 
 async function repointEntitiesToResources(
 	tx: Transaction,
 	source: string,
 	target: string,
+	summary: MergeSummary,
 ): Promise<void> {
 	await tx.execute(sql`
 		insert into entities_to_resources (entity_id, resource_id, position, created_at, updated_at)
@@ -126,15 +141,20 @@ async function repointEntitiesToResources(
 		where entity_id = ${source}
 		on conflict do nothing
 	`);
-	await tx
-		.delete(schema.entitiesToResources)
-		.where(eq(schema.entitiesToResources.entityId, source));
+	addToMergeSummary(
+		summary,
+		"entities_to_resources",
+		await tx
+			.delete(schema.entitiesToResources)
+			.where(eq(schema.entitiesToResources.entityId, source)),
+	);
 }
 
 async function repointProjectsToOrganisationalUnits(
 	tx: Transaction,
 	source: string,
 	target: string,
+	summary: MergeSummary,
 ): Promise<void> {
 	// project endpoint (source is a project).
 	await tx.execute(sql`
@@ -144,9 +164,13 @@ async function repointProjectsToOrganisationalUnits(
 		where project_document_id = ${source}
 		on conflict do nothing
 	`);
-	await tx
-		.delete(schema.projectsToOrganisationalUnits)
-		.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"projects_to_organisational_units",
+		await tx
+			.delete(schema.projectsToOrganisationalUnits)
+			.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, source)),
+	);
 
 	// unit endpoint (source is an organisational unit).
 	await tx.execute(sql`
@@ -156,15 +180,20 @@ async function repointProjectsToOrganisationalUnits(
 		where unit_document_id = ${source}
 		on conflict do nothing
 	`);
-	await tx
-		.delete(schema.projectsToOrganisationalUnits)
-		.where(eq(schema.projectsToOrganisationalUnits.unitDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"projects_to_organisational_units",
+		await tx
+			.delete(schema.projectsToOrganisationalUnits)
+			.where(eq(schema.projectsToOrganisationalUnits.unitDocumentId, source)),
+	);
 }
 
 async function repointOrganisationalUnitsRelations(
 	tx: Transaction,
 	source: string,
 	target: string,
+	summary: MergeSummary,
 ): Promise<void> {
 	// unit endpoint. Skip rows that would become a self-relation with the target.
 	await tx.execute(sql`
@@ -174,9 +203,13 @@ async function repointOrganisationalUnitsRelations(
 		where unit_document_id = ${source} and related_unit_document_id not in (${source}, ${target})
 		on conflict do nothing
 	`);
-	await tx
-		.delete(schema.organisationalUnitsRelations)
-		.where(eq(schema.organisationalUnitsRelations.unitDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"organisational_units_to_units",
+		await tx
+			.delete(schema.organisationalUnitsRelations)
+			.where(eq(schema.organisationalUnitsRelations.unitDocumentId, source)),
+	);
 
 	// related-unit endpoint.
 	await tx.execute(sql`
@@ -186,15 +219,20 @@ async function repointOrganisationalUnitsRelations(
 		where related_unit_document_id = ${source} and unit_document_id not in (${source}, ${target})
 		on conflict do nothing
 	`);
-	await tx
-		.delete(schema.organisationalUnitsRelations)
-		.where(eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"organisational_units_to_units",
+		await tx
+			.delete(schema.organisationalUnitsRelations)
+			.where(eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, source)),
+	);
 }
 
 async function repointArticleContributors(
 	tx: Transaction,
 	source: string,
 	target: string,
+	summary: MergeSummary,
 ): Promise<void> {
 	// impact_case_studies_to_persons — article endpoint (source is an impact case study).
 	await tx.execute(sql`
@@ -204,9 +242,13 @@ async function repointArticleContributors(
 		where impact_case_study_document_id = ${source}
 		on conflict do nothing
 	`);
-	await tx
-		.delete(schema.impactCaseStudiesToPersons)
-		.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"impact_case_studies_to_persons",
+		await tx
+			.delete(schema.impactCaseStudiesToPersons)
+			.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId, source)),
+	);
 
 	// impact_case_studies_to_persons — person endpoint (source is a person).
 	await tx.execute(sql`
@@ -216,9 +258,13 @@ async function repointArticleContributors(
 		where person_document_id = ${source}
 		on conflict do nothing
 	`);
-	await tx
-		.delete(schema.impactCaseStudiesToPersons)
-		.where(eq(schema.impactCaseStudiesToPersons.personDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"impact_case_studies_to_persons",
+		await tx
+			.delete(schema.impactCaseStudiesToPersons)
+			.where(eq(schema.impactCaseStudiesToPersons.personDocumentId, source)),
+	);
 
 	// spotlight_articles_to_persons — article endpoint (source is a spotlight article).
 	await tx.execute(sql`
@@ -228,9 +274,13 @@ async function repointArticleContributors(
 		where spotlight_article_document_id = ${source}
 		on conflict do nothing
 	`);
-	await tx
-		.delete(schema.spotlightArticlesToPersons)
-		.where(eq(schema.spotlightArticlesToPersons.spotlightArticleDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"spotlight_articles_to_persons",
+		await tx
+			.delete(schema.spotlightArticlesToPersons)
+			.where(eq(schema.spotlightArticlesToPersons.spotlightArticleDocumentId, source)),
+	);
 
 	// spotlight_articles_to_persons — person endpoint (source is a person).
 	await tx.execute(sql`
@@ -240,87 +290,236 @@ async function repointArticleContributors(
 		where person_document_id = ${source}
 		on conflict do nothing
 	`);
-	await tx
-		.delete(schema.spotlightArticlesToPersons)
-		.where(eq(schema.spotlightArticlesToPersons.personDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"spotlight_articles_to_persons",
+		await tx
+			.delete(schema.spotlightArticlesToPersons)
+			.where(eq(schema.spotlightArticlesToPersons.personDocumentId, source)),
+	);
+}
+
+/** The report tables referencing a person↔org relation, and the column naming their report. */
+const personRelationReportTables = [
+	{
+		table: "country_report_contributions",
+		report: "country_report_id",
+		frozenRole: "contribution_role",
+	},
+	{
+		table: "working_group_report_chairs",
+		report: "working_group_report_id",
+		frozenRole: "chair_role",
+	},
+] as const;
+
+type PersonRelationEndpoint = "organisational_unit_document_id" | "person_document_id";
+
+/**
+ * Each person↔org relation whose `endpoint` is `source` that duplicates one whose `endpoint` is
+ * `target`, paired with the one it duplicates. `endpoint` and `other` are trusted column names,
+ * never user input.
+ */
+function getDuplicatePersonRelations(
+	endpoint: PersonRelationEndpoint,
+	other: PersonRelationEndpoint,
+	source: string,
+	target: string,
+): SQL {
+	const endpointColumn = sql.identifier(endpoint);
+	const otherColumn = sql.identifier(other);
+
+	return sql`
+		select distinct on (s.id) s.id as source_id, t.id as target_id
+		from persons_to_organisational_units s
+		join persons_to_organisational_units t
+			on t.${endpointColumn} = ${target}
+			and t.${otherColumn} = s.${otherColumn}
+			and t.role_type_id = s.role_type_id
+			and t.duration && s.duration
+		where s.${endpointColumn} = ${source}
+		order by s.id, t.id
+	`;
 }
 
 /**
- * Re-point person↔org relations. These carry children keyed by the relation row id
+ * Re-point person↔org relations. These carry report children keyed by the relation row id
  * (`country_report_contributions` and `working_group_report_chairs`), so the rows must be updated
- * in place (preserving the id) rather than re-inserted. A source row that would overlap an existing
- * target row (same other-endpoint + role + overlapping duration — the `person_org_role_no_overlap`
- * exclusion key) is deleted first (with its children, neither of which cascades), so the in-place
- * update cannot trip the exclusion constraint.
+ * in place (preserving the id) rather than re-inserted.
+ *
+ * A source row that would overlap an existing target row (same other endpoint + role + overlapping
+ * duration — the `person_org_role_no_overlap` exclusion key) is a duplicate of it: the source row
+ * is deleted so the in-place update cannot trip the exclusion constraint. Reports that referenced
+ * the duplicate are re-pointed onto the target row it duplicates first, so they keep listing the
+ * person — reports are never changed by deleting what they point to.
  */
 async function repointPersonsToOrganisationalUnits(
 	tx: Transaction,
 	source: string,
 	target: string,
+	summary: MergeSummary,
 ): Promise<void> {
 	// person endpoint (source is a person): collide on (org, role, duration).
-	const overlappingByPerson = sql`
-		select s.id from persons_to_organisational_units s
-		where s.person_document_id = ${source} and exists (
-			select 1 from persons_to_organisational_units t
-			where t.person_document_id = ${target}
-				and t.organisational_unit_document_id = s.organisational_unit_document_id
-				and t.role_type_id = s.role_type_id
-				and t.duration && s.duration
-		)
-	`;
-	await tx.execute(sql`
-		delete from country_report_contributions where person_to_org_unit_id in (${overlappingByPerson})
-	`);
-	await tx.execute(sql`
-		delete from working_group_report_chairs where person_to_org_unit_id in (${overlappingByPerson})
-	`);
-	await tx.execute(sql`
-		delete from persons_to_organisational_units s
-		where s.person_document_id = ${source} and exists (
-			select 1 from persons_to_organisational_units t
-			where t.person_document_id = ${target}
-				and t.organisational_unit_document_id = s.organisational_unit_document_id
-				and t.role_type_id = s.role_type_id
-				and t.duration && s.duration
-		)
-	`);
-	await tx
-		.update(schema.personsToOrganisationalUnits)
-		.set({ personDocumentId: target })
-		.where(eq(schema.personsToOrganisationalUnits.personDocumentId, source));
-
+	await repointPersonRelationEndpoint(
+		tx,
+		"person_document_id",
+		"organisational_unit_document_id",
+		source,
+		target,
+		summary,
+	);
 	// org endpoint (source is an organisational unit): collide on (person, role, duration).
-	const overlappingByOrg = sql`
-		select s.id from persons_to_organisational_units s
-		where s.organisational_unit_document_id = ${source} and exists (
-			select 1 from persons_to_organisational_units t
-			where t.organisational_unit_document_id = ${target}
-				and t.person_document_id = s.person_document_id
-				and t.role_type_id = s.role_type_id
-				and t.duration && s.duration
-		)
-	`;
-	await tx.execute(sql`
-		delete from country_report_contributions where person_to_org_unit_id in (${overlappingByOrg})
-	`);
-	await tx.execute(sql`
-		delete from working_group_report_chairs where person_to_org_unit_id in (${overlappingByOrg})
-	`);
-	await tx.execute(sql`
-		delete from persons_to_organisational_units s
-		where s.organisational_unit_document_id = ${source} and exists (
-			select 1 from persons_to_organisational_units t
-			where t.organisational_unit_document_id = ${target}
-				and t.person_document_id = s.person_document_id
-				and t.role_type_id = s.role_type_id
-				and t.duration && s.duration
-		)
-	`);
-	await tx
-		.update(schema.personsToOrganisationalUnits)
-		.set({ organisationalUnitDocumentId: target })
-		.where(eq(schema.personsToOrganisationalUnits.organisationalUnitDocumentId, source));
+	await repointPersonRelationEndpoint(
+		tx,
+		"organisational_unit_document_id",
+		"person_document_id",
+		source,
+		target,
+		summary,
+	);
+}
+
+/**
+ * Re-point the person↔org relations whose `endpoint` column is `source`. `endpoint` and `other` are
+ * trusted column names from {@link repointPersonsToOrganisationalUnits}, never user input.
+ */
+async function repointPersonRelationEndpoint(
+	tx: Transaction,
+	endpoint: PersonRelationEndpoint,
+	other: PersonRelationEndpoint,
+	source: string,
+	target: string,
+	summary: MergeSummary,
+): Promise<void> {
+	const endpointColumn = sql.identifier(endpoint);
+
+	const duplicates = getDuplicatePersonRelations(endpoint, other, source, target);
+
+	for (const { table, report, frozenRole } of personRelationReportTables) {
+		const reportTable = sql.identifier(table);
+		const reportColumn = sql.identifier(report);
+		const frozenRoleColumn = sql.identifier(frozenRole);
+
+		// Drop a report row that the re-point would duplicate: the report already lists the target
+		// relation, or another duplicate of it. The report keeps listing the person through that row.
+		addToMergeSummary(
+			summary,
+			table,
+			await tx.execute(sql`
+				with duplicates as (${duplicates})
+				delete from ${reportTable} r
+				using duplicates d
+				where r.person_to_org_unit_id = d.source_id and exists (
+					select 1 from ${reportTable} x
+					where x.${reportColumn} = r.${reportColumn}
+						and x.${frozenRoleColumn} is not distinct from r.${frozenRoleColumn}
+						and (
+							x.person_to_org_unit_id = d.target_id
+							or (
+								x.id < r.id
+								and x.person_to_org_unit_id in (
+									select source_id from duplicates where target_id = d.target_id
+								)
+							)
+						)
+				)
+			`),
+		);
+
+		addToMergeSummary(
+			summary,
+			table,
+			await tx.execute(sql`
+				with duplicates as (${duplicates})
+				update ${reportTable} r
+				set person_to_org_unit_id = d.target_id
+				from duplicates d
+				where r.person_to_org_unit_id = d.source_id
+			`),
+		);
+	}
+
+	addToMergeSummary(
+		summary,
+		"persons_to_organisational_units",
+		await tx.execute(sql`
+			with duplicates as (${duplicates})
+			delete from persons_to_organisational_units
+			where id in (select source_id from duplicates)
+		`),
+	);
+
+	addToMergeSummary(
+		summary,
+		"persons_to_organisational_units",
+		await tx.execute(sql`
+			update persons_to_organisational_units
+			set ${endpointColumn} = ${target}
+			where ${endpointColumn} = ${source}
+		`),
+	);
+}
+
+/** The `[endpoint, other]` columns of a person↔org relation that an entity of each type can be. */
+const personRelationEndpoints: Partial<
+	Record<AdaptedEntityType, [PersonRelationEndpoint, PersonRelationEndpoint]>
+> = {
+	organisational_units: ["organisational_unit_document_id", "person_document_id"],
+	persons: ["person_document_id", "organisational_unit_document_id"],
+};
+
+/**
+ * Reject relation collisions whose report rows freeze different historical roles. The report
+ * tables' unique keys do not allow both rows to point at the same surviving relation, so silently
+ * choosing either row would discard report history.
+ *
+ * Only persons and organisational units are endpoints of person↔org relations, so merges of other
+ * types have nothing to check.
+ */
+async function assertNoFrozenReportRoleConflicts(
+	tx: Transaction,
+	type: AdaptedEntityType,
+	source: string,
+	target: string,
+): Promise<void> {
+	const endpoints = personRelationEndpoints[type];
+	if (endpoints == null) {
+		return;
+	}
+
+	const duplicates = getDuplicatePersonRelations(...endpoints, source, target);
+
+	for (const { table, report, frozenRole } of personRelationReportTables) {
+		const reportTable = sql.identifier(table);
+		const reportColumn = sql.identifier(report);
+		const frozenRoleColumn = sql.identifier(frozenRole);
+		const conflict = await tx.execute(sql`
+			with duplicates as (${duplicates})
+			select 1
+			from ${reportTable} r
+			join duplicates d on r.person_to_org_unit_id = d.source_id
+			where exists (
+				select 1
+				from ${reportTable} x
+				where x.${reportColumn} = r.${reportColumn}
+					and x.${frozenRoleColumn} is distinct from r.${frozenRoleColumn}
+					and (
+						x.person_to_org_unit_id = d.target_id
+						or (
+							x.id < r.id
+							and x.person_to_org_unit_id in (
+								select source_id from duplicates where target_id = d.target_id
+							)
+						)
+					)
+			)
+			limit 1
+		`);
+
+		if (conflict.rows.length > 0) {
+			throw new UserFacingError("frozen-report-role-conflict");
+		}
+	}
 }
 
 /**
@@ -334,51 +533,88 @@ async function repointInPlaceReferences(
 	tx: Transaction,
 	source: string,
 	target: string,
+	summary: MergeSummary,
 ): Promise<void> {
-	await tx
-		.update(schema.servicesToOrganisationalUnits)
-		.set({ organisationalUnitDocumentId: target })
-		.where(eq(schema.servicesToOrganisationalUnits.organisationalUnitDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"services_to_organisational_units",
+		await tx
+			.update(schema.servicesToOrganisationalUnits)
+			.set({ organisationalUnitDocumentId: target })
+			.where(eq(schema.servicesToOrganisationalUnits.organisationalUnitDocumentId, source)),
+	);
 
-	await tx
-		.update(schema.countryReports)
-		.set({ countryDocumentId: target })
-		.where(eq(schema.countryReports.countryDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"country_reports",
+		await tx
+			.update(schema.countryReports)
+			.set({ countryDocumentId: target })
+			.where(eq(schema.countryReports.countryDocumentId, source)),
+	);
 
-	await tx
-		.update(schema.workingGroupReports)
-		.set({ workingGroupDocumentId: target })
-		.where(eq(schema.workingGroupReports.workingGroupDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"working_group_reports",
+		await tx
+			.update(schema.workingGroupReports)
+			.set({ workingGroupDocumentId: target })
+			.where(eq(schema.workingGroupReports.workingGroupDocumentId, source)),
+	);
 
-	await tx
-		.update(schema.countryReportProjectContributions)
-		.set({ projectDocumentId: target })
-		.where(eq(schema.countryReportProjectContributions.projectDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"country_report_project_contributions",
+		await tx
+			.update(schema.countryReportProjectContributions)
+			.set({ projectDocumentId: target })
+			.where(eq(schema.countryReportProjectContributions.projectDocumentId, source)),
+	);
 
-	await tx
-		.update(schema.countryReportInstitutions)
-		.set({ organisationalUnitDocumentId: target })
-		.where(eq(schema.countryReportInstitutions.organisationalUnitDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"country_report_institutions",
+		await tx
+			.update(schema.countryReportInstitutions)
+			.set({ organisationalUnitDocumentId: target })
+			.where(eq(schema.countryReportInstitutions.organisationalUnitDocumentId, source)),
+	);
 
-	await tx
-		.update(schema.reportingCampaignCountryThresholds)
-		.set({ countryDocumentId: target })
-		.where(eq(schema.reportingCampaignCountryThresholds.countryDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"reporting_campaign_country_thresholds",
+		await tx
+			.update(schema.reportingCampaignCountryThresholds)
+			.set({ countryDocumentId: target })
+			.where(eq(schema.reportingCampaignCountryThresholds.countryDocumentId, source)),
+	);
 
-	await tx
-		.update(schema.users)
-		.set({ personDocumentId: target })
-		.where(eq(schema.users.personDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"users",
+		await tx
+			.update(schema.users)
+			.set({ personDocumentId: target })
+			.where(eq(schema.users.personDocumentId, source)),
+	);
 
-	await tx
-		.update(schema.users)
-		.set({ organisationalUnitDocumentId: target })
-		.where(eq(schema.users.organisationalUnitDocumentId, source));
+	addToMergeSummary(
+		summary,
+		"users",
+		await tx
+			.update(schema.users)
+			.set({ organisationalUnitDocumentId: target })
+			.where(eq(schema.users.organisationalUnitDocumentId, source)),
+	);
 
-	await tx
-		.update(schema.navigationItems)
-		.set({ entityId: target })
-		.where(eq(schema.navigationItems.entityId, source));
+	addToMergeSummary(
+		summary,
+		"navigation_items",
+		await tx
+			.update(schema.navigationItems)
+			.set({ entityId: target })
+			.where(eq(schema.navigationItems.entityId, source)),
+	);
 }
 
 // ---------------------------------------------------------------------------
@@ -447,16 +683,19 @@ export async function mergeEntities(
 		source.type === target.type,
 		`Cannot merge entities of different types (${source.type} → ${target.type}).`,
 	);
+	await assertNoFrozenReportRoleConflicts(tx, source.type, sourceId, targetId);
 
-	await repointEntitiesToEntities(tx, sourceId, targetId);
-	await repointEntitiesToResources(tx, sourceId, targetId);
-	await repointProjectsToOrganisationalUnits(tx, sourceId, targetId);
-	await repointOrganisationalUnitsRelations(tx, sourceId, targetId);
-	await repointArticleContributors(tx, sourceId, targetId);
-	await repointPersonsToOrganisationalUnits(tx, sourceId, targetId);
-	await repointInPlaceReferences(tx, sourceId, targetId);
+	const summary: MergeSummary = {};
+
+	await repointEntitiesToEntities(tx, sourceId, targetId, summary);
+	await repointEntitiesToResources(tx, sourceId, targetId, summary);
+	await repointProjectsToOrganisationalUnits(tx, sourceId, targetId, summary);
+	await repointOrganisationalUnitsRelations(tx, sourceId, targetId, summary);
+	await repointArticleContributors(tx, sourceId, targetId, summary);
+	await repointPersonsToOrganisationalUnits(tx, sourceId, targetId, summary);
+	await repointInPlaceReferences(tx, sourceId, targetId, summary);
 
 	await deleteSourceDocument(tx, sourceId, source.type);
 
-	return { sourceId, targetId, type: source.type };
+	return { sourceId, targetId, type: source.type, summary };
 }

@@ -4,6 +4,7 @@ import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import slugify from "@sindresorhus/slugify";
 
+import { assertNotReferencedByReports } from "@/lib/data/report-references";
 import type { Transaction } from "@/lib/db";
 import { isUniqueViolation } from "@/lib/db/errors";
 import { asc, eq, inArray, or } from "@/lib/db/sql";
@@ -827,11 +828,13 @@ export async function assertDocumentNotLinkedToUser(
  * deleting the `entities` row — otherwise the delete aborts with a foreign-key violation. Reporting
  * org refs (country/working-group reports, institutions, thresholds) are intentionally NOT removed
  * here: like before this migration, a report blocks deletion of the org unit it is about; reports
- * are removed only by their own delete actions.
+ * are removed only by their own delete actions. Likewise, a document whose person↔org relations a
+ * report refers to cannot be deleted: reports are never changed as a side effect of a delete.
  */
 export async function deleteDocumentRelations(tx: Transaction, documentId: string): Promise<void> {
-	// Person↔org relations reference this document on either endpoint. Remove their report references
-	// first (no ON DELETE CASCADE), then the relation rows themselves.
+	await assertNotReferencedByReports(tx, { type: "document", id: documentId });
+
+	// Person↔org relations reference this document on either endpoint.
 	const personOrgRelations = await tx
 		.select({ id: schema.personsToOrganisationalUnits.id })
 		.from(schema.personsToOrganisationalUnits)
@@ -844,9 +847,7 @@ export async function deleteDocumentRelations(tx: Transaction, documentId: strin
 
 	if (personOrgRelations.length > 0) {
 		const relationIds = personOrgRelations.map((r) => r.id);
-		await tx
-			.delete(schema.countryReportContributions)
-			.where(inArray(schema.countryReportContributions.personToOrgUnitId, relationIds));
+		await assertNotReferencedByReports(tx, { type: "contributions", ids: relationIds });
 		await tx
 			.delete(schema.personsToOrganisationalUnits)
 			.where(inArray(schema.personsToOrganisationalUnits.id, relationIds));

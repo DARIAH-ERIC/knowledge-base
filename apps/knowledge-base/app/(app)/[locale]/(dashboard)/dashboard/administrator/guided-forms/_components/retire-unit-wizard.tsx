@@ -17,6 +17,7 @@ import type { CalendarDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useEffect, useState, useTransition } from "react";
 
+import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 import {
 	FormSection,
 	FormSectionTitle,
@@ -94,6 +95,7 @@ export function RetireUnitWizard(props: Readonly<RetireUnitWizardProps>): ReactN
 
 	const [preflight, setPreflight] = useState<RetireUnitPreflight | null>(null);
 	const [isPreflightPending, startPreflightTransition] = useTransition();
+	const [hasPreflightFailed, setHasPreflightFailed] = useState(false);
 
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [isSubmitPending, startSubmitTransition] = useTransition();
@@ -107,13 +109,18 @@ export function RetireUnitWizard(props: Readonly<RetireUnitWizardProps>): ReactN
 		}
 
 		startPreflightTransition(async () => {
-			const result = await retireUnitPreflightAction({
-				unitDocumentId: unit.id,
-				end: end.toString(),
-			});
+			setHasPreflightFailed(false);
+			try {
+				const result = await retireUnitPreflightAction({
+					unitDocumentId: unit.id,
+					end: end.toString(),
+				});
 
-			setPreflight(result);
-			setExcluded(new Set());
+				setPreflight(result);
+				setExcluded(new Set());
+			} catch {
+				setHasPreflightFailed(true);
+			}
 		});
 	}, [end, isReviewStep, unit]);
 
@@ -244,7 +251,13 @@ export function RetireUnitWizard(props: Readonly<RetireUnitWizardProps>): ReactN
 							/>
 						))}
 
-					{isPreflightPending || preflight == null ? (
+					{hasPreflightFailed ? (
+						<ActionErrorAlert
+							message={t(
+								"Could not check the change against the data-integrity rules. Please try again.",
+							)}
+						/>
+					) : isPreflightPending || preflight == null ? (
 						<div className="flex items-center gap-x-2 text-sm text-muted-fg">
 							<ProgressCircle aria-label={t("Checking...")} isIndeterminate={true} />
 							{t("Checking against the data-integrity rules...")}

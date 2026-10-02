@@ -1,6 +1,10 @@
 "use client";
 
-import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import {
+	type ActionState,
+	createActionStateInitial,
+	isActionStateError,
+} from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
@@ -565,7 +569,12 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
 						try {
-							await deleteContributionAction(id);
+							const state = await deleteContributionAction(id);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteError(message ?? t("Could not delete person relation. Please try again."));
+								return;
+							}
 							router.refresh();
 							setItemToDelete(null);
 						} catch {

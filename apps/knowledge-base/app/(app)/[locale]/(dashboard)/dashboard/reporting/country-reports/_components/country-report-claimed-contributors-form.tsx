@@ -16,7 +16,8 @@ import {
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
-import { getCompensationRoleLabel } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels";
+import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
+import { useCompensationRoleLabel } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels";
 import type { CompensationRole } from "@/lib/data/report-contributions";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
@@ -42,7 +43,7 @@ interface CountryReportClaimedContributorsFormProps {
 	};
 	availableContributions: Array<AvailableContribution>;
 	addAction: ServerAction;
-	deleteAction: (formData: FormData) => Promise<void>;
+	deleteAction: ServerAction;
 }
 
 export function CountryReportClaimedContributorsForm(
@@ -51,6 +52,7 @@ export function CountryReportClaimedContributorsForm(
 	const { report, availableContributions, addAction, deleteAction } = props;
 
 	const t = useExtracted();
+	const getCompensationRoleLabel = useCompensationRoleLabel();
 	const [state, action, isPending] = useActionState(addAction, createActionStateInitial());
 	const [selectedId, setSelectedId] = useState<string>("");
 
@@ -68,7 +70,7 @@ export function CountryReportClaimedContributorsForm(
 			{report.contributions.length > 0 && (
 				<ul className="divide-y divide-border rounded-md border">
 					{report.contributions.map((contribution) => {
-						const roleLabel = getCompensationRoleLabel(t, contribution.compensationRole);
+						const roleLabel = getCompensationRoleLabel(contribution.compensationRole);
 
 						return (
 							<li
@@ -84,18 +86,23 @@ export function CountryReportClaimedContributorsForm(
 										</span>
 									</div>
 								</div>
-								<form action={deleteAction}>
-									<input name="contributionId" type="hidden" value={contribution.id} />
-									<input name="countryReportId" type="hidden" value={report.id} />
-									<Button
-										className="text-danger hover:bg-danger/10 hover:text-danger"
-										intent="plain"
-										size="sm"
-										type="submit"
-									>
-										{t("Remove")}
-									</Button>
-								</form>
+								<ActionForm action={deleteAction}>
+									{(isPending) => (
+										<>
+											<input name="contributionId" type="hidden" value={contribution.id} />
+											<input name="countryReportId" type="hidden" value={report.id} />
+											<Button
+												isPending={isPending}
+												className="text-danger hover:bg-danger/10 hover:text-danger"
+												intent="plain"
+												size="sm"
+												type="submit"
+											>
+												{t("Remove")}
+											</Button>
+										</>
+									)}
+								</ActionForm>
 							</li>
 						);
 					})}
@@ -120,7 +127,7 @@ export function CountryReportClaimedContributorsForm(
 							<FieldError />
 							<SearchableSelectContent>
 								{availableContributions.map((candidate) => {
-									const roleLabel = getCompensationRoleLabel(t, candidate.compensationRole) ?? "";
+									const roleLabel = getCompensationRoleLabel(candidate.compensationRole) ?? "";
 									const label = `${candidate.personName} — ${roleLabel} (${candidate.organisationalUnitName})`;
 
 									return (

@@ -26,6 +26,7 @@ import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { deleteServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/delete-service.action";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
+import { runAction } from "@/lib/run-action";
 import { getServiceStatusLabel } from "@/lib/service-status-label";
 
 interface ServicesPageProps {
@@ -180,13 +181,16 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						try {
-							await deleteServiceAction(id);
-							router.refresh();
-							setItemToDelete(null);
-						} catch {
-							setDeleteError(t("Could not delete service. Please try again."));
+						const error = await runAction(
+							() => deleteServiceAction(id),
+							t("Could not delete service. Please try again."),
+						);
+						if (error != null) {
+							setDeleteError(error);
+							return;
 						}
+						router.refresh();
+						setItemToDelete(null);
 					});
 				}}
 			/>

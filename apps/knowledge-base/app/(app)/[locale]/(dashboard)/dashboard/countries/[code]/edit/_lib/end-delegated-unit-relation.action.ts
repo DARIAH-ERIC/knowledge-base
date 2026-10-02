@@ -1,51 +1,49 @@
 "use server";
 
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
 
 import { assertCanManageCountryInstitutionRelation } from "@/app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/authorize-country-institution-relation";
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAuthenticated } from "@/lib/auth/session";
-import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import { createCommandAction } from "@/lib/server/create-command-action";
 import { UserFacingError } from "@/lib/user-facing-error";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 /** Delegated counterpart of `endUnitRelationAction` for country partner-institution relations. */
-export async function endDelegatedUnitRelationAction(id: string, end: Date): Promise<void> {
-	const { user } = await assertAuthenticated();
+export const endDelegatedUnitRelationAction = createCommandAction({
+	requireAuth: true,
+	audit: { action: "relation_end", subjectType: "unit_relations" },
+	revalidate: "/[locale]/dashboard/countries",
 
-	const relation = await db.query.organisationalUnitsRelations.findFirst({
-		where: { id },
-		columns: { duration: true, unitDocumentId: true, relatedUnitDocumentId: true },
-	});
+	async mutate(tx, [id, end]: [string, Date], ctx) {
+		assert(ctx.user, "Not authenticated.");
 
-	if (relation == null) {
-		return;
-	}
+		const relation = await tx.query.organisationalUnitsRelations.findFirst({
+			where: { id },
+			columns: { duration: true, unitDocumentId: true, relatedUnitDocumentId: true },
+		});
+		if (relation == null) {
+			throw new UserFacingError("record-not-found");
+		}
 
-	await assertCanManageCountryInstitutionRelation(user, {
-		institutionDocumentId: relation.unitDocumentId,
-		relatedUnitDocumentId: relation.relatedUnitDocumentId,
-	});
+		await assertCanManageCountryInstitutionRelation(ctx.user, {
+			institutionDocumentId: relation.unitDocumentId,
+			relatedUnitDocumentId: relation.relatedUnitDocumentId,
+		});
 
-	if (end < relation.duration.start) {
-		throw new UserFacingError("relation-end-before-start");
-	}
+		if (end < relation.duration.start) {
+			throw new UserFacingError("relation-end-before-start");
+		}
 
-	await db
-		.update(schema.organisationalUnitsRelations)
-		.set({ duration: { start: relation.duration.start, end } })
-		.where(eq(schema.organisationalUnitsRelations.id, id));
+		await tx
+			.update(schema.organisationalUnitsRelations)
+			.set({ duration: { start: relation.duration.start, end } })
+			.where(eq(schema.organisationalUnitsRelations.id, id));
 
-	await recordAuditEvent(db, {
-		actorUserId: user.id,
-		action: "relation_end",
-		subjectType: "unit_relations",
-		subjectId: id,
-		summary: { end },
-	});
+		return { subjectId: id, auditSummary: { end } };
+	},
 
-	revalidatePath("/[locale]/dashboard/countries", "layout");
-	await dispatchWebhook({ tags: ["members-partners", "working-groups"] });
-}
+	async postCommit() {
+		await dispatchWebhook({ tags: ["members-partners", "working-groups"] });
+	},
+});

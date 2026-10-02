@@ -1,44 +1,39 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import { createCommandAction } from "@/lib/server/create-command-action";
 import { UserFacingError } from "@/lib/user-facing-error";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function endUnitRelationAction(id: string, end: Date): Promise<void> {
-	const auditSession = await assertAdmin();
+export const endUnitRelationAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "relation_end", subjectType: "unit_relations" },
+	revalidate: "/[locale]/dashboard/administrator",
 
-	const relation = await db.query.organisationalUnitsRelations.findFirst({
-		where: { id },
-		columns: { duration: true },
-	});
+	async mutate(tx, [id, end]: [string, Date]) {
+		const relation = await tx.query.organisationalUnitsRelations.findFirst({
+			where: { id },
+			columns: { duration: true },
+		});
+		if (relation == null) {
+			throw new UserFacingError("record-not-found");
+		}
 
-	if (relation == null) {
-		return;
-	}
+		if (end < relation.duration.start) {
+			throw new UserFacingError("relation-end-before-start");
+		}
 
-	if (end < relation.duration.start) {
-		throw new UserFacingError("relation-end-before-start");
-	}
+		await tx
+			.update(schema.organisationalUnitsRelations)
+			.set({ duration: { start: relation.duration.start, end } })
+			.where(eq(schema.organisationalUnitsRelations.id, id));
 
-	await db
-		.update(schema.organisationalUnitsRelations)
-		.set({ duration: { start: relation.duration.start, end } })
-		.where(eq(schema.organisationalUnitsRelations.id, id));
+		return { subjectId: id, auditSummary: { end } };
+	},
 
-	await recordAuditEvent(db, {
-		actorUserId: auditSession.user.id,
-		action: "relation_end",
-		subjectType: "unit_relations",
-		subjectId: id,
-		summary: { end },
-	});
-
-	revalidatePath("/[locale]/dashboard/administrator", "layout");
-	await dispatchWebhook({ tags: ["members-partners", "working-groups"] });
-}
+	async postCommit() {
+		await dispatchWebhook({ tags: ["members-partners", "working-groups"] });
+	},
+});

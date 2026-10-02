@@ -73,8 +73,9 @@ async function shouldInjectFailure(): Promise<boolean> {
  * audit) + post-commit fan-out + revalidate + redirect/return. Use for delete/publish/discard-style
  * actions that take a positional id argument rather than form data.
  *
- * Returns an ActionState: callers should check via `isActionStateError` and handle accordingly.
- * Internal errors (logged) come back as a generic "Internal server error" action state.
+ * Returns an ActionState: callers should check via `isActionStateError` and handle accordingly. A
+ * successful state carries the mutation's `successData`, if it set any. Internal errors (logged)
+ * come back as a generic "Internal server error" action state.
  */
 export function createCommandAction<
 	TArgs extends ReadonlyArray<unknown>,
@@ -155,57 +156,12 @@ export function createCommandAction<
 				redirect({ href, locale });
 			}
 
-			return createActionStateSuccess({});
+			return createActionStateSuccess({ data: result.successData });
 		} catch (error) {
 			rethrow(error);
 			log.error(error);
-			const message = getUserFacingErrorMessage(error, {
-				documentLinkedToUser: t(
-					"A user account is linked to this record. Update that user's linked person or country before deleting it.",
-				),
-				entityLinkedFromNavigation: t(
-					"This record is linked from a navigation menu. Remove the navigation link before deleting it.",
-				),
-				entitySlugConflict: t("An entity with this slug already exists."),
-				uniqueConflict: t("A record with these values already exists."),
-				missingRelatedRecord: t(
-					"A related record no longer exists. Refresh the page and try again.",
-				),
-				navigationItemChildWithoutLink: t(
-					"An item inside a dropdown must link to a page or a url.",
-				),
-				navigationItemInvalidParent: t(
-					"Child items can only be added to a top-level item that does not link anywhere itself.",
-				),
-				navigationItemLinkWithChildren: t(
-					"This item opens a dropdown, so it cannot link anywhere itself. Remove its child items first.",
-				),
-				publishedSlugRename: t(
-					"This entity is published, so its address can only be changed by an administrator on the Maintenance page.",
-				),
-				recordConflict: t("This record conflicts with an existing record."),
-				missingDariahEric: t(
-					"The DARIAH-EU organisational unit could not be found, so this relation cannot be recorded.",
-				),
-				missingPairedRelationUnit: t(
-					"The governance body this role must also be recorded against could not be found.",
-				),
-				relationEndBeforeStart: t("The end date must be on or after the start of the relation."),
-				relationNotEndable: t(
-					"This relation is not one this form can end, or it has already been ended. Refresh the page and try again.",
-				),
-				relationPeriodOverlap: t(
-					"This relation already exists during an overlapping period. Adjust the dates and try again.",
-				),
-				serviceKpiConflict: t(
-					"Both services have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge.",
-				),
-				slugTooLong: t("This slug is too long to be used as a web address. Please shorten it."),
-				socialMediaKpiConflict: t(
-					"Both accounts have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge.",
-				),
-				invalidData: t("The submitted data violates a data rule."),
-				missingData: t("The submitted data is incomplete."),
+			const message = await getUserFacingErrorMessage(error, {
+				isDelete: opts.audit.action === "delete",
 			});
 			return createActionStateError<TValidationErrors>({
 				message: message ?? t("Internal server error."),

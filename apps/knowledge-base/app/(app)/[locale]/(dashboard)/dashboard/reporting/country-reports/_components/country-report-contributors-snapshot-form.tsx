@@ -9,7 +9,7 @@ import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
 
-import { getCompensationRoleLabel } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels";
+import { useCompensationRoleLabel } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels";
 import type { CompensationRole } from "@/lib/data/report-contributions";
 import { LocaleLink } from "@/lib/navigation/navigation";
 import type { ServerAction } from "@/lib/server/create-server-action";
@@ -43,6 +43,7 @@ export function CountryReportContributorsSnapshotForm(
 	const { countryReportId, contributors, missing, canManageRelations, refreshAction } = props;
 
 	const t = useExtracted();
+	const getCompensationRoleLabel = useCompensationRoleLabel();
 	const [state, action, isPending] = useActionState(refreshAction, createActionStateInitial());
 
 	const hasContent = contributors.length > 0 || missing.length > 0;
@@ -69,7 +70,7 @@ export function CountryReportContributorsSnapshotForm(
 			{contributors.length > 0 && (
 				<ul className="divide-y divide-border rounded-md border">
 					{contributors.map((contributor) => {
-						const roleLabel = getCompensationRoleLabel(t, contributor.compensationRole);
+						const roleLabel = getCompensationRoleLabel(contributor.compensationRole);
 
 						return (
 							<li
@@ -117,7 +118,7 @@ export function CountryReportContributorsSnapshotForm(
 									<p className="text-sm font-medium text-fg">{contributor.personName}</p>
 									<div className="flex flex-wrap items-center gap-2">
 										<Badge intent="info">
-											{getCompensationRoleLabel(t, contributor.compensationRole)}
+											{getCompensationRoleLabel(contributor.compensationRole)}
 										</Badge>
 									</div>
 								</div>

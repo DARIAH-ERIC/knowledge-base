@@ -1,6 +1,10 @@
 "use client";
 
-import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import {
+	type ActionState,
+	createActionStateError,
+	createActionStateInitial,
+} from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
@@ -33,6 +37,7 @@ import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
@@ -48,6 +53,7 @@ import {
 	type OrganisationalUnitOption,
 	toOrganisationalUnitDocumentOptionsPage,
 } from "@/lib/organisational-unit-options";
+import { runAction } from "@/lib/run-action";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 /**
@@ -58,8 +64,8 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 export interface UnitRelationActions {
 	create: ServerAction;
 	update: ServerAction;
-	end: (id: string, end: Date) => Promise<void>;
-	delete: (id: string) => Promise<void>;
+	end: (id: string, end: Date) => Promise<ActionState>;
+	delete: (id: string) => Promise<ActionState>;
 }
 
 /** Core, editable metadata of a source unit, used by the optional create/edit affordances. */
@@ -186,7 +192,11 @@ export function ReverseUnitRelationsSection(
 
 	const [localRelations, setLocalRelations] = useState(relations);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string; start: Date } | null>(null);
+	const [endError, setEndError] = useState<string | null>(null);
+	const [isEndPending, startEndTransition] = useTransition();
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
+	const [isDeletePending, startDeleteTransition] = useTransition();
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 	const minEndDate = dateToCalendarDate(itemToEnd?.start);
 
@@ -355,10 +365,22 @@ export function ReverseUnitRelationsSection(
 		setIsEditUnitFieldsLoading(true);
 
 		startTransition(async () => {
-			const fields = await editSourceUnit.getFields(relation.unitDocumentId);
-			setEditUnitFields(
-				fields ?? { name: relation.unitName, acronym: null, ror: null, summary: null },
-			);
+			try {
+				const fields = await editSourceUnit.getFields(relation.unitDocumentId);
+				setEditUnitFields(
+					fields ?? { name: relation.unitName, acronym: null, ror: null, summary: null },
+				);
+			} catch {
+				// Fall back to the values shown in the table, so the form stays usable.
+				setEditUnitFields({ name: relation.unitName, acronym: null, ror: null, summary: null });
+				setEditUnitState(
+					createActionStateError({
+						message: t(
+							"Could not load the current organisation details. Showing the values from the table.",
+						),
+					}),
+				);
+			}
 			setIsEditUnitFieldsLoading(false);
 		});
 	}
@@ -613,8 +635,9 @@ export function ReverseUnitRelationsSection(
 			<ModalContent
 				isOpen={itemToEnd != null}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isEndPending) {
 						setItemToEnd(null);
+						setEndError(null);
 					}
 				}}
 				role="alertdialog"
@@ -624,7 +647,7 @@ export function ReverseUnitRelationsSection(
 					description={t("Set the date on which this relation ended.")}
 					title={t("End relation")}
 				/>
-				<ModalBody>
+				<ModalBody className="flex flex-col gap-y-4">
 					<DatePicker
 						granularity="day"
 						minValue={minEndDate ?? undefined}
@@ -636,10 +659,12 @@ export function ReverseUnitRelationsSection(
 						<Label>{t("End date")}</Label>
 						<DatePickerTrigger />
 					</DatePicker>
+					<ActionErrorAlert message={endError} />
 				</ModalBody>
 				<ModalFooter>
-					<ModalClose>{t("Cancel")}</ModalClose>
+					<ModalClose isDisabled={isEndPending}>{t("Cancel")}</ModalClose>
 					<Button
+						isPending={isEndPending}
 						isDisabled={
 							selectedEndDate == null ||
 							(minEndDate != null && selectedEndDate.compare(minEndDate) < 0)
@@ -651,8 +676,15 @@ export function ReverseUnitRelationsSection(
 
 							const end = selectedEndDate.toDate("UTC");
 
-							startTransition(async () => {
-								await actions.end(itemToEnd.id, end);
+							startEndTransition(async () => {
+								const error = await runAction(
+									() => actions.end(itemToEnd.id, end),
+									t("Could not end relation. Please try again."),
+								);
+								if (error != null) {
+									setEndError(error);
+									return;
+								}
 								setLocalRelations((prev) =>
 									prev.map((relation) =>
 										relation.id === itemToEnd.id
@@ -780,8 +812,9 @@ export function ReverseUnitRelationsSection(
 			<ModalContent
 				isOpen={itemToDelete != null}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
+						setDeleteError(null);
 					}
 				}}
 				role="alertdialog"
@@ -791,9 +824,15 @@ export function ReverseUnitRelationsSection(
 					description={t("This will permanently delete this relation.")}
 					title={t("Delete relation")}
 				/>
+				{deleteError != null ? (
+					<ModalBody>
+						<ActionErrorAlert message={deleteError} />
+					</ModalBody>
+				) : null}
 				<ModalFooter>
-					<ModalClose>{t("Cancel")}</ModalClose>
+					<ModalClose isDisabled={isDeletePending}>{t("Cancel")}</ModalClose>
 					<Button
+						isPending={isDeletePending}
 						intent="danger"
 						onPress={() => {
 							if (itemToDelete == null) {
@@ -801,8 +840,15 @@ export function ReverseUnitRelationsSection(
 							}
 
 							const id = itemToDelete.id;
-							startTransition(async () => {
-								await actions.delete(id);
+							startDeleteTransition(async () => {
+								const error = await runAction(
+									() => actions.delete(id),
+									t("Could not delete relation. Please try again."),
+								);
+								if (error != null) {
+									setDeleteError(error);
+									return;
+								}
 								setLocalRelations((prev) => prev.filter((relation) => relation.id !== id));
 								setItemToDelete(null);
 							});

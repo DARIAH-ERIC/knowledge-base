@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/u
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface AvailableSocialMedia {
@@ -31,7 +32,7 @@ interface WorkingGroupReportSocialMediaFormProps {
 	};
 	availableSocialMedia: Array<AvailableSocialMedia>;
 	addAction: ServerAction;
-	deleteAction: (formData: FormData) => Promise<void>;
+	deleteAction: ServerAction;
 }
 
 export function WorkingGroupReportSocialMediaForm(
@@ -57,13 +58,17 @@ export function WorkingGroupReportSocialMediaForm(
 										<p className="text-xs text-muted-fg">{claimed.socialMedia.url}</p>
 									)}
 								</div>
-								<form action={deleteAction}>
-									<input name="claimedId" type="hidden" value={claimed.id} />
-									<input name="workingGroupReportId" type="hidden" value={report.id} />
-									<Button intent="danger" size="sm" type="submit">
-										{t("Remove")}
-									</Button>
-								</form>
+								<ActionForm action={deleteAction}>
+									{(isPending) => (
+										<>
+											<input name="claimedId" type="hidden" value={claimed.id} />
+											<input name="workingGroupReportId" type="hidden" value={report.id} />
+											<Button isPending={isPending} intent="danger" size="sm" type="submit">
+												{t("Remove")}
+											</Button>
+										</>
+									)}
+								</ActionForm>
 							</li>
 						))}
 					</ul>

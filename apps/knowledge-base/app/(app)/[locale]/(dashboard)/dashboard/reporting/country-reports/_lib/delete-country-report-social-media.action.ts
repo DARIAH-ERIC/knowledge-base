@@ -1,32 +1,34 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 
-import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertCan, assertReportEditable } from "@/lib/auth/permissions";
-import { assertAuthenticated } from "@/lib/auth/session";
 import { countryReportRevalidatePaths } from "@/lib/data/reporting-urls";
-import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { UserFacingError } from "@/lib/user-facing-error";
 
-export async function deleteCountryReportSocialMediaAction(formData: FormData): Promise<void> {
-	if (!(await globalPostRequestRateLimit())) {
-		return;
-	}
+const InputSchema = v.object({
+	membershipId: v.pipe(v.string(), v.uuid()),
+	countryReportId: v.pipe(v.string(), v.uuid()),
+});
 
-	const membershipId = formData.get("membershipId");
-	const countryReportId = formData.get("countryReportId");
-	if (typeof membershipId !== "string" || typeof countryReportId !== "string") {
-		return;
-	}
+export const deleteCountryReportSocialMediaAction = createMutationAction({
+	schema: InputSchema,
+	requireAuth: true,
+	audit: { action: "delete", subjectType: "country_reports" },
+	revalidate: countryReportRevalidatePaths,
 
-	const { user } = await assertAuthenticated();
-	await assertCan(user, "update", { type: "country_report", id: countryReportId });
-	await assertReportEditable(user, { type: "country_report", id: countryReportId });
+	async preCheck({ input, ctx }) {
+		await assertCan(ctx.user, "update", { type: "country_report", id: input.countryReportId });
+		await assertReportEditable(ctx.user, { type: "country_report", id: input.countryReportId });
+		return undefined;
+	},
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, input) {
+		const { membershipId, countryReportId } = input;
+
 		// Scope by both ids so a row can only be removed via the report it belongs to (the authz check is
 		// on countryReportId, so matching the membership id alone would allow cross-report deletes).
 		const membership = await tx.query.countryReportSocialMedia.findFirst({
@@ -34,7 +36,7 @@ export async function deleteCountryReportSocialMediaAction(formData: FormData): 
 			columns: { socialMediaId: true },
 		});
 		if (membership == null) {
-			return;
+			throw new UserFacingError("record-not-found");
 		}
 
 		// Remove the account's KPI values for this report along with the membership.
@@ -55,17 +57,7 @@ export async function deleteCountryReportSocialMediaAction(formData: FormData): 
 					eq(schema.countryReportSocialMedia.countryReportId, countryReportId),
 				),
 			);
-	});
 
-	await recordAuditEvent(db, {
-		actorUserId: user.id,
-		action: "delete",
-		subjectType: "country_reports",
-		subjectId: countryReportId,
-		summary: getAuditSummaryFromFormData(formData),
-	});
-
-	for (const path of countryReportRevalidatePaths) {
-		revalidatePath(path, "layout");
-	}
-}
+		return { subjectId: countryReportId };
+	},
+});

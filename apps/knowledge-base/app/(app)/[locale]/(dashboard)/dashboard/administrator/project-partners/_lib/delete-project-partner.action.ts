@@ -1,34 +1,29 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
-import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function deleteProjectPartnerAction(id: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const deleteProjectPartnerAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "delete", subjectType: "project_partners" },
+	revalidate: "/[locale]/dashboard/administrator",
 
-	// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
-	const subjectLabel = await resolveAuditSubjectLabel("project_partners", id);
+	async mutate(tx, [id]: [string]) {
+		// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
+		const subjectLabel = await resolveAuditSubjectLabel("project_partners", id, tx);
 
-	await db
-		.delete(schema.projectsToOrganisationalUnits)
-		.where(eq(schema.projectsToOrganisationalUnits.id, id));
+		await tx
+			.delete(schema.projectsToOrganisationalUnits)
+			.where(eq(schema.projectsToOrganisationalUnits.id, id));
 
-	await recordAuditEvent(db, {
-		actorUserId: auditSession.user.id,
-		action: "delete",
-		subjectType: "project_partners",
-		subjectId: id,
-		subjectLabel,
-		summary: {},
-	});
+		return { subjectId: id, subjectLabel };
+	},
 
-	revalidatePath("/[locale]/dashboard/administrator", "layout");
-	await dispatchWebhook({ tags: ["projects"] });
-}
+	async postCommit() {
+		await dispatchWebhook({ tags: ["projects"] });
+	},
+});

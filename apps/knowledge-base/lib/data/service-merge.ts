@@ -1,6 +1,7 @@
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
+import { type MergeSummary, addToMergeSummary } from "@/lib/data/merge-summary";
 import type { Transaction } from "@/lib/db";
 import { eq, sql } from "@/lib/db/sql";
 import { UserFacingError } from "@/lib/user-facing-error";
@@ -18,6 +19,7 @@ export interface MergeServicesResult {
 	targetId: string;
 	source: ServiceIdentity;
 	target: ServiceIdentity;
+	summary: MergeSummary;
 }
 
 /**
@@ -110,10 +112,11 @@ async function assertNoKpiConflicts(
  */
 async function repointLinks(
 	tx: Transaction,
-	table: string,
+	table: (typeof linkTables)[number]["table"],
 	columns: ReadonlyArray<string>,
 	source: string,
 	target: string,
+	summary: MergeSummary,
 ): Promise<void> {
 	const linkTable = sql.identifier(table);
 	const sameLink = sql.join(
@@ -124,17 +127,25 @@ async function repointLinks(
 		sql` and `,
 	);
 
-	await tx.execute(sql`
+	addToMergeSummary(
+		summary,
+		table,
+		await tx.execute(sql`
 		delete from ${linkTable} src
 		where src.service_id = ${source} and exists (
 			select 1 from ${linkTable} tgt
 			where tgt.service_id = ${target} and ${sameLink}
 		)
-	`);
+	`),
+	);
 
-	await tx.execute(sql`
+	addToMergeSummary(
+		summary,
+		table,
+		await tx.execute(sql`
 		update ${linkTable} set service_id = ${target} where service_id = ${source}
-	`);
+	`),
+	);
 }
 
 /**
@@ -142,11 +153,10 @@ async function repointLinks(
  * `targetId`, then delete the emptied source row. The target keeps its own name, type, status,
  * marketplace id, and flags — none of the source's fields are merged.
  *
- * This is the safe counterpart to deleting a service outright: `deleteServiceAction` drops the
- * source's country-report rows along with it, so a service that a past report reported KPIs against
- * takes that reporting history with it. Merging carries the history onto the canonical service
- * instead, which is what makes retiring a `needs_review` service (one the SSHOC marketplace no
- * longer lists) safe.
+ * This is the way to retire a service that reports refer to: `deleteServiceAction` refuses to
+ * delete a service any country report points at, since that would change the report. Merging
+ * carries the reporting history onto the canonical service instead, which is what makes retiring a
+ * `needs_review` service (one the SSHOC marketplace no longer lists) safe.
  *
  * Like social media, a service is a plain record: no versions, fields, or content blocks to tear
  * down, and it is not part of the website search index. Services of different types and statuses
@@ -178,16 +188,22 @@ export async function mergeServices(
 
 	await assertNoKpiConflicts(tx, sourceId, targetId);
 
+	const summary: MergeSummary = {};
+
 	for (const { table, columns } of linkTables) {
-		await repointLinks(tx, table, columns, sourceId, targetId);
+		await repointLinks(tx, table, columns, sourceId, targetId, summary);
 	}
 
-	await tx
-		.update(schema.countryReportServiceKpis)
-		.set({ serviceId: targetId })
-		.where(eq(schema.countryReportServiceKpis.serviceId, sourceId));
+	addToMergeSummary(
+		summary,
+		"country_report_service_kpis",
+		await tx
+			.update(schema.countryReportServiceKpis)
+			.set({ serviceId: targetId })
+			.where(eq(schema.countryReportServiceKpis.serviceId, sourceId)),
+	);
 
 	await tx.delete(schema.services).where(eq(schema.services.id, sourceId));
 
-	return { sourceId, targetId, source, target };
+	return { sourceId, targetId, source, target, summary };
 }

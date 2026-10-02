@@ -12,6 +12,7 @@ import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
 import type {
 	AvailableSocialMediaAccount,
 	ReportSocialMediaAccount,
@@ -40,7 +41,7 @@ interface CountryReportSocialMediaFormProps {
 	saveKpisAction: ServerAction;
 	addAction: ServerAction;
 	createAction: ServerAction;
-	deleteAction: (formData: FormData) => Promise<void>;
+	deleteAction: ServerAction;
 }
 
 export function CountryReportSocialMediaForm(
@@ -136,7 +137,7 @@ interface AccountCardProps {
 	account: ReportSocialMediaAccount;
 	reportId: string;
 	kpiCategories: ReadonlyArray<SocialMediaKpiCategory>;
-	deleteAction: (formData: FormData) => Promise<void>;
+	deleteAction: ServerAction;
 }
 
 interface MetricRow {
@@ -178,18 +179,23 @@ function AccountCard(props: Readonly<AccountCardProps>): ReactNode {
 					<p className="text-sm font-medium text-fg">{account.name}</p>
 					<p className="text-xs text-muted-fg">{account.url}</p>
 				</div>
-				<form action={deleteAction}>
-					<input name="membershipId" type="hidden" value={account.id} />
-					<input name="countryReportId" type="hidden" value={reportId} />
-					<Button
-						className="text-danger hover:bg-danger/10 hover:text-danger"
-						intent="plain"
-						size="sm"
-						type="submit"
-					>
-						{t("Remove")}
-					</Button>
-				</form>
+				<ActionForm action={deleteAction}>
+					{(isPending) => (
+						<>
+							<input name="membershipId" type="hidden" value={account.id} />
+							<input name="countryReportId" type="hidden" value={reportId} />
+							<Button
+								isPending={isPending}
+								className="text-danger hover:bg-danger/10 hover:text-danger"
+								intent="plain"
+								size="sm"
+								type="submit"
+							>
+								{t("Remove")}
+							</Button>
+						</>
+					)}
+				</ActionForm>
 			</div>
 
 			{metrics.length > 0 && (

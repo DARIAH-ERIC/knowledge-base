@@ -22,12 +22,14 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 import {
 	FormLayout,
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import type { AvailablePerson } from "@/lib/data/article-contributors";
+import { runAction } from "@/lib/run-action";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface Contributor {
@@ -42,7 +44,7 @@ interface ArticleContributorsSectionProps {
 	initialPersonItems: Array<AvailablePerson>;
 	initialPersonTotal: number;
 	createAction: ServerAction;
-	deleteAction: (articleId: string, personId: string) => Promise<void>;
+	deleteAction: (articleId: string, personId: string) => Promise<ActionState>;
 }
 
 async function fetchPersonOptionsPage(
@@ -94,6 +96,7 @@ export function ArticleContributorsSection(
 
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 
 	function formAction(formData: FormData) {
 		const role = selectedRole;
@@ -121,6 +124,8 @@ export function ArticleContributorsSection(
 					<FormSectionTitle title={t("Contributors")} />
 				</div>
 
+				<ActionErrorAlert message={deleteError} />
+
 				{localContributors.length > 0 ? (
 					<Table aria-label="contributors" className="[--gutter:0] sm:[--gutter:0]">
 						<TableHeader>
@@ -139,8 +144,16 @@ export function ArticleContributorsSection(
 											className="block-7 sm:block-7"
 											intent="plain"
 											onPress={() => {
+												setDeleteError(null);
 												startTransition(async () => {
-													await deleteAction(articleId, contributor.personId);
+													const error = await runAction(
+														() => deleteAction(articleId, contributor.personId),
+														t("Could not remove contributor. Please try again."),
+													);
+													if (error != null) {
+														setDeleteError(error);
+														return;
+													}
 													setLocalContributors((prev) =>
 														prev.filter((c) => c.personId !== contributor.personId),
 													);

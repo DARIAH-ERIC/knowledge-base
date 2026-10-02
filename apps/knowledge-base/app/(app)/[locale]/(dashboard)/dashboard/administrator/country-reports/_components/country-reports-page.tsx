@@ -25,6 +25,7 @@ import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { deleteCountryReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/delete-country-report.action";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
+import { runAction } from "@/lib/run-action";
 import type { ListSortDirection } from "@/lib/server/list-search-params";
 
 type CountryReportRow = Pick<schema.CountryReport, "id" | "status"> & {
@@ -151,13 +152,16 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveReport(id);
-						try {
-							await deleteCountryReportAction(id);
-							router.refresh();
-							setItemToDelete(null);
-						} catch {
-							setDeleteError(t("Could not delete country report. Please try again."));
+						const error = await runAction(
+							() => deleteCountryReportAction(id),
+							t("Could not delete country report. Please try again."),
+						);
+						if (error != null) {
+							setDeleteError(error);
+							return;
 						}
+						router.refresh();
+						setItemToDelete(null);
 					});
 				}}
 			/>

@@ -2,6 +2,7 @@
 
 import { resolveEntityDocumentLabel } from "@/lib/data/audit-log";
 import { mergeEntities } from "@/lib/data/entity-merge";
+import type { MergeSummary } from "@/lib/data/merge-summary";
 import {
 	type WebsiteDocumentDescriptor,
 	deleteWebsiteDocument,
@@ -19,6 +20,8 @@ interface MergeEntitiesActionResult {
 	/** The soon-to-be-deleted source's website document — removed after the merge commits. */
 	sourceDescriptor: WebsiteDocumentDescriptor | null;
 	auditSummary: Record<string, unknown>;
+	/** What the merge re-pointed, listed in the UI once it succeeds. */
+	successData: { summary: MergeSummary };
 }
 
 export const mergeEntitiesAction = createCommandAction({
@@ -43,7 +46,13 @@ export const mergeEntitiesAction = createCommandAction({
 			targetId: result.targetId,
 			entityType: result.type,
 			sourceDescriptor,
-			auditSummary: { sourceId, targetId: result.targetId, type: result.type },
+			auditSummary: {
+				sourceId,
+				targetId: result.targetId,
+				type: result.type,
+				repointed: result.summary,
+			},
+			successData: { summary: result.summary },
 		};
 	},
 

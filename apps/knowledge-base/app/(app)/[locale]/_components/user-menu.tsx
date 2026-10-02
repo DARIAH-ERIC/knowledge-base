@@ -11,6 +11,7 @@ import {
 	MenuSeparator,
 	MenuTrigger,
 } from "@dariah-eric/ui/menu";
+import { queue } from "@dariah-eric/ui/toast";
 import {
 	CommandLineIcon as IconCommandMenu,
 	EnvelopeIcon as IconContact,
@@ -23,9 +24,10 @@ import {
 	ScaleIcon as IconTermsOfUse,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode } from "react";
+import { Fragment, type ReactNode, startTransition } from "react";
 
 import { signOutAction } from "@/lib/auth/sign-out.action";
+import { runAction } from "@/lib/run-action";
 
 interface UserMenuProps {
 	/** Only the dashboard has a command palette to open. */
@@ -109,7 +111,15 @@ export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 
 				<MenuItem
 					onAction={() => {
-						void signOutAction();
+						startTransition(async () => {
+							const error = await runAction(
+								() => signOutAction(),
+								t("Could not sign out. Please try again."),
+							);
+							if (error != null) {
+								queue.add({ title: error }, { timeout: 5000 });
+							}
+						});
 					}}
 				>
 					<IconSignOut />
