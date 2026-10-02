@@ -25,6 +25,7 @@ import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { deleteReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/delete-reporting-campaign.action";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
+import { runAction } from "@/lib/run-action";
 import type { ListSortDirection } from "@/lib/server/list-search-params";
 
 interface ReportingCampaignsPageProps {
@@ -146,13 +147,16 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveCampaign(id);
-						try {
-							await deleteReportingCampaignAction(id);
-							router.refresh();
-							setItemToDelete(null);
-						} catch {
-							setDeleteError(t("Could not delete reporting campaign. Please try again."));
+						const error = await runAction(
+							() => deleteReportingCampaignAction(id),
+							t("Could not delete reporting campaign. Please try again."),
+						);
+						if (error != null) {
+							setDeleteError(error);
+							return;
 						}
+						router.refresh();
+						setItemToDelete(null);
 					});
 				}}
 			/>

@@ -49,6 +49,7 @@ import {
 	type OrganisationalUnitOption,
 	toOrganisationalUnitDocumentOptionsPage,
 } from "@/lib/organisational-unit-options";
+import { runAction } from "@/lib/run-action";
 
 interface ProjectPartnersPageProps {
 	projectPartners: ProjectPartnersResult;
@@ -487,13 +488,16 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						try {
-							await deleteProjectPartnerAction(id);
-							router.refresh();
-							setItemToDelete(null);
-						} catch {
-							setDeleteError(t("Could not delete project partner. Please try again."));
+						const error = await runAction(
+							() => deleteProjectPartnerAction(id),
+							t("Could not delete project partner. Please try again."),
+						);
+						if (error != null) {
+							setDeleteError(error);
+							return;
 						}
+						router.refresh();
+						setItemToDelete(null);
 					});
 				}}
 			/>

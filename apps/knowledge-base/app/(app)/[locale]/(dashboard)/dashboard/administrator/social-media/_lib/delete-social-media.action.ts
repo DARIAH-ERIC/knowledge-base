@@ -1,30 +1,25 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
-import { db } from "@/lib/db";
+import { assertNotReferencedByReports } from "@/lib/data/report-references";
 import { eq } from "@/lib/db/sql";
+import { createCommandAction } from "@/lib/server/create-command-action";
 
-export async function deleteSocialMediaAction(id: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const deleteSocialMediaAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "delete", subjectType: "social_media" },
+	revalidate: "/[locale]/dashboard/administrator/social-media",
 
-	// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
-	const subjectLabel = await resolveAuditSubjectLabel("social_media", id);
+	async mutate(tx, [id]: [string]) {
+		await assertNotReferencedByReports(tx, { type: "social_media", id });
 
-	await db.delete(schema.socialMedia).where(eq(schema.socialMedia.id, id));
+		// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
+		const subjectLabel = await resolveAuditSubjectLabel("social_media", id, tx);
 
-	await recordAuditEvent(db, {
-		actorUserId: auditSession.user.id,
-		action: "delete",
-		subjectType: "social_media",
-		subjectId: id,
-		subjectLabel,
-		summary: {},
-	});
+		await tx.delete(schema.socialMedia).where(eq(schema.socialMedia.id, id));
 
-	revalidatePath("/[locale]/dashboard/administrator/social-media", "layout");
-}
+		return { subjectId: id, subjectLabel };
+	},
+});

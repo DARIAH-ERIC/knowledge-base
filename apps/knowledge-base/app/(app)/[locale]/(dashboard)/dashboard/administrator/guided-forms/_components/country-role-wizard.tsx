@@ -19,6 +19,7 @@ import type { CalendarDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useEffect, useState, useTransition } from "react";
 
+import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
 import {
 	FormSection,
@@ -170,6 +171,7 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 
 	const [preflight, setPreflight] = useState<WizardPreflight | null>(null);
 	const [isPreflightPending, startPreflightTransition] = useTransition();
+	const [hasPreflightFailed, setHasPreflightFailed] = useState(false);
 
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [isSubmitPending, startSubmitTransition] = useTransition();
@@ -199,9 +201,14 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 		}
 
 		startPreflightTransition(async () => {
-			const result = await openCountryRoleAppointmentsAction(person.id);
-			setAppointments(result);
-			setAppointmentId(result.length === 1 ? (result[0]?.id ?? null) : null);
+			setHasPreflightFailed(false);
+			try {
+				const result = await openCountryRoleAppointmentsAction(person.id);
+				setAppointments(result);
+				setAppointmentId(result.length === 1 ? (result[0]?.id ?? null) : null);
+			} catch {
+				setHasPreflightFailed(true);
+			}
 		});
 	}, [isEndMode, person]);
 
@@ -211,12 +218,17 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 		}
 
 		startPreflightTransition(async () => {
-			const result = await endCountryRolePreflightAction({
-				appointmentId,
-				end: endDate.toString(),
-			});
+			setHasPreflightFailed(false);
+			try {
+				const result = await endCountryRolePreflightAction({
+					appointmentId,
+					end: endDate.toString(),
+				});
 
-			setEndPreflight(result);
+				setEndPreflight(result);
+			} catch {
+				setHasPreflightFailed(true);
+			}
 		});
 	}, [appointmentId, endDate, isEndMode, isReviewStep]);
 
@@ -226,18 +238,23 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 		}
 
 		startPreflightTransition(async () => {
-			const result = await countryRolePreflightAction({
-				personDocumentId,
-				personName,
-				countryDocumentId: country.id,
-				roleType,
-				counterpartRoleType: effectiveCounterpartRoleType,
-				start: start.toString(),
-				end: end?.toString() ?? null,
-				lifecycle: "draft",
-			});
+			setHasPreflightFailed(false);
+			try {
+				const result = await countryRolePreflightAction({
+					personDocumentId,
+					personName,
+					countryDocumentId: country.id,
+					roleType,
+					counterpartRoleType: effectiveCounterpartRoleType,
+					start: start.toString(),
+					end: end?.toString() ?? null,
+					lifecycle: "draft",
+				});
 
-			setPreflight(result);
+				setPreflight(result);
+			} catch {
+				setHasPreflightFailed(true);
+			}
 		});
 	}, [
 		country,
@@ -433,7 +450,13 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 						title={t("Appointment to end")}
 						variant="stacked"
 					>
-						{appointments == null ? (
+						{hasPreflightFailed ? (
+							<ActionErrorAlert
+								message={t(
+									"Could not check the change against the data-integrity rules. Please try again.",
+								)}
+							/>
+						) : appointments == null ? (
 							<div className="flex items-center gap-x-2 text-sm text-muted-fg">
 								<ProgressCircle aria-label={t("Loading...")} isIndeterminate={true} />
 								{t("Loading appointments...")}
@@ -584,7 +607,13 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 					<input name="appointmentId" type="hidden" value={appointmentId ?? ""} />
 					<input name="end" type="hidden" value={endDate?.toString() ?? ""} />
 
-					{isPreflightPending || endPreflight == null ? (
+					{hasPreflightFailed ? (
+						<ActionErrorAlert
+							message={t(
+								"Could not check the change against the data-integrity rules. Please try again.",
+							)}
+						/>
+					) : isPreflightPending || endPreflight == null ? (
 						<div className="flex items-center gap-x-2 text-sm text-muted-fg">
 							<ProgressCircle aria-label={t("Checking...")} isIndeterminate={true} />
 							{t("Checking against the data-integrity rules...")}
@@ -651,7 +680,13 @@ export function CountryRoleWizard(props: Readonly<CountryRoleWizardProps>): Reac
 					<input name="start" type="hidden" value={start?.toString() ?? ""} />
 					<input name="end" type="hidden" value={end?.toString() ?? ""} />
 
-					{isPreflightPending || preflight == null ? (
+					{hasPreflightFailed ? (
+						<ActionErrorAlert
+							message={t(
+								"Could not check the change against the data-integrity rules. Please try again.",
+							)}
+						/>
+					) : isPreflightPending || preflight == null ? (
 						<div className="flex items-center gap-x-2 text-sm text-muted-fg">
 							<ProgressCircle aria-label={t("Checking...")} isIndeterminate={true} />
 							{t("Checking against the data-integrity rules...")}

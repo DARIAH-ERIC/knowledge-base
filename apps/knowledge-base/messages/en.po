@@ -528,6 +528,10 @@ msgid "xYJkOZ"
 msgstr "Imprint"
 
 #: app/(app)/[locale]/_components/user-menu.tsx
+msgid "WarBa-"
+msgstr "Could not sign out. Please try again."
+
+#: app/(app)/[locale]/_components/user-menu.tsx
 msgid "xXbJso"
 msgstr "Sign out"
 
@@ -580,9 +584,6 @@ msgstr "Send"
 #: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts
 #: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts
 #: app/(app)/[locale]/(auth)/auth/verify-email/page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/close-reporting-campaign.action.ts
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/delete-working-group-report-question.action.ts
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/launch-reporting-campaign.action.ts
 #: lib/server/create-command-action.ts
 #: lib/server/create-server-action.ts
 msgid "CDu063"
@@ -1680,6 +1681,10 @@ msgid "PSbXlj"
 msgstr "Set the date on which this contribution ended."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx
+msgid "XvdiWz"
+msgstr "Could not end contribution. Please try again."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx
@@ -1693,6 +1698,10 @@ msgstr "Update the organisation, role, and duration."
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx
 msgid "FmsfxZ"
 msgstr "This will permanently delete this contribution."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx
+msgid "jUuXdt"
+msgstr "Could not delete contribution. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal.tsx
@@ -2076,6 +2085,10 @@ msgid "W6nwjo"
 msgstr "Draft"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx
+msgid "BR0Bkj"
+msgstr "Could not publish the draft. Please try again."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx
 msgid "2SWTJN"
 msgstr "Publish saved draft"
 
@@ -2086,6 +2099,10 @@ msgstr "Discard draft"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx
 msgid "L1apwO"
 msgstr "Discard unpublished changes? The published version will remain."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx
+msgid "ZsXF6y"
+msgstr "Could not discard the draft. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx
 msgid "nmpevl"
@@ -2386,6 +2403,10 @@ msgid "iS7BYy"
 msgstr "Showing <strong>{start, number}</strong> to <strong>{end, number}</strong> of <strong>{total, number}</strong> results"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
+msgid "xyQOIm"
+msgstr "Could not load the current person details. Showing the values from the table."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-edit-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-details.tsx
@@ -2460,12 +2481,21 @@ msgid "vSuRKQ"
 msgstr "Set the date on which this person relation ended."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
+msgid "dhjzAX"
+msgstr "Could not end person relation. Please try again."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
 msgid "aKQ2_y"
 msgstr "Update the person, role, and duration."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
 msgid "eVXEns"
 msgstr "This will permanently delete this person relation."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx
+msgid "_wJ5uS"
+msgstr "Could not delete person relation. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
 msgid "RBBPXp"
@@ -2481,6 +2511,10 @@ msgstr "Sort name"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
 msgid "g7KtK9"
 msgstr "Edit the details of the selected person."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section.tsx
+msgid "BHRKwP"
+msgstr "Could not load the current organisation details. Showing the values from the table."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx
@@ -2529,6 +2563,11 @@ msgstr "Set the date on which this relation ended."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx
+msgid "3_qq0-"
+msgstr "Could not end relation. Please try again."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx
 msgid "ih-ppt"
 msgstr "Update the related unit, relation type, and duration."
 
@@ -2536,6 +2575,11 @@ msgstr "Update the related unit, relation type, and duration."
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx
 msgid "wbeOZ9"
 msgstr "This will permanently delete this relation."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx
+msgid "B9NQII"
+msgstr "Could not delete relation. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section.tsx
 msgid "hWJjme"
@@ -2710,6 +2754,12 @@ msgstr "No project selected"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx
 msgid "JDJoIZ"
 msgstr "This action cannot be undone."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-projects-section.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx
+msgid "6o1in2"
+msgstr "Could not delete project partner. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-details.tsx
@@ -3081,10 +3131,6 @@ msgstr "No organisation selected"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx
 msgid "W6HL-A"
 msgstr "person relation"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx
-msgid "_wJ5uS"
-msgstr "Could not delete person relation. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
 msgid "zpAgR4"
@@ -3788,6 +3834,12 @@ msgstr "ORCID"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
 msgid "cCivJ9"
 msgstr "Which appointment is ending, and when. The governance-body membership it pairs with is closed on the same date, and is shown on the next step."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/partner-institution-wizard.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/retire-unit-wizard.tsx
+msgid "w2ax-i"
+msgstr "Could not check the change against the data-integrity rules. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
 msgid "p_BS1u"
@@ -4910,6 +4962,14 @@ msgstr "Merge accounts"
 msgid "97Wa0E"
 msgstr "Merge social-media accounts"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "4LwQdu"
+msgstr "Nothing referred to the source, so nothing was re-pointed."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list.tsx
+msgid "ad735N"
+msgstr "Re-pointed onto the target:"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/mutually-exclusive-relations-check.tsx
 msgid "yH8NxA"
 msgstr "Mutually exclusive relations"
@@ -5345,10 +5405,6 @@ msgstr "No partner selected"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx
 msgid "LKkSQR"
 msgstr "project partner"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx
-msgid "6o1in2"
-msgstr "Could not delete project partner. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/upsert-project-partner.action.ts
 msgid "Ptmgrb"
@@ -6205,6 +6261,10 @@ msgid "O4dgz1"
 msgstr "Linked actor"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
+msgid "OfYDMn"
+msgstr "Could not sign in as this user. Please try again."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
 msgid "D_ZZLA"
 msgstr "Sign in as this user"
 
@@ -6238,6 +6298,8 @@ msgid "Rkewjs"
 msgstr "You cannot remove your own ability to manage admin accounts."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.action.ts
+#: lib/server/create-command-action.ts
+#: lib/server/create-server-action.ts
 msgid "LCaXVG"
 msgstr "At least one admin user must be allowed to manage admin accounts."
 
@@ -6901,6 +6963,11 @@ msgstr "This service is already listed."
 msgid "-eQkjv"
 msgstr "This account is already listed."
 
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/confirm-country-report.action.ts
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/confirm-working-group-report.action.ts
+msgid "RCzYOb"
+msgstr "Only a submitted report can be accepted. Refresh the page and try again."
+
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-contribution.action.ts
 msgid "NWtwEp"
 msgstr "This person is already listed as a contributor."
@@ -6924,6 +6991,11 @@ msgstr "Coordinator contributors updated from current relations."
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/refresh-country-report-institutions.action.ts
 msgid "TsO0GL"
 msgstr "Institutions updated from current relations."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/submit-country-report.action.ts
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/submit-working-group-report.action.ts
+msgid "fGcSMi"
+msgstr "Only a draft report in an open campaign can be submitted. Refresh the page and try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/contributors/page.tsx
 msgid "loiFYi"
@@ -7088,6 +7160,10 @@ msgstr "Dashboard - Working group reports"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section.tsx
 msgid "tTygkM"
 msgstr "Remove contributor"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section.tsx
+msgid "bw2D2h"
+msgstr "Could not remove contributor. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section.tsx
 msgid "qMnDKU"
@@ -7280,6 +7356,11 @@ msgstr "No documents yet."
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx
 msgid "fr30KR"
 msgstr "Add document"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx
+msgid "4e60mT"
+msgstr "Could not move the item. Please try again."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx
 msgid "X8rwM0"
@@ -8036,6 +8117,26 @@ msgstr "This SSHOC marketplace actor id is already assigned to another organisat
 
 #: lib/server/create-command-action.ts
 #: lib/server/create-server-action.ts
+msgid "cyzyjk"
+msgstr "A country or working group report refers to this record, so it cannot be deleted. Deleting it would change the report."
+
+#: lib/server/create-command-action.ts
+#: lib/server/create-server-action.ts
+msgid "S_uBod"
+msgstr "You are not allowed to delete admin accounts."
+
+#: lib/server/create-command-action.ts
+#: lib/server/create-server-action.ts
+msgid "LHCJID"
+msgstr "You cannot delete your own account."
+
+#: lib/server/create-command-action.ts
+#: lib/server/create-server-action.ts
+msgid "v71yRU"
+msgstr "This service is imported from the SSHOC Marketplace and cannot be deleted here."
+
+#: lib/server/create-command-action.ts
+#: lib/server/create-server-action.ts
 msgid "aca-RI"
 msgstr "A user account is linked to this record. Update that user's linked person or country before deleting it."
 
@@ -8053,6 +8154,10 @@ msgstr "An entity with this slug already exists."
 #: lib/server/create-server-action.ts
 msgid "WtzfWm"
 msgstr "A record with these values already exists."
+
+#: lib/server/create-command-action.ts
+msgid "6rdzji"
+msgstr "Other records still refer to this record, so it cannot be deleted."
 
 #: lib/server/create-command-action.ts
 #: lib/server/create-server-action.ts
@@ -8078,6 +8183,11 @@ msgstr "This item opens a dropdown, so it cannot link anywhere itself. Remove it
 #: lib/server/create-server-action.ts
 msgid "G5W8LK"
 msgstr "This entity is published, so its address can only be changed by an administrator on the Maintenance page."
+
+#: lib/server/create-command-action.ts
+#: lib/server/create-server-action.ts
+msgid "yXo2s3"
+msgstr "This record no longer exists. Refresh the page and try again."
 
 #: lib/server/create-command-action.ts
 #: lib/server/create-server-action.ts

@@ -129,6 +129,15 @@ export function createServerAction<
 
 			log.error(error);
 			const message = getUserFacingErrorMessage(error, {
+				referencedByReport: t(
+					"A country or working group report refers to this record, so it cannot be deleted. Deleting it would change the report.",
+				),
+				adminAccountDeletionNotAllowed: t("You are not allowed to delete admin accounts."),
+				lastAdminManager: t("At least one admin user must be allowed to manage admin accounts."),
+				ownAccountDeletion: t("You cannot delete your own account."),
+				sshocServiceDeletion: t(
+					"This service is imported from the SSHOC Marketplace and cannot be deleted here.",
+				),
 				documentLinkedToUser: t(
 					"A user account is linked to this record. Update that user's linked person or country before deleting it.",
 				),
@@ -165,6 +174,7 @@ export function createServerAction<
 				publishedSlugRename: t(
 					"This entity is published, so its address can only be changed by an administrator on the Maintenance page.",
 				),
+				recordNotFound: t("This record no longer exists. Refresh the page and try again."),
 				recordConflict: t("This record conflicts with an existing record."),
 				serviceKpiConflict: t(
 					"Both services have a value for the same KPI in the same country report. Remove the duplicate KPIs from that report, then merge.",

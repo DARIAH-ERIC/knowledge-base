@@ -171,74 +171,122 @@ describe("mergeEntities", () => {
 		});
 	});
 
-	it("drops the children of an overlapping person↔org relation (chairs + contributions) instead of aborting", async () => {
+	it("re-points the report rows of an overlapping person↔org relation onto the relation it duplicates", async () => {
 		await withTransaction(async (tx) => {
-			const personTypeId = await getPersonTypeId(tx);
-			const roleTypeId = await getPersonRoleTypeId(tx);
+			const { source, target, sourceRelationId, targetRelationId, workingGroupReportId } =
+				await createOverlappingPersonRelations(tx);
 
-			const source = await createPublishedDocument(tx, personTypeId, `merge-src-${randomUUID()}`);
-			const target = await createPublishedDocument(tx, personTypeId, `merge-tgt-${randomUUID()}`);
-			const orgUnit = await createBareEntity(tx, personTypeId);
-
-			// Same org, role, and (open-ended) period for both persons: once the source relation is
-			// re-pointed onto the target it overlaps the target's existing relation and must be dropped.
-			const duration = { start: new Date("2020-01-01T00:00:00.000Z") };
-			const [sourceRelation] = await tx
-				.insert(schema.personsToOrganisationalUnits)
-				.values({
-					personDocumentId: source.documentId,
-					organisationalUnitDocumentId: orgUnit,
-					roleTypeId,
-					duration,
-				})
-				.returning({ id: schema.personsToOrganisationalUnits.id });
-			assert(sourceRelation);
-			await tx.insert(schema.personsToOrganisationalUnits).values({
-				personDocumentId: target.documentId,
-				organisationalUnitDocumentId: orgUnit,
-				roleTypeId,
-				duration,
-			});
-
-			// Capture the source relation as a working-group-report chair — a child keyed by the relation
-			// id whose FK does NOT cascade, so it must be deleted before the overlapping relation is, or
-			// the merge aborts with a foreign-key violation.
-			const [campaign] = await tx
-				.insert(schema.reportingCampaigns)
-				.values({ year: 2_000_000 + Math.floor(Math.random() * 1_000_000) })
-				.returning({ id: schema.reportingCampaigns.id });
-			assert(campaign);
-			const [report] = await tx
-				.insert(schema.workingGroupReports)
-				.values({ campaignId: campaign.id, workingGroupDocumentId: orgUnit })
-				.returning({ id: schema.workingGroupReports.id });
-			assert(report);
+			// A working group report names the duplicate (source) relation as a chair. Reports are never
+			// changed by deleting what they point to, so the chair must follow onto the target relation.
 			await tx.insert(schema.workingGroupReportChairs).values({
-				workingGroupReportId: report.id,
-				personToOrgUnitId: sourceRelation.id,
+				workingGroupReportId,
+				personToOrgUnitId: sourceRelationId,
 				chairRole: "is_chair_of",
 			});
 
-			// Pre-fix this raised a foreign_key_violation from the orphaned chair row.
-			await mergeEntities(tx, source.documentId, target.documentId);
+			const result = await mergeEntities(tx, source, target);
 
-			expect(
-				await tx.query.entities.findFirst({ where: { id: source.documentId } }),
-			).toBeUndefined();
-			// The chair keyed to the deleted overlapping relation is cleaned up.
+			expect(await tx.query.entities.findFirst({ where: { id: source } })).toBeUndefined();
+			// The chair now points at the target's relation; the report still lists the person.
 			expect(
 				await tx
-					.select({ id: schema.workingGroupReportChairs.id })
+					.select({ personToOrgUnitId: schema.workingGroupReportChairs.personToOrgUnitId })
 					.from(schema.workingGroupReportChairs)
-					.where(eq(schema.workingGroupReportChairs.workingGroupReportId, report.id)),
-			).toHaveLength(0);
+					.where(eq(schema.workingGroupReportChairs.workingGroupReportId, workingGroupReportId)),
+			).toStrictEqual([{ personToOrgUnitId: targetRelationId }]);
 			// Target keeps exactly its own single relation to the org.
 			expect(
 				await tx
 					.select({ id: schema.personsToOrganisationalUnits.id })
 					.from(schema.personsToOrganisationalUnits)
-					.where(eq(schema.personsToOrganisationalUnits.personDocumentId, target.documentId)),
+					.where(eq(schema.personsToOrganisationalUnits.personDocumentId, target)),
 			).toHaveLength(1);
+			expect(result.summary).toMatchObject({
+				persons_to_organisational_units: 1,
+				working_group_report_chairs: 1,
+			});
+		});
+	});
+
+	it("keeps a single report row when the report already lists the relation the duplicate is merged into", async () => {
+		await withTransaction(async (tx) => {
+			const { source, target, sourceRelationId, targetRelationId, workingGroupReportId } =
+				await createOverlappingPersonRelations(tx);
+
+			await tx.insert(schema.workingGroupReportChairs).values([
+				{ workingGroupReportId, personToOrgUnitId: sourceRelationId, chairRole: "is_chair_of" },
+				{ workingGroupReportId, personToOrgUnitId: targetRelationId, chairRole: "is_chair_of" },
+			]);
+
+			await mergeEntities(tx, source, target);
+
+			// Re-pointing the source's row would list the target relation twice (and trip the unique key),
+			// so it collapses into the row the report already had.
+			expect(
+				await tx
+					.select({ personToOrgUnitId: schema.workingGroupReportChairs.personToOrgUnitId })
+					.from(schema.workingGroupReportChairs)
+					.where(eq(schema.workingGroupReportChairs.workingGroupReportId, workingGroupReportId)),
+			).toStrictEqual([{ personToOrgUnitId: targetRelationId }]);
 		});
 	});
 });
+
+/**
+ * Two persons with the same org, role, and (open-ended) period: once the source's relation is
+ * re-pointed onto the target it overlaps the target's existing relation, so it is a duplicate.
+ */
+async function createOverlappingPersonRelations(tx: Tx): Promise<{
+	source: string;
+	target: string;
+	sourceRelationId: string;
+	targetRelationId: string;
+	workingGroupReportId: string;
+}> {
+	const personTypeId = await getPersonTypeId(tx);
+	const roleTypeId = await getPersonRoleTypeId(tx);
+
+	const source = await createPublishedDocument(tx, personTypeId, `merge-src-${randomUUID()}`);
+	const target = await createPublishedDocument(tx, personTypeId, `merge-tgt-${randomUUID()}`);
+	const orgUnit = await createBareEntity(tx, personTypeId);
+
+	const duration = { start: new Date("2020-01-01T00:00:00.000Z") };
+	const [sourceRelation, targetRelation] = await tx
+		.insert(schema.personsToOrganisationalUnits)
+		.values([
+			{
+				personDocumentId: source.documentId,
+				organisationalUnitDocumentId: orgUnit,
+				roleTypeId,
+				duration,
+			},
+			{
+				personDocumentId: target.documentId,
+				organisationalUnitDocumentId: orgUnit,
+				roleTypeId,
+				duration,
+			},
+		])
+		.returning({ id: schema.personsToOrganisationalUnits.id });
+	assert(sourceRelation);
+	assert(targetRelation);
+
+	const [campaign] = await tx
+		.insert(schema.reportingCampaigns)
+		.values({ year: 2_000_000 + Math.floor(Math.random() * 1_000_000) })
+		.returning({ id: schema.reportingCampaigns.id });
+	assert(campaign);
+	const [report] = await tx
+		.insert(schema.workingGroupReports)
+		.values({ campaignId: campaign.id, workingGroupDocumentId: orgUnit })
+		.returning({ id: schema.workingGroupReports.id });
+	assert(report);
+
+	return {
+		source: source.documentId,
+		target: target.documentId,
+		sourceRelationId: sourceRelation.id,
+		targetRelationId: targetRelation.id,
+		workingGroupReportId: report.id,
+	};
+}

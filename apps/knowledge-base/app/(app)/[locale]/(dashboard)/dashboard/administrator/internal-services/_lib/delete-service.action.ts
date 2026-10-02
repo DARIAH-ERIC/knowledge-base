@@ -1,35 +1,36 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
-import { db } from "@/lib/db";
+import { assertNotReferencedByReports } from "@/lib/data/report-references";
 import { eq } from "@/lib/db/sql";
+import { createCommandAction } from "@/lib/server/create-command-action";
+import { UserFacingError } from "@/lib/user-facing-error";
 
-export async function deleteServiceAction(id: string): Promise<void> {
-	const auditSession = await assertAdmin();
-	const service = await db.query.services.findFirst({
-		where: { id },
-		columns: { sshocMarketplaceId: true },
-	});
+export const deleteServiceAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "delete", subjectType: "internal_services" },
+	revalidate: "/[locale]/dashboard/administrator/internal-services",
 
-	if (service == null || service.sshocMarketplaceId != null) {
-		return;
-	}
+	async mutate(tx, [id]: [string]) {
+		const service = await tx.query.services.findFirst({
+			where: { id },
+			columns: { sshocMarketplaceId: true },
+		});
+		if (service == null) {
+			throw new UserFacingError("record-not-found");
+		}
+		// Marketplace services are owned by the SSHOC ingest, which would recreate them anyway.
+		if (service.sshocMarketplaceId != null) {
+			throw new UserFacingError("sshoc-service-deletion");
+		}
 
-	// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
-	const subjectLabel = await resolveAuditSubjectLabel("internal_services", id);
+		await assertNotReferencedByReports(tx, { type: "service", id });
 
-	await db.transaction(async (tx) => {
-		await tx
-			.delete(schema.countryReportServiceKpis)
-			.where(eq(schema.countryReportServiceKpis.serviceId, id));
-		await tx
-			.delete(schema.countryReportServices)
-			.where(eq(schema.countryReportServices.serviceId, id));
+		// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
+		const subjectLabel = await resolveAuditSubjectLabel("internal_services", id, tx);
+
 		await tx
 			.delete(schema.servicesToSocialMedia)
 			.where(eq(schema.servicesToSocialMedia.serviceId, id));
@@ -37,16 +38,7 @@ export async function deleteServiceAction(id: string): Promise<void> {
 			.delete(schema.servicesToOrganisationalUnits)
 			.where(eq(schema.servicesToOrganisationalUnits.serviceId, id));
 		await tx.delete(schema.services).where(eq(schema.services.id, id));
-	});
 
-	await recordAuditEvent(db, {
-		actorUserId: auditSession.user.id,
-		action: "delete",
-		subjectType: "internal_services",
-		subjectId: id,
-		subjectLabel,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/administrator/internal-services", "layout");
-}
+		return { subjectId: id, subjectLabel };
+	},
+});

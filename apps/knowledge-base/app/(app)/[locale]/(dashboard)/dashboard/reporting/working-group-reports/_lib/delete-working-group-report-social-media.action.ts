@@ -1,51 +1,50 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 
-import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertCan, assertReportEditable } from "@/lib/auth/permissions";
-import { assertAuthenticated } from "@/lib/auth/session";
 import { workingGroupReportRevalidatePaths } from "@/lib/data/reporting-urls";
-import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export async function deleteWorkingGroupReportSocialMediaAction(formData: FormData): Promise<void> {
-	if (!(await globalPostRequestRateLimit())) {
-		return;
-	}
+const InputSchema = v.object({
+	claimedId: v.pipe(v.string(), v.uuid()),
+	workingGroupReportId: v.pipe(v.string(), v.uuid()),
+});
 
-	const claimedId = formData.get("claimedId");
-	const workingGroupReportId = formData.get("workingGroupReportId");
-	if (typeof claimedId !== "string" || typeof workingGroupReportId !== "string") {
-		return;
-	}
+export const deleteWorkingGroupReportSocialMediaAction = createMutationAction({
+	schema: InputSchema,
+	requireAuth: true,
+	audit: { action: "delete", subjectType: "working_group_reports" },
+	revalidate: workingGroupReportRevalidatePaths,
 
-	const { user } = await assertAuthenticated();
-	await assertCan(user, "update", { type: "working_group_report", id: workingGroupReportId });
-	await assertReportEditable(user, { type: "working_group_report", id: workingGroupReportId });
+	async preCheck({ input, ctx }) {
+		await assertCan(ctx.user, "update", {
+			type: "working_group_report",
+			id: input.workingGroupReportId,
+		});
+		await assertReportEditable(ctx.user, {
+			type: "working_group_report",
+			id: input.workingGroupReportId,
+		});
+		return undefined;
+	},
 
-	// Scope by both ids so a row can only be removed via the report it belongs to (the authz check is on
-	// workingGroupReportId, so matching the claimed id alone would allow cross-report deletes).
-	await db
-		.delete(schema.workingGroupReportSocialMedia)
-		.where(
-			and(
-				eq(schema.workingGroupReportSocialMedia.id, claimedId),
-				eq(schema.workingGroupReportSocialMedia.workingGroupReportId, workingGroupReportId),
-			),
-		);
+	async mutate(tx, input) {
+		const { claimedId, workingGroupReportId } = input;
 
-	await recordAuditEvent(db, {
-		actorUserId: user.id,
-		action: "delete",
-		subjectType: "working_group_reports",
-		subjectId: workingGroupReportId,
-		summary: getAuditSummaryFromFormData(formData),
-	});
+		// Scope by both ids so a row can only be removed via the report it belongs to (the authz check is
+		// on workingGroupReportId, so matching the claimed id alone would allow cross-report deletes).
+		await tx
+			.delete(schema.workingGroupReportSocialMedia)
+			.where(
+				and(
+					eq(schema.workingGroupReportSocialMedia.id, claimedId),
+					eq(schema.workingGroupReportSocialMedia.workingGroupReportId, workingGroupReportId),
+				),
+			);
 
-	for (const path of workingGroupReportRevalidatePaths) {
-		revalidatePath(path, "layout");
-	}
-}
+		return { subjectId: workingGroupReportId };
+	},
+});

@@ -13,6 +13,7 @@ import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
 
+import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface ReportEvent {
@@ -29,7 +30,7 @@ interface WorkingGroupReportEventsFormProps {
 		events: Array<ReportEvent>;
 	};
 	addAction: ServerAction;
-	deleteAction: (formData: FormData) => Promise<void>;
+	deleteAction: ServerAction;
 }
 
 export function WorkingGroupReportEventsForm(
@@ -58,13 +59,17 @@ export function WorkingGroupReportEventsForm(
 									</p>
 									{event.url != null && <p className="text-xs text-muted-fg">{event.url}</p>}
 								</div>
-								<form action={deleteAction}>
-									<input name="eventId" type="hidden" value={event.id} />
-									<input name="workingGroupReportId" type="hidden" value={report.id} />
-									<Button intent="danger" size="sm" type="submit">
-										{t("Remove")}
-									</Button>
-								</form>
+								<ActionForm action={deleteAction}>
+									{(isPending) => (
+										<>
+											<input name="eventId" type="hidden" value={event.id} />
+											<input name="workingGroupReportId" type="hidden" value={report.id} />
+											<Button isPending={isPending} intent="danger" size="sm" type="submit">
+												{t("Remove")}
+											</Button>
+										</>
+									)}
+								</ActionForm>
 							</li>
 						))}
 					</ul>

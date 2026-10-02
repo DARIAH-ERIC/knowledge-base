@@ -1,6 +1,10 @@
 "use client";
 
-import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import {
+	type ActionState,
+	createActionStateError,
+	createActionStateInitial,
+} from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
@@ -33,6 +37,7 @@ import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
@@ -44,6 +49,7 @@ import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_comp
 import type { ContributionPersonOption } from "@/lib/data/contributions";
 import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
 import { dateToCalendarDate } from "@/lib/date";
+import { runAction } from "@/lib/run-action";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 /**
@@ -54,8 +60,8 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 export interface PersonRelationActions {
 	create: ServerAction;
 	update: ServerAction;
-	end: (id: string, end: Date) => Promise<void>;
-	delete: (id: string) => Promise<void>;
+	end: (id: string, end: Date) => Promise<ActionState>;
+	delete: (id: string) => Promise<ActionState>;
 }
 
 /** Core, editable metadata of a person, used by the optional edit affordance. */
@@ -153,7 +159,9 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 
 	const [localRelations, setLocalRelations] = useState(relations);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string; start: Date } | null>(null);
+	const [endError, setEndError] = useState<string | null>(null);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 	const minEndDate = dateToCalendarDate(itemToEnd?.start);
 
@@ -182,6 +190,8 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
 	const [isEditPending, startEditTransition] = useTransition();
+	const [isDeletePending, startDeleteTransition] = useTransition();
+	const [isEndPending, startEndTransition] = useTransition();
 
 	const validationErrors = state.status === "error" ? state.validationErrors : undefined;
 	const selectedRoleOption = roleOptions.find((option) => option.roleTypeId === selectedRoleTypeId);
@@ -329,10 +339,22 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 		setIsEditPersonFieldsLoading(true);
 
 		startTransition(async () => {
-			const fields = await personEditor.getFields(relation.personDocumentId);
-			setEditPersonFields(
-				fields ?? { name: relation.personName, sortName: relation.personSortName },
-			);
+			try {
+				const fields = await personEditor.getFields(relation.personDocumentId);
+				setEditPersonFields(
+					fields ?? { name: relation.personName, sortName: relation.personSortName },
+				);
+			} catch {
+				// Fall back to the values shown in the table, so the form stays usable.
+				setEditPersonFields({ name: relation.personName, sortName: relation.personSortName });
+				setEditPersonState(
+					createActionStateError({
+						message: t(
+							"Could not load the current person details. Showing the values from the table.",
+						),
+					}),
+				);
+			}
 			setIsEditPersonFieldsLoading(false);
 		});
 	}
@@ -454,6 +476,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 													onAction={() => {
 														setItemToEnd({ id: relation.id, start: relation.duration.start });
 														setSelectedEndDate(null);
+														setEndError(null);
 													}}
 												>
 													{t("End person relation")}
@@ -464,6 +487,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 												danger={true}
 												icon={<TrashIcon className="me-2 block-4 inline-4" />}
 												onAction={() => {
+													setDeleteError(null);
 													setItemToDelete({ id: relation.id });
 												}}
 											>
@@ -593,7 +617,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 			<ModalContent
 				isOpen={itemToEnd != null}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isEndPending) {
 						setItemToEnd(null);
 					}
 				}}
@@ -604,7 +628,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 					description={t("Set the date on which this person relation ended.")}
 					title={t("End person relation")}
 				/>
-				<ModalBody>
+				<ModalBody className="flex flex-col gap-y-4">
 					<DatePicker
 						granularity="day"
 						minValue={minEndDate ?? undefined}
@@ -616,10 +640,12 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 						<Label>{t("End date")}</Label>
 						<DatePickerTrigger />
 					</DatePicker>
+					<ActionErrorAlert message={endError} />
 				</ModalBody>
 				<ModalFooter>
-					<ModalClose>{t("Cancel")}</ModalClose>
+					<ModalClose isDisabled={isEndPending}>{t("Cancel")}</ModalClose>
 					<Button
+						isPending={isEndPending}
 						isDisabled={
 							selectedEndDate == null ||
 							(minEndDate != null && selectedEndDate.compare(minEndDate) < 0)
@@ -631,11 +657,21 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 
 							const end = selectedEndDate.toDate("UTC");
 
-							startTransition(async () => {
-								await actions.end(itemToEnd.id, end);
+							const id = itemToEnd.id;
+							setEndError(null);
+
+							startEndTransition(async () => {
+								const error = await runAction(
+									() => actions.end(id, end),
+									t("Could not end person relation. Please try again."),
+								);
+								if (error != null) {
+									setEndError(error);
+									return;
+								}
 								setLocalRelations((prev) =>
 									prev.map((relation) =>
-										relation.id === itemToEnd.id
+										relation.id === id
 											? { ...relation, duration: { ...relation.duration, end } }
 											: relation,
 									),
@@ -757,7 +793,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 			<ModalContent
 				isOpen={itemToDelete != null}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
 					}
 				}}
@@ -768,18 +804,31 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 					description={t("This will permanently delete this person relation.")}
 					title={t("Delete person relation")}
 				/>
+				<ModalBody>
+					<ActionErrorAlert message={deleteError} />
+				</ModalBody>
 				<ModalFooter>
-					<ModalClose>{t("Cancel")}</ModalClose>
+					<ModalClose isDisabled={isDeletePending}>{t("Cancel")}</ModalClose>
 					<Button
 						intent="danger"
+						isPending={isDeletePending}
 						onPress={() => {
 							if (itemToDelete == null) {
 								return;
 							}
 
 							const id = itemToDelete.id;
-							startTransition(async () => {
-								await actions.delete(id);
+							setDeleteError(null);
+
+							startDeleteTransition(async () => {
+								const error = await runAction(
+									() => actions.delete(id),
+									t("Could not delete person relation. Please try again."),
+								);
+								if (error != null) {
+									setDeleteError(error);
+									return;
+								}
 								setLocalRelations((prev) => prev.filter((relation) => relation.id !== id));
 								setItemToDelete(null);
 							});

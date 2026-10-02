@@ -5,6 +5,7 @@ import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
 import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { WorkingGroupReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
 import { confirmWorkingGroupReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/confirm-working-group-report.action";
@@ -51,17 +52,29 @@ export async function WorkingGroupReportSummaryScreen(
 
 				<div className="flex flex-wrap gap-3">
 					{canConfirm && report.status === "draft" && report.campaign.status === "open" && (
-						<form action={submitWorkingGroupReportAction}>
-							<input name="id" type="hidden" value={report.id} />
-							<Button type="submit">{t("Submit report")}</Button>
-						</form>
+						<ActionForm action={submitWorkingGroupReportAction}>
+							{(isPending) => (
+								<>
+									<input name="id" type="hidden" value={report.id} />
+									<Button isPending={isPending} type="submit">
+										{t("Submit report")}
+									</Button>
+								</>
+							)}
+						</ActionForm>
 					)}
 
 					{isAdmin && report.status === "submitted" && (
-						<form action={confirmWorkingGroupReportAction}>
-							<input name="id" type="hidden" value={report.id} />
-							<Button type="submit">{t("Accept report")}</Button>
-						</form>
+						<ActionForm action={confirmWorkingGroupReportAction}>
+							{(isPending) => (
+								<>
+									<input name="id" type="hidden" value={report.id} />
+									<Button isPending={isPending} type="submit">
+										{t("Accept report")}
+									</Button>
+								</>
+							)}
+						</ActionForm>
 					)}
 
 					{report.status === "accepted" && (

@@ -2,9 +2,10 @@
 
 import { Button } from "@dariah-eric/ui/button";
 import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
-import { AlertTriangleIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
+
+import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 
 interface DeleteModalProps {
 	/**
@@ -42,13 +43,7 @@ export function DeleteModal(props: Readonly<DeleteModalProps>): ReactNode {
 			<ModalHeader description={description} title={title} />
 			{errorMessage != null ? (
 				<div className="px-6 pbe-2">
-					<p
-						className="flex items-center gap-x-2 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
-						role="alert"
-					>
-						<AlertTriangleIcon aria-hidden={true} className="block-4 inline-4" />
-						{errorMessage}
-					</p>
+					<ActionErrorAlert message={errorMessage} />
 				</div>
 			) : null}
 			<ModalFooter>

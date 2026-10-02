@@ -1,21 +1,20 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
-import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
+import { createCommandAction } from "@/lib/server/create-command-action";
 
-export async function deleteWorkingGroupReportAction(id: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const deleteWorkingGroupReportAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "delete", subjectType: "working_group_reports" },
+	revalidate: "/[locale]/dashboard/administrator/working-group-reports",
 
-	// Snapshot the label while the report still exists, so the audit log doesn't fall back to the uuid.
-	const subjectLabel = await resolveAuditSubjectLabel("working_group_reports", id);
+	async mutate(tx, [id]: [string]) {
+		// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
+		const subjectLabel = await resolveAuditSubjectLabel("working_group_reports", id, tx);
 
-	await db.transaction(async (tx) => {
 		await tx
 			.delete(schema.reportScreenComments)
 			.where(
@@ -40,16 +39,7 @@ export async function deleteWorkingGroupReportAction(id: string): Promise<void> 
 			.delete(schema.reportExternalResourceSnapshots)
 			.where(eq(schema.reportExternalResourceSnapshots.workingGroupReportId, id));
 		await tx.delete(schema.workingGroupReports).where(eq(schema.workingGroupReports.id, id));
-	});
 
-	await recordAuditEvent(db, {
-		actorUserId: auditSession.user.id,
-		action: "delete",
-		subjectType: "working_group_reports",
-		subjectId: id,
-		subjectLabel,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/administrator/working-group-reports", "layout");
-}
+		return { subjectId: id, subjectLabel };
+	},
+});

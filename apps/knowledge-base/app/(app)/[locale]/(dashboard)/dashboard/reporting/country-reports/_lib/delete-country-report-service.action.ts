@@ -1,38 +1,40 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 
-import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertCan, assertReportEditable } from "@/lib/auth/permissions";
-import { assertAuthenticated } from "@/lib/auth/session";
 import { countryReportRevalidatePaths } from "@/lib/data/reporting-urls";
-import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
+import { UserFacingError } from "@/lib/user-facing-error";
 
-export async function deleteCountryReportServiceAction(formData: FormData): Promise<void> {
-	if (!(await globalPostRequestRateLimit())) {
-		return;
-	}
+const InputSchema = v.object({
+	membershipId: v.pipe(v.string(), v.uuid()),
+	countryReportId: v.pipe(v.string(), v.uuid()),
+});
 
-	const membershipId = formData.get("membershipId");
-	const countryReportId = formData.get("countryReportId");
-	if (typeof membershipId !== "string" || typeof countryReportId !== "string") {
-		return;
-	}
+export const deleteCountryReportServiceAction = createMutationAction({
+	schema: InputSchema,
+	requireAuth: true,
+	audit: { action: "delete", subjectType: "country_reports" },
+	revalidate: countryReportRevalidatePaths,
 
-	const { user } = await assertAuthenticated();
-	await assertCan(user, "update", { type: "country_report", id: countryReportId });
-	await assertReportEditable(user, { type: "country_report", id: countryReportId });
+	async preCheck({ input, ctx }) {
+		await assertCan(ctx.user, "update", { type: "country_report", id: input.countryReportId });
+		await assertReportEditable(ctx.user, { type: "country_report", id: input.countryReportId });
+		return undefined;
+	},
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, input) {
+		const { membershipId, countryReportId } = input;
+
 		const membership = await tx.query.countryReportServices.findFirst({
 			where: { id: membershipId, countryReportId },
 			columns: { serviceId: true },
 		});
 		if (membership == null) {
-			return;
+			throw new UserFacingError("record-not-found");
 		}
 
 		await tx
@@ -52,17 +54,7 @@ export async function deleteCountryReportServiceAction(formData: FormData): Prom
 					eq(schema.countryReportServices.countryReportId, countryReportId),
 				),
 			);
-	});
 
-	await recordAuditEvent(db, {
-		actorUserId: user.id,
-		action: "delete",
-		subjectType: "country_reports",
-		subjectId: countryReportId,
-		summary: getAuditSummaryFromFormData(formData),
-	});
-
-	for (const path of countryReportRevalidatePaths) {
-		revalidatePath(path, "layout");
-	}
-}
+		return { subjectId: countryReportId };
+	},
+});

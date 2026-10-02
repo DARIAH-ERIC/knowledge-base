@@ -30,6 +30,7 @@ import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useState, useTransition } from "react";
 
+import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
@@ -45,6 +46,7 @@ import {
 	type OrganisationalUnitOption,
 	toOrganisationalUnitDocumentOptionsPage,
 } from "@/lib/organisational-unit-options";
+import { runAction } from "@/lib/run-action";
 
 interface ProjectPartner {
 	id: string;
@@ -130,6 +132,7 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 	const [dialog, setDialog] = useState<DialogState>(emptyDialog);
 	const [formState, setFormState] = useState<ActionState>(() => createActionStateInitial());
 	const [itemToDelete, setItemToDelete] = useState<ProjectPartner | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const [isFormPending, startFormTransition] = useTransition();
 	const [isDeletePending, startDeleteTransition] = useTransition();
 
@@ -406,8 +409,9 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 			<ModalContent
 				isOpen={itemToDelete != null}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
+						setDeleteError(null);
 					}
 				}}
 				role="alertdialog"
@@ -417,8 +421,13 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 					description={t("This action cannot be undone.")}
 					title={t("Delete project partner")}
 				/>
+				{deleteError != null ? (
+					<ModalBody>
+						<ActionErrorAlert message={deleteError} />
+					</ModalBody>
+				) : null}
 				<ModalFooter>
-					<ModalClose>{t("Cancel")}</ModalClose>
+					<ModalClose isDisabled={isDeletePending}>{t("Cancel")}</ModalClose>
 					<Button
 						intent="danger"
 						isPending={isDeletePending}
@@ -429,7 +438,14 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 
 							const id = itemToDelete.id;
 							startDeleteTransition(async () => {
-								await deleteProjectPartnerAction(id);
+								const error = await runAction(
+									() => deleteProjectPartnerAction(id),
+									t("Could not delete project partner. Please try again."),
+								);
+								if (error != null) {
+									setDeleteError(error);
+									return;
+								}
 								setItems((prev) => prev.filter((item) => item.id !== id));
 								setItemToDelete(null);
 							});

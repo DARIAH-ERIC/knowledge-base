@@ -17,6 +17,7 @@ import {
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
 	EntityDeleteModal,
@@ -33,6 +34,7 @@ import { deleteDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/d
 import { deleteDocumentPolicyGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/delete-document-policy-group.action";
 import { moveDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/move-document-or-policy.action";
 import { moveDocumentPolicyGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/move-document-policy-group.action";
+import { runAction } from "@/lib/run-action";
 
 type DocumentItem = Pick<
 	schema.DocumentOrPolicy,
@@ -307,6 +309,14 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 	const [groupDeleteError, setGroupDeleteError] = useState<string | null>(null);
 	const [isGroupDeletePending, startGroupDeleteTransition] = useTransition();
 	const [groupToEdit, setGroupToEdit] = useState<{ id: string; label: string } | null>(null);
+	const [moveError, setMoveError] = useState<string | null>(null);
+
+	function move(action: () => Promise<unknown>) {
+		setMoveError(null);
+		startTransition(async () => {
+			setMoveError(await runAction(action, t("Could not move the item. Please try again.")));
+		});
+	}
 
 	return (
 		<Fragment>
@@ -328,6 +338,7 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 					</>
 				}
 			/>
+			<ActionErrorAlert className="mbe-4" message={moveError} />
 
 			<div className="p-(--layout-padding)">
 				{groups.map((group, groupIndex) => (
@@ -356,14 +367,10 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 							setGroupToEdit(group);
 						}}
 						onMoveDocument={(id, direction) => {
-							startTransition(async () => {
-								await moveDocumentOrPolicyAction(id, direction);
-							});
+							move(() => moveDocumentOrPolicyAction(id, direction));
 						}}
 						onMoveGroup={(id, direction) => {
-							startTransition(async () => {
-								await moveDocumentPolicyGroupAction(id, direction);
-							});
+							move(() => moveDocumentPolicyGroupAction(id, direction));
 						}}
 					/>
 				))}
@@ -384,9 +391,7 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 						setDialogState({ isOpen: true, item });
 					}}
 					onMoveDocument={(id, direction) => {
-						startTransition(async () => {
-							await moveDocumentOrPolicyAction(id, direction);
-						});
+						move(() => moveDocumentOrPolicyAction(id, direction));
 					}}
 				/>
 			</div>
@@ -430,12 +435,15 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 					const id = documentToDelete;
 					setDocumentDeleteError(null);
 					startDocumentDeleteTransition(async () => {
-						try {
-							await deleteDocumentOrPolicyAction(id);
-							setDocumentToDelete(null);
-						} catch {
-							setDocumentDeleteError(t("Could not delete document or policy. Please try again."));
+						const error = await runAction(
+							() => deleteDocumentOrPolicyAction(id),
+							t("Could not delete document or policy. Please try again."),
+						);
+						if (error != null) {
+							setDocumentDeleteError(error);
+							return;
 						}
+						setDocumentToDelete(null);
 					});
 				}}
 			/>
@@ -456,12 +464,15 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 					const id = groupToDelete;
 					setGroupDeleteError(null);
 					startGroupDeleteTransition(async () => {
-						try {
-							await deleteDocumentPolicyGroupAction(id);
-							setGroupToDelete(null);
-						} catch {
-							setGroupDeleteError(t("Could not delete group. Please try again."));
+						const error = await runAction(
+							() => deleteDocumentPolicyGroupAction(id),
+							t("Could not delete group. Please try again."),
+						);
+						if (error != null) {
+							setGroupDeleteError(error);
+							return;
 						}
+						setGroupToDelete(null);
 					});
 				}}
 			/>

@@ -1,5 +1,6 @@
 "use server";
 
+import type { MergeSummary } from "@/lib/data/merge-summary";
 import { mergeServices } from "@/lib/data/service-merge";
 import { createCommandAction } from "@/lib/server/create-command-action";
 
@@ -7,6 +8,8 @@ interface MergeServicesActionResult {
 	subjectId: string;
 	subjectLabel: string;
 	auditSummary: Record<string, unknown>;
+	/** What the merge re-pointed, listed in the UI once it succeeds. */
+	successData: { summary: MergeSummary };
 }
 
 export const mergeServicesAction = createCommandAction({
@@ -33,7 +36,9 @@ export const mergeServicesAction = createCommandAction({
 					status: result.source.status,
 					sshocMarketplaceId: result.source.sshocMarketplaceId,
 				},
+				repointed: result.summary,
 			},
+			successData: { summary: result.summary },
 		};
 	},
 });

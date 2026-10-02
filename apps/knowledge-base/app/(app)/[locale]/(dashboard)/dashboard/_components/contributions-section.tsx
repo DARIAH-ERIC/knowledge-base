@@ -31,8 +31,9 @@ import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/u
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
+import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
@@ -47,6 +48,7 @@ import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
 import type { ContributionRoleOption, PersonContribution } from "@/lib/data/contributions";
 import { dateToCalendarDate } from "@/lib/date";
+import { runAction } from "@/lib/run-action";
 
 interface ContributionsSectionProps {
 	personDocumentId: string;
@@ -114,7 +116,9 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 
 	const [localContributions, setLocalContributions] = useState(contributions);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string; start: Date } | null>(null);
+	const [endError, setEndError] = useState<string | null>(null);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 	const minEndDate = dateToCalendarDate(itemToEnd?.start);
 
@@ -143,6 +147,8 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
 	const [isEditPending, startEditTransition] = useTransition();
+	const [isDeletePending, startDeleteTransition] = useTransition();
+	const [isEndPending, startEndTransition] = useTransition();
 
 	const validationErrors = state.status === "error" ? state.validationErrors : undefined;
 	const selectedRoleOption = roleOptions.find((option) => option.roleTypeId === selectedRoleTypeId);
@@ -319,6 +325,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 															start: contribution.duration.start,
 														});
 														setSelectedEndDate(null);
+														setEndError(null);
 													}}
 												>
 													{t("End contribution")}
@@ -329,6 +336,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 												danger={true}
 												icon={<TrashIcon className="me-2 block-4 inline-4" />}
 												onAction={() => {
+													setDeleteError(null);
 													setItemToDelete({ id: contribution.id });
 												}}
 											>
@@ -463,7 +471,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 			<ModalContent
 				isOpen={itemToEnd != null}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isEndPending) {
 						setItemToEnd(null);
 					}
 				}}
@@ -474,7 +482,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 					description={t("Set the date on which this contribution ended.")}
 					title={t("End contribution")}
 				/>
-				<ModalBody>
+				<ModalBody className="flex flex-col gap-y-4">
 					<DatePicker
 						granularity="day"
 						minValue={minEndDate ?? undefined}
@@ -486,10 +494,12 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 						<Label>{t("End date")}</Label>
 						<DatePickerTrigger />
 					</DatePicker>
+					<ActionErrorAlert message={endError} />
 				</ModalBody>
 				<ModalFooter>
-					<ModalClose>{t("Cancel")}</ModalClose>
+					<ModalClose isDisabled={isEndPending}>{t("Cancel")}</ModalClose>
 					<Button
+						isPending={isEndPending}
 						isDisabled={
 							selectedEndDate == null ||
 							(minEndDate != null && selectedEndDate.compare(minEndDate) < 0)
@@ -501,12 +511,20 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 
 							const end = selectedEndDate.toDate("UTC");
 
-							startTransition(async () => {
-								await endContributionAction(itemToEnd.id, end);
+							const id = itemToEnd.id;
+							setEndError(null);
+
+							startEndTransition(async () => {
+								const error = await runAction(
+									() => endContributionAction(id, end),
+									t("Could not end contribution. Please try again."),
+								);
+								if (error != null) {
+									setEndError(error);
+									return;
+								}
 								setLocalContributions((prev) =>
-									prev.map((c) =>
-										c.id === itemToEnd.id ? { ...c, duration: { ...c.duration, end } } : c,
-									),
+									prev.map((c) => (c.id === id ? { ...c, duration: { ...c.duration, end } } : c)),
 								);
 								setItemToEnd(null);
 							});
@@ -635,7 +653,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 			<ModalContent
 				isOpen={itemToDelete != null}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
 					}
 				}}
@@ -646,18 +664,31 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 					description={t("This will permanently delete this contribution.")}
 					title={t("Delete contribution")}
 				/>
+				<ModalBody>
+					<ActionErrorAlert message={deleteError} />
+				</ModalBody>
 				<ModalFooter>
-					<ModalClose>{t("Cancel")}</ModalClose>
+					<ModalClose isDisabled={isDeletePending}>{t("Cancel")}</ModalClose>
 					<Button
 						intent="danger"
+						isPending={isDeletePending}
 						onPress={() => {
 							if (itemToDelete == null) {
 								return;
 							}
 
 							const id = itemToDelete.id;
-							startTransition(async () => {
-								await deleteContributionAction(id);
+							setDeleteError(null);
+
+							startDeleteTransition(async () => {
+								const error = await runAction(
+									() => deleteContributionAction(id),
+									t("Could not delete contribution. Please try again."),
+								);
+								if (error != null) {
+									setDeleteError(error);
+									return;
+								}
 								setLocalContributions((prev) =>
 									prev.filter((contribution) => contribution.id !== id),
 								);

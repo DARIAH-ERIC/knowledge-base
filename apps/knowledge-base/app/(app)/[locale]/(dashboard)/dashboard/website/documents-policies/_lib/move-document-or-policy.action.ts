@@ -1,29 +1,25 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
 import { and, eq, isNull } from "@/lib/db/sql";
+import { createCommandAction } from "@/lib/server/create-command-action";
+import { UserFacingError } from "@/lib/user-facing-error";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function moveDocumentOrPolicyAction(
-	id: string,
-	direction: "up" | "down",
-): Promise<void> {
-	const auditSession = await assertAdmin();
+export const moveDocumentOrPolicyAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "documents_policies" },
+	revalidate: "/[locale]/dashboard/website/documents-policies",
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, [id, direction]: [string, "up" | "down"]) {
 		const item = await tx.query.documentsPolicies.findFirst({
 			where: { id },
 			columns: { id: true, position: true, groupId: true },
 		});
 
 		if (item == null) {
-			return;
+			throw new UserFacingError("record-not-found");
 		}
 
 		const siblings = await tx
@@ -40,12 +36,12 @@ export async function moveDocumentOrPolicyAction(
 		const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
 
 		if (targetIndex < 0 || targetIndex >= siblings.length) {
-			return;
+			return { subjectId: id, auditSummary: { direction } };
 		}
 
 		const target = siblings[targetIndex];
 		if (target == null) {
-			return;
+			return { subjectId: id, auditSummary: { direction } };
 		}
 
 		await tx
@@ -57,19 +53,11 @@ export async function moveDocumentOrPolicyAction(
 			.update(schema.documentsPolicies)
 			.set({ position: item.position })
 			.where(eq(schema.documentsPolicies.id, target.id));
-	});
 
-	after(async () => {
+		return { subjectId: id, auditSummary: { direction } };
+	},
+
+	async postCommit() {
 		await dispatchWebhook({ tags: ["documents-policies"] });
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession.user.id,
-		action: "update",
-		subjectType: "documents_policies",
-		subjectId: id,
-		summary: { direction },
-	});
-
-	revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");
-}
+	},
+});

@@ -18,7 +18,9 @@ import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/u
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState, useTransition } from "react";
 
+import { MergeSummaryList } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list";
 import { mergeSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/merge-social-media.action";
+import type { MergeSummary } from "@/lib/data/merge-summary";
 import { useRouter } from "@/lib/navigation/navigation";
 
 const CONFIRM_WORD = "MERGE";
@@ -73,6 +75,7 @@ export function MergeSocialMedia(): ReactNode {
 	const [confirmText, setConfirmText] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
+	const [summary, setSummary] = useState<MergeSummary>({});
 	const [isPending, startTransition] = useTransition();
 
 	const sameEntry = source != null && target != null && source.id === target.id;
@@ -98,6 +101,11 @@ export function MergeSocialMedia(): ReactNode {
 					setError(message ?? t("Could not merge the social-media entries. Please try again."));
 					return;
 				}
+				setSummary(
+					state.status === "success"
+						? ((state.data as { summary?: MergeSummary } | undefined)?.summary ?? {})
+						: {},
+				);
 				setSuccess(
 					t("Merged “{source}” into “{target}”.", { source: source.name, target: target.name }),
 				);
@@ -173,6 +181,7 @@ export function MergeSocialMedia(): ReactNode {
 			{success != null ? (
 				<Note intent="success" role="status">
 					{success}
+					<MergeSummaryList summary={summary} />
 				</Note>
 			) : null}
 

@@ -1,48 +1,29 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 
-import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
-import { redirect } from "@/lib/navigation/navigation";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export async function deleteWorkingGroupReportQuestionAction(formData: FormData): Promise<void> {
-	const locale = await getLocale();
-	const t = await getExtracted();
+const InputSchema = v.object({
+	id: v.pipe(v.string(), v.uuid()),
+	campaignId: v.pipe(v.string(), v.uuid()),
+});
 
-	if (!(await globalPostRequestRateLimit())) {
-		throw new Error(t("Too many requests."));
-	}
+export const deleteWorkingGroupReportQuestionAction = createMutationAction({
+	schema: InputSchema,
+	requireAdmin: true,
+	audit: { action: "delete", subjectType: "reporting_campaigns" },
+	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
+	redirect: ({ input }) =>
+		`/dashboard/administrator/reporting-campaigns/${input.campaignId}/edit/questions`,
 
-	const auditSession = await assertAdmin();
+	async mutate(tx, input) {
+		await tx
+			.delete(schema.workingGroupReportQuestions)
+			.where(eq(schema.workingGroupReportQuestions.id, input.id));
 
-	const { id, campaignId } = getFormDataValues(formData) as {
-		id: string;
-		campaignId: string;
-	};
-
-	await db
-		.delete(schema.workingGroupReportQuestions)
-		.where(eq(schema.workingGroupReportQuestions.id, id));
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession.user.id,
-		action: "delete",
-		subjectType: "reporting_campaigns",
-		subjectId: campaignId,
-		summary: getAuditSummaryFromFormData(formData),
-	});
-
-	revalidatePath("/[locale]/dashboard/administrator/reporting-campaigns", "layout");
-
-	redirect({
-		href: `/dashboard/administrator/reporting-campaigns/${campaignId}/edit/questions`,
-		locale,
-	});
-}
+		return { subjectId: input.campaignId };
+	},
+});

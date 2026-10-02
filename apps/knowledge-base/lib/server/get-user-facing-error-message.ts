@@ -2,6 +2,11 @@ import { getUserFacingDatabaseError } from "@/lib/db/errors";
 import { findUserFacingError } from "@/lib/user-facing-error";
 
 interface ErrorMessages {
+	sshocServiceDeletion: string;
+	ownAccountDeletion: string;
+	lastAdminManager: string;
+	adminAccountDeletionNotAllowed: string;
+	referencedByReport: string;
 	documentLinkedToUser: string;
 	entityLinkedFromNavigation: string;
 	entitySlugConflict: string;
@@ -14,6 +19,7 @@ interface ErrorMessages {
 	navigationItemInvalidParent: string;
 	navigationItemLinkWithChildren: string;
 	publishedSlugRename: string;
+	recordNotFound: string;
 	recordConflict: string;
 	relationEndBeforeStart: string;
 	relationNotEndable: string;
@@ -31,6 +37,21 @@ export function getUserFacingErrorMessage(error: unknown, messages: ErrorMessage
 	const appError = findUserFacingError(error);
 	if (appError != null) {
 		switch (appError.kind) {
+			case "sshoc-service-deletion": {
+				return messages.sshocServiceDeletion;
+			}
+			case "own-account-deletion": {
+				return messages.ownAccountDeletion;
+			}
+			case "last-admin-manager": {
+				return messages.lastAdminManager;
+			}
+			case "admin-account-deletion-not-allowed": {
+				return messages.adminAccountDeletionNotAllowed;
+			}
+			case "referenced-by-report": {
+				return messages.referencedByReport;
+			}
 			case "document-linked-to-user": {
 				return messages.documentLinkedToUser;
 			}
@@ -51,6 +72,9 @@ export function getUserFacingErrorMessage(error: unknown, messages: ErrorMessage
 			}
 			case "published-slug-rename": {
 				return messages.publishedSlugRename;
+			}
+			case "record-not-found": {
+				return messages.recordNotFound;
 			}
 			case "relation-end-before-start": {
 				return messages.relationEndBeforeStart;

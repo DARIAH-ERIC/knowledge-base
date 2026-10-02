@@ -5,6 +5,7 @@ import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
 import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { CountryReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary";
 import { confirmCountryReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/confirm-country-report.action";
@@ -51,17 +52,29 @@ export async function CountryReportSummaryScreen(
 
 				<div className="flex flex-wrap gap-3">
 					{canConfirm && report.status === "draft" && report.campaign.status === "open" && (
-						<form action={submitCountryReportAction}>
-							<input name="id" type="hidden" value={report.id} />
-							<Button type="submit">{t("Submit report")}</Button>
-						</form>
+						<ActionForm action={submitCountryReportAction}>
+							{(isPending) => (
+								<>
+									<input name="id" type="hidden" value={report.id} />
+									<Button isPending={isPending} type="submit">
+										{t("Submit report")}
+									</Button>
+								</>
+							)}
+						</ActionForm>
 					)}
 
 					{isAdmin && report.status === "submitted" && (
-						<form action={confirmCountryReportAction}>
-							<input name="id" type="hidden" value={report.id} />
-							<Button type="submit">{t("Accept report")}</Button>
-						</form>
+						<ActionForm action={confirmCountryReportAction}>
+							{(isPending) => (
+								<>
+									<input name="id" type="hidden" value={report.id} />
+									<Button isPending={isPending} type="submit">
+										{t("Accept report")}
+									</Button>
+								</>
+							)}
+						</ActionForm>
 					)}
 
 					{report.status === "accepted" && (

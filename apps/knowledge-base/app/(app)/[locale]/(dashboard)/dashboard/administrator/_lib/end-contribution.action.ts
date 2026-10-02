@@ -1,51 +1,49 @@
 "use server";
 
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
-import { assertAuthenticated } from "@/lib/auth/session";
-import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import { createCommandAction } from "@/lib/server/create-command-action";
 import { UserFacingError } from "@/lib/user-facing-error";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function endContributionAction(id: string, end: Date): Promise<void> {
-	const { user } = await assertAuthenticated();
+export const endContributionAction = createCommandAction({
+	requireAuth: true,
+	audit: { action: "relation_end", subjectType: "contributions" },
+	revalidate: "/[locale]/dashboard/administrator",
 
-	const contribution = await db.query.personsToOrganisationalUnits.findFirst({
-		where: { id },
-		columns: { duration: true, organisationalUnitDocumentId: true },
-	});
+	async mutate(tx, [id, end]: [string, Date], ctx) {
+		assert(ctx.user, "Not authenticated.");
 
-	if (contribution == null) {
-		return;
-	}
+		const contribution = await tx.query.personsToOrganisationalUnits.findFirst({
+			where: { id },
+			columns: { duration: true, organisationalUnitDocumentId: true },
+		});
+		if (contribution == null) {
+			throw new UserFacingError("record-not-found");
+		}
 
-	// Admins always pass; delegated callers may only manage people on units they are scoped to edit.
-	await assertCan(user, "update", {
-		type: "organisational_unit",
-		id: contribution.organisationalUnitDocumentId,
-	});
+		// Admins always pass; delegated callers may only manage people on units they are scoped to edit.
+		await assertCan(ctx.user, "update", {
+			type: "organisational_unit",
+			id: contribution.organisationalUnitDocumentId,
+		});
 
-	if (end < contribution.duration.start) {
-		throw new UserFacingError("relation-end-before-start");
-	}
+		if (end < contribution.duration.start) {
+			throw new UserFacingError("relation-end-before-start");
+		}
 
-	await db
-		.update(schema.personsToOrganisationalUnits)
-		.set({ duration: { start: contribution.duration.start, end } })
-		.where(eq(schema.personsToOrganisationalUnits.id, id));
+		await tx
+			.update(schema.personsToOrganisationalUnits)
+			.set({ duration: { start: contribution.duration.start, end } })
+			.where(eq(schema.personsToOrganisationalUnits.id, id));
 
-	await recordAuditEvent(db, {
-		actorUserId: user.id,
-		action: "relation_end",
-		subjectType: "contributions",
-		subjectId: id,
-		summary: { end },
-	});
+		return { subjectId: id, auditSummary: { end } };
+	},
 
-	revalidatePath("/[locale]/dashboard/administrator", "layout");
-	await dispatchWebhook({ tags: ["persons"] });
-}
+	async postCommit() {
+		await dispatchWebhook({ tags: ["persons"] });
+	},
+});

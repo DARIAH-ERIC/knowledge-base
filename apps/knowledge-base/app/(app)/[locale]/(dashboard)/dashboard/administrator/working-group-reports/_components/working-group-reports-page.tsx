@@ -25,6 +25,7 @@ import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { deleteWorkingGroupReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_lib/delete-working-group-report.action";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
+import { runAction } from "@/lib/run-action";
 import type { ListSortDirection } from "@/lib/server/list-search-params";
 
 type WorkingGroupReportRow = Pick<schema.WorkingGroupReport, "id" | "status"> & {
@@ -156,13 +157,16 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveReport(id);
-						try {
-							await deleteWorkingGroupReportAction(id);
-							router.refresh();
-							setItemToDelete(null);
-						} catch {
-							setDeleteError(t("Could not delete working group report. Please try again."));
+						const error = await runAction(
+							() => deleteWorkingGroupReportAction(id),
+							t("Could not delete working group report. Please try again."),
+						);
+						if (error != null) {
+							setDeleteError(error);
+							return;
 						}
+						router.refresh();
+						setItemToDelete(null);
 					});
 				}}
 			/>

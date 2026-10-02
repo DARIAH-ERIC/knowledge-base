@@ -31,8 +31,9 @@ import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/u
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
+import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
@@ -47,6 +48,7 @@ import { endUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { updateUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-unit-relation.action";
 import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 import { dateToCalendarDate } from "@/lib/date";
+import { runAction } from "@/lib/run-action";
 
 interface UnitRelationsSectionProps {
 	unitDocumentId: string;
@@ -104,7 +106,11 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 
 	const [localRelations, setLocalRelations] = useState(relations);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string; start: Date } | null>(null);
+	const [endError, setEndError] = useState<string | null>(null);
+	const [isEndPending, startEndTransition] = useTransition();
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
+	const [isDeletePending, startDeleteTransition] = useTransition();
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 	const minEndDate = dateToCalendarDate(itemToEnd?.start);
 	const [itemToEdit, setItemToEdit] = useState<UnitRelation | null>(null);
@@ -442,8 +448,9 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 			<ModalContent
 				isOpen={itemToEnd != null}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isEndPending) {
 						setItemToEnd(null);
+						setEndError(null);
 					}
 				}}
 				role="alertdialog"
@@ -453,7 +460,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 					description={t("Set the date on which this relation ended.")}
 					title={t("End relation")}
 				/>
-				<ModalBody>
+				<ModalBody className="flex flex-col gap-y-4">
 					<DatePicker
 						granularity="day"
 						minValue={minEndDate ?? undefined}
@@ -465,10 +472,12 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 						<Label>{t("End date")}</Label>
 						<DatePickerTrigger />
 					</DatePicker>
+					<ActionErrorAlert message={endError} />
 				</ModalBody>
 				<ModalFooter>
-					<ModalClose>{t("Cancel")}</ModalClose>
+					<ModalClose isDisabled={isEndPending}>{t("Cancel")}</ModalClose>
 					<Button
+						isPending={isEndPending}
 						isDisabled={
 							selectedEndDate == null ||
 							(minEndDate != null && selectedEndDate.compare(minEndDate) < 0)
@@ -480,8 +489,15 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 
 							const end = selectedEndDate.toDate("UTC");
 
-							startTransition(async () => {
-								await endUnitRelationAction(itemToEnd.id, end);
+							startEndTransition(async () => {
+								const error = await runAction(
+									() => endUnitRelationAction(itemToEnd.id, end),
+									t("Could not end relation. Please try again."),
+								);
+								if (error != null) {
+									setEndError(error);
+									return;
+								}
 								setLocalRelations((prev) =>
 									prev.map((relation) =>
 										relation.id === itemToEnd.id
@@ -609,8 +625,9 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 			<ModalContent
 				isOpen={itemToDelete != null}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
+						setDeleteError(null);
 					}
 				}}
 				role="alertdialog"
@@ -620,9 +637,15 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 					description={t("This will permanently delete this relation.")}
 					title={t("Delete relation")}
 				/>
+				{deleteError != null ? (
+					<ModalBody>
+						<ActionErrorAlert message={deleteError} />
+					</ModalBody>
+				) : null}
 				<ModalFooter>
-					<ModalClose>{t("Cancel")}</ModalClose>
+					<ModalClose isDisabled={isDeletePending}>{t("Cancel")}</ModalClose>
 					<Button
+						isPending={isDeletePending}
 						intent="danger"
 						onPress={() => {
 							if (itemToDelete == null) {
@@ -630,8 +653,15 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 							}
 
 							const id = itemToDelete.id;
-							startTransition(async () => {
-								await deleteUnitRelationAction(id);
+							startDeleteTransition(async () => {
+								const error = await runAction(
+									() => deleteUnitRelationAction(id),
+									t("Could not delete relation. Please try again."),
+								);
+								if (error != null) {
+									setDeleteError(error);
+									return;
+								}
 								setLocalRelations((prev) => prev.filter((relation) => relation.id !== id));
 								setItemToDelete(null);
 							});

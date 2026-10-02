@@ -10,6 +10,7 @@ import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
 
+import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
 import {
 	FormLayout,
 	FormSection,
@@ -51,18 +52,23 @@ export function CampaignQuestionsForm(props: Readonly<CampaignQuestionsFormProps
 								</div>
 							</div>
 
-							<form action={deleteWorkingGroupReportQuestionAction}>
-								<input name="campaignId" type="hidden" value={campaignId} />
-								<input name="id" type="hidden" value={q.id} />
-								<Button
-									className="text-danger hover:text-danger"
-									intent="secondary"
-									size="sm"
-									type="submit"
-								>
-									{t("Remove")}
-								</Button>
-							</form>
+							<ActionForm action={deleteWorkingGroupReportQuestionAction}>
+								{(isPending) => (
+									<>
+										<input name="campaignId" type="hidden" value={campaignId} />
+										<input name="id" type="hidden" value={q.id} />
+										<Button
+											isPending={isPending}
+											className="text-danger hover:text-danger"
+											intent="secondary"
+											size="sm"
+											type="submit"
+										>
+											{t("Remove")}
+										</Button>
+									</>
+								)}
+							</ActionForm>
 						</li>
 					))}
 				</ol>

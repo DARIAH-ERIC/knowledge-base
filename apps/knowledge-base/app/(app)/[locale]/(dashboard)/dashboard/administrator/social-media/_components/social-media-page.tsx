@@ -26,6 +26,7 @@ import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { deleteSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_lib/delete-social-media.action";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
+import { runAction } from "@/lib/run-action";
 
 interface SocialMediaPageProps {
 	dir: "asc" | "desc";
@@ -162,13 +163,16 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						try {
-							await deleteSocialMediaAction(id);
-							router.refresh();
-							setItemToDelete(null);
-						} catch {
-							setDeleteError(t("Could not delete social media. Please try again."));
+						const error = await runAction(
+							() => deleteSocialMediaAction(id),
+							t("Could not delete social media. Please try again."),
+						);
+						if (error != null) {
+							setDeleteError(error);
+							return;
 						}
+						router.refresh();
+						setItemToDelete(null);
 					});
 				}}
 			/>

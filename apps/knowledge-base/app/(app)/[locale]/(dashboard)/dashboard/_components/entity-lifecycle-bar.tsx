@@ -4,12 +4,22 @@ import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
 import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import { Link } from "@dariah-eric/ui/link";
-import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
+import {
+	ModalBody,
+	ModalClose,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+} from "@dariah-eric/ui/modal";
+import { queue } from "@dariah-eric/ui/toast";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState, useTransition } from "react";
 
-/** Lifecycle command actions return an ActionState on completion; the bar ignores it. */
+import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
+import { runAction } from "@/lib/run-action";
+
+/** Lifecycle command actions return an ActionState on completion; the bar shows its error, if any. */
 type LifecycleAction = (documentId: string) => Promise<unknown>;
 
 interface EntityLifecycleBarProps {
@@ -28,6 +38,7 @@ export function EntityLifecycleBar(props: Readonly<EntityLifecycleBarProps>): Re
 	const [isPublishing, startPublishTransition] = useTransition();
 	const [isDiscarding, startDiscardTransition] = useTransition();
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+	const [discardError, setDiscardError] = useState<string | null>(null);
 
 	let badgeIntent: "success" | "info" | "warning";
 	let badgeLabel: string;
@@ -62,7 +73,13 @@ export function EntityLifecycleBar(props: Readonly<EntityLifecycleBarProps>): Re
 					isPending={isPublishing}
 					onPress={() => {
 						startPublishTransition(async () => {
-							await publishAction(documentId);
+							const error = await runAction(
+								() => publishAction(documentId),
+								t("Could not publish the draft. Please try again."),
+							);
+							if (error != null) {
+								queue.add({ title: error }, { timeout: 5000 });
+							}
 						});
 					}}
 					size="sm"
@@ -77,6 +94,7 @@ export function EntityLifecycleBar(props: Readonly<EntityLifecycleBarProps>): Re
 						intent="plain"
 						isPending={isDiscarding}
 						onPress={() => {
+							setDiscardError(null);
 							setIsConfirmOpen(true);
 						}}
 						size="sm"
@@ -84,19 +102,40 @@ export function EntityLifecycleBar(props: Readonly<EntityLifecycleBarProps>): Re
 						{t("Discard draft")}
 					</Button>
 
-					<ModalContent isOpen={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+					<ModalContent
+						isOpen={isConfirmOpen}
+						onOpenChange={(open) => {
+							if (!isDiscarding) {
+								setIsConfirmOpen(open);
+							}
+						}}
+					>
 						<ModalHeader
 							description={t("Discard unpublished changes? The published version will remain.")}
 							title={t("Discard draft")}
 						/>
+						{discardError != null ? (
+							<ModalBody>
+								<ActionErrorAlert message={discardError} />
+							</ModalBody>
+						) : null}
 						<ModalFooter>
-							<ModalClose>{t("Cancel")}</ModalClose>
+							<ModalClose isDisabled={isDiscarding}>{t("Cancel")}</ModalClose>
 							<Button
 								intent="warning"
+								isPending={isDiscarding}
 								onPress={() => {
-									setIsConfirmOpen(false);
+									setDiscardError(null);
 									startDiscardTransition(async () => {
-										await discardDraftAction(documentId);
+										const error = await runAction(
+											() => discardDraftAction(documentId),
+											t("Could not discard the draft. Please try again."),
+										);
+										if (error != null) {
+											setDiscardError(error);
+											return;
+										}
+										setIsConfirmOpen(false);
 									});
 								}}
 							>

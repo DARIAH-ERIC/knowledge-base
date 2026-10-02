@@ -1,5 +1,6 @@
 "use server";
 
+import type { MergeSummary } from "@/lib/data/merge-summary";
 import { mergeSocialMedia } from "@/lib/data/social-media-merge";
 import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
@@ -8,6 +9,8 @@ interface MergeSocialMediaActionResult {
 	subjectId: string;
 	subjectLabel: string;
 	auditSummary: Record<string, unknown>;
+	/** What the merge re-pointed, listed in the UI once it succeeds. */
+	successData: { summary: MergeSummary };
 }
 
 export const mergeSocialMediaAction = createCommandAction({
@@ -25,7 +28,9 @@ export const mergeSocialMediaAction = createCommandAction({
 			auditSummary: {
 				mergedInto: { id: result.target.id, name: result.target.name, url: result.target.url },
 				source: { type: result.source.type, name: result.source.name, url: result.source.url },
+				repointed: result.summary,
 			},
+			successData: { summary: result.summary },
 		};
 	},
 

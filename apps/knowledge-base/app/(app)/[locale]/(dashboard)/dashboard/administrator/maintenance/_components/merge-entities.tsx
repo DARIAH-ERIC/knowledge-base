@@ -23,7 +23,9 @@ import {
 	isSameEntityType,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option";
 import { renderEntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option-item";
+import { MergeSummaryList } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/merge-summary-list";
 import { mergeEntitiesAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_lib/merge-entities.action";
+import type { MergeSummary } from "@/lib/data/merge-summary";
 import { useRouter } from "@/lib/navigation/navigation";
 
 const CONFIRM_WORD = "MERGE";
@@ -51,6 +53,7 @@ export function MergeEntities(): ReactNode {
 	const [confirmText, setConfirmText] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
+	const [summary, setSummary] = useState<MergeSummary>({});
 	const [isPending, startTransition] = useTransition();
 
 	const sameEntity = source != null && target != null && source.id === target.id;
@@ -77,6 +80,11 @@ export function MergeEntities(): ReactNode {
 					setError(message ?? t("Could not merge the entities. Please try again."));
 					return;
 				}
+				setSummary(
+					state.status === "success"
+						? ((state.data as { summary?: MergeSummary } | undefined)?.summary ?? {})
+						: {},
+				);
 				setSuccess(
 					t("Merged “{source}” into “{target}”.", { source: source.name, target: target.name }),
 				);
@@ -160,6 +168,7 @@ export function MergeEntities(): ReactNode {
 			{success != null ? (
 				<Note intent="success" role="status">
 					{success}
+					<MergeSummaryList summary={summary} />
 				</Note>
 			) : null}
 

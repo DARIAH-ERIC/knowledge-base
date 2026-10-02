@@ -15,6 +15,7 @@ import {
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 import {
 	EntityDeleteModal,
 	EntityListHeader,
@@ -27,6 +28,7 @@ import { NavigationMenuCreateDialog } from "@/app/(app)/[locale]/(dashboard)/das
 import { deleteNavigationItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/delete-navigation-item.action";
 import { deleteNavigationMenuAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/delete-navigation-menu.action";
 import { moveNavigationItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/move-navigation-item.action";
+import { runAction } from "@/lib/run-action";
 
 export type NavigationItemWithChildren = Pick<
 	schema.NavigationItem,
@@ -218,9 +220,11 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 	const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 	const [deleteItemError, setDeleteItemError] = useState<string | null>(null);
 	const [isDeleteItemPending, startDeleteItemTransition] = useTransition();
+	const [moveError, setMoveError] = useState<string | null>(null);
 
 	return (
 		<Fragment>
+			<ActionErrorAlert className="mbe-2" message={moveError} />
 			<div className="flex flex-col gap-y-1">
 				{tree.length === 0 ? (
 					<p className="px-2 py-4 text-sm text-muted-fg">{t("No items yet.")}</p>
@@ -244,8 +248,14 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 								setItemDialogState({ isOpen: true, item });
 							}}
 							onMoveItem={(id, direction) => {
+								setMoveError(null);
 								startTransition(async () => {
-									await moveNavigationItemAction(id, direction);
+									setMoveError(
+										await runAction(
+											() => moveNavigationItemAction(id, direction),
+											t("Could not move the item. Please try again."),
+										),
+									);
 								});
 							}}
 						/>
@@ -297,12 +307,15 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 					const id = itemToDelete;
 					setDeleteItemError(null);
 					startDeleteItemTransition(async () => {
-						try {
-							await deleteNavigationItemAction(id);
-							setItemToDelete(null);
-						} catch {
-							setDeleteItemError(t("Could not delete navigation item. Please try again."));
+						const error = await runAction(
+							() => deleteNavigationItemAction(id),
+							t("Could not delete navigation item. Please try again."),
+						);
+						if (error != null) {
+							setDeleteItemError(error);
+							return;
 						}
+						setItemToDelete(null);
 					});
 				}}
 			/>
@@ -386,12 +399,15 @@ export function NavigationPage(props: Readonly<NavigationPageProps>): ReactNode 
 					const id = menuToDelete;
 					setDeleteMenuError(null);
 					startDeleteMenuTransition(async () => {
-						try {
-							await deleteNavigationMenuAction(id);
-							setMenuToDelete(null);
-						} catch {
-							setDeleteMenuError(t("Could not delete navigation menu. Please try again."));
+						const error = await runAction(
+							() => deleteNavigationMenuAction(id),
+							t("Could not delete navigation menu. Please try again."),
+						);
+						if (error != null) {
+							setDeleteMenuError(error);
+							return;
 						}
+						setMenuToDelete(null);
 					});
 				}}
 			/>

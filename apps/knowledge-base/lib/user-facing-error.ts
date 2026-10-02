@@ -1,18 +1,24 @@
 /** The disallowed operations a mutation can reject with a message that is safe to show the user. */
 export type UserFacingErrorKind =
+	| "admin-account-deletion-not-allowed"
 	| "document-linked-to-user"
+	| "last-admin-manager"
 	| "missing-dariah-eric"
 	| "missing-paired-relation-unit"
 	| "navigation-item-child-without-link"
 	| "navigation-item-invalid-parent"
 	| "navigation-item-link-with-children"
+	| "own-account-deletion"
 	| "published-slug-rename"
+	| "record-not-found"
+	| "referenced-by-report"
 	| "relation-end-before-start"
 	| "relation-not-endable"
 	| "relation-period-overlap"
 	| "service-kpi-conflict"
 	| "slug-too-long"
-	| "social-media-kpi-conflict";
+	| "social-media-kpi-conflict"
+	| "sshoc-service-deletion";
 
 /**
  * A failure a mutation raises on purpose, having recognised a disallowed operation, so the action

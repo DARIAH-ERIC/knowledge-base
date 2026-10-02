@@ -16,6 +16,7 @@ import {
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
 import { getCompensationRoleLabel } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels";
 import type { CompensationRole } from "@/lib/data/report-contributions";
 import type { ServerAction } from "@/lib/server/create-server-action";
@@ -42,7 +43,7 @@ interface CountryReportClaimedContributorsFormProps {
 	};
 	availableContributions: Array<AvailableContribution>;
 	addAction: ServerAction;
-	deleteAction: (formData: FormData) => Promise<void>;
+	deleteAction: ServerAction;
 }
 
 export function CountryReportClaimedContributorsForm(
@@ -84,18 +85,23 @@ export function CountryReportClaimedContributorsForm(
 										</span>
 									</div>
 								</div>
-								<form action={deleteAction}>
-									<input name="contributionId" type="hidden" value={contribution.id} />
-									<input name="countryReportId" type="hidden" value={report.id} />
-									<Button
-										className="text-danger hover:bg-danger/10 hover:text-danger"
-										intent="plain"
-										size="sm"
-										type="submit"
-									>
-										{t("Remove")}
-									</Button>
-								</form>
+								<ActionForm action={deleteAction}>
+									{(isPending) => (
+										<>
+											<input name="contributionId" type="hidden" value={contribution.id} />
+											<input name="countryReportId" type="hidden" value={report.id} />
+											<Button
+												isPending={isPending}
+												className="text-danger hover:bg-danger/10 hover:text-danger"
+												intent="plain"
+												size="sm"
+												type="submit"
+											>
+												{t("Remove")}
+											</Button>
+										</>
+									)}
+								</ActionForm>
 							</li>
 						);
 					})}
