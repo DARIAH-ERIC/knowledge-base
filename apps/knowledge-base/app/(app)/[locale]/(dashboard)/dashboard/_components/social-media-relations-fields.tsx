@@ -17,6 +17,7 @@ import {
 	ModalFooter,
 	ModalHeader,
 } from "@dariah-eric/ui/modal";
+import { Note } from "@dariah-eric/ui/note";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
@@ -89,12 +90,23 @@ export function SocialMediaRelationsFields(
 	const [localSocialMediaItems, setLocalSocialMediaItems] = useState<Array<SocialMediaOption>>(
 		() => selectedSocialMediaItems ?? [],
 	);
+	/** Ids of social media created from the dialog, which exist already but are not linked yet. */
+	const [createdSocialMediaIds, setCreatedSocialMediaIds] = useState<Array<string>>([]);
 	const [isCreateSocialMediaOpen, setIsCreateSocialMediaOpen] = useState(false);
 	const [createSocialMediaFormKey, setCreateSocialMediaFormKey] = useState(0);
 	const [createSocialMediaState, setCreateSocialMediaState] = useState<
 		ActionState<CreatedSocialMedia>
 	>(() => createActionStateInitial());
 	const [isCreateSocialMediaPending, startCreateSocialMediaTransition] = useTransition();
+
+	/** Links are only persisted with the surrounding form, order included. */
+	const initialIds = initialSocialMediaIds ?? [];
+	const hasUnsavedChanges =
+		selectedSocialMediaIds.length !== initialIds.length ||
+		selectedSocialMediaIds.some((id, index) => id !== initialIds[index]);
+	const hasUnlinkedCreatedSocialMedia = selectedSocialMediaIds.some((id) =>
+		createdSocialMediaIds.includes(id),
+	);
 
 	function handleCreateSocialMedia(formData: FormData) {
 		startCreateSocialMediaTransition(async () => {
@@ -111,6 +123,7 @@ export function SocialMediaRelationsFields(
 					},
 				]);
 				setSelectedSocialMediaIds((prev) => [...prev, result.data.id]);
+				setCreatedSocialMediaIds((prev) => [...prev, result.data.id]);
 				setIsCreateSocialMediaOpen(false);
 				setCreateSocialMediaFormKey((prev) => prev + 1);
 			}
@@ -158,6 +171,15 @@ export function SocialMediaRelationsFields(
 				<PlusIcon />
 				{t("Create social media")}
 			</Button>
+			{hasUnsavedChanges ? (
+				<Note intent="info" role="status">
+					{hasUnlinkedCreatedSocialMedia
+						? t(
+								"New social media entries are created right away, but are only linked once you save the form.",
+							)
+						: t("Social media links are saved together with the form. Save to keep these changes.")}
+				</Note>
+			) : null}
 			{selectedSocialMediaIds.map((id, index) => (
 				<input key={id} name={`socialMediaIds.${String(index)}`} type="hidden" value={id} />
 			))}
