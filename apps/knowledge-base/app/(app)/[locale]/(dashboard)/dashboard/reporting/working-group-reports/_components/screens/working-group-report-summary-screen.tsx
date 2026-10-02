@@ -1,11 +1,10 @@
-import { Button } from "@dariah-eric/ui/button";
 import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
+import { ReportActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-action-form";
 import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { WorkingGroupReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
 import { confirmWorkingGroupReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/confirm-working-group-report.action";
@@ -52,29 +51,19 @@ export async function WorkingGroupReportSummaryScreen(
 
 				<div className="flex flex-wrap gap-3">
 					{canConfirm && report.status === "draft" && report.campaign.status === "open" && (
-						<ActionForm action={submitWorkingGroupReportAction}>
-							{(isPending) => (
-								<>
-									<input name="id" type="hidden" value={report.id} />
-									<Button isPending={isPending} type="submit">
-										{t("Submit report")}
-									</Button>
-								</>
-							)}
-						</ActionForm>
+						<ReportActionForm
+							action={submitWorkingGroupReportAction}
+							label={t("Submit report")}
+							reportId={report.id}
+						/>
 					)}
 
 					{isAdmin && report.status === "submitted" && (
-						<ActionForm action={confirmWorkingGroupReportAction}>
-							{(isPending) => (
-								<>
-									<input name="id" type="hidden" value={report.id} />
-									<Button isPending={isPending} type="submit">
-										{t("Accept report")}
-									</Button>
-								</>
-							)}
-						</ActionForm>
+						<ReportActionForm
+							action={confirmWorkingGroupReportAction}
+							label={t("Accept report")}
+							reportId={report.id}
+						/>
 					)}
 
 					{report.status === "accepted" && (

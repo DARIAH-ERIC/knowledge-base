@@ -1,11 +1,10 @@
-import { Button } from "@dariah-eric/ui/button";
 import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
+import { ReportActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-action-form";
 import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { CountryReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary";
 import { confirmCountryReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/confirm-country-report.action";
@@ -52,29 +51,19 @@ export async function CountryReportSummaryScreen(
 
 				<div className="flex flex-wrap gap-3">
 					{canConfirm && report.status === "draft" && report.campaign.status === "open" && (
-						<ActionForm action={submitCountryReportAction}>
-							{(isPending) => (
-								<>
-									<input name="id" type="hidden" value={report.id} />
-									<Button isPending={isPending} type="submit">
-										{t("Submit report")}
-									</Button>
-								</>
-							)}
-						</ActionForm>
+						<ReportActionForm
+							action={submitCountryReportAction}
+							label={t("Submit report")}
+							reportId={report.id}
+						/>
 					)}
 
 					{isAdmin && report.status === "submitted" && (
-						<ActionForm action={confirmCountryReportAction}>
-							{(isPending) => (
-								<>
-									<input name="id" type="hidden" value={report.id} />
-									<Button isPending={isPending} type="submit">
-										{t("Accept report")}
-									</Button>
-								</>
-							)}
-						</ActionForm>
+						<ReportActionForm
+							action={confirmCountryReportAction}
+							label={t("Accept report")}
+							reportId={report.id}
+						/>
 					)}
 
 					{report.status === "accepted" && (

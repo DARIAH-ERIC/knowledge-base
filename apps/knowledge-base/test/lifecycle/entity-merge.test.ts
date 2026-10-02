@@ -230,6 +230,73 @@ describe("mergeEntities", () => {
 			).toStrictEqual([{ personToOrgUnitId: targetRelationId }]);
 		});
 	});
+
+	it("rejects a merge when working-group report rows have different frozen chair roles", async () => {
+		await withTransaction(async (tx) => {
+			const { source, target, sourceRelationId, targetRelationId, workingGroupReportId } =
+				await createOverlappingPersonRelations(tx);
+
+			await tx.insert(schema.workingGroupReportChairs).values([
+				{ workingGroupReportId, personToOrgUnitId: sourceRelationId, chairRole: "is_chair_of" },
+				{
+					workingGroupReportId,
+					personToOrgUnitId: targetRelationId,
+					chairRole: "is_vice_chair_of",
+				},
+			]);
+
+			await expect(mergeEntities(tx, source, target)).rejects.toThrow(
+				"working_group_report_chairs contains conflicting frozen report roles",
+			);
+
+			expect(await tx.query.entities.findFirst({ where: { id: source } })).toBeDefined();
+			expect(
+				await tx
+					.select({ chairRole: schema.workingGroupReportChairs.chairRole })
+					.from(schema.workingGroupReportChairs)
+					.where(eq(schema.workingGroupReportChairs.workingGroupReportId, workingGroupReportId)),
+			).toHaveLength(2);
+		});
+	});
+
+	it("rejects a merge when country-report rows have different frozen contribution roles", async () => {
+		await withTransaction(async (tx) => {
+			const { source, target, sourceRelationId, targetRelationId, campaignId } =
+				await createOverlappingPersonRelations(tx);
+			const entityTypeId = await getPersonTypeId(tx);
+			const countryDocumentId = await createBareEntity(tx, entityTypeId);
+			const [report] = await tx
+				.insert(schema.countryReports)
+				.values({ campaignId, countryDocumentId })
+				.returning({ id: schema.countryReports.id });
+			assert(report);
+
+			await tx.insert(schema.countryReportContributions).values([
+				{
+					countryReportId: report.id,
+					personToOrgUnitId: sourceRelationId,
+					contributionRole: "national_coordinator",
+				},
+				{
+					countryReportId: report.id,
+					personToOrgUnitId: targetRelationId,
+					contributionRole: "national_coordinator_deputy",
+				},
+			]);
+
+			await expect(mergeEntities(tx, source, target)).rejects.toThrow(
+				"country_report_contributions contains conflicting frozen report roles",
+			);
+
+			expect(await tx.query.entities.findFirst({ where: { id: source } })).toBeDefined();
+			expect(
+				await tx
+					.select({ contributionRole: schema.countryReportContributions.contributionRole })
+					.from(schema.countryReportContributions)
+					.where(eq(schema.countryReportContributions.countryReportId, report.id)),
+			).toHaveLength(2);
+		});
+	});
 });
 
 /**
@@ -242,6 +309,7 @@ async function createOverlappingPersonRelations(tx: Tx): Promise<{
 	sourceRelationId: string;
 	targetRelationId: string;
 	workingGroupReportId: string;
+	campaignId: string;
 }> {
 	const personTypeId = await getPersonTypeId(tx);
 	const roleTypeId = await getPersonRoleTypeId(tx);
@@ -288,5 +356,6 @@ async function createOverlappingPersonRelations(tx: Tx): Promise<{
 		sourceRelationId: sourceRelation.id,
 		targetRelationId: targetRelation.id,
 		workingGroupReportId: report.id,
+		campaignId: campaign.id,
 	};
 }
