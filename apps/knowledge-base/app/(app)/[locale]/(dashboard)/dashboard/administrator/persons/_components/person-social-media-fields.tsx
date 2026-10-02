@@ -19,6 +19,7 @@ import {
 	ModalFooter,
 	ModalHeader,
 } from "@dariah-eric/ui/modal";
+import { Note } from "@dariah-eric/ui/note";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
@@ -79,6 +80,22 @@ export function PersonSocialMediaFields(props: Readonly<PersonSocialMediaFieldsP
 			});
 		},
 	});
+
+	/**
+	 * Entries are version-scoped, so they are only persisted with the person form. Comparing against
+	 * the loaded entries (order included) lets the notice disappear again when a change is undone.
+	 */
+	const hasUnsavedChanges =
+		rows.length !== (initialSocialMedia ?? []).length ||
+		rows.some((row, index) => {
+			const initial = initialSocialMedia?.[index];
+			return (
+				initial == null ||
+				row.type !== initial.type ||
+				row.url !== initial.url ||
+				row.label !== initial.label
+			);
+		});
 
 	function handleSubmitEntry(entry: PersonSocialMediaEntry) {
 		const edited = editedRow;
@@ -165,6 +182,14 @@ export function PersonSocialMediaFields(props: Readonly<PersonSocialMediaFieldsP
 				<PlusIcon />
 				{t("Add entry")}
 			</Button>
+
+			{hasUnsavedChanges ? (
+				<Note intent="info" role="status">
+					{t(
+						"Social media changes are saved together with the person. Save the person to keep them.",
+					)}
+				</Note>
+			) : null}
 
 			{rows.map((row, index) => (
 				<Fragment key={row.key}>

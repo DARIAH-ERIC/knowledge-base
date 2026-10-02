@@ -173,6 +173,48 @@ test.describe("persons admin", () => {
 		expect(updated).toMatchObject({ email: null, imageId: null, orcid: null });
 	});
 
+	test("should persist social media edited in the dialog once the person is saved", async ({
+		createAdminPersonsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const personsPage = createAdminPersonsPage(workerIndex);
+
+		const name = `${personsPage.workerPrefix} Social Media ${randomUUID()}`;
+		const url = `https://github.com/e2e-${randomUUID()}`;
+
+		await personsPage.gotoCreate();
+		await personsPage.fillName(name);
+		await personsPage.fillSortName("Media, Social");
+		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await personsPage.fillBiography("Biography for social media test.");
+		await personsPage.addSocialMedia({ type: "GitHub", url });
+		await personsPage.submitForm();
+
+		expect(await db.getPersonSocialMediaByName(name)).toStrictEqual([
+			{ label: null, type: "github", url },
+		]);
+
+		await personsPage.gotoEditFromList(name);
+		await expect(personsPage.socialMediaUnsavedNotice()).toBeHidden();
+
+		// The dialog only changes the form, so the notice points out that the person still needs saving.
+		await personsPage.editSocialMedia(url, { type: "GitHub", url, label: "Code" });
+		await expect(personsPage.socialMediaList().getByRole("row", { name: url })).toContainText(
+			"Code",
+		);
+		await expect(personsPage.socialMediaUnsavedNotice()).toBeVisible();
+		expect(await db.getPersonSocialMediaByName(name)).toStrictEqual([
+			{ label: null, type: "github", url },
+		]);
+
+		await personsPage.submitForm();
+
+		expect(await db.getPersonSocialMediaByName(name)).toStrictEqual([
+			{ label: "Code", type: "github", url },
+		]);
+	});
+
 	test("failure injection forces createServerAction to return an error state", async ({
 		page,
 		createAdminPersonsPage,

@@ -1415,6 +1415,31 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
+	/** The person's own social media, in their stored order. */
+	async getPersonSocialMediaByName(
+		name: string,
+	): Promise<Array<{ label: string | null; type: string; url: string }>> {
+		const person = await this.getPersonByName(name);
+
+		if (person == null) {
+			return [];
+		}
+
+		return this.db
+			.select({
+				label: schema.personSocialMedia.label,
+				type: schema.personSocialMediaTypes.type,
+				url: schema.personSocialMedia.url,
+			})
+			.from(schema.personSocialMedia)
+			.innerJoin(
+				schema.personSocialMediaTypes,
+				eq(schema.personSocialMedia.typeId, schema.personSocialMediaTypes.id),
+			)
+			.where(eq(schema.personSocialMedia.personId, person.id))
+			.orderBy(schema.personSocialMedia.position);
+	}
+
 	async getPersonBiographyByName(name: string): Promise<unknown> {
 		const person = await this.getPersonByName(name);
 

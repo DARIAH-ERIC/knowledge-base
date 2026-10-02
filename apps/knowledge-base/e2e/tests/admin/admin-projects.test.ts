@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { socialMediaUnsavedNote } from "@/e2e/lib/fixtures/social-media-form";
 import { expect, test } from "@/e2e/lib/test";
 
 test.describe("projects admin", () => {
@@ -353,6 +354,55 @@ test.describe("projects admin", () => {
 
 		const relations = await db.getProjectRelationsByName(projectName);
 		expect(relations?.socialMediaIds).toStrictEqual([socialMediaA!.id]);
+	});
+
+	test("should note that social media links are only saved with the project", async ({
+		page,
+		createAdminProjectsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const adminProjectsPage = createAdminProjectsPage(workerIndex);
+		const projectName = `${adminProjectsPage.workerPrefix} Social Note ${randomUUID()}`;
+		const socialMediaName = `${adminProjectsPage.workerPrefix} Social Note ${randomUUID()}`;
+		const note = socialMediaUnsavedNote(page);
+
+		await adminProjectsPage.gotoCreate();
+		await adminProjectsPage.fillName(projectName);
+		await adminProjectsPage.selectFirstScope();
+		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
+		await adminProjectsPage.fillSummary("Project for the social media unsaved note");
+		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await adminProjectsPage.submitForm();
+
+		await adminProjectsPage.searchByName(projectName);
+		await adminProjectsPage.gotoEditFromList(projectName);
+		await expect(note).toBeHidden();
+
+		// The dialog creates the social media record right away, but the link waits for the form.
+		await adminProjectsPage.createSocialMediaInForm(
+			socialMediaName,
+			"https://example.com/project-social-note",
+		);
+		await expect(note).toContainText("only linked once you save the form");
+		const socialMedia = await db.getSocialMediaByName(socialMediaName);
+		expect(socialMedia).not.toBeNull();
+		expect((await db.getProjectRelationsByName(projectName))?.socialMediaIds).toStrictEqual([]);
+
+		await adminProjectsPage.submitForm();
+		expect((await db.getProjectRelationsByName(projectName))?.socialMediaIds).toStrictEqual([
+			socialMedia!.id,
+		]);
+
+		await adminProjectsPage.searchByName(projectName);
+		await adminProjectsPage.gotoEditFromList(projectName);
+		await expect(note).toBeHidden();
+
+		await adminProjectsPage.removeSelectedInControlByName("Social media", socialMediaName);
+		await expect(note).toContainText("Save to keep these changes");
+		expect((await db.getProjectRelationsByName(projectName))?.socialMediaIds).toStrictEqual([
+			socialMedia!.id,
+		]);
 	});
 
 	test("should delete a project", async ({ createAdminProjectsPage, db }) => {

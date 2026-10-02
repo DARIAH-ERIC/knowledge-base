@@ -101,6 +101,53 @@ export class AdminPersonsPage {
 	}
 
 	// ---------------------------------------------------------------------------
+	// Social media section
+	// ---------------------------------------------------------------------------
+
+	socialMediaList(): Locator {
+		return this.page.getByRole("grid", { name: "Social media" });
+	}
+
+	socialMediaUnsavedNotice(): Locator {
+		return this.page.getByRole("status").filter({ hasText: "Save the person to keep them." });
+	}
+
+	async addSocialMedia(entry: { type: string; url: string; label?: string }): Promise<void> {
+		await this.page.getByRole("button", { name: "Add entry" }).click();
+		await this.fillSocialMediaDialog("Add social media", "Add", entry);
+	}
+
+	async editSocialMedia(
+		url: string,
+		entry: { type: string; url: string; label?: string },
+	): Promise<void> {
+		await this.socialMediaList()
+			.getByRole("row")
+			.filter({ hasText: url })
+			.getByRole("button", { name: "Edit entry" })
+			.click();
+		await this.fillSocialMediaDialog("Edit social media", "Save", entry);
+	}
+
+	private async fillSocialMediaDialog(
+		title: string,
+		submitLabel: string,
+		entry: { type: string; url: string; label?: string },
+	): Promise<void> {
+		const dialog = this.page.getByRole("dialog", { name: title });
+		await dialog.waitFor({ state: "visible" });
+		const typeControl = dialog
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Type" }) });
+		await typeControl.locator("button[aria-expanded]:not([slot])").click();
+		await this.page.getByRole("option", { name: entry.type, exact: true }).click();
+		await dialog.getByLabel("URL").fill(entry.url);
+		await dialog.getByLabel("Label (optional)").fill(entry.label ?? "");
+		await dialog.getByRole("button", { name: submitLabel, exact: true }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	// ---------------------------------------------------------------------------
 	// Slug field
 	// ---------------------------------------------------------------------------
 

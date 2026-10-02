@@ -1,4 +1,4 @@
-import { type Page, expect } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 
 export async function createSocialMediaInForm(
 	page: Page,
@@ -17,4 +17,9 @@ export async function createSocialMediaInForm(
 	await dialog.getByRole("button", { name: "Create" }).click();
 	await dialog.waitFor({ state: "hidden" });
 	await expect(page.getByText(name, { exact: true })).toBeVisible();
+}
+
+/** The note the social media picker shows while its links differ from the saved ones. */
+export function socialMediaUnsavedNote(page: Page): Locator {
+	return page.getByRole("status").filter({ hasText: /only linked once you save|Save to keep/ });
 }

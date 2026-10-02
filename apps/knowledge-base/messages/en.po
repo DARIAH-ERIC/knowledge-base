@@ -1231,7 +1231,6 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
@@ -1407,7 +1406,6 @@ msgstr "Label"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
@@ -1462,7 +1460,6 @@ msgstr "Role"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/unused-social-media-cleanup.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx
@@ -1646,7 +1643,6 @@ msgstr "Description"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-contribution-amounts-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-country-thresholds-form.tsx
@@ -1868,7 +1864,6 @@ msgstr "SSHOC services"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
@@ -2622,12 +2617,10 @@ msgstr "Edit the details of the selected entry."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 msgid "Ak3MsC"
 msgstr "Add social media"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 msgid "Umb_UT"
 msgstr "No social media linked"
 
@@ -2636,27 +2629,30 @@ msgid "O5jOXr"
 msgstr "Open record"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 msgid "_IN_vq"
 msgstr "Create social media"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
+msgid "8g1cm6"
+msgstr "New social media entries are created right away, but are only linked once you save the form."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx
+msgid "0lulQW"
+msgstr "Social media links are saved together with the form. Save to keep these changes."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx
 msgid "JhDUsu"
 msgstr "Fill in the details for the new social media entry."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 msgid "QsHamg"
 msgstr "Start date (optional)"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 msgid "ZKneN8"
 msgstr "End date (optional)"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-create-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-menu-create-dialog.tsx
 msgid "VzzYJk"
@@ -5254,6 +5250,10 @@ msgstr "Remove entry"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
 msgid "9YgNeh"
 msgstr "Add entry"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
+msgid "72BCPd"
+msgstr "Social media changes are saved together with the person. Save the person to keep them."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
 msgid "K5JFd_"
