@@ -8,10 +8,10 @@ const embeddedImageNodeTypes = new Set(["assetImage", "image"]);
  *
  * Every image on the site is an asset in the object store, referenced from an `image` (or gallery,
  * media) content block by its key. An image node inside a rich-text body is neither: a plain
- * `image` carries whatever `src` was pasted — usually someone else's server — and an `assetImage`
- * that ended up nested in a list or table keeps a signed url that expires, with no reference to the
- * asset at all. The editor's paste guard keeps both out; this is the check for everything else that
- * reaches the write path.
+ * `image` (no longer in the editor's schema, but nothing stops a hand-built payload from sending
+ * one) carries whatever `src` it came with, and an `assetImage` that ended up nested in a list or
+ * table keeps a signed url that expires, with no reference to the asset at all — or, as a pasted
+ * placeholder, no asset yet. This is the check for everything that reaches the write path.
  */
 export function hasEmbeddedImage(content: JSONContent | null | undefined): boolean {
 	if (content == null) {

@@ -178,6 +178,25 @@ JSON/rich-text fields. It does not delete stale rows or objects — run
 
 Requires the same `DATABASE_*` and `S3_*` environment variables as `data:clean:unused-assets`.
 
+### `data:import:embedded-images`
+
+Moves images stored inside rich text — plain `image` nodes pointing at an external `src`, and
+`assetImage` nodes the editor never split out — into the media library and `image` content blocks.
+External images are downloaded, prepared like a dashboard upload and stored as assets labelled with
+their source url (reused on re-runs). Writes a TSV report to `.cache/embedded-images.tsv`.
+
+```bash
+pnpm --filter @dariah-eric/maintenance run data:import:embedded-images                                 # dry run
+pnpm --filter @dariah-eric/maintenance run data:import:embedded-images -- --apply                      # import + rewrite
+pnpm --filter @dariah-eric/maintenance run data:import:embedded-images -- --apply --drop-unresolved    # also remove unrecoverable images
+```
+
+A body holding an image that cannot be resolved (relative url, failed download, unknown asset key)
+is left untouched unless `--drop-unresolved` is passed. Images nested in lists, tables or quotes are
+placed after their container and marked `nested` in the report. The dashboard no longer has the plain
+`image` node in its schema, so run this to completion before deploying that change. Requires the
+same `DATABASE_*` and `S3_*` environment variables as `data:clean:unused-assets`.
+
 ### `data:clean:empty-content-blocks`
 
 Removes semantically empty `rich_text` content blocks (empty paragraphs, stray hard breaks,

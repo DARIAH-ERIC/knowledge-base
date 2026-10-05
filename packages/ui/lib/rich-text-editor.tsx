@@ -7,7 +7,6 @@ import {
 	placeholderValueKindsEnum,
 } from "@dariah-eric/database/placeholder-values";
 import { type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
-import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
 import { Table } from "@tiptap/extension-table";
 import { TableKit } from "@tiptap/extension-table/kit";
@@ -100,7 +99,7 @@ import {
 } from "@/lib/rich-text-block-attrs";
 import { FootnotePasteGuard } from "@/lib/rich-text-footnote";
 import { FootnoteNode, inlineFootnoteExtensions } from "@/lib/rich-text-footnote-node";
-import { ExternalImagePasteGuard } from "@/lib/rich-text-image-paste";
+import { PastedImageGuard, parsePastedImage } from "@/lib/rich-text-image-paste";
 import {
 	type SlashCommandHandlers,
 	SlashCommandMenu,
@@ -1726,9 +1725,9 @@ function createAssetImageNode(
 				caption: { default: null },
 				captionMode: { default: "inherit" },
 				layout: { default: "default" },
-				// Where a pasted `<img>` pointed, kept on the placeholder `ExternalImagePasteGuard` puts in
-				// its place so the author knows which image to upload. Editor-only: never rendered, never
-				// stored — picking an asset clears it.
+				// Where a pasted `<img>` pointed, kept on the placeholder it parses to (`parsePastedImage`)
+				// so the author knows which image to upload. Editor-only: never rendered, never stored —
+				// picking an asset clears it.
 				sourceUrl: { default: null, rendered: false },
 			};
 		},
@@ -1750,6 +1749,9 @@ function createAssetImageNode(
 						};
 					},
 				},
+				// Any other `<img>` — pasted or dropped from outside — is an image to pick from the media
+				// library, never one to keep pointing at its `src`.
+				{ tag: "img[src]", getAttrs: parsePastedImage },
 			];
 		},
 
@@ -2872,9 +2874,12 @@ interface CreateRichTextExtensionsOptions {
 
 /**
  * Canonical extension set for the rich text editor. Shared with the static renderer so that the
- * read-only details views resolve the same node types the editor can produce (e.g. `image`,
- * `assetImage`, `embedBlock`); otherwise rendering content authored in the editor or imported from
- * WordPress throws `Unknown node type`.
+ * read-only details views resolve the same node types the editor can produce (e.g. `assetImage`,
+ * `embedBlock`); otherwise rendering content authored in the editor throws `Unknown node type`.
+ *
+ * Deliberately no plain `image` node: an image is always an asset from the media library. Stored
+ * documents had theirs moved into image blocks by `data:import:embedded-images`, and a pasted
+ * `<img>` parses as an `assetImage` placeholder instead.
  */
 export function createRichTextExtensions(
 	options?: Readonly<CreateRichTextExtensionsOptions>,
@@ -2920,7 +2925,6 @@ export function createRichTextExtensions(
 		TableKit.configure({ table: false }),
 		createTableNode(options?.hasFootnotes),
 		LinkWithTargets,
-		Image,
 		createAssetImageNode(
 			options?.renderImagePicker,
 			options?.renderAssetMetadata,
@@ -2991,7 +2995,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			}),
 			...(hasFootnotes ? [] : [FootnotePasteGuard]),
 			// A placeholder is only useful where its panel can open a picker to fill it.
-			ExternalImagePasteGuard.configure({ withPlaceholders: renderImagePicker != null }),
+			PastedImageGuard.configure({ withPlaceholders: renderImagePicker != null }),
 		],
 		[renderImagePicker, renderAssetMetadata, isEditable, hasFootnotes],
 	);

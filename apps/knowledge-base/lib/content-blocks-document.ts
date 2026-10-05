@@ -137,28 +137,6 @@ export function mergeBlocksToDocument(blocks: Array<MergeableBlock>): JSONConten
 	return { type: "doc", content: nodes };
 }
 
-/**
- * A plain `image` node — a pasted or imported `<img>` stored with whatever `src` it had — as an
- * empty image block that remembers where it pointed. Its panel opens on load and says the image is
- * not in the media library, so the author sees which one must be replaced before the save refuses
- * it (see `hasEmbeddedImage`), instead of looking at an image indistinguishable from the rest.
- */
-function toImagePlaceholder(node: JSONContent): JSONContent {
-	if (node.type !== "image") {
-		return node;
-	}
-
-	return {
-		type: "assetImage",
-		attrs: {
-			imageKey: null,
-			imageUrl: null,
-			alt: (node.attrs?.alt as string | null | undefined) ?? null,
-			sourceUrl: (node.attrs?.src as string | null | undefined) ?? null,
-		},
-	};
-}
-
 /** The nodes one level of blocks becomes — the document's children, or a container's. */
 function mergeBlocksToNodes(blocks: Array<MergeableBlock>): Array<JSONContent> {
 	const nodes: Array<JSONContent> = [];
@@ -166,7 +144,7 @@ function mergeBlocksToNodes(blocks: Array<MergeableBlock>): Array<JSONContent> {
 	for (const block of blocks) {
 		if (block.type === "rich_text") {
 			const children = block.content?.content ?? [];
-			nodes.push(...children.map((child) => toImagePlaceholder(child)));
+			nodes.push(...children);
 		} else if (block.type === "image") {
 			const captionMode = normalizeCaptionMode(block.content?.captionMode, block.content?.caption);
 			nodes.push({
