@@ -20,6 +20,8 @@ import { getEntityRelationOptionsByIds } from "@/lib/data/relations";
 import { type Transaction, db } from "@/lib/db";
 import { and, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
+import { hasEmbeddedImage } from "@/lib/rich-text-images";
+import { UserFacingError } from "@/lib/user-facing-error";
 
 async function getAssetIdByKey(tx: Transaction, key: string): Promise<string | null> {
 	const asset = await tx.query.assets.findFirst({
@@ -147,6 +149,9 @@ export async function upsertTypedContentBlock(
 			// Strip spacer paragraphs first, so a block left holding nothing else is recognised as empty
 			// and removed rather than stored as a run of blank lines.
 			const content = withoutBlankParagraphs(block.content ?? {});
+			if (hasEmbeddedImage(content)) {
+				throw new UserFacingError("rich-text-embedded-image");
+			}
 			if (isEmptyRichTextDocument(content)) {
 				await tx.delete(schema.contentBlocks).where(eq(schema.contentBlocks.id, blockId));
 				break;
@@ -163,14 +168,17 @@ export async function upsertTypedContentBlock(
 		}
 
 		case "image": {
+			// Refused rather than skipped: the `content_blocks` row is already written, so skipping would
+			// leave an image block with nothing behind it — and the author's image (a pasted one, say,
+			// still waiting to be picked from the media library) would vanish without a word.
 			const imageKey = block.content?.imageKey;
 			if (imageKey == null) {
-				break;
+				throw new UserFacingError("image-block-without-asset");
 			}
 
 			const imageId = await getAssetIdByKey(tx, imageKey);
 			if (imageId == null) {
-				break;
+				throw new UserFacingError("image-block-without-asset");
 			}
 
 			const caption = block.content?.caption ?? null;
@@ -348,6 +356,9 @@ export async function upsertTypedContentBlock(
 
 			const side = block.content?.side ?? "start";
 			const content = cleanRequiredBody(block.content?.content);
+			if (hasEmbeddedImage(content)) {
+				throw new UserFacingError("rich-text-embedded-image");
+			}
 			const caption = block.content?.caption ?? null;
 			const captionMode = block.content?.captionMode ?? (caption != null ? "override" : "inherit");
 

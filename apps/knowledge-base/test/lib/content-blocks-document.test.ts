@@ -382,3 +382,54 @@ describe("blocks that cannot be stored", () => {
 		expect(doc.content![0]!.content).toEqual([{ type: "paragraph" }]);
 	});
 });
+
+describe("images stored inside rich text", () => {
+	// A plain `image` node is a pasted `<img>` kept with whatever `src` it had. The save refuses it,
+	// so it must come back as a placeholder the author can see and replace from the media library.
+	it("loads a plain image node as an empty image block that remembers its source", () => {
+		const block: MergeableBlock = {
+			type: "rich_text",
+			content: {
+				type: "doc",
+				content: [
+					paragraph("Before."),
+					{ type: "image", attrs: { src: "https://example.com/photo.jpg", alt: "A photo" } },
+					paragraph("After."),
+				],
+			},
+		};
+
+		const doc = mergeBlocksToDocument([block]);
+
+		expect(doc.content).toEqual([
+			paragraph("Before."),
+			{
+				type: "assetImage",
+				attrs: {
+					imageKey: null,
+					imageUrl: null,
+					alt: "A photo",
+					sourceUrl: "https://example.com/photo.jpg",
+				},
+			},
+			paragraph("After."),
+		]);
+	});
+
+	it("saves the placeholder as an image block without a key, for the write path to refuse", () => {
+		const blocks = splitDocumentToBlocks({
+			type: "doc",
+			content: [
+				{
+					type: "assetImage",
+					attrs: { imageKey: null, imageUrl: null, sourceUrl: "https://example.com/photo.jpg" },
+				},
+			],
+		});
+
+		expect(blocks).toHaveLength(1);
+		expect(blocks[0]!.type).toBe("image");
+		expect(contentOf(blocks[0])).toMatchObject({ imageKey: undefined });
+		expect(JSON.stringify(blocks[0])).not.toContain("example.com");
+	});
+});
