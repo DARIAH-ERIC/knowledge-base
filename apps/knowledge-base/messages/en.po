@@ -8294,6 +8294,14 @@ msgid "WtzfWm"
 msgstr "A record with these values already exists."
 
 #: lib/server/get-user-facing-error-message.ts
+msgid "p94UAR"
+msgstr "An image block has no image from the media library. Pick an image for it, or remove the block."
+
+#: lib/server/get-user-facing-error-message.ts
+msgid "_q8nPI"
+msgstr "The text contains an image that is not in the media library, for example one pasted from another website. Upload it to the media library and add it as an image block, or remove it."
+
+#: lib/server/get-user-facing-error-message.ts
 msgid "UxrCFa"
 msgstr "The DARIAH-EU organisational unit could not be found, so this relation cannot be recorded."
 

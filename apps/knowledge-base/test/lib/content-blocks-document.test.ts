@@ -382,3 +382,22 @@ describe("blocks that cannot be stored", () => {
 		expect(doc.content![0]!.content).toEqual([{ type: "paragraph" }]);
 	});
 });
+
+describe("pasted-image placeholders", () => {
+	it("saves the placeholder as an image block without a key, for the write path to refuse", () => {
+		const blocks = splitDocumentToBlocks({
+			type: "doc",
+			content: [
+				{
+					type: "assetImage",
+					attrs: { imageKey: null, imageUrl: null, sourceUrl: "https://example.com/photo.jpg" },
+				},
+			],
+		});
+
+		expect(blocks).toHaveLength(1);
+		expect(blocks[0]!.type).toBe("image");
+		expect(contentOf(blocks[0])).toMatchObject({ imageKey: undefined });
+		expect(JSON.stringify(blocks[0])).not.toContain("example.com");
+	});
+});

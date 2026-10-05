@@ -13,6 +13,7 @@ interface ErrorMessages {
 	entityLinkedFromNavigation: string;
 	entitySlugConflict: string;
 	frozenReportRoleConflict: string;
+	imageBlockWithoutAsset: string;
 	invalidData: string;
 	missingDariahEric: string;
 	missingData: string;
@@ -27,6 +28,7 @@ interface ErrorMessages {
 	relationEndBeforeStart: string;
 	relationNotEndable: string;
 	relationPeriodOverlap: string;
+	richTextEmbeddedImage: string;
 	serviceKpiConflict: string;
 	slugTooLong: string;
 	socialMediaKpiConflict: string;
@@ -77,6 +79,9 @@ export async function getUserFacingErrorMessage(
 			case "frozen-report-role-conflict": {
 				return messages.frozenReportRoleConflict;
 			}
+			case "image-block-without-asset": {
+				return messages.imageBlockWithoutAsset;
+			}
 			case "missing-dariah-eric": {
 				return messages.missingDariahEric;
 			}
@@ -106,6 +111,9 @@ export async function getUserFacingErrorMessage(
 			}
 			case "relation-period-overlap": {
 				return messages.relationPeriodOverlap;
+			}
+			case "rich-text-embedded-image": {
+				return messages.richTextEmbeddedImage;
 			}
 			case "service-kpi-conflict": {
 				return messages.serviceKpiConflict;
@@ -173,6 +181,12 @@ async function getErrorMessages(options: GetUserFacingErrorMessageOptions): Prom
 			"Both records are listed in the same report with different roles. Make the roles in that report match, then merge.",
 		),
 		uniqueConflict: t("A record with these values already exists."),
+		imageBlockWithoutAsset: t(
+			"An image block has no image from the media library. Pick an image for it, or remove the block.",
+		),
+		richTextEmbeddedImage: t(
+			"The text contains an image that is not in the media library, for example one pasted from another website. Upload it to the media library and add it as an image block, or remove it.",
+		),
 		missingDariahEric: t(
 			"The DARIAH-EU organisational unit could not be found, so this relation cannot be recorded.",
 		),

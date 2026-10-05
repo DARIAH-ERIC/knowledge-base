@@ -44,11 +44,6 @@ describe("draggable node classification", () => {
 			"assetImage",
 			"embedBlock",
 			"galleryBlock",
-			// Tiptap's own `image` node, kept in the schema so documents imported from WordPress still
-			// open: it stores a raw `src` and refers to no asset at all, which is why authoring uses
-			// `assetImage` instead. Listed here so it stays visible rather than being mistaken for one
-			// of ours — anything still holding one is content that never made it into the media library.
-			"image",
 		]);
 	});
 });

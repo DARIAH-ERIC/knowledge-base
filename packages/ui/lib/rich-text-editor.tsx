@@ -7,7 +7,6 @@ import {
 	placeholderValueKindsEnum,
 } from "@dariah-eric/database/placeholder-values";
 import { type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
-import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
 import { Table } from "@tiptap/extension-table";
 import { TableKit } from "@tiptap/extension-table/kit";
@@ -100,6 +99,7 @@ import {
 } from "@/lib/rich-text-block-attrs";
 import { FootnotePasteGuard } from "@/lib/rich-text-footnote";
 import { FootnoteNode, inlineFootnoteExtensions } from "@/lib/rich-text-footnote-node";
+import { PastedImageGuard, parsePastedImage } from "@/lib/rich-text-image-paste";
 import {
 	type SlashCommandHandlers,
 	SlashCommandMenu,
@@ -1430,6 +1430,7 @@ function AssetImageNodeView({
 	const caption = node.attrs.caption as JSONContent | null;
 	const captionMode = node.attrs.captionMode as ImageCaptionMode;
 	const layout = normalizeImageLayout(node.attrs.layout);
+	const sourceUrl = node.attrs.sourceUrl as string | null;
 	const resolvedCaption = resolveImageCaption(captionMode, caption, assetCaption);
 
 	const [isEditing, setIsEditing] = useState(
@@ -1469,6 +1470,7 @@ function AssetImageNodeView({
 		updateAttributes({
 			imageKey: imageKeyInput.trim() || null,
 			imageUrl: nextImageUrl,
+			sourceUrl: null,
 			caption: isEmptyRichTextDocument(captionJson) ? null : captionJson,
 			captionMode: captionModeInput,
 			layout: layoutInput,
@@ -1494,6 +1496,17 @@ function AssetImageNodeView({
 				   had dragged across it. The panel is a form, not document text, so nothing in its
 				   chrome is selectable; the fields inside it opt back in. */
 				<div className="flex flex-col gap-y-3 p-4 select-none **:[[contenteditable]]:select-text [&_input]:select-text">
+					{sourceUrl != null ? (
+						<Note className="select-text" intent="warning">
+							{"This image was pasted from "}
+							<a className="break-all" href={sourceUrl} rel="noreferrer" target="_blank">
+								{sourceUrl}
+							</a>
+							{
+								". Images must come from the media library: upload it there and pick it below, or remove this block."
+							}
+						</Note>
+					) : null}
 					{renderAssetMetadata != null && imageKey != null
 						? renderAssetMetadata({
 								imageKey,
@@ -1516,6 +1529,7 @@ function AssetImageNodeView({
 									assetCaption: asset?.caption ?? null,
 									caption: isEmptyRichTextDocument(captionJson) ? null : captionJson,
 									captionMode: captionModeInput,
+									sourceUrl: null,
 								});
 								setImageKeyInput(nextImageKey);
 								setImageUrlInput(nextImageUrl);
@@ -1633,7 +1647,7 @@ function AssetImageNodeView({
 								{"Cancel"}
 							</Button>
 						) : null}
-						{(imageKey != null || imageUrl != null) && editor.isEditable ? (
+						{(imageKey != null || imageUrl != null || sourceUrl != null) && editor.isEditable ? (
 							<Button intent="outline" onPress={deleteNode} size="sm" type="button">
 								{"Remove"}
 							</Button>
@@ -1711,6 +1725,10 @@ function createAssetImageNode(
 				caption: { default: null },
 				captionMode: { default: "inherit" },
 				layout: { default: "default" },
+				// Where a pasted `<img>` pointed, kept on the placeholder it parses to (`parsePastedImage`)
+				// so the author knows which image to upload. Editor-only: never rendered, never stored —
+				// picking an asset clears it.
+				sourceUrl: { default: null, rendered: false },
 			};
 		},
 
@@ -1731,6 +1749,9 @@ function createAssetImageNode(
 						};
 					},
 				},
+				// Any other `<img>` — pasted or dropped from outside — is an image to pick from the media
+				// library, never one to keep pointing at its `src`.
+				{ tag: "img[src]", getAttrs: parsePastedImage },
 			];
 		},
 
@@ -2853,9 +2874,12 @@ interface CreateRichTextExtensionsOptions {
 
 /**
  * Canonical extension set for the rich text editor. Shared with the static renderer so that the
- * read-only details views resolve the same node types the editor can produce (e.g. `image`,
- * `assetImage`, `embedBlock`); otherwise rendering content authored in the editor or imported from
- * WordPress throws `Unknown node type`.
+ * read-only details views resolve the same node types the editor can produce (e.g. `assetImage`,
+ * `embedBlock`); otherwise rendering content authored in the editor throws `Unknown node type`.
+ *
+ * Deliberately no plain `image` node: an image is always an asset from the media library. Stored
+ * documents had theirs moved into image blocks by `data:import:embedded-images`, and a pasted
+ * `<img>` parses as an `assetImage` placeholder instead.
  */
 export function createRichTextExtensions(
 	options?: Readonly<CreateRichTextExtensionsOptions>,
@@ -2901,7 +2925,6 @@ export function createRichTextExtensions(
 		TableKit.configure({ table: false }),
 		createTableNode(options?.hasFootnotes),
 		LinkWithTargets,
-		Image,
 		createAssetImageNode(
 			options?.renderImagePicker,
 			options?.renderAssetMetadata,
@@ -2971,6 +2994,8 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				slashCommandHandlersRef: isEditable ? slashCommandHandlersRef : undefined,
 			}),
 			...(hasFootnotes ? [] : [FootnotePasteGuard]),
+			// A placeholder is only useful where its panel can open a picker to fill it.
+			PastedImageGuard.configure({ withPlaceholders: renderImagePicker != null }),
 		],
 		[renderImagePicker, renderAssetMetadata, isEditable, hasFootnotes],
 	);
@@ -3313,6 +3338,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			if (!editor) {
 				return;
 			}
+			// Images are assets in the object store, so one without a key has nothing to point at.
 			if (imageKey) {
 				editor
 					.chain()
@@ -3328,8 +3354,6 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						},
 					})
 					.run();
-			} else {
-				editor.chain().focus().setImage({ src: imageUrl }).run();
 			}
 		},
 		[editor],
