@@ -1,6 +1,7 @@
 "use server";
 
 import type { MergeSummary } from "@/lib/data/merge-summary";
+import { isSocialMediaLinkedToPublishedEric } from "@/lib/data/social-media-relations";
 import { mergeSocialMedia } from "@/lib/data/social-media-merge";
 import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
@@ -11,6 +12,7 @@ interface MergeSocialMediaActionResult {
 	auditSummary: Record<string, unknown>;
 	/** What the merge re-pointed, listed in the UI once it succeeds. */
 	successData: { summary: MergeSummary };
+	affectsSiteMetadata: boolean;
 }
 
 export const mergeSocialMediaAction = createCommandAction({
@@ -19,6 +21,7 @@ export const mergeSocialMediaAction = createCommandAction({
 	revalidate: "/[locale]/dashboard/administrator/maintenance",
 
 	async mutate(tx, [sourceId, targetId]: [string, string]): Promise<MergeSocialMediaActionResult> {
+		const affectsSiteMetadata = await isSocialMediaLinkedToPublishedEric(tx, [sourceId]);
 		const result = await mergeSocialMedia(tx, sourceId, targetId);
 
 		return {
@@ -31,11 +34,14 @@ export const mergeSocialMediaAction = createCommandAction({
 				repointed: result.summary,
 			},
 			successData: { summary: result.summary },
+			affectsSiteMetadata,
 		};
 	},
 
-	async postCommit() {
+	async postCommit({ result }) {
 		// Units and projects that linked the source now link the target.
-		await dispatchWebhook({ tags: ["social-media"] });
+		await dispatchWebhook({
+			tags: ["social-media", ...(result.affectsSiteMetadata ? (["site-metadata"] as const) : [])],
+		});
 	},
 });

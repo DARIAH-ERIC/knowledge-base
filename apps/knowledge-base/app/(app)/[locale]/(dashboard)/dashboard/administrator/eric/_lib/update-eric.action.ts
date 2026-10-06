@@ -100,6 +100,6 @@ export const updateEricAction = createMutationAction({
 			return;
 		}
 		await syncWebsiteDocumentForEntity(result.subjectId);
-		await dispatchWebhook({ tags: ["members-partners"] });
+		await dispatchWebhook({ tags: ["site-metadata"] });
 	},
 });
