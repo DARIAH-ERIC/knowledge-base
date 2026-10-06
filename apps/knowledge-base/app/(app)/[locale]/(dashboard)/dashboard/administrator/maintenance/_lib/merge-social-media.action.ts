@@ -1,8 +1,8 @@
 "use server";
 
 import type { MergeSummary } from "@/lib/data/merge-summary";
-import { isSocialMediaLinkedToPublishedEric } from "@/lib/data/social-media-relations";
 import { mergeSocialMedia } from "@/lib/data/social-media-merge";
+import { isSocialMediaLinkedToPublishedEric } from "@/lib/data/social-media-relations";
 import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
