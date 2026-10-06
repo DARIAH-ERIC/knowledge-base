@@ -27,7 +27,7 @@ export const router = createRouter()
 			summary: "Get spotlight articles",
 			description: "Retrieve a paginated list of spotlight articles",
 			operationId: "getSpotlightArticles",
-			"x-cache-tags": ["assets", "persons", "spotlight-articles"],
+			"x-cache-tags": ["assets", "spotlight-articles"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -63,7 +63,7 @@ export const router = createRouter()
 			summary: "Get spotlight article slugs",
 			description: "Retrieve a paginated list of spotlight article slugs",
 			operationId: "getSpotlightArticleSlugs",
-			"x-cache-tags": ["assets", "persons", "spotlight-articles"],
+			"x-cache-tags": ["spotlight-articles"],
 			responses: {
 				200: {
 					description: "Success response",

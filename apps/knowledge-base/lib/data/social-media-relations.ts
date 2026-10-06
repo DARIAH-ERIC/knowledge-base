@@ -1,7 +1,50 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import type { Transaction } from "@/lib/db";
-import { eq, inArray } from "@/lib/db/sql";
+import { and, eq, inArray } from "@/lib/db/sql";
+
+const dariahEuSlug = "dariah-eu";
+
+/** Whether any account is linked to the published DARIAH-EU ERIC version shown in site metadata. */
+export async function isSocialMediaLinkedToPublishedEric(
+	tx: Transaction,
+	socialMediaIds: ReadonlyArray<string>,
+): Promise<boolean> {
+	if (socialMediaIds.length === 0) {
+		return false;
+	}
+
+	const row = await tx
+		.select({ id: schema.organisationalUnitsToSocialMedia.id })
+		.from(schema.organisationalUnitsToSocialMedia)
+		.innerJoin(
+			schema.organisationalUnits,
+			eq(
+				schema.organisationalUnits.id,
+				schema.organisationalUnitsToSocialMedia.organisationalUnitId,
+			),
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.publishedId, schema.organisationalUnits.id),
+		)
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.documentLifecycle.documentId))
+		.where(
+			and(
+				inArray(schema.organisationalUnitsToSocialMedia.socialMediaId, [...socialMediaIds]),
+				eq(schema.entities.slug, dariahEuSlug),
+				eq(schema.organisationalUnitTypes.type, "eric"),
+			),
+		)
+		.limit(1)
+		.then((rows) => rows[0]);
+
+	return row != null;
+}
 
 interface ExistingSocialMediaRow {
 	id: string;
