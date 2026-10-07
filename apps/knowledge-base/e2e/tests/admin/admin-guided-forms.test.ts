@@ -49,9 +49,12 @@ async function selectAsyncOption(
 	await searchInput.fill(searchText);
 	await searchInput.press("Enter");
 
-	const option = page.getByRole("option").first();
-	await option.waitFor({ state: "visible" });
-	await option.click();
+	/**
+	 * Wait for the option matching the search, not just any option: the list keeps showing the
+	 * previous (unfiltered) results while the search is pending, and those get replaced underneath a
+	 * click on them.
+	 */
+	await page.getByRole("option", { name: searchText, exact: true }).click();
 }
 
 /**
