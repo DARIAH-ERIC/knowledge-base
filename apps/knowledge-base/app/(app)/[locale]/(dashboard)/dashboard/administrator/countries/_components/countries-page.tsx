@@ -14,6 +14,7 @@ import {
 import { EyeIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
+import { Collection } from "react-aria-components";
 
 import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
@@ -27,7 +28,10 @@ import {
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteCountryAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/delete-country.action";
 import { dashboardPageSize } from "@/config/pagination.config";
-import type { CountryMemberObserverStatus } from "@/lib/data/countries";
+import type {
+	CountryMemberObserverPeriod,
+	CountryMemberObserverStatus,
+} from "@/lib/data/countries";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface CountriesPageProps {
@@ -36,6 +40,7 @@ interface CountriesPageProps {
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
 				documentId: string;
 				memberObserverFrom: Date | null;
+				memberObserverHistory: Array<CountryMemberObserverPeriod>;
 				memberObserverStatus: CountryMemberObserverStatus;
 				memberObserverUntil: Date | null;
 				entity: Pick<schema.Entity, "slug">;
@@ -58,6 +63,20 @@ function memberObserverStatusIntent(
 }
 
 const pageSize = dashboardPageSize;
+
+function MemberObserverStatusBadge(props: {
+	status: Exclude<CountryMemberObserverStatus, null>;
+}): ReactNode {
+	const { status } = props;
+
+	const t = useExtracted();
+
+	return (
+		<Badge intent={memberObserverStatusIntent(status)}>
+			{status === "is_member_of" ? t("Member") : t("Observer")}
+		</Badge>
+	);
+}
 
 export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 	const { countries, dir: initialDir, page: initialPage, q: initialQ, sort: initialSort } = props;
@@ -96,6 +115,7 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
 				onSortChange={search.setSortDescriptor}
 				sortDescriptor={search.sortDescriptor}
+				treeColumn="name"
 			>
 				<TableHeader>
 					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
@@ -115,9 +135,7 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 							<TableCell>{item.name}</TableCell>
 							<TableCell>
 								{item.memberObserverStatus != null ? (
-									<Badge intent={memberObserverStatusIntent(item.memberObserverStatus)}>
-										{item.memberObserverStatus === "is_member_of" ? t("Member") : t("Observer")}
-									</Badge>
+									<MemberObserverStatusBadge status={item.memberObserverStatus} />
 								) : (
 									"—"
 								)}
@@ -166,6 +184,31 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 									</RowActionsMenu.Action>
 								</RowActionsMenu>
 							</TableCell>
+							{/* Earlier membership/observer periods, revealed by expanding the row. */}
+							<Collection
+								items={item.memberObserverHistory.map((period, index) => {
+									return { ...period, id: `history-${String(index)}` };
+								})}
+							>
+								{(period) => (
+									<TableRow className="text-muted-fg">
+										<TableCell>
+											<span className="text-xs">{t("Previously")}</span>
+										</TableCell>
+										<TableCell>
+											<MemberObserverStatusBadge status={period.status} />
+										</TableCell>
+										<TableCell>{format.dateTime(period.from, { dateStyle: "short" })}</TableCell>
+										<TableCell>
+											{period.until != null
+												? format.dateTime(period.until, { dateStyle: "short" })
+												: t("present")}
+										</TableCell>
+										<TableCell />
+										<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60%" />
+									</TableRow>
+								)}
+							</Collection>
 						</TableRow>
 					)}
 				</TableBody>

@@ -8,6 +8,12 @@ import { alias, and, count, desc, eq, inArray, sql } from "@/lib/db/sql";
 
 export type CountryMemberObserverStatus = "is_member_of" | "is_observer_of" | null;
 
+export interface CountryMemberObserverPeriod {
+	from: Date;
+	status: Exclude<CountryMemberObserverStatus, null>;
+	until: Date | null;
+}
+
 export type CountriesSort = "name" | "status";
 
 interface GetCountriesParams {
@@ -23,6 +29,11 @@ export interface CountriesResult {
 		Pick<schema.OrganisationalUnit, "id" | "name"> & {
 			documentId: string;
 			memberObserverFrom: Date | null;
+			/**
+			 * Earlier membership/observer periods, most recent first; the current one is in the flat
+			 * fields above.
+			 */
+			memberObserverHistory: Array<CountryMemberObserverPeriod>;
 			memberObserverStatus: CountryMemberObserverStatus;
 			memberObserverUntil: Date | null;
 			entity: Pick<schema.Entity, "slug">;
@@ -58,6 +69,17 @@ function compareNullableStrings(a: string | null, b: string | null, dir: "asc" |
 		return -1;
 	}
 	return compareStrings(a, b, dir);
+}
+
+function compareMemberObserverPeriods(
+	a: CountryMemberObserverPeriod,
+	b: CountryMemberObserverPeriod,
+): number {
+	if ((a.until == null) !== (b.until == null)) {
+		return a.until == null ? -1 : 1;
+	}
+
+	return b.from.getTime() - a.from.getTime();
 }
 
 function getCountryStatusSortValue(status: CountryMemberObserverStatus): string | null {
@@ -142,10 +164,7 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 
 	const countryIds = items.map((item) => item.id);
 	const ericIds = erics.map((eric) => eric.id);
-	let relationByCountryId = new Map<
-		string,
-		{ from: Date; status: Exclude<CountryMemberObserverStatus, null>; until: Date | null }
-	>();
+	const relationsByCountryId = new Map<string, Array<CountryMemberObserverPeriod>>();
 
 	if (countryIds.length > 0 && ericIds.length > 0) {
 		// Unit↔unit relations are document-level; re-key through entity_versions so the result keeps the
@@ -179,40 +198,33 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 				),
 			);
 
-		relationByCountryId = new Map();
-
 		for (const relation of relations) {
-			const existing = relationByCountryId.get(relation.unitId);
-			const nextRelation = {
+			const periods = relationsByCountryId.get(relation.unitId) ?? [];
+			periods.push({
 				from: relation.duration.start,
 				status: relation.status as Exclude<CountryMemberObserverStatus, null>,
 				until: relation.duration.end ?? null,
-			};
+			});
+			relationsByCountryId.set(relation.unitId, periods);
+		}
 
-			if (existing == null) {
-				relationByCountryId.set(relation.unitId, nextRelation);
-				continue;
-			}
-
-			const shouldReplace =
-				(existing.until != null && nextRelation.until == null) || nextRelation.from > existing.from;
-
-			if (shouldReplace) {
-				relationByCountryId.set(relation.unitId, nextRelation);
-			}
+		// Current period first: an open-ended one wins, otherwise the most recently started.
+		for (const periods of relationsByCountryId.values()) {
+			periods.sort(compareMemberObserverPeriods);
 		}
 	}
 
 	const data = items.map((item) => {
-		const relation = relationByCountryId.get(item.id);
+		const [current, ...history] = relationsByCountryId.get(item.id) ?? [];
 
 		return {
 			documentId: item.documentId,
 			entity: { slug: item.slug },
 			id: item.id,
-			memberObserverFrom: relation?.from ?? null,
-			memberObserverStatus: relation?.status ?? null,
-			memberObserverUntil: relation?.until ?? null,
+			memberObserverFrom: current?.from ?? null,
+			memberObserverHistory: history,
+			memberObserverStatus: current?.status ?? null,
+			memberObserverUntil: current?.until ?? null,
 			name: item.name,
 			hasDraft: item.hasDraft,
 			isPublished: item.isPublished,
