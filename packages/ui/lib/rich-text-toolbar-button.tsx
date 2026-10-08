@@ -30,6 +30,12 @@ export function RichTextEditorToolbarButton({
 				onPress={() => {
 					onClick();
 				}}
+				/**
+				 * Keep focus in the editor. Otherwise the button takes focus on press, and tiptap only
+				 * refocuses the editor on the next animation frame, so a keystroke in between lands on the
+				 * button (a space would press it again).
+				 */
+				preventFocusOnPress={true}
 				type="button"
 			>
 				<Icon className="block-4 inline-4" />
