@@ -49,11 +49,7 @@ async function selectAsyncOption(
 	await searchInput.fill(searchText);
 	await searchInput.press("Enter");
 
-	/**
-	 * Wait for the option matching the search, not just any option: the list keeps showing the
-	 * previous (unfiltered) results while the search is pending, and those get replaced underneath a
-	 * click on them.
-	 */
+	// Match by name: the unfiltered list stays visible until the search results replace it.
 	await page.getByRole("option", { name: searchText, exact: true }).click();
 }
 

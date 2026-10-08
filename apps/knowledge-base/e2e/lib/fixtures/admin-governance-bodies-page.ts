@@ -304,8 +304,9 @@ export class AdminGovernanceBodiesPage {
 			.getByRole("searchbox");
 		await search.fill(searchText);
 		await search.press("Enter");
-		await this.page.getByRole("option").first().waitFor({ state: "visible" });
-		await this.page.getByRole("option").first().click();
+		// Match the search text, not just any option: the unfiltered list (which includes the other
+		// workers' fixtures) stays visible until the search results replace it.
+		await this.page.getByRole("option", { name: searchText }).first().click();
 		// Wait for the selection to commit (the placeholder is replaced by the person's name). Without
 		// this, a click landing mid-refresh can leave the field empty, so a later submit silently fails
 		// client validation and fires no POST — surfacing as a `waitForActionSuccess` timeout.

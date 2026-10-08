@@ -252,8 +252,9 @@ export class AdminWorkingGroupsPage {
 			.getByRole("searchbox");
 		await search.fill(SEEDED_PERSON_SEARCH_TERM);
 		await search.press("Enter");
-		await this.page.getByRole("option").first().waitFor({ state: "visible" });
-		await this.page.getByRole("option").first().click();
+		// Match the search term, not just any option: the unfiltered list (which includes the other
+		// workers' fixtures) stays visible until the search results replace it.
+		await this.page.getByRole("option", { name: SEEDED_PERSON_SEARCH_TERM }).first().click();
 		// Wait for the selection to commit before the caller submits (see selectFirstRelatedUnit).
 		await form.getByRole("button", { name: "No person selected" }).waitFor({ state: "hidden" });
 	}
