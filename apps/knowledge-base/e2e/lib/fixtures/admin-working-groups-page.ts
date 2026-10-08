@@ -181,6 +181,13 @@ export class AdminWorkingGroupsPage {
 				await this.page.getByRole("button", { name: "Add relation" }).click();
 			},
 		});
+		// The form clears its selections only once the response has been applied. Wait for that, or a
+		// late reset wipes the caller's next selections.
+		await this.page
+			.locator("form")
+			.filter({ has: this.page.getByRole("button", { name: "Add relation" }) })
+			.getByRole("button", { name: "No related unit selected" })
+			.waitFor({ state: "visible" });
 	}
 
 	async openFirstRelationsRowAction(action: string): Promise<void> {
@@ -252,8 +259,9 @@ export class AdminWorkingGroupsPage {
 			.getByRole("searchbox");
 		await search.fill(SEEDED_PERSON_SEARCH_TERM);
 		await search.press("Enter");
-		await this.page.getByRole("option").first().waitFor({ state: "visible" });
-		await this.page.getByRole("option").first().click();
+		// Match the search term, not just any option: the unfiltered list (which includes the other
+		// workers' fixtures) stays visible until the search results replace it.
+		await this.page.getByRole("option", { name: SEEDED_PERSON_SEARCH_TERM }).first().click();
 		// Wait for the selection to commit before the caller submits (see selectFirstRelatedUnit).
 		await form.getByRole("button", { name: "No person selected" }).waitFor({ state: "hidden" });
 	}
@@ -284,6 +292,13 @@ export class AdminWorkingGroupsPage {
 				await this.page.getByRole("button", { name: "Add person" }).click();
 			},
 		});
+		// The form clears its selections only once the response has been applied. Wait for that, or a
+		// late reset wipes the caller's next selections.
+		await this.page
+			.locator("form")
+			.filter({ has: this.page.getByRole("button", { name: "Add person" }) })
+			.getByRole("button", { name: "No person selected" })
+			.waitFor({ state: "visible" });
 	}
 
 	async openFirstPeopleRowAction(action: string): Promise<void> {

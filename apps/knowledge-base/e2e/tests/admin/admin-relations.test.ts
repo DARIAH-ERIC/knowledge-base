@@ -91,9 +91,13 @@ async function selectAsyncOption(
 		await searchInput.press("Enter");
 	}
 
-	// With a search text the caller named the row it wants; without one, any row will do — but only a
-	// seeded one, never a fixture the other worker is about to delete.
-	const option = searchText != null ? page.getByRole("option").first() : firstSeededOption(page);
+	// With a search text the caller named the row it wants — match it by name, because the unfiltered
+	// list stays visible until the search results replace it. Without one, any row will do — but only
+	// a seeded one, never a fixture the other worker is about to delete.
+	const option =
+		searchText != null
+			? page.getByRole("option", { name: searchText, exact: true })
+			: firstSeededOption(page);
 	await option.waitFor({ state: "visible" });
 	await option.click();
 	// Wait for the selection to commit (the trigger no longer shows its placeholder) before the caller

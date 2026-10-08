@@ -50,9 +50,8 @@ async function openReviewFor(page: Page, workingGroupName: string): Promise<void
 		.getByRole("searchbox");
 	await search.fill(workingGroupName);
 	await search.press("Enter");
-	const option = page.getByRole("option").first();
-	await option.waitFor({ state: "visible" });
-	await option.click();
+	// Match by name: the unfiltered list stays visible until the search results replace it.
+	await page.getByRole("option", { name: workingGroupName, exact: true }).click();
 
 	await fillDatePicker(page, "End date", END_DATE.year, END_DATE.month, END_DATE.day);
 	await page.getByRole("button", { name: "Review" }).click();

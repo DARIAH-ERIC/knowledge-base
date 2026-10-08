@@ -49,9 +49,8 @@ async function selectAsyncOption(
 	await searchInput.fill(searchText);
 	await searchInput.press("Enter");
 
-	const option = page.getByRole("option").first();
-	await option.waitFor({ state: "visible" });
-	await option.click();
+	// Match by name: the unfiltered list stays visible until the search results replace it.
+	await page.getByRole("option", { name: searchText, exact: true }).click();
 }
 
 /**

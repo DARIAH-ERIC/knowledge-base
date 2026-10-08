@@ -200,6 +200,13 @@ export class AdminGovernanceBodiesPage {
 				await this.page.getByRole("button", { name: "Add relation" }).click();
 			},
 		});
+		// The form clears its selections only once the response has been applied. Wait for that, or a
+		// late reset wipes the caller's next selections.
+		await this.page
+			.locator("form")
+			.filter({ has: this.page.getByRole("button", { name: "Add relation" }) })
+			.getByRole("button", { name: "No related unit selected" })
+			.waitFor({ state: "visible" });
 	}
 
 	async openFirstRelationsRowAction(action: string): Promise<void> {
@@ -304,8 +311,9 @@ export class AdminGovernanceBodiesPage {
 			.getByRole("searchbox");
 		await search.fill(searchText);
 		await search.press("Enter");
-		await this.page.getByRole("option").first().waitFor({ state: "visible" });
-		await this.page.getByRole("option").first().click();
+		// Match the search text, not just any option: the unfiltered list (which includes the other
+		// workers' fixtures) stays visible until the search results replace it.
+		await this.page.getByRole("option", { name: searchText }).first().click();
 		// Wait for the selection to commit (the placeholder is replaced by the person's name). Without
 		// this, a click landing mid-refresh can leave the field empty, so a later submit silently fails
 		// client validation and fires no POST — surfacing as a `waitForActionSuccess` timeout.
@@ -340,6 +348,13 @@ export class AdminGovernanceBodiesPage {
 				await this.page.getByRole("button", { name: "Add person" }).click();
 			},
 		});
+		// The form clears its selections only once the response has been applied. Wait for that, or a
+		// late reset wipes the caller's next selections.
+		await this.page
+			.locator("form")
+			.filter({ has: this.page.getByRole("button", { name: "Add person" }) })
+			.getByRole("button", { name: "No person selected" })
+			.waitFor({ state: "visible" });
 	}
 
 	async openFirstPeopleRowAction(action: string): Promise<void> {
