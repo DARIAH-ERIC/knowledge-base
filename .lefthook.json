@@ -3,6 +3,7 @@
 	"pre-commit": {
 		"commands": {
 			"oxlint": {
+				"glob": "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}",
 				"run": "bun oxlint --fix --report-unused-disable-directives --type-aware --type-check {staged_files}",
 				"stage_fixed": true
 			},

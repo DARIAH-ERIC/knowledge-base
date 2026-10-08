@@ -24,11 +24,6 @@ if (process.env.CI == null) {
 
 const config = defineConfig({
 	extends: configs,
-	options: {
-		reportUnusedDisableDirectives: "error",
-		typeAware: true,
-		typeCheck: true,
-	},
 	settings: {
 		"better-tailwindcss": {
 			cwd: import.meta.dirname,
