@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
+import { openActionsMenu } from "@/e2e/lib/fixtures/actions-menu";
 
 const BASE_PATH = "/en/dashboard/administrator/eric";
 
@@ -34,7 +35,7 @@ export class AdminEricPage {
 
 	async gotoEditFromList(): Promise<void> {
 		await this.goto();
-		await this.row().getByRole("button", { name: "Open actions menu" }).click();
+		await openActionsMenu(this.row());
 		await Promise.all([
 			this.page.waitForURL(`**${BASE_PATH}/**/edit`),
 			this.page.getByRole("menuitem", { name: "Edit" }).click(),
@@ -43,7 +44,7 @@ export class AdminEricPage {
 
 	async gotoDetailsFromList(): Promise<void> {
 		await this.goto();
-		await this.row().getByRole("button", { name: "Open actions menu" }).click();
+		await openActionsMenu(this.row());
 		await Promise.all([
 			this.page.waitForURL(`**${BASE_PATH}/**/details`),
 			this.page.getByRole("menuitem", { name: "View" }).click(),

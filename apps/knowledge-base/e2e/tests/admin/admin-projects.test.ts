@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { openActionsMenu } from "@/e2e/lib/fixtures/actions-menu";
 import { socialMediaUnsavedNote } from "@/e2e/lib/fixtures/social-media-form";
 import { expect, test } from "@/e2e/lib/test";
 
@@ -136,7 +137,7 @@ test.describe("projects admin", () => {
 		await expect(row).toBeVisible();
 
 		// Click the edit menu item for this row.
-		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await openActionsMenu(row);
 		await Promise.all([
 			page.waitForURL("**/edit"),
 			page.getByRole("menuitem", { name: "Edit" }).click(),
@@ -213,7 +214,7 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.searchByName(originalName);
 		const row = adminProjectsPage.projectRowByName(originalName);
 		await expect(row).toBeVisible();
-		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await openActionsMenu(row);
 		await Promise.all([
 			page.waitForURL("**/edit"),
 			page.getByRole("menuitem", { name: "Edit" }).click(),
@@ -256,7 +257,7 @@ test.describe("projects admin", () => {
 
 		await adminProjectsPage.searchByName(originalName);
 		const row = adminProjectsPage.projectRowByName(originalName);
-		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await openActionsMenu(row);
 		await Promise.all([
 			page.waitForURL("**/edit"),
 			page.getByRole("menuitem", { name: "Edit" }).click(),
@@ -311,12 +312,7 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.submitForm();
 
 		await adminProjectsPage.searchByName(projectName);
-		await adminProjectsPage
-			.projectRowByName(projectName)
-			.getByRole("button", {
-				name: "Open actions menu",
-			})
-			.click();
+		await openActionsMenu(adminProjectsPage.projectRowByName(projectName));
 		await Promise.all([
 			page.waitForURL("**/edit"),
 			page.getByRole("menuitem", { name: "Edit" }).click(),
@@ -337,12 +333,7 @@ test.describe("projects admin", () => {
 		// row whose remove handler had captured a stale selection (see AsyncListSelect's `valueRef`).
 		// Remove C, then B — only A should remain.
 		await adminProjectsPage.searchByName(projectName);
-		await adminProjectsPage
-			.projectRowByName(projectName)
-			.getByRole("button", {
-				name: "Open actions menu",
-			})
-			.click();
+		await openActionsMenu(adminProjectsPage.projectRowByName(projectName));
 		await Promise.all([
 			page.waitForURL("**/edit"),
 			page.getByRole("menuitem", { name: "Edit" }).click(),
@@ -463,10 +454,7 @@ test.describe("projects admin", () => {
 
 		// Link the entries via edit so this test exercises reordering an existing selection.
 		await adminProjectsPage.searchByName(projectName);
-		await adminProjectsPage
-			.projectRowByName(projectName)
-			.getByRole("button", { name: "Open actions menu" })
-			.click();
+		await openActionsMenu(adminProjectsPage.projectRowByName(projectName));
 		await Promise.all([
 			page.waitForURL("**/edit"),
 			page.getByRole("menuitem", { name: "Edit" }).click(),
@@ -498,10 +486,7 @@ test.describe("projects admin", () => {
 
 		// Re-open the edit form and drag the first entry down one: [A, B, C] -> [B, A, C].
 		await adminProjectsPage.searchByName(projectName);
-		await adminProjectsPage
-			.projectRowByName(projectName)
-			.getByRole("button", { name: "Open actions menu" })
-			.click();
+		await openActionsMenu(adminProjectsPage.projectRowByName(projectName));
 		await Promise.all([
 			page.waitForURL("**/edit"),
 			page.getByRole("menuitem", { name: "Edit" }).click(),
