@@ -7,7 +7,11 @@ import {
 	isActionStateSuccess,
 } from "@dariah-eric/next-lib/actions";
 import { type ReactNode, startTransition, useLayoutEffect, useRef } from "react";
-import { Form as AriaForm, type FormProps as AriaFormProps } from "react-aria-components";
+import {
+	Form as AriaForm,
+	type FormProps as AriaFormProps,
+	FormContext,
+} from "react-aria-components";
 
 export interface FormProps<
 	TData = unknown,
@@ -40,9 +44,8 @@ export function Form<TData = unknown, TValidationErrors extends object = Validat
 		onSubmit?.(event);
 
 		/**
-		 * Only handle submissions of this form element. A nested form, e.g. in a dialog, receives this
-		 * handler via react-aria's `FormContext`, and submit events of other nested forms bubble up
-		 * through portals.
+		 * Only handle submissions of this form element: submit events of forms nested in the React
+		 * tree, e.g. in a dialog, bubble up through portals.
 		 */
 		const form = formRef.current;
 		if (form == null || event.target !== form) {
@@ -64,18 +67,25 @@ export function Form<TData = unknown, TValidationErrors extends object = Validat
 	};
 
 	return (
-		<AriaForm
-			ref={formRef}
-			validationErrors={
-				isActionStateError(state)
-					? (state.validationErrors as AriaFormProps["validationErrors"])
-					: undefined
-			}
-			{...rest}
-			action={action}
-			onSubmit={onSubmitForm}
-		>
-			{children}
-		</AriaForm>
+		/**
+		 * React-aria's `Form` provides all its props to descendants via `FormContext`, and a nested
+		 * `Form` (e.g. in a dialog) would merge them into its own: chaining `onSubmit`, and inheriting
+		 * `id`, `className` and `validationErrors`. A form must not inherit from an enclosing form.
+		 */
+		<FormContext.Provider value={null}>
+			<AriaForm
+				ref={formRef}
+				validationErrors={
+					isActionStateError(state)
+						? (state.validationErrors as AriaFormProps["validationErrors"])
+						: undefined
+				}
+				{...rest}
+				action={action}
+				onSubmit={onSubmitForm}
+			>
+				{children}
+			</AriaForm>
+		</FormContext.Provider>
 	);
 }
