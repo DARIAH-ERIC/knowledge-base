@@ -39,6 +39,16 @@ export function Form<TData = unknown, TValidationErrors extends object = Validat
 	const onSubmitForm: NonNullable<AriaFormProps["onSubmit"]> = (event) => {
 		onSubmit?.(event);
 
+		/**
+		 * Only handle submissions of this form element. A nested form, e.g. in a dialog, receives this
+		 * handler via react-aria's `FormContext`, and submit events of other nested forms bubble up
+		 * through portals.
+		 */
+		const form = formRef.current;
+		if (form == null || event.target !== form) {
+			return;
+		}
+
 		if (event.defaultPrevented || typeof action !== "function") {
 			return;
 		}
@@ -46,7 +56,7 @@ export function Form<TData = unknown, TValidationErrors extends object = Validat
 		event.preventDefault();
 
 		const { submitter } = event.nativeEvent as globalThis.SubmitEvent;
-		const formData = new FormData(event.currentTarget, submitter);
+		const formData = new FormData(form, submitter);
 
 		startTransition(async () => {
 			await action(formData);
