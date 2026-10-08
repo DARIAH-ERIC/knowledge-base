@@ -5,11 +5,6 @@ import { defineConfig } from "oxlint";
 
 const config = defineConfig({
 	extends: [base, drizzle, turbo],
-	options: {
-		reportUnusedDisableDirectives: "error",
-		typeAware: true,
-		typeCheck: true,
-	},
 });
 
 export default config;

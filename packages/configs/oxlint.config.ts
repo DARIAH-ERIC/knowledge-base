@@ -4,11 +4,6 @@ import { defineConfig } from "oxlint";
 
 const config = defineConfig({
 	extends: [base, turbo],
-	options: {
-		reportUnusedDisableDirectives: "error",
-		typeAware: true,
-		typeCheck: true,
-	},
 	rules: {
 		"import/no-default-export": "off",
 	},

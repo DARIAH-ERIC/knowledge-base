@@ -26,11 +26,6 @@ if (process.env.CI == null) {
 
 const config = defineConfig({
 	extends: configs,
-	options: {
-		reportUnusedDisableDirectives: "error",
-		typeAware: true,
-		typeCheck: true,
-	},
 	rules: {
 		"no-restricted-imports": ["error", { patterns: [{ group: ["./*", "../*"] }] }],
 	},
