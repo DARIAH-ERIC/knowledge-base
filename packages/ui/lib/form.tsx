@@ -71,6 +71,8 @@ export function Form<TData = unknown, TValidationErrors extends object = Validat
 		 * React-aria's `Form` provides all its props to descendants via `FormContext`, and a nested
 		 * `Form` (e.g. in a dialog) would merge them into its own: chaining `onSubmit`, and inheriting
 		 * `id`, `className` and `validationErrors`. A form must not inherit from an enclosing form.
+		 *
+		 * @see {@link https://github.com/adobe/react-spectrum/issues/10740}
 		 */
 		<FormContext.Provider value={null}>
 			<AriaForm
