@@ -913,6 +913,8 @@ export class DatabaseService {
 				and(
 					eq(schema.organisationalUnitTypes.type, "country"),
 					eq(schema.entityStatus.type, "published"),
+					// Another worker's country fixture can be deleted while the caller still relies on it.
+					sql`${schema.organisationalUnits.name} NOT LIKE ${"[e2e-worker-%"}`,
 					isMember ? exists(membership) : notExists(membership),
 				),
 			)
@@ -1256,7 +1258,7 @@ export class DatabaseService {
 			.where(eq(schema.personsToOrganisationalUnits.id, id));
 	}
 
-	/** The first published country, whatever its relation to DARIAH-EU. */
+	/** The first published seeded country, whatever its relation to DARIAH-EU. */
 	async getFirstPublishedCountry(): Promise<{ documentId: string; name: string } | null> {
 		const [row] = await this.db
 			.select({
@@ -1274,6 +1276,7 @@ export class DatabaseService {
 				and(
 					eq(schema.organisationalUnitTypes.type, "country"),
 					eq(schema.entityStatus.type, "published"),
+					sql`${schema.organisationalUnits.name} NOT LIKE ${"[e2e-worker-%"}`,
 				),
 			)
 			.orderBy(schema.organisationalUnits.name)
