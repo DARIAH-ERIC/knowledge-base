@@ -238,7 +238,8 @@ describe("navigation", () => {
 
 				const { menuId, menuName, childItemId } = await seed(db);
 
-				const grandchildLabel = f.lorem.word();
+				// Unique, so it cannot occur elsewhere in the response (a lorem word like "sit" can).
+				const grandchildLabel = `grandchild-${uuidv7()}`;
 
 				await db.insert(schema.navigationItems).values({
 					id: uuidv7(),
