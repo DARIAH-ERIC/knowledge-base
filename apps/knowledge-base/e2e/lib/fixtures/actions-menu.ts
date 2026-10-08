@@ -11,6 +11,12 @@ export async function openActionsMenu(scope: Locator): Promise<void> {
 	const trigger = scope.getByRole("button", { name: "Open actions menu" }).first();
 	const menu = scope.page().getByRole("menu");
 
+	/**
+	 * A menu closed just before (e.g. with Escape) stays visible during its exit animation, and would
+	 * otherwise be mistaken for the menu being opened here.
+	 */
+	await expect(menu).toBeHidden();
+
 	await expect(async () => {
 		if (!(await menu.isVisible())) {
 			await trigger.click();
