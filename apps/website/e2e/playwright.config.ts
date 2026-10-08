@@ -62,7 +62,7 @@ export default defineConfig({
 		baseURL: config.baseUrl,
 		navigationTimeout: isCI ? 60_000 : 30_000,
 		screenshot: "on-first-failure",
-		trace: "on-first-retry",
+		trace: "retain-on-first-failure",
 	},
 	projects: [
 		{
