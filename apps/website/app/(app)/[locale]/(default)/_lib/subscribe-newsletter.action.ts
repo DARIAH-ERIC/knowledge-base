@@ -34,7 +34,6 @@ export const subscribeNewsletterAction = createServerAction<
 		const errors = v.flatten<typeof SubscribeNewsletterInputSchema>(validation.issues);
 
 		return createActionStateError({
-			formData,
 			message: errors.root ?? e("invalid-form-fields"),
 			validationErrors: errors.nested,
 		});
@@ -51,7 +50,6 @@ export const subscribeNewsletterAction = createServerAction<
 
 				if (message.title === "Member Exists") {
 					return createActionStateError({
-						formData,
 						message: t("already-subscribed"),
 					});
 				}
@@ -61,7 +59,6 @@ export const subscribeNewsletterAction = createServerAction<
 		}
 
 		return createActionStateError({
-			formData,
 			message: t("error"),
 		});
 	}

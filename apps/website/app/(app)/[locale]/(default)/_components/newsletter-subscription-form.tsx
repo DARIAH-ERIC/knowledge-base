@@ -19,13 +19,7 @@ export function NewsletterSubscriptionForm(): ReactNode {
 		<Form action={action} className="grid gap-y-6" state={state}>
 			<FormStatus state={state} />
 
-			<TextField
-				autoComplete="email"
-				defaultValue={(state.formData?.get("email") ?? "") as string}
-				isRequired={true}
-				name="email"
-				type="email"
-			>
+			<TextField autoComplete="email" isRequired={true} name="email" type="email">
 				<Label>{t("email")}</Label>
 				<Input />
 			</TextField>
