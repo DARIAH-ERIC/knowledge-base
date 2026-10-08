@@ -23,6 +23,8 @@ export function RichTextEditorToolbarButton({
 		<Tooltip>
 			<ButtonPrimitive
 				aria-label={ariaLabel}
+				/** Exposes the toggle state of formatting buttons, which is otherwise only a style. */
+				aria-pressed={isActive}
 				className={twMerge(
 					"relative inline-flex items-center justify-center rounded-md text-muted-fg transition-colors block-8 inline-8 hover:text-fg focus:ring-2 focus:ring-ring focus:outline-none",
 					isActive === true && "bg-primary-subtle/50 text-fg",

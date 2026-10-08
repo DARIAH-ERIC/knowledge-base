@@ -135,9 +135,12 @@ export class WebsiteSpotlightArticlesPage {
 		const captionEditor = caption.getByRole("textbox", { name: "Table caption" });
 		await captionEditor.click();
 
-		await caption.getByRole("button", { name: "Bold", exact: true }).click();
+		const bold = caption.getByRole("button", { name: "Bold", exact: true });
+		await bold.click();
+		await expect(bold).toHaveAttribute("aria-pressed", "true");
 		await this.page.keyboard.type(options.boldPrefix);
-		await caption.getByRole("button", { name: "Bold", exact: true }).click();
+		await bold.click();
+		await expect(bold).toHaveAttribute("aria-pressed", "false");
 
 		/** The separator is typed on its own, so each run's text is exactly what is asserted on. */
 		await this.page.keyboard.type(" ");
