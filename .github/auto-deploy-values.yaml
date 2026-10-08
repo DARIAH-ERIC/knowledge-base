@@ -19,7 +19,7 @@ service:
 ingress:
   enabled: true
   path: "/"
-  className: "nginx-proxy-protocol"
+  className: "traefik-proxy-protocol"
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/proxy-body-size: "24m"
