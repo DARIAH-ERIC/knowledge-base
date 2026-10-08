@@ -181,6 +181,13 @@ export class AdminWorkingGroupsPage {
 				await this.page.getByRole("button", { name: "Add relation" }).click();
 			},
 		});
+		// The form clears its selections only once the response has been applied. Wait for that, or a
+		// late reset wipes the caller's next selections.
+		await this.page
+			.locator("form")
+			.filter({ has: this.page.getByRole("button", { name: "Add relation" }) })
+			.getByRole("button", { name: "No related unit selected" })
+			.waitFor({ state: "visible" });
 	}
 
 	async openFirstRelationsRowAction(action: string): Promise<void> {
@@ -285,6 +292,13 @@ export class AdminWorkingGroupsPage {
 				await this.page.getByRole("button", { name: "Add person" }).click();
 			},
 		});
+		// The form clears its selections only once the response has been applied. Wait for that, or a
+		// late reset wipes the caller's next selections.
+		await this.page
+			.locator("form")
+			.filter({ has: this.page.getByRole("button", { name: "Add person" }) })
+			.getByRole("button", { name: "No person selected" })
+			.waitFor({ state: "visible" });
 	}
 
 	async openFirstPeopleRowAction(action: string): Promise<void> {
