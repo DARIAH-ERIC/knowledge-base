@@ -27,7 +27,7 @@ export const router = createRouter()
 			summary: "Get opportunities",
 			description: "Retrieve a paginated list of opportunities",
 			operationId: "getOpportunities",
-			"x-cache-tags": ["assets", "opportunities"],
+			"x-cache-tags": ["opportunities"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -99,7 +99,7 @@ export const router = createRouter()
 			summary: "Get opportunity by id",
 			description: "Retrieve an opportunity by id",
 			operationId: "getOpportunityById",
-			"x-cache-tags": ["assets", "opportunities"],
+			"x-cache-tags": ["opportunities"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -140,7 +140,7 @@ export const router = createRouter()
 			summary: "Get opportunity by slug",
 			description: "Retrieve an opportunity by slug",
 			operationId: "getOpportunityBySlug",
-			"x-cache-tags": ["assets", "opportunities"],
+			"x-cache-tags": ["opportunities"],
 			responses: {
 				200: {
 					description: "Success response",
