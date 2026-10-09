@@ -178,7 +178,7 @@ export const router = createRouter()
 			summary: "Get document or policy by id",
 			description: "Retrieve a document or policy by id",
 			operationId: "getDocumentOrPolicyById",
-			"x-cache-tags": ["assets", "documents-policies"],
+			"x-cache-tags": ["documents-policies"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -222,7 +222,7 @@ export const router = createRouter()
 			description:
 				"Stream the S3-stored file for a document or policy by id. Not found for an external link.",
 			operationId: "getDocumentOrPolicyFileById",
-			"x-cache-tags": ["assets", "documents-policies"],
+			"x-cache-tags": ["documents-policies"],
 			responses: {
 				200: {
 					description: "Binary file stream",
@@ -272,7 +272,7 @@ export const router = createRouter()
 			description:
 				"Stream the S3-stored file for a document or policy by slug. Not found for an external link.",
 			operationId: "getDocumentOrPolicyFileBySlug",
-			"x-cache-tags": ["assets", "documents-policies"],
+			"x-cache-tags": ["documents-policies"],
 			responses: {
 				200: {
 					description: "Binary file stream",
@@ -320,7 +320,7 @@ export const router = createRouter()
 			summary: "Get document or policy by slug",
 			description: "Retrieve a document or policy by slug",
 			operationId: "getDocumentOrPolicyBySlug",
-			"x-cache-tags": ["assets", "documents-policies"],
+			"x-cache-tags": ["documents-policies"],
 			responses: {
 				200: {
 					description: "Success response",

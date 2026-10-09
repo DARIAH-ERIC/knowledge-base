@@ -27,7 +27,7 @@ export const router = createRouter()
 			summary: "Get members and partners",
 			description: "Retrieve a paginated list of members and partners",
 			operationId: "getMembersAndPartners",
-			"x-cache-tags": ["assets", "members-partners", "social-media"],
+			"x-cache-tags": ["members-partners", "social-media"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -99,7 +99,7 @@ export const router = createRouter()
 			summary: "Get member or partner by id",
 			description: "Retrieve a member or partner by id",
 			operationId: "getMembersAndPartnersById",
-			"x-cache-tags": ["assets", "members-partners", "persons", "social-media"],
+			"x-cache-tags": ["members-partners", "persons", "social-media"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -140,7 +140,7 @@ export const router = createRouter()
 			summary: "Get member or partner by slug",
 			description: "Retrieve a member or partner by slug",
 			operationId: "getMemberOrPartnerBySlug",
-			"x-cache-tags": ["assets", "members-partners", "persons", "social-media"],
+			"x-cache-tags": ["members-partners", "persons", "social-media"],
 			responses: {
 				200: {
 					description: "Success response",

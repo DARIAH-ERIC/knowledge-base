@@ -27,7 +27,7 @@ export const router = createRouter()
 			summary: "Get funding calls",
 			description: "Retrieve a paginated list of funding calls",
 			operationId: "getFundingCalls",
-			"x-cache-tags": ["assets", "funding-calls"],
+			"x-cache-tags": ["funding-calls"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -99,7 +99,7 @@ export const router = createRouter()
 			summary: "Get funding call by id",
 			description: "Retrieve a funding call by id",
 			operationId: "getFundingCallById",
-			"x-cache-tags": ["assets", "funding-calls"],
+			"x-cache-tags": ["funding-calls"],
 			responses: {
 				200: {
 					description: "Success response",
@@ -140,7 +140,7 @@ export const router = createRouter()
 			summary: "Get funding call by slug",
 			description: "Retrieve a funding call by slug",
 			operationId: "getFundingCallBySlug",
-			"x-cache-tags": ["assets", "funding-calls"],
+			"x-cache-tags": ["funding-calls"],
 			responses: {
 				200: {
 					description: "Success response",
