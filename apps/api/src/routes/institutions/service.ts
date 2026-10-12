@@ -166,6 +166,8 @@ function institutionQuery(db: Database | Transaction) {
 			logoWidth: schema.assets.width,
 			logoHeight: schema.assets.height,
 			logoAspectRatio: schema.assets.aspectRatio,
+			logoFocalPointX: schema.assets.focalPointX,
+			logoFocalPointY: schema.assets.focalPointY,
 			logoMimeType: schema.assets.mimeType,
 			logoAlt: schema.assets.alt,
 			logoCaption: schema.assets.caption,
@@ -226,6 +228,8 @@ interface InstitutionRow {
 	logoWidth: number | null;
 	logoHeight: number | null;
 	logoAspectRatio: number | null;
+	logoFocalPointX: number | null;
+	logoFocalPointY: number | null;
 	logoMimeType: string | null;
 	logoAlt: string | null;
 	logoCaption: JSONContent | null;
@@ -264,6 +268,8 @@ function mapInstitutionRow(row: InstitutionRow) {
 				width: row.logoWidth,
 				height: row.logoHeight,
 				aspectRatio: row.logoAspectRatio,
+				focalPointX: row.logoFocalPointX,
+				focalPointY: row.logoFocalPointY,
 				mimeType: row.logoMimeType!,
 				licenseName: row.licenseName,
 				licenseUrl: row.licenseUrl,
