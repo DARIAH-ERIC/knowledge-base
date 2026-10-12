@@ -262,6 +262,8 @@ interface ArticleRow {
 	imageWidth: number | null;
 	imageHeight: number | null;
 	imageAspectRatio: number | null;
+	imageFocalPointX: number | null;
+	imageFocalPointY: number | null;
 	imageMimeType: string;
 	/** The article's own caption choice for its featured image (see `withResolvedCaption`). */
 	entityImageCaption: JSONContent | null;
@@ -286,6 +288,8 @@ function toArticle(type: PersonArticleType, row: ArticleRow): PersonArticle {
 		imageWidth: imageSourceWidth,
 		imageHeight: imageSourceHeight,
 		imageAspectRatio,
+		imageFocalPointX,
+		imageFocalPointY,
 		imageMimeType,
 		entityImageCaption,
 		entityImageCaptionMode,
@@ -310,6 +314,8 @@ function toArticle(type: PersonArticleType, row: ArticleRow): PersonArticle {
 					width: imageSourceWidth,
 					height: imageSourceHeight,
 					aspectRatio: imageAspectRatio,
+					focalPointX: imageFocalPointX,
+					focalPointY: imageFocalPointY,
 					mimeType: imageMimeType,
 					licenseName,
 					licenseUrl,
@@ -370,6 +376,8 @@ export async function getPersonArticles(
 				imageWidth: spotlightArticleAssets.width,
 				imageHeight: spotlightArticleAssets.height,
 				imageAspectRatio: spotlightArticleAssets.aspectRatio,
+				imageFocalPointX: spotlightArticleAssets.focalPointX,
+				imageFocalPointY: spotlightArticleAssets.focalPointY,
 				imageMimeType: spotlightArticleAssets.mimeType,
 				entityImageCaption: schema.spotlightArticles.imageCaption,
 				entityImageCaptionMode: schema.spotlightArticles.imageCaptionMode,
@@ -416,6 +424,8 @@ export async function getPersonArticles(
 				imageWidth: impactCaseStudyAssets.width,
 				imageHeight: impactCaseStudyAssets.height,
 				imageAspectRatio: impactCaseStudyAssets.aspectRatio,
+				imageFocalPointX: impactCaseStudyAssets.focalPointX,
+				imageFocalPointY: impactCaseStudyAssets.focalPointY,
 				imageMimeType: impactCaseStudyAssets.mimeType,
 				entityImageCaption: schema.impactCaseStudies.imageCaption,
 				entityImageCaptionMode: schema.impactCaseStudies.imageCaptionMode,
