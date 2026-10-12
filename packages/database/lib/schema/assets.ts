@@ -62,7 +62,7 @@ export const assets = p.snakeCase.table(
 		p.index("assets_key_idx").on(t.key),
 		p.check(
 			"assets_focal_point_check",
-			sql`(${t.focalPointX} IS NULL AND ${t.focalPointY} IS NULL) OR (${t.focalPointX} BETWEEN 0 AND 1 AND ${t.focalPointY} BETWEEN 0 AND 1)`,
+			sql`(${t.focalPointX} IS NULL AND ${t.focalPointY} IS NULL) OR (${t.focalPointX} IS NOT NULL AND ${t.focalPointY} IS NOT NULL AND ${t.focalPointX} BETWEEN 0 AND 1 AND ${t.focalPointY} BETWEEN 0 AND 1)`,
 		),
 	],
 );

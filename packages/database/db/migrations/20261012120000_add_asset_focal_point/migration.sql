@@ -17,7 +17,12 @@ ALTER TABLE "assets"
 ALTER TABLE "assets"
 	ADD CONSTRAINT "assets_focal_point_check" CHECK (
 		("focal_point_x" IS NULL AND "focal_point_y" IS NULL)
-		OR ("focal_point_x" BETWEEN 0 AND 1 AND "focal_point_y" BETWEEN 0 AND 1)
+		OR (
+			"focal_point_x" IS NOT NULL
+			AND "focal_point_y" IS NOT NULL
+			AND "focal_point_x" BETWEEN 0 AND 1
+			AND "focal_point_y" BETWEEN 0 AND 1
+		)
 	);
 
 --> statement-breakpoint
