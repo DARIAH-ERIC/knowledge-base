@@ -9,7 +9,7 @@ const config = defineConfig({
 		"no-misleading-character-class": "error",
 		"no-regex-spaces": "error",
 		"no-useless-backreference": "off",
-		// "prefer-regex-literals": "error", // Not yet supported by oxlint.
+		"prefer-regex-literals": "error",
 
 		"regexp/confusing-quantifier": "warn",
 		"regexp/control-character-escape": "error",

@@ -1,3 +1,4 @@
+import { getDefaultSelectors } from "eslint-plugin-better-tailwindcss/api/defaults";
 import { defineConfig } from "oxlint";
 
 const config = defineConfig({
@@ -34,6 +35,7 @@ const config = defineConfig({
 	settings: {
 		"better-tailwindcss": {
 			selectors: [
+				...getDefaultSelectors(),
 				{
 					kind: "callee",
 					name: "^cn$",
