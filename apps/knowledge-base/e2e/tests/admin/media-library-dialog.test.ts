@@ -1,4 +1,5 @@
 import { E2E_TEST_ASSET_LABEL } from "@/e2e/lib/fixtures/database-service";
+import { clickHydrated } from "@/e2e/lib/fixtures/hydration";
 import { expect, test } from "@/e2e/lib/test";
 
 /** A host whose image picker offers several prefixes, defaulting to `images`. */
@@ -25,7 +26,7 @@ test.describe("media library dialog", () => {
 		let dialog = await assetsPage.openMediaLibraryDialog(MULTI_PREFIX_HOST_PATH);
 		await assetsPage.searchInMediaLibrary(dialog, E2E_TEST_ASSET_LABEL);
 		await dialog.getByRole("button", { name: "logos", exact: true }).click();
-		await dialog.getByRole("tab", { name: "Upload" }).click();
+		await clickHydrated(dialog.getByRole("tab", { name: "Upload" }));
 		await expect(dialog.getByRole("tab", { name: "Upload" })).toHaveAttribute(
 			"aria-selected",
 			"true",

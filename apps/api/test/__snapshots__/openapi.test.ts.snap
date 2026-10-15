@@ -7371,6 +7371,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
         "type": "object",
       },
+      "GetNavigationResponse": {
+        "$ref": "#/components/schemas/NavigationMenuList",
+      },
       "GetNewsItemSlugsResponse": {
         "description": "Paginated list of news item slugs",
         "properties": {
@@ -7635,6 +7638,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
         "type": "object",
       },
+      "GetSiteMetadataResponse": {
+        "$ref": "#/components/schemas/SiteMetadata",
+      },
       "GetSitemapResponse": {
         "description": "All website urls derived from published content",
         "properties": {
@@ -7756,6 +7762,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "workingGroups",
         ],
         "type": "object",
+      },
+      "GetStatisticsResponse": {
+        "$ref": "#/components/schemas/GetStatistics",
       },
       "GetWorkingGroupSlugsResponse": {
         "description": "Paginated list of working group slugs",
@@ -22374,6 +22383,34 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             },
             "description": "Binary file stream",
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {},
+                    "error": {
+                      "items": {},
+                      "type": "array",
+                    },
+                    "success": {
+                      "enum": [
+                        false,
+                      ],
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Validation Error",
+          },
           "404": {
             "content": {
               "application/json": {
@@ -24196,7 +24233,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NavigationMenuList",
+                  "$ref": "#/components/schemas/GetNavigationResponse",
                 },
               },
             },
@@ -25514,7 +25551,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SiteMetadata",
+                  "$ref": "#/components/schemas/GetSiteMetadataResponse",
                 },
               },
             },
@@ -25941,7 +25978,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetStatistics",
+                  "$ref": "#/components/schemas/GetStatisticsResponse",
                 },
               },
             },
