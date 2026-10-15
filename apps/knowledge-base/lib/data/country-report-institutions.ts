@@ -71,9 +71,11 @@ export function groupCountryReportInstitutionSummaryRows(
 
 	return Array.from(byDocumentId.values()).toSorted((left, right) => {
 		const leftTypeOrder =
+			// oxlint-disable-next-line typescript/no-unnecessary-condition -- guards an empty `representationTypes`, which the `!` hides.
 			countryReportInstitutionRepresentationPrecedence[left.representationTypes[0]!] ??
 			Number.MAX_VALUE;
 		const rightTypeOrder =
+			// oxlint-disable-next-line typescript/no-unnecessary-condition -- guards an empty `representationTypes`, which the `!` hides.
 			countryReportInstitutionRepresentationPrecedence[right.representationTypes[0]!] ??
 			Number.MAX_VALUE;
 

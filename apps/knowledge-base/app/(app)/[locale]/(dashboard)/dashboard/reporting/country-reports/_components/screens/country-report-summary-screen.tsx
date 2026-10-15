@@ -2,7 +2,7 @@ import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import { ReportActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-action-form";
 import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
@@ -71,7 +71,7 @@ export async function CountryReportSummaryScreen(
 					)}
 
 					{canDownload && (
-						<>
+						<Fragment>
 							<a
 								className={buttonStyles({ intent: "plain", size: "sm" })}
 								download={`country-report-${reportId}.pdf`}
@@ -88,7 +88,7 @@ export async function CountryReportSummaryScreen(
 								<ArrowDownTrayIcon className="me-2 block-4 inline-4" />
 								{t("Download JSON")}
 							</a>
-						</>
+						</Fragment>
 					)}
 				</div>
 			</div>

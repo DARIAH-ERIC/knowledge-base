@@ -1,5 +1,3 @@
-// oxlint-disable jsx-a11y/iframe-has-title
-
 "use client";
 
 import {
@@ -36,6 +34,7 @@ import {
 } from "lucide-react";
 import { useExtracted } from "next-intl";
 import {
+	Fragment,
 	type ReactNode,
 	type RefObject,
 	useCallback,
@@ -499,6 +498,7 @@ function EmbedNodeView({
 									allowFullScreen={true}
 									className="block-full inline-full"
 									referrerPolicy="strict-origin-when-cross-origin"
+									// oxlint-disable-next-line react/iframe-missing-sandbox -- video embeds need both allow-scripts and allow-same-origin.
 									sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
 									src={embedUrl}
 									title={getEmbedTitle(title, url, embedUrl)}
@@ -907,7 +907,7 @@ function AccordionItemNodeView({
 					data-drag-handle={editor.isEditable ? "" : undefined}
 				>
 					{editor.isEditable ? (
-						<>
+						<Fragment>
 							<Input
 								aria-label="Panel title"
 								className="flex-1"
@@ -926,7 +926,7 @@ function AccordionItemNodeView({
 							>
 								<Trash2Icon className="block-4 inline-4" />
 							</button>
-						</>
+						</Fragment>
 					) : (
 						<strong className="text-sm font-medium">{title}</strong>
 					)}
@@ -1537,7 +1537,7 @@ function AssetImageNodeView({
 						</div>
 					) : null}
 					{renderImagePicker == null ? (
-						<>
+						<Fragment>
 							<div className="flex flex-col gap-y-1">
 								<label className="text-sm/6 font-medium" htmlFor={imageKeyInputId}>
 									{"Asset key"}
@@ -1566,7 +1566,7 @@ function AssetImageNodeView({
 									value={imageUrlInput}
 								/>
 							</div>
-						</>
+						</Fragment>
 					) : null}
 					<div className="flex flex-col gap-y-1">
 						<span className="text-sm/6 font-medium">{"Layout"}</span>
@@ -2128,6 +2128,25 @@ const galleryLayoutLabel: Record<GalleryLayout, string> = {
 	logos: "Logos",
 };
 
+/**
+ * A gallery item in the edit form, with a row id that lives only as long as the form. Items carry
+ * no id of their own (two placements of the same asset are a legitimate gallery), but each row
+ * holds an uncontrolled caption editor, so a row must keep its identity when it is moved or a row
+ * above it is removed - a positional key would leave each editor showing the caption of the item
+ * that used to be there, and the next keystroke would write it onto the wrong item.
+ */
+interface GalleryItemRow {
+	rowId: string;
+	item: GalleryItemAttrs;
+}
+
+let galleryItemRowCount = 0;
+
+function createGalleryItemRow(item: GalleryItemAttrs): GalleryItemRow {
+	galleryItemRowCount += 1;
+	return { rowId: `gallery-item-${String(galleryItemRowCount)}`, item };
+}
+
 interface GalleryNodeViewProps extends NodeViewProps {
 	hasFootnotes?: boolean;
 	renderImagePicker?: ImagePickerRenderer;
@@ -2158,12 +2177,14 @@ function GalleryNodeView({
 
 	const [isEditing, setIsEditing] = useState(items.length === 0 && editor.isEditable);
 	const [layoutInput, setLayoutInput] = useState<GalleryLayout>(layout);
-	const [itemsInput, setItemsInput] = useState<Array<GalleryItemAttrs>>(items);
+	const [rowsInput, setRowsInput] = useState<Array<GalleryItemRow>>(() =>
+		items.map(createGalleryItemRow),
+	);
 	const [captionInput, setCaptionInput] = useState<JSONContent | null>(caption);
 
 	function resetInputs() {
 		setLayoutInput(layout);
-		setItemsInput(items);
+		setRowsInput(items.map(createGalleryItemRow));
 		setCaptionInput(caption);
 	}
 
@@ -2176,13 +2197,15 @@ function GalleryNodeView({
 	}
 
 	function updateItem(index: number, changes: Partial<GalleryItemAttrs>) {
-		setItemsInput((current) =>
-			current.map((item, itemIndex) => (itemIndex === index ? { ...item, ...changes } : item)),
+		setRowsInput((current) =>
+			current.map((row, rowIndex) =>
+				rowIndex === index ? { ...row, item: { ...row.item, ...changes } } : row,
+			),
 		);
 	}
 
 	function moveItem(index: number, direction: -1 | 1) {
-		setItemsInput((current) => {
+		setRowsInput((current) => {
 			const nextIndex = index + direction;
 			if (nextIndex < 0 || nextIndex >= current.length) {
 				return current;
@@ -2198,7 +2221,8 @@ function GalleryNodeView({
 	}
 
 	function handleApply() {
-		const nextItems = itemsInput
+		const nextItems = rowsInput
+			.map((row) => row.item)
 			.filter((item) => item.imageKey != null)
 			.map((item) => {
 				return {
@@ -2275,13 +2299,8 @@ function GalleryNodeView({
 							onChange={setCaptionInput}
 						/>
 					</div>
-					{itemsInput.map((item, index) => (
-						<div
-							// Items carry no id of their own, and two placements of the same asset are a
-							// legitimate gallery, so position is the only thing that identifies a row.
-							key={index}
-							className="flex flex-col gap-y-3 rounded-lg border border-border p-3"
-						>
+					{rowsInput.map(({ rowId, item }, index) => (
+						<div key={rowId} className="flex flex-col gap-y-3 rounded-lg border border-border p-3">
 							<div className="flex items-center justify-between gap-x-2">
 								<span className="text-sm/6 font-medium">{`Image ${String(index + 1)}`}</span>
 								<div className="flex shrink-0 items-center gap-x-1">
@@ -2300,7 +2319,7 @@ function GalleryNodeView({
 									<Button
 										aria-label={`Move image ${String(index + 1)} later`}
 										intent="outline"
-										isDisabled={index === itemsInput.length - 1}
+										isDisabled={index === rowsInput.length - 1}
 										onPress={() => {
 											moveItem(index, 1);
 										}}
@@ -2313,8 +2332,8 @@ function GalleryNodeView({
 										aria-label={`Remove image ${String(index + 1)}`}
 										intent="outline"
 										onPress={() => {
-											setItemsInput((current) =>
-												current.filter((_, itemIndex) => itemIndex !== index),
+											setRowsInput((current) =>
+												current.filter((_, rowIndex) => rowIndex !== index),
 											);
 										}}
 										size="sm"
@@ -2376,27 +2395,27 @@ function GalleryNodeView({
 							{/* One asset per trip through the picker: the media library dialog is
 							    single-select, so a gallery is built up by picking repeatedly. */}
 							{renderImagePicker((imageKey, imageUrl, asset) => {
-								setItemsInput((current) => [
+								setRowsInput((current) => [
 									...current,
-									{
+									createGalleryItemRow({
 										imageKey,
 										imageUrl,
 										alt: asset?.alt ?? null,
 										assetCaption: asset?.caption ?? null,
 										caption: null,
 										captionMode: "inherit",
-									},
+									}),
 								]);
 							})}
 						</div>
 					) : null}
-					{itemsInput.length === 0 ? (
+					{rowsInput.length === 0 ? (
 						<Note intent="info">{"Pick at least one image to keep this gallery."}</Note>
 					) : null}
 					<div className={blockPanelFooterClassName}>
 						<Button
 							intent="primary"
-							isDisabled={itemsInput.length === 0}
+							isDisabled={rowsInput.length === 0}
 							onPress={handleApply}
 							size="sm"
 							type="button"
@@ -2438,6 +2457,7 @@ function GalleryNodeView({
 								// it is drawn here the way it will render rather than as a tiled gallery item.
 								if (layout === "logos") {
 									return (
+										// oxlint-disable-next-line react/no-array-index-key -- read-only render of the applied items; gallery items have no identity of their own.
 										<li key={index} className="flex items-center">
 											<img
 												alt={item.alt ?? ""}
@@ -2450,6 +2470,7 @@ function GalleryNodeView({
 								}
 
 								return (
+									// oxlint-disable-next-line react/no-array-index-key -- read-only render of the applied items; gallery items have no identity of their own.
 									<li key={index} className="flex flex-col gap-y-1">
 										{/* A gallery mixes wide banners, portraits and transparent logos, so the tile
 										    bounds the image instead of cropping it: a fixed-ratio box keeps the grid
@@ -2997,7 +3018,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			// A placeholder is only useful where its panel can open a picker to fill it.
 			PastedImageGuard.configure({ withPlaceholders: renderImagePicker != null }),
 		],
-		[renderImagePicker, renderAssetMetadata, isEditable, hasFootnotes],
+		[renderImagePicker, renderAssetMetadata, isEditable, hasFootnotes, slashCommandHandlersRef],
 	);
 
 	const editor = useEditor({
@@ -3693,6 +3714,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						{footnotes.map((note, index) => (
 							// Positional keys: a note has no identity of its own — it is the marker at this
 							// position in the document, and the list is rebuilt from the document on every change.
+							// oxlint-disable-next-line react/no-array-index-key -- a footnote is its position in the document.
 							<li key={index}>
 								{note != null ? (
 									<InlineRichTextRenderer content={note} />

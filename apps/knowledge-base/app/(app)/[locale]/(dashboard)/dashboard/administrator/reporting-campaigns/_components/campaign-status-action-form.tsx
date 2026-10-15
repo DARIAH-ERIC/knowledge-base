@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@dariah-eric/ui/button";
-import type { ComponentProps, ReactNode } from "react";
+import { type ComponentProps, Fragment, type ReactNode } from "react";
 
 import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
 import type { ServerAction } from "@/lib/server/create-server-action";
@@ -22,12 +22,12 @@ export function CampaignStatusActionForm(
 	return (
 		<ActionForm action={action}>
 			{(isPending) => (
-				<>
+				<Fragment>
 					<input name="id" type="hidden" value={campaignId} />
 					<Button intent={intent} isPending={isPending} type="submit">
 						{label}
 					</Button>
-				</>
+				</Fragment>
 			)}
 		</ActionForm>
 	);

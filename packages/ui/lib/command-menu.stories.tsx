@@ -38,7 +38,6 @@ export const Default: Story = {
 		children: null,
 	},
 	render() {
-		// oxlint-disable-next-line react-hooks/rules-of-hooks
 		const [isOpen, setIsOpen] = useState(false);
 
 		return (
@@ -101,7 +100,6 @@ export const WithShortcut: Story = {
 		children: null,
 	},
 	render() {
-		// oxlint-disable-next-line react-hooks/rules-of-hooks
 		const [isOpen, setIsOpen] = useState(false);
 
 		return (

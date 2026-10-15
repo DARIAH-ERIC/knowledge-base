@@ -1,3 +1,4 @@
+// oxlint-disable-next-line import/no-named-as-default -- the default export is the documented entry point.
 import PDFDocument from "pdfkit";
 
 import { loadDariahWordmark } from "@/app/api/reporting/_lib/report-logo";

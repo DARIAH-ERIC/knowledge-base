@@ -280,6 +280,7 @@ function PersonSocialMediaEntryDialog(
 				<ModalBody className="flex flex-col gap-y-5">
 					{/* `defaultSelectedKey` is flagged deprecated, but the plural form is typed for
 					    `selectionMode="multiple"` only, so it is still the single-select API here. */}
+					{/* oxlint-disable-next-line typescript/no-deprecated -- see above. */}
 					<Select defaultSelectedKey={entry?.type ?? "website"} isRequired={true} name="type">
 						<Label>{t("Type")}</Label>
 						<SelectTrigger />

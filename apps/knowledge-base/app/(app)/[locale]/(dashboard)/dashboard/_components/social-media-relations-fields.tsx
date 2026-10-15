@@ -142,7 +142,7 @@ export function SocialMediaRelationsFields(
 				isOrderable={true}
 				onChange={setSelectedSocialMediaIds}
 				renderSelectedItem={(item) => (
-					<>
+					<Fragment>
 						<GridListLabel className="truncate">{item.name}</GridListLabel>
 						{item.description != null && item.description !== "" ? (
 							<GridListDescription className="truncate">{item.description}</GridListDescription>
@@ -156,7 +156,7 @@ export function SocialMediaRelationsFields(
 							<ArrowTopRightOnSquareIcon className="block-3.5 inline-3.5" />
 							{t("Open record")}
 						</LocaleLink>
-					</>
+					</Fragment>
 				)}
 				selectedItems={localSocialMediaItems}
 				value={selectedSocialMediaIds}

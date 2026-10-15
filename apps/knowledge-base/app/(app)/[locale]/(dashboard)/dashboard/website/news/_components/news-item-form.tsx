@@ -81,7 +81,8 @@ export function NewsItemForm(props: Readonly<NewsItemFormProps>): ReactNode {
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
 	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(newsItem?.image ?? null);
-	const now = new Date();
+	// oxlint-disable-next-line react/hook-use-state -- a stable "now" for the render, never updated.
+	const [now] = useState(() => new Date());
 
 	return (
 		<FormLayout>

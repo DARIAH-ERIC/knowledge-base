@@ -407,9 +407,7 @@ describe("assets", () => {
 				const ratios = Object.keys(imageVariantAspectRatios) as Array<ImageVariantAspectRatio>;
 				const focalPoints = [undefined, "0,0", "0.5,0.2", "1,1"];
 
-				const locations = new Set<string>();
-
-				locations.add((await getVariantLocation(db, { name })).location);
+				const locations = new Set<string>([(await getVariantLocation(db, { name })).location]);
 
 				for (const w of imageVariantWidths) {
 					locations.add((await getVariantLocation(db, { name, w })).location);

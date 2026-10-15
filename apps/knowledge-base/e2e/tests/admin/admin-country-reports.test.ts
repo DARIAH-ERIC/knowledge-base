@@ -18,7 +18,6 @@ test.describe("country reports admin", () => {
 		const workerIndex = test.info().workerIndex;
 		const campaignYear = campaignYearForTest(0);
 		const reportsPage = createAdminCountryReportsPage(workerIndex);
-		// oxlint-disable-next-line no-useless-assignment
 		let reportId: string | null = null;
 
 		const campaign = await db.createOpenCampaign(campaignYear);
@@ -77,7 +76,6 @@ test.describe("country reports admin", () => {
 		const reportsPage = createAdminCountryReportsPage(workerIndex);
 		const campaign = await db.createOpenCampaign(campaignYear);
 		const country = await db.getCountryOption();
-		// oxlint-disable-next-line no-useless-assignment
 		let reportId: string | null = null;
 
 		try {

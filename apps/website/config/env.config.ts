@@ -1,5 +1,3 @@
-/* eslint-disable no-restricted-syntax */
-
 import { addTrailingSlash, removeTrailingSlash } from "@acdh-oeaw/lib";
 import { define } from "@dariah-eric/env";
 import * as v from "valibot";

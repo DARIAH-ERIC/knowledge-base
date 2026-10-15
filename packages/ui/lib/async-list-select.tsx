@@ -3,7 +3,7 @@
 import { XMarkIcon } from "@heroicons/react/16/solid";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
+import { Fragment, type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import {
 	Button as AriaButton,
 	DialogTrigger as AriaDialogTrigger,
@@ -70,10 +70,10 @@ function renderDefaultOption(item: AsyncOption): ReactNode {
 	}
 
 	return (
-		<>
+		<Fragment>
 			<ListBoxLabel className="truncate">{item.name}</ListBoxLabel>
 			<ListBoxDescription className="truncate">{item.description}</ListBoxDescription>
-		</>
+		</Fragment>
 	);
 }
 
@@ -224,10 +224,10 @@ function AsyncListSelectInner<T extends AsyncOption>(
 							renderSelectedItem != null ? (
 								renderSelectedItem(item)
 							) : item.description != null && item.description !== "" ? (
-								<>
+								<Fragment>
 									<GridListLabel className="truncate">{item.name}</GridListLabel>
 									<GridListDescription className="truncate">{item.description}</GridListDescription>
-								</>
+								</Fragment>
 							) : (
 								<GridListLabel className="truncate">{item.name}</GridListLabel>
 							);

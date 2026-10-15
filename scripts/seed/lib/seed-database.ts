@@ -1,5 +1,3 @@
-// oxlint-disable oxc/no-map-spread
-
 import { groupBy, keyBy } from "@acdh-oeaw/lib";
 import { type Database, type Transaction, plainTextToRichText } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";

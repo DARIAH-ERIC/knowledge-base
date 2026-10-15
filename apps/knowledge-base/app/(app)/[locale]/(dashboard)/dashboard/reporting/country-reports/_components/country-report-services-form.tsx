@@ -162,7 +162,7 @@ function ServiceCard(props: Readonly<ServiceCardProps>): ReactNode {
 				<p className="text-sm font-medium text-fg">{service.name}</p>
 				<ActionForm action={deleteAction}>
 					{(isPending) => (
-						<>
+						<Fragment>
 							<input name="membershipId" type="hidden" value={service.membershipId} />
 							<input name="countryReportId" type="hidden" value={reportId} />
 							<Button
@@ -174,7 +174,7 @@ function ServiceCard(props: Readonly<ServiceCardProps>): ReactNode {
 							>
 								{t("Remove service")}
 							</Button>
-						</>
+						</Fragment>
 					)}
 				</ActionForm>
 			</div>

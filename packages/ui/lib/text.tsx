@@ -1,5 +1,3 @@
-/* eslint-disable @eslint-react/prefer-read-only-props */
-
 "use client";
 
 import cn from "clsx/lite";

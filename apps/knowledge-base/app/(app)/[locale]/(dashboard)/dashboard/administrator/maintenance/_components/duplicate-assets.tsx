@@ -108,7 +108,7 @@ export function DuplicateAssets({
 								)}
 							</Button>
 						</div>
-						<div className="grid grid-cols-[repeat(auto-fill,minmax(min(16rem,100%),1fr))] gap-3 mbs-4">
+						<div className="mbs-4 grid grid-cols-[repeat(auto-fill,minmax(min(16rem,100%),1fr))] gap-3">
 							{group.assets.map((asset) => (
 								<label
 									className="flex cursor-pointer gap-3 rounded-md border p-2 has-checked:border-accent"
@@ -132,7 +132,7 @@ export function DuplicateAssets({
 										src={asset.url}
 										storageKey={asset.key}
 									/>
-									<span className="min-inline-0 text-sm">
+									<span className="text-sm min-inline-0">
 										<span className="line-clamp-2 font-medium">{asset.label}</span>
 										<span className="block truncate text-xs text-muted-fg" title={asset.key}>
 											{asset.key}

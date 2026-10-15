@@ -978,6 +978,8 @@ export class WebsiteNewsPage {
 		galleryCaption?: string;
 		/** 1-based index of the item to move one place earlier, as the panel labels them. */
 		moveEarlier?: number;
+		/** Text to type at the end of an item's custom caption after the move, before Apply. */
+		editAfterMove?: { position: number; append: string };
 	}): Promise<void> {
 		await this.chooseInsert("Gallery");
 
@@ -1020,6 +1022,15 @@ export class WebsiteNewsPage {
 				.click();
 		}
 
+		if (options.editAfterMove != null) {
+			const textbox = block.getByRole("textbox", {
+				name: `Custom caption for image ${String(options.editAfterMove.position)}`,
+			});
+			await textbox.click();
+			await textbox.press("End");
+			await textbox.pressSequentially(options.editAfterMove.append);
+		}
+
 		await block.getByRole("button", { name: "Apply" }).click();
 	}
 
@@ -1032,6 +1043,7 @@ export class WebsiteNewsPage {
 		captions: Array<string>;
 		galleryCaption?: string;
 		moveEarlier?: number;
+		editAfterMove?: { position: number; append: string };
 	}): Promise<void> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
 		await this.page.getByRole("menuitem", { name: "Content" }).click();
@@ -1049,6 +1061,7 @@ export class WebsiteNewsPage {
 			captions: options.captions,
 			galleryCaption: options.galleryCaption,
 			moveEarlier: options.moveEarlier,
+			editAfterMove: options.editAfterMove,
 		});
 
 		/**

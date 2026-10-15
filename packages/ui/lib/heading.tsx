@@ -6,7 +6,6 @@ export interface HeadingProps extends ComponentProps<"h1" | "h2" | "h3" | "h4" |
 }
 
 export function Heading({ className, level = 1, ...props }: Readonly<HeadingProps>): ReactNode {
-	// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 	const Element: `h${typeof level}` = `h${level}`;
 
 	return (

@@ -266,6 +266,7 @@ function rewriteAssetKeys(value: unknown, keyMap: ReadonlyMap<string, string>): 
 			return rewritten;
 		});
 
+		// oxlint-disable-next-line typescript/no-unnecessary-condition -- `changed` is set inside a callback, which typescript does not see.
 		return changed ? next : value;
 	}
 
@@ -277,6 +278,7 @@ function rewriteAssetKeys(value: unknown, keyMap: ReadonlyMap<string, string>): 
 			return [key, rewritten] as const;
 		});
 
+		// oxlint-disable-next-line typescript/no-unnecessary-condition -- `changed` is set inside a callback, which typescript does not see.
 		return changed ? Object.fromEntries(entries) : value;
 	}
 

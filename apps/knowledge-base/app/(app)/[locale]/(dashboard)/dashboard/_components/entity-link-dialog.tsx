@@ -4,7 +4,7 @@ import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Button } from "@dariah-eric/ui/button";
 import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
 import { useExtracted } from "next-intl";
-import { type ComponentType, type ReactNode, useEffect, useState } from "react";
+import { type ComponentType, Fragment, type ReactNode, useEffect, useState } from "react";
 
 import {
 	type EntityOption,
@@ -104,7 +104,7 @@ export function EntityLinkDialog({
 	}
 
 	return (
-		<>
+		<Fragment>
 			{Trigger != null ? (
 				<Trigger
 					open={() => {
@@ -151,6 +151,6 @@ export function EntityLinkDialog({
 					</Button>
 				</ModalFooter>
 			</ModalContent>
-		</>
+		</Fragment>
 	);
 }

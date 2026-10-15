@@ -29,6 +29,7 @@ import {
 	Fragment,
 	type ReactNode,
 	useEffect,
+	useEffectEvent,
 	useRef,
 	useState,
 	useTransition,
@@ -187,21 +188,25 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	 * caller reached by searching) simply stays unselected; the author searches for its replacement
 	 * as they would anyway.
 	 *
-	 * Driven by an effect rather than by the trigger's click handler, because a controlled caller
-	 * opens the dialog by flipping `isOpen` and never goes through a trigger at all.
+	 * Driven by the `isOpen` transition rather than by the trigger's click handler, because a
+	 * controlled caller opens the dialog by flipping `isOpen` and never goes through a trigger at
+	 * all. The local state is reset during render; the fetch runs from an effect.
 	 */
-	useEffect(() => {
-		if (!isOpen) {
-			return;
+	const [wasOpen, setWasOpen] = useState(isOpen);
+	if (isOpen !== wasOpen) {
+		setWasOpen(isOpen);
+		if (isOpen) {
+			setActiveTab("select");
+			setSelectedPrefix(defaultPrefix);
+			setOffset(0);
+			setQuery("");
+			setAppliedQ("");
+			setSelectedKeys(new Set());
+			setSelectedAsset(null);
 		}
+	}
 
-		setActiveTab("select");
-		setSelectedPrefix(defaultPrefix);
-		setOffset(0);
-		setQuery("");
-		setAppliedQ("");
-		setSelectedKeys(new Set());
-		setSelectedAsset(null);
+	const onOpen = useEffectEvent(() => {
 		startFetching(async () => {
 			const [items, licenses] = await Promise.all([
 				fetchPage(0, "", defaultPrefix),
@@ -217,7 +222,12 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 				setSelectedAsset(preselected);
 			}
 		});
-		// oxlint-disable-next-line react-hooks/exhaustive-deps -- runs on the transition into open only.
+	});
+
+	useEffect(() => {
+		if (isOpen) {
+			onOpen();
+		}
 	}, [isOpen]);
 
 	function handleOpen() {
@@ -259,6 +269,17 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 
 	// Debounced search-as-you-type: fetch the first page whenever the trimmed
 	// query settles to a value different from what is currently applied.
+	const applyQuery = useEffectEvent((q: string) => {
+		setAppliedQ(q);
+		setSelectedKeys(new Set());
+		setSelectedAsset(null);
+		startFetching(async () => {
+			const items = await fetchPage(0, q, selectedPrefix);
+			setDisplayedAssets(items);
+			setOffset(0);
+		});
+	});
+
 	useEffect(() => {
 		if (!isOpen) {
 			return;
@@ -269,20 +290,13 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 			if (q === appliedQ) {
 				return;
 			}
-			setAppliedQ(q);
-			setSelectedKeys(new Set());
-			setSelectedAsset(null);
-			startFetching(async () => {
-				const items = await fetchPage(0, q, selectedPrefix);
-				setDisplayedAssets(items);
-				setOffset(0);
-			});
+			applyQuery(q);
 		}, 300);
 
 		return () => {
 			window.clearTimeout(handle);
 		};
-	}, [query, appliedQ, selectedPrefix, isOpen]);
+	}, [query, appliedQ, isOpen]);
 
 	function handlePrev() {
 		const newOffset: number = offset - mediaLibraryPageSize;

@@ -118,121 +118,119 @@ export function ArticleContributorsSection(
 	}
 
 	return (
-		<Fragment>
-			<div className="space-y-6 max-inline-3xl">
-				<div className="space-y-1">
-					<FormSectionTitle title={t("Contributors")} />
-				</div>
-
-				<ActionErrorAlert message={deleteError} />
-
-				{localContributors.length > 0 ? (
-					<Table aria-label="contributors" className="[--gutter:0] sm:[--gutter:0]">
-						<TableHeader>
-							<TableColumn isRowHeader={true}>{t("Person")}</TableColumn>
-							<TableColumn>{t("Role")}</TableColumn>
-							<TableColumn />
-						</TableHeader>
-						<TableBody items={localContributors}>
-							{(contributor) => (
-								<TableRow id={contributor.personId}>
-									<TableCell>{contributor.personName}</TableCell>
-									<TableCell>{formatRole(contributor.role)}</TableCell>
-									<TableCell className="text-end">
-										<Button
-											aria-label={t("Remove contributor")}
-											className="block-7 sm:block-7"
-											intent="plain"
-											onPress={() => {
-												setDeleteError(null);
-												startTransition(async () => {
-													const error = await runAction(
-														() => deleteAction(articleId, contributor.personId),
-														t("Could not remove contributor. Please try again."),
-													);
-													if (error != null) {
-														setDeleteError(error);
-														return;
-													}
-													setLocalContributors((prev) =>
-														prev.filter((c) => c.personId !== contributor.personId),
-													);
-												});
-											}}
-											size="sq-sm"
-										>
-											<TrashIcon className="block-4 inline-4" />
-										</Button>
-									</TableCell>
-								</TableRow>
-							)}
-						</TableBody>
-					</Table>
-				) : (
-					<p className="text-sm text-neutral-500">{t("No contributors.")}</p>
-				)}
-
-				<FormLayout variant="stacked">
-					<Form action={formAction} className="flex flex-col gap-y-6" state={state}>
-						<FormSection
-							description={t("Add a person as a contributor to this article.")}
-							title={t("Add contributor")}
-							variant="stacked"
-						>
-							<AsyncSelect
-								aria-label={t("Person")}
-								emptyMessage={t("No persons found.")}
-								fetchPage={fetchPersonOptionsPage}
-								initialItems={initialPersonItems}
-								initialTotal={initialPersonTotal}
-								isRequired={true}
-								label={t("Person")}
-								onSelect={(item) => {
-									setSelectedPerson(item);
-								}}
-								placeholder={t("No person selected")}
-								selectedItem={selectedPerson}
-							/>
-							<input name="personId" type="hidden" value={selectedPerson?.id ?? ""} />
-
-							<Select
-								isRequired={true}
-								onChange={(key) => {
-									setSelectedRole(key == null ? null : String(key));
-								}}
-								value={selectedRole}
-							>
-								<Label>{t("Role")}</Label>
-								<SelectTrigger />
-								<FieldError />
-								<SelectContent>
-									{articleContributorRolesEnum.map((role) => (
-										<SelectItem key={role} id={role}>
-											{formatRole(role)}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<input name="role" type="hidden" value={selectedRole ?? ""} />
-
-							<input name="articleId" type="hidden" value={articleId} />
-						</FormSection>
-
-						<Button className="self-start" isPending={isPending} type="submit">
-							{isPending ? (
-								<Fragment>
-									<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-									<span aria-hidden={true}>{t("Saving...")}</span>
-								</Fragment>
-							) : (
-								t("Add contributor")
-							)}
-						</Button>
-
-						<FormStatus className="self-start" state={state} />
-					</Form>
-				</FormLayout>
+		<div className="space-y-6 max-inline-3xl">
+			<div className="space-y-1">
+				<FormSectionTitle title={t("Contributors")} />
 			</div>
-		</Fragment>
+
+			<ActionErrorAlert message={deleteError} />
+
+			{localContributors.length > 0 ? (
+				<Table aria-label="contributors" className="[--gutter:0] sm:[--gutter:0]">
+					<TableHeader>
+						<TableColumn isRowHeader={true}>{t("Person")}</TableColumn>
+						<TableColumn>{t("Role")}</TableColumn>
+						<TableColumn />
+					</TableHeader>
+					<TableBody items={localContributors}>
+						{(contributor) => (
+							<TableRow id={contributor.personId}>
+								<TableCell>{contributor.personName}</TableCell>
+								<TableCell>{formatRole(contributor.role)}</TableCell>
+								<TableCell className="text-end">
+									<Button
+										aria-label={t("Remove contributor")}
+										className="block-7 sm:block-7"
+										intent="plain"
+										onPress={() => {
+											setDeleteError(null);
+											startTransition(async () => {
+												const error = await runAction(
+													() => deleteAction(articleId, contributor.personId),
+													t("Could not remove contributor. Please try again."),
+												);
+												if (error != null) {
+													setDeleteError(error);
+													return;
+												}
+												setLocalContributors((prev) =>
+													prev.filter((c) => c.personId !== contributor.personId),
+												);
+											});
+										}}
+										size="sq-sm"
+									>
+										<TrashIcon className="block-4 inline-4" />
+									</Button>
+								</TableCell>
+							</TableRow>
+						)}
+					</TableBody>
+				</Table>
+			) : (
+				<p className="text-sm text-neutral-500">{t("No contributors.")}</p>
+			)}
+
+			<FormLayout variant="stacked">
+				<Form action={formAction} className="flex flex-col gap-y-6" state={state}>
+					<FormSection
+						description={t("Add a person as a contributor to this article.")}
+						title={t("Add contributor")}
+						variant="stacked"
+					>
+						<AsyncSelect
+							aria-label={t("Person")}
+							emptyMessage={t("No persons found.")}
+							fetchPage={fetchPersonOptionsPage}
+							initialItems={initialPersonItems}
+							initialTotal={initialPersonTotal}
+							isRequired={true}
+							label={t("Person")}
+							onSelect={(item) => {
+								setSelectedPerson(item);
+							}}
+							placeholder={t("No person selected")}
+							selectedItem={selectedPerson}
+						/>
+						<input name="personId" type="hidden" value={selectedPerson?.id ?? ""} />
+
+						<Select
+							isRequired={true}
+							onChange={(key) => {
+								setSelectedRole(key == null ? null : String(key));
+							}}
+							value={selectedRole}
+						>
+							<Label>{t("Role")}</Label>
+							<SelectTrigger />
+							<FieldError />
+							<SelectContent>
+								{articleContributorRolesEnum.map((role) => (
+									<SelectItem key={role} id={role}>
+										{formatRole(role)}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<input name="role" type="hidden" value={selectedRole ?? ""} />
+
+						<input name="articleId" type="hidden" value={articleId} />
+					</FormSection>
+
+					<Button className="self-start" isPending={isPending} type="submit">
+						{isPending ? (
+							<Fragment>
+								<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+								<span aria-hidden={true}>{t("Saving...")}</span>
+							</Fragment>
+						) : (
+							t("Add contributor")
+						)}
+					</Button>
+
+					<FormStatus className="self-start" state={state} />
+				</Form>
+			</FormLayout>
+		</div>
 	);
 }

@@ -281,6 +281,7 @@ export type ZoteroItemType = Exclude<
  * @see {@link https://www.zotero.org/support/dev/web_api/v3/basics#searching}
  */
 function buildZoteroItemTypeFilter(): string {
+	// oxlint-disable-next-line typescript/no-unnecessary-condition -- stays correct when the list of excluded types changes.
 	if (excludedZoteroItemTypes.length === 1) {
 		return `-${excludedZoteroItemTypes[0]}`;
 	}

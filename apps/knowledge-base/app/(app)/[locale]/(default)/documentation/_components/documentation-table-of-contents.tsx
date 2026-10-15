@@ -28,7 +28,6 @@ function useCurrentHeadingId(headingIds: string): string | null {
 			.split("\n")
 			// A slug can begin with a digit ("2024-in-review") or carry a non-latin letter, neither of
 			// which is a valid bare `#id` selector — looking the anchor up by id sidesteps escaping it.
-			// oxlint-disable-next-line unicorn/prefer-query-selector
 			.map((id) => document.getElementById(id))
 			.filter((element) => element != null);
 

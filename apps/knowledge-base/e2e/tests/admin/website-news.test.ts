@@ -1206,6 +1206,50 @@ test.describe("website news admin", () => {
 		]);
 	});
 
+	/**
+	 * Each item row holds its own caption editor, which only reads its content when it mounts. A row
+	 * has to keep its identity when it moves, or the editors stay put while the items move under
+	 * them: each shows the caption of the item that used to be in its place, and typing into one
+	 * writes that stale caption onto the wrong item.
+	 */
+	test("should keep each gallery caption with its item when editing after a reorder", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const newsPage = createWebsiteNewsPage(test.info().workerIndex);
+		const title = `${newsPage.workerPrefix} Gallery Reorder Edit ${randomUUID()}`;
+		const firstCaption = `First gallery caption ${randomUUID()}`;
+		const secondCaption = `Second gallery caption ${randomUUID()}`;
+		const appended = ` edited ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item editing a gallery caption after a reorder");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+
+		await newsPage.addContentWithGallery({
+			above: `Above the gallery ${randomUUID()}`,
+			below: `Below the gallery ${randomUUID()}`,
+			layout: "Grid",
+			assetLabel: "E2E Test Asset",
+			captions: [firstCaption, secondCaption],
+			moveEarlier: 2,
+			/** The second item is now first; its caption is the one that gets the edit. */
+			editAfterMove: { position: 1, append: appended },
+		});
+		await newsPage.submitForm();
+
+		const contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		const captions = (contentBlocks[1]!.galleryItems as Array<{ caption: unknown }>).map((item) =>
+			JSON.stringify(item.caption),
+		);
+		expect(captions).toStrictEqual([
+			expect.stringContaining(`${secondCaption}${appended}`),
+			expect.stringContaining(firstCaption),
+		]);
+		expect(captions[1]).not.toContain(appended);
+	});
+
 	test("should save standalone and inline button links in a content block", async ({
 		page,
 		createWebsiteNewsPage,

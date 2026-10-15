@@ -54,7 +54,7 @@ export function CampaignQuestionsForm(props: Readonly<CampaignQuestionsFormProps
 
 							<ActionForm action={deleteWorkingGroupReportQuestionAction}>
 								{(isPending) => (
-									<>
+									<Fragment>
 										<input name="campaignId" type="hidden" value={campaignId} />
 										<input name="id" type="hidden" value={q.id} />
 										<Button
@@ -66,7 +66,7 @@ export function CampaignQuestionsForm(props: Readonly<CampaignQuestionsFormProps
 										>
 											{t("Remove")}
 										</Button>
-									</>
+									</Fragment>
 								)}
 							</ActionForm>
 						</li>

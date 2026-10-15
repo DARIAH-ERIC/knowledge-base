@@ -20,7 +20,7 @@ import {
 import { ListBulletIcon, MagnifyingGlassIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import cn from "clsx/lite";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useEffect } from "react";
+import { Fragment, type ReactNode, useEffect, useRef } from "react";
 
 import { useDashboardCommandPalette } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-command-palette-context";
 import { ColorSchemeToggle } from "@/app/(app)/[locale]/_components/color-scheme-toggle";
@@ -431,7 +431,13 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 	/** On mobile the sidebar is shown as a sheet at full width, however collapsed the desktop one is. */
 	const isCollapsed = state === "collapsed" && !isMobile;
 
+	/** Close the mobile sheet after navigating. */
+	const lastPathnameRef = useRef(pathname);
 	useEffect(() => {
+		if (lastPathnameRef.current === pathname) {
+			return;
+		}
+		lastPathnameRef.current = pathname;
 		setIsOpenOnMobile(false);
 	}, [pathname, setIsOpenOnMobile]);
 
@@ -449,35 +455,33 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 			<SidebarContent>
 				<SidebarSectionGroup className="pbe-4">
 					{!isMobile ? (
-						<Fragment>
-							<div className="px-4 pbs-2">
-								<Button
-									aria-label={t("Open quick search")}
-									className={cn(
-										"group",
-										state === "expanded" &&
-											"bg-bg sm:justify-between sm:inline-full dark:bg-secondary/50",
-									)}
-									intent={state === "expanded" ? "outline" : "plain"}
-									onPress={openCommandPalette}
-									size={state === "expanded" ? "md" : "sq-md"}
-								>
-									{state === "expanded" ? (
-										<Fragment>
-											<span className="flex items-center gap-x-2">
-												<MagnifyingGlassIcon className="block-5 inline-5 sm:block-4 sm:inline-4" />
-												<span className="truncate text-muted-fg group-hover:text-fg">
-													{t("Quick search...")}
-												</span>
+						<div className="px-4 pbs-2">
+							<Button
+								aria-label={t("Open quick search")}
+								className={cn(
+									"group",
+									state === "expanded" &&
+										"bg-bg sm:justify-between sm:inline-full dark:bg-secondary/50",
+								)}
+								intent={state === "expanded" ? "outline" : "plain"}
+								onPress={openCommandPalette}
+								size={state === "expanded" ? "md" : "sq-md"}
+							>
+								{state === "expanded" ? (
+									<Fragment>
+										<span className="flex items-center gap-x-2">
+											<MagnifyingGlassIcon className="block-5 inline-5 sm:block-4 sm:inline-4" />
+											<span className="truncate text-muted-fg group-hover:text-fg">
+												{t("Quick search...")}
 											</span>
-											<Keyboard>{"⌘+k"}</Keyboard>
-										</Fragment>
-									) : (
-										<MagnifyingGlassIcon />
-									)}
-								</Button>
-							</div>
-						</Fragment>
+										</span>
+										<Keyboard>{"⌘+k"}</Keyboard>
+									</Fragment>
+								) : (
+									<MagnifyingGlassIcon />
+								)}
+							</Button>
+						</div>
 					) : null}
 					<SidebarSection label={t("Overview")}>
 						<SidebarItem

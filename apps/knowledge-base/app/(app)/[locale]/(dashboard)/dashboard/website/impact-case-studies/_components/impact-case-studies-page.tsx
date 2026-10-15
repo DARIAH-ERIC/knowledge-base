@@ -82,10 +82,10 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 				title={t("Impact case studies")}
 				description={t("Manage all impact case studies in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/website/impact-case-studies/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

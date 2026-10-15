@@ -151,6 +151,7 @@ export function SelectMonth({ state }: Readonly<{ state: CalendarContextState }>
 			<SelectTrigger className="text-sm/5 inline-22 **:data-[slot=select-value]:inline-block **:data-[slot=select-value]:truncate sm:px-2.5 sm:py-1.5 sm:*:text-sm/5" />
 			<SelectContent className="min-inline-0">
 				{months.map((month, index) => (
+					// oxlint-disable-next-line react/no-array-index-key -- static list of months.
 					<SelectItem key={index} id={(index + 1).toString()} textValue={month}>
 						<SelectLabel>{month}</SelectLabel>
 					</SelectItem>
@@ -189,6 +190,7 @@ export function SelectYear({ state }: Readonly<{ state: CalendarContextState }>)
 			<SelectTrigger className="text-sm/5 sm:px-2.5 sm:py-1.5 sm:*:text-sm/5" />
 			<SelectContent>
 				{years.map((year, i) => (
+					// oxlint-disable-next-line react/no-array-index-key -- static list of years.
 					<SelectItem key={i} id={i} textValue={year.formatted}>
 						<SelectLabel>{year.formatted}</SelectLabel>
 					</SelectItem>

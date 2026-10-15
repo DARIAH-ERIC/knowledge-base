@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-
 import { createUrl } from "@acdh-oeaw/lib";
 import { test as base } from "@playwright/test";
 

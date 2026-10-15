@@ -1,3 +1,4 @@
+// oxlint-disable-next-line oxc/no-barrel-file -- deliberate entry point.
 export * from "./schema/audit-logs";
 export * from "./schema/assets";
 export * from "./schema/background-jobs";

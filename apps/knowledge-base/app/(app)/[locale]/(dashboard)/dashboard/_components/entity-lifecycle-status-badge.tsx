@@ -2,7 +2,7 @@
 
 import { Badge } from "@dariah-eric/ui/badge";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 interface EntityLifecycleStatusBadgeProps {
 	hasDraft: boolean;
@@ -32,5 +32,5 @@ export function EntityLifecycleStatusBadge(
 		return <Badge intent="success">{t("Published")}</Badge>;
 	}
 
-	return <Fragment />;
+	return null;
 }

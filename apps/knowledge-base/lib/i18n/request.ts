@@ -16,7 +16,6 @@ async function getLocale(params: GetRequestConfigParams): Promise<IntlLocale> {
 	 * default locale.
 	 */
 	try {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
 		const locale = await rootParams.locale();
 		return isValidLocale(locale) ? locale : routing.defaultLocale;
 	} catch {

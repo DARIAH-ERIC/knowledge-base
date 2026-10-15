@@ -61,8 +61,8 @@ const retry: RequestOptions["retry"] = {
 };
 
 export interface RorClient {
-	matchAffiliation(affiliation: string): Promise<RorMatch | null>;
-	getOrganization(rorId: string): Promise<RorOrganization | null>;
+	matchAffiliation: (affiliation: string) => Promise<RorMatch | null>;
+	getOrganization: (rorId: string) => Promise<RorOrganization | null>;
 }
 
 export function createRorClient(params: { baseUrl: string }): RorClient {

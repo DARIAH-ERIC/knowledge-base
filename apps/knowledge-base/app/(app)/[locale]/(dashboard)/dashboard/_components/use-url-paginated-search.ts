@@ -12,7 +12,9 @@ import {
 
 type UrlPaginatedFilters = Record<string, string>;
 
-interface UseUrlPaginatedSearchParams<TFilters extends UrlPaginatedFilters = Record<never, never>> {
+interface UseUrlPaginatedSearchParams<
+	TFilters extends UrlPaginatedFilters = Record<string, never>,
+> {
 	debounceMs?: number;
 	dir?: ListSortDirection;
 	filters?: TFilters;
@@ -21,7 +23,9 @@ interface UseUrlPaginatedSearchParams<TFilters extends UrlPaginatedFilters = Rec
 	sort?: string;
 }
 
-interface UseUrlPaginatedSearchResult<TFilters extends UrlPaginatedFilters = Record<never, never>> {
+interface UseUrlPaginatedSearchResult<
+	TFilters extends UrlPaginatedFilters = Record<string, never>,
+> {
 	dir: ListSortDirection | undefined;
 	filters: TFilters;
 	inputValue: string;
@@ -45,7 +49,7 @@ interface UrlPaginatedSearchState<TFilters extends UrlPaginatedFilters> {
 	sort?: string;
 }
 
-export function useUrlPaginatedSearch<TFilters extends UrlPaginatedFilters = Record<never, never>>(
+export function useUrlPaginatedSearch<TFilters extends UrlPaginatedFilters = Record<string, never>>(
 	params: Readonly<UseUrlPaginatedSearchParams<TFilters>>,
 ): UseUrlPaginatedSearchResult<TFilters> {
 	const { debounceMs = 300, dir, filters, page, q, sort } = params;

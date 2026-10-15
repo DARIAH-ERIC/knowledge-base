@@ -110,7 +110,7 @@ export const createContributionAction = createServerAction(
 					.then((rows) => rows[0]!);
 
 				await recordAuditEvent(tx, {
-					actorUserId: user?.id,
+					actorUserId: user.id,
 					action: "create",
 					subjectType: "contributions",
 					subjectId: row.id,

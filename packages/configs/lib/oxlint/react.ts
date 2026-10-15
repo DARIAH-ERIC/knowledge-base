@@ -102,7 +102,7 @@ const config = defineConfig({
 		"react/jsx-no-script-url": "warn",
 		"react/memo-dependencies": "error",
 		"react/no-namespace": "error",
-		"react/no-unstable-nested-components": "error",
+		"react/no-unstable-nested-components": ["error", { allowAsProps: true }],
 		"react/react-in-jsx-scope": "off",
 		"react/style-prop-object": "warn",
 
@@ -156,7 +156,7 @@ const config = defineConfig({
 		"react/prefer-function-component": "error",
 		"react/rule-suppression": "error",
 		"react/syntax": "error",
-		"react/todo": "error",
+		"react/todo": "off",
 		"react/unsupported-syntax": "error",
 
 		/**

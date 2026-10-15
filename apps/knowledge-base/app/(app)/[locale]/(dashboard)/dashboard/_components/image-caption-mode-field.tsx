@@ -8,7 +8,7 @@ import { isEmptyRichTextDocument } from "@dariah-eric/ui/rich-text";
 import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useState } from "react";
+import { Fragment, type ReactNode, useState } from "react";
 
 interface ImageCaptionModeFieldProps {
 	/** The caption stored on the asset, previewed while inheriting. */
@@ -96,10 +96,10 @@ export function ImageCaptionModeField(props: Readonly<ImageCaptionModeFieldProps
 			</div>
 
 			{name != null ? (
-				<>
+				<Fragment>
 					<input name={`${name}Mode`} type="hidden" value={captionMode} />
 					<input name={name} type="hidden" value={caption != null ? JSON.stringify(caption) : ""} />
-				</>
+				</Fragment>
 			) : null}
 		</div>
 	);

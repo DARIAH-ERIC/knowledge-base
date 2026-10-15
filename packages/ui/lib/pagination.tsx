@@ -302,7 +302,6 @@ export function PaginationGap(props: Readonly<PaginationGapProps>): ReactNode {
 			{...rest}
 			aria-hidden={true}
 		>
-			{/* eslint-disable-next-line react/jsx-no-literals */}
 			{children ?? <Fragment>&hellip;</Fragment>}
 		</li>
 	);

@@ -3,7 +3,7 @@
 import { RichTextEditor, RichTextEditorToolbarButton } from "@dariah-eric/ui/rich-text-editor";
 import type { JSONContent } from "@tiptap/core";
 import { ImageIcon } from "lucide-react";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { Fragment, type ReactNode, useCallback, useMemo, useState } from "react";
 
 import { BlockAssetMetadata } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/block-asset-metadata";
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
@@ -38,9 +38,7 @@ export function RichTextContentBlocksField({
 				block.type === "callout",
 		) ?? [];
 	const initialContent = mergeBlocksToDocument(mergeableBlocks);
-	const [editorContent, setEditorContent] = useState<JSONContent>(
-		initialContent ?? { type: "doc", content: [] },
-	);
+	const [editorContent, setEditorContent] = useState<JSONContent>(initialContent);
 	const blocks = useMemo(() => splitDocumentToBlocks(editorContent), [editorContent]);
 	const renderImagePicker = useCallback(
 		(insert: (key: string, url: string) => void) => (
@@ -89,7 +87,7 @@ export function RichTextContentBlocksField({
 	);
 
 	return (
-		<>
+		<Fragment>
 			<RichTextEditor
 				aria-label={ariaLabel}
 				blocks={["callout", "leadIn", "buttonLink", "placeholderValue"]}
@@ -101,12 +99,13 @@ export function RichTextContentBlocksField({
 			/>
 			{blocks.map((block, idx) => (
 				<input
+					// oxlint-disable-next-line react/no-array-index-key -- stateless hidden inputs named by position.
 					key={idx}
 					name={`${name}ContentBlocks.${String(idx)}`}
 					type="hidden"
 					value={JSON.stringify(block)}
 				/>
 			))}
-		</>
+		</Fragment>
 	);
 }

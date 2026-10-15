@@ -585,7 +585,7 @@ export function getEvents(baseUrl: string): Promise<Array<WP_Event>> {
 		searchParams: createUrlSearchParams({ per_page: 100, start_date: "2000-01-01" }),
 	});
 
-	// oxlint-disable-next-line typescript/no-unsafe-member-access, typescript/no-unsafe-type-assertion
+	// oxlint-disable-next-line typescript/no-unsafe-member-access
 	return getAll(url, "x-tec-totalpages", (response) => response.events as Array<WP_Event>);
 }
 

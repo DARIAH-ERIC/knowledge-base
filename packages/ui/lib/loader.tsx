@@ -91,10 +91,8 @@ export function Loader(props: Readonly<LoaderProps>): ReactNode {
 
 	return (
 		<ProgressBar
-			// eslint-disable-next-line @eslint-react/prefer-destructuring-assignment
 			aria-label={props["aria-label"] ?? t("Pending...")}
 			data-slot="loader"
-			// eslint-disable-next-line @eslint-react/prefer-destructuring-assignment
 			formatOptions={props.formatOptions}
 			isIndeterminate={isIndeterminate}
 		>

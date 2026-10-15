@@ -1,5 +1,3 @@
-// oxlint-disable jsx-a11y/iframe-has-title
-
 "use client";
 
 import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
@@ -408,6 +406,7 @@ export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewP
 							const number = index + 1;
 
 							return (
+								// oxlint-disable-next-line react/no-array-index-key -- a footnote is its position in the document.
 								<li id={`fn${String(number)}`} key={index}>
 									{/* Inline: the backlink belongs at the end of the note's last line, not under it. */}
 									{note != null ? <InlineRichTextRenderer content={note} isInline={true} /> : null}
@@ -521,6 +520,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 							allowFullScreen={true}
 							className="block-full inline-full"
+							// oxlint-disable-next-line react/iframe-missing-sandbox -- video embeds need both allow-scripts and allow-same-origin.
 							sandbox="allow-scripts allow-same-origin allow-presentation"
 							src={embedUrl}
 							title={getEmbedTitle(title, url, embedUrl)}
@@ -564,6 +564,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							const { caption } = resolveGalleryItemCaption(item);
 
 							return (
+								// oxlint-disable-next-line react/no-array-index-key -- read-only render; gallery items have no identity of their own.
 								<li key={idx} className="flex items-center">
 									<img
 										alt={toPlainText(caption)}
@@ -587,6 +588,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 								// The slide is a cap, not a fixed width: it takes the image's natural width up
 								// to `min(20rem, 80vw)`, so a narrow source makes a narrow slide rather than
 								// being stretched across an oversized one.
+								// oxlint-disable-next-line react/no-array-index-key -- read-only render; gallery items have no identity of their own.
 								<figure key={idx} className="shrink-0 snap-start max-inline-[min(20rem,80vw)]">
 									<img
 										alt={toPlainText(caption)}
@@ -620,6 +622,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 							const { caption } = resolveGalleryItemCaption(item);
 
 							return (
+								// oxlint-disable-next-line react/no-array-index-key -- read-only render; gallery items have no identity of their own.
 								<figure key={idx}>
 									{/* Same rule as the `image` block: drawn at its natural width inside the track
 									    and centred, never upscaled to fill — imgproxy does not enlarge, so a source
@@ -686,6 +689,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 						<div className="flex flex-wrap gap-2">
 							{ctas.map((cta, idx) => (
 								<a
+									// oxlint-disable-next-line react/no-array-index-key -- read-only render of the block's CTAs.
 									key={idx}
 									className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-fg"
 									href={cta.url}

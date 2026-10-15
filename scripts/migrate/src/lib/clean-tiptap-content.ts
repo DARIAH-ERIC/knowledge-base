@@ -1,4 +1,3 @@
-import { normalizeRichTextDocument } from "@dariah-eric/database/rich-text-normalize";
 import type { JSONContent } from "@tiptap/core";
 
 /**
@@ -10,7 +9,7 @@ import type { JSONContent } from "@tiptap/core";
  * mutated.
  */
 
-export { normalizeRichTextDocument as cleanTiptapDoc };
+export { normalizeRichTextDocument as cleanTiptapDoc } from "@dariah-eric/database/rich-text-normalize";
 
 export interface OverExtendedLink {
 	text: string;

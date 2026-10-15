@@ -65,7 +65,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
 	render() {
-		const Example = () => {
+		function Example() {
 			const [value, setValue] = useState<Array<string>>([]);
 
 			return (
@@ -86,7 +86,7 @@ export const Default: Story = {
 					</p>
 				</div>
 			);
-		};
+		}
 
 		return <Example />;
 	},
@@ -94,7 +94,7 @@ export const Default: Story = {
 
 export const WithDescriptions: Story = {
 	render() {
-		const Example = () => {
+		function Example() {
 			const [value, setValue] = useState<Array<string>>([]);
 
 			return (
@@ -112,7 +112,7 @@ export const WithDescriptions: Story = {
 					/>
 				</div>
 			);
-		};
+		}
 
 		return <Example />;
 	},
@@ -120,7 +120,7 @@ export const WithDescriptions: Story = {
 
 export const PreSelected: Story = {
 	render() {
-		const Example = () => {
+		function Example() {
 			const [value, setValue] = useState<Array<string>>(["t-2", "t-5", "t-9"]);
 
 			return (
@@ -137,7 +137,7 @@ export const PreSelected: Story = {
 					/>
 				</div>
 			);
-		};
+		}
 
 		return <Example />;
 	},

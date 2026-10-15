@@ -68,7 +68,6 @@ export function Table(props: Readonly<TableProps>): ReactNode {
 	} = props;
 
 	return (
-		// eslint-disable-next-line @eslint-react/no-unstable-context-value
 		<TableContext value={{ allowResize, bleed, grid, striped }}>
 			<div className="flow-root">
 				<div

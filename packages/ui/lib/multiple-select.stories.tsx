@@ -94,7 +94,7 @@ export const WithDescription: Story = {
 export const Controlled: Story = {
 	args: {},
 	render(props) {
-		const ControlledExample = () => {
+		function ControlledExample() {
 			const [value, setValue] = useState<Array<string | number>>(["react", "svelte"]);
 
 			return (
@@ -118,7 +118,7 @@ export const Controlled: Story = {
 					</p>
 				</div>
 			);
-		};
+		}
 
 		return <ControlledExample />;
 	},

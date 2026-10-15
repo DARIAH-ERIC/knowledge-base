@@ -218,7 +218,6 @@ async function getAdjacentEvents(db: Database | Transaction, params: GetAdjacent
 		},
 	} as const;
 
-	// oxlint-disable-next-line unicorn/consistent-function-scoping
 	function serializeAdjacentEvent(item: {
 		id: schema.Event["id"];
 		title: schema.Event["title"];

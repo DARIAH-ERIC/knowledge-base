@@ -287,7 +287,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 				title={t("Person relations")}
 				description={t("All person-to-organisation relations in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<Button
 							className="shrink-0 whitespace-pre"
@@ -297,7 +297,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 							<PlusIcon className="me-2 block-4 inline-4" />
 							{t("Add relation")}
 						</Button>
-					</>
+					</Fragment>
 				}
 			/>
 

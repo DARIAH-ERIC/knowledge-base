@@ -18,7 +18,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
 	const { session, user } = await getCurrentSession();
 
-	if (session == null || user == null) {
+	if (session == null) {
 		return new NextResponse(null, { status: 401 });
 	}
 

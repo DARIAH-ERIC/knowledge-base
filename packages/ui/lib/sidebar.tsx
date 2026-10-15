@@ -31,6 +31,7 @@ import {
 	Separator as AriaSeparator,
 	type SeparatorProps as AriaSeparatorProps,
 	Text as AriaText,
+	TextContext as AriaTextContext,
 	Tree as AriaTree,
 	TreeItem as AriaTreeItem,
 	TreeItemContent as AriaTreeItemContent,
@@ -112,7 +113,6 @@ export function SidebarProvider(props: Readonly<SidebarProviderProps>): ReactNod
 				setInternalOpenState(openState);
 			}
 
-			// eslint-disable-next-line unicorn/no-document-cookie, @typescript-eslint/restrict-template-expressions
 			document.cookie = `${SIDEBAR_COOKIE_NAME}=${String(openState)}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
 		},
 		[setOpenProp, open],
@@ -246,7 +246,12 @@ export function Sidebar(props: Readonly<SidebarProps>): ReactNode {
 					onOpenChange={setIsOpenOnMobile}
 					side={side}
 				>
-					{children}
+					{/*
+					    The sheet is a dialog, whose text context only offers a `description` slot. The
+					    sidebar's own text (e.g. `SidebarLabel`'s `slot="label"`) is not dialog text, so it
+					    must not inherit that context - react-aria throws on an unknown slot.
+					*/}
+					<AriaTextContext.Provider value={null}>{children}</AriaTextContext.Provider>
 				</SheetContent>
 			</Fragment>
 		);
