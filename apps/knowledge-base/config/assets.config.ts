@@ -27,7 +27,7 @@ export const documentMimeTypes = [
 
 export const mediaLibraryPageSize = 20;
 
-/** Must be less than `serverActions.bodySizeLimit` in `next.config.ts`. */
+/** Must be less than `serverActions.bodySizeLimit` and `proxyClientMaxBodySize` in `next.config.ts`. */
 export const imageSizeLimit = 20 * 1024 * 1024; /** 20 MB */
 
 /**
