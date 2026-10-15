@@ -36,7 +36,10 @@ const validate = define({
 		),
 		NEXT_PUBLIC_WEBSITE_SENTRY_DSN: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		NEXT_PUBLIC_WEBSITE_SENTRY_ORG: v.optional(v.pipe(v.string(), v.nonEmpty())),
-		NEXT_PUBLIC_WEBSITE_SENTRY_PII: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
+		NEXT_PUBLIC_WEBSITE_SENTRY_DATA_COLLECTION: v.optional(
+			v.picklist(["disabled", "enabled"]),
+			"disabled",
+		),
 		NEXT_PUBLIC_WEBSITE_SENTRY_PROJECT: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		NEXT_PUBLIC_WEBSITE_SERVICE_ID: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 	}),
@@ -112,7 +115,8 @@ export const env = validate({
 		NEXT_PUBLIC_WEBSITE_MATOMO_ID: process.env.NEXT_PUBLIC_WEBSITE_MATOMO_ID,
 		NEXT_PUBLIC_WEBSITE_SENTRY_DSN: process.env.NEXT_PUBLIC_WEBSITE_SENTRY_DSN,
 		NEXT_PUBLIC_WEBSITE_SENTRY_ORG: process.env.NEXT_PUBLIC_WEBSITE_SENTRY_ORG,
-		NEXT_PUBLIC_WEBSITE_SENTRY_PII: process.env.NEXT_PUBLIC_WEBSITE_SENTRY_PII,
+		NEXT_PUBLIC_WEBSITE_SENTRY_DATA_COLLECTION:
+			process.env.NEXT_PUBLIC_WEBSITE_SENTRY_DATA_COLLECTION,
 		NEXT_PUBLIC_WEBSITE_SENTRY_PROJECT: process.env.NEXT_PUBLIC_WEBSITE_SENTRY_PROJECT,
 		NEXT_PUBLIC_WEBSITE_SERVICE_ID: process.env.NEXT_PUBLIC_WEBSITE_SERVICE_ID,
 		NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME:

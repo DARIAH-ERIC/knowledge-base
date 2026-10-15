@@ -4,19 +4,19 @@
 import * as Sentry from "@sentry/nextjs";
 
 import { env } from "@/config/env.config";
+import { getDataCollection } from "@/config/sentry.config";
 
 Sentry.init({
 	dsn: env.NEXT_PUBLIC_WEBSITE_SENTRY_DSN,
-	enableLogs: true,
 	integrations: [Sentry.replayIntegration()],
 	replaysOnErrorSampleRate: 1,
 	replaysSessionSampleRate: 0.1,
 	/**
-	 * Enable sending personally identifiable information.
+	 * Only collect personally identifiable information when explicitly enabled.
 	 *
 	 * @see {@link https://docs.sentry.io/platforms/javascript/guides/nextjs/data-management/data-collected/}
 	 */
-	sendDefaultPii: env.NEXT_PUBLIC_WEBSITE_SENTRY_PII === "enabled",
+	dataCollection: getDataCollection(env.NEXT_PUBLIC_WEBSITE_SENTRY_DATA_COLLECTION),
 	tracesSampleRate: 0.1,
 });
 

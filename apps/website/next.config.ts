@@ -1,5 +1,5 @@
 import { optimizeReactAriaLocales } from "@dariah-eric/configs/nextjs/react-aria-optimize-locales";
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs/config";
 import type { NextConfig as Config } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -71,13 +71,13 @@ const plugins: Array<(config: Config) => Config> = [
 		return withSentryConfig(config, {
 			org: env.NEXT_PUBLIC_WEBSITE_SENTRY_ORG,
 			project: env.NEXT_PUBLIC_WEBSITE_SENTRY_PROJECT,
+			reactComponentAnnotation: {
+				enabled: true,
+			},
 			silent: env.CI !== true,
 			/** Route browser requests to `sentry` through a `next.js` rewrite to circumvent ad-blockers. */
 			tunnelRoute: "/monitoring",
 			webpack: {
-				reactComponentAnnotation: {
-					enabled: true,
-				},
 				treeshake: {
 					removeDebugLogging: true,
 				},

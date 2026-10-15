@@ -5,21 +5,26 @@ import { ParentBasedSampler, SamplingDecision } from "@opentelemetry/sdk-trace-b
 import * as Sentry from "@sentry/node";
 
 import { env } from "~/config/env.config";
+import { getDataCollection } from "~/config/sentry.config";
 
 Sentry.init({
 	dsn: env.API_SENTRY_DSN,
 	/**
 	 * We use Sentry for error reporting only, not tracing. OpenTelemetry (below) owns the global
-	 * tracer provider and exports traces to our own collector, so Sentry must not set up its own
-	 * OpenTelemetry integration (which would register a competing provider).
+	 * tracer provider and exports traces to our own collector, so Sentry must not register a
+	 * competing provider, and keeps tracing disabled (no `tracesSampleRate`).
+	 * `openTelemetryIntegration` links captured errors to the active OpenTelemetry trace.
+	 *
+	 * @see {@link https://docs.sentry.io/platforms/javascript/guides/node/migration/v10-to-v11/}
 	 */
-	skipOpenTelemetrySetup: true,
+	enableOpenTelemetrySetup: false,
+	integrations: [Sentry.openTelemetryIntegration()],
 	/**
-	 * Enable sending personally identifiable information.
+	 * Only collect personally identifiable information when explicitly enabled.
 	 *
 	 * @see {@link https://docs.sentry.io/platforms/javascript/guides/node/data-management/data-collected/}
 	 */
-	sendDefaultPii: env.API_SENTRY_PII === "enabled",
+	dataCollection: getDataCollection(env.API_SENTRY_DATA_COLLECTION),
 });
 
 /**
