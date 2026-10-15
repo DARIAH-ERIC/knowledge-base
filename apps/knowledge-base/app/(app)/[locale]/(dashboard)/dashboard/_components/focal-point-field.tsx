@@ -1,11 +1,6 @@
 "use client";
 
-import {
-	type CropFrame,
-	type ImageVariantAspectRatio,
-	getCropFrame,
-	imageVariantAspectRatios,
-} from "@dariah-eric/images/crop";
+import { type CropFrame, getCropFrame, getCropOverlap } from "@dariah-eric/images/crop";
 import { Button } from "@dariah-eric/ui/button";
 import { descriptionStyles, labelStyles } from "@dariah-eric/ui/field";
 import { useExtracted } from "next-intl";
@@ -27,23 +22,31 @@ import {
 	centreFocalPoint,
 	clampFocalPoint,
 	formatFocalPointInput,
+	toObjectPosition,
 	toPercent,
 } from "@/lib/focal-point";
 
 /**
- * The crops to preview: exactly the ratios the api will cut, rather than the website's layouts.
- * Every slot on the website snaps to one of these, so this is what it can show — without the
- * knowledge base having to know which component uses which.
+ * Generic shapes spanning the range a featured image is cropped to — not one per slot of the
+ * website, which would tie this to its layouts. The extremes matter most, since they cut the most
+ * and so bound what stays visible everywhere: a square, for portraits and tiles, and 8:3, close to
+ * the desktop page header (1652:620). Between them, 4:3 is the mobile page header, and 16:9 the
+ * link preview the api crops for `og:image`.
  */
-const cropAspectRatios = Object.entries(imageVariantAspectRatios) as Array<
-	[ImageVariantAspectRatio, number]
->;
+const previewCrops = [
+	{ id: "1:1", aspectRatio: 1 },
+	{ id: "4:3", aspectRatio: 4 / 3 },
+	{ id: "16:9", aspectRatio: 16 / 9 },
+	{ id: "8:3", aspectRatio: 8 / 3 },
+] as const;
 
-/**
- * Outlined on the image until the editor picks another: the banner, which cuts the most from the
- * landscape photos featured images usually are, so it is the crop most likely to lose something.
- */
-const defaultOutlinedCrop: ImageVariantAspectRatio = "21x9";
+type PreviewCropId = (typeof previewCrops)[number]["id"];
+
+/** Which crop the image is outlined with: one of them, or what all of them keep. */
+type OutlinedCrop = PreviewCropId | "all";
+
+/** The safe area first: where text, logos and faces stay visible on every page. */
+const defaultOutlinedCrop: OutlinedCrop = "all";
 
 /** Arrow keys move the point by this much, or by a tenth of it with shift held. */
 const keyboardStep = 0.05;
@@ -70,19 +73,24 @@ export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNod
 	const [point, setPoint] = useState<FocalPoint | null>(defaultValue);
 	/** Unknown until the image has loaded, and every crop frame depends on it. */
 	const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
-	const [outlinedCrop, setOutlinedCrop] = useState<ImageVariantAspectRatio | null>(
-		defaultOutlinedCrop,
-	);
+	const [outlinedCrop, setOutlinedCrop] = useState<OutlinedCrop | null>(defaultOutlinedCrop);
 
 	const current = point ?? centreFocalPoint;
 
-	function getFrame(cropAspectRatio: number): CropFrame | null {
-		if (imageAspectRatio == null) {
-			return null;
-		}
-
-		return getCropFrame({ cropAspectRatio, focalPoint: current, imageAspectRatio });
-	}
+	const frames =
+		imageAspectRatio != null
+			? previewCrops.map((crop) => {
+					return {
+						id: crop.id,
+						frame: getCropFrame({
+							cropAspectRatio: crop.aspectRatio,
+							focalPoint: current,
+							imageAspectRatio,
+						}),
+					};
+				})
+			: null;
+	const overlap = frames != null ? getCropOverlap(frames.map(({ frame }) => frame)) : null;
 
 	function handleImageLoad(event: SyntheticEvent<HTMLImageElement>) {
 		const image = event.currentTarget;
@@ -147,8 +155,17 @@ export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNod
 		y: String(Math.round(current.y * 100)),
 	});
 
-	const outlinedFrame =
-		outlinedCrop != null ? getFrame(imageVariantAspectRatios[outlinedCrop]) : null;
+	/** The part left undimmed, and the crops drawn as dashed outlines around it. */
+	const highlightedFrame =
+		outlinedCrop === "all"
+			? overlap
+			: (frames?.find((entry) => entry.id === outlinedCrop)?.frame ?? null);
+	const dashedFrames = outlinedCrop === "all" && frames != null ? frames : [];
+	/** The overlap's own shape, in pixels rather than fractions, for its thumbnail. */
+	const overlapAspectRatio =
+		overlap != null && imageAspectRatio != null && overlap.height > 0
+			? (overlap.width * imageAspectRatio) / overlap.height
+			: 1;
 
 	return (
 		<div className="flex flex-col gap-y-3">
@@ -194,16 +211,23 @@ export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNod
 						onLoad={handleImageLoad}
 						src={src}
 					/>
-					{outlinedFrame != null ? (
-						/* Everything the crop cuts off is dimmed by the frame's own shadow, clipped to the
+					{highlightedFrame != null ? (
+						/* Everything cut off is dimmed by the highlighted frame's own shadow, clipped to the
 						   image, so the part that stays reads as a window onto it. */
 						<span
 							aria-hidden={true}
 							className="pointer-events-none absolute inset-0 overflow-hidden rounded-sm"
 						>
+							{dashedFrames.map(({ id, frame }) => (
+								<span
+									key={id}
+									className="absolute border border-dashed border-white/70"
+									style={toFrameBox(frame)}
+								/>
+							))}
 							<span
 								className="absolute shadow-[0_0_0_9999px_rgb(0_0_0/0.5)] outline-2 -outline-offset-1 outline-white"
-								style={toFrameBox(outlinedFrame)}
+								style={toFrameBox(highlightedFrame)}
 							/>
 						</span>
 					) : null}
@@ -232,60 +256,84 @@ export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNod
 			</div>
 
 			{/* The thumbnails double as the switch for which crop is outlined on the image above: they
-			    show every crop at once, the outline shows what each one leaves out. */}
+			    show every crop at once, the outline shows what each one leaves out. Each grows with its
+			    shape, so they all come out the same height. */}
 			<ToggleButtonGroup
 				aria-label={t("Crop outlined on the image")}
-				className="grid grid-cols-[1fr_1.5fr_1.78fr_2.33fr] items-end gap-2"
+				className="flex flex-row items-end gap-2"
 				onSelectionChange={(keys) => {
-					const [crop] = [...keys] as Array<ImageVariantAspectRatio>;
+					const [crop] = [...keys] as Array<OutlinedCrop>;
 					setOutlinedCrop(crop ?? null);
 				}}
 				selectedKeys={outlinedCrop != null ? [outlinedCrop] : []}
 				selectionMode="single"
 			>
-				{cropAspectRatios.map(([crop, cropAspectRatio]) => {
-					const frame = getFrame(cropAspectRatio);
-
-					return (
-						<ToggleButton
-							key={crop}
-							className={({ isFocusVisible, isHovered, isSelected }) =>
-								twJoin(
-									"flex cursor-default flex-col gap-y-1 rounded-sm text-xs text-muted-fg outline-2 outline-offset-2 outline-transparent",
-									isHovered && "text-fg",
-									isSelected && "font-medium text-fg",
-									isFocusVisible && "outline-focus-outline",
-								)
-							}
-							id={crop}
-						>
-							{({ isSelected }) => (
-								<>
-									<span
-										className={twJoin(
-											"relative block overflow-hidden rounded-sm bg-muted",
-											isSelected && "ring-2 ring-fg",
-										)}
-										style={{ aspectRatio: cropAspectRatio }}
-									>
-										{frame != null ? (
-											<img
-												alt=""
-												className="absolute"
-												draggable={false}
-												src={src}
-												style={toCroppedImageBox(frame)}
-											/>
-										) : null}
-									</span>
-									<span className="text-center">{crop.replace("x", ":")}</span>
-								</>
-							)}
-						</ToggleButton>
-					);
-				})}
+				{previewCrops.map((crop) => (
+					<CropThumbnail key={crop.id} aspectRatio={crop.aspectRatio} id={crop.id} label={crop.id}>
+						{/* Cropped by the browser exactly as the website crops it. */}
+						<img
+							alt=""
+							className="object-cover block-full inline-full"
+							draggable={false}
+							src={src}
+							style={{ objectPosition: toObjectPosition(current) }}
+						/>
+					</CropThumbnail>
+				))}
+				<CropThumbnail aspectRatio={overlapAspectRatio} id="all" label={t("All crops")}>
+					{overlap != null ? (
+						<img
+							alt=""
+							className="absolute"
+							draggable={false}
+							src={src}
+							style={toCroppedImageBox(overlap)}
+						/>
+					) : null}
+				</CropThumbnail>
 			</ToggleButtonGroup>
 		</div>
+	);
+}
+
+interface CropThumbnailProps {
+	aspectRatio: number;
+	children: ReactNode;
+	id: OutlinedCrop;
+	label: string;
+}
+
+function CropThumbnail(props: Readonly<CropThumbnailProps>): ReactNode {
+	const { aspectRatio, children, id, label } = props;
+
+	return (
+		<ToggleButton
+			className={({ isFocusVisible, isHovered, isSelected }) =>
+				twJoin(
+					"flex basis-0 cursor-default flex-col gap-y-1 rounded-sm text-xs text-muted-fg outline-2 outline-offset-2 outline-transparent min-inline-0",
+					isHovered && "text-fg",
+					isSelected && "font-medium text-fg",
+					isFocusVisible && "outline-focus-outline",
+				)
+			}
+			id={id}
+			style={{ flexGrow: aspectRatio }}
+		>
+			{({ isSelected }) => (
+				<>
+					<span
+						className={twJoin(
+							"relative block overflow-hidden rounded-sm bg-muted",
+							isSelected && "ring-2 ring-fg",
+						)}
+						style={{ aspectRatio }}
+					>
+						{children}
+					</span>
+					<span className="truncate text-center">{label}</span>
+				</>
+			)}
+		</ToggleButton>
 	);
 }
 
@@ -300,9 +348,8 @@ function toFrameBox(frame: CropFrame): CSSProperties {
 }
 
 /**
- * Scales and shifts the whole image inside a box the shape of the crop, so the box shows exactly
- * the frame. Not `object-position`, which places the crop differently from imgproxy (see
- * `getCropFrame`).
+ * Scales and shifts the whole image inside a box the shape of a frame, so the box shows exactly
+ * that part. For a frame no single `object-position` describes, like the overlap of all crops.
  */
 function toCroppedImageBox(frame: CropFrame): CSSProperties {
 	return {

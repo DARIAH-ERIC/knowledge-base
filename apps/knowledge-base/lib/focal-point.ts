@@ -37,6 +37,16 @@ export function toPercent(fraction: number): string {
 }
 
 /**
+ * The css `object-position` that crops an `object-fit: cover` image around {@link FocalPoint} — the
+ * website's own rule, which `getCropFrame` describes and the api's crops follow.
+ */
+export function toObjectPosition(point: FocalPoint | null | undefined): string {
+	const { x, y } = point ?? centreFocalPoint;
+
+	return `${toPercent(x)} ${toPercent(y)}`;
+}
+
+/**
  * How a focal point travels in a form: one hidden input holding `"x,y"`, or `"none"` to clear it. A
  * single sentinel value rather than an empty input, because `getFormDataValues` drops empty inputs
  * — an emptied field would be indistinguishable from one the form never rendered.

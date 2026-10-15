@@ -2301,6 +2301,10 @@ msgstr "Reset to centre"
 msgid "XIaDY5"
 msgstr "Crop outlined on the image"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/focal-point-field.tsx
+msgid "Aj-8Pj"
+msgstr "All crops"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/image-caption-mode-field.tsx
 msgid "ZPLjxQ"
 msgstr "Caption behavior"

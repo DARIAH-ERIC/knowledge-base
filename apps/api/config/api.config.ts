@@ -31,5 +31,23 @@ export const imageVariantVersion = "v1";
  */
 export const imageVariantWidths = [320, 480, 640, 960, 1280, 1600, 2048, 2560, 3200, 3840] as const;
 
-/** Shared with the knowledge base, which previews these crops. */
-export { type ImageVariantAspectRatio, imageVariantAspectRatios } from "@dariah-eric/images/crop";
+/**
+ * The aspect ratios the variant endpoint will crop to, as `width / height`.
+ *
+ * Deliberately a small set the layouts snap to, rather than one entry per slot. The consuming
+ * website currently renders ten distinct ratios, all of them arrived at by fitting a box and
+ * letting `object-cover` absorb the difference — reproducing that here would move the same
+ * arbitrariness onto the server and multiply the cache surface for no gain.
+ *
+ * Omitting the ratio is a first-class mode, not a fallback: it scales to width and does not crop,
+ * which is what a letterboxed slot (`object-contain`) and a "view full size" link both need.
+ */
+export const imageVariantAspectRatios = {
+	"1x1": 1,
+	"3x2": 3 / 2,
+	"16x9": 16 / 9,
+	/** The banner ratio the wide card and hero slots (~2.15–2.23) snap to. */
+	"21x9": 21 / 9,
+} as const;
+
+export type ImageVariantAspectRatio = keyof typeof imageVariantAspectRatios;
