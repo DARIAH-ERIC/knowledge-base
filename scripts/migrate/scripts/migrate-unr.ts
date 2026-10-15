@@ -1566,8 +1566,9 @@ async function main() {
 
 	/**
 	 * Migrates reports from unr to knowledge base. For each report in unr: - Creates a country report
+	 *
 	 * - Updates the mapping between unr reports and kb country reports - Creates reporting campaign
-	 * country threshold - For each comment in a report: - Creates report screen key comment
+	 *   country threshold - For each comment in a report: - Creates report screen key comment
 	 */
 
 	log.info("Migrating reports...");
@@ -1863,9 +1864,10 @@ async function main() {
 	/**
 	 * Migrates project from unr to knowledge base. Projects are grouped by either acronym or title
 	 * For each group: - Creates an entity in the entity table - Creates a project - For each funder:
+	 *
 	 * - Creates organisational unit of type institution - Creates a relation between the funding unit
-	 * and the project - For each group item (project funding leverage): - Creates a country report
-	 * project contribution
+	 *   and the project - For each group item (project funding leverage): - Creates a country report
+	 *   project contribution
 	 */
 
 	log.info("Migrating projects...");
