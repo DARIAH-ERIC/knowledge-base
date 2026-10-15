@@ -54,3 +54,44 @@ export function toObjectPosition(point: FocalPoint | null | undefined): string {
 export function formatFocalPointInput(point: FocalPoint | null): string {
 	return point != null ? `${String(point.x)},${String(point.y)}` : "none";
 }
+
+/** A shape an image is cropped to, named by its ratio. */
+export interface PreviewCrop {
+	id: string;
+	aspectRatio: number;
+}
+
+/**
+ * Generic shapes spanning the range the website crops a photo to — not one per slot, which would
+ * tie this to its layouts. The extremes matter most, since they cut the most and so bound what
+ * stays visible everywhere: 4:3, the mobile page header and narrowest card, and 8:3, close to the
+ * desktop page header (1652:620). 16:9 is the link preview the api crops for `og:image`. Never a
+ * square: no photo is shown as one.
+ */
+const imageCrops: ReadonlyArray<PreviewCrop> = [
+	{ id: "4:3", aspectRatio: 4 / 3 },
+	{ id: "16:9", aspectRatio: 16 / 9 },
+	{ id: "8:3", aspectRatio: 8 / 3 },
+];
+
+/** A portrait is only ever cropped square, on a person's page and card. */
+const avatarCrops: ReadonlyArray<PreviewCrop> = [{ id: "1:1", aspectRatio: 1 }];
+
+/**
+ * The crops an asset is shown at, going by the prefix it is stored under, which is also how the
+ * website tells them apart. `null` for one that is never cropped, so a focal point would do
+ * nothing: a logo is always fitted whole, and a document is not an image.
+ */
+export function getPreviewCrops(key: string): ReadonlyArray<PreviewCrop> | null {
+	const prefix = key.split("/")[0];
+
+	if (prefix === "images") {
+		return imageCrops;
+	}
+
+	if (prefix === "avatars") {
+		return avatarCrops;
+	}
+
+	return null;
+}

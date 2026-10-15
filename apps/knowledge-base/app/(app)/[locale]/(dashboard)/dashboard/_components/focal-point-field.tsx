@@ -19,6 +19,7 @@ import { twJoin } from "tailwind-merge";
 
 import {
 	type FocalPoint,
+	type PreviewCrop,
 	centreFocalPoint,
 	clampFocalPoint,
 	formatFocalPointInput,
@@ -26,33 +27,16 @@ import {
 	toPercent,
 } from "@/lib/focal-point";
 
-/**
- * Generic shapes spanning the range a featured image is cropped to — not one per slot of the
- * website, which would tie this to its layouts. The extremes matter most, since they cut the most
- * and so bound what stays visible everywhere: a square, for portraits and tiles, and 8:3, close to
- * the desktop page header (1652:620). Between them, 4:3 is the mobile page header, and 16:9 the
- * link preview the api crops for `og:image`.
- */
-const previewCrops = [
-	{ id: "1:1", aspectRatio: 1 },
-	{ id: "4:3", aspectRatio: 4 / 3 },
-	{ id: "16:9", aspectRatio: 16 / 9 },
-	{ id: "8:3", aspectRatio: 8 / 3 },
-] as const;
-
-type PreviewCropId = (typeof previewCrops)[number]["id"];
-
-/** Which crop the image is outlined with: one of them, or what all of them keep. */
-type OutlinedCrop = PreviewCropId | "all";
-
-/** The safe area first: where text, logos and faces stay visible on every page. */
-const defaultOutlinedCrop: OutlinedCrop = "all";
+/** Outlines what every crop keeps, where there is more than one. */
+const allCrops = "all";
 
 /** Arrow keys move the point by this much, or by a tenth of it with shift held. */
 const keyboardStep = 0.05;
 
 interface FocalPointFieldProps {
 	alt: string;
+	/** The shapes the image is cropped to (see `getPreviewCrops`). */
+	crops: ReadonlyArray<PreviewCrop>;
 	defaultValue: FocalPoint | null;
 	name: string;
 	src: string;
@@ -64,7 +48,7 @@ interface FocalPointFieldProps {
  * `formatFocalPointInput`), so the field always submits — "reset" is sent as an explicit `"none"`.
  */
 export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNode {
-	const { alt, defaultValue, name, src } = props;
+	const { alt, crops, defaultValue, name, src } = props;
 
 	const t = useExtracted();
 	const labelId = useId();
@@ -73,13 +57,17 @@ export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNod
 	const [point, setPoint] = useState<FocalPoint | null>(defaultValue);
 	/** Unknown until the image has loaded, and every crop frame depends on it. */
 	const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
-	const [outlinedCrop, setOutlinedCrop] = useState<OutlinedCrop | null>(defaultOutlinedCrop);
+	const hasOverlap = crops.length > 1;
+	/** The safe area first, where there is one: where text and faces stay visible on every page. */
+	const [outlinedCrop, setOutlinedCrop] = useState<string | null>(
+		hasOverlap ? allCrops : (crops[0]?.id ?? null),
+	);
 
 	const current = point ?? centreFocalPoint;
 
 	const frames =
 		imageAspectRatio != null
-			? previewCrops.map((crop) => {
+			? crops.map((crop) => {
 					return {
 						id: crop.id,
 						frame: getCropFrame({
@@ -157,10 +145,10 @@ export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNod
 
 	/** The part left undimmed, and the crops drawn as dashed outlines around it. */
 	const highlightedFrame =
-		outlinedCrop === "all"
+		outlinedCrop === allCrops
 			? overlap
 			: (frames?.find((entry) => entry.id === outlinedCrop)?.frame ?? null);
-	const dashedFrames = outlinedCrop === "all" && frames != null ? frames : [];
+	const dashedFrames = outlinedCrop === allCrops && frames != null ? frames : [];
 	/** The overlap's own shape, in pixels rather than fractions, for its thumbnail. */
 	const overlapAspectRatio =
 		overlap != null && imageAspectRatio != null && overlap.height > 0
@@ -262,13 +250,13 @@ export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNod
 				aria-label={t("Crop outlined on the image")}
 				className="flex flex-row items-end gap-2"
 				onSelectionChange={(keys) => {
-					const [crop] = [...keys] as Array<OutlinedCrop>;
+					const [crop] = [...keys] as Array<string>;
 					setOutlinedCrop(crop ?? null);
 				}}
 				selectedKeys={outlinedCrop != null ? [outlinedCrop] : []}
 				selectionMode="single"
 			>
-				{previewCrops.map((crop) => (
+				{crops.map((crop) => (
 					<CropThumbnail key={crop.id} aspectRatio={crop.aspectRatio} id={crop.id} label={crop.id}>
 						{/* Cropped by the browser exactly as the website crops it. */}
 						<img
@@ -280,17 +268,19 @@ export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNod
 						/>
 					</CropThumbnail>
 				))}
-				<CropThumbnail aspectRatio={overlapAspectRatio} id="all" label={t("All crops")}>
-					{overlap != null ? (
-						<img
-							alt=""
-							className="absolute"
-							draggable={false}
-							src={src}
-							style={toCroppedImageBox(overlap)}
-						/>
-					) : null}
-				</CropThumbnail>
+				{hasOverlap ? (
+					<CropThumbnail aspectRatio={overlapAspectRatio} id={allCrops} label={t("All crops")}>
+						{overlap != null ? (
+							<img
+								alt=""
+								className="absolute"
+								draggable={false}
+								src={src}
+								style={toCroppedImageBox(overlap)}
+							/>
+						) : null}
+					</CropThumbnail>
+				) : null}
 			</ToggleButtonGroup>
 		</div>
 	);
@@ -299,7 +289,7 @@ export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNod
 interface CropThumbnailProps {
 	aspectRatio: number;
 	children: ReactNode;
-	id: OutlinedCrop;
+	id: string;
 	label: string;
 }
 
