@@ -1,36 +1,49 @@
 "use client";
 
+import {
+	type CropFrame,
+	type ImageVariantAspectRatio,
+	getCropFrame,
+	imageVariantAspectRatios,
+} from "@dariah-eric/images/crop";
 import { Button } from "@dariah-eric/ui/button";
 import { descriptionStyles, labelStyles } from "@dariah-eric/ui/field";
 import { useExtracted } from "next-intl";
 import {
+	type CSSProperties,
 	type KeyboardEvent,
 	type PointerEvent,
 	type ReactNode,
+	type SyntheticEvent,
 	useId,
 	useRef,
 	useState,
 } from "react";
+import { ToggleButton, ToggleButtonGroup } from "react-aria-components";
+import { twJoin } from "tailwind-merge";
 
 import {
 	type FocalPoint,
 	centreFocalPoint,
 	clampFocalPoint,
 	formatFocalPointInput,
-	toObjectPosition,
 	toPercent,
 } from "@/lib/focal-point";
 
 /**
- * The shapes the website crops featured images to: the mobile card, the desktop banner, and a
- * square for avatars and grid tiles. Previewing them is what lets an editor judge a point — the
- * crosshair alone does not show what gets cut off.
+ * The crops to preview: exactly the ratios the api will cut, rather than the website's layouts.
+ * Every slot on the website snaps to one of these, so this is what it can show — without the
+ * knowledge base having to know which component uses which.
  */
-const previewAspectRatios = [
-	{ label: "1:1", value: 1 },
-	{ label: "4:3", value: 4 / 3 },
-	{ label: "8:3", value: 8 / 3 },
-] as const;
+const cropAspectRatios = Object.entries(imageVariantAspectRatios) as Array<
+	[ImageVariantAspectRatio, number]
+>;
+
+/**
+ * Outlined on the image until the editor picks another: the banner, which cuts the most from the
+ * landscape photos featured images usually are, so it is the crop most likely to lose something.
+ */
+const defaultOutlinedCrop: ImageVariantAspectRatio = "21x9";
 
 /** Arrow keys move the point by this much, or by a tenth of it with shift held. */
 const keyboardStep = 0.05;
@@ -55,8 +68,30 @@ export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNod
 	const descriptionId = useId();
 	const imageRef = useRef<HTMLImageElement>(null);
 	const [point, setPoint] = useState<FocalPoint | null>(defaultValue);
+	/** Unknown until the image has loaded, and every crop frame depends on it. */
+	const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
+	const [outlinedCrop, setOutlinedCrop] = useState<ImageVariantAspectRatio | null>(
+		defaultOutlinedCrop,
+	);
 
 	const current = point ?? centreFocalPoint;
+
+	function getFrame(cropAspectRatio: number): CropFrame | null {
+		if (imageAspectRatio == null) {
+			return null;
+		}
+
+		return getCropFrame({ cropAspectRatio, focalPoint: current, imageAspectRatio });
+	}
+
+	function handleImageLoad(event: SyntheticEvent<HTMLImageElement>) {
+		const image = event.currentTarget;
+		/** A vector without intrinsic dimensions reports zero; its rendered box has the same shape. */
+		const width = image.naturalWidth > 0 ? image.naturalWidth : image.clientWidth;
+		const height = image.naturalHeight > 0 ? image.naturalHeight : image.clientHeight;
+
+		setImageAspectRatio(width > 0 && height > 0 ? width / height : null);
+	}
 
 	function setPointFromPointer(event: PointerEvent<HTMLElement>) {
 		const rect = imageRef.current?.getBoundingClientRect();
@@ -112,6 +147,9 @@ export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNod
 		y: String(Math.round(current.y * 100)),
 	});
 
+	const outlinedFrame =
+		outlinedCrop != null ? getFrame(imageVariantAspectRatios[outlinedCrop]) : null;
+
 	return (
 		<div className="flex flex-col gap-y-3">
 			<input name={name} type="hidden" value={formatFocalPointInput(point)} />
@@ -153,8 +191,22 @@ export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNod
 						alt={alt}
 						className="block select-none max-block-72 max-inline-full"
 						draggable={false}
+						onLoad={handleImageLoad}
 						src={src}
 					/>
+					{outlinedFrame != null ? (
+						/* Everything the crop cuts off is dimmed by the frame's own shadow, clipped to the
+						   image, so the part that stays reads as a window onto it. */
+						<span
+							aria-hidden={true}
+							className="pointer-events-none absolute inset-0 overflow-hidden rounded-sm"
+						>
+							<span
+								className="absolute shadow-[0_0_0_9999px_rgb(0_0_0/0.5)] outline-2 -outline-offset-1 outline-white"
+								style={toFrameBox(outlinedFrame)}
+							/>
+						</span>
+					) : null}
 					<span
 						aria-hidden={true}
 						className="pointer-events-none absolute -translate-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgb(0_0_0/0.6)] block-6 inline-6"
@@ -179,24 +231,86 @@ export function FocalPointField(props: Readonly<FocalPointFieldProps>): ReactNod
 				</Button>
 			</div>
 
-			<div className="grid grid-cols-[1fr_1.33fr_2.67fr] items-end gap-2">
-				{previewAspectRatios.map((preview) => (
-					<figure key={preview.label} className="flex flex-col gap-y-1">
-						<div
-							className="overflow-hidden rounded-sm bg-muted"
-							style={{ aspectRatio: preview.value }}
+			{/* The thumbnails double as the switch for which crop is outlined on the image above: they
+			    show every crop at once, the outline shows what each one leaves out. */}
+			<ToggleButtonGroup
+				aria-label={t("Crop outlined on the image")}
+				className="grid grid-cols-[1fr_1.5fr_1.78fr_2.33fr] items-end gap-2"
+				onSelectionChange={(keys) => {
+					const [crop] = [...keys] as Array<ImageVariantAspectRatio>;
+					setOutlinedCrop(crop ?? null);
+				}}
+				selectedKeys={outlinedCrop != null ? [outlinedCrop] : []}
+				selectionMode="single"
+			>
+				{cropAspectRatios.map(([crop, cropAspectRatio]) => {
+					const frame = getFrame(cropAspectRatio);
+
+					return (
+						<ToggleButton
+							key={crop}
+							className={({ isFocusVisible, isHovered, isSelected }) =>
+								twJoin(
+									"flex cursor-default flex-col gap-y-1 rounded-sm text-xs text-muted-fg outline-2 outline-offset-2 outline-transparent",
+									isHovered && "text-fg",
+									isSelected && "font-medium text-fg",
+									isFocusVisible && "outline-focus-outline",
+								)
+							}
+							id={crop}
 						>
-							<img
-								alt=""
-								className="object-cover block-full inline-full"
-								src={src}
-								style={{ objectPosition: toObjectPosition(current) }}
-							/>
-						</div>
-						<figcaption className="text-center text-xs text-muted-fg">{preview.label}</figcaption>
-					</figure>
-				))}
-			</div>
+							{({ isSelected }) => (
+								<>
+									<span
+										className={twJoin(
+											"relative block overflow-hidden rounded-sm bg-muted",
+											isSelected && "ring-2 ring-fg",
+										)}
+										style={{ aspectRatio: cropAspectRatio }}
+									>
+										{frame != null ? (
+											<img
+												alt=""
+												className="absolute"
+												draggable={false}
+												src={src}
+												style={toCroppedImageBox(frame)}
+											/>
+										) : null}
+									</span>
+									<span className="text-center">{crop.replace("x", ":")}</span>
+								</>
+							)}
+						</ToggleButton>
+					);
+				})}
+			</ToggleButtonGroup>
 		</div>
 	);
+}
+
+/** Places a crop frame over the whole image it was cut from. */
+function toFrameBox(frame: CropFrame): CSSProperties {
+	return {
+		left: toPercent(frame.x),
+		top: toPercent(frame.y),
+		width: toPercent(frame.width),
+		height: toPercent(frame.height),
+	};
+}
+
+/**
+ * Scales and shifts the whole image inside a box the shape of the crop, so the box shows exactly
+ * the frame. Not `object-position`, which places the crop differently from imgproxy (see
+ * `getCropFrame`).
+ */
+function toCroppedImageBox(frame: CropFrame): CSSProperties {
+	return {
+		left: toPercent(-frame.x / frame.width),
+		top: toPercent(-frame.y / frame.height),
+		width: toPercent(1 / frame.width),
+		height: toPercent(1 / frame.height),
+		/** Preflight caps images at their container's width, which is exactly what this overflows. */
+		maxWidth: "none",
+	};
 }

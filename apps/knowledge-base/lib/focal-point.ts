@@ -31,13 +31,6 @@ export function clampFocalPoint(point: FocalPoint): FocalPoint {
 	return { x: clamp(point.x), y: clamp(point.y) };
 }
 
-/** The CSS `object-position` that keeps {@link FocalPoint} in view under `object-fit: cover`. */
-export function toObjectPosition(point: FocalPoint | null | undefined): string {
-	const { x, y } = point ?? centreFocalPoint;
-
-	return `${toPercent(x)} ${toPercent(y)}`;
-}
-
 /** Rounded, because `0.29 * 100` is `28.999999999999996` and that is what would end up in the css. */
 export function toPercent(fraction: number): string {
 	return `${String(Math.round(fraction * 10_000) / 100)}%`;
