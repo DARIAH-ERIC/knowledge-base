@@ -564,8 +564,11 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 								// being stretched across an oversized one.
 								// oxlint-disable-next-line react/no-array-index-key -- read-only render; gallery items have no identity of their own.
 								<figure key={idx} className="max-inline-[min(20rem,80vw)]">
+									{/* The asset's alt text, not the caption: the caption renders below the image,
+									    so reusing it as `alt` would have a screen reader read it twice. Without
+									    alt text the image falls back to `""`, as in the `image` block. */}
 									<img
-										alt={toPlainText(caption)}
+										alt={item.asset?.alt ?? ""}
 										className="ms-auto me-auto rounded-lg inline-auto max-block-96 max-inline-full"
 										src={item.imageUrl}
 									/>
@@ -588,8 +591,9 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 					// strips already carry one.
 					//
 					// Item captions credit an asset, and a caption under each mark would rebuild the
-					// grid this arrangement exists to avoid, so here they only reach `alt`. The
-					// gallery's own caption still renders below the row.
+					// grid this arrangement exists to avoid, so here they only stand in for `alt` when
+					// the asset has no alt text of its own. The gallery's own caption still renders
+					// below the row.
 					<ul className="flex list-none flex-wrap items-center justify-center gap-x-8 gap-y-6 p-0">
 						{items.map((item, idx) => {
 							if (item.imageUrl == null || item.imageUrl === "") {
@@ -602,7 +606,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 								// oxlint-disable-next-line react/no-array-index-key -- read-only render; gallery items have no identity of their own.
 								<li key={idx} className="flex items-center">
 									<img
-										alt={toPlainText(caption)}
+										alt={item.asset?.alt ?? toPlainText(caption)}
 										className="inline-auto max-block-24 max-inline-full"
 										src={item.imageUrl}
 									/>
@@ -646,9 +650,10 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 									{/* Same rule as the `image` block: drawn at its natural width inside the track
 									    and centred, never upscaled to fill — imgproxy does not enlarge, so a source
 									    narrower than the track has no more detail to give. The block cap keeps a
-									    portrait source from towering over its row-mates. */}
+									    portrait source from towering over its row-mates. Alt text as in the
+									    carousel. */}
 									<img
-										alt={toPlainText(caption)}
+										alt={item.asset?.alt ?? ""}
 										className="ms-auto me-auto rounded-lg inline-auto max-block-96 max-inline-full"
 										src={item.imageUrl}
 									/>
