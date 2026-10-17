@@ -194,6 +194,48 @@ jobs:
       - name: Stop services
         run: pnpm run dev:services:down
 
+  # Renders every story of `@dariah-eric/ui` in headless chromium. It runs in the Playwright
+  # container the e2e jobs use, since vitest's browser provider resolves to the same playwright
+  # version, and needs none of their services.
+  storybook:
+    name: Storybook tests
+    runs-on: ubuntu-24.04
+    needs: config
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.config.outputs.playwright_version }}-noble
+      options: --user 1001 --ipc=host
+    timeout-minutes: 15
+
+    env:
+      HOME: "/home/pwuser"
+      PLAYWRIGHT_BROWSERS_PATH: "/ms-playwright"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Trust repository
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          cache: true
+
+      - name: Use node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm exec turbo run --filter "./packages/*" build
+
+      - name: Run storybook tests
+        run: pnpm exec turbo run --filter "@dariah-eric/ui" test:storybook
+
   e2e:
     name: End-to-end tests / ${{ matrix.name }}
     runs-on: ubuntu-24.04
@@ -369,7 +411,7 @@ jobs:
   build-deploy:
     name: Build and deploy
     if: ${{ github.event_name == 'push' }}
-    needs: [validate, test, e2e]
+    needs: [validate, test, storybook, e2e]
     uses: ./.github/workflows/build-deploy.yaml
     secrets: inherit
     # https://docs.github.com/en/actions/using-workflows/reusing-workflows#access-and-permissions

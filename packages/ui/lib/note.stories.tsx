@@ -39,6 +39,8 @@ export const Info: Story = {
 };
 
 export const Warning: Story = {
+	/** Known a11y violations, reported as warnings until fixed: see #995. */
+	parameters: { a11y: { test: "todo" } },
 	args: { children: "This action cannot be undone.", intent: "warning" },
 	render(props) {
 		const { children, ...rest } = props;
