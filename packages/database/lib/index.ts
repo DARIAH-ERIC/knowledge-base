@@ -5,9 +5,10 @@ import type { PoolConfig } from "pg";
 
 import { DatabaseConnectionError } from "./errors";
 import { relations } from "./relations";
-import * as schema from "./schema";
 
-export { relations, schema };
+export { relations };
+// oxlint-disable-next-line oxc/no-barrel-file -- deliberate entry point.
+export * as schema from "./schema";
 
 interface CreateClientParams {
 	connection: string | PoolConfig;

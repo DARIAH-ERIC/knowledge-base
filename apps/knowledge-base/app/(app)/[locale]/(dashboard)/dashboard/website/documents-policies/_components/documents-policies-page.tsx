@@ -324,7 +324,7 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 				title={t("Documents and policies")}
 				description={t("Manage all documents and policies in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<DocumentPolicyGroupCreateDialog />
 						<Button
 							intent="secondary"
@@ -335,7 +335,7 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 							<PlusIcon className="me-2 block-4 inline-4" />
 							{t("New document")}
 						</Button>
-					</>
+					</Fragment>
 				}
 			/>
 			<ActionErrorAlert className="mbe-4" message={moveError} />

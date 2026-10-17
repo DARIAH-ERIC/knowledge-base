@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckIcon, MinusIcon } from "@heroicons/react/20/solid";
-import type { ComponentProps, ReactNode } from "react";
+import { type ComponentProps, Fragment, type ReactNode } from "react";
 import {
 	CheckboxButton,
 	type CheckboxButtonProps,
@@ -74,14 +74,14 @@ export function Checkbox({
 						const content = isStringChild ? <CheckboxLabel>{children}</CheckboxLabel> : children;
 
 						return (
-							<>
+							<Fragment>
 								<span
 									className={twMerge([
 										"relative isolate flex shrink-0 items-center justify-center rounded-sm text-bg inset-ring inset-ring-input transition group-hover:inset-ring-muted-fg/30",
 										"sm:block-4 sm:inline-4 sm:*:data-[slot=check-indicator]:block-3.5 sm:*:data-[slot=check-indicator]:inline-3.5",
 										"block-4.5 inline-4.5 *:data-[slot=check-indicator]:block-4 *:data-[slot=check-indicator]:inline-4",
 										"in-disabled:bg-muted",
-										(isSelected ?? isIndeterminate) && [
+										(isSelected || isIndeterminate) && [
 											"bg-(--checkbox-bg,var(--color-primary)) text-(--checkbox-fg,var(--color-primary-fg)) inset-ring-(--checkbox-ring,var(--color-ring))",
 											"group-invalid:bg-danger group-invalid:text-danger-fg dark:group-invalid:inset-ring-danger-subtle-fg/70",
 										],
@@ -97,7 +97,7 @@ export function Checkbox({
 									{indicator}
 								</span>
 								{content}
-							</>
+							</Fragment>
 						);
 					},
 				)}

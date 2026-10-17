@@ -112,7 +112,6 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 
 	const { LinkComponent = "a" } = use(UiContext);
 
-	// eslint-disable-next-line @eslint-react/prefer-destructuring-assignment
 	const textValue = props.textValue ?? (typeof children === "string" ? children : undefined);
 
 	return (

@@ -6,6 +6,7 @@ import { descriptionStyles, labelStyles } from "@dariah-eric/ui/field";
 import { useExtracted } from "next-intl";
 import {
 	type CSSProperties,
+	Fragment,
 	type KeyboardEvent,
 	type PointerEvent,
 	type ReactNode,
@@ -310,7 +311,7 @@ function CropThumbnail(props: Readonly<CropThumbnailProps>): ReactNode {
 			style={{ flexGrow: aspectRatio }}
 		>
 			{({ isSelected }) => (
-				<>
+				<Fragment>
 					<span
 						className={twJoin(
 							"relative block overflow-hidden rounded-sm bg-muted",
@@ -321,7 +322,7 @@ function CropThumbnail(props: Readonly<CropThumbnailProps>): ReactNode {
 						{children}
 					</span>
 					<span className="truncate text-center">{label}</span>
-				</>
+				</Fragment>
 			)}
 		</ToggleButton>
 	);

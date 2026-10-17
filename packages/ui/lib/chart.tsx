@@ -4,7 +4,6 @@ import {
 	type ReactNode,
 	type RefObject,
 	useCallback,
-	useEffect,
 	useLayoutEffect,
 	useRef,
 	useState,
@@ -449,10 +448,11 @@ export function useChartGeometry(
 	}, []);
 
 	// A filter change can shorten the category list while a band is hovered.
-	useEffect(() => {
-		// oxlint-disable-next-line react/set-state-in-effect
+	const [prevWidth, setPrevWidth] = useState(width);
+	if (width !== prevWidth) {
+		setPrevWidth(width);
 		setActiveIndex(null);
-	}, [width]);
+	}
 
 	const paddingInlineStart = axisGutter(Math.max(...axisLabels.map((label) => label.length), 0));
 

@@ -25,7 +25,6 @@ export const queue = new AriaToastQueue<ToastContent>({
 	wrapUpdate(fn: () => void): void {
 		if ("startViewTransition" in document) {
 			document.startViewTransition(() => {
-				// eslint-disable-next-line @eslint-react/dom/no-flush-sync
 				flushSync(fn);
 			});
 		} else {

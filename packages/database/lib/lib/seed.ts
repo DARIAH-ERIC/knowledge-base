@@ -1,5 +1,3 @@
-// oxlint-disable oxc/no-map-spread
-
 import { groupBy, keyBy } from "@acdh-oeaw/lib";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
@@ -353,7 +351,6 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 		record(entityTypesByType.documentation_pages.id, documentationPageIds);
 
 		await db.insert(schema.documentationPages).values(
-			// oxlint-disable-next-line oxc/no-map-spread
 			documentationPageIds.map(({ versionId }, index) => {
 				return { ...documentationPages[index]!, id: versionId };
 			}),
@@ -557,7 +554,6 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 		const organisationalUnitsIds = await db
 			.insert(schema.organisationalUnits)
 			.values(
-				// oxlint-disable-next-line oxc/no-map-spread
 				organisationalUnitIds.map(({ versionId }, index) => {
 					return { ...organisationalUnits[index]!, id: versionId };
 				}),

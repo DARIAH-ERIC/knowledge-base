@@ -21,7 +21,7 @@
 				]
 			}
 		],
-		"at-rule-prelude-no-invalid": [true, { "ignoreAtRules": ["media"] }],
+		"at-rule-prelude-no-invalid": [true, { "ignoreAtRules": ["apply", "media"] }],
 		"block-no-empty": true,
 		"comment-no-empty": true,
 		"custom-property-no-missing-var-function": true,

@@ -159,7 +159,7 @@ export const WithSections: Story = {
 export const Controlled: Story = {
 	args: {},
 	render(props) {
-		const ControlledExample = () => {
+		function ControlledExample() {
 			const [value, setValue] = useState<string | number | null>("de");
 
 			return (
@@ -187,7 +187,7 @@ export const Controlled: Story = {
 					</p>
 				</div>
 			);
-		};
+		}
 
 		return <ControlledExample />;
 	},

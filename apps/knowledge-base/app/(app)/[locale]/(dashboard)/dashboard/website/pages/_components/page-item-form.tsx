@@ -83,7 +83,8 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
 	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(pageItem?.image ?? null);
-	const now = new Date();
+	// oxlint-disable-next-line react/hook-use-state -- a stable "now" for the render, never updated.
+	const [now] = useState(() => new Date());
 
 	return (
 		<FormLayout>

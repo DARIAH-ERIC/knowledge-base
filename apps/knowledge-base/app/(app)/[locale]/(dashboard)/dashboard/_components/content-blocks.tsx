@@ -308,6 +308,7 @@ export function ContentBlocks({
 }: Readonly<ContentBlocksProps>): ReactNode {
 	const t = useExtracted();
 
+	// oxlint-disable-next-line react/hook-use-state -- initial value only, never updated.
 	const [mergedInitialItems] = useState(() => mergeInitialItems(initialItems));
 
 	const list = useListData<ContentBlockListItem>({
@@ -519,7 +520,7 @@ function ContentBlockItem({
 	};
 
 	return (
-		<>
+		<Fragment>
 			{isDropTarget && dropPosition === "before" && (
 				<div aria-hidden={true} className="mx-1 rounded-full bg-accent block-0.5" />
 			)}
@@ -631,7 +632,7 @@ function ContentBlockItem({
 			{isDropTarget && dropPosition === "after" && (
 				<div aria-hidden={true} className="mx-1 rounded-full bg-accent block-0.5" />
 			)}
-		</>
+		</Fragment>
 	);
 }
 
@@ -1026,6 +1027,7 @@ function HeroContentBlockPanel({
 			<div className="flex flex-col gap-y-3">
 				<Label>{t("CTAs")}</Label>
 				{ctas.map((cta, idx) => (
+					// oxlint-disable-next-line react/no-array-index-key -- inputs are controlled, so a positional key keeps each row in sync.
 					<div key={idx} className="flex items-end gap-x-2">
 						<TextField
 							className="flex-1"

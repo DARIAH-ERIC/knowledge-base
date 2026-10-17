@@ -1,5 +1,3 @@
-// oxlint-disable oxc/no-map-spread
-
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
@@ -263,7 +261,6 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 	);
 
 	await db.insert(schema.organisationalUnits).values(
-		// oxlint-disable-next-line oxc/no-map-spread
 		items.slice(1).map((item) => {
 			return { ...item.organisationalUnit, typeId: workingGroupType.id, imageId: asset.id };
 		}),

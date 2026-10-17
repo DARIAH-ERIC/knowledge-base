@@ -11,8 +11,10 @@ import { formatFileSize } from "@/lib/format-file-size";
 
 /**
  * A picked asset as an editing screen knows it. Only `key` and `url` are needed to submit and
- * preview the selection; the rest is metadata the summary surfaces so authors can see - and correct
- * - what they picked without leaving the form.
+ * preview the selection; the rest is metadata the summary surfaces so authors can see - and
+ * correct
+ *
+ * - What they picked without leaving the form.
  */
 export interface SelectedImage {
 	key: string;

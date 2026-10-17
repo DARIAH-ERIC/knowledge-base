@@ -181,7 +181,7 @@ export function UnusedAssetsCleanup(props: Readonly<UnusedAssetsCleanupProps>): 
 								src={asset.url}
 								storageKey={asset.key}
 							/>
-							{asset.mimeType?.startsWith("image/") ? (
+							{asset.mimeType.startsWith("image/") ? (
 								<Modal>
 									<Button
 										aria-label={t("View full-size image")}

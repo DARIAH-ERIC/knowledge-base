@@ -1,5 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
+import { waitForHydration } from "@/e2e/lib/fixtures/hydration";
+
 const BASE_PATH = "/en/dashboard/website/featured";
 
 /** Accessible names for one featured section's selection list and its "add" popover trigger. */
@@ -172,6 +174,8 @@ export class AdminFeaturedItemsPage {
 	async goto(): Promise<void> {
 		await this.page.goto(BASE_PATH);
 		await this.page.waitForURL(`**${BASE_PATH}`);
+		/** The remove buttons and drag handles do nothing until the lists have hydrated. */
+		await waitForHydration(this.page.getByRole("button", { name: "Save", exact: true }));
 	}
 
 	async save(): Promise<void> {

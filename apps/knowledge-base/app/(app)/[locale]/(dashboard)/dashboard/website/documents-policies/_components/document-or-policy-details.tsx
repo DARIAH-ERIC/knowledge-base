@@ -74,14 +74,14 @@ export function DocumentOrPolicyDetails(props: Readonly<DocumentOrPolicyDetailsP
 				<DescriptionDetails>{documentOrPolicy.summary}</DescriptionDetails>
 
 				{documentOrPolicy.url != null ? (
-					<>
+					<Fragment>
 						<DescriptionTerm>{t("URL")}</DescriptionTerm>
 						<DescriptionDetails>{documentOrPolicy.url}</DescriptionDetails>
-					</>
+					</Fragment>
 				) : null}
 
 				{documentOrPolicy.document != null ? (
-					<>
+					<Fragment>
 						<DescriptionTerm>{t("Document")}</DescriptionTerm>
 						<DescriptionDetails>
 							<a
@@ -92,11 +92,11 @@ export function DocumentOrPolicyDetails(props: Readonly<DocumentOrPolicyDetailsP
 								{documentOrPolicy.document.label}
 							</a>
 						</DescriptionDetails>
-					</>
+					</Fragment>
 				) : null}
 
 				{documentOrPolicy.linkUrl != null ? (
-					<>
+					<Fragment>
 						<DescriptionTerm>{t("External link")}</DescriptionTerm>
 						<DescriptionDetails>
 							<a
@@ -108,7 +108,7 @@ export function DocumentOrPolicyDetails(props: Readonly<DocumentOrPolicyDetailsP
 								{documentOrPolicy.linkUrl}
 							</a>
 						</DescriptionDetails>
-					</>
+					</Fragment>
 				) : null}
 
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>

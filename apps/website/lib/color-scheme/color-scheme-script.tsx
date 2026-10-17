@@ -11,7 +11,6 @@ const localStorageKey = "ui-color-scheme";
 export function ColorSchemeScript(): ReactNode {
 	return (
 		<script
-			// eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
 			dangerouslySetInnerHTML={{
 				__html: `(${String(createColorSchemeScript)})("${dataAttribute}", "${localStorageKey}")`,
 			}}

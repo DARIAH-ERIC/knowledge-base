@@ -61,7 +61,6 @@ type DocumentFromFields<F extends ReadonlyArray<CollectionFieldSchema>> = {
 function getQueryableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 	fields: F,
 ): Array<QueryableFieldNames<F[number]>> {
-	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
 	return fields.filter((f) => f.index !== false).map((f) => f.name) as Array<
 		QueryableFieldNames<F[number]>
 	>;
@@ -70,7 +69,6 @@ function getQueryableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 function getSearchableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 	fields: F,
 ): Array<SearchableFieldNames<F[number]>> {
-	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
 	return fields
 		.filter((f) => f.index !== false && ["string", "string[]", "string*"].includes(f.type))
 		.map((f) => f.name) as Array<SearchableFieldNames<F[number]>>;
@@ -79,7 +77,6 @@ function getSearchableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 function getFilterableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 	fields: F,
 ): Array<FilterableFieldNames<F[number]>> {
-	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
 	return fields.filter((f) => f.index !== false).map((f) => f.name) as Array<
 		FilterableFieldNames<F[number]>
 	>;
@@ -88,7 +85,6 @@ function getFilterableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 function getSortableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 	fields: F,
 ): Array<SortableFieldNames<F[number]>> {
-	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
 	return fields.filter((f) => f.sort === true).map((f) => f.name) as Array<
 		SortableFieldNames<F[number]>
 	>;
@@ -97,7 +93,6 @@ function getSortableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 function getFacetableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 	fields: F,
 ): Array<FacetableFieldNames<F[number]>> {
-	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
 	return fields.filter((f) => f.facet === true).map((f) => f.name) as Array<
 		FacetableFieldNames<F[number]>
 	>;
@@ -128,7 +123,7 @@ export interface Collection<F extends ReadonlyArray<CollectionFieldSchema>> {
 	filterableFields: ReadonlyArray<FilterableFieldNames<F[number]>>;
 	sortableFields: ReadonlyArray<SortableFieldNames<F[number]>>;
 	facetableFields: ReadonlyArray<FacetableFieldNames<F[number]>>;
-	schema(name: string): CollectionCreateSchema;
+	schema: (name: string) => CollectionCreateSchema;
 }
 
 export function defineCollection<F extends ReadonlyArray<StrictFieldSchema>>(config: {

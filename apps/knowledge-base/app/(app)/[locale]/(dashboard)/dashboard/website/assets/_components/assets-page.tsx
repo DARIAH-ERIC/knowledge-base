@@ -102,7 +102,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 				title={t("Assets")}
 				description={t("Manage all images in the media library.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} placeholder={t("Search by label")} />
 
 						<Select
@@ -149,7 +149,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 								router.refresh();
 							}}
 						/>
-					</>
+					</Fragment>
 				}
 			/>
 

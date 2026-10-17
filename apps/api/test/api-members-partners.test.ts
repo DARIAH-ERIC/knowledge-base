@@ -17,6 +17,7 @@ vi.mock("@/services/search", () => {
 		search: {
 			collections: {
 				resources: {
+					// oxlint-disable-next-line typescript/require-await -- mocks an async api.
 					search: async ({ filterBy }: { filterBy?: string }) => {
 						const ids = filterBy?.match(/id:\[([^\]]+)\]/)?.[1]?.split(",") ?? [];
 

@@ -10,7 +10,7 @@ import {
 } from "@dariah-eric/ui/table";
 import { EyeIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
@@ -32,7 +32,7 @@ export function EricPage(props: Readonly<EricPageProps>): ReactNode {
 	const editHref = `/dashboard/administrator/eric/${eric.slug}/edit`;
 
 	return (
-		<>
+		<Fragment>
 			<EntityListHeader
 				title={t("DARIAH ERIC")}
 				description={t("Manage DARIAH ERIC and its member and partner relations.")}
@@ -72,6 +72,6 @@ export function EricPage(props: Readonly<EricPageProps>): ReactNode {
 					</TableRow>
 				</TableBody>
 			</Table>
-		</>
+		</Fragment>
 	);
 }

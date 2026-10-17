@@ -52,12 +52,30 @@ export class AssetsPage {
 	// Media library dialog (embedded in forms, backed by `/api/assets`)
 	// ---------------------------------------------------------------------------
 
-	async openMediaLibraryDialog(): Promise<Locator> {
-		await this.page.goto(MEDIA_LIBRARY_HOST_PATH);
+	/**
+	 * Navigates to `hostPath` and opens the dialog from its image picker. Pass a different host for a
+	 * picker with several prefixes - the persons form only offers `avatars`.
+	 */
+	async openMediaLibraryDialog(hostPath = MEDIA_LIBRARY_HOST_PATH): Promise<Locator> {
+		await this.page.goto(hostPath);
+		return this.reopenMediaLibraryDialog();
+	}
+
+	/** Opens the dialog again from the picker on the current page, without navigating. */
+	async reopenMediaLibraryDialog(): Promise<Locator> {
 		await this.page.getByRole("button", { name: /^(Select|Change) image$/ }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
 		return dialog;
+	}
+
+	/**
+	 * Closes via the footer's cancel button rather than `Escape`: with focus in the asset grid,
+	 * `Escape` clears the grid's selection instead of dismissing the dialog.
+	 */
+	async closeMediaLibraryDialog(dialog: Locator): Promise<void> {
+		await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+		await dialog.waitFor({ state: "hidden" });
 	}
 
 	/**

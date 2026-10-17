@@ -113,7 +113,7 @@ export const updateContributionAction = createServerAction(
 					.where(eq(schema.personsToOrganisationalUnits.id, id));
 
 				await recordAuditEvent(tx, {
-					actorUserId: user?.id,
+					actorUserId: user.id,
 					action: "update",
 					subjectType: "contributions",
 					subjectId: id,

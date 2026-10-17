@@ -44,7 +44,9 @@ export async function getNewsletters(params: GetNewslettersParams) {
 	const data = result.campaigns.map((campaign) => {
 		return {
 			id: campaign.id,
+			// oxlint-disable-next-line typescript/no-unnecessary-condition -- mailchimp responses do not always match their types.
 			subject_line: campaign.settings.subject_line ?? campaign.settings.title ?? "",
+			// oxlint-disable-next-line typescript/no-unnecessary-condition -- mailchimp responses do not always match their types.
 			send_time: campaign.send_time ?? null,
 			archive_url: campaign.archive_url,
 			status: campaign.status,

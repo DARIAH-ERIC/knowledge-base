@@ -175,7 +175,6 @@ export function Carousel(props: Readonly<CarouselProps>): ReactNode {
 				className="flex snap-x snap-mandatory list-none gap-4 overflow-x-auto p-0 pbe-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-safe:scroll-smooth"
 				// oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- A scroller safari does not make focusable itself, see above.
 				tabIndex={0}
-				// oxlint-disable-next-line jsx-a11y/no-redundant-roles -- Webkit drops list semantics from a list styled without markers.
 				role="list"
 			>
 				{slides.map((slide, index) => (

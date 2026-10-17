@@ -80,10 +80,10 @@ export function DocumentationPagesPage(props: Readonly<DocumentationPagesPagePro
 				title={t("Documentation pages")}
 				description={t("Manage all documentation pages in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/administrator/documentation-pages/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

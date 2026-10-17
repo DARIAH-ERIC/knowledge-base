@@ -101,7 +101,7 @@ function comparePositions(a: PersonPosition, b: PersonPosition): number {
 		return byStart;
 	}
 
-	return (a.entity.label ?? "").localeCompare(b.entity.label ?? "");
+	return a.entity.label.localeCompare(b.entity.label);
 }
 
 export type PersonPositionPeriod = "current" | "former";

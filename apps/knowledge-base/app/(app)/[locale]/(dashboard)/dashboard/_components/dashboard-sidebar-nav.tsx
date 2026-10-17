@@ -6,7 +6,7 @@ import { Separator } from "@dariah-eric/ui/separator";
 import { SidebarNav, SidebarTrigger, useSidebar } from "@dariah-eric/ui/sidebar";
 import { MagnifyingGlassIcon as IconSearch } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { useDashboardCommandPalette } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-command-palette-context";
 import { UserMenu } from "@/app/(app)/[locale]/_components/user-menu";
@@ -33,17 +33,15 @@ export function DashboardSidebarNav(props: Readonly<DashboardSidebarNavProps>): 
 			</span>
 			<div className="ms-auto flex shrink-0 items-center gap-x-2">
 				{isMobile ? (
-					<Fragment>
-						<Button
-							aria-label={t("Open command menu")}
-							intent="plain"
-							isCircle={true}
-							onPress={openCommandPalette}
-							size="sq-sm"
-						>
-							<IconSearch />
-						</Button>
-					</Fragment>
+					<Button
+						aria-label={t("Open command menu")}
+						intent="plain"
+						isCircle={true}
+						onPress={openCommandPalette}
+						size="sq-sm"
+					>
+						<IconSearch />
+					</Button>
 				) : null}
 				<UserMenu onOpenCommandMenu={openCommandPalette} user={user} />
 			</div>

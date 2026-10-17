@@ -51,6 +51,7 @@ export function DraftsList(props: Readonly<DraftsListProps>): ReactNode {
 	);
 
 	const typeOptions = useMemo(
+		// oxlint-disable-next-line unicorn/no-array-sort -- sorts a fresh array from `Array.from`.
 		() => Array.from(new Set(drafts.map(draftType))).sort((a, b) => a.localeCompare(b)),
 		[drafts],
 	);

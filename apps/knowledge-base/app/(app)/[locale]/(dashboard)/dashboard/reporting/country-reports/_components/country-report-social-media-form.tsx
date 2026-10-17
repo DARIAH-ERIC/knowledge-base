@@ -181,7 +181,7 @@ function AccountCard(props: Readonly<AccountCardProps>): ReactNode {
 				</div>
 				<ActionForm action={deleteAction}>
 					{(isPending) => (
-						<>
+						<Fragment>
 							<input name="membershipId" type="hidden" value={account.id} />
 							<input name="countryReportId" type="hidden" value={reportId} />
 							<Button
@@ -193,7 +193,7 @@ function AccountCard(props: Readonly<AccountCardProps>): ReactNode {
 							>
 								{t("Remove")}
 							</Button>
-						</>
+						</Fragment>
 					)}
 				</ActionForm>
 			</div>

@@ -29,6 +29,18 @@ const config = defineConfig({
 	rules: {
 		"no-restricted-imports": ["error", { patterns: [{ group: ["./*", "../*"] }] }],
 	},
+	overrides: [
+		{
+			/**
+			 * Dashboard images are imgproxy/S3 urls rendered at known sizes (previews, detail headers,
+			 * the focal-point editor's overlay), where `next/image` adds nothing.
+			 */
+			files: ["app/(app)/[[]locale]/(dashboard)/**"],
+			rules: {
+				"nextjs/no-img-element": "off",
+			},
+		},
+	],
 	settings: {
 		"better-tailwindcss": {
 			cwd: import.meta.dirname,

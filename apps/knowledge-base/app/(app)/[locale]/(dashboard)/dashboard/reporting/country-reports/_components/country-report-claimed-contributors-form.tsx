@@ -88,7 +88,7 @@ export function CountryReportClaimedContributorsForm(
 								</div>
 								<ActionForm action={deleteAction}>
 									{(isPending) => (
-										<>
+										<Fragment>
 											<input name="contributionId" type="hidden" value={contribution.id} />
 											<input name="countryReportId" type="hidden" value={report.id} />
 											<Button
@@ -100,7 +100,7 @@ export function CountryReportClaimedContributorsForm(
 											>
 												{t("Remove")}
 											</Button>
-										</>
+										</Fragment>
 									)}
 								</ActionForm>
 							</li>

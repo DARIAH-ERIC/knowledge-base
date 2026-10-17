@@ -85,7 +85,8 @@ export function ImpactCaseStudyForm(props: Readonly<ImpactCaseStudyFormProps>): 
 	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
 		impactCaseStudy?.image ?? null,
 	);
-	const now = new Date();
+	// oxlint-disable-next-line react/hook-use-state -- a stable "now" for the render, never updated.
+	const [now] = useState(() => new Date());
 	return (
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" id={formId} state={state}>

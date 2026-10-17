@@ -241,7 +241,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 				title={t("Project partners")}
 				description={t("Review and manage project-to-organisation partner relations.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<Button
 							className="shrink-0 whitespace-pre"
@@ -251,7 +251,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 							<PlusIcon className="me-2 block-4 inline-4" />
 							{t("Add partner")}
 						</Button>
-					</>
+					</Fragment>
 				}
 			/>
 

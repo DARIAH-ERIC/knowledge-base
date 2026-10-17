@@ -46,7 +46,7 @@ function humanizeSummaryKey(key: string): string {
 
 function formatSummaryValue(value: unknown): string {
 	if (Array.isArray(value)) {
-		return value.map((entry) => String(entry)).join(", ");
+		return value.map(String).join(", ");
 	}
 	if (typeof value === "boolean") {
 		return value ? "yes" : "no";

@@ -22,10 +22,10 @@ import {
 } from "./resources";
 
 export interface SearchResourcesCache<CacheError = unknown> {
-	getOrFetch<T, FetchError>(
+	getOrFetch: <T, FetchError>(
 		key: string,
 		fetcher: () => Promise<Result<T, FetchError>>,
-	): Promise<Result<T, FetchError | CacheError>>;
+	) => Promise<Result<T, FetchError | CacheError>>;
 }
 
 export interface CreateSearchResourcesServiceParams {

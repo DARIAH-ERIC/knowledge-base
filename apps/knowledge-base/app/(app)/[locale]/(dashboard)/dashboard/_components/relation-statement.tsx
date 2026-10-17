@@ -2,7 +2,7 @@
 
 import { Badge } from "@dariah-eric/ui/badge";
 import { useExtracted, useFormatter } from "next-intl";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 
@@ -46,12 +46,12 @@ export function RelationStatement(props: Readonly<RelationStatementProps>): Reac
 	return (
 		<li className="text-sm">
 			{showSource ? (
-				<>
+				<Fragment>
 					<RelationLink className="font-medium" href={sourceHref}>
 						{source}
 					</RelationLink>
 					{" · "}
-				</>
+				</Fragment>
 			) : null}
 			<span className="text-muted-fg">{relation}</span>
 			{" · "}
@@ -59,10 +59,10 @@ export function RelationStatement(props: Readonly<RelationStatementProps>): Reac
 				{target}
 			</RelationLink>
 			{targetType != null ? (
-				<>
+				<Fragment>
 					{" "}
 					<Badge intent="slate">{targetType}</Badge>
-				</>
+				</Fragment>
 			) : null}
 			{formattedDuration != null ? (
 				<span className="text-muted-fg">

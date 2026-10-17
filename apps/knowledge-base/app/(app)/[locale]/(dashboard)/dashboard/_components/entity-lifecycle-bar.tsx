@@ -14,7 +14,7 @@ import {
 import { queue } from "@dariah-eric/ui/toast";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useState, useTransition } from "react";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 import { runAction } from "@/lib/run-action";
@@ -89,7 +89,7 @@ export function EntityLifecycleBar(props: Readonly<EntityLifecycleBarProps>): Re
 			) : null}
 
 			{hasDraft && isPublished && discardDraftAction != null ? (
-				<>
+				<Fragment>
 					<Button
 						intent="plain"
 						isPending={isDiscarding}
@@ -143,7 +143,7 @@ export function EntityLifecycleBar(props: Readonly<EntityLifecycleBarProps>): Re
 							</Button>
 						</ModalFooter>
 					</ModalContent>
-				</>
+				</Fragment>
 			) : null}
 		</div>
 	);

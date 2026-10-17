@@ -6,7 +6,7 @@ import { Button } from "@dariah-eric/ui/button";
 import { fieldErrorStyles } from "@dariah-eric/ui/field";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useState } from "react";
+import { Fragment, type ReactNode, useState } from "react";
 
 import { ImageCaptionModeField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-caption-mode-field";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
@@ -80,7 +80,7 @@ export function ImageSelectField<T extends AssetPrefix>(
 	);
 
 	return (
-		<>
+		<Fragment>
 			{selectedImage != null ? (
 				<SelectedImageCard
 					footer={
@@ -130,6 +130,6 @@ export function ImageSelectField<T extends AssetPrefix>(
 				value={selectedImage?.key ?? ""}
 			/>
 			{error ? <div className={fieldErrorStyles()}>{t("Please select an image.")}</div> : null}
-		</>
+		</Fragment>
 	);
 }

@@ -672,7 +672,6 @@ export function createWordPressContentMigrator(
 			let richTextRun: Array<JSONContent> = [];
 
 			for (const node of doc.content ?? []) {
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 				if (node.type === "image" && typeof node.attrs?.src === "string") {
 					if (richTextRun.length > 0) {
 						blocks.push({
@@ -686,7 +685,6 @@ export function createWordPressContentMigrator(
 						 * The original rather than the theme-sized derivative the post markup points at, and
 						 * labelled with the url its bytes actually came from.
 						 */
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
 						const source = await resolveFullResolutionUrl(new URL(node.attrs.src));
 
 						const asset = await upload(
@@ -695,21 +693,17 @@ export function createWordPressContentMigrator(
 							source,
 							source.href,
 							undefined,
-							// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
 							typeof node.attrs.alt === "string" && node.attrs.alt !== ""
-								? // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-									node.attrs.alt
+								? node.attrs.alt
 								: undefined,
 						);
 						if (asset != null) {
 							blocks.push({ type: "image", assetId: asset.id });
 						}
 					} catch {
-						// eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
 						log.warn(`Failed to migrate inline image: ${node.attrs.src}`);
 					}
 				} else {
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 					richTextRun.push(node);
 				}
 			}

@@ -48,7 +48,6 @@ export function ToggleGroup(props: Readonly<ToggleGroupProps>): ReactNode {
 	} = props;
 
 	return (
-		// eslint-disable-next-line @eslint-react/no-unstable-context-value
 		<ToggleGroupContext value={{ size, selectionMode, orientation }}>
 			<AriaToggleButtonGroup
 				{...rest}

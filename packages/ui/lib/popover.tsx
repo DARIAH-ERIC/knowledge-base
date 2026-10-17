@@ -38,7 +38,6 @@ export interface PopoverContentProps extends PopoverPrimitiveProps {
 export function PopoverContent(props: Readonly<PopoverContentProps>): ReactNode {
 	const { children, arrow = false, className, ...rest } = props;
 
-	// eslint-disable-next-line @eslint-react/prefer-destructuring-assignment
 	const offset = props.offset ?? (arrow ? 12 : 8);
 
 	return (

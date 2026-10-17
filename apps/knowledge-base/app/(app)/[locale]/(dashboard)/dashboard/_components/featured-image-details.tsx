@@ -19,9 +19,11 @@ interface FeaturedImageDetailsProps {
 /**
  * A featured image as the website will render it: the picture, what the asset is, and the caption
  * the entity's caption mode resolves to. Details views exist so an editor can check what was saved,
- * so they apply the same resolution the API does rather than showing the asset's caption regardless
- * - or, as before, no caption at all. The same summary backs the editing screens, minus their
- * controls, so an image reads the same before and after saving.
+ * so they apply the same resolution the API does rather than showing the asset's caption
+ * regardless
+ *
+ * - Or, as before, no caption at all. The same summary backs the editing screens, minus their
+ *   controls, so an image reads the same before and after saving.
  */
 export function FeaturedImageDetails(props: Readonly<FeaturedImageDetailsProps>): ReactNode {
 	const { image, imageCaption, imageCaptionMode } = props;

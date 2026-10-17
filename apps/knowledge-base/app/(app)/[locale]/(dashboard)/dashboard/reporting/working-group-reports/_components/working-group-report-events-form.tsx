@@ -61,13 +61,13 @@ export function WorkingGroupReportEventsForm(
 								</div>
 								<ActionForm action={deleteAction}>
 									{(isPending) => (
-										<>
+										<Fragment>
 											<input name="eventId" type="hidden" value={event.id} />
 											<input name="workingGroupReportId" type="hidden" value={report.id} />
 											<Button isPending={isPending} intent="danger" size="sm" type="submit">
 												{t("Remove")}
 											</Button>
-										</>
+										</Fragment>
 									)}
 								</ActionForm>
 							</li>

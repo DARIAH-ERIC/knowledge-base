@@ -201,6 +201,7 @@ function rewriteDocumentLinks<T>(value: T, assetKeys: ReadonlyMap<string, string
 				changed ||= next !== item;
 				return next;
 			});
+			// oxlint-disable-next-line typescript/no-unnecessary-condition -- `changed` is set inside a callback, which typescript does not see.
 			return changed ? result : node;
 		}
 

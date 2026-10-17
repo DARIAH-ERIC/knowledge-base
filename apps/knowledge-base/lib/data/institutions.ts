@@ -336,7 +336,6 @@ export async function getInstitutions(
 			)
 			.where(and(versionPick, where))
 			.orderBy(nameOrderBy);
-		total = items.length;
 	} else {
 		const matchingStatuses = institutionStatuses.filter((status) =>
 			institutionStatusLabels[status].toLowerCase().includes(query.toLowerCase()),
@@ -464,8 +463,8 @@ export async function getInstitutions(
 				),
 			)
 			.orderBy(nameOrderBy);
-		total = items.length;
 	}
+	total = items.length;
 
 	if (!needsDerivedSort) {
 		const pagedItems = items.slice(offset, offset + limit);

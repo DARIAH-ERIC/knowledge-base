@@ -252,6 +252,7 @@ async function findNewsMediaTextBlocks(): Promise<Map<string, Array<MediaTextVer
 				fieldId: row.fieldId,
 				position: row.position,
 				imageAssetLabel: row.imageAssetLabel,
+				// oxlint-disable-next-line typescript/no-unnecessary-condition -- defensive against legacy rows.
 				content: row.content ?? null,
 			});
 		},

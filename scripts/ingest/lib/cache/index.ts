@@ -29,7 +29,6 @@ export function createCacheService(params: CreateCacheServiceParams) {
 				log.info(`Cache hit for "${key}".`);
 
 				return Result.tryPromise({
-					// oxlint-disable-next-line typescript/no-unsafe-type-assertion
 					try() {
 						return readFile(file, { encoding: "utf-8" }).then(
 							(content) => JSON.parse(content) as T,

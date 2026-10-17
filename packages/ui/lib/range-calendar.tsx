@@ -30,6 +30,7 @@ export function RangeCalendar<T extends DateValue>(
 					const id = index + 1;
 					return (
 						<CalendarGrid
+							// oxlint-disable-next-line react/no-array-index-key -- one grid per visible month offset.
 							key={index}
 							className="[&_td]:border-collapse [&_td]:px-0 [&_td]:py-0.5"
 							offset={id >= 2 ? { months: id - 1 } : undefined}

@@ -1,3 +1,4 @@
+// oxlint-disable-next-line import/no-unassigned-import -- side effect: sets up instrumentation before anything else loads.
 import "@/instrumentation";
 
 import { log } from "@acdh-oeaw/lib";

@@ -1333,7 +1333,6 @@ async function main() {
 
 	log.info("Migrating projects...");
 
-	// oxlint-disable-next-line unicorn/consistent-function-scoping
 	function normalizeProjectLookupValue(value: string): string {
 		return value.trim().replaceAll(/\s+/g, " ").toLowerCase();
 	}
@@ -1639,6 +1638,7 @@ async function main() {
 			const participantWpIds = new Set(
 				project.relations.institutions
 					.map((i) => i.id)
+					// oxlint-disable-next-line typescript/no-unnecessary-condition -- untyped wordpress data.
 					.filter((id) => id !== project.relations.coordinator?.id),
 			);
 

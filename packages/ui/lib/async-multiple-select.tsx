@@ -169,6 +169,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 			{label != null ? <Label>{label}</Label> : null}
 
 			<AriaDialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
+				{/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- a larger mouse target only; keyboard users open the list with the "Open options" button inside. */}
 				<div
 					ref={triggerRef}
 					className={twMerge(

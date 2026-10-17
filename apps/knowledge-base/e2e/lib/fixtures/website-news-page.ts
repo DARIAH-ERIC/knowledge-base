@@ -3,6 +3,7 @@ import { type Locator, type Page, expect } from "@playwright/test";
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { openActionsMenu } from "@/e2e/lib/fixtures/actions-menu";
 import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
+import { clickHydrated } from "@/e2e/lib/fixtures/hydration";
 import { dragGridRowDownByName } from "@/e2e/lib/fixtures/reorder";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
@@ -76,7 +77,7 @@ export class WebsiteNewsPage {
 		await this.page.getByRole("button", { name: /^(Select|Change) image$/ }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
-		await dialog.getByRole("tab", { name: "Upload" }).click();
+		await clickHydrated(dialog.getByRole("tab", { name: "Upload" }));
 		await dialog.locator('input[type="file"]').setInputFiles(filePath);
 		await dialog.getByLabel("Label").fill(label);
 		await dialog.getByLabel("Alt text").fill(`${label} alt text`);
@@ -470,12 +471,12 @@ export class WebsiteNewsPage {
 		await this.chooseInsert("Link to document");
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
-		await dialog.getByRole("tab", { name: "Upload" }).click();
+		await clickHydrated(dialog.getByRole("tab", { name: "Upload" }));
 		await expect(dialog.locator('input[type="file"]')).toHaveAttribute(
 			"accept",
 			/application\/pdf/,
 		);
-		await dialog.getByRole("tab", { name: "Select" }).click();
+		await clickHydrated(dialog.getByRole("tab", { name: "Select" }));
 		const asset = dialog.getByRole("gridcell", { name: assetLabel });
 		await expect(asset).toHaveCount(1);
 		await asset.click();
@@ -978,6 +979,8 @@ export class WebsiteNewsPage {
 		galleryCaption?: string;
 		/** 1-based index of the item to move one place earlier, as the panel labels them. */
 		moveEarlier?: number;
+		/** Text to type at the end of an item's custom caption after the move, before Apply. */
+		editAfterMove?: { position: number; append: string };
 	}): Promise<void> {
 		await this.chooseInsert("Gallery");
 
@@ -1020,6 +1023,15 @@ export class WebsiteNewsPage {
 				.click();
 		}
 
+		if (options.editAfterMove != null) {
+			const textbox = block.getByRole("textbox", {
+				name: `Custom caption for image ${String(options.editAfterMove.position)}`,
+			});
+			await textbox.click();
+			await textbox.press("End");
+			await textbox.pressSequentially(options.editAfterMove.append);
+		}
+
 		await block.getByRole("button", { name: "Apply" }).click();
 	}
 
@@ -1032,6 +1044,7 @@ export class WebsiteNewsPage {
 		captions: Array<string>;
 		galleryCaption?: string;
 		moveEarlier?: number;
+		editAfterMove?: { position: number; append: string };
 	}): Promise<void> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
 		await this.page.getByRole("menuitem", { name: "Content" }).click();
@@ -1049,6 +1062,7 @@ export class WebsiteNewsPage {
 			captions: options.captions,
 			galleryCaption: options.galleryCaption,
 			moveEarlier: options.moveEarlier,
+			editAfterMove: options.editAfterMove,
 		});
 
 		/**

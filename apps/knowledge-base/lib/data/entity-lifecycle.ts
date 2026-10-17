@@ -48,19 +48,27 @@ export interface EntityLifecycleAdapter {
 	 * Copy the subtype row (and any subtype-owned children) from sourceVersionId to targetVersionId.
 	 * targetVersionId already exists as an entity_versions row.
 	 */
-	cloneSubtype(tx: Transaction, sourceVersionId: string, targetVersionId: string): Promise<void>;
+	cloneSubtype: (
+		tx: Transaction,
+		sourceVersionId: string,
+		targetVersionId: string,
+	) => Promise<void>;
 
 	/**
 	 * Replace subtype-owned rows for an existing target version from a source version. Adapters can
 	 * override this when replacement must preserve rows owned by other versions.
 	 */
-	replaceSubtype?(tx: Transaction, sourceVersionId: string, targetVersionId: string): Promise<void>;
+	replaceSubtype?: (
+		tx: Transaction,
+		sourceVersionId: string,
+		targetVersionId: string,
+	) => Promise<void>;
 
 	/**
 	 * Delete the subtype row (and any subtype-owned children) for versionId, in preparation for it
 	 * being overwritten. Do NOT delete the entity_versions row itself — the caller does that.
 	 */
-	wipeSubtype(tx: Transaction, versionId: string): Promise<void>;
+	wipeSubtype: (tx: Transaction, versionId: string) => Promise<void>;
 }
 
 /**

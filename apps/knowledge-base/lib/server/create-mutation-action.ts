@@ -23,9 +23,10 @@ import { type ServerAction, createServerAction } from "@/lib/server/create-serve
 
 /**
  * What the mutate function returns. - `auditSummary` is merged into the audit row's summary field.
- * - `successMessage` / `successData` are forwarded to the response when no redirect is set. Set
- * these from inside `mutate` (where the action's own `t = await getExtracted()` binding lives, so
- * the i18n extractor can see the `t(...)` calls). Don't try to pass `t` via the wrapper.
+ *
+ * - `successMessage` / `successData` are forwarded to the response when no redirect is set. Set these
+ *   from inside `mutate` (where the action's own `t = await getExtracted()` binding lives, so the
+ *   i18n extractor can see the `t(...)` calls). Don't try to pass `t` via the wrapper.
  */
 export interface MutationResult<TSuccessData = unknown> {
 	subjectId: string;

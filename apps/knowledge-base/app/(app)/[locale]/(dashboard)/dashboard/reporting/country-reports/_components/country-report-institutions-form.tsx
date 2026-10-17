@@ -52,7 +52,9 @@ function useRepresentationLabel(): (
 ) => string | null {
 	const t = useExtracted();
 
-	return (type) => {
+	function getRepresentationLabel(
+		type: CountryReportInstitutionRepresentation | null,
+	): string | null {
 		switch (type) {
 			case null: {
 				return null;
@@ -70,7 +72,9 @@ function useRepresentationLabel(): (
 				return null;
 			}
 		}
-	};
+	}
+
+	return getRepresentationLabel;
 }
 
 function institutionLabel(name: string, acronym: string | null): string {

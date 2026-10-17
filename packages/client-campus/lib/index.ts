@@ -151,9 +151,7 @@ function createListAll<TParams extends object, TItem>(
 			let offset = 0;
 			let total = Infinity;
 
-			// oxlint-disable-next-line typescript/no-unnecessary-condition
 			while (offset < total) {
-				// oxlint-disable-next-line no-await-in-loop
 				const { data } = yield* Result.await(getPage({ ...params, limit: pageSize, offset }));
 				items.push(...data.items);
 				total = data.total;

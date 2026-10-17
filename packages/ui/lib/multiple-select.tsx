@@ -87,6 +87,7 @@ export function MultipleSelect<T extends OptionBase>(
 	const { contains } = useFilter({ sensitivity: "base" });
 
 	const { before, after, list } = useMemo(() => {
+		// oxlint-disable-next-line react/no-react-children -- splits the children around the search field by display name.
 		const arr = Children.toArray(children);
 		const idx = arr.findIndex(
 			// @ts-expect-error -- display name
