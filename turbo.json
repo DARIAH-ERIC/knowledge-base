@@ -168,6 +168,11 @@
 			"inputs": ["$TURBO_DEFAULT$", "**/.env.local", "**/.env.*.local"],
 			"outputs": ["coverage/**"]
 		},
+		"test:storybook": {
+			"cache": false,
+			"dependsOn": ["^build"],
+			"env": ["PLAYWRIGHT_BROWSERS_PATH"]
+		},
 		"test:e2e": {
 			"cache": false,
 			"dependsOn": ["^build"],
