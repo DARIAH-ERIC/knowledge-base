@@ -1,250 +1,223 @@
 "use client";
 
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
-import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
 import { useExtracted } from "next-intl";
-import {
-	type ComponentProps,
-	type HTMLAttributes,
-	type KeyboardEvent,
-	type ReactNode,
-	createContext,
-	use,
-	useCallback,
-	useEffect,
-	useState,
-} from "react";
+import { type ReactNode, type RefObject, useEffect, useId, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
-import { Button, type ButtonProps } from "@/lib/button";
-import { cx } from "@/lib/primitive";
+import { buttonStyles } from "@/lib/button-styles";
 
-export type CarouselApi = UseEmblaCarouselType[1];
-type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
-type CarouselOptions = UseCarouselParameters[0];
-type CarouselPlugin = UseCarouselParameters[1];
+/**
+ * How far, in css pixels, the strip may sit off an edge and still count as at it — scroll positions
+ * are fractional.
+ */
+const edgeTolerance = 1;
 
-type CarouselContextProps = {
-	carouselRef: ReturnType<typeof useEmblaCarousel>[0];
-	api: ReturnType<typeof useEmblaCarousel>[1];
-	scrollPrev: () => void;
-	scrollNext: () => void;
-	canScrollPrev: boolean;
-	canScrollNext: boolean;
-} & CarouselProps;
+type Direction = "previous" | "next";
 
-const CarouselContext = createContext<CarouselContextProps | null>(null);
+/** Whether the strip can still scroll towards its start, and towards its end. */
+type ScrollState = Record<Direction, boolean>;
 
-const useCarousel = () => {
-	const context = use(CarouselContext);
+/**
+ * Where the strip can still scroll to, or `null` until it has been measured — before hydration.
+ *
+ * Read from the scroll offset's magnitude, which is the distance from the start edge in either
+ * writing direction — in a right-to-left strip, `scrollLeft` counts down from zero. Slides as well
+ * as the strip are observed, since an image that settles on a different width changes how far the
+ * strip can scroll without resizing the strip itself.
+ */
+function useScrollState(ref: RefObject<HTMLElement | null>): ScrollState | null {
+	const [scrollState, setScrollState] = useState<ScrollState | null>(null);
 
-	if (!context) {
-		throw new Error("useCarousel must be used within a <Carousel />");
-	}
+	useEffect(() => {
+		const scroller = ref.current;
 
-	return context;
-};
-
-interface CarouselRootProps {
-	CarouselContent?: typeof CarouselContent;
-	CarouselHandler?: typeof CarouselHandler;
-	CarouselItem?: typeof CarouselItem;
-	CarouselButton?: typeof CarouselButton;
-}
-
-interface CarouselProps extends HTMLAttributes<HTMLDivElement>, CarouselRootProps {
-	opts?: CarouselOptions;
-	plugins?: CarouselPlugin;
-	orientation?: "horizontal" | "vertical";
-	setApi?: (api: CarouselApi) => void;
-}
-
-export function Carousel({
-	orientation = "horizontal",
-	opts,
-	setApi,
-	plugins,
-	className,
-	children,
-	...props
-}: Readonly<CarouselProps>): ReactNode {
-	const [carouselRef, api] = useEmblaCarousel(
-		{
-			...opts,
-			axis: orientation === "horizontal" ? "x" : "y",
-		},
-		plugins,
-	);
-	const [canScrollPrev, setCanScrollPrev] = useState(false);
-	const [canScrollNext, setCanScrollNext] = useState(false);
-
-	const onSelect = useCallback((api: CarouselApi) => {
-		if (!api) {
+		if (scroller == null) {
 			return;
 		}
 
-		setCanScrollPrev(api.canScrollPrev());
-		setCanScrollNext(api.canScrollNext());
-	}, []);
-
-	const scrollPrev = useCallback(() => {
-		api?.scrollPrev();
-	}, [api]);
-
-	const scrollNext = useCallback(() => {
-		api?.scrollNext();
-	}, [api]);
-
-	const handleKeyDown = useCallback(
-		(event: KeyboardEvent<HTMLDivElement>) => {
-			if (event.key === "ArrowLeft") {
-				event.preventDefault();
-				scrollPrev();
-			} else if (event.key === "ArrowRight") {
-				event.preventDefault();
-				scrollNext();
+		function update() {
+			if (scroller == null) {
+				return;
 			}
-		},
-		[scrollPrev, scrollNext],
-	);
 
-	useEffect(() => {
-		if (!api || !setApi) {
-			return;
+			const offset = Math.abs(scroller.scrollLeft);
+			const maxOffset = scroller.scrollWidth - scroller.clientWidth;
+			const previous = offset > edgeTolerance;
+			const next = offset < maxOffset - edgeTolerance;
+
+			/** Kept when unchanged, so scrolling only re-renders as the strip reaches or leaves an edge. */
+			setScrollState((state) =>
+				state?.previous === previous && state.next === next ? state : { previous, next },
+			);
 		}
 
-		setApi(api);
-	}, [api, setApi]);
+		update();
 
-	useEffect(() => {
-		if (!api) {
-			return;
+		scroller.addEventListener("scroll", update, { passive: true });
+
+		const observer = new ResizeObserver(update);
+		observer.observe(scroller);
+		for (const slide of scroller.children) {
+			observer.observe(slide);
 		}
-
-		// eslint-disable-next-line react-hooks/set-state-in-effect
-		onSelect(api);
-		api.on("reInit", onSelect);
-		api.on("select", onSelect);
 
 		return () => {
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-			api?.off("select", onSelect);
+			scroller.removeEventListener("scroll", update);
+			observer.disconnect();
 		};
-	}, [api, onSelect]);
+	}, [ref]);
 
-	return (
-		<CarouselContext
-			value={{
-				carouselRef,
-				api,
-				opts,
-				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-				orientation: orientation ?? (opts?.axis === "y" ? "vertical" : "horizontal"),
-				scrollPrev,
-				scrollNext,
-				canScrollPrev,
-				canScrollNext,
-			}}
-		>
-			<div
-				aria-roledescription="carousel"
-				className={twMerge("relative", className)}
-				onKeyDownCapture={handleKeyDown}
-				role="region"
-				{...props}
-			>
-				{children}
-			</div>
-		</CarouselContext>
-	);
+	return scrollState;
 }
 
-export function CarouselContent({
-	className,
-	...props
-}: Readonly<ComponentProps<"div">>): ReactNode {
-	const { carouselRef, orientation } = useCarousel();
+/**
+ * `aria-disabled` rather than `disabled`, which `buttonStyles` dims on its own: the edge buttons
+ * stay focusable, so they need the same dimming, and their hover overlay held back.
+ */
+const buttonClassName = twMerge(
+	buttonStyles({ intent: "outline", size: "sq-sm", isCircle: true }),
+	"shrink-0 aria-disabled:opacity-50 aria-disabled:hover:bg-(--btn-bg) forced-colors:aria-disabled:text-[GrayText]",
+);
 
-	return (
-		<div ref={carouselRef} className="overflow-hidden">
-			<div
-				className={twMerge(
-					"flex",
-					orientation === "horizontal" ? "-ms-4" : "-mbs-4 flex-col",
-					className,
-				)}
-				{...props}
-			/>
-		</div>
-	);
-}
+type CarouselProps = {
+	slides: Array<ReactNode>;
+} & (
+	| {
+			/** What the strip holds, for its accessible name — e.g. "Image gallery". */
+			label: string;
+			labelledBy?: never;
+	  }
+	| {
+			/** The id of a visible label, such as the gallery's own caption, to name the strip by instead. */
+			labelledBy: string;
+			label?: never;
+	  }
+);
 
-export function CarouselItem({ className, ...props }: Readonly<ComponentProps<"div">>): ReactNode {
-	const { orientation } = useCarousel();
+/**
+ * A row of slides that scrolls sideways, one slide snapping to the start edge at a time.
+ *
+ * Native scrolling, not a transform-driven carousel, so touch, trackpad and shift-wheel scrolling
+ * work as anywhere else, and the strip still scrolls before hydration. Once measured, a previous
+ * and a next button below it serve readers on a mouse, who cannot swipe and rarely know to
+ * shift-scroll. Below rather than laid over the strip's edges, where they would cover part of a
+ * photo, and — with slides of different heights — the caption of a shorter one. Their row keeps its
+ * space, unseen, until the strip has been measured, so it does not push the content below down as
+ * it appears; only a strip whose slides turn out to fit drops it.
+ *
+ * A button at its edge is `aria-disabled` rather than `disabled` or hidden, either of which would
+ * drop its focus to the body as a keyboard reaches the end. The strip itself takes focus too, so a
+ * keyboard can scroll it with the arrow keys — chromium and firefox already make a scroller
+ * focusable, safari does not.
+ *
+ * A list, and a `group` rather than a `region` landmark, so a page with several galleries gets no
+ * landmark for each and a screen reader still announces a slide's position in the set. The buttons
+ * point at the list with `aria-controls`, as in the aria practices guide's carousel example.
+ */
+export function Carousel(props: Readonly<CarouselProps>): ReactNode {
+	const { label, labelledBy, slides } = props;
 
-	return (
-		<div
-			className={twMerge(
-				"group/carousel-item relative shrink-0 grow-0 basis-full min-inline-0 focus:outline-hidden focus-visible:outline-hidden",
-				orientation === "horizontal" ? "ps-4" : "pbs-4",
-				className,
-			)}
-			{...props}
-		/>
-	);
-}
-
-export function CarouselHandler({
-	ref,
-	className,
-	...props
-}: Readonly<ComponentProps<"div">>): ReactNode {
-	const { orientation } = useCarousel();
-	return (
-		<div
-			ref={ref}
-			className={twMerge(
-				"relative z-10 mbs-6 flex items-center gap-x-2",
-				orientation === "horizontal" ? "justify-end" : "justify-center",
-				className,
-			)}
-			data-slot="carousel-handler"
-			{...props}
-		/>
-	);
-}
-
-export function CarouselButton({
-	segment,
-	className,
-	intent = "outline",
-	isCircle = true,
-	size = "sq-sm",
-	ref,
-	...props
-}: Readonly<ButtonProps & { segment: "previous" | "next" }>): ReactNode {
 	const t = useExtracted("ui");
 
-	const { orientation, scrollPrev, canScrollPrev, scrollNext, canScrollNext } = useCarousel();
-	const isNext = segment === "next";
-	const canScroll = isNext ? canScrollNext : canScrollPrev;
-	const scroll = isNext ? scrollNext : scrollPrev;
-	const Icon = isNext ? ChevronRightIcon : ChevronLeftIcon;
+	const listId = useId();
+	const scrollerRef = useRef<HTMLUListElement>(null);
+	const scrollState = useScrollState(scrollerRef);
+
+	function scrollBySlide(direction: Direction) {
+		const scroller = scrollerRef.current;
+
+		if (scroller == null || scrollState?.[direction] !== true) {
+			return;
+		}
+
+		const isRtl = getComputedStyle(scroller).direction === "rtl";
+		const scrollerRect = scroller.getBoundingClientRect();
+
+		/** Each slide's start edge, measured from the strip's start edge along the inline axis. */
+		const offsets = Array.from(scroller.children, (slide) => {
+			const rect = slide.getBoundingClientRect();
+
+			return isRtl ? scrollerRect.right - rect.right : rect.left - scrollerRect.left;
+		});
+
+		/**
+		 * The first slide past the start edge, or the last one before it. The edge rather than the
+		 * slide in view, so a press mid-way through a smooth scroll continues from wherever the strip
+		 * has got to.
+		 */
+		const delta =
+			direction === "next"
+				? offsets.find((offset) => offset > edgeTolerance)
+				: offsets.findLast((offset) => offset < -edgeTolerance);
+
+		if (delta == null) {
+			return;
+		}
+
+		/**
+		 * No `behavior`: the strip's own `scroll-behavior` decides, which is smooth unless reduced
+		 * motion is asked for.
+		 */
+		scroller.scrollBy({ left: isRtl ? -delta : delta });
+	}
 
 	return (
-		<Button
-			ref={ref}
-			aria-label={isNext ? t("Next slide") : t("Previous slide")}
-			className={cx([orientation === "vertical" ? "rotate-90" : "", "shrink-0"], className)}
-			data-handler={segment}
-			intent={intent}
-			isCircle={isCircle}
-			isDisabled={!canScroll}
-			onPress={scroll}
-			size={size}
-			{...props}
+		<div
+			aria-label={label}
+			aria-labelledby={labelledBy}
+			aria-roledescription={t("carousel")}
+			role="group"
 		>
-			<Icon className="block-4 inline-4" />
-		</Button>
+			<ul
+				ref={scrollerRef}
+				id={listId}
+				className="flex snap-x snap-mandatory list-none gap-4 overflow-x-auto p-0 pbe-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-safe:scroll-smooth"
+				// oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- A scroller safari does not make focusable itself, see above.
+				tabIndex={0}
+				// oxlint-disable-next-line jsx-a11y/no-redundant-roles -- Webkit drops list semantics from a list styled without markers.
+				role="list"
+			>
+				{slides.map((slide, index) => (
+					// oxlint-disable-next-line react/no-array-index-key -- Slides carry no id of their own.
+					<li key={index} className="shrink-0 snap-start">
+						{slide}
+					</li>
+				))}
+			</ul>
+			{scrollState != null && !scrollState.previous && !scrollState.next ? null : (
+				<div
+					className={twMerge(
+						"mbs-2 flex justify-end gap-x-2",
+						scrollState == null ? "invisible" : undefined,
+					)}
+				>
+					<button
+						aria-controls={listId}
+						aria-disabled={scrollState?.previous !== true}
+						aria-label={t("Previous slide")}
+						className={buttonClassName}
+						onClick={() => {
+							scrollBySlide("previous");
+						}}
+						type="button"
+					>
+						<ChevronLeftIcon aria-hidden={true} className="block-4 inline-4 rtl:-scale-x-100" />
+					</button>
+					<button
+						aria-controls={listId}
+						aria-disabled={scrollState?.next !== true}
+						aria-label={t("Next slide")}
+						className={buttonClassName}
+						onClick={() => {
+							scrollBySlide("next");
+						}}
+						type="button"
+					>
+						<ChevronRightIcon aria-hidden={true} className="block-4 inline-4 rtl:-scale-x-100" />
+					</button>
+				</div>
+			)}
+		</div>
 	);
 }

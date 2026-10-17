@@ -85,7 +85,6 @@ catalog:
   drizzle-kit: rc
   drizzle-orm: rc
   drizzle-seed: rc
-  embla-carousel-react: ^8.6.0
   eslint-plugin-better-tailwindcss: ^4.7.0
   eslint-plugin-drizzle: rc
   eslint-plugin-playwright: ^2.11.0

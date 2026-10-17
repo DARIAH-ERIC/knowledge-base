@@ -111,13 +111,18 @@ msgstr "Select year"
 
 #: ../../packages/ui/lib/carousel.tsx
 msgctxt "ui"
-msgid "Y9bYKH"
-msgstr "Next slide"
+msgid "c7T-Ci"
+msgstr "carousel"
 
 #: ../../packages/ui/lib/carousel.tsx
 msgctxt "ui"
 msgid "MH3koz"
 msgstr "Previous slide"
+
+#: ../../packages/ui/lib/carousel.tsx
+msgctxt "ui"
+msgid "Y9bYKH"
+msgstr "Next slide"
 
 #: ../../packages/ui/lib/command-menu.tsx
 msgctxt "ui"
