@@ -110,13 +110,18 @@ msgid "Select year"
 msgstr ""
 
 #: lib/carousel.tsx
-msgctxt "ui.Y9bYKH"
-msgid "Next slide"
-msgstr ""
+msgctxt "ui.c7T-Ci"
+msgid "carousel"
+msgstr "carousel"
 
 #: lib/carousel.tsx
 msgctxt "ui.MH3koz"
 msgid "Previous slide"
+msgstr ""
+
+#: lib/carousel.tsx
+msgctxt "ui.Y9bYKH"
+msgid "Next slide"
 msgstr ""
 
 #: lib/command-menu.tsx

@@ -110,13 +110,18 @@ msgid "Select year"
 msgstr ""
 
 #: ../../packages/ui/lib/carousel.tsx
-msgctxt "ui.Y9bYKH"
-msgid "Next slide"
-msgstr ""
+msgctxt "ui.c7T-Ci"
+msgid "carousel"
+msgstr "carousel"
 
 #: ../../packages/ui/lib/carousel.tsx
 msgctxt "ui.MH3koz"
 msgid "Previous slide"
+msgstr ""
+
+#: ../../packages/ui/lib/carousel.tsx
+msgctxt "ui.Y9bYKH"
+msgid "Next slide"
 msgstr ""
 
 #: ../../packages/ui/lib/command-menu.tsx
@@ -2550,6 +2555,16 @@ msgstr ""
 msgctxt "jXwIPj"
 msgid "Reset to centre"
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/focal-point-field.tsx
+msgctxt "XIaDY5"
+msgid "Crop outlined on the image"
+msgstr "Crop outlined on the image"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/focal-point-field.tsx
+msgctxt "Aj-8Pj"
+msgid "All crops"
+msgstr "All crops"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/image-caption-mode-field.tsx
 msgctxt "ZPLjxQ"
@@ -8726,9 +8741,9 @@ msgid "No assets match your filters."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx
-msgctxt "LUrZ38"
-msgid "Update label, alt text, caption, and focal point for this asset."
-msgstr ""
+msgctxt "wiDCsL"
+msgid "Label, alt text, caption, and focal point belong to this asset, so changes apply wherever it is used."
+msgstr "Label, alt text, caption, and focal point belong to this asset, so changes apply wherever it is used."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx
 msgctxt "23lI3e"
@@ -8745,6 +8760,11 @@ msgstr ""
 msgctxt "DAQ44c"
 msgid "Describe the image for accessibility"
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx
+msgctxt "mTFle9"
+msgid "Shown with the image by default. Where the image is placed, the caption can be replaced or hidden for that placement only."
+msgstr "Shown with the image by default. Where the image is placed, the caption can be replaced or hidden for that placement only."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
 msgctxt "IKdCiO"

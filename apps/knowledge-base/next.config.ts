@@ -23,6 +23,11 @@ const config: Config = {
 	experimental: {
 		authInterrupts: true,
 		globalNotFound: true,
+		/**
+		 * `proxy.ts` buffers request bodies and truncates them at this limit (default 10mb) before they
+		 * reach server actions. Must be at least `serverActions.bodySizeLimit`.
+		 */
+		proxyClientMaxBodySize: "24mb",
 		serverActions: {
 			/**
 			 * Must be larger than `imageSizeLimit` in `config/assets.config.ts` to allow multipart

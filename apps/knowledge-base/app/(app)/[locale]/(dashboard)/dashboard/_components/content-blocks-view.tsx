@@ -2,6 +2,7 @@
 
 import { type ImageCaptionMode, resolveImageCaption } from "@dariah-eric/database/image-captions";
 import { ButtonLink } from "@dariah-eric/ui/button-link";
+import { Carousel } from "@dariah-eric/ui/carousel";
 import { InlineRichTextRenderer } from "@dariah-eric/ui/inline-rich-text-renderer";
 import { Note } from "@dariah-eric/ui/note";
 import {
@@ -300,7 +301,12 @@ function getEmbedHostname(url: string): string | null {
 function CaptionFigcaption({
 	caption,
 	className,
-}: Readonly<{ caption: JSONContent | null | undefined; className?: string }>): ReactNode {
+	id,
+}: Readonly<{
+	caption: JSONContent | null | undefined;
+	className?: string;
+	id?: string;
+}>): ReactNode {
 	if (isEmptyRichTextDocument(caption)) {
 		return null;
 	}
@@ -314,7 +320,7 @@ function CaptionFigcaption({
 		 * its own `richtext` wrapper, which re-declares colour and size, so anything inherited from
 		 * the `figcaption` is overridden before it reaches the text. The element keeps the spacing.
 		 */
-		<figcaption className={twMerge("mbs-2", className)}>
+		<figcaption className={twMerge("mbs-2", className)} id={id}>
 			{/* A caption takes footnotes where its article does, and its markers are numbered by the same
 			    walk as the prose (`numberFootnotes` reaches node attributes), so they anchor the same way
 			    — otherwise a caption's marker would be the one number on the page that links nowhere. */}
@@ -436,6 +442,8 @@ interface ContentBlockViewProps {
 }
 
 function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): ReactNode {
+	const galleryCaptionId = useId();
+
 	switch (contentBlock.type) {
 		case "callout": {
 			const intent = contentBlock.content?.intent ?? "info";
@@ -540,6 +548,33 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 				return null;
 			}
 
+			// Built outside the JSX, where a callback in a prop reads to the linter as a nested component.
+			const carouselSlides =
+				layout === "carousel"
+					? items.flatMap((item, idx) => {
+							if (item.imageUrl == null || item.imageUrl === "") {
+								return [];
+							}
+
+							const { caption } = resolveGalleryItemCaption(item);
+
+							return [
+								// The slide is a cap, not a fixed width: it takes the image's natural width up
+								// to `min(20rem, 80vw)`, so a narrow source makes a narrow slide rather than
+								// being stretched across an oversized one.
+								// oxlint-disable-next-line react/no-array-index-key -- read-only render; gallery items have no identity of their own.
+								<figure key={idx} className="max-inline-[min(20rem,80vw)]">
+									<img
+										alt={toPlainText(caption)}
+										className="ms-auto me-auto rounded-lg inline-auto max-block-96 max-inline-full"
+										src={item.imageUrl}
+									/>
+									<CaptionFigcaption caption={caption} />
+								</figure>,
+							];
+						})
+					: [];
+
 			const images =
 				layout === "logos" ? (
 					// A logo row is a list of marks to recognise, not a set of images to look at, so it
@@ -576,30 +611,14 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 						})}
 					</ul>
 				) : layout === "carousel" ? (
-					<div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pbe-2">
-						{items.map((item, idx) => {
-							if (item.imageUrl == null || item.imageUrl === "") {
-								return null;
-							}
-
-							const { caption } = resolveGalleryItemCaption(item);
-
-							return (
-								// The slide is a cap, not a fixed width: it takes the image's natural width up
-								// to `min(20rem, 80vw)`, so a narrow source makes a narrow slide rather than
-								// being stretched across an oversized one.
-								// oxlint-disable-next-line react/no-array-index-key -- read-only render; gallery items have no identity of their own.
-								<figure key={idx} className="shrink-0 snap-start max-inline-[min(20rem,80vw)]">
-									<img
-										alt={toPlainText(caption)}
-										className="ms-auto me-auto rounded-lg inline-auto max-block-96 max-inline-full"
-										src={item.imageUrl}
-									/>
-									<CaptionFigcaption caption={caption} />
-								</figure>
-							);
-						})}
-					</div>
+					// Named by the gallery's own caption when it has one, so two galleries on a page are
+					// told apart by what they show rather than both reading as "Image gallery".
+					<Carousel
+						{...(isEmptyRichTextDocument(galleryCaption)
+							? { label: "Image gallery" }
+							: { labelledBy: galleryCaptionId })}
+						slides={carouselSlides}
+					/>
 				) : (
 					// The track minimum is derived from the content column, not picked: the reading
 					// surfaces cap it at `--breakpoint-md` (48rem), so two tracks plus the 1rem gap
@@ -650,7 +669,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			return (
 				<figure className={blockFigurePadding}>
 					{images}
-					<CaptionFigcaption caption={galleryCaption} />
+					<CaptionFigcaption caption={galleryCaption} id={galleryCaptionId} />
 				</figure>
 			);
 		}

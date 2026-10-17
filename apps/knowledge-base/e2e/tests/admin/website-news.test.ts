@@ -1,7 +1,9 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
+import { stat } from "node:fs/promises";
 import { join } from "node:path";
 
 import type { JSONContent } from "@tiptap/core";
+import sharp from "sharp";
 
 import { imageSizeLimit } from "@/config/assets.config";
 import { openActionsMenu } from "@/e2e/lib/fixtures/actions-menu";
@@ -205,6 +207,36 @@ test.describe("website news admin", () => {
 			),
 		).toBeVisible();
 		await expect(dialog.getByRole("button", { name: "Upload" })).toBeDisabled();
+	});
+
+	/**
+	 * Server action requests pass through `proxy.ts`, which truncates bodies at
+	 * `proxyClientMaxBodySize` (10mb by default) independently of `serverActions.bodySizeLimit`.
+	 */
+	test("should upload an image larger than the default proxy body size limit", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const newsPage = createWebsiteNewsPage(workerIndex);
+
+		const imageLabel = `${newsPage.workerPrefix} Large Image ${randomUUID()}`;
+		const filePath = test.info().outputPath("large.png");
+
+		/** Random noise barely compresses, so a 2000x2000 RGB png is roughly 12mb. */
+		const width = 2000;
+		const height = 2000;
+		await sharp(randomBytes(width * height * 3), { raw: { width, height, channels: 3 } })
+			.png({ compressionLevel: 0 })
+			.toFile(filePath);
+		const { size } = await stat(filePath);
+		expect(size).toBeGreaterThan(10 * 1024 * 1024);
+		expect(size).toBeLessThan(imageSizeLimit);
+
+		await newsPage.gotoCreate();
+		await newsPage.uploadImageFromMediaLibrary(filePath, imageLabel);
+
+		expect(await db.getAssetByLabel(imageLabel)).not.toBeNull();
 	});
 
 	test("should edit all news item form fields", async ({ page, createWebsiteNewsPage, db }) => {

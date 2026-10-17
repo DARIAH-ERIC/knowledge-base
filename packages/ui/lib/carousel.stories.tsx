@@ -1,12 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import {
-	Carousel,
-	CarouselButton,
-	CarouselContent,
-	CarouselHandler,
-	CarouselItem,
-} from "./carousel";
+import { Carousel } from "./carousel";
 
 const meta = {
 	title: "Components/Carousel",
@@ -15,7 +9,10 @@ const meta = {
 		layout: "centered",
 	},
 	tags: ["autodocs"],
-	args: {},
+	args: {
+		label: "Example slides",
+		slides: [],
+	},
 } satisfies Meta<typeof Carousel>;
 
 export default meta;
@@ -30,54 +27,62 @@ const slides = [
 ];
 
 export const Default: Story = {
-	args: {},
 	render() {
 		return (
 			<div className="inline-80">
-				<Carousel>
-					<CarouselContent>
-						{slides.map((slide) => (
-							<CarouselItem key={slide.id}>
-								<div
-									className={`flex items-center justify-center rounded-xl block-40 ${slide.bg} text-sm font-medium`}
-								>
-									{slide.label}
-								</div>
-							</CarouselItem>
-						))}
-					</CarouselContent>
-					<CarouselHandler>
-						<CarouselButton segment="previous" />
-						<CarouselButton segment="next" />
-					</CarouselHandler>
-				</Carousel>
+				<Carousel
+					label="Example slides"
+					slides={slides.map((slide) => (
+						<div
+							key={slide.id}
+							className={`flex items-center justify-center rounded-xl block-40 inline-64 ${slide.bg} text-sm font-medium`}
+						>
+							{slide.label}
+						</div>
+					))}
+				/>
 			</div>
 		);
 	},
 };
 
-export const MultipleVisible: Story = {
-	args: {},
+/** Slides of different widths, as a gallery of images at their own aspect ratios gives. */
+export const MixedWidths: Story = {
 	render() {
 		return (
 			<div className="inline-96">
-				<Carousel opts={{ align: "start" }}>
-					<CarouselContent>
-						{slides.map((slide) => (
-							<CarouselItem key={slide.id} className="basis-1/2">
-								<div
-									className={`flex items-center justify-center rounded-xl block-32 ${slide.bg} text-sm font-medium`}
-								>
-									{slide.label}
-								</div>
-							</CarouselItem>
-						))}
-					</CarouselContent>
-					<CarouselHandler>
-						<CarouselButton segment="previous" />
-						<CarouselButton segment="next" />
-					</CarouselHandler>
-				</Carousel>
+				<Carousel
+					label="Example slides"
+					slides={slides.map((slide, index) => (
+						<div
+							key={slide.id}
+							className={`flex items-center justify-center rounded-xl block-32 ${index % 2 === 0 ? "inline-48" : "inline-28"} ${slide.bg} text-sm font-medium`}
+						>
+							{slide.label}
+						</div>
+					))}
+				/>
+			</div>
+		);
+	},
+};
+
+/** Slides that fit drop the button row. */
+export const Fitting: Story = {
+	render() {
+		return (
+			<div className="inline-96">
+				<Carousel
+					label="Example slides"
+					slides={slides.slice(0, 2).map((slide) => (
+						<div
+							key={slide.id}
+							className={`flex items-center justify-center rounded-xl block-32 inline-32 ${slide.bg} text-sm font-medium`}
+						>
+							{slide.label}
+						</div>
+					))}
+				/>
 			</div>
 		);
 	},
