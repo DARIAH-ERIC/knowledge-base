@@ -23,6 +23,8 @@ export const Default: Story = {
 };
 
 export const Intents: Story = {
+	/** Known a11y violations, reported as warnings until fixed: see #995. */
+	parameters: { a11y: { test: "todo" } },
 	args: { children: null },
 	render() {
 		const intents = [

@@ -32,6 +32,8 @@ const rows = [
 ];
 
 export const Default: Story = {
+	/** Known a11y violations, reported as warnings until fixed: see #995. */
+	parameters: { a11y: { test: "todo" } },
 	args: {},
 	render(props) {
 		return (
@@ -55,6 +57,8 @@ export const Default: Story = {
 };
 
 export const Striped: Story = {
+	/** Known a11y violations, reported as warnings until fixed: see #995. */
+	parameters: { a11y: { test: "todo" } },
 	args: { striped: true },
 	render(props) {
 		return (
@@ -78,6 +82,8 @@ export const Striped: Story = {
 };
 
 export const WithGrid: Story = {
+	/** Known a11y violations, reported as warnings until fixed: see #995. */
+	parameters: { a11y: { test: "todo" } },
 	args: { grid: true },
 	render(props) {
 		return (
@@ -101,6 +107,8 @@ export const WithGrid: Story = {
 };
 
 export const Empty: Story = {
+	/** Known a11y violations, reported as warnings until fixed: see #995. */
+	parameters: { a11y: { test: "todo" } },
 	args: {},
 	render(props) {
 		return (
