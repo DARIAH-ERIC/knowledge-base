@@ -35,6 +35,10 @@ const { getDariahEricDocumentId } = await import("@/lib/data/unit-relations");
 type Tx = Transaction;
 
 const ACTIVE_DURATION = { start: new Date("2020-01-01T00:00:00.000Z") } as const;
+const ENDED_DURATION = {
+	start: new Date("2020-01-01T00:00:00.000Z"),
+	end: new Date("2021-01-01T00:00:00.000Z"),
+} as const;
 
 function makeUser(
 	overrides: Readonly<{
@@ -123,13 +127,14 @@ async function seedPersonRelation(
 		personDocumentId: string;
 		organisationalUnitDocumentId: string;
 		role: (typeof schema.personRoleTypesEnum)[number];
+		duration?: { start: Date; end?: Date };
 	}>,
 ): Promise<void> {
 	await tx.insert(schema.personsToOrganisationalUnits).values({
 		personDocumentId: input.personDocumentId,
 		organisationalUnitDocumentId: input.organisationalUnitDocumentId,
 		roleTypeId: await roleTypeId(tx, input.role),
-		duration: ACTIVE_DURATION,
+		duration: input.duration ?? ACTIVE_DURATION,
 	});
 }
 
@@ -139,13 +144,14 @@ async function seedUnitRelation(
 		unitDocumentId: string;
 		relatedUnitDocumentId: string;
 		status: (typeof schema.organisationalUnitStatusEnum)[number];
+		duration?: { start: Date; end?: Date };
 	}>,
 ): Promise<void> {
 	await tx.insert(schema.organisationalUnitsRelations).values({
 		unitDocumentId: input.unitDocumentId,
 		relatedUnitDocumentId: input.relatedUnitDocumentId,
 		status: await statusId(tx, input.status),
-		duration: ACTIVE_DURATION,
+		duration: input.duration ?? ACTIVE_DURATION,
 	});
 }
 
@@ -295,6 +301,82 @@ describe("delegated edit guards", () => {
 			await expect(assertCanEditPerson(chairUser, foreignPerson, tx)).rejects.toThrow("REDIRECT");
 			await expect(
 				assertCanEditPerson(makeUser({ role: "admin" }), foreignPerson, tx),
+			).resolves.toBeUndefined();
+		});
+	});
+
+	it("assertCanEditPerson: allows every person a managed unit lists, incl. ended and consortium relations", async () => {
+		await withTransaction(async (tx) => {
+			const country = await seedUnit(tx, "country");
+			const consortium = await seedUnit(tx, "national_consortium");
+			await seedUnitRelation(tx, {
+				unitDocumentId: consortium,
+				relatedUnitDocumentId: country,
+				status: "is_national_consortium_of",
+			});
+			const coordinator = await seedPersonDocument(tx);
+			await seedPersonRelation(tx, {
+				personDocumentId: coordinator,
+				organisationalUnitDocumentId: country,
+				role: "national_coordinator",
+			});
+
+			// A former member is still listed on the country's People tab.
+			const formerMember = await seedPersonDocument(tx);
+			await seedPersonRelation(tx, {
+				personDocumentId: formerMember,
+				organisationalUnitDocumentId: country,
+				role: "national_representative",
+				duration: ENDED_DURATION,
+			});
+
+			const consortiumMember = await seedPersonDocument(tx);
+			await seedPersonRelation(tx, {
+				personDocumentId: consortiumMember,
+				organisationalUnitDocumentId: consortium,
+				role: "national_coordination_staff",
+			});
+
+			const user = makeUser({ personDocumentId: coordinator });
+
+			await expect(assertCanEditPerson(user, formerMember, tx)).resolves.toBeUndefined();
+			await expect(assertCanEditPerson(user, consortiumMember, tx)).resolves.toBeUndefined();
+		});
+	});
+
+	it("country institution guards: allow every institution the Institutions tab lists, incl. ended located-in", async () => {
+		await withTransaction(async (tx) => {
+			const ericDocumentId = await getDariahEricDocumentId();
+			assert(ericDocumentId, "DARIAH ERIC must be seeded for this test");
+
+			const country = await seedUnit(tx, "country");
+			const coordinator = await seedPersonDocument(tx);
+			await seedPersonRelation(tx, {
+				personDocumentId: coordinator,
+				organisationalUnitDocumentId: country,
+				role: "national_coordinator",
+			});
+
+			// `getEricInstitutionsForCountry` lists institutions by any located-in row, current or not.
+			const formerInstitution = await seedUnit(tx, "institution");
+			await seedUnitRelation(tx, {
+				unitDocumentId: formerInstitution,
+				relatedUnitDocumentId: country,
+				status: "is_located_in",
+				duration: ENDED_DURATION,
+			});
+
+			const user = makeUser({ personDocumentId: coordinator });
+
+			await expect(
+				assertCanEditCountryInstitution(user, formerInstitution, tx),
+			).resolves.toBeUndefined();
+			await expect(
+				assertCanManageCountryInstitutionRelation(
+					user,
+					{ institutionDocumentId: formerInstitution, relatedUnitDocumentId: ericDocumentId },
+					tx,
+				),
 			).resolves.toBeUndefined();
 		});
 	});
