@@ -23,5 +23,7 @@ CREATE TABLE IF NOT EXISTS "user_invitations" (
 
 --> statement-breakpoint
 
-CREATE INDEX IF NOT EXISTS "user_invitations_user_id_idx"
+-- At most one invitation per user, so that only the most recently sent link works. Sending a new
+-- one upserts on this index, which also serialises concurrent resends for the same user.
+CREATE UNIQUE INDEX IF NOT EXISTS "user_invitations_user_id_unique"
 	ON "user_invitations" ("user_id");

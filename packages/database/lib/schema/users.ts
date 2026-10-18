@@ -169,7 +169,8 @@ export const userInvitations = p.snakeCase.table(
 		expiresAt: f.timestamp("expires_at").notNull(),
 		...f.timestamps(),
 	},
-	(t) => [p.index("user_invitations_user_id_idx").on(t.userId)],
+	/** At most one invitation per user, so that only the most recently sent link works. */
+	(t) => [p.uniqueIndex("user_invitations_user_id_unique").on(t.userId)],
 );
 
 export type UserInvitation = typeof userInvitations.$inferSelect;

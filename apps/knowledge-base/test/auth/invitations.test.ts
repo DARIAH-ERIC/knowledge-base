@@ -4,7 +4,7 @@ import type { Database } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { describe, expect, it } from "vitest";
 
-import type { Transaction } from "@/lib/db";
+import { type Transaction, db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { withTransaction } from "@/test/lib/with-transaction";
 
@@ -145,6 +145,42 @@ describe("invitations", () => {
 			expect(await auth.getUserInvitation(first.token)).toBeNull();
 			expect(await auth.getUserInvitation(second.token)).not.toBeNull();
 		});
+	});
+
+	/**
+	 * Needs real concurrency, so unlike the rest of the suite this commits to the database (and
+	 * cleans up after itself). Each replacement holds its transaction open for a moment, as the
+	 * resend action does while it sends the email, so that the transactions reliably overlap.
+	 */
+	it("keeps a single valid link when invitations are replaced concurrently", async () => {
+		const auth = createTestAuthService(db as unknown as Transaction);
+		const email = createEmail();
+		const user = await auth.createInvitedUser(email, "Invitee");
+
+		try {
+			const tokens = await Promise.all(
+				Array.from({ length: 3 }, () =>
+					db.transaction(async (tx) => {
+						const { token } = await auth.createUserInvitation(user.id, email, tx);
+						await new Promise((resolve) => {
+							setTimeout(resolve, 100);
+						});
+						return token;
+					}),
+				),
+			);
+
+			const rows = await db
+				.select({ id: schema.userInvitations.id })
+				.from(schema.userInvitations)
+				.where(eq(schema.userInvitations.userId, user.id));
+			expect(rows).toHaveLength(1);
+
+			const valid = await Promise.all(tokens.map((token) => auth.getUserInvitation(token)));
+			expect(valid.filter((invitation) => invitation != null)).toHaveLength(1);
+		} finally {
+			await db.delete(schema.users).where(eq(schema.users.id, user.id));
+		}
 	});
 
 	it("rejects expired invitations", async () => {

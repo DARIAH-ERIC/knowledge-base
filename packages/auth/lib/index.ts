@@ -681,23 +681,27 @@ export function createAuthService(params: CreateAuthServiceParams) {
 	/**
 	 * Replaces any earlier invitation for the user, so only the most recently sent link works. The
 	 * returned token goes into the emailed link; only its hash is stored.
+	 *
+	 * A single upsert on the unique `user_id` rather than delete-then-insert: concurrent resends
+	 * would otherwise both delete before either inserts, leaving two valid links. With the upsert, a
+	 * second transaction waits on the first's row and then overwrites it.
 	 */
 	async function createUserInvitation(
 		userId: string,
 		email: string,
 		tx: Database | Transaction = db,
 	): Promise<{ token: string; expiresAt: Date }> {
-		await tx.delete(schema.userInvitations).where(eq(schema.userInvitations.userId, userId));
-
 		const token = generateRandomString();
+		const id = hashSessionSecret(token).toString("hex");
 		const expiresAt = new Date(Date.now() + config.invitations.durationMs);
 
-		await tx.insert(schema.userInvitations).values({
-			id: hashSessionSecret(token).toString("hex"),
-			userId,
-			email,
-			expiresAt,
-		});
+		await tx
+			.insert(schema.userInvitations)
+			.values({ id, userId, email, expiresAt })
+			.onConflictDoUpdate({
+				target: schema.userInvitations.userId,
+				set: { id, email, expiresAt, updatedAt: new Date() },
+			});
 
 		return { token, expiresAt };
 	}
