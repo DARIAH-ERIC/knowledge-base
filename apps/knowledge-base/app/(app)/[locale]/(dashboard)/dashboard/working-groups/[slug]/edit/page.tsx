@@ -52,6 +52,7 @@ export default async function WorkingGroupEditPage(
 
 	const [
 		{ items: initialAssets },
+		{ items: initialPersonAssets },
 		initialSocialMedia,
 		data,
 		personRelations,
@@ -59,6 +60,7 @@ export default async function WorkingGroupEditPage(
 		{ items: initialPersonItems, total: initialPersonTotal },
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "avatars" }),
 		getSocialMediaOptions(),
 		getOrganisationalUnitEditData({
 			slug,
@@ -89,6 +91,7 @@ export default async function WorkingGroupEditPage(
 		<DelegatedWorkingGroupEditForm
 			documentId={workingGroup.documentId}
 			initialAssets={initialAssets}
+			initialPersonAssets={initialPersonAssets}
 			initialPersonItems={initialPersonItems}
 			initialPersonTotal={initialPersonTotal}
 			initialSocialMediaIds={data.socialMediaIds}

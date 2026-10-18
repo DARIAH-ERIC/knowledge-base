@@ -108,7 +108,9 @@ export const updateContributionAction = createServerAction(
 						organisationalUnitDocumentId,
 						roleTypeId,
 						duration,
-						description,
+						// Only admins may set the description (see `createContributionAction`); a delegated
+						// edit keeps whatever an admin wrote.
+						...(user.role === "admin" ? { description } : {}),
 					})
 					.where(eq(schema.personsToOrganisationalUnits.id, id));
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
+import { assert, getFormDataValues } from "@acdh-oeaw/lib";
 import {
 	type GetValidationErrors,
 	createActionStateError,
@@ -14,6 +14,7 @@ import type { UploadedAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import { UploadImageInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.schema";
 import { imageGridOptions } from "@/config/assets.config";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
+import { canUploadAssets } from "@/lib/auth/asset-permissions";
 import { uploadAsset } from "@/lib/data/assets";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -24,54 +25,56 @@ import { createServerAction } from "@/lib/server/create-server-action";
 export const uploadImageAction = createServerAction<
 	UploadedAsset,
 	GetValidationErrors<typeof UploadImageInputSchema>
->(
-	// FIXME: should use a coarser-grained "can upload assets" capability instead of requireAdmin
-	{ requireAdmin: true },
-	async function uploadImageAction(state, formData, { user }) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+>({ requireAuth: true }, async function uploadImageAction(state, formData, { user }) {
+	const locale = await getLocale();
+	const t = await getExtracted();
 
-		const validation = await v.safeParseAsync(UploadImageInputSchema, getFormDataValues(formData), {
-			lang: getIntlLanguage(locale),
+	assert(user != null);
+	// Returned as an error rather than redirected, so a form the media library sits in survives.
+	if (!(await canUploadAssets(user))) {
+		return createActionStateError({ message: t("You are not allowed to upload files.") });
+	}
+
+	const validation = await v.safeParseAsync(UploadImageInputSchema, getFormDataValues(formData), {
+		lang: getIntlLanguage(locale),
+	});
+
+	if (!validation.success) {
+		const errors = v.flatten<typeof UploadImageInputSchema>(validation.issues);
+		return createActionStateError({
+			formData,
+			message: errors.root ?? t("Invalid or missing fields."),
+			validationErrors: errors.nested,
 		});
+	}
 
-		if (!validation.success) {
-			const errors = v.flatten<typeof UploadImageInputSchema>(validation.issues);
-			return createActionStateError({
-				formData,
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
+	const { file, licenseId, prefix, label, alt, caption } = validation.output;
 
-		const { file, licenseId, prefix, label, alt, caption } = validation.output;
+	const { id, key } = await uploadAsset({ file, licenseId, prefix, label, alt, caption });
+	const { url } = images.generateSignedImageUrl({ key, options: imageGridOptions });
 
-		const { id, key } = await uploadAsset({ file, licenseId, prefix, label, alt, caption });
-		const { url } = images.generateSignedImageUrl({ key, options: imageGridOptions });
+	await recordAuditEvent(db, {
+		actorUserId: user.id,
+		action: "create",
+		subjectType: "assets",
+		subjectId: id,
+		subjectLabel: label ?? file.name,
+		summary: getAuditSummaryFromFormData(formData),
+	});
 
-		await recordAuditEvent(db, {
-			actorUserId: user?.id,
-			action: "create",
-			subjectType: "assets",
-			subjectId: id,
-			subjectLabel: label ?? file.name,
-			summary: getAuditSummaryFromFormData(formData),
-		});
+	revalidatePath("/[locale]/dashboard/website/assets", "page");
+	revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
 
-		revalidatePath("/[locale]/dashboard/website/assets", "page");
-		revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
-
-		return createActionStateSuccess({
-			message: t("Successfully uploaded file."),
-			data: {
-				id,
-				key,
-				url,
-				alt: alt ?? null,
-				caption: caption ?? null,
-				licenseId: licenseId ?? null,
-				mimeType: file.type,
-			},
-		});
-	},
-);
+	return createActionStateSuccess({
+		message: t("Successfully uploaded file."),
+		data: {
+			id,
+			key,
+			url,
+			alt: alt ?? null,
+			caption: caption ?? null,
+			licenseId: licenseId ?? null,
+			mimeType: file.type,
+		},
+	});
+});

@@ -36,6 +36,7 @@ import {
 } from "react";
 import { FileTrigger, type Selection } from "react-aria-components";
 
+import { useAssetPermissions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-permissions-context";
 import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
 import { CaptionField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
@@ -108,6 +109,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	} = props;
 
 	const t = useExtracted();
+	const { canUpload, canEditMetadata } = useAssetPermissions();
 	const acceptsNonImageFiles = acceptedFileTypes.some((mimeType) => !mimeType.startsWith("image/"));
 
 	const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(false);
@@ -425,9 +427,13 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 			<ModalContent isOpen={isOpen} onOpenChange={handleOpenChange} size="3xl">
 				<ModalHeader
 					description={
-						acceptsNonImageFiles
-							? t("Select an existing file or upload a new one.")
-							: t("Select an existing image or upload a new one.")
+						canUpload
+							? acceptsNonImageFiles
+								? t("Select an existing file or upload a new one.")
+								: t("Select an existing image or upload a new one.")
+							: acceptsNonImageFiles
+								? t("Select an existing file.")
+								: t("Select an existing image.")
 					}
 					title={t("Media library")}
 				/>
@@ -442,7 +448,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 					>
 						<TabList aria-label={t("Media library")}>
 							<Tab id="select">{t("Select")}</Tab>
-							<Tab id="upload">{t("Upload")}</Tab>
+							{canUpload ? <Tab id="upload">{t("Upload")}</Tab> : null}
 						</TabList>
 
 						<TabPanel
@@ -494,7 +500,9 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 									<p className="text-center text-sm text-muted-fg">
 										{appliedQ
 											? t("No assets found for your search.")
-											: t("No assets found. Upload one to get started.")}
+											: canUpload
+												? t("No assets found. Upload one to get started.")
+												: t("No assets found.")}
 									</p>
 								</div>
 							) : (
@@ -647,71 +655,76 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 							</div>
 						</TabPanel>
 
-						<TabPanel
-							className="flex flex-1 flex-col gap-4 overflow-y-auto p-1"
-							id="upload"
-							shouldPreserveState={true}
-						>
-							<form ref={uploadFormRef} action={handleUploadAction} id="upload-form">
-								<input name="prefix" type="hidden" value={selectedPrefix} />
+						{canUpload ? (
+							<TabPanel
+								className="flex flex-1 flex-col gap-4 overflow-y-auto p-1"
+								id="upload"
+								shouldPreserveState={true}
+							>
+								<form ref={uploadFormRef} action={handleUploadAction} id="upload-form">
+									<input name="prefix" type="hidden" value={selectedPrefix} />
 
-								<div className="flex flex-col gap-4">
-									<div className="flex flex-wrap items-start gap-4">
-										<FileTrigger acceptedFileTypes={acceptedFileTypes} onSelect={handleFileChoose}>
-											<Button intent="outline" type="button">
-												{t("Choose file...")}
-											</Button>
-										</FileTrigger>
+									<div className="flex flex-col gap-4">
+										<div className="flex flex-wrap items-start gap-4">
+											<FileTrigger
+												acceptedFileTypes={acceptedFileTypes}
+												onSelect={handleFileChoose}
+											>
+												<Button intent="outline" type="button">
+													{t("Choose file...")}
+												</Button>
+											</FileTrigger>
 
-										{pendingFileUrl != null && pendingFile != null ? (
-											<AssetPreview
-												alt={pendingFile.name}
-												className="rounded-sm block-24 inline-24"
-												imageClassName="object-contain"
-												mimeType={pendingFile.type}
-												src={pendingFileUrl}
-												storageKey={pendingFile.name}
-											/>
+											{pendingFileUrl != null && pendingFile != null ? (
+												<AssetPreview
+													alt={pendingFile.name}
+													className="rounded-sm block-24 inline-24"
+													imageClassName="object-contain"
+													mimeType={pendingFile.type}
+													src={pendingFileUrl}
+													storageKey={pendingFile.name}
+												/>
+											) : null}
+										</div>
+
+										{pendingFile != null ? (
+											<p className="text-sm text-muted-fg">{pendingFile.name}</p>
 										) : null}
+
+										{uploadError != null ? (
+											<p className="text-sm text-danger" role="alert">
+												{uploadError}
+											</p>
+										) : null}
+
+										<TextField name="label">
+											<Label>{t("Label")}</Label>
+											<Input placeholder={pendingFile?.name ?? ""} />
+										</TextField>
+
+										<TextField name="alt">
+											<Label>{t("Alt text")}</Label>
+											<Input />
+										</TextField>
+
+										<CaptionField name="caption" />
+
+										<Select defaultValue="none" name="licenseId">
+											<Label>{t("License")}</Label>
+											<SelectTrigger />
+											<SelectContent>
+												<SelectItem id="none">{t("No license")}</SelectItem>
+												{licenseOptions.map((license) => (
+													<SelectItem key={license.id} id={license.id}>
+														{license.code} - {license.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
 									</div>
-
-									{pendingFile != null ? (
-										<p className="text-sm text-muted-fg">{pendingFile.name}</p>
-									) : null}
-
-									{uploadError != null ? (
-										<p className="text-sm text-danger" role="alert">
-											{uploadError}
-										</p>
-									) : null}
-
-									<TextField name="label">
-										<Label>{t("Label")}</Label>
-										<Input placeholder={pendingFile?.name ?? ""} />
-									</TextField>
-
-									<TextField name="alt">
-										<Label>{t("Alt text")}</Label>
-										<Input />
-									</TextField>
-
-									<CaptionField name="caption" />
-
-									<Select defaultValue="none" name="licenseId">
-										<Label>{t("License")}</Label>
-										<SelectTrigger />
-										<SelectContent>
-											<SelectItem id="none">{t("No license")}</SelectItem>
-											{licenseOptions.map((license) => (
-												<SelectItem key={license.id} id={license.id}>
-													{license.code} - {license.name}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-								</div>
-							</form>
-						</TabPanel>
+								</form>
+							</TabPanel>
+						) : null}
 					</Tabs>
 				</ModalBody>
 
@@ -731,7 +744,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 								</a>
 							) : null}
 
-							{selectedAsset?.id != null ? (
+							{canEditMetadata && selectedAsset?.id != null ? (
 								<EditAssetMetadataDialog
 									asset={{
 										id: selectedAsset.id,

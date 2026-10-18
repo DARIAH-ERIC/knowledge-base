@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
-import { clickHydrated } from "@/e2e/lib/fixtures/hydration";
+import { openActionsMenu } from "@/e2e/lib/fixtures/actions-menu";
+import { selectTab } from "@/e2e/lib/fixtures/hydration";
 import { expect, test } from "@/e2e/lib/test";
 
 /**
@@ -49,22 +50,40 @@ test.describe("country people and institutions (delegated national coordinator)"
 		await expect(page.getByRole("tab", { name: "People" })).toBeVisible();
 	}
 
-	test("person tab: selects a freshly created draft person without reloading", async ({
+	/**
+	 * The row containing `text`, paging forward through the (client-side paginated) table until it
+	 * shows: the seeded country may have more relations than fit on one page.
+	 */
+	async function findRow(page: Page, table: Locator, text: string): Promise<Locator> {
+		const row = table.getByRole("row").filter({ hasText: text });
+		const next = page.getByRole("link", { name: "Next page" });
+		await expect(async () => {
+			if (!(await row.isVisible()) && (await next.isVisible())) {
+				await next.click();
+			}
+			await expect(row).toBeVisible({ timeout: 1_000 });
+		}).toPass({ timeout: 20_000 });
+		return row;
+	}
+
+	test("person tab: creates, links and edits a draft person without reloading", async ({
 		page,
 		db,
 	}, testInfo) => {
 		const prefix = `[e2e-worker-${String(testInfo.workerIndex)}]`;
 		const name = `${prefix} Country Person ${randomUUID()}`;
 		const sortName = `${prefix}, Country Person`;
+		const email = `${randomUUID()}@example.com`;
 
 		await gotoEdit(page);
-		await clickHydrated(page.getByRole("tab", { name: "People" }));
+		await selectTab(page.getByRole("tab", { name: "People" }));
 
 		await page.getByRole("button", { name: "Add new person" }).click();
 		const dialog = page.getByRole("dialog", { name: "Add new person" });
 		await dialog.getByLabel("Name", { exact: true }).fill(name);
 		await dialog.getByRole("textbox", { name: "Sort name" }).fill(sortName);
-		await dialog.getByRole("button", { name: "Add person" }).click();
+		await dialog.getByRole("textbox", { name: "Email", exact: true }).fill(email);
+		await dialog.getByRole("button", { name: "Create person" }).click();
 		await dialog.waitFor({ state: "hidden" });
 
 		// Select the first allowed country role (avoids hard-coding the exact role set).
@@ -77,6 +96,8 @@ test.describe("country people and institutions (delegated national coordinator)"
 		const form = page
 			.locator("form")
 			.filter({ has: page.getByRole("button", { name: "Add person" }) });
+		// The relation description is admin-only.
+		await expect(form.getByRole("textbox", { name: "Description", exact: true })).toHaveCount(0);
 		const startDate = form.getByRole("group", { name: "Start date" });
 		await startDate.getByRole("spinbutton", { name: /day/i }).click();
 		await page.keyboard.type("01");
@@ -99,6 +120,30 @@ test.describe("country people and institutions (delegated national coordinator)"
 		// The relation targets the COUNTRY document, not the consortium.
 		const relations = await db.getPersonRelationsByUnitVersionId(countryVersionId);
 		expect(relations.some((relation) => relation.personId === person!.documentId)).toBe(true);
+
+		// Editing only the name keeps what was set on creation: the edit sheet loads the full person,
+		// and saving it rewrites every field.
+		const editedName = `${name} (edited)`;
+		const peopleTable = page.getByRole("grid", { name: "people" });
+		await openActionsMenu(await findRow(page, peopleTable, name));
+		await page.getByRole("menuitem", { name: "Edit person", exact: true }).click();
+
+		const editSheet = page.getByRole("dialog", { name: "Edit person" });
+		const nameField = editSheet.getByLabel("Name", { exact: true });
+		await expect(nameField).toHaveValue(name);
+		await expect(editSheet.getByRole("textbox", { name: "Email", exact: true })).toHaveValue(email);
+		await nameField.fill(editedName);
+		await waitForActionSuccess({
+			page,
+			trigger: async () => {
+				await editSheet.getByRole("button", { name: "Save", exact: true }).click();
+			},
+		});
+
+		const edited = await db.getPersonByName(editedName);
+		expect(edited, "the edited person exists").not.toBeNull();
+		expect(edited!.email).toBe(email);
+		expect(await db.getPublishedVersionId(edited!.documentId)).toBeNull();
 	});
 
 	test("person tab: lists a freshly created draft person in the picker after reload", async ({
@@ -113,13 +158,13 @@ test.describe("country people and institutions (delegated national coordinator)"
 		const sortName = `0000 ${prefix} Reload Person`;
 
 		await gotoEdit(page);
-		await clickHydrated(page.getByRole("tab", { name: "People" }));
+		await selectTab(page.getByRole("tab", { name: "People" }));
 
 		await page.getByRole("button", { name: "Add new person" }).click();
 		const dialog = page.getByRole("dialog", { name: "Add new person" });
 		await dialog.getByLabel("Name", { exact: true }).fill(name);
 		await dialog.getByRole("textbox", { name: "Sort name" }).fill(sortName);
-		await dialog.getByRole("button", { name: "Add person" }).click();
+		await dialog.getByRole("button", { name: "Create person" }).click();
 		await dialog.waitFor({ state: "hidden" });
 
 		const person = await db.getPersonByName(name);
@@ -130,7 +175,7 @@ test.describe("country people and institutions (delegated national coordinator)"
 		// Regression: the page server-fetched published persons only, so after a refresh the picker
 		// dropped the just-created draft even though the (draft-aware) options api would still find it.
 		await gotoEdit(page);
-		await clickHydrated(page.getByRole("tab", { name: "People" }));
+		await selectTab(page.getByRole("tab", { name: "People" }));
 
 		// Open the picker WITHOUT typing: searching would hit the draft-aware api and mask the bug,
 		// which only affects the initial, server-provided option list.
@@ -143,22 +188,24 @@ test.describe("country people and institutions (delegated national coordinator)"
 		await expect(listbox.getByRole("option", { name, exact: true })).toBeVisible();
 	});
 
-	test("institution tab: creates and links a freshly created draft institution without reloading", async ({
+	test("institution tab: creates, links and edits a draft institution without reloading", async ({
 		page,
 		db,
 	}, testInfo) => {
 		const prefix = `[e2e-worker-${String(testInfo.workerIndex)}]`;
 		const name = `${prefix} Partner Institution ${randomUUID()}`;
+		const acronym = `E2E-${randomUUID().slice(0, 8)}`;
 
 		await gotoEdit(page);
-		await clickHydrated(page.getByRole("tab", { name: "Institutions" }));
+		await selectTab(page.getByRole("tab", { name: "Institutions" }));
 
 		// Create a new (draft) institution; the create action also adds the `is_located_in` edge and
 		// selects it in the picker.
 		await page.getByRole("button", { name: "Add new institution" }).click();
 		const dialog = page.getByRole("dialog", { name: "Add new institution" });
-		await dialog.getByRole("textbox", { name: "Name" }).fill(name);
-		await dialog.getByRole("button", { name: "Save" }).click();
+		await dialog.getByLabel("Name", { exact: true }).fill(name);
+		await dialog.getByRole("textbox", { name: "Acronym", exact: true }).fill(acronym);
+		await dialog.getByRole("button", { name: "Create institution" }).click();
 		await dialog.waitFor({ state: "hidden" });
 
 		// Choose the first partner status, fill the start date, and create the partner relation. The
@@ -210,6 +257,32 @@ test.describe("country people and institutions (delegated national coordinator)"
 					relation.relatedUnitDocumentId !== countryDocumentId,
 			),
 		).toBe(true);
+
+		// Editing only the name keeps what was set on creation: the edit sheet loads the full
+		// institution, and saving it rewrites every field.
+		const editedName = `${name} (edited)`;
+		const institutionsTable = page.getByRole("grid", { name: "Institutions" });
+		await openActionsMenu(await findRow(page, institutionsTable, name));
+		await page.getByRole("menuitem", { name: "Edit institution", exact: true }).click();
+
+		const editSheet = page.getByRole("dialog", { name: "Edit institution" });
+		const nameField = editSheet.getByLabel("Name", { exact: true });
+		await expect(nameField).toHaveValue(name);
+		await expect(editSheet.getByRole("textbox", { name: "Acronym", exact: true })).toHaveValue(
+			acronym,
+		);
+		await nameField.fill(editedName);
+		await waitForActionSuccess({
+			page,
+			trigger: async () => {
+				await editSheet.getByRole("button", { name: "Save", exact: true }).click();
+			},
+		});
+
+		const edited = await db.getInstitutionByName(editedName);
+		expect(edited, "the edited institution exists").not.toBeNull();
+		expect(edited!.acronym).toBe(acronym);
+		expect(await db.getPublishedVersionId(edited!.documentId)).toBeNull();
 	});
 
 	test("institution tab: lists a freshly created draft institution in the picker after reload", async ({
@@ -220,14 +293,14 @@ test.describe("country people and institutions (delegated national coordinator)"
 		const name = `${prefix} Reload Institution ${randomUUID()}`;
 
 		await gotoEdit(page);
-		await clickHydrated(page.getByRole("tab", { name: "Institutions" }));
+		await selectTab(page.getByRole("tab", { name: "Institutions" }));
 
 		// Creating the draft institution also adds its `is_located_in` edge to the country, so it is in
 		// scope for the country-scoped picker even without completing a partner relation.
 		await page.getByRole("button", { name: "Add new institution" }).click();
 		const dialog = page.getByRole("dialog", { name: "Add new institution" });
-		await dialog.getByRole("textbox", { name: "Name" }).fill(name);
-		await dialog.getByRole("button", { name: "Save" }).click();
+		await dialog.getByLabel("Name", { exact: true }).fill(name);
+		await dialog.getByRole("button", { name: "Create institution" }).click();
 		await dialog.waitFor({ state: "hidden" });
 
 		const institution = await db.getInstitutionByName(name);
@@ -238,7 +311,7 @@ test.describe("country people and institutions (delegated national coordinator)"
 		// from the options api, so the regression here is the api filtering to published-only — a draft
 		// institution the coordinator just created would vanish from the picker after a refresh.
 		await gotoEdit(page);
-		await clickHydrated(page.getByRole("tab", { name: "Institutions" }));
+		await selectTab(page.getByRole("tab", { name: "Institutions" }));
 
 		const institutionControl = page
 			.locator('[data-slot="control"]')

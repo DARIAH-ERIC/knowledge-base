@@ -4,7 +4,7 @@ import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { openActionsMenu } from "@/e2e/lib/fixtures/actions-menu";
 import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
-import { clickHydrated } from "@/e2e/lib/fixtures/hydration";
+import { selectTab } from "@/e2e/lib/fixtures/hydration";
 import { dragGridRowDownByName } from "@/e2e/lib/fixtures/reorder";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 import { createSocialMediaInForm } from "@/e2e/lib/fixtures/social-media-form";
@@ -259,7 +259,7 @@ export class AdminProjectsPage {
 	}
 
 	async goToProjectPartnersTab(): Promise<void> {
-		await clickHydrated(this.page.getByRole("tab", { name: "Project partners" }));
+		await selectTab(this.page.getByRole("tab", { name: "Project partners" }));
 	}
 
 	projectPartnersTable(): Locator {

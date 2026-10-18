@@ -4,12 +4,14 @@ import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { Fragment, type ReactNode } from "react";
 
+import { AssetPermissionsProvider } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-permissions-context";
 import { DashboardCommandPaletteProvider } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-command-palette";
 import { DashboardSidebar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar";
 import { DashboardSidebarNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav";
 import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/main";
 import { ImpersonationBanner } from "@/app/(app)/[locale]/_components/impersonation-banner";
 import { SkipLink } from "@/components/skip-link";
+import { canUploadAssets } from "@/lib/auth/asset-permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getUserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
 
@@ -35,7 +37,10 @@ export default async function DashbardLayout(
 	const defaultOpen = sidebarState ? sidebarState.value === "true" : true;
 
 	const { isImpersonating, realUser, user } = await assertAuthenticated();
-	const organisationalUnitScopes = await getUserOrganisationalUnitScopes(user);
+	const [organisationalUnitScopes, canUpload] = await Promise.all([
+		getUserOrganisationalUnitScopes(user),
+		canUploadAssets(user),
+	]);
 
 	return (
 		<Fragment>
@@ -65,7 +70,11 @@ export default async function DashbardLayout(
 						<DashboardSidebarNav breadcrumbs={breadcrumbs} user={user} />
 
 						<div className="flex flex-1 flex-col gap-y-(--layout-padding) p-(--layout-padding) [--layout-padding:--spacing(4)] sm:[--layout-padding:--spacing(6)]">
-							{children}
+							<AssetPermissionsProvider
+								value={{ canUpload, canEditMetadata: user.role === "admin" }}
+							>
+								{children}
+							</AssetPermissionsProvider>
 						</div>
 					</SidebarInset>
 				</DashboardCommandPaletteProvider>

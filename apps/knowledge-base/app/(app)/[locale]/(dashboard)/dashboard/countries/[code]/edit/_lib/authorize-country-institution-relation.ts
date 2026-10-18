@@ -5,8 +5,41 @@ import { getLocale } from "next-intl/server";
 import { can } from "@/lib/auth/permissions";
 import { getDariahEricDocumentId } from "@/lib/data/unit-relations";
 import { type Database, type Transaction, db } from "@/lib/db";
-import { and, eq, sql } from "@/lib/db/sql";
+import { and, eq } from "@/lib/db/sql";
 import { redirect } from "@/lib/navigation/navigation";
+
+/**
+ * Whether the user may edit a country the institution is located in. Any `is_located_in` row
+ * counts, current or not, matching `getEricInstitutionsForCountry`: every institution a country's
+ * Institutions tab lists is one its coordinators can manage.
+ */
+async function canEditSomeCountryOfInstitution(
+	user: User,
+	institutionDocumentId: string,
+	executor: Database | Transaction,
+): Promise<boolean> {
+	const countries = await executor
+		.select({ documentId: schema.organisationalUnitsRelations.relatedUnitDocumentId })
+		.from(schema.organisationalUnitsRelations)
+		.innerJoin(
+			schema.organisationalUnitStatus,
+			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+		)
+		.where(
+			and(
+				eq(schema.organisationalUnitsRelations.unitDocumentId, institutionDocumentId),
+				eq(schema.organisationalUnitStatus.status, "is_located_in"),
+			),
+		);
+
+	return (
+		await Promise.all(
+			countries.map((country) =>
+				can(user, "update", { type: "organisational_unit", id: country.documentId }, executor),
+			),
+		)
+	).some(Boolean);
+}
 
 /**
  * Authorize a delegated edit of a "partner institution" relation surfaced on a country dashboard.
@@ -28,32 +61,11 @@ export async function assertCanManageCountryInstitutionRelation(
 
 		const targetsEric = ericDocumentId != null && params.relatedUnitDocumentId === ericDocumentId;
 
-		const countries = targetsEric
-			? await executor
-					.select({ documentId: schema.organisationalUnitsRelations.relatedUnitDocumentId })
-					.from(schema.organisationalUnitsRelations)
-					.innerJoin(
-						schema.organisationalUnitStatus,
-						eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
-					)
-					.where(
-						and(
-							eq(schema.organisationalUnitsRelations.unitDocumentId, params.institutionDocumentId),
-							eq(schema.organisationalUnitStatus.status, "is_located_in"),
-							sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
-						),
-					)
-			: [];
+		const canEditSomeCountry =
+			targetsEric &&
+			(await canEditSomeCountryOfInstitution(user, params.institutionDocumentId, executor));
 
-		const canEditSomeCountry = (
-			await Promise.all(
-				countries.map((country) =>
-					can(user, "update", { type: "organisational_unit", id: country.documentId }, executor),
-				),
-			)
-		).some(Boolean);
-
-		if (!targetsEric || !canEditSomeCountry) {
+		if (!canEditSomeCountry) {
 			const locale = await getLocale();
 			redirect({ href: "/dashboard", locale });
 		}
@@ -74,30 +86,7 @@ export async function assertCanEditCountryInstitution(
 		return;
 	}
 
-	const countries = await executor
-		.select({ documentId: schema.organisationalUnitsRelations.relatedUnitDocumentId })
-		.from(schema.organisationalUnitsRelations)
-		.innerJoin(
-			schema.organisationalUnitStatus,
-			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
-		)
-		.where(
-			and(
-				eq(schema.organisationalUnitsRelations.unitDocumentId, institutionDocumentId),
-				eq(schema.organisationalUnitStatus.status, "is_located_in"),
-				sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
-			),
-		);
-
-	const canEditSomeCountry = (
-		await Promise.all(
-			countries.map((country) =>
-				can(user, "update", { type: "organisational_unit", id: country.documentId }, executor),
-			),
-		)
-	).some(Boolean);
-
-	if (!canEditSomeCountry) {
+	if (!(await canEditSomeCountryOfInstitution(user, institutionDocumentId, executor))) {
 		const locale = await getLocale();
 		redirect({ href: "/dashboard", locale });
 	}

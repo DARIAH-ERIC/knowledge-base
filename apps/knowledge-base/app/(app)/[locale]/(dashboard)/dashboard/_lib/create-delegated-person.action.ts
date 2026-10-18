@@ -1,83 +1,47 @@
 "use server";
 
-import { assert, getFormDataValues } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
+import { getExtracted } from "next-intl/server";
 import * as v from "valibot";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
+import { CreatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.schema";
 import { assertCan } from "@/lib/auth/permissions";
-import { createDraftDocumentFromTitle } from "@/lib/data/entity-lifecycle";
-import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createPersonDraft } from "@/lib/data/save-person-draft";
+import { getRequestedSlug } from "@/lib/entity-slug-input";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 const CreateDelegatedPersonActionInputSchema = v.object({
+	...CreatePersonActionInputSchema.entries,
 	organisationalUnitDocumentId: v.pipe(v.string(), v.uuid()),
-	name: v.pipe(v.string(), v.nonEmpty()),
-	sortName: v.pipe(v.string(), v.nonEmpty()),
 });
 
 /**
  * Creates a new person as a draft, so a delegated caller (working-group chair, national
  * coordinator) can add someone who is not yet in the system and immediately relate them to the unit
- * they manage. Publishing the person remains an admin task. Authorized against the organisational
- * unit the caller is editing.
+ * they manage. Takes the same fields as the admin create form; publishing the person remains an
+ * admin task. Authorized against the organisational unit the caller is editing.
  */
-export const createDelegatedPersonAction = createServerAction(
-	{ requireAuth: true },
-	async function createDelegatedPersonAction(state, formData, { user }) {
-		const locale = await getLocale();
-		const t = await getExtracted();
-
-		const result = await v.safeParseAsync(
-			CreateDelegatedPersonActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateDelegatedPersonActionInputSchema>(result.issues);
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { organisationalUnitDocumentId, name, sortName } = result.output;
-
-		assert(user != null);
-		await assertCan(user, "update", {
+export const createDelegatedPersonAction = createMutationAction({
+	schema: CreateDelegatedPersonActionInputSchema,
+	requireAuth: true,
+	audit: { action: "create", subjectType: "persons" },
+	revalidate: "/[locale]/dashboard",
+	async preCheck({ input, ctx }) {
+		await assertCan(ctx.user, "update", {
 			type: "organisational_unit",
-			id: organisationalUnitDocumentId,
+			id: input.organisationalUnitDocumentId,
 		});
-
-		const created = await db.transaction(async (tx) => {
-			const entityType = await tx.query.entityTypes.findFirst({
-				where: { type: "persons" },
-				columns: { id: true },
-			});
-			assert(entityType);
-
-			const { documentId, versionId } = await createDraftDocumentFromTitle(tx, entityType.id, name);
-
-			await tx.insert(schema.persons).values({ id: versionId, name, sortName });
-
-			await recordAuditEvent(tx, {
-				actorUserId: user.id,
-				action: "create",
-				subjectType: "persons",
-				subjectId: documentId,
-				summary: { name, sortName, lifecycle: "draft" },
-			});
-
-			return { documentId };
-		});
-
-		revalidatePath("/[locale]/dashboard", "layout");
-
-		return createActionStateSuccess({ data: { id: created.documentId, name, sortName } });
 	},
-);
+	async mutate(tx, input) {
+		const t = await getExtracted();
+		const { documentId } = await createPersonDraft(tx, {
+			...input,
+			requestedSlug: getRequestedSlug(input.slug),
+		});
+		return {
+			subjectId: documentId,
+			auditSummary: { lifecycle: "draft" },
+			successMessage: t("Person saved as draft."),
+			successData: { id: documentId, name: input.name, sortName: input.sortName },
+		};
+	},
+});
