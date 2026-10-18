@@ -71,13 +71,13 @@ export function CalendarHeader({
 	isRange,
 	className,
 	...props
-}: Readonly<ComponentProps<"header"> & { isRange?: boolean }>): ReactNode {
+}: Readonly<ComponentProps<"div"> & { isRange?: boolean }>): ReactNode {
 	const t = useExtracted("ui");
 	const { direction } = useLocale();
 	const state = use(CalendarStateContext)!;
 
 	return (
-		<header
+		<div
 			className={twMerge(
 				"flex justify-between gap-1.5 ps-1.5 pe-1 pbs-1 pbe-5 inline-full sm:pbe-4",
 				className,
@@ -120,7 +120,7 @@ export function CalendarHeader({
 					{direction === "rtl" ? <ChevronLeftIcon /> : <ChevronRightIcon />}
 				</Button>
 			</div>
-		</header>
+		</div>
 	);
 }
 

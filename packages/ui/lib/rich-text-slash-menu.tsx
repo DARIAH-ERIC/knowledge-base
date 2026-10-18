@@ -401,13 +401,12 @@ export function SlashCommandMenu(props: Readonly<SlashCommandMenuProps>): ReactN
 
 	/**
 	 * Focus stays in the editor while the menu is open, so the editor is what has to point a screen
-	 * reader at the highlighted option.
+	 * reader at the highlighted option. No `aria-expanded`: the editor is a `textbox`, which does not
+	 * support it.
 	 */
 	useEffect(() => {
 		const element = editor.view.dom;
 		const isOpen = trigger != null;
-
-		element.setAttribute("aria-expanded", String(isOpen));
 
 		if (isOpen && activeIndex >= 0) {
 			element.setAttribute("aria-controls", listboxId);
@@ -418,7 +417,6 @@ export function SlashCommandMenu(props: Readonly<SlashCommandMenuProps>): ReactN
 		}
 
 		return () => {
-			element.removeAttribute("aria-expanded");
 			element.removeAttribute("aria-controls");
 			element.removeAttribute("aria-activedescendant");
 		};

@@ -195,6 +195,8 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 					<TagGroup
 						aria-label={t("Selected items")}
 						className="flex-1 min-inline-0"
+						/** Tells assistive tech, not only the eye, that the selection cannot be changed. */
+						disabledKeys={isDisabled ? value : undefined}
 						onRemove={
 							isDisabled
 								? undefined
@@ -219,7 +221,8 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 								const text = typeof content === "string" ? content : item.name;
 
 								return (
-									<Tag className="rounded-md max-inline-64" textValue={text}>
+									// The control already fades as a whole when disabled; the tag's own fade would double it.
+									<Tag className="rounded-md max-inline-64 disabled:opacity-100" textValue={text}>
 										<span className="truncate min-inline-0" title={text}>
 											{content}
 										</span>

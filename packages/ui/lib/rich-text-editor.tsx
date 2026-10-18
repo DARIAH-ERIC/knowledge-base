@@ -117,6 +117,7 @@ const richtextSizeClass: Record<RichTextSize, string> = {
 };
 
 interface RichTextEditorProps {
+	/** Names the editor's `textbox`. A read-only editor is not a field, so it takes no name. */
 	"aria-label"?: string;
 	className?: string;
 	/** Scales the text of the content element. Defaults to the base `richtext` sizing when omitted. */
@@ -3043,9 +3044,19 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					"richtext px-4 py-3 footnotes max-inline-none min-block-37.5 focus:outline-none",
 					size != null ? richtextSizeClass[size] : undefined,
 				),
-				role: "textbox",
-				"aria-multiline": "true",
-				...(ariaLabel != null ? { "aria-label": ariaLabel } : {}),
+				/**
+				 * Only an editable editor is a field. Read-only, it is content like any other, read as its
+				 * headings, lists and links rather than announced as a text input nobody can type into.
+				 * Tiptap adds `role="textbox"` unless one is given, so read-only states its role
+				 * explicitly.
+				 */
+				...(isEditable
+					? {
+							role: "textbox",
+							"aria-multiline": "true",
+							...(ariaLabel != null ? { "aria-label": ariaLabel } : {}),
+						}
+					: { role: "none" }),
 			},
 		},
 	});
