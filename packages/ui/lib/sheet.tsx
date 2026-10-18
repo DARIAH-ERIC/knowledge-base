@@ -1,16 +1,20 @@
 "use client";
 
 import { Fragment, type ReactNode } from "react";
+import type { DialogProps as AriaDialogProps } from "react-aria-components/Dialog";
 import {
-	DialogTrigger as AriaDialogTrigger,
-	Modal as AriaModal,
-	ModalOverlay as AriaModalOverlay,
-	type DialogProps,
-	type ModalOverlayProps,
-} from "react-aria-components";
+	Sheet as AriaSheet,
+	SheetBackdrop as AriaSheetBackdrop,
+	SheetContent as AriaSheetContent,
+	SheetOverlay as AriaSheetOverlay,
+	type SheetOverlayProps as AriaSheetOverlayProps,
+	type SheetProps as AriaSheetProps,
+	SheetTrigger as AriaSheetTrigger,
+	type SheetTriggerProps as AriaSheetTriggerProps,
+} from "react-aria-components/Sheet";
+import { twJoin } from "tailwind-merge";
 
 import {
-	Dialog,
 	DialogBody,
 	DialogClose,
 	DialogCloseIcon,
@@ -22,74 +26,120 @@ import {
 } from "@/lib/dialog";
 import { cx } from "@/lib/primitive";
 
-export const Sheet = AriaDialogTrigger;
+export interface SheetProps extends AriaSheetTriggerProps {}
+
+export function Sheet(props: Readonly<SheetProps>): ReactNode {
+	return <AriaSheetTrigger {...props} />;
+}
+
+const positions = {
+	top: "w-full max-w-[800px] rounded-b-4xl border-b [--sheet-stack-y:8px] data-[float=false]:border-x data-[float=true]:mx-2 data-[float=true]:mt-2 data-[float=true]:w-[calc(100%-1rem)] data-[float=true]:border-b-0",
+	bottom:
+		"w-full max-w-[800px] rounded-t-4xl border-t [--sheet-stack-y:-8px] data-[float=false]:border-x data-[float=true]:mx-2 data-[float=true]:mb-2 data-[float=true]:w-[calc(100%-1rem)] data-[float=true]:border-t-0",
+	left: "h-dvh w-3/4 border-r [--sheet-stack-x:8px] sm:max-w-80 data-[float=true]:my-2 data-[float=true]:ml-2 data-[float=true]:h-[calc(100dvh-1rem)] data-[float=true]:border-r-0",
+	right:
+		"h-dvh w-3/4 border-l [--sheet-stack-x:-8px] sm:max-w-80 data-[float=true]:my-2 data-[float=true]:mr-2 data-[float=true]:h-[calc(100dvh-1rem)] data-[float=true]:border-l-0",
+	start:
+		"h-dvh w-3/4 border-e [--sheet-stack-x:8px] sm:max-w-80 rtl:[--sheet-stack-x:-8px] data-[float=true]:my-2 data-[float=true]:ms-2 data-[float=true]:h-[calc(100dvh-1rem)] data-[float=true]:border-e-0",
+	end: "h-dvh w-3/4 border-s [--sheet-stack-x:-8px] sm:max-w-80 rtl:[--sheet-stack-x:8px] data-[float=true]:my-2 data-[float=true]:me-2 data-[float=true]:h-[calc(100dvh-1rem)] data-[float=true]:border-s-0",
+	center: "w-[calc(100%-2rem)] max-w-lg rounded-2xl border data-[float=true]:border-0",
+};
 
 export interface SheetContentProps
 	extends
-		Omit<ModalOverlayProps, "children">,
-		Pick<DialogProps, "aria-label" | "role" | "aria-labelledby" | "children"> {
+		Omit<AriaSheetOverlayProps, "children" | "className">,
+		Pick<AriaSheetProps, "className" | "swipeAnimation" | "swipeAnimationRange">,
+		Pick<AriaDialogProps, "aria-label" | "aria-labelledby" | "role" | "children"> {
+	position?: keyof typeof positions;
 	closeButton?: boolean;
 	isFloat?: boolean;
-	side?: "top" | "bottom" | "left" | "right";
-	overlay?: Omit<ModalOverlayProps, "children">;
+	overscrollPadding?: boolean;
+	overlay?: Omit<AriaSheetOverlayProps, "children" | "position">;
 }
 
-const sideVariants: Record<string, string> = {
-	top: "entering:slide-in-from-top exiting:slide-out-to-top inset-x-0 top-0 rounded-b-2xl border-b data-[float=true]:inset-x-2 data-[float=true]:top-2 data-[float=true]:border-b-0",
-	bottom:
-		"entering:slide-in-from-bottom exiting:slide-out-to-bottom inset-x-0 bottom-0 rounded-t-2xl border-t data-[float=true]:inset-x-2 data-[float=true]:bottom-2 data-[float=true]:border-t-0",
-	left: "entering:slide-in-from-left exiting:slide-out-to-left-80 inset-y-0 left-0 h-auto w-3/4 overflow-y-auto border-r sm:max-w-80 data-[float=true]:inset-y-2 data-[float=true]:left-2 data-[float=true]:border-r-0",
-	right:
-		"entering:slide-in-from-right exiting:slide-out-to-right-80 inset-y-0 right-0 h-auto w-3/4 overflow-y-auto border-l sm:max-w-80 data-[float=true]:inset-y-2 data-[float=true]:right-2 data-[float=true]:border-l-0",
-};
-
+/**
+ * A panel sliding in from an edge of the viewport, built on the react-aria `Sheet`, which also lets
+ * it be swiped away. Accepts the same header, body and footer slots as `ModalContent`.
+ */
 export function SheetContent({
 	className,
-	isDismissable: isDismissableInternal,
-	side = "right",
+	position = "bottom",
 	role = "dialog",
 	closeButton = true,
-	isFloat = true,
-	// oxlint-disable-next-line no-unused-vars
-	overlay: _,
+	isFloat = false,
+	overscrollPadding,
+	overlay,
+	snapPoints,
+	preventDismissal = false,
+	swipeAnimation,
+	swipeAnimationRange,
 	children,
 	...props
 }: Readonly<SheetContentProps>): ReactNode {
-	const isDismissable = isDismissableInternal ?? role !== "alertdialog";
 	return (
-		<AriaModalOverlay
-			className="fixed inset-s-0 inset-bs-0 z-50 overflow-hidden bg-black/15 block-full inline-full entering:animate-in entering:duration-500 entering:fade-in exiting:animate-out exiting:duration-300 exiting:fade-out"
-			isDismissable={isDismissable}
+		<AriaSheetOverlay
 			{...props}
+			{...overlay}
+			className={cx("z-50", overlay?.className)}
+			position={position}
+			preventDismissal={preventDismissal}
+			snapPoints={snapPoints}
 		>
-			<AriaModal
+			<AriaSheetBackdrop
+				className="bg-black/15 entering:animate-in entering:duration-300 entering:fade-in exiting:animate-out exiting:duration-300 exiting:fade-out"
+				swipeAnimation="sheet-backdrop"
+				swipeAnimationRange={snapPoints != null ? { start: snapPoints.length - 1 } : undefined}
+			/>
+			<AriaSheet
 				className={cx(
-					"fixed z-50 grid gap-4 border-muted-fg/20 bg-overlay text-overlay-fg shadow-lg dark:border-border",
-					"transform-gpu transition ease-in-out will-change-transform [--visual-viewport-vertical-padding:16px]",
+					"relative box-content shrink-0 origin-top transition-transform [--sheet-gap:0px] motion-reduce:transition-none data-[float=true]:[--sheet-gap:16px]",
+					"border-fg/20 bg-overlay text-overlay-fg shadow-lg dark:border-border",
 					"dark:data-[float=true]:ring-border data-[float=true]:rounded-lg data-[float=true]:ring data-[float=true]:ring-fg/5",
-					"border-fg/20 dark:border-border",
-					"entering:animate-in entering:duration-500 entering:fade-in",
-					"exiting:animate-out exiting:duration-300 exiting:fade-in",
-					sideVariants[side],
+					positions[position],
 					className,
 				)}
 				data-float={isFloat}
+				data-slot="sheet"
+				overscrollPadding={isFloat ? false : (overscrollPadding ?? true)}
+				stackAnimation="sheet-scale-back"
+				swipeAnimation={swipeAnimation}
+				swipeAnimationRange={swipeAnimationRange}
 			>
-				<Dialog aria-label={props["aria-label"]} className="sm:[--gutter:--spacing(6)]" role={role}>
+				{!preventDismissal && position === "bottom" ? (
+					<div
+						aria-hidden={true}
+						className="pointer-events-none absolute inset-s-0 inset-e-0 inset-bs-2 mx-auto rounded-full bg-fg/30 block-1 inline-10"
+					/>
+				) : null}
+				<AriaSheetContent
+					aria-label={props["aria-label"]}
+					aria-labelledby={props["aria-labelledby"]}
+					/**
+					 * The sheet content is the dialog, so it takes the same column layout as `Dialog`,
+					 * including handing a wrapping form the column, so the body scrolls and the footer stays
+					 * reachable.
+					 */
+					className={twJoin(
+						"peer/dialog group/dialog relative flex flex-col overflow-hidden outline-hidden [--gutter:--spacing(6)] max-block-[calc(var(--visual-viewport-height)-var(--sheet-gap))]",
+						"[&>form]:flex [&>form]:flex-1 [&>form]:flex-col [&>form]:min-block-0",
+					)}
+					data-slot="dialog"
+					role={role}
+				>
 					{(values) => (
 						<Fragment>
 							{typeof children === "function" ? children(values) : children}
-							{closeButton && (
+							{closeButton ? (
 								<DialogCloseIcon
 									className="inset-e-2.5 inset-bs-2.5"
-									isDismissable={isDismissable}
+									isDismissable={!preventDismissal}
 								/>
-							)}
+							) : null}
 						</Fragment>
 					)}
-				</Dialog>
-			</AriaModal>
-		</AriaModalOverlay>
+				</AriaSheetContent>
+			</AriaSheet>
+		</AriaSheetOverlay>
 	);
 }
 

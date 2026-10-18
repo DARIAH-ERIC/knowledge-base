@@ -241,10 +241,10 @@ export function Sidebar(props: Readonly<SidebarProps>): ReactNode {
 					closeButton={closeButton}
 					data-intent="default"
 					data-slot="sidebar"
-					dir={side === "right" ? "rtl" : "ltr"}
+					isFloat={true}
 					isOpen={isOpenOnMobile}
 					onOpenChange={setIsOpenOnMobile}
-					side={side}
+					position={side}
 				>
 					{/*
 					    The sheet is a dialog, whose text context only offers a `description` slot. The

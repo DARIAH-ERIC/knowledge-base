@@ -2113,6 +2113,33 @@
 	}
 }
 
+/**
+ * Scroll-driven animations of the react-aria `Sheet`, referenced by name from `sheet.tsx`. Declared
+ * outside `@theme`, which would only emit keyframes used by an `animate-*` utility.
+ */
+@keyframes sheet-backdrop {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes sheet-scale-back {
+	to {
+		transform: translate(var(--sheet-stack-x, 0), var(--sheet-stack-y, 0)) scale(0.95);
+	}
+}
+
+/** Without scroll-driven animations, a sheet with a sheet stacked on top just stays scaled back. */
+@supports not (animation-timeline: view()) {
+	[data-slot="sheet"][data-has-descendants] {
+		transform: translate(var(--sheet-stack-x, 0), var(--sheet-stack-y, 0)) scale(0.95);
+	}
+}
+
 @layer base {
 	*,
 	::after,

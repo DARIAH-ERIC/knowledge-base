@@ -1,7 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { Button } from "./button";
-import { Sheet, SheetBody, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "./sheet";
+import {
+	Sheet,
+	SheetBody,
+	SheetClose,
+	SheetContent,
+	SheetFooter,
+	SheetHeader,
+	SheetTitle,
+} from "./sheet";
 
 const meta = {
 	title: "Components/Sheet",
@@ -11,9 +19,9 @@ const meta = {
 	},
 	tags: ["autodocs"],
 	argTypes: {
-		side: {
+		position: {
 			control: "select",
-			options: ["top", "bottom", "left", "right"],
+			options: ["top", "bottom", "left", "right", "start", "end", "center"],
 		},
 	},
 	args: {},
@@ -49,10 +57,38 @@ export const Default: Story = {
 	},
 };
 
+export const End: Story = {
+	args: {
+		children: null,
+		className: "sm:max-w-2xl",
+		position: "end",
+	},
+	render(args) {
+		return (
+			<Sheet>
+				<Button intent="outline">{"Open End Sheet"}</Button>
+				<SheetContent {...args}>
+					<SheetHeader
+						description={"A wide side panel, for example for a form."}
+						title={"New entry"}
+					/>
+					<SheetBody>
+						<p className="text-sm/6 text-muted-fg">{"This sheet slides in from the end."}</p>
+					</SheetBody>
+					<SheetFooter>
+						<SheetClose>{"Cancel"}</SheetClose>
+						<Button intent="primary">{"Save"}</Button>
+					</SheetFooter>
+				</SheetContent>
+			</Sheet>
+		);
+	},
+};
+
 export const Left: Story = {
 	args: {
 		children: null,
-		side: "left",
+		position: "left",
 	},
 	render(args) {
 		return (
@@ -74,7 +110,7 @@ export const Left: Story = {
 export const Bottom: Story = {
 	args: {
 		children: null,
-		side: "bottom",
+		position: "bottom",
 	},
 	render(args) {
 		return (
