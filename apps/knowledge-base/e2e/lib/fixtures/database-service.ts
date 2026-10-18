@@ -2386,20 +2386,26 @@ export class DatabaseService {
 		isEmailVerified: boolean;
 		invitations: number;
 	} | null> {
-		const [row] = await this.db
+		const [user] = await this.db
 			.select({
+				id: schema.users.id,
 				hasPassword: sql<boolean>`${schema.users.passwordHash} IS NOT NULL`,
 				isEmailVerified: schema.users.isEmailVerified,
-				invitations: sql<number>`(
-					SELECT count(*)::int FROM ${schema.userInvitations}
-					WHERE ${schema.userInvitations.userId} = ${schema.users.id}
-				)`,
 			})
 			.from(schema.users)
 			.where(eq(schema.users.name, name))
 			.limit(1);
 
-		return row ?? null;
+		if (user == null) {
+			return null;
+		}
+
+		const invitations = await this.db.$count(
+			schema.userInvitations,
+			eq(schema.userInvitations.userId, user.id),
+		);
+
+		return { hasPassword: user.hasPassword, isEmailVerified: user.isEmailVerified, invitations };
 	}
 
 	/** A user who signed up (or accepted their invitation) and so has a password. */
