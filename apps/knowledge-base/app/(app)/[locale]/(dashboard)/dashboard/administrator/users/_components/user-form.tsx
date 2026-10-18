@@ -11,6 +11,7 @@ import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import { Text } from "@dariah-eric/ui/text";
 import { TextField } from "@dariah-eric/ui/text-field";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { useExtracted } from "next-intl";
@@ -146,11 +147,9 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 					) : null}
 
 					{user == null && (
-						<TextField isRequired={true} name="password" type="password">
-							<Label>{t("Password")}</Label>
-							<Input />
-							<FieldError />
-						</TextField>
+						<Text>
+							{t("We will email the user an invitation link to choose their own password.")}
+						</Text>
 					)}
 
 					{user != null && <input name="id" type="hidden" value={user.id} />}

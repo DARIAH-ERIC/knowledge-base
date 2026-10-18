@@ -10,7 +10,7 @@ import {
 	TableRow,
 } from "@dariah-eric/ui/table";
 import { queue } from "@dariah-eric/ui/toast";
-import { PencilSquareIcon, TrashIcon, UserIcon } from "@heroicons/react/24/outline";
+import { EnvelopeIcon, PencilSquareIcon, TrashIcon, UserIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
@@ -25,6 +25,7 @@ import {
 import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-link";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteUserAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/delete-user.action";
+import { resendUserInvitationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/resend-user-invitation.action";
 import { startImpersonationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/start-impersonation.action";
 import { dashboardPageSize } from "@/config/pagination.config";
 import type { UsersResult } from "@/lib/data/users";
@@ -74,6 +75,7 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 	});
 	const [isDeletePending, startDeleteTransition] = useTransition();
 	const [, startImpersonationTransition] = useTransition();
+	const [, startResendInvitationTransition] = useTransition();
 
 	return (
 		<Fragment>
@@ -129,9 +131,13 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 								</Badge>
 							</TableCell>
 							<TableCell>
-								<Badge intent={item.isEmailVerified ? "success" : "warning"}>
-									{item.isEmailVerified ? t("Yes") : t("No")}
-								</Badge>
+								{item.isInvitationPending ? (
+									<Badge intent="warning">{t("Invitation pending")}</Badge>
+								) : (
+									<Badge intent={item.isEmailVerified ? "success" : "warning"}>
+										{item.isEmailVerified ? t("Yes") : t("No")}
+									</Badge>
+								)}
 							</TableCell>
 							<TableCell>
 								{item.actor != null ? (
@@ -173,6 +179,29 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 										}}
 									>
 										{t("Sign in as this user")}
+									</RowActionsMenu.Action>
+									<RowActionsMenu.Action
+										icon={<EnvelopeIcon className="me-2 block-4 inline-4" />}
+										isDisabled={
+											!item.isInvitationPending ||
+											(!currentUserCanManageAdmins && item.role === "admin")
+										}
+										onAction={() => {
+											startResendInvitationTransition(async () => {
+												const error = await runAction(
+													() => resendUserInvitationAction(item.id),
+													t("Could not send the invitation. Please try again."),
+												);
+												queue.add(
+													{
+														title: error ?? t("Invitation sent to {email}.", { email: item.email }),
+													},
+													{ timeout: 5000 },
+												);
+											});
+										}}
+									>
+										{t("Resend invitation")}
 									</RowActionsMenu.Action>
 									<RowActionsMenu.Separator />
 									<RowActionsMenu.Action

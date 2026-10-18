@@ -8,10 +8,10 @@ import {
 } from "node:crypto";
 
 import { createUrl } from "@acdh-oeaw/lib";
-import type { Database } from "@dariah-eric/database";
+import type { Database, Transaction } from "@dariah-eric/database";
 import { DatabaseError } from "@dariah-eric/database/errors";
 import * as schema from "@dariah-eric/database/schema";
-import { and, eq, sql } from "@dariah-eric/database/sql";
+import { and, eq, isNull, sql } from "@dariah-eric/database/sql";
 import type { EmailService } from "@dariah-eric/email";
 import { ExpiringTokenBucket, RefillingTokenBucket, Throttler } from "@dariah-eric/rate-limiter";
 import { request } from "@dariah-eric/request";
@@ -45,6 +45,10 @@ interface AuthServiceConfig {
 	};
 	passwordResetSessions: {
 		cookie: CookieConfig;
+	};
+	invitations: {
+		/** How long an emailed invitation link stays valid. */
+		durationMs: number;
 	};
 	sessions: {
 		cookie: CookieConfig;
@@ -158,8 +162,12 @@ export type PasswordResetSessionValidationResult =
 	| AuthenticatedPasswordResetSession
 	| UnauthenticatedPasswordResetSession;
 
+export interface UserInvitation extends Pick<schema.UserInvitation, "email" | "expiresAt"> {
+	user: Pick<User, "id" | "email" | "name">;
+}
+
 interface CreateUserWithPasswordParams {
-	db: Database;
+	db: Database | Transaction;
 	email: string;
 	encryptionKey: Buffer;
 	name: string;
@@ -223,10 +231,13 @@ const unauthenticated: UnauthenticatedSession = {
 	isImpersonating: false,
 };
 
-export async function createUserWithPassword(params: CreateUserWithPasswordParams): Promise<User> {
-	const { db, email, encryptionKey, name, password } = params;
+interface InsertUserParams extends Omit<CreateUserWithPasswordParams, "password"> {
+	passwordHash: string | null;
+}
 
-	const passwordHash = await generatePasswordHash(password);
+async function insertUser(params: InsertUserParams): Promise<User> {
+	const { db, email, encryptionKey, name, passwordHash } = params;
+
 	const twoFactorRecoveryCode = encryptUtf8String(generateTwoFactorRecoveryCode(), encryptionKey);
 
 	const [user] = await db
@@ -244,6 +255,14 @@ export async function createUserWithPassword(params: CreateUserWithPasswordParam
 	}
 
 	return user;
+}
+
+export async function createUserWithPassword(params: CreateUserWithPasswordParams): Promise<User> {
+	const { password, ...rest } = params;
+
+	const passwordHash = await generatePasswordHash(password);
+
+	return insertUser({ ...rest, passwordHash });
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -569,7 +588,8 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		return user ?? null;
 	}
 
-	async function getUserPasswordHash(userId: string): Promise<string> {
+	/** Null for an invited user who has not chosen a password yet. */
+	async function getUserPasswordHash(userId: string): Promise<string | null> {
 		const [user] = await db
 			.select({
 				passwordHash: schema.users.passwordHash,
@@ -577,7 +597,7 @@ export function createAuthService(params: CreateAuthServiceParams) {
 			.from(schema.users)
 			.where(eq(schema.users.id, userId));
 
-		if (user?.passwordHash == null) {
+		if (user == null) {
 			throw new InvalidUserIdError({ id: userId, message: "Invalid user" });
 		}
 
@@ -627,13 +647,159 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		return count === 0;
 	}
 
-	async function createUser(email: string, name: string, password: string): Promise<User> {
+	/** Pass `tx` to create the user inside a caller's transaction. */
+	async function createUser(
+		email: string,
+		name: string,
+		password: string,
+		tx: Database | Transaction = db,
+	): Promise<User> {
 		return createUserWithPassword({
-			db,
+			db: tx,
 			email,
 			encryptionKey: secrets.encryptionKey,
 			name,
 			password,
+		});
+	}
+
+	/** Creates an account without a password, to be completed through {@link createUserInvitation}. */
+	async function createInvitedUser(
+		email: string,
+		name: string,
+		tx: Database | Transaction = db,
+	): Promise<User> {
+		return insertUser({
+			db: tx,
+			email,
+			encryptionKey: secrets.encryptionKey,
+			name,
+			passwordHash: null,
+		});
+	}
+
+	/**
+	 * Replaces any earlier invitation for the user, so only the most recently sent link works. The
+	 * returned token goes into the emailed link; only its hash is stored.
+	 */
+	async function createUserInvitation(
+		userId: string,
+		email: string,
+		tx: Database | Transaction = db,
+	): Promise<{ token: string; expiresAt: Date }> {
+		await tx.delete(schema.userInvitations).where(eq(schema.userInvitations.userId, userId));
+
+		const token = generateRandomString();
+		const expiresAt = new Date(Date.now() + config.invitations.durationMs);
+
+		await tx.insert(schema.userInvitations).values({
+			id: hashSessionSecret(token).toString("hex"),
+			userId,
+			email,
+			expiresAt,
+		});
+
+		return { token, expiresAt };
+	}
+
+	/**
+	 * Resolves an invitation token, or null when it is unknown or expired, when the account has since
+	 * got a password (through a password reset, say), or when the account's email changed after the
+	 * invitation was sent.
+	 */
+	async function getUserInvitation(
+		token: string,
+		tx: Database | Transaction = db,
+	): Promise<UserInvitation | null> {
+		const [result] = await tx
+			.select({
+				email: schema.userInvitations.email,
+				expiresAt: schema.userInvitations.expiresAt,
+				user: {
+					id: schema.users.id,
+					email: schema.users.email,
+					name: schema.users.name,
+				},
+			})
+			.from(schema.userInvitations)
+			.innerJoin(schema.users, eq(schema.userInvitations.userId, schema.users.id))
+			.where(
+				and(
+					eq(schema.userInvitations.id, hashSessionSecret(token).toString("hex")),
+					isNull(schema.users.passwordHash),
+				),
+			);
+
+		if (result == null) {
+			return null;
+		}
+
+		if (Date.now() >= result.expiresAt.getTime()) {
+			return null;
+		}
+
+		if (result.email.toLowerCase() !== result.user.email.toLowerCase()) {
+			return null;
+		}
+
+		return result;
+	}
+
+	/**
+	 * Sets the invited user's password and marks their email as verified: following the emailed link
+	 * proves they control the inbox. Returns null when the invitation is no longer valid.
+	 */
+	async function acceptUserInvitation(
+		token: string,
+		password: string,
+	): Promise<UserInvitation["user"] | null> {
+		const passwordHash = await generatePasswordHash(password);
+
+		return await db.transaction(async (tx) => {
+			const invitation = await getUserInvitation(token, tx);
+
+			if (invitation == null) {
+				return null;
+			}
+
+			/** Guarded on the null hash again, so two concurrent submissions cannot both succeed. */
+			const [user] = await tx
+				.update(schema.users)
+				.set({ passwordHash, isEmailVerified: true })
+				.where(and(eq(schema.users.id, invitation.user.id), isNull(schema.users.passwordHash)))
+				.returning({ id: schema.users.id });
+
+			if (user == null) {
+				return null;
+			}
+
+			await tx
+				.delete(schema.userInvitations)
+				.where(eq(schema.userInvitations.userId, invitation.user.id));
+
+			return invitation.user;
+		});
+	}
+
+	async function sendInvitationEmail(params: { to: string; name: string; url: string }) {
+		const { to, name, url } = params;
+
+		const expiresInDays = Math.round(config.invitations.durationMs / (1000 * 60 * 60 * 24));
+
+		return await email.sendEmail({
+			from: config.emailAddress,
+			to,
+			subject: "You have been invited to the DARIAH knowledge base",
+			text: [
+				`Hello ${name},`,
+				"",
+				"An account has been created for you in the DARIAH knowledge base.",
+				"Follow this link to choose your password and finish setting up your account:",
+				"",
+				url,
+				"",
+				`The link is valid for ${String(expiresInDays)} days.`,
+			].join("\n"),
 		});
 	}
 
@@ -1088,6 +1254,11 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		verifyPasswordStrength,
 		isEmailAvailable,
 		createUser,
+		createInvitedUser,
+		createUserInvitation,
+		getUserInvitation,
+		acceptUserInvitation,
+		sendInvitationEmail,
 		createEmailVerificationRequest,
 		deleteEmailVerificationRequest,
 		sendVerificationEmail,

@@ -25,7 +25,6 @@ test.describe("users admin", () => {
 
 		await usersPage.fillName(name);
 		await usersPage.fillEmail(email);
-		await usersPage.fillPassword("TestPassword123!");
 
 		await usersPage.submitForm();
 
@@ -42,6 +41,85 @@ test.describe("users admin", () => {
 			personId: null,
 			role: "user",
 		});
+
+		// The user is invited rather than given a password by the admin.
+		await expect(usersPage.rowByName(name).getByText("Invitation pending")).toBeVisible();
+		expect(await db.getUserCredentialStateByName(name)).toStrictEqual({
+			hasPassword: false,
+			isEmailVerified: false,
+			invitations: 1,
+		});
+	});
+
+	test("should resend an invitation", async ({ page, createAdminUsersPage, db }) => {
+		const workerIndex = test.info().workerIndex;
+		const usersPage = createAdminUsersPage(workerIndex);
+
+		const name = `${usersPage.workerPrefix} Resend ${randomUUID()}`;
+		const email = `e2e-worker-${String(workerIndex)}+${randomUUID()}@example.com`;
+
+		await usersPage.gotoCreate();
+		await usersPage.fillName(name);
+		await usersPage.fillEmail(email);
+		await usersPage.submitForm();
+
+		await usersPage.searchByName(name);
+		await usersPage.resendInvitation(name);
+
+		await expect(page.getByText(`Invitation sent to ${email}.`)).toBeVisible();
+		// The new invitation replaces the old one, so only the latest link works.
+		expect(await db.getUserCredentialStateByName(name)).toMatchObject({ invitations: 1 });
+	});
+
+	test("invited user can choose a password and continue to two-factor setup", async ({
+		browser,
+		createAdminUsersPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const usersPage = createAdminUsersPage(workerIndex);
+
+		const name = `${usersPage.workerPrefix} Invitee ${randomUUID()}`;
+		const email = `e2e-worker-${String(workerIndex)}+${randomUUID()}@example.com`;
+
+		await usersPage.gotoCreate();
+		await usersPage.fillName(name);
+		await usersPage.fillEmail(email);
+		await usersPage.submitForm();
+
+		const user = await db.getUserByName(name);
+		expect(user).not.toBeNull();
+		const token = await db.createUserInvitationToken(user!.id);
+		const href = `/en/auth/accept-invitation?token=${token}`;
+
+		// Accepting signs the invitee in, replacing whoever was signed in before; a fresh context keeps
+		// the shared admin session out of it.
+		const context = await browser.newContext({ storageState: { cookies: [], origins: [] } });
+		try {
+			const page = await context.newPage();
+
+			await page.goto(href);
+			await expect(page.getByRole("heading", { name: `Welcome, ${name}` })).toBeVisible();
+
+			const password = `e2e-${randomUUID()}`;
+			await page.getByLabel("Password", { exact: true }).fill(password);
+			await page.getByLabel("Confirm password").fill(password);
+			await page.getByRole("button", { name: "Set password" }).click();
+
+			await page.waitForURL("**/auth/two-factor/setup");
+
+			expect(await db.getUserCredentialStateByName(name)).toStrictEqual({
+				hasPassword: true,
+				isEmailVerified: true,
+				invitations: 0,
+			});
+
+			// The link is single use.
+			await page.goto(href);
+			await expect(page.getByRole("heading", { name: "Invitation not valid" })).toBeVisible();
+		} finally {
+			await context.close();
+		}
 	});
 
 	test("should edit all user form fields", async ({ page, createAdminUsersPage, db }) => {
@@ -54,7 +132,6 @@ test.describe("users admin", () => {
 		await usersPage.gotoCreate();
 		await usersPage.fillName(originalName);
 		await usersPage.fillEmail(email);
-		await usersPage.fillPassword("TestPassword123!");
 		await usersPage.submitForm();
 
 		await usersPage.searchByName(originalName);
@@ -107,7 +184,6 @@ test.describe("users admin", () => {
 		await usersPage.fillEmail(email);
 		await usersPage.selectRole("Admin");
 		await usersPage.setCanManageAdmins();
-		await usersPage.fillPassword("TestPassword123!");
 		await usersPage.selectPersonActor(person.name);
 		await usersPage.submitForm();
 
@@ -144,7 +220,6 @@ test.describe("users admin", () => {
 		await usersPage.gotoCreate();
 		await usersPage.fillName(name);
 		await usersPage.fillEmail(email);
-		await usersPage.fillPassword("TestPassword123!");
 		await usersPage.submitForm();
 
 		await usersPage.searchByName(name);

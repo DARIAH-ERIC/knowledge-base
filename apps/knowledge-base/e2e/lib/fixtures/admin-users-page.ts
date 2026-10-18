@@ -40,10 +40,6 @@ export class AdminUsersPage {
 		await this.page.getByLabel("Email").fill(email);
 	}
 
-	async fillPassword(password: string): Promise<void> {
-		await this.page.getByLabel("Password").fill(password);
-	}
-
 	async selectRole(role: "Admin" | "User"): Promise<void> {
 		const control = this.page
 			.locator('[data-slot="control"]')
@@ -136,6 +132,12 @@ export class AdminUsersPage {
 		await openActionsMenu(row);
 		await this.page.getByRole("menuitem", { name: "Sign in as this user" }).click();
 		await this.page.waitForURL("**/dashboard");
+	}
+
+	async resendInvitation(name: string): Promise<void> {
+		const row = this.rowByName(name);
+		await openActionsMenu(row);
+		await this.page.getByRole("menuitem", { name: "Resend invitation" }).click();
 	}
 
 	/** Opens the row's actions menu and returns the impersonation item, for asserting it is disabled. */

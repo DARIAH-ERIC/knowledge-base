@@ -70,16 +70,25 @@ export default async function VerifyEmailPage(
 				<div>
 					<h1 className="text-xl/10 font-semibold">{t("Verify email address")}</h1>
 
-					<Text>
-						{t("We sent an 8-digit verification code to {email}.", {
-							email: emailVerificationRequest?.email ?? user.email,
-						})}
-					</Text>
+					{emailVerificationRequest != null ? (
+						<Text>
+							{t("We sent an 8-digit verification code to {email}.", {
+								email: emailVerificationRequest.email,
+							})}
+						</Text>
+					) : (
+						/** E.g. accounts created by an admin, which never had a code sent. */
+						<Text>
+							{t("Request an 8-digit verification code to be sent to {email}.", {
+								email: user.email,
+							})}
+						</Text>
+					)}
 				</div>
 
-				<EmailVerificationForm />
+				{emailVerificationRequest != null ? <EmailVerificationForm /> : null}
 
-				<ResendEmailVerificationCodeForm />
+				<ResendEmailVerificationCodeForm isInitialRequest={emailVerificationRequest == null} />
 
 				<Text className="mbs-4">
 					<TextLink href="/auth/settings">{t("Change email address")}</TextLink>

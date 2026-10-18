@@ -14,7 +14,8 @@ export const users = p.snakeCase.table(
 		id: p.uuid("id").primaryKey().default(uuidv7()),
 		email: p.text("email").notNull(),
 		isEmailVerified: p.boolean("is_email_verified").notNull().default(false),
-		passwordHash: p.text("password_hash").notNull(),
+		/** Null until an invited user accepts their invitation and chooses a password. */
+		passwordHash: p.text("password_hash"),
 		twoFactorTotpKey: p.bytea("two_factor_totp_key"),
 		twoFactorRecoveryCode: p.bytea("two_factor_recovery_code").notNull(),
 		name: p.text("name").notNull(),
@@ -150,3 +151,30 @@ export type EmailVerificationRequestInput = typeof emailVerificationRequests.$in
 export const EmailVerificationRequestSelectSchema = createSelectSchema(emailVerificationRequests);
 export const EmailVerificationRequestInsertSchema = createInsertSchema(emailVerificationRequests);
 export const EmailVerificationRequestUpdateSchema = createUpdateSchema(emailVerificationRequests);
+
+/**
+ * A pending invitation for an account an admin created. The id is the hash of the token sent by
+ * email, so a leaked table row cannot be redeemed. `email` pins the invitation to the address it
+ * was sent to: changing the account's email invalidates it.
+ */
+export const userInvitations = p.snakeCase.table(
+	"user_invitations",
+	{
+		id: p.text("id").primaryKey(),
+		userId: p
+			.uuid("user_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		email: p.text("email").notNull(),
+		expiresAt: f.timestamp("expires_at").notNull(),
+		...f.timestamps(),
+	},
+	(t) => [p.index("user_invitations_user_id_idx").on(t.userId)],
+);
+
+export type UserInvitation = typeof userInvitations.$inferSelect;
+export type UserInvitationInput = typeof userInvitations.$inferInsert;
+
+export const UserInvitationSelectSchema = createSelectSchema(userInvitations);
+export const UserInvitationInsertSchema = createInsertSchema(userInvitations);
+export const UserInvitationUpdateSchema = createUpdateSchema(userInvitations);

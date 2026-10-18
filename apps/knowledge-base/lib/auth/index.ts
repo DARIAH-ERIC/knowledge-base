@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 
 import {
 	emailVerificationRequests,
+	invitations,
 	passwordResetSessions,
 	passwords,
 	sessions,
@@ -17,6 +18,7 @@ export const auth = createAuthService({
 		passwords,
 		emailVerificationRequests,
 		passwordResetSessions,
+		invitations,
 		sessions,
 	},
 	context: {

@@ -33,6 +33,8 @@ export interface UsersResult {
 	data: Array<
 		Pick<schema.User, "canManageAdmins" | "email" | "id" | "isEmailVerified" | "name" | "role"> & {
 			actor: UserActor | null;
+			/** Invited by an admin and not yet accepted, i.e. no password chosen. */
+			isInvitationPending: boolean;
 		}
 	>;
 	limit: number;
@@ -167,6 +169,7 @@ async function getUsers(params: Readonly<GetUsersParams>): Promise<UsersResult> 
 				email: schema.users.email,
 				id: schema.users.id,
 				isEmailVerified: schema.users.isEmailVerified,
+				isInvitationPending: sql<boolean>`${schema.users.passwordHash} IS NULL`,
 				name: schema.users.name,
 				organisationalUnitDocumentId: schema.users.organisationalUnitDocumentId,
 				personDocumentId: schema.users.personDocumentId,

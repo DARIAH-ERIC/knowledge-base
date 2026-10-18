@@ -6,7 +6,6 @@ export const CreateUserActionInputSchema = v.pipe(
 		email: v.pipe(v.string(), v.email()),
 		role: v.picklist(["admin", "user"] as const),
 		canManageAdmins: v.optional(v.literal("true")),
-		password: v.pipe(v.string(), v.minLength(8)),
 		personId: v.optional(v.pipe(v.string(), v.uuid())),
 		organisationalUnitId: v.optional(v.pipe(v.string(), v.uuid())),
 	}),
