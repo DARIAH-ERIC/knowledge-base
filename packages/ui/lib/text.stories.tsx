@@ -23,8 +23,6 @@ export const Default: Story = {
 };
 
 export const WithInlineElements: Story = {
-	/** Known a11y violations, reported as warnings until fixed: see #995. */
-	parameters: { a11y: { test: "todo" } },
 	args: {},
 	render() {
 		return (

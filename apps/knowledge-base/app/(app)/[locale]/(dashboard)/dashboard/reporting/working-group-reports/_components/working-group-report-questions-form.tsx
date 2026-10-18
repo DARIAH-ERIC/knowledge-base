@@ -44,7 +44,6 @@ export function WorkingGroupReportQuestionsForm(
 					<section key={question.id} className="flex flex-col gap-y-4">
 						<div className="rounded-md border border-border bg-muted/30 p-4">
 							<RichTextEditor
-								aria-label={`Question ${String(question.position)}`}
 								content={question.question as JSONContent}
 								isEditable={false}
 								size="sm"

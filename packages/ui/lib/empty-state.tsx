@@ -19,7 +19,6 @@ export function EmptyState(props: Readonly<EmptyStateProps>): ReactNode {
 
 	return (
 		<div
-			aria-hidden={true}
 			className={cn("relative flex items-center justify-center block-72 md:block-100", className)}
 		>
 			<div

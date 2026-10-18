@@ -145,18 +145,11 @@ const meta = {
 	title: "Components/RichTextEditor",
 	component: RichTextEditor,
 	tags: ["autodocs"],
-	/**
-	 * Reported, not enforced. Every story in this file trips the same findings, and all of them
-	 * belong to the editor rather than to any one story: the `textbox` root carries an
-	 * `aria-expanded` that role does not allow and has no accessible name of its own, and two toolbar
-	 * controls miss the contrast threshold. Failing each story on them would tie its own regression
-	 * test to unrelated a11y debt; `"todo"` keeps the findings visible until they are fixed (#995).
-	 */
-	parameters: { a11y: { test: "todo" } },
 	argTypes: {
 		isEditable: { control: "boolean" },
 	},
 	args: {
+		"aria-label": "Content",
 		// oxlint-disable-next-line typescript/strict-void-return
 		onChange: fn(),
 	},

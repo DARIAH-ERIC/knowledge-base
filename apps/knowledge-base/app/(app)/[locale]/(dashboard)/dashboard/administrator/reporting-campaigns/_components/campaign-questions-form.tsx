@@ -43,12 +43,7 @@ export function CampaignQuestionsForm(props: Readonly<CampaignQuestionsFormProps
 									{t("Question")} {q.position}
 								</span>
 								<div className="rounded-md border border-border bg-muted/30 p-4">
-									<RichTextEditor
-										aria-label={t("Question")}
-										content={q.question}
-										isEditable={false}
-										size="sm"
-									/>
+									<RichTextEditor content={q.question} isEditable={false} size="sm" />
 								</div>
 							</div>
 

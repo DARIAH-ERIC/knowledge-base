@@ -1756,7 +1756,7 @@
 		--accent-fg: oklch(13% 0.028 261.692deg);
 
 		--muted: oklch(96.7% 0.003 264.542deg);
-		--muted-fg: oklch(55.1% 0.027 264.364deg);
+		--muted-fg: oklch(54% 0.027 264.364deg);
 
 		--success: oklch(59.6% 0.145 163.225deg);
 		--success-fg: oklch(100% 0 0deg);
@@ -1773,7 +1773,7 @@
 
 		--amber: oklch(78.1% 0.161 71.221deg);
 		--amber-subtle: oklch(84.2% 0.163 71.221deg / 20%);
-		--amber-subtle-fg: oklch(56.3% 0.137 53.978deg);
+		--amber-subtle-fg: oklch(54.5% 0.137 53.978deg);
 
 		--rose: oklch(63.2% 0.196 10.126deg);
 		--rose-subtle: oklch(71.4% 0.172 10.126deg / 15%);
@@ -1795,10 +1795,10 @@
 		--warning-fg: oklch(27.9% 0.077 45.635deg);
 
 		--warning-subtle: oklch(82.8% 0.189 84.429deg / 20%);
-		--warning-subtle-fg: oklch(55.5% 0.163 48.998deg);
+		--warning-subtle-fg: oklch(54.5% 0.163 48.998deg);
 
 		--danger: oklch(57.7% 0.245 27.325deg);
-		--danger-fg: oklch(97.1% 0.013 17.38deg);
+		--danger-fg: oklch(100% 0 0deg);
 
 		--danger-subtle: oklch(63.7% 0.237 25.331deg / 15%);
 		--danger-subtle-fg: oklch(50.5% 0.213 27.518deg);
@@ -1933,7 +1933,7 @@
 		--warning-subtle-fg: oklch(82.8% 0.189 84.429deg);
 
 		--danger: oklch(57.7% 0.245 27.325deg);
-		--danger-fg: oklch(97.1% 0.013 17.38deg);
+		--danger-fg: oklch(100% 0 0deg);
 
 		--danger-subtle: oklch(63.7% 0.237 25.331deg / 10%);
 		--danger-subtle-fg: oklch(70.4% 0.191 22.216deg);

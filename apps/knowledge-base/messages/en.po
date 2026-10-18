@@ -6714,7 +6714,6 @@ msgid "No questions yet."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-questions-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx
 msgctxt "kgOBET"
 msgid "Question"
 msgstr ""
@@ -7903,11 +7902,6 @@ msgctxt "XLoCJx"
 msgid "Publications"
 msgstr ""
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-comments-section.tsx
-msgctxt "jXKNoR"
-msgid "Comment for {section}"
-msgstr ""
-
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-edit-guard.tsx
 msgctxt "0ODgIO"
 msgid "You have unsaved changes. Leave this screen without saving?"
@@ -8623,11 +8617,6 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
 msgctxt "7X1psl"
 msgid "No social media accounts linked to this working group."
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx
-msgctxt "DwjT1H"
-msgid "Answer"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx

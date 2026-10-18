@@ -23,28 +23,24 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-	/** Known a11y violations, reported as warnings until fixed: see #995. */
-	parameters: { a11y: { test: "todo" } },
 	args: {},
 	render(props) {
 		return (
 			<Pagination {...props}>
-				<PaginationSection>
-					<PaginationPrevious href="#" />
-				</PaginationSection>
 				<PaginationList>
-					<PaginationItem href="#" isCurrent={true}>
-						{"1"}
-					</PaginationItem>
-					<PaginationItem href="#">{"2"}</PaginationItem>
-					<PaginationItem href="#">{"3"}</PaginationItem>
-					<PaginationGap />
-					<PaginationItem href="#">{"8"}</PaginationItem>
-					<PaginationItem href="#">{"9"}</PaginationItem>
-				</PaginationList>
-				<PaginationSection>
+					<PaginationPrevious href="#" />
+					<PaginationSection>
+						<PaginationItem href="#" isCurrent={true}>
+							{"1"}
+						</PaginationItem>
+						<PaginationItem href="#">{"2"}</PaginationItem>
+						<PaginationItem href="#">{"3"}</PaginationItem>
+						<PaginationGap />
+						<PaginationItem href="#">{"8"}</PaginationItem>
+						<PaginationItem href="#">{"9"}</PaginationItem>
+					</PaginationSection>
 					<PaginationNext href="#" />
-				</PaginationSection>
+				</PaginationList>
 			</Pagination>
 		);
 	},
