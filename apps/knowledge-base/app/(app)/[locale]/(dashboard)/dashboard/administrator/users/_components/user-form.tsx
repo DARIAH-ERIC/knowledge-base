@@ -103,6 +103,13 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 		user?.organisationalUnit ?? null,
 	);
 
+	/** Clearing the picker unlinks the user, so "Link to" goes back to "None" to show what is saved. */
+	function clearActor() {
+		setActorType("none");
+		setSelectedPerson(null);
+		setSelectedCountry(null);
+	}
+
 	return (
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
@@ -183,6 +190,7 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 							isRequired={true}
 							label={t("Person")}
 							loadOnMount={true}
+							onClear={clearActor}
 							onSelect={setSelectedPerson}
 							placeholder={t("Select a person")}
 							selectedItem={selectedPerson}
@@ -199,6 +207,7 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 							isRequired={true}
 							label={t("Country")}
 							loadOnMount={true}
+							onClear={clearActor}
 							onSelect={setSelectedCountry}
 							placeholder={t("Select a country")}
 							selectedItem={selectedCountry}

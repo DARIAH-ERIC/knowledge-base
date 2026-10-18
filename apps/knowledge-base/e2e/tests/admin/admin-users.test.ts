@@ -280,6 +280,48 @@ test.describe("users admin", () => {
 		});
 	});
 
+	test("should unlink a user by clearing the selected person", async ({
+		page,
+		createAdminUsersPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const usersPage = createAdminUsersPage(workerIndex);
+		const person = await db.getPersonOption();
+		const name = `${usersPage.workerPrefix} Unlink ${randomUUID()}`;
+		const email = `e2e-worker-${String(workerIndex)}+unlink-${randomUUID()}@example.com`;
+
+		await usersPage.gotoCreate();
+		await usersPage.fillName(name);
+		await usersPage.fillEmail(email);
+		await usersPage.selectPersonActor(person.name);
+		await usersPage.submitForm();
+
+		expect((await db.getUserByName(name))?.personId).not.toBeNull();
+
+		await usersPage.searchByName(name);
+		await openActionsMenu(usersPage.rowByName(name));
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		await usersPage.clearActor("Person");
+		// Clearing goes back to "None", so the form shows that saving removes the link.
+		await expect(page.getByRole("button", { name: "Clear selection" })).toBeHidden();
+		await expect(
+			page
+				.locator('[data-slot="control"]')
+				.filter({ has: page.getByText("Link to", { exact: true }) }),
+		).toContainText("None");
+		await usersPage.submitForm();
+
+		expect(await db.getUserByName(name)).toMatchObject({
+			organisationalUnitId: null,
+			personId: null,
+		});
+	});
+
 	test("should delete a user", async ({ createAdminUsersPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const usersPage = createAdminUsersPage(workerIndex);

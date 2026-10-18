@@ -84,6 +84,11 @@ msgctxt "ui.hBhV8k"
 msgid "Open options"
 msgstr ""
 
+#: lib/async-select.tsx
+msgctxt "ui.EYIw2M"
+msgid "Clear selection"
+msgstr "Clear selection"
+
 #: lib/breadcrumbs.tsx
 msgctxt "ui.ByoZDD"
 msgid "Breadcrumbs"

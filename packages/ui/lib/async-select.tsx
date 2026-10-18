@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { ChevronUpDownIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { useResizeObserver } from "@react-aria/utils";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useCallback, useRef, useState } from "react";
@@ -37,6 +37,8 @@ export interface AsyncSelectProps<T extends AsyncOption> {
 	isRequired?: boolean;
 	label?: string;
 	loadOnMount?: boolean;
+	/** Shows a button that clears the selection. Omit for fields that must always have a value. */
+	onClear?: () => void;
 	onSelect: (item: T) => void;
 	pageSize?: number;
 	placeholder: string;
@@ -86,6 +88,7 @@ function AsyncSelectInner<T extends AsyncOption>(
 		isRequired = false,
 		label,
 		loadOnMount = false,
+		onClear,
 		onSelect,
 		pageSize = defaultPageSize,
 		placeholder,
@@ -125,6 +128,7 @@ function AsyncSelectInner<T extends AsyncOption>(
 	});
 
 	const renderOption = renderItem ?? renderDefaultItem;
+	const isClearable = onClear != null && selectedItem != null && !isDisabled;
 	const loadErrorMessage =
 		loadError != null && loadError.message !== ""
 			? loadError.message
@@ -138,140 +142,158 @@ function AsyncSelectInner<T extends AsyncOption>(
 		>
 			{label != null ? <Label>{label}</Label> : null}
 
-			<AriaDialogTrigger
-				isOpen={isOpen}
-				onOpenChange={(open) => {
-					setIsOpen(open);
+			<div className="flex items-center gap-x-1">
+				<AriaDialogTrigger
+					isOpen={isOpen}
+					onOpenChange={(open) => {
+						setIsOpen(open);
 
-					if (open && loadOnMount && initialItems.length === 0) {
-						handleSearch();
-					}
-				}}
-			>
-				<AriaButton
-					ref={triggerRef}
-					aria-required={isRequired || undefined}
-					className={cx(
-						"group/select-trigger flex cursor-default items-center gap-x-2 rounded-lg border border-input px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] text-start text-fg outline-hidden transition duration-200 inline-full min-inline-0 sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
-						"hover:border-muted-fg/30",
-						"focus:border-ring/70 focus:bg-primary-subtle/5 focus:ring-3 focus:ring-ring/20",
-						isOpen ? "border-ring/70 bg-primary-subtle/5 ring-3 ring-ring/20" : undefined,
-						isDisabled ? "opacity-50" : undefined,
-					)}
-					isDisabled={isDisabled}
+						if (open && loadOnMount && initialItems.length === 0) {
+							handleSearch();
+						}
+					}}
 				>
-					<span
-						className={twMerge(
-							"flex-1 truncate text-start",
-							selectedItem == null ? "text-muted-fg" : undefined,
+					<AriaButton
+						ref={triggerRef}
+						aria-required={isRequired || undefined}
+						className={cx(
+							"group/select-trigger flex flex-1 cursor-default items-center gap-x-2 rounded-lg border border-input px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] text-start text-fg outline-hidden transition duration-200 inline-full min-inline-0 sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
+							"hover:border-muted-fg/30",
+							"focus:border-ring/70 focus:bg-primary-subtle/5 focus:ring-3 focus:ring-ring/20",
+							isOpen ? "border-ring/70 bg-primary-subtle/5 ring-3 ring-ring/20" : undefined,
+							isDisabled ? "opacity-50" : undefined,
 						)}
+						isDisabled={isDisabled}
 					>
-						{selectedItem?.name ?? placeholder}
-					</span>
-					<ChevronUpDownIcon
-						className="shrink-0 text-muted-fg block-5 inline-5 sm:block-4 sm:inline-4"
-						data-slot="chevron"
-					/>
-				</AriaButton>
+						<span
+							className={twMerge(
+								"flex-1 truncate text-start",
+								selectedItem == null ? "text-muted-fg" : undefined,
+							)}
+						>
+							{selectedItem?.name ?? placeholder}
+						</span>
+						<ChevronUpDownIcon
+							className="shrink-0 text-muted-fg block-5 inline-5 sm:block-4 sm:inline-4"
+							data-slot="chevron"
+						/>
+					</AriaButton>
 
-				<AriaPopover
-					className={cx(
-						"group/popover origin-(--trigger-anchor-point) overflow-hidden rounded-xl border border-fg/10 bg-overlay text-overlay-fg shadow-xs outline-hidden",
-						"inline-(--trigger-width)",
-						"entering:animate-in entering:fade-in",
-						"exiting:animate-out exiting:fade-out",
-					)}
-					placement="bottom"
-					style={triggerWidth != null ? { "--trigger-width": triggerWidth } : undefined}
-				>
-					<div className="flex flex-col gap-3 p-3">
-						<SearchField onChange={setSearchText} onSubmit={handleSearch} value={searchText}>
-							<SearchInput autoFocus={true} placeholder={inputPlaceholder ?? t("Search")} />
-						</SearchField>
-
-						{loadError != null ? (
-							<p className="py-3 text-center text-sm text-danger-subtle-fg">{loadErrorMessage}</p>
-						) : displayedItems.length > 0 ? (
-							<div className="relative">
-								<ListBox
-									aria-label={ariaLabel}
-									className={cx(
-										"max-block-72 [&::-webkit-scrollbar]:block-2! [&::-webkit-scrollbar]:inline-2!",
-										isPending ? "opacity-50" : undefined,
-									)}
-									// Options survive between fetches as the same objects, so a caller that swaps its
-									// `renderItem` would otherwise keep the markup the previous one produced.
-									dependencies={[renderOption]}
-									items={displayedItems}
-									onSelectionChange={(keys) => {
-										if (keys === "all") {
-											return;
-										}
-
-										const [first] = [...keys];
-
-										if (first == null) {
-											return;
-										}
-
-										const item = displayedItems.find((entry) => entry.id === first);
-
-										if (item == null) {
-											return;
-										}
-
-										onSelect(item);
-										setIsOpen(false);
-									}}
-									selectedKeys={selectedItem != null ? new Set([selectedItem.id]) : new Set()}
-									selectionMode="single"
-								>
-									{(item) => (
-										<ListBoxItem id={item.id} textValue={item.name}>
-											{renderOption(item)}
-										</ListBoxItem>
-									)}
-								</ListBox>
-
-								{isPending ? (
-									<div className="absolute inset-0 flex items-center justify-center">
-										<ProgressCircle aria-label={t("Pending...")} isIndeterminate={true} />
-									</div>
-								) : null}
-							</div>
-						) : isPending ? (
-							<div className="flex items-center justify-center py-6">
-								<ProgressCircle aria-label={t("Pending...")} isIndeterminate={true} />
-							</div>
-						) : (
-							<p className="py-3 text-center text-sm text-muted-fg">
-								{emptyMessage ?? t("No options found.")}
-							</p>
+					<AriaPopover
+						className={cx(
+							"group/popover origin-(--trigger-anchor-point) overflow-hidden rounded-xl border border-fg/10 bg-overlay text-overlay-fg shadow-xs outline-hidden",
+							"inline-(--trigger-width)",
+							"entering:animate-in entering:fade-in",
+							"exiting:animate-out exiting:fade-out",
 						)}
+						placement="bottom"
+						style={triggerWidth != null ? { "--trigger-width": triggerWidth } : undefined}
+					>
+						<div className="flex flex-col gap-3 p-3">
+							<SearchField onChange={setSearchText} onSubmit={handleSearch} value={searchText}>
+								<SearchInput autoFocus={true} placeholder={inputPlaceholder ?? t("Search")} />
+							</SearchField>
 
-						{hasPrev || hasNext ? (
-							<div className="flex justify-between gap-2">
-								<Button
-									intent="outline"
-									isDisabled={!hasPrev || isPending}
-									onPress={handlePrev}
-									type="button"
-								>
-									{t("Previous page")}
-								</Button>
-								<Button
-									intent="outline"
-									isDisabled={!hasNext || isPending}
-									onPress={handleNext}
-									type="button"
-								>
-									{t("Next page")}
-								</Button>
-							</div>
-						) : null}
-					</div>
-				</AriaPopover>
-			</AriaDialogTrigger>
+							{loadError != null ? (
+								<p className="py-3 text-center text-sm text-danger-subtle-fg">{loadErrorMessage}</p>
+							) : displayedItems.length > 0 ? (
+								<div className="relative">
+									<ListBox
+										aria-label={ariaLabel}
+										className={cx(
+											"max-block-72 [&::-webkit-scrollbar]:block-2! [&::-webkit-scrollbar]:inline-2!",
+											isPending ? "opacity-50" : undefined,
+										)}
+										// Options survive between fetches as the same objects, so a caller that swaps its
+										// `renderItem` would otherwise keep the markup the previous one produced.
+										dependencies={[renderOption]}
+										items={displayedItems}
+										onSelectionChange={(keys) => {
+											if (keys === "all") {
+												return;
+											}
+
+											const [first] = [...keys];
+
+											if (first == null) {
+												return;
+											}
+
+											const item = displayedItems.find((entry) => entry.id === first);
+
+											if (item == null) {
+												return;
+											}
+
+											onSelect(item);
+											setIsOpen(false);
+										}}
+										selectedKeys={selectedItem != null ? new Set([selectedItem.id]) : new Set()}
+										selectionMode="single"
+									>
+										{(item) => (
+											<ListBoxItem id={item.id} textValue={item.name}>
+												{renderOption(item)}
+											</ListBoxItem>
+										)}
+									</ListBox>
+
+									{isPending ? (
+										<div className="absolute inset-0 flex items-center justify-center">
+											<ProgressCircle aria-label={t("Pending...")} isIndeterminate={true} />
+										</div>
+									) : null}
+								</div>
+							) : isPending ? (
+								<div className="flex items-center justify-center py-6">
+									<ProgressCircle aria-label={t("Pending...")} isIndeterminate={true} />
+								</div>
+							) : (
+								<p className="py-3 text-center text-sm text-muted-fg">
+									{emptyMessage ?? t("No options found.")}
+								</p>
+							)}
+
+							{hasPrev || hasNext ? (
+								<div className="flex justify-between gap-2">
+									<Button
+										intent="outline"
+										isDisabled={!hasPrev || isPending}
+										onPress={handlePrev}
+										type="button"
+									>
+										{t("Previous page")}
+									</Button>
+									<Button
+										intent="outline"
+										isDisabled={!hasNext || isPending}
+										onPress={handleNext}
+										type="button"
+									>
+										{t("Next page")}
+									</Button>
+								</div>
+							) : null}
+						</div>
+					</AriaPopover>
+				</AriaDialogTrigger>
+
+				{isClearable ? (
+					<Button
+						aria-label={t("Clear selection")}
+						intent="plain"
+						onPress={() => {
+							onClear();
+							// The button disappears with the selection, so keep focus in the field.
+							triggerRef.current?.focus();
+						}}
+						size="sq-sm"
+						type="button"
+					>
+						<XMarkIcon />
+					</Button>
+				) : null}
+			</div>
 
 			{errorMessage != null && errorMessage !== "" ? (
 				<div className={fieldErrorStyles()}>{errorMessage}</div>

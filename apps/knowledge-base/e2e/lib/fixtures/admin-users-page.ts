@@ -80,6 +80,13 @@ export class AdminUsersPage {
 		await expect(control.getByText(name, { exact: true })).toBeVisible();
 	}
 
+	async clearActor(label: "Person" | "Country"): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: label }) });
+		await control.getByRole("button", { name: "Clear selection" }).click();
+	}
+
 	async selectPersonActor(name: string): Promise<void> {
 		await this.selectActorType("Person");
 		await this.selectActor("Person", name);
