@@ -51,6 +51,24 @@ test.describe("persons admin", () => {
 		expect(JSON.stringify(await db.getPersonBiographyByName(name))).toContain(biography);
 	});
 
+	test("should leave the required marker out of a field's accessible name", async ({
+		page,
+		createAdminPersonsPage,
+	}) => {
+		const personsPage = createAdminPersonsPage(test.info().workerIndex);
+		await personsPage.gotoCreate();
+
+		// The asterisk is drawn with `content: "*" / ""`: shown, but with empty alternative text, so a
+		// screen reader announces the label and the field's required state, not a "star".
+		const name = page.getByRole("textbox", { name: "Name", exact: true });
+		await expect(name).toHaveAccessibleName("Name");
+		const marker = await name.evaluate((input) => {
+			const label = (input as HTMLInputElement).labels?.[0];
+			return label == null ? null : getComputedStyle(label, "::after").content;
+		});
+		expect(marker).toContain("*");
+	});
+
 	test("should store images inserted in person rich-text biographies as image content blocks", async ({
 		createAdminPersonsPage,
 		db,

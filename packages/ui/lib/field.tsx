@@ -17,7 +17,7 @@ import { cx } from "@/lib/primitive";
 export const labelStyles = tv({
 	base: [
 		"text-base/6 text-fg select-none group-disabled:opacity-50 in-disabled:opacity-50 sm:text-sm/6",
-		"in-data-required:after:ms-0.5 in-data-required:after:text-danger in-data-required:after:content-['*']",
+		"in-data-required:after:ms-0.5 in-data-required:after:text-danger in-data-required:after:content-['*'/'']",
 	],
 });
 
