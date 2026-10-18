@@ -86,7 +86,6 @@ test.describe("impersonation", () => {
 		await usersPage.gotoCreate();
 		await usersPage.fillName(name);
 		await usersPage.fillEmail(email);
-		await usersPage.fillPassword("TestPassword123!");
 		await usersPage.selectRole("Admin");
 		await usersPage.submitForm();
 
@@ -116,7 +115,6 @@ test.describe("impersonation", () => {
 		await usersPage.gotoCreate();
 		await usersPage.fillName(name);
 		await usersPage.fillEmail(email);
-		await usersPage.fillPassword("TestPassword123!");
 		await usersPage.submitForm();
 
 		await usersPage.searchByName(name);

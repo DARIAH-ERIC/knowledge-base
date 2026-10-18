@@ -92,6 +92,38 @@ export const Default: Story = {
 	},
 };
 
+export const Clearable: Story = {
+	render() {
+		function Example() {
+			const [selected, setSelected] = useState<Person | null>(initialPage[0] ?? null);
+
+			return (
+				<div className="inline-80">
+					<AsyncSelect<Person>
+						aria-label="Person"
+						fetchPage={fetchPeople}
+						initialItems={initialPage}
+						initialTotal={allPeople.length}
+						label="Person"
+						onClear={() => {
+							setSelected(null);
+						}}
+						onSelect={setSelected}
+						placeholder="Select a person..."
+						selectedItem={selected}
+					/>
+					<p className="mbs-2 text-sm text-muted-fg">
+						{"Selected: "}
+						{selected?.name ?? "none"}
+					</p>
+				</div>
+			);
+		}
+
+		return <Example />;
+	},
+};
+
 export const WithDescriptions: Story = {
 	render() {
 		function Example() {

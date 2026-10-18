@@ -54,6 +54,14 @@ export const signInAction = createServerAction(async function signInAction(state
 	}
 
 	const passwordHash = await auth.getUserPasswordHash(user.id);
+	if (passwordHash == null) {
+		return createActionStateError({
+			message: t(
+				"This account has not been activated yet. Follow the link in your invitation email to choose a password.",
+			),
+		});
+	}
+
 	const isValidPassword = await auth.verifyPasswordHash(passwordHash, password);
 	if (!isValidPassword) {
 		return createActionStateError({ message: t("Incorrect password.") });

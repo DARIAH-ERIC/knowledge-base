@@ -1,3 +1,5 @@
+import { createHash, randomBytes } from "node:crypto";
+
 import { type Transaction, createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { and, eq, exists, inArray, notExists, or, sql } from "@dariah-eric/database/sql";
@@ -2377,6 +2379,83 @@ export class DatabaseService {
 			.limit(1);
 
 		return row ?? null;
+	}
+
+	async getUserCredentialStateByName(name: string): Promise<{
+		hasPassword: boolean;
+		isEmailVerified: boolean;
+		invitations: number;
+	} | null> {
+		const [user] = await this.db
+			.select({
+				id: schema.users.id,
+				hasPassword: sql<boolean>`${schema.users.passwordHash} IS NOT NULL`,
+				isEmailVerified: schema.users.isEmailVerified,
+			})
+			.from(schema.users)
+			.where(eq(schema.users.name, name))
+			.limit(1);
+
+		if (user == null) {
+			return null;
+		}
+
+		const invitations = await this.db.$count(
+			schema.userInvitations,
+			eq(schema.userInvitations.userId, user.id),
+		);
+
+		return { hasPassword: user.hasPassword, isEmailVerified: user.isEmailVerified, invitations };
+	}
+
+	/** A user who signed up (or accepted their invitation) and so has a password. */
+	async createUserWithPassword(params: { name: string; email: string }): Promise<{ id: string }> {
+		const [user] = await this.db
+			.insert(schema.users)
+			.values({
+				email: params.email,
+				name: params.name,
+				passwordHash: "not-a-real-hash",
+				twoFactorRecoveryCode: randomBytes(16),
+				isEmailVerified: true,
+			})
+			.returning({ id: schema.users.id });
+		if (user == null) {
+			throw new Error("Failed to create user.");
+		}
+
+		return user;
+	}
+
+	async countUsersByEmail(email: string): Promise<number> {
+		return this.db.$count(schema.users, sql`LOWER(${schema.users.email}) = LOWER(${email})`);
+	}
+
+	/**
+	 * Replaces the user's invitation with one whose token the test knows, standing in for the link in
+	 * the invitation email: Mailpit is shared with suites that clear it, so reading the real email
+	 * would be flaky. Only the token's hash is stored, exactly as the auth service does.
+	 */
+	async createUserInvitationToken(userId: string): Promise<string> {
+		const token = randomBytes(32).toString("hex");
+
+		const [user] = await this.db
+			.select({ email: schema.users.email })
+			.from(schema.users)
+			.where(eq(schema.users.id, userId));
+		if (user == null) {
+			throw new Error(`User ${userId} not found.`);
+		}
+
+		await this.db.delete(schema.userInvitations).where(eq(schema.userInvitations.userId, userId));
+		await this.db.insert(schema.userInvitations).values({
+			id: createHash("sha-256").update(token).digest("hex"),
+			userId,
+			email: user.email,
+			expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+		});
+
+		return token;
 	}
 
 	async getPageItemByTitle(title: string): Promise<{

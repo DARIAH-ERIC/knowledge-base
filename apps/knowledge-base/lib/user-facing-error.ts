@@ -1,9 +1,12 @@
 /** The disallowed operations a mutation can reject with a message that is safe to show the user. */
 export type UserFacingErrorKind =
+	| "admin-account-change-not-allowed"
 	| "admin-account-deletion-not-allowed"
 	| "document-linked-to-user"
 	| "frozen-report-role-conflict"
 	| "image-block-without-asset"
+	| "invitation-email-not-sent"
+	| "invitation-not-pending"
 	| "last-admin-manager"
 	| "missing-dariah-eric"
 	| "missing-paired-relation-unit"

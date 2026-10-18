@@ -30,6 +30,7 @@ function createTestAuthService(tx: Transaction) {
 			passwords: { length: { min: 8, max: 255 } },
 			emailVerificationRequests: { cookie },
 			passwordResetSessions: { cookie },
+			invitations: { durationMs: sessionDurationMs },
 			sessions: { cookie, impersonation: { durationMs: impersonationDurationMs } },
 		},
 		context: {

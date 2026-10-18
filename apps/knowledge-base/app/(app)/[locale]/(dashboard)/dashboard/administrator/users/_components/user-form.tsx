@@ -11,6 +11,7 @@ import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import { Text } from "@dariah-eric/ui/text";
 import { TextField } from "@dariah-eric/ui/text-field";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { useExtracted } from "next-intl";
@@ -102,6 +103,13 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 		user?.organisationalUnit ?? null,
 	);
 
+	/** Clearing the picker unlinks the user, so "Link to" goes back to "None" to show what is saved. */
+	function clearActor() {
+		setActorType("none");
+		setSelectedPerson(null);
+		setSelectedCountry(null);
+	}
+
 	return (
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
@@ -146,11 +154,9 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 					) : null}
 
 					{user == null && (
-						<TextField isRequired={true} name="password" type="password">
-							<Label>{t("Password")}</Label>
-							<Input />
-							<FieldError />
-						</TextField>
+						<Text>
+							{t("We will email the user an invitation link to choose their own password.")}
+						</Text>
 					)}
 
 					{user != null && <input name="id" type="hidden" value={user.id} />}
@@ -184,6 +190,7 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 							isRequired={true}
 							label={t("Person")}
 							loadOnMount={true}
+							onClear={clearActor}
 							onSelect={setSelectedPerson}
 							placeholder={t("Select a person")}
 							selectedItem={selectedPerson}
@@ -200,6 +207,7 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 							isRequired={true}
 							label={t("Country")}
 							loadOnMount={true}
+							onClear={clearActor}
 							onSelect={setSelectedCountry}
 							placeholder={t("Select a country")}
 							selectedItem={selectedCountry}

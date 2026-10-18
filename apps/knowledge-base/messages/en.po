@@ -84,6 +84,11 @@ msgctxt "ui.hBhV8k"
 msgid "Open options"
 msgstr ""
 
+#: ../../packages/ui/lib/async-select.tsx
+msgctxt "ui.EYIw2M"
+msgid "Clear selection"
+msgstr "Clear selection"
+
 #: ../../packages/ui/lib/breadcrumbs.tsx
 msgctxt "ui.ByoZDD"
 msgid "Breadcrumbs"
@@ -561,30 +566,28 @@ msgctxt "xXbJso"
 msgid "Sign out"
 msgstr ""
 
-#: app/(app)/[locale]/(auth)/auth/forgot-password/_components/forgot-password-form.tsx
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/_components/accept-invitation-form.tsx
+#: app/(app)/[locale]/(auth)/auth/reset-password/_components/reset-password-form.tsx
 #: app/(app)/[locale]/(auth)/auth/sign-in/_components/sign-in-form.tsx
 #: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx
-#: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx
-msgctxt "sy-pv5"
-msgid "Email"
+msgctxt "5sg7KC"
+msgid "Password"
 msgstr ""
 
-#: app/(app)/[locale]/(auth)/auth/forgot-password/_components/forgot-password-form.tsx
-#: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx
-msgctxt "9WRlF4"
-msgid "Send"
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/_components/accept-invitation-form.tsx
+#: app/(app)/[locale]/(auth)/auth/reset-password/_components/reset-password-form.tsx
+#: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx
+msgctxt "8HimVK"
+msgid "Confirm password"
 msgstr ""
 
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/_components/accept-invitation-form.tsx
+msgctxt "QOiG4E"
+msgid "Set password"
+msgstr "Set password"
+
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/_lib/accept-invitation.action.ts
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/page.tsx
 #: app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password.action.ts
 #: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx
 #: app/(app)/[locale]/(auth)/auth/recovery-code/page.tsx
@@ -618,6 +621,7 @@ msgctxt "CDu063"
 msgid "Too many requests."
 msgstr ""
 
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/_lib/accept-invitation.action.ts
 #: app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password.action.ts
 #: app/(app)/[locale]/(auth)/auth/reset-password/_lib/reset-password.action.ts
 #: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-recovery-code.action.ts
@@ -646,17 +650,25 @@ msgctxt "z9RwCc"
 msgid "Invalid or missing fields."
 msgstr ""
 
-#: app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password.action.ts
-#: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts
-msgctxt "aEdOxR"
-msgid "Account does not exist."
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/_lib/accept-invitation.action.ts
+#: app/(app)/[locale]/(auth)/auth/reset-password/_lib/reset-password.action.ts
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts
+#: app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.action.ts
+msgctxt "aZPBJm"
+msgid "Weak password."
 msgstr ""
 
-#: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx
-msgctxt "9H3bhD"
-msgid "Forgot password"
-msgstr ""
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/_lib/accept-invitation.action.ts
+msgctxt "8dpkG4"
+msgid "This invitation link is invalid or has expired."
+msgstr "This invitation link is invalid or has expired."
 
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/page.tsx
+msgctxt "j2QN5I"
+msgid "Accept invitation"
+msgstr "Accept invitation"
+
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/page.tsx
 #: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx
 #: app/(app)/[locale]/(auth)/auth/recovery-code/page.tsx
 #: app/(app)/[locale]/(auth)/auth/reset-password/page.tsx
@@ -680,16 +692,33 @@ msgctxt "ejEGdx"
 msgid "Home"
 msgstr ""
 
-#: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx
-msgctxt "cyRU1N"
-msgid "Forgot your password?"
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/(index)/page.tsx
+msgctxt "msSyC_"
+msgid "Welcome, {name}"
 msgstr ""
 
-#: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx
-msgctxt "htvY7x"
-msgid "We will send a password reset code to your email address."
-msgstr ""
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/page.tsx
+msgctxt "Cqf1Lp"
+msgid "Choose a password for your account {email}."
+msgstr "Choose a password for your account {email}."
 
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/page.tsx
+msgctxt "L5H-dg"
+msgid "Invitation not valid"
+msgstr "Invitation not valid"
+
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/page.tsx
+msgctxt "qz1H1N"
+msgid "This invitation link is invalid or has expired. Ask an administrator to send you a new one."
+msgstr "This invitation link is invalid or has expired. Ask an administrator to send you a new one."
+
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/page.tsx
+msgctxt "JGqajM"
+msgid "Already set a password?"
+msgstr "Already set a password?"
+
+#: app/(app)/[locale]/(auth)/auth/accept-invitation/page.tsx
 #: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx
 #: app/(app)/[locale]/(auth)/auth/sign-in/_components/sign-in-form.tsx
 #: app/(app)/[locale]/(auth)/auth/sign-in/page.tsx
@@ -699,6 +728,51 @@ msgstr ""
 #: app/(app)/[locale]/unauthorized.tsx
 msgctxt "SQJto2"
 msgid "Sign in"
+msgstr ""
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/_components/forgot-password-form.tsx
+#: app/(app)/[locale]/(auth)/auth/sign-in/_components/sign-in-form.tsx
+#: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx
+#: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx
+msgctxt "sy-pv5"
+msgid "Email"
+msgstr ""
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/_components/forgot-password-form.tsx
+#: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx
+msgctxt "9WRlF4"
+msgid "Send"
+msgstr ""
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password.action.ts
+#: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts
+msgctxt "aEdOxR"
+msgid "Account does not exist."
+msgstr ""
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx
+msgctxt "9H3bhD"
+msgid "Forgot password"
+msgstr ""
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx
+msgctxt "cyRU1N"
+msgid "Forgot your password?"
+msgstr ""
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx
+msgctxt "htvY7x"
+msgid "We will send a password reset code to your email address."
 msgstr ""
 
 #: app/(app)/[locale]/(auth)/auth/recovery-code/page.tsx
@@ -725,20 +799,6 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/wizard-shell.tsx
 msgctxt "acrOoz"
 msgid "Continue"
-msgstr ""
-
-#: app/(app)/[locale]/(auth)/auth/reset-password/_components/reset-password-form.tsx
-#: app/(app)/[locale]/(auth)/auth/sign-in/_components/sign-in-form.tsx
-#: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx
-msgctxt "5sg7KC"
-msgid "Password"
-msgstr ""
-
-#: app/(app)/[locale]/(auth)/auth/reset-password/_components/reset-password-form.tsx
-#: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx
-msgctxt "8HimVK"
-msgid "Confirm password"
 msgstr ""
 
 #: app/(app)/[locale]/(auth)/auth/reset-password/_components/reset-password-form.tsx
@@ -776,13 +836,6 @@ msgstr ""
 #: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts
 msgctxt "z6socI"
 msgid "Forbidden."
-msgstr ""
-
-#: app/(app)/[locale]/(auth)/auth/reset-password/_lib/reset-password.action.ts
-#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts
-#: app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.action.ts
-msgctxt "aZPBJm"
-msgid "Weak password."
 msgstr ""
 
 #: app/(app)/[locale]/(auth)/auth/reset-password/page.tsx
@@ -934,6 +987,11 @@ msgstr ""
 msgctxt "dVE1PE"
 msgid "Update two-factor authentication"
 msgstr ""
+
+#: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts
+msgctxt "5ZQJqQ"
+msgid "This account has not been activated yet. Follow the link in your invitation email to choose a password."
+msgstr "This account has not been activated yet. Follow the link in your invitation email to choose a password."
 
 #: app/(app)/[locale]/(auth)/auth/sign-in/page.tsx
 msgctxt "0VMkDa"
@@ -1118,6 +1176,11 @@ msgid "Verification code"
 msgstr ""
 
 #: app/(app)/[locale]/(auth)/auth/verify-email/_components/resend-email-verification-code-form.tsx
+msgctxt "KFpaMd"
+msgid "Send verification code"
+msgstr "Send verification code"
+
+#: app/(app)/[locale]/(auth)/auth/verify-email/_components/resend-email-verification-code-form.tsx
 msgctxt "62beOi"
 msgid "Resend verification code"
 msgstr ""
@@ -1136,6 +1199,11 @@ msgstr ""
 msgctxt "1Cuvc8"
 msgid "We sent an 8-digit verification code to {email}."
 msgstr ""
+
+#: app/(app)/[locale]/(auth)/auth/verify-email/page.tsx
+msgctxt "gowtiQ"
+msgid "Request an 8-digit verification code to be sent to {email}."
+msgstr "Request an 8-digit verification code to be sent to {email}."
 
 #: app/(app)/[locale]/(auth)/auth/verify-email/page.tsx
 msgctxt "EI6y9l"
@@ -3205,11 +3273,6 @@ msgstr "Person saved as draft."
 #: app/(app)/[locale]/(dashboard)/dashboard/_lib/create-social-media.action.ts
 msgctxt "O166c7"
 msgid "Invalid social media type."
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/(index)/page.tsx
-msgctxt "msSyC_"
-msgid "Welcome, {name}"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/(index)/page.tsx
@@ -7508,6 +7571,11 @@ msgid "Can manage other admin users"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx
+msgctxt "bSnRMr"
+msgid "We will email the user an invitation link to choose their own password."
+msgstr "We will email the user an invitation link to choose their own password."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx
 msgctxt "heMA8U"
 msgid "Actor link"
 msgstr ""
@@ -7555,6 +7623,11 @@ msgid "Linked actor"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
+msgctxt "QIHvkI"
+msgid "Invitation pending"
+msgstr "Invitation pending"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
 msgctxt "OfYDMn"
 msgid "Could not sign in as this user. Please try again."
 msgstr ""
@@ -7563,6 +7636,21 @@ msgstr ""
 msgctxt "D_ZZLA"
 msgid "Sign in as this user"
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
+msgctxt "-tnCwX"
+msgid "Could not send the invitation. Please try again."
+msgstr "Could not send the invitation. Please try again."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
+msgctxt "s3dZc1"
+msgid "Invitation sent to {email}."
+msgstr "Invitation sent to {email}."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
+msgctxt "EJzpC9"
+msgid "Resend invitation"
+msgstr "Resend invitation"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx
 msgctxt "sUNhQE"
@@ -7580,10 +7668,9 @@ msgid "You are not allowed to create admin users."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/create-user.action.ts
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.action.ts
-msgctxt "fYgCZQ"
-msgid "This email address is already in use."
-msgstr ""
+msgctxt "usjl8_"
+msgid "A user with this email address already exists. Edit that user instead."
+msgstr "A user with this email address already exists. Edit that user instead."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.action.ts
 msgctxt "fNr_cy"
@@ -7591,6 +7678,7 @@ msgid "User not found."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.action.ts
+#: lib/server/get-user-facing-error-message.ts
 msgctxt "rX7JKM"
 msgid "You are not allowed to change admin accounts."
 msgstr ""
@@ -7604,6 +7692,11 @@ msgstr ""
 #: lib/server/get-user-facing-error-message.ts
 msgctxt "LCaXVG"
 msgid "At least one admin user must be allowed to manage admin accounts."
+msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.action.ts
+msgctxt "fYgCZQ"
+msgid "This email address is already in use."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/[id]/edit/page.tsx
@@ -9953,6 +10046,16 @@ msgstr ""
 msgctxt "p94UAR"
 msgid "An image block has no image from the media library. Pick an image for it, or remove the block."
 msgstr ""
+
+#: lib/server/get-user-facing-error-message.ts
+msgctxt "bK-L0p"
+msgid "The invitation email could not be sent. Please try again."
+msgstr "The invitation email could not be sent. Please try again."
+
+#: lib/server/get-user-facing-error-message.ts
+msgctxt "hxkVK5"
+msgid "This user has already accepted their invitation."
+msgstr "This user has already accepted their invitation."
 
 #: lib/server/get-user-facing-error-message.ts
 msgctxt "_q8nPI"

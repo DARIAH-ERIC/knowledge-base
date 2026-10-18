@@ -6,6 +6,7 @@ import { getExtracted } from "next-intl/server";
 
 import { canManageAdminAccounts } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/admin-management";
 import { CreateUserActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/create-user.schema";
+import { sendUserInvitation } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/send-user-invitation";
 import { auth } from "@/lib/auth";
 import { eq } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
@@ -26,19 +27,24 @@ export const createUserAction = createMutationAction({
 			});
 		}
 
+		/**
+		 * Never invite an existing account: that would email its owner a link while they already have a
+		 * password. An admin trying to is usually after a role or actor change, which is an edit.
+		 */
 		if (!(await auth.isEmailAvailable(input.email))) {
 			return createActionStateError({
-				message: t("This email address is already in use."),
+				message: t("A user with this email address already exists. Edit that user instead."),
 			});
 		}
 
 		return undefined;
 	},
 
-	async mutate(tx, input) {
+	async mutate(tx, input, ctx) {
 		const canManageAdminsFlag = input.canManageAdmins === "true";
 
-		const user = await auth.createUser(input.email, input.name, input.password);
+		/** The user chooses their own password by following the emailed invitation link. */
+		const user = await auth.createInvitedUser(input.email, input.name, tx);
 
 		await tx
 			.update(schema.users)
@@ -51,6 +57,8 @@ export const createUserAction = createMutationAction({
 			})
 			.where(eq(schema.users.id, user.id));
 
-		return { subjectId: user.id };
+		await sendUserInvitation(tx, user, ctx.locale);
+
+		return { subjectId: user.id, auditSummary: { invitation: "sent" } };
 	},
 });

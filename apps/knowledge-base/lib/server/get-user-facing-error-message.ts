@@ -7,6 +7,7 @@ interface ErrorMessages {
 	sshocServiceDeletion: string;
 	ownAccountDeletion: string;
 	lastAdminManager: string;
+	adminAccountChangeNotAllowed: string;
 	adminAccountDeletionNotAllowed: string;
 	referencedByReport: string;
 	documentLinkedToUser: string;
@@ -14,6 +15,8 @@ interface ErrorMessages {
 	entitySlugConflict: string;
 	frozenReportRoleConflict: string;
 	imageBlockWithoutAsset: string;
+	invitationEmailNotSent: string;
+	invitationNotPending: string;
 	invalidData: string;
 	missingDariahEric: string;
 	missingData: string;
@@ -67,6 +70,9 @@ export async function getUserFacingErrorMessage(
 			case "last-admin-manager": {
 				return messages.lastAdminManager;
 			}
+			case "admin-account-change-not-allowed": {
+				return messages.adminAccountChangeNotAllowed;
+			}
 			case "admin-account-deletion-not-allowed": {
 				return messages.adminAccountDeletionNotAllowed;
 			}
@@ -81,6 +87,12 @@ export async function getUserFacingErrorMessage(
 			}
 			case "image-block-without-asset": {
 				return messages.imageBlockWithoutAsset;
+			}
+			case "invitation-email-not-sent": {
+				return messages.invitationEmailNotSent;
+			}
+			case "invitation-not-pending": {
+				return messages.invitationNotPending;
 			}
 			case "missing-dariah-eric": {
 				return messages.missingDariahEric;
@@ -164,6 +176,7 @@ async function getErrorMessages(options: GetUserFacingErrorMessageOptions): Prom
 		referencedByReport: t(
 			"A country or working group report refers to this record, so it cannot be deleted. Deleting it would change the report.",
 		),
+		adminAccountChangeNotAllowed: t("You are not allowed to change admin accounts."),
 		adminAccountDeletionNotAllowed: t("You are not allowed to delete admin accounts."),
 		lastAdminManager: t("At least one admin user must be allowed to manage admin accounts."),
 		ownAccountDeletion: t("You cannot delete your own account."),
@@ -184,6 +197,8 @@ async function getErrorMessages(options: GetUserFacingErrorMessageOptions): Prom
 		imageBlockWithoutAsset: t(
 			"An image block has no image from the media library. Pick an image for it, or remove the block.",
 		),
+		invitationEmailNotSent: t("The invitation email could not be sent. Please try again."),
+		invitationNotPending: t("This user has already accepted their invitation."),
 		richTextEmbeddedImage: t(
 			"The text contains an image that is not in the media library, for example one pasted from another website. Upload it to the media library and add it as an image block, or remove it.",
 		),

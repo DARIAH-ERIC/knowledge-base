@@ -71,7 +71,8 @@ export const updatePasswordAction = createServerAction(
 		}
 
 		const passwordHash = await auth.getUserPasswordHash(user.id);
-		const isValidPassword = await auth.verifyPasswordHash(passwordHash, password);
+		const isValidPassword =
+			passwordHash != null && (await auth.verifyPasswordHash(passwordHash, password));
 		if (!isValidPassword) {
 			return createActionStateError({ message: t("Incorrect password.") });
 		}

@@ -44,6 +44,10 @@ export const passwordResetSessions: { cookie: CookieConfig } = {
 	},
 };
 
+export const invitations = {
+	durationMs: 1000 * 60 * 60 * 24 * 7 /** 7 days. */,
+};
+
 export const sessions: {
 	cookie: CookieConfig;
 	impersonation: { durationMs: number };
