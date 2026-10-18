@@ -27,9 +27,13 @@ export const createUserAction = createMutationAction({
 			});
 		}
 
+		/**
+		 * Never invite an existing account: that would email its owner a link while they already have a
+		 * password. An admin trying to is usually after a role or actor change, which is an edit.
+		 */
 		if (!(await auth.isEmailAvailable(input.email))) {
 			return createActionStateError({
-				message: t("This email address is already in use."),
+				message: t("A user with this email address already exists. Edit that user instead."),
 			});
 		}
 

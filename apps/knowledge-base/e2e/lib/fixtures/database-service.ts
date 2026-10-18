@@ -2402,6 +2402,29 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
+	/** A user who signed up (or accepted their invitation) and so has a password. */
+	async createUserWithPassword(params: { name: string; email: string }): Promise<{ id: string }> {
+		const [user] = await this.db
+			.insert(schema.users)
+			.values({
+				email: params.email,
+				name: params.name,
+				passwordHash: "not-a-real-hash",
+				twoFactorRecoveryCode: randomBytes(16),
+				isEmailVerified: true,
+			})
+			.returning({ id: schema.users.id });
+		if (user == null) {
+			throw new Error("Failed to create user.");
+		}
+
+		return user;
+	}
+
+	async countUsersByEmail(email: string): Promise<number> {
+		return this.db.$count(schema.users, sql`LOWER(${schema.users.email}) = LOWER(${email})`);
+	}
+
 	/**
 	 * Replaces the user's invitation with one whose token the test knows, standing in for the link in
 	 * the invitation email: Mailpit is shared with suites that clear it, so reading the real email

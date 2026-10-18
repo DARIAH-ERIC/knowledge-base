@@ -51,6 +51,41 @@ test.describe("users admin", () => {
 		});
 	});
 
+	test("should refuse to invite an email address that already has an account", async ({
+		page,
+		createAdminUsersPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const usersPage = createAdminUsersPage(workerIndex);
+
+		const existingName = `${usersPage.workerPrefix} Signed Up ${randomUUID()}`;
+		const email = `e2e-worker-${String(workerIndex)}+${randomUUID()}@example.com`;
+		await db.createUserWithPassword({ name: existingName, email });
+
+		const name = `${usersPage.workerPrefix} Duplicate ${randomUUID()}`;
+
+		await usersPage.gotoCreate();
+		await usersPage.fillName(name);
+		// Email addresses are compared case-insensitively.
+		await usersPage.fillEmail(email.toUpperCase());
+		await page.getByRole("button", { name: "Save" }).click();
+
+		await expect(
+			page.getByText("A user with this email address already exists. Edit that user instead."),
+		).toBeVisible();
+		expect(page.url()).toContain("/dashboard/administrator/users/create");
+
+		expect(await db.countUsersByEmail(email)).toBe(1);
+		expect(await db.getUserByName(name)).toBeNull();
+		// The existing account is untouched: it keeps its password and gets no invitation.
+		expect(await db.getUserCredentialStateByName(existingName)).toStrictEqual({
+			hasPassword: true,
+			isEmailVerified: true,
+			invitations: 0,
+		});
+	});
+
 	test("should resend an invitation", async ({ page, createAdminUsersPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const usersPage = createAdminUsersPage(workerIndex);

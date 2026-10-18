@@ -7663,10 +7663,9 @@ msgid "You are not allowed to create admin users."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/create-user.action.ts
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.action.ts
-msgctxt "fYgCZQ"
-msgid "This email address is already in use."
-msgstr ""
+msgctxt "usjl8_"
+msgid "A user with this email address already exists. Edit that user instead."
+msgstr "A user with this email address already exists. Edit that user instead."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.action.ts
 msgctxt "fNr_cy"
@@ -7688,6 +7687,11 @@ msgstr ""
 #: lib/server/get-user-facing-error-message.ts
 msgctxt "LCaXVG"
 msgid "At least one admin user must be allowed to manage admin accounts."
+msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.action.ts
+msgctxt "fYgCZQ"
+msgid "This email address is already in use."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/[id]/edit/page.tsx
