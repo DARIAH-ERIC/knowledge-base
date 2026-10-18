@@ -4,7 +4,9 @@ import { isNonEmptyString } from "@acdh-oeaw/lib";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import type { AssetPrefix } from "@dariah-eric/storage/config";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
-import { Label } from "@dariah-eric/ui/field";
+import { FieldError, Label } from "@dariah-eric/ui/field";
+import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
 import { GridList, GridListItem } from "@dariah-eric/ui/grid-list";
 import { Input } from "@dariah-eric/ui/input";
 import {
@@ -30,7 +32,6 @@ import {
 	type ReactNode,
 	useEffect,
 	useEffectEvent,
-	useRef,
 	useState,
 	useTransition,
 } from "react";
@@ -137,10 +138,11 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	const [pendingFile, setPendingFile] = useState<File | null>(null);
 	const [pendingFileUrl, setPendingFileUrl] = useState<string | null>(null);
 	const [uploadError, setUploadError] = useState<string | null>(null);
+	const [uploadState, setUploadState] = useState<Awaited<ReturnType<typeof uploadImageAction>>>(
+		createActionStateInitial(),
+	);
 	const [licenseOptions, setLicenseOptions] = useState<Array<LicenseOption>>([]);
 	const [isUploading, startUploading] = useTransition();
-
-	const uploadFormRef = useRef<HTMLFormElement>(null);
 
 	const hasPrev = offset > 0;
 	const hasNext = displayedAssets.length === mediaLibraryPageSize;
@@ -176,7 +178,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		setPendingFile(null);
 		setPendingFileUrl(null);
 		setUploadError(null);
-		uploadFormRef.current?.reset();
+		setUploadState(createActionStateInitial());
 	}
 
 	/**
@@ -366,6 +368,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		formData.append("file", pendingFile);
 		startUploading(async () => {
 			const result = await uploadImageAction(createActionStateInitial(), formData);
+			setUploadState(result);
 
 			if (result.status === "success") {
 				// The upload action returns no label; `uploadAsset` stores `label ?? file.name`, so the
@@ -661,10 +664,14 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 								id="upload"
 								shouldPreserveState={true}
 							>
-								<form ref={uploadFormRef} action={handleUploadAction} id="upload-form">
+								{/* `Form` keeps the entered values when the upload fails; the modal unmounts its content
+								    when closed, so the fields start empty each time. */}
+								<Form action={handleUploadAction} id="upload-form" state={uploadState}>
 									<input name="prefix" type="hidden" value={selectedPrefix} />
 
 									<div className="flex flex-col gap-4">
+										<FormStatus state={uploadState} />
+
 										<div className="flex flex-wrap items-start gap-4">
 											<FileTrigger
 												acceptedFileTypes={acceptedFileTypes}
@@ -700,11 +707,13 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 										<TextField name="label">
 											<Label>{t("Label")}</Label>
 											<Input placeholder={pendingFile?.name ?? ""} />
+											<FieldError />
 										</TextField>
 
 										<TextField name="alt">
 											<Label>{t("Alt text")}</Label>
 											<Input />
+											<FieldError />
 										</TextField>
 
 										<CaptionField name="caption" />
@@ -722,7 +731,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 											</SelectContent>
 										</Select>
 									</div>
-								</form>
+								</Form>
 							</TabPanel>
 						) : null}
 					</Tabs>

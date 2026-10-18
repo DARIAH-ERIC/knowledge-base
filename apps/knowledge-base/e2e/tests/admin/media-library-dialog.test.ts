@@ -93,4 +93,38 @@ test.describe("media library dialog", () => {
 		expect(items.every((item) => item.key.startsWith("logos/"))).toBe(true);
 		await expect(assetsPage.mediaLibraryAssetByLabel(dialog, E2E_TEST_ASSET_LABEL)).toHaveCount(1);
 	});
+
+	test("keeps entered upload metadata when the upload fails", async ({ createAssetsPage }) => {
+		const assetsPage = createAssetsPage();
+
+		let dialog = await assetsPage.openMediaLibraryDialog(MULTI_PREFIX_HOST_PATH);
+		await clickHydrated(dialog.getByRole("tab", { name: "Upload" }));
+
+		/** `accept` only filters the file picker, so the server rejects the file type. */
+		await dialog.locator('input[type="file"]').setInputFiles({
+			name: "not-an-image.txt",
+			mimeType: "text/plain",
+			buffer: Buffer.from("not an image"),
+		});
+		await dialog.getByLabel("Label").fill("Label which must survive a failed upload");
+		await dialog.getByLabel("Alt text").fill("Alt text which must survive a failed upload");
+		await dialog.getByRole("button", { name: "Upload", exact: true }).click();
+
+		await expect(dialog.getByText("Invalid or missing fields.")).toBeVisible();
+		/** React's automatic form reset must not discard the user's input. */
+		await expect(dialog.getByLabel("Label")).toHaveValue(
+			"Label which must survive a failed upload",
+		);
+		await expect(dialog.getByLabel("Alt text")).toHaveValue(
+			"Alt text which must survive a failed upload",
+		);
+
+		await assetsPage.closeMediaLibraryDialog(dialog);
+		dialog = await assetsPage.reopenMediaLibraryDialog();
+		await clickHydrated(dialog.getByRole("tab", { name: "Upload" }));
+
+		await expect(dialog.getByLabel("Label")).toHaveValue("");
+		await expect(dialog.getByLabel("Alt text")).toHaveValue("");
+		await expect(dialog.getByText("Invalid or missing fields.")).toBeHidden();
+	});
 });
