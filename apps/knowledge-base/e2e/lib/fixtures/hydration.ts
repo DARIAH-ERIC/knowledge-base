@@ -24,3 +24,23 @@ export async function clickHydrated(locator: Locator): Promise<void> {
 	await waitForHydration(locator);
 	await locator.click();
 }
+
+/**
+ * Selects `tab`, re-clicking until it reports `aria-selected="true"`.
+ *
+ * `waitForHydration` is not enough for a tab on a page still hydrating: React attaches
+ * `__reactProps$…` while it renders a hydrating boundary, before that boundary commits. A press
+ * that lands then forces React to finish the hydration synchronously and re-creates the tab, so the
+ * pointer-up hits a new element and the press is lost. Selecting a tab is idempotent, so retrying
+ * is safe — unlike for the once-only actions `clickHydrated` is meant for. Not for tabs whose
+ * selection is expected to be cancelled (e.g. by an unsaved-changes guard).
+ */
+export async function selectTab(tab: Locator): Promise<void> {
+	await waitForHydration(tab);
+	await expect(async () => {
+		if ((await tab.getAttribute("aria-selected")) !== "true") {
+			await tab.click();
+		}
+		await expect(tab).toHaveAttribute("aria-selected", "true", { timeout: 2_000 });
+	}).toPass({ timeout: 20_000 });
+}

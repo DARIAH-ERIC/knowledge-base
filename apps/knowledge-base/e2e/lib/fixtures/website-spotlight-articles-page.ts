@@ -3,7 +3,7 @@ import { type Locator, type Page, expect } from "@playwright/test";
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { openActionsMenu } from "@/e2e/lib/fixtures/actions-menu";
 import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
-import { clickHydrated } from "@/e2e/lib/fixtures/hydration";
+import { selectTab } from "@/e2e/lib/fixtures/hydration";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/website/spotlight-articles";
@@ -234,7 +234,7 @@ export class WebsiteSpotlightArticlesPage {
 	// ---------------------------------------------------------------------------
 
 	async goToContributorsTab(): Promise<void> {
-		await clickHydrated(this.page.getByRole("tab", { name: "Contributors" }));
+		await selectTab(this.page.getByRole("tab", { name: "Contributors" }));
 	}
 
 	contributorsTable(): Locator {
