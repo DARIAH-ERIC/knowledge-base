@@ -1,78 +1,45 @@
 "use server";
 
-import { assert, getFormDataValues } from "@acdh-oeaw/lib";
-import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
+import { getExtracted } from "next-intl/server";
 import * as v from "valibot";
 
 import { assertCanEditPerson } from "@/app/(app)/[locale]/(dashboard)/dashboard/_lib/authorize-delegated-person";
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { ensureDraftVersion, touchVersion } from "@/lib/data/entity-lifecycle";
-import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
-import { db } from "@/lib/db";
-import { eq } from "@/lib/db/sql";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { UpdatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.schema";
+import { updatePersonDraft } from "@/lib/data/save-person-draft";
+import { getRequestedSlug } from "@/lib/entity-slug-input";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 const UpdateDelegatedPersonActionInputSchema = v.object({
-	documentId: v.pipe(v.string(), v.uuid()),
+	...UpdatePersonActionInputSchema.entries,
+	// Required here, as the people table shows the saved name right away.
 	name: v.pipe(v.string(), v.nonEmpty()),
 	sortName: v.pipe(v.string(), v.nonEmpty()),
 });
 
 /**
- * Edits a person's core metadata as a draft. A delegated caller (working-group chair, national
- * coordinator) may edit a person who appears in a unit they manage; publishing remains an admin
- * task.
+ * Edits a person as a draft, with the same fields as the admin edit form. A delegated caller
+ * (working-group chair, national coordinator) may edit a person who appears in a unit they manage;
+ * publishing remains an admin task.
  */
-export const updateDelegatedPersonAction = createServerAction(
-	{ requireAuth: true },
-	async function updateDelegatedPersonAction(state, formData, { user }) {
-		const locale = await getLocale();
-		const t = await getExtracted();
-
-		const result = await v.safeParseAsync(
-			UpdateDelegatedPersonActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof UpdateDelegatedPersonActionInputSchema>(result.issues);
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { documentId, name, sortName } = result.output;
-
-		assert(user != null);
-		await assertCanEditPerson(user, documentId);
-
-		await db.transaction(async (tx) => {
-			const draftVersionId = await ensureDraftVersion(tx, documentId, personsLifecycleAdapter);
-
-			await tx
-				.update(schema.persons)
-				.set({ name, sortName })
-				.where(eq(schema.persons.id, draftVersionId));
-
-			await touchVersion(tx, draftVersionId);
-
-			await recordAuditEvent(tx, {
-				actorUserId: user.id,
-				action: "update",
-				subjectType: "persons",
-				subjectId: documentId,
-				summary: { name, sortName, lifecycle: "draft" },
-			});
-		});
-
-		revalidatePath("/[locale]/dashboard", "layout");
-
-		return createActionStateSuccess({ data: { name, sortName } });
+export const updateDelegatedPersonAction = createMutationAction({
+	schema: UpdateDelegatedPersonActionInputSchema,
+	requireAuth: true,
+	audit: { action: "update", subjectType: "persons" },
+	revalidate: "/[locale]/dashboard",
+	async preCheck({ input, ctx }) {
+		await assertCanEditPerson(ctx.user, input.documentId);
 	},
-);
+	async mutate(tx, input) {
+		const t = await getExtracted();
+		await updatePersonDraft(tx, input.documentId, {
+			...input,
+			requestedSlug: getRequestedSlug(input.slug),
+		});
+		return {
+			subjectId: input.documentId,
+			auditSummary: { lifecycle: "draft" },
+			successMessage: t("Person saved as draft."),
+			successData: { name: input.name, sortName: input.sortName },
+		};
+	},
+});

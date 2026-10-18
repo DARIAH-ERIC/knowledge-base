@@ -27,6 +27,8 @@ import type { ReverseUnitRelation, UnitRelationStatusOption } from "@/lib/data/u
 
 interface DelegatedCountryEditFormProps {
 	initialAssets: ComponentProps<typeof NationalConsortiumForm>["initialAssets"];
+	/** Media library assets for the image of a person created from the People tab. */
+	initialPersonAssets: ComponentProps<typeof NationalConsortiumForm>["initialAssets"];
 	nationalConsortium: ComponentProps<typeof NationalConsortiumForm>["nationalConsortium"];
 	initialSocialMediaIds: Array<string>;
 	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
@@ -55,6 +57,7 @@ export function DelegatedCountryEditForm(
 ): ReactNode {
 	const {
 		initialAssets,
+		initialPersonAssets,
 		nationalConsortium,
 		initialSocialMediaIds,
 		initialSocialMediaItems,
@@ -104,11 +107,16 @@ export function DelegatedCountryEditForm(
 				<TabPanel id="people" shouldPreserveState={true}>
 					<PersonRelationsSection
 						actions={personRelationActions}
-						createPersonAction={createDelegatedPersonAction}
+						canEditDescription={false}
+						createPerson={{
+							action: createDelegatedPersonAction,
+							initialAssets: initialPersonAssets,
+						}}
 						includeDraftPersons={true}
 						personEditor={{
 							updateAction: updateDelegatedPersonAction,
 							getFields: getDelegatedPersonAction,
+							initialAssets: initialPersonAssets,
 							rowActionLabel: t("Edit person"),
 							title: t("Edit person"),
 						}}
@@ -130,13 +138,20 @@ export function DelegatedCountryEditForm(
 							actions={delegatedUnitRelationActions}
 							createSourceUnit={{
 								action: createDelegatedInstitutionAction,
+								initialAssets,
+								initialSocialMediaItems,
+								initialSocialMediaTotal,
 								scopeDocumentId: countryDocumentId,
 								buttonLabel: t("Add new institution"),
+								submitLabel: t("Create institution"),
 								title: t("Add new institution"),
 							}}
 							editSourceUnit={{
 								updateAction: updateDelegatedInstitutionAction,
 								getFields: getDelegatedInstitutionAction,
+								initialAssets,
+								initialSocialMediaItems,
+								initialSocialMediaTotal,
 								rowActionLabel: t("Edit institution"),
 								title: t("Edit institution"),
 							}}

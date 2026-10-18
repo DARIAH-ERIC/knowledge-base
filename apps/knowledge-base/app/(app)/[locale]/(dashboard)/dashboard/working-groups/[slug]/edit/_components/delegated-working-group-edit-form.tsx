@@ -21,6 +21,8 @@ import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person
 
 interface DelegatedWorkingGroupEditFormProps {
 	initialAssets: ComponentProps<typeof WorkingGroupForm>["initialAssets"];
+	/** Media library assets for the image of a person created from the People tab. */
+	initialPersonAssets: ComponentProps<typeof WorkingGroupForm>["initialAssets"];
 	workingGroup: ComponentProps<typeof WorkingGroupForm>["workingGroup"];
 	documentId: string;
 	initialSocialMediaIds: Array<string>;
@@ -43,6 +45,7 @@ export function DelegatedWorkingGroupEditForm(
 ): ReactNode {
 	const {
 		initialAssets,
+		initialPersonAssets,
 		workingGroup,
 		documentId,
 		initialSocialMediaIds,
@@ -88,11 +91,16 @@ export function DelegatedWorkingGroupEditForm(
 				<TabPanel id="people" shouldPreserveState={true}>
 					<PersonRelationsSection
 						actions={personRelationActions}
-						createPersonAction={createDelegatedPersonAction}
+						canEditDescription={false}
+						createPerson={{
+							action: createDelegatedPersonAction,
+							initialAssets: initialPersonAssets,
+						}}
 						includeDraftPersons={true}
 						personEditor={{
 							updateAction: updateDelegatedPersonAction,
 							getFields: getDelegatedPersonAction,
+							initialAssets: initialPersonAssets,
 							rowActionLabel: t("Edit person"),
 							title: t("Edit person"),
 						}}

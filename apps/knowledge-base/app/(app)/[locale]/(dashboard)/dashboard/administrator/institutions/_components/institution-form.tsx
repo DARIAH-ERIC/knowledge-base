@@ -27,18 +27,134 @@ import { RichTextContentBlocksField } from "@/app/(app)/[locale]/(dashboard)/das
 import { SocialMediaRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
-interface InstitutionFormProps {
+interface InstitutionFormFieldsProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	institution?: Pick<
 		schema.OrganisationalUnit,
-		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
+		"acronym" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
 	> & {
 		descriptionContentBlocks?: Array<ContentBlock>;
-		entityVersion: { entity: { id: string; slug: string } };
+		entityVersion: { entity: { slug: string } };
 	} & { image: SelectedImage | null };
-	formId?: string;
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
+	initialSocialMediaIds?: Array<string>;
+	initialSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
+	initialSocialMediaTotal?: number;
+	selectedSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
+}
+
+/**
+ * The fields of an institution, without the surrounding form and the admin-only relation fields.
+ * Shared by `InstitutionForm` and the sheet that creates an institution from the country
+ * dashboard.
+ */
+export function InstitutionFormFields(props: Readonly<InstitutionFormFieldsProps>): ReactNode {
+	const {
+		initialAssets,
+		institution,
+		initialSocialMediaIds,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
+		selectedSocialMediaItems,
+		isPublished,
+	} = props;
+
+	const t = useExtracted();
+
+	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
+		institution?.image ?? null,
+	);
+
+	return (
+		<Fragment>
+			<FormSection description={t("Enter the institution details.")} title={t("Details")}>
+				<TextField defaultValue={institution?.name} isRequired={true} name="name">
+					<Label>{t("Name")}</Label>
+					<Input />
+					<FieldError />
+				</TextField>
+
+				<TextField defaultValue={institution?.acronym ?? undefined} name="acronym">
+					<Label>{t("Acronym")}</Label>
+					<Input />
+					<FieldError />
+				</TextField>
+
+				<TextField defaultValue={institution?.ror ?? undefined} name="ror">
+					<Label>{t("ROR")}</Label>
+					<Input />
+					<FieldError />
+				</TextField>
+
+				<TextField
+					defaultValue={
+						institution?.sshocMarketplaceActorId != null
+							? String(institution.sshocMarketplaceActorId)
+							: undefined
+					}
+					name="sshocMarketplaceActorId"
+					type="number"
+				>
+					<Label>{t("SSHOC actor ID")}</Label>
+					<Input />
+					<FieldError />
+				</TextField>
+
+				<TextField defaultValue={institution?.summary ?? undefined} name="summary">
+					<Label>{t("Summary")}</Label>
+					<TextArea rows={5} />
+					<FieldError />
+				</TextField>
+
+				<EntitySlugField isPublished={isPublished} slug={institution?.entityVersion.entity.slug} />
+			</FormSection>
+
+			<Separator className="my-6" />
+
+			<FormSection description={t("Select or upload an image.")} title={t("Image")}>
+				<ImageSelectField
+					allowRemove={true}
+					defaultPrefix="logos"
+					initialAssets={initialAssets}
+					onChange={setSelectedImage}
+					prefixes={["avatars", "images", "logos"]}
+					selectedImage={selectedImage}
+				/>
+			</FormSection>
+
+			<Separator className="my-6" />
+
+			<FormSection description={t("Add a description.")} title={t("Description")} variant="stacked">
+				<RichTextContentBlocksField
+					aria-label={t("Description")}
+					initialBlocks={institution?.descriptionContentBlocks}
+					initialAssets={initialAssets}
+					name="description"
+				/>
+			</FormSection>
+
+			{initialSocialMediaItems != null && initialSocialMediaTotal != null ? (
+				<Fragment>
+					<Separator className="my-6" />
+
+					<SocialMediaRelationsFields
+						description={t("Link social media accounts to this institution.")}
+						initialSocialMediaIds={initialSocialMediaIds}
+						initialSocialMediaItems={initialSocialMediaItems}
+						initialSocialMediaTotal={initialSocialMediaTotal}
+						selectedSocialMediaItems={selectedSocialMediaItems}
+					/>
+				</Fragment>
+			) : null}
+		</Fragment>
+	);
+}
+
+interface InstitutionFormProps extends InstitutionFormFieldsProps {
+	institution?: NonNullable<InstitutionFormFieldsProps["institution"]> &
+		Pick<schema.OrganisationalUnit, "id"> & { entityVersion: { entity: { id: string } } };
+	formId?: string;
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
 	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
@@ -46,18 +162,13 @@ interface InstitutionFormProps {
 	initialRelatedResourceIds?: Array<string>;
 	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
 	initialRelatedResourceTotal: number;
-	initialSocialMediaIds?: Array<string>;
-	initialSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
-	initialSocialMediaTotal?: number;
 	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
-	selectedSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
 	showRelationFields?: boolean;
 }
 
 export function InstitutionForm(props: Readonly<InstitutionFormProps>): ReactNode {
 	const {
-		initialAssets,
 		formAction,
 		formId,
 		institution,
@@ -67,128 +178,37 @@ export function InstitutionForm(props: Readonly<InstitutionFormProps>): ReactNod
 		initialRelatedResourceIds,
 		initialRelatedResourceItems,
 		initialRelatedResourceTotal,
-		initialSocialMediaIds,
-		initialSocialMediaItems,
-		initialSocialMediaTotal,
 		selectedRelatedEntities,
 		selectedRelatedResources,
-		selectedSocialMediaItems,
 		showRelationFields = true,
-		isPublished,
+		...fieldsProps
 	} = props;
 
 	const t = useExtracted();
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
-		institution?.image ?? null,
-	);
-
 	return (
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" id={formId} state={state}>
-				<FormSection description={t("Enter the institution details.")} title={t("Details")}>
-					<TextField defaultValue={institution?.name} isRequired={true} name="name">
-						<Label>{t("Name")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-
-					<TextField defaultValue={institution?.acronym ?? undefined} name="acronym">
-						<Label>{t("Acronym")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-
-					<TextField defaultValue={institution?.ror ?? undefined} name="ror">
-						<Label>{t("ROR")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-
-					<TextField
-						defaultValue={
-							institution?.sshocMarketplaceActorId != null
-								? String(institution.sshocMarketplaceActorId)
-								: undefined
-						}
-						name="sshocMarketplaceActorId"
-						type="number"
-					>
-						<Label>{t("SSHOC actor ID")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-
-					<TextField defaultValue={institution?.summary ?? undefined} name="summary">
-						<Label>{t("Summary")}</Label>
-						<TextArea rows={5} />
-						<FieldError />
-					</TextField>
-
-					<EntitySlugField
-						isPublished={isPublished}
-						slug={institution?.entityVersion.entity.slug}
-					/>
-				</FormSection>
-
-				<Separator className="my-6" />
-
-				<FormSection description={t("Select or upload an image.")} title={t("Image")}>
-					<ImageSelectField
-						allowRemove={true}
-						defaultPrefix="logos"
-						initialAssets={initialAssets}
-						onChange={setSelectedImage}
-						prefixes={["avatars", "images", "logos"]}
-						selectedImage={selectedImage}
-					/>
-				</FormSection>
-
-				<Separator className="my-6" />
-
-				<FormSection
-					description={t("Add a description.")}
-					title={t("Description")}
-					variant="stacked"
-				>
-					<RichTextContentBlocksField
-						aria-label={t("Description")}
-						initialBlocks={institution?.descriptionContentBlocks}
-						initialAssets={initialAssets}
-						name="description"
-					/>
-				</FormSection>
-
-				<Separator className="my-6" />
-
-				{initialSocialMediaItems != null && initialSocialMediaTotal != null ? (
-					<Fragment>
-						<SocialMediaRelationsFields
-							description={t("Link social media accounts to this institution.")}
-							initialSocialMediaIds={initialSocialMediaIds}
-							initialSocialMediaItems={initialSocialMediaItems}
-							initialSocialMediaTotal={initialSocialMediaTotal}
-							selectedSocialMediaItems={selectedSocialMediaItems}
-						/>
-
-						<Separator className="my-6" />
-					</Fragment>
-				) : null}
+				<InstitutionFormFields {...fieldsProps} institution={institution} />
 
 				{showRelationFields ? (
-					<EntityRelationsFields
-						formId={formId}
-						initialRelatedEntityIds={initialRelatedEntityIds}
-						initialRelatedEntityItems={initialRelatedEntityItems}
-						initialRelatedEntityTotal={initialRelatedEntityTotal}
-						initialRelatedResourceIds={initialRelatedResourceIds}
-						initialRelatedResourceItems={initialRelatedResourceItems}
-						initialRelatedResourceTotal={initialRelatedResourceTotal}
-						selectedRelatedEntities={selectedRelatedEntities}
-						selectedRelatedResources={selectedRelatedResources}
-					/>
+					<Fragment>
+						<Separator className="my-6" />
+
+						<EntityRelationsFields
+							formId={formId}
+							initialRelatedEntityIds={initialRelatedEntityIds}
+							initialRelatedEntityItems={initialRelatedEntityItems}
+							initialRelatedEntityTotal={initialRelatedEntityTotal}
+							initialRelatedResourceIds={initialRelatedResourceIds}
+							initialRelatedResourceItems={initialRelatedResourceItems}
+							initialRelatedResourceTotal={initialRelatedResourceTotal}
+							selectedRelatedEntities={selectedRelatedEntities}
+							selectedRelatedResources={selectedRelatedResources}
+						/>
+					</Fragment>
 				) : null}
 
 				{institution != null ? (

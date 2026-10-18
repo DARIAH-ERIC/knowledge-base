@@ -38,8 +38,7 @@ export const createContributionAction = createServerAction(
 			});
 		}
 
-		const { personDocumentId, roleTypeId, organisationalUnitDocumentId, duration, description } =
-			result.output;
+		const { personDocumentId, roleTypeId, organisationalUnitDocumentId, duration } = result.output;
 
 		// Admins always pass; delegated callers (working-group chairs, national coordinators) may manage
 		// people only on organisational units they are scoped to edit.
@@ -48,6 +47,10 @@ export const createContributionAction = createServerAction(
 			type: "organisational_unit",
 			id: organisationalUnitDocumentId,
 		});
+
+		// The description is shown on the website without review and only matters for relations admins
+		// curate (e.g. DCO members), so only admins may set it.
+		const description = user.role === "admin" ? result.output.description : null;
 
 		try {
 			const returned = await db.transaction(async (tx) => {

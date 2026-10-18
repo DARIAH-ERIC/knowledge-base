@@ -1,10 +1,6 @@
 "use client";
 
-import {
-	type ActionState,
-	createActionStateError,
-	createActionStateInitial,
-} from "@dariah-eric/next-lib/actions";
+import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
@@ -35,9 +31,17 @@ import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/u
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
+import {
+	type ComponentProps,
+	Fragment,
+	type ReactNode,
+	startTransition,
+	useState,
+	useTransition,
+} from "react";
 
 import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
+import { EntityFormSheet } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-sheet";
 import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	FormLayout,
@@ -46,6 +50,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useClientTable } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-client-table";
+import { InstitutionFormFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form";
 import type { OrganisationalUnitType } from "@/lib/data/organisational-units";
 import type { ReverseUnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 import { dateToCalendarDate } from "@/lib/date";
@@ -68,20 +73,24 @@ export interface UnitRelationActions {
 	delete: (id: string) => Promise<ActionState>;
 }
 
-/** Core, editable metadata of a source unit, used by the optional create/edit affordances. */
-export interface EditableUnitFields {
-	name: string;
-	acronym: string | null;
-	ror: string | null;
-	summary: string | null;
-}
+/** A source unit as loaded into the full institution form by the optional edit affordance. */
+export type EditableUnit = NonNullable<
+	ComponentProps<typeof InstitutionFormFields>["institution"]
+> & {
+	isPublished: boolean;
+	socialMediaIds: Array<string>;
+	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
+};
 
 /**
- * Optional affordance to create a new source unit (e.g. an institution) inline and select it. The
- * action receives the unit's core fields plus a hidden `scopeDocumentId`, and must return `{ id,
- * name }`.
+ * Optional affordance to create a new source unit (an institution) in a side sheet, using the full
+ * institution form, and select it. The action receives the institution fields plus a hidden
+ * `scopeDocumentId`, and must return `{ id, name }`.
  */
-export interface CreateSourceUnit {
+export interface CreateSourceUnit extends Pick<
+	ComponentProps<typeof InstitutionFormFields>,
+	"initialAssets" | "initialSocialMediaItems" | "initialSocialMediaTotal"
+> {
 	action: ServerAction;
 	/**
 	 * Passed as a hidden `scopeDocumentId` field for the action to authorize against (e.g. the
@@ -89,13 +98,21 @@ export interface CreateSourceUnit {
 	 */
 	scopeDocumentId: string;
 	buttonLabel: string;
+	submitLabel: string;
 	title: string;
 }
 
-/** Optional affordance to edit an existing source unit's own metadata from its row. */
-export interface EditSourceUnit {
+/**
+ * Optional affordance to edit an existing source unit (an institution) from its row, in a side
+ * sheet with the full institution form. The action receives the institution fields plus a hidden
+ * `documentId`, and must return `{ name }`.
+ */
+export interface EditSourceUnit extends Pick<
+	ComponentProps<typeof InstitutionFormFields>,
+	"initialAssets" | "initialSocialMediaItems" | "initialSocialMediaTotal"
+> {
 	updateAction: ServerAction;
-	getFields: (documentId: string) => Promise<EditableUnitFields | null>;
+	getFields: (documentId: string) => Promise<EditableUnit | null>;
 	rowActionLabel: string;
 	title: string;
 }
@@ -323,89 +340,33 @@ export function ReverseUnitRelationsSection(
 	}
 
 	const [isCreateUnitOpen, setIsCreateUnitOpen] = useState(false);
-	const [createUnitState, setCreateUnitState] = useState<ActionState>(() =>
-		createActionStateInitial(),
-	);
-	const [isCreateUnitPending, startCreateUnitTransition] = useTransition();
 
 	const [unitToEdit, setUnitToEdit] = useState<{ id: string } | null>(null);
-	const [editUnitFields, setEditUnitFields] = useState<EditableUnitFields | null>(null);
-	const [isEditUnitFieldsLoading, setIsEditUnitFieldsLoading] = useState(false);
-	const [editUnitState, setEditUnitState] = useState<ActionState>(() => createActionStateInitial());
-	const [isEditUnitPending, startEditUnitTransition] = useTransition();
+	const [editUnitFields, setEditUnitFields] = useState<EditableUnit | null>(null);
+	const [editUnitLoadError, setEditUnitLoadError] = useState<string | null>(null);
 
-	function createUnitFormAction(formData: FormData) {
-		if (createSourceUnit == null) {
-			return;
-		}
-
-		startCreateUnitTransition(async () => {
-			const newState = await createSourceUnit.action(createUnitState, formData);
-			setCreateUnitState(newState);
-
-			if (newState.status === "success") {
-				const data = newState.data as { id: string; name: string } | undefined;
-				if (data != null) {
-					setSelectedUnitItem({ id: data.id, name: data.name });
-					setIsCreateUnitOpen(false);
-					setCreateUnitState(createActionStateInitial());
-				}
-			}
-		});
-	}
-
-	function openEditUnitDialog(relation: ReverseUnitRelation) {
+	function openEditUnitSheet(relation: ReverseUnitRelation) {
 		if (editSourceUnit == null) {
 			return;
 		}
 
-		setEditUnitState(createActionStateInitial());
 		setUnitToEdit({ id: relation.unitDocumentId });
 		setEditUnitFields(null);
-		setIsEditUnitFieldsLoading(true);
+		setEditUnitLoadError(null);
 
 		startTransition(async () => {
+			// Without the full current entry the form cannot be shown: saving it would overwrite the
+			// fields that failed to load.
+			const error = t("Could not load the current organisation details. Please try again.");
 			try {
 				const fields = await editSourceUnit.getFields(relation.unitDocumentId);
-				setEditUnitFields(
-					fields ?? { name: relation.unitName, acronym: null, ror: null, summary: null },
-				);
-			} catch {
-				// Fall back to the values shown in the table, so the form stays usable.
-				setEditUnitFields({ name: relation.unitName, acronym: null, ror: null, summary: null });
-				setEditUnitState(
-					createActionStateError({
-						message: t(
-							"Could not load the current organisation details. Showing the values from the table.",
-						),
-					}),
-				);
-			}
-			setIsEditUnitFieldsLoading(false);
-		});
-	}
-
-	function editUnitFormAction(formData: FormData) {
-		if (editSourceUnit == null) {
-			return;
-		}
-
-		startEditUnitTransition(async () => {
-			const newState = await editSourceUnit.updateAction(editUnitState, formData);
-			setEditUnitState(newState);
-
-			if (newState.status === "success" && unitToEdit != null) {
-				const data = newState.data as { name: string } | undefined;
-				if (data != null) {
-					setLocalRelations((prev) =>
-						prev.map((relation) =>
-							relation.unitDocumentId === unitToEdit.id
-								? { ...relation, unitName: data.name }
-								: relation,
-						),
-					);
+				if (fields == null) {
+					setEditUnitLoadError(error);
+				} else {
+					setEditUnitFields(fields);
 				}
-				setUnitToEdit(null);
+			} catch {
+				setEditUnitLoadError(error);
 			}
 		});
 	}
@@ -481,7 +442,7 @@ export function ReverseUnitRelationsSection(
 												<RowActionsMenu.Action
 													icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
 													onAction={() => {
-														openEditUnitDialog(relation);
+														openEditUnitSheet(relation);
 													}}
 												>
 													{editSourceUnit.rowActionLabel}
@@ -586,7 +547,6 @@ export function ReverseUnitRelationsSection(
 										className="self-start"
 										intent="outline"
 										onPress={() => {
-											setCreateUnitState(createActionStateInitial());
 											setIsCreateUnitOpen(true);
 										}}
 									>
@@ -860,123 +820,66 @@ export function ReverseUnitRelationsSection(
 			</ModalContent>
 
 			{createSourceUnit != null ? (
-				<ModalContent
+				<EntityFormSheet
+					action={createSourceUnit.action}
+					description={t(
+						"Create a new entry, then select it above. The entry is saved as a draft until an administrator publishes it.",
+					)}
 					isOpen={isCreateUnitOpen}
-					onOpenChange={(open) => {
-						if (!open) {
-							setIsCreateUnitOpen(false);
-						}
+					onOpenChange={setIsCreateUnitOpen}
+					onSuccess={(data: AsyncOption) => {
+						setSelectedUnitItem({ id: data.id, name: data.name });
 					}}
+					submitLabel={createSourceUnit.submitLabel}
+					title={createSourceUnit.title}
 				>
-					<ModalHeader
-						description={t("Create a new entry, then select it above.")}
-						title={createSourceUnit.title}
+					<InstitutionFormFields
+						initialAssets={createSourceUnit.initialAssets}
+						initialSocialMediaItems={createSourceUnit.initialSocialMediaItems}
+						initialSocialMediaTotal={createSourceUnit.initialSocialMediaTotal}
 					/>
-					<Form action={createUnitFormAction} state={createUnitState}>
-						<ModalBody className="flex flex-col gap-y-4">
-							<input
-								name="scopeDocumentId"
-								type="hidden"
-								value={createSourceUnit.scopeDocumentId}
-							/>
-							<TextField isRequired={true} name="name">
-								<Label>{t("Name")}</Label>
-								<Input />
-								<FieldError />
-							</TextField>
-							<TextField name="acronym">
-								<Label>{t("Acronym")}</Label>
-								<Input />
-								<FieldError />
-							</TextField>
-							<TextField name="ror">
-								<Label>{t("ROR")}</Label>
-								<Input />
-								<FieldError />
-							</TextField>
-							<TextField name="summary">
-								<Label>{t("Summary")}</Label>
-								<Input />
-								<FieldError />
-							</TextField>
-							<FormStatus className="self-start" state={createUnitState} />
-						</ModalBody>
-						<ModalFooter>
-							<ModalClose>{t("Cancel")}</ModalClose>
-							<Button isPending={isCreateUnitPending} type="submit">
-								{isCreateUnitPending ? (
-									<Fragment>
-										<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-										<span aria-hidden={true}>{t("Saving...")}</span>
-									</Fragment>
-								) : (
-									t("Save")
-								)}
-							</Button>
-						</ModalFooter>
-					</Form>
-				</ModalContent>
+					<input name="scopeDocumentId" type="hidden" value={createSourceUnit.scopeDocumentId} />
+				</EntityFormSheet>
 			) : null}
 
 			{editSourceUnit != null ? (
-				<ModalContent
+				<EntityFormSheet
+					action={editSourceUnit.updateAction}
+					description={t(
+						"Edit the details of the selected entry. Changes are saved as a draft until an administrator publishes them.",
+					)}
+					isLoading={editUnitFields == null && editUnitLoadError == null}
 					isOpen={unitToEdit != null}
+					loadError={editUnitLoadError}
 					onOpenChange={(open) => {
 						if (!open) {
 							setUnitToEdit(null);
 						}
 					}}
+					onSuccess={(data: { name: string }) => {
+						const id = unitToEdit?.id;
+						setLocalRelations((prev) =>
+							prev.map((relation) =>
+								relation.unitDocumentId === id ? { ...relation, unitName: data.name } : relation,
+							),
+						);
+					}}
+					submitLabel={t("Save")}
+					title={editSourceUnit.title}
 				>
-					<ModalHeader
-						description={t("Edit the details of the selected entry.")}
-						title={editSourceUnit.title}
-					/>
-					{isEditUnitFieldsLoading || editUnitFields == null ? (
-						<ModalBody>
-							<ProgressCircle aria-label={t("Loading...")} isIndeterminate={true} />
-						</ModalBody>
-					) : (
-						<Form action={editUnitFormAction} state={editUnitState}>
-							<ModalBody className="flex flex-col gap-y-4">
-								<input name="documentId" type="hidden" value={unitToEdit?.id ?? ""} />
-								<TextField defaultValue={editUnitFields.name} isRequired={true} name="name">
-									<Label>{t("Name")}</Label>
-									<Input />
-									<FieldError />
-								</TextField>
-								<TextField defaultValue={editUnitFields.acronym ?? undefined} name="acronym">
-									<Label>{t("Acronym")}</Label>
-									<Input />
-									<FieldError />
-								</TextField>
-								<TextField defaultValue={editUnitFields.ror ?? undefined} name="ror">
-									<Label>{t("ROR")}</Label>
-									<Input />
-									<FieldError />
-								</TextField>
-								<TextField defaultValue={editUnitFields.summary ?? undefined} name="summary">
-									<Label>{t("Summary")}</Label>
-									<Input />
-									<FieldError />
-								</TextField>
-								<FormStatus className="self-start" state={editUnitState} />
-							</ModalBody>
-							<ModalFooter>
-								<ModalClose>{t("Cancel")}</ModalClose>
-								<Button isPending={isEditUnitPending} type="submit">
-									{isEditUnitPending ? (
-										<Fragment>
-											<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-											<span aria-hidden={true}>{t("Saving...")}</span>
-										</Fragment>
-									) : (
-										t("Save")
-									)}
-								</Button>
-							</ModalFooter>
-						</Form>
-					)}
-				</ModalContent>
+					{editUnitFields != null ? (
+						<InstitutionFormFields
+							initialAssets={editSourceUnit.initialAssets}
+							initialSocialMediaIds={editUnitFields.socialMediaIds}
+							initialSocialMediaItems={editSourceUnit.initialSocialMediaItems}
+							initialSocialMediaTotal={editSourceUnit.initialSocialMediaTotal}
+							institution={editUnitFields}
+							isPublished={editUnitFields.isPublished}
+							selectedSocialMediaItems={editUnitFields.selectedSocialMediaItems}
+						/>
+					) : null}
+					<input name="documentId" type="hidden" value={unitToEdit?.id ?? ""} />
+				</EntityFormSheet>
 			) : null}
 		</Fragment>
 	);

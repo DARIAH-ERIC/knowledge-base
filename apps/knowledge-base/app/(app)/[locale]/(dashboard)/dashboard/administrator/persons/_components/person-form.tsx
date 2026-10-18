@@ -28,11 +28,11 @@ import { PersonSocialMediaFields } from "@/app/(app)/[locale]/(dashboard)/dashbo
 import type { PersonSocialMediaEntry } from "@/lib/data/person-social-media";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
-interface PersonFormProps {
+interface PersonFormFieldsProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
-	person?: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
+	person?: Pick<schema.Person, "email" | "name" | "orcid" | "sortName"> & {
 		biographyContentBlocks?: Array<ContentBlock>;
-		entityVersion: { entity: { id: string; slug: string } };
+		entityVersion: { entity: { slug: string } };
 		socialMedia?: Array<PersonSocialMediaEntry>;
 	} & {
 		image: SelectedImage | null;
@@ -41,6 +41,93 @@ interface PersonFormProps {
 	};
 	/** Whether the edited person is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
+}
+
+/**
+ * The fields of a person, without the surrounding form. Shared by `PersonForm` and the sheet that
+ * creates a person from a delegated dashboard.
+ */
+export function PersonFormFields(props: Readonly<PersonFormFieldsProps>): ReactNode {
+	const { initialAssets, isPublished, person } = props;
+
+	const t = useExtracted();
+
+	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(person?.image ?? null);
+
+	return (
+		<Fragment>
+			<FormSection
+				description={t("Enter the personal and contact details related to the person.")}
+				title={t("Details")}
+			>
+				<TextField defaultValue={person?.name} isRequired={true} name="name">
+					<Label>{t("Name")}</Label>
+					<Input />
+					<FieldError />
+				</TextField>
+
+				<TextField defaultValue={person?.sortName} isRequired={true} name="sortName">
+					<Label>{t("Sort name")}</Label>
+					<Input />
+					<FieldError />
+				</TextField>
+
+				<TextField defaultValue={person?.email ?? undefined} name="email" type="email">
+					<Label>{t("Email")}</Label>
+					<Input />
+					<FieldError />
+				</TextField>
+
+				<TextField defaultValue={person?.orcid ?? undefined} name="orcid">
+					<Label>{t("ORCID")}</Label>
+					<Input />
+					<FieldError />
+				</TextField>
+
+				<EntitySlugField isPublished={isPublished} slug={person?.entityVersion.entity.slug} />
+			</FormSection>
+
+			<Separator className="my-6" />
+
+			<PersonSocialMediaFields initialSocialMedia={person?.socialMedia} />
+
+			<Separator className="my-6" />
+
+			<FormSection description={t("Select or upload an image.")} title={t("Image")}>
+				<ImageSelectField
+					allowRemove={true}
+					captionName="imageCaption"
+					defaultCaption={person?.imageCaption}
+					defaultCaptionMode={person?.imageCaptionMode}
+					defaultPrefix="avatars"
+					initialAssets={initialAssets}
+					onChange={setSelectedImage}
+					prefixes={["avatars"]}
+					selectedImage={selectedImage}
+				/>
+			</FormSection>
+
+			<Separator className="my-6" />
+
+			<FormSection
+				description={t("Add a short biography.")}
+				title={t("Biography")}
+				variant="stacked"
+			>
+				<RichTextContentBlocksField
+					aria-label={t("Biography")}
+					initialBlocks={person?.biographyContentBlocks}
+					initialAssets={initialAssets}
+					name="biography"
+				/>
+			</FormSection>
+		</Fragment>
+	);
+}
+
+interface PersonFormProps extends PersonFormFieldsProps {
+	person?: NonNullable<PersonFormFieldsProps["person"]> &
+		Pick<schema.Person, "id"> & { entityVersion: { entity: { id: string } } };
 	formAction: ServerAction;
 }
 
@@ -51,76 +138,10 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(person?.image ?? null);
-
 	return (
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
-				<FormSection
-					description={t("Enter the personal and contact details related to the person.")}
-					title={t("Details")}
-				>
-					<TextField defaultValue={person?.name} isRequired={true} name="name">
-						<Label>{t("Name")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-
-					<TextField defaultValue={person?.sortName} isRequired={true} name="sortName">
-						<Label>{t("Sort name")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-
-					<TextField defaultValue={person?.email ?? undefined} name="email" type="email">
-						<Label>{t("Email")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-
-					<TextField defaultValue={person?.orcid ?? undefined} name="orcid">
-						<Label>{t("ORCID")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-
-					<EntitySlugField isPublished={isPublished} slug={person?.entityVersion.entity.slug} />
-				</FormSection>
-
-				<Separator className="my-6" />
-
-				<PersonSocialMediaFields initialSocialMedia={person?.socialMedia} />
-
-				<Separator className="my-6" />
-
-				<FormSection description={t("Select or upload an image.")} title={t("Image")}>
-					<ImageSelectField
-						allowRemove={true}
-						captionName="imageCaption"
-						defaultCaption={person?.imageCaption}
-						defaultCaptionMode={person?.imageCaptionMode}
-						defaultPrefix="avatars"
-						initialAssets={initialAssets}
-						onChange={setSelectedImage}
-						prefixes={["avatars"]}
-						selectedImage={selectedImage}
-					/>
-				</FormSection>
-
-				<Separator className="my-6" />
-
-				<FormSection
-					description={t("Add a short biography.")}
-					title={t("Biography")}
-					variant="stacked"
-				>
-					<RichTextContentBlocksField
-						aria-label={t("Biography")}
-						initialBlocks={person?.biographyContentBlocks}
-						initialAssets={initialAssets}
-						name="biography"
-					/>
-				</FormSection>
+				<PersonFormFields initialAssets={initialAssets} isPublished={isPublished} person={person} />
 
 				{person != null ? (
 					<Fragment>

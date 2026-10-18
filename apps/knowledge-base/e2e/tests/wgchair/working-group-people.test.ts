@@ -66,7 +66,7 @@ test.describe("working group people (delegated chair)", () => {
 		const dialog = page.getByRole("dialog", { name: "Add new person" });
 		await dialog.getByLabel("Name", { exact: true }).fill(input.name);
 		await dialog.getByRole("textbox", { name: "Sort name" }).fill(input.sortName);
-		await dialog.getByRole("button", { name: "Add person" }).click();
+		await dialog.getByRole("button", { name: "Create person" }).click();
 		await dialog.waitFor({ state: "hidden" });
 
 		// Pick the role.
@@ -138,7 +138,7 @@ test.describe("working group people (delegated chair)", () => {
 		await waitForActionSuccess({
 			page,
 			trigger: async () => {
-				await dialog.getByRole("button", { name: "Save" }).click();
+				await dialog.getByRole("button", { name: "Save", exact: true }).click();
 			},
 		});
 
@@ -169,7 +169,7 @@ test.describe("working group people (delegated chair)", () => {
 		await waitForActionSuccess({
 			page,
 			trigger: async () => {
-				await dialog.getByRole("button", { name: "Add person" }).click();
+				await dialog.getByRole("button", { name: "Create person" }).click();
 			},
 		});
 		await dialog.waitFor({ state: "hidden" });

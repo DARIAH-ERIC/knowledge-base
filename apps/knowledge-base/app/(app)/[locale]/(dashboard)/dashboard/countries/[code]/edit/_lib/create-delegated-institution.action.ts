@@ -1,108 +1,72 @@
 "use server";
 
-import { assert, getFormDataValues } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
+import { getExtracted } from "next-intl/server";
 import * as v from "valibot";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
+import { CreateInstitutionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/create-institution.schema";
 import { assertCan } from "@/lib/auth/permissions";
-import { createDraftDocumentFromTitle } from "@/lib/data/entity-lifecycle";
-import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createInstitutionDraft } from "@/lib/data/create-institution-draft";
+import { checkSshocMarketplaceActorIdAvailable } from "@/lib/data/sshoc-marketplace-actor-id";
+import { getRequestedSlug } from "@/lib/entity-slug-input";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 const CreateDelegatedInstitutionActionInputSchema = v.object({
+	// Related entities and resources are curated by admins, so the delegated form does not offer them.
+	...v.omit(CreateInstitutionActionInputSchema, ["relatedEntityIds", "relatedResourceIds"]).entries,
 	// The section posts the country document id as a generic hidden `scopeDocumentId` field.
 	scopeDocumentId: v.pipe(v.string(), v.uuid()),
-	name: v.pipe(v.string(), v.nonEmpty()),
-	acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
-	ror: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
-	summary: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 });
 
 /**
  * Creates a new institution as a draft and locates it in the coordinator's country
- * (`is_located_in`), so it becomes selectable in the country-scoped institution picker. Publishing
- * remains an admin task. Authorized against the country the caller is editing.
+ * (`is_located_in`), so it becomes selectable in the country-scoped institution picker. Takes the
+ * fields of the admin create form except relations; publishing remains an admin task. Authorized
+ * against the country the caller is editing.
  */
-export const createDelegatedInstitutionAction = createServerAction(
-	{ requireAuth: true },
-	async function createDelegatedInstitutionAction(state, formData, { user }) {
-		const locale = await getLocale();
+export const createDelegatedInstitutionAction = createMutationAction({
+	schema: CreateDelegatedInstitutionActionInputSchema,
+	requireAuth: true,
+	audit: { action: "create", subjectType: "institutions" },
+	revalidate: "/[locale]/dashboard/countries",
+	async preCheck({ input, ctx }) {
+		await assertCan(ctx.user, "update", {
+			type: "organisational_unit",
+			id: input.scopeDocumentId,
+		});
+		return checkSshocMarketplaceActorIdAvailable({
+			sshocMarketplaceActorId: input.sshocMarketplaceActorId,
+		});
+	},
+	async mutate(tx, input) {
 		const t = await getExtracted();
 
-		const result = await v.safeParseAsync(
-			CreateDelegatedInstitutionActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateDelegatedInstitutionActionInputSchema>(result.issues);
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { scopeDocumentId: countryDocumentId, name, acronym, ror, summary } = result.output;
-
-		assert(user != null);
-		await assertCan(user, "update", { type: "organisational_unit", id: countryDocumentId });
-
-		const created = await db.transaction(async (tx) => {
-			const entityType = await tx.query.entityTypes.findFirst({
-				where: { type: "organisational_units" },
-				columns: { id: true },
-			});
-			assert(entityType);
-
-			const institutionType = await tx.query.organisationalUnitTypes.findFirst({
-				where: { type: "institution" },
-				columns: { id: true },
-			});
-			assert(institutionType);
-
-			const locatedInStatus = await tx.query.organisationalUnitStatus.findFirst({
-				where: { status: "is_located_in" },
-				columns: { id: true },
-			});
-			assert(locatedInStatus);
-
-			const { documentId, versionId } = await createDraftDocumentFromTitle(tx, entityType.id, name);
-
-			await tx.insert(schema.organisationalUnits).values({
-				id: versionId,
-				acronym,
-				name,
-				ror,
-				summary,
-				typeId: institutionType.id,
-			});
-
-			await tx.insert(schema.organisationalUnitsRelations).values({
-				unitDocumentId: documentId,
-				relatedUnitDocumentId: countryDocumentId,
-				status: locatedInStatus.id,
-				duration: { start: new Date() },
-			});
-
-			await recordAuditEvent(tx, {
-				actorUserId: user.id,
-				action: "create",
-				subjectType: "institutions",
-				subjectId: documentId,
-				summary: { name, lifecycle: "draft" },
-			});
-
-			return { documentId };
+		const { documentId } = await createInstitutionDraft(tx, {
+			...input,
+			requestedSlug: getRequestedSlug(input.slug),
+			relatedEntityIds: [],
+			relatedResourceIds: [],
 		});
 
-		revalidatePath("/[locale]/dashboard/countries", "layout");
+		const locatedInStatus = await tx.query.organisationalUnitStatus.findFirst({
+			where: { status: "is_located_in" },
+			columns: { id: true },
+		});
+		assert(locatedInStatus);
 
-		return createActionStateSuccess({ data: { id: created.documentId, name } });
+		await tx.insert(schema.organisationalUnitsRelations).values({
+			unitDocumentId: documentId,
+			relatedUnitDocumentId: input.scopeDocumentId,
+			status: locatedInStatus.id,
+			duration: { start: new Date() },
+		});
+
+		return {
+			subjectId: documentId,
+			auditSummary: { lifecycle: "draft" },
+			successMessage: t("Institution saved as draft."),
+			successData: { id: documentId, name: input.name },
+		};
 	},
-);
+});

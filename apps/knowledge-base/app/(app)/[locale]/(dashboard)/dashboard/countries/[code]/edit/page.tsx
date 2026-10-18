@@ -60,6 +60,7 @@ export default async function CountryEditPage(
 	// while the Details tab edits the national consortium. Relations are document-level and need no draft.
 	const [
 		{ items: initialAssets },
+		{ items: initialPersonAssets },
 		initialSocialMedia,
 		data,
 		personRelations,
@@ -70,6 +71,7 @@ export default async function CountryEditPage(
 		ericInstitutionStatusOptions,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "avatars" }),
 		getSocialMediaOptions(),
 		getOrganisationalUnitEditData({
 			slug: consortium.slug,
@@ -122,6 +124,7 @@ export default async function CountryEditPage(
 			ericInstitutionRelations={ericInstitutionRelations}
 			ericInstitutionStatusOptions={ericInstitutionStatusOptions}
 			initialAssets={initialAssets}
+			initialPersonAssets={initialPersonAssets}
 			initialPersonItems={initialPersonItems}
 			initialPersonTotal={initialPersonTotal}
 			initialSocialMediaIds={data.socialMediaIds}
