@@ -71,6 +71,41 @@ test.describe("users admin", () => {
 		expect(await db.getUserCredentialStateByName(name)).toMatchObject({ invitations: 1 });
 	});
 
+	test("invited user cannot sign in before choosing a password", async ({
+		browser,
+		createAdminUsersPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const usersPage = createAdminUsersPage(workerIndex);
+
+		const name = `${usersPage.workerPrefix} Not Activated ${randomUUID()}`;
+		const email = `e2e-worker-${String(workerIndex)}+${randomUUID()}@example.com`;
+
+		await usersPage.gotoCreate();
+		await usersPage.fillName(name);
+		await usersPage.fillEmail(email);
+		await usersPage.submitForm();
+
+		const context = await browser.newContext({ storageState: { cookies: [], origins: [] } });
+		try {
+			const page = await context.newPage();
+
+			await page.goto("/en/auth/sign-in");
+			await page.getByLabel("Email").fill(email);
+			await page.getByLabel("Password").fill("any password at all");
+			await page.getByRole("button", { name: "Sign in" }).click();
+
+			await expect(page.getByText("This account has not been activated yet.")).toBeVisible();
+			expect(page.url()).toContain("/auth/sign-in");
+			expect(
+				(await context.cookies()).some((cookie) => cookie.name === "session"),
+				"no session is created",
+			).toBe(false);
+		} finally {
+			await context.close();
+		}
+	});
+
 	test("invited user can choose a password and continue to two-factor setup", async ({
 		browser,
 		createAdminUsersPage,

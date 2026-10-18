@@ -83,6 +83,40 @@ describe("invitations", () => {
 		});
 	});
 
+	it("rejects unknown tokens without touching any account", async () => {
+		await withTransaction(async (tx) => {
+			const auth = createTestAuthService(tx);
+			const email = createEmail();
+			const user = await auth.createInvitedUser(email, "Invitee", tx);
+			await auth.createUserInvitation(user.id, email, tx);
+
+			const unknownToken = randomBytes(32).toString("hex");
+
+			expect(await auth.getUserInvitation(unknownToken)).toBeNull();
+			expect(
+				await auth.acceptUserInvitation(unknownToken, "correct horse battery staple"),
+			).toBeNull();
+			expect(await auth.getUserPasswordHash(user.id)).toBeNull();
+			expect((await auth.getUserById(user.id))?.isEmailVerified).toBe(false);
+		});
+	});
+
+	it("does not accept the stored hash in place of the token", async () => {
+		await withTransaction(async (tx) => {
+			const auth = createTestAuthService(tx);
+			const email = createEmail();
+			const user = await auth.createInvitedUser(email, "Invitee", tx);
+			await auth.createUserInvitation(user.id, email, tx);
+
+			const [row] = await tx
+				.select({ id: schema.userInvitations.id })
+				.from(schema.userInvitations)
+				.where(eq(schema.userInvitations.userId, user.id));
+
+			expect(await auth.getUserInvitation(row!.id)).toBeNull();
+		});
+	});
+
 	it("only stores a hash of the token", async () => {
 		await withTransaction(async (tx) => {
 			const auth = createTestAuthService(tx);
