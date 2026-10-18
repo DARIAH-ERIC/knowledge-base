@@ -39,6 +39,10 @@ async function getBox(locator: Locator): Promise<{ width: number; height: number
 }
 
 test.describe("asset focal point", () => {
+	test.afterAll(async ({ db }, testInfo) => {
+		await db.cleanupWorkerAssets(testInfo.workerIndex);
+	});
+
 	for (const { title, file, aspectRatio } of uploads) {
 		test(`can be picked on ${title}`, async ({ createAssetsPage, db }) => {
 			const assetsPage = createAssetsPage();
