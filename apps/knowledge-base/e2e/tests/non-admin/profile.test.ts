@@ -66,8 +66,10 @@ test.describe("own profile", () => {
 		await expect(page.getByRole("heading", { level: 1, name: "Your profile" })).toBeVisible();
 
 		// Roles are listed read-only.
-		await expect(page.getByText(country.name, { exact: true })).toBeVisible();
-		await expect(page.getByText("national representative", { exact: true })).toBeVisible();
+		// Scoped to the page content: the role also puts the country in the sidebar.
+		const main = page.getByRole("main");
+		await expect(main.getByText(country.name, { exact: true })).toBeVisible();
+		await expect(main.getByText("national representative", { exact: true })).toBeVisible();
 
 		// People may not choose their own public URL.
 		await expect(page.getByLabel("Slug")).toHaveCount(0);
