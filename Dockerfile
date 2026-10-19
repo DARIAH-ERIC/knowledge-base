@@ -11,7 +11,11 @@ ENV CI=true
 # turbo-pruned Docker workspaces.
 # @see {@link https://github.com/pnpm/pnpm/issues/11865}
 ENV pnpm_config_verify_deps_before_run=false
-RUN corepack enable
+# pnpm is installed with npm instead of corepack, which is deprecated and no longer bundled with
+# node.js from v25. The version is supplied as a build arg (resolved from the `packageManager` field
+# in CI), so the image runs the same pnpm the repo pins.
+ARG PNPM_VERSION
+RUN npm install --global "pnpm@${PNPM_VERSION}"
 # `turbo prune` runs before `pnpm install`, so it needs a turbo binary available up front. The version
 # is supplied as a build arg (resolved from the lockfile in CI) instead of installing the floating
 # latest, so prune is reproducible and matches the repo turbo used via `pnpm exec turbo` in the build
