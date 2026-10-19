@@ -4,6 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 
+import { findOtherOpenCampaign } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/find-other-open-campaign";
 import { UpdateReportingCampaignActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/update-reporting-campaign.schema";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -30,6 +31,18 @@ export const updateReportingCampaignAction = createMutationAction({
 					year: [t("A campaign for this year already exists.")],
 				},
 			});
+		}
+
+		if (input.status === "open") {
+			const openCampaign = await findOtherOpenCampaign(input.id);
+			if (openCampaign != null) {
+				return createActionStateError({
+					message: t(
+						"The {year} campaign is still open. Close it before opening another campaign.",
+						{ year: String(openCampaign.year) },
+					),
+				});
+			}
 		}
 
 		return undefined;

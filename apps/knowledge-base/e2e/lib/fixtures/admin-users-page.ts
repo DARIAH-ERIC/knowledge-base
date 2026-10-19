@@ -147,7 +147,7 @@ export class AdminUsersPage {
 		await this.page.getByRole("menuitem", { name: "Resend invitation" }).click();
 	}
 
-	/** Opens the row's actions menu and returns the impersonation item, for asserting it is disabled. */
+	/** Opens the row's actions menu and returns the impersonation item, which may not be offered. */
 	async openImpersonationRowAction(name: string): Promise<Locator> {
 		const row = this.rowByName(name);
 		await openActionsMenu(row);

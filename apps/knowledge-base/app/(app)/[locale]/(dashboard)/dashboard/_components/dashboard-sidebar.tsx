@@ -17,7 +17,14 @@ import {
 	SidebarSectionGroup,
 	useSidebar,
 } from "@dariah-eric/ui/sidebar";
-import { ListBulletIcon, MagnifyingGlassIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+import {
+	FlagIcon,
+	ListBulletIcon,
+	MagnifyingGlassIcon,
+	Squares2X2Icon,
+	UserCircleIcon,
+	UserGroupIcon,
+} from "@heroicons/react/24/outline";
 import cn from "clsx/lite";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useEffect, useRef } from "react";
@@ -295,97 +302,76 @@ export function useSidebarMenu(
 
 	const reportingSection: SidebarMenuSection = {
 		title: t("Reporting"),
-		items: isAdmin
-			? [
-					{
-						href: "/dashboard/reporting/administrator",
-						tooltip: t("Overview"),
-						label: t("Overview"),
-						icon: <ListBulletIcon />,
-					},
-					{
-						href: "/dashboard/administrator/reporting-campaigns",
-						tooltip: t("Reporting campaigns"),
-						label: t("Reporting campaigns"),
-						icon: <ListBulletIcon />,
-					},
-					{
-						href: "/dashboard/administrator/reporting-statistics",
-						tooltip: t("Statistics"),
-						label: t("Statistics"),
-						icon: <ListBulletIcon />,
-					},
-					{
-						href: "/dashboard/administrator/country-reports",
-						tooltip: t("Country reports"),
-						label: t("Country reports"),
-						icon: <ListBulletIcon />,
-					},
-					{
-						href: "/dashboard/administrator/working-group-reports",
-						tooltip: t("Working group reports"),
-						label: t("Working group reports"),
-						icon: <ListBulletIcon />,
-					},
-				]
-			: [
-					{
-						href: "/dashboard/reporting",
-						tooltip: t("Overview"),
-						label: t("Overview"),
-						icon: <ListBulletIcon />,
-					},
-					{
-						href: "/dashboard/reporting/country-reports",
-						tooltip: t("Country reports"),
-						label: t("Country reports"),
-						icon: <ListBulletIcon />,
-					},
-					{
-						href: "/dashboard/reporting/working-group-reports",
-						tooltip: t("Working group reports"),
-						label: t("Working group reports"),
-						icon: <ListBulletIcon />,
-					},
-				],
+		items: [
+			{
+				href: "/dashboard/reporting/administrator",
+				tooltip: t("Overview"),
+				label: t("Overview"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/reporting-campaigns",
+				tooltip: t("Reporting campaigns"),
+				label: t("Reporting campaigns"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/reporting-statistics",
+				tooltip: t("Statistics"),
+				label: t("Statistics"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/country-reports",
+				tooltip: t("Country reports"),
+				label: t("Country reports"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/working-group-reports",
+				tooltip: t("Working group reports"),
+				label: t("Working group reports"),
+				icon: <ListBulletIcon />,
+			},
+		],
 	};
 
+	if (!isAdmin) {
+		// Non-admins navigate by the units they hold a role in. Each unit's page carries its own
+		// reports; the current campaign is on the dashboard home.
+		const countriesSection: SidebarMenuSection = {
+			title: t("National consortia"),
+			items: organisationalUnitScopes.countries.map((country) => {
+				return {
+					href: `/dashboard/countries/${country.slug}`,
+					tooltip: country.name,
+					label: country.name,
+					icon: <FlagIcon />,
+				};
+			}),
+		};
+
+		const workingGroupsSection: SidebarMenuSection = {
+			title: t("Working groups"),
+			items: organisationalUnitScopes.workingGroups.map((workingGroup) => {
+				return {
+					href: `/dashboard/working-groups/${workingGroup.slug}`,
+					tooltip: workingGroup.name,
+					label: workingGroup.name,
+					icon: <UserGroupIcon />,
+				};
+			}),
+		};
+
+		return [countriesSection, workingGroupsSection].filter((section) => section.items.length > 0);
+	}
+
 	return [
-		...(isAdmin ? [administrationSection] : []),
-		...(isAdmin ? [adminSection] : []),
-		...(isAdmin ? [knowledgeBaseSection] : []),
-		...(!isAdmin
-			? organisationalUnitScopes.countries.map((country) => {
-					return {
-						title: country.name,
-						items: [
-							{
-								href: `/dashboard/countries/${country.slug}`,
-								tooltip: t("National consortium"),
-								label: t("National consortium"),
-								icon: <ListBulletIcon />,
-							},
-						],
-					};
-				})
-			: []),
-		...(!isAdmin
-			? organisationalUnitScopes.workingGroups.map((workingGroup) => {
-					return {
-						title: workingGroup.name,
-						items: [
-							{
-								href: `/dashboard/working-groups/${workingGroup.slug}`,
-								tooltip: t("Working group"),
-								label: t("Working group"),
-								icon: <ListBulletIcon />,
-							},
-						],
-					};
-				})
-			: []),
+		administrationSection,
+		adminSection,
+		knowledgeBaseSection,
 		reportingSection,
-		...(isAdmin ? [websiteSection] : []),
+		websiteSection,
 	] satisfies Array<SidebarMenuSection>;
 }
 
@@ -395,6 +381,7 @@ function getCurrentSidebarHref(
 ): string | undefined {
 	const hrefs = [
 		"/dashboard",
+		"/dashboard/profile",
 		...sidebarMenu.flatMap((section) => section.items.map((item) => item.href)),
 	];
 
@@ -414,12 +401,14 @@ function getCurrentSidebarHref(
 }
 
 interface DashboardSidebarProps extends SidebarProps {
+	/** Whether the account is linked to a person, whose details the user may then edit. */
+	hasPerson: boolean;
 	isAdmin: boolean;
 	organisationalUnitScopes: UserOrganisationalUnitScopes;
 }
 
 export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactNode {
-	const { isAdmin, organisationalUnitScopes, ...sidebarProps } = props;
+	const { hasPerson, isAdmin, organisationalUnitScopes, ...sidebarProps } = props;
 	const { state, isMobile, setIsOpenOnMobile } = useSidebar();
 	const { openCommandPalette } = useDashboardCommandPalette();
 	const pathname = usePathname();
@@ -492,6 +481,16 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 							<Squares2X2Icon />
 							<SidebarLabel>{t("Dashboard")}</SidebarLabel>
 						</SidebarItem>
+						{hasPerson ? (
+							<SidebarItem
+								href="/dashboard/profile"
+								isCurrent={currentHref === "/dashboard/profile"}
+								tooltip={t("Your profile")}
+							>
+								<UserCircleIcon />
+								<SidebarLabel>{t("Your profile")}</SidebarLabel>
+							</SidebarItem>
+						) : null}
 					</SidebarSection>
 
 					{sidebarMenu.map((section, index) => (

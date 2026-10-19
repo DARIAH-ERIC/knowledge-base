@@ -53,6 +53,7 @@ export default async function DashbardLayout(
 				>
 					<DashboardSidebar
 						collapsible="dock"
+						hasPerson={user.personDocumentId != null}
 						isAdmin={user.role === "admin"}
 						organisationalUnitScopes={organisationalUnitScopes}
 					/>

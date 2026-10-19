@@ -268,11 +268,22 @@ export async function getUserAllCountryReports(
 		countryOrgUnitIds.push(user.organisationalUnitDocumentId);
 	}
 
-	if (countryOrgUnitIds.length === 0) {
+	return queryCountryReportHistory([...new Set(countryOrgUnitIds)]);
+}
+
+/** Reports of a single country across all campaigns. Callers check the user may read them. */
+export async function getCountryReportHistory(
+	countryDocumentId: string,
+): Promise<Array<CountryReportHistoryItem>> {
+	return queryCountryReportHistory([countryDocumentId]);
+}
+
+async function queryCountryReportHistory(
+	countryDocumentIds: Array<string>,
+): Promise<Array<CountryReportHistoryItem>> {
+	if (countryDocumentIds.length === 0) {
 		return [];
 	}
-
-	const uniqueIds = [...new Set(countryOrgUnitIds)];
 
 	const rows = await db
 		.select({
@@ -298,7 +309,7 @@ export async function getUserAllCountryReports(
 			schema.organisationalUnits,
 			sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 		)
-		.where(inArray(schema.countryReports.countryDocumentId, uniqueIds))
+		.where(inArray(schema.countryReports.countryDocumentId, countryDocumentIds))
 		.orderBy(desc(schema.reportingCampaigns.year));
 
 	return rows.map((r) => {
@@ -360,9 +371,20 @@ export async function getUserAllWorkingGroupReports(
 			),
 		);
 
-	const wgOrgUnitIds = [...new Set(relations.map((r) => r.orgUnitId))];
+	return queryWorkingGroupReportHistory([...new Set(relations.map((r) => r.orgUnitId))]);
+}
 
-	if (wgOrgUnitIds.length === 0) {
+/** Reports of a single working group across all campaigns. Callers check the user may read them. */
+export async function getWorkingGroupReportHistory(
+	workingGroupDocumentId: string,
+): Promise<Array<WorkingGroupReportHistoryItem>> {
+	return queryWorkingGroupReportHistory([workingGroupDocumentId]);
+}
+
+async function queryWorkingGroupReportHistory(
+	workingGroupDocumentIds: Array<string>,
+): Promise<Array<WorkingGroupReportHistoryItem>> {
+	if (workingGroupDocumentIds.length === 0) {
 		return [];
 	}
 
@@ -393,7 +415,7 @@ export async function getUserAllWorkingGroupReports(
 			schema.organisationalUnits,
 			sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 		)
-		.where(inArray(schema.workingGroupReports.workingGroupDocumentId, wgOrgUnitIds))
+		.where(inArray(schema.workingGroupReports.workingGroupDocumentId, workingGroupDocumentIds))
 		.orderBy(desc(schema.reportingCampaigns.year));
 
 	return rows.map((r) => {

@@ -2,9 +2,7 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted, getLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { ReportingOverviewPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/reporting-overview-page";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getUserReportingScope } from "@/lib/data/reporting";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -28,11 +26,10 @@ export default async function DashboardReportingPage(
 ): Promise<ReactNode> {
 	const { user } = await assertAuthenticated();
 
-	if (user.role === "admin") {
-		redirect({ href: "/dashboard/reporting/administrator", locale: await getLocale() });
-	}
-
-	const scope = await getUserReportingScope(user);
-
-	return <ReportingOverviewPage scope={scope} />;
+	// Non-admins find the current campaign on the dashboard home, and earlier reports on the Reports
+	// tab of their national consortium or working group.
+	redirect({
+		href: user.role === "admin" ? "/dashboard/reporting/administrator" : "/dashboard",
+		locale: await getLocale(),
+	});
 }

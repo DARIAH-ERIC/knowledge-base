@@ -11,7 +11,8 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import type { CountryReportScope, WorkingGroupReportScope } from "@/lib/data/reporting";
 
-interface ReportingOverviewPageProps {
+interface CurrentCampaignOverviewProps {
+	userName: string;
 	scope: {
 		campaignYear: number | null;
 		workingGroupReports: Array<WorkingGroupReportScope>;
@@ -34,10 +35,11 @@ function groupReportsByStatus<T extends { status: string }>(
 	}, {});
 }
 
-export async function ReportingOverviewPage(
-	props: Readonly<ReportingOverviewPageProps>,
+/** Dashboard home for non-admins: their reports in the open reporting campaign. */
+export async function CurrentCampaignOverview(
+	props: Readonly<CurrentCampaignOverviewProps>,
 ): Promise<ReactNode> {
-	const { scope } = props;
+	const { scope, userName } = props;
 
 	const t = await getExtracted();
 
@@ -69,28 +71,40 @@ export async function ReportingOverviewPage(
 		<Fragment>
 			<Header>
 				<HeaderContent>
-					<HeaderTitle>{t("Reporting")}</HeaderTitle>
+					<HeaderTitle>{t("Welcome, {name}", { name: userName })}</HeaderTitle>
 					<HeaderDescription>
 						{scope.campaignYear != null
-							? t("Manage your reports for the current reporting campaign.")
-							: t("View and manage reports.")}
+							? t("Manage your reports for the {year} reporting campaign.", {
+									year: String(scope.campaignYear),
+								})
+							: t("Manage your reports for the current reporting campaign.")}
 					</HeaderDescription>
 				</HeaderContent>
 			</Header>
 
-			{!hasReports ? (
+			{scope.campaignYear == null ? (
 				<EmptyState
-					description={t("No country or working group reports are available.")}
-					title={t("No reports found")}
+					description={t(
+						"There is currently no open reporting campaign. Reports from earlier campaigns are on the Reports tab of your national consortium or working group.",
+					)}
+					title={t("No open reporting campaign")}
+				/>
+			) : !hasReports ? (
+				<EmptyState
+					description={t(
+						"You have no reports to work on in the {year} reporting campaign. Reports from earlier campaigns are on the Reports tab of your national consortium or working group.",
+						{ year: String(scope.campaignYear) },
+					)}
+					title={t("No reports in the current campaign")}
 				/>
 			) : (
-				<div className="flex flex-col gap-y-10 px-(--layout-padding)">
+				<div className="mbs-8 flex flex-col gap-y-10 px-(--layout-padding)">
 					<div className="grid gap-4 md:grid-cols-3">
 						<section className="rounded-lg border bg-bg p-4">
 							<p className="text-xs font-medium tracking-wide text-muted-fg uppercase">
 								{t("Campaign")}
 							</p>
-							<p className="mbs-2 text-2xl font-semibold text-fg">{scope.campaignYear ?? "—"}</p>
+							<p className="mbs-2 text-2xl font-semibold text-fg">{scope.campaignYear}</p>
 							<p className="mbs-1 text-sm text-muted-fg">{t("Current open reporting campaign")}</p>
 						</section>
 

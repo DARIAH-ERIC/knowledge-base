@@ -41,6 +41,8 @@ interface PersonFormFieldsProps {
 	};
 	/** Whether the edited person is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
+	/** `false` for people editing their own profile, who may not choose their public URL. */
+	showSlug?: boolean;
 }
 
 /**
@@ -48,7 +50,7 @@ interface PersonFormFieldsProps {
  * creates a person from a delegated dashboard.
  */
 export function PersonFormFields(props: Readonly<PersonFormFieldsProps>): ReactNode {
-	const { initialAssets, isPublished, person } = props;
+	const { initialAssets, isPublished, person, showSlug = true } = props;
 
 	const t = useExtracted();
 
@@ -84,7 +86,9 @@ export function PersonFormFields(props: Readonly<PersonFormFieldsProps>): ReactN
 					<FieldError />
 				</TextField>
 
-				<EntitySlugField isPublished={isPublished} slug={person?.entityVersion.entity.slug} />
+				{showSlug ? (
+					<EntitySlugField isPublished={isPublished} slug={person?.entityVersion.entity.slug} />
+				) : null}
 			</FormSection>
 
 			<Separator className="my-6" />

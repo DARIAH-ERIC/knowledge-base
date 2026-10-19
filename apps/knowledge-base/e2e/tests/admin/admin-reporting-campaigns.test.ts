@@ -1,3 +1,5 @@
+import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
+import { clickHydrated } from "@/e2e/lib/fixtures/hydration";
 import { expect, test } from "@/e2e/lib/test";
 
 test.describe("reporting campaigns admin", () => {
@@ -25,12 +27,13 @@ test.describe("reporting campaigns admin", () => {
 
 		await campaignsPage.gotoCreate();
 		await campaignsPage.fillYear(campaignYear);
-		await campaignsPage.selectStatus("open");
+		// New campaigns start as drafts: opening one is what "Launch" is for, and only one campaign
+		// may be open at a time (the seed and other suites keep campaigns open).
 		await campaignsPage.submitCreateForm();
 
 		const created = await db.getReportingCampaignByYear(campaignYear);
 		expect(created).not.toBeNull();
-		expect(created).toMatchObject({ year: campaignYear, status: "open" });
+		expect(created).toMatchObject({ year: campaignYear, status: "draft" });
 		campaignId = created!.id;
 
 		await campaignsPage.searchByYear(campaignYear);
@@ -50,12 +53,35 @@ test.describe("reporting campaigns admin", () => {
 		const updated = await db.getReportingCampaignById(campaignId!);
 		expect(updated).not.toBeNull();
 		expect(updated).toMatchObject({ year: updatedYear, status: "closed" });
+	});
 
-		// Restore to "open" so country/WG report tests (if they share the DB year) still work.
-		// This test suite owns 3100+workerIndex so we restore here inline.
-		await campaignsPage.gotoSettings(campaignId!);
-		await campaignsPage.selectStatus("open");
-		await campaignsPage.submitCreateForm();
+	test("should refuse to open a second campaign", async ({
+		createAdminReportingCampaignsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const campaignsPage = createAdminReportingCampaignsPage(workerIndex);
+		// Another campaign this worker owns is open; the seed and other suites may keep more open.
+		const otherOpenCampaign = await db.createOpenCampaign(3950 + workerIndex);
+
+		try {
+			await campaignsPage.gotoSettings(campaignId!);
+			await campaignsPage.selectStatus("open");
+			// Refused, so the form stays put instead of redirecting like `submitCreateForm` expects.
+			await waitForActionSuccess({
+				page: campaignsPage.page,
+				trigger: () => clickHydrated(campaignsPage.page.getByRole("button", { name: "Save" })),
+			});
+
+			await expect(
+				campaignsPage.page.getByText(
+					/campaign is still open\. Close it before opening another campaign\./,
+				),
+			).toBeVisible();
+			expect(await db.getReportingCampaignById(campaignId!)).toMatchObject({ status: "closed" });
+		} finally {
+			await db.deleteReportingCampaign(otherOpenCampaign.id);
+		}
 	});
 
 	test("should set event amounts", async ({ createAdminReportingCampaignsPage, db }) => {

@@ -81,6 +81,8 @@ const { updateContributionAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action");
 const { updateDelegatedPersonAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/_lib/update-delegated-person.action");
+const { updateOwnPersonAction } =
+	await import("@/app/(app)/[locale]/(dashboard)/dashboard/profile/_lib/update-own-person.action");
 const { updateDelegatedInstitutionAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/update-delegated-institution.action");
 const { createDraftDocument, getDocumentVersions, publishVersion } =
@@ -381,6 +383,80 @@ describe("delegated entity edits are saved as drafts", () => {
 			});
 			expect(published?.name).toBe(original?.name);
 			expect(draft?.name).toBe("Edited Institution");
+		});
+	});
+});
+
+describe("people editing their own person", () => {
+	async function getSlug(tx: Tx, documentId: string): Promise<string | undefined> {
+		const row = await tx.query.entities.findFirst({
+			where: { id: documentId },
+			columns: { slug: true },
+		});
+		return row?.slug;
+	}
+
+	it("saves a draft of the signed-in user's own person, never of a submitted one", async () => {
+		await withActionTransaction(async (tx) => {
+			const own = await seedPerson(tx, "Published Name");
+			await publishVersion(tx, own, personsLifecycleAdapter);
+			const other = await seedPerson(tx, "Other Name");
+			await signIn(tx, "user", own);
+
+			const state = await updateOwnPersonAction(
+				createActionStateInitial(),
+				toFormData({ documentId: other, name: "Edited Name", sortName: "Edited Name" }),
+			);
+			expect(state.status, JSON.stringify(state)).toBe("success");
+
+			const { draftId, publishedId } = await getDocumentVersions(tx, own);
+			assert(draftId != null && publishedId != null);
+			const published = await tx.query.persons.findFirst({
+				where: { id: publishedId },
+				columns: { name: true },
+			});
+			const draft = await tx.query.persons.findFirst({
+				where: { id: draftId },
+				columns: { name: true },
+			});
+			expect(published?.name).toBe("Published Name");
+			expect(draft?.name).toBe("Edited Name");
+
+			const { draftId: otherDraftId } = await getDocumentVersions(tx, other);
+			assert(otherDraftId != null);
+			const otherDraft = await tx.query.persons.findFirst({
+				where: { id: otherDraftId },
+				columns: { name: true },
+			});
+			expect(otherDraft?.name).toBe("Other Name");
+		});
+	});
+
+	it("ignores a submitted slug", async () => {
+		await withActionTransaction(async (tx) => {
+			// Draft-only, so the slug would still be changeable through the delegated or admin form.
+			const own = await seedPerson(tx);
+			const slug = await getSlug(tx, own);
+			await signIn(tx, "user", own);
+
+			const state = await updateOwnPersonAction(
+				createActionStateInitial(),
+				toFormData({ name: "Edited Name", sortName: "Edited Name", slug: "chosen-by-me" }),
+			);
+			expect(state.status, JSON.stringify(state)).toBe("success");
+			expect(await getSlug(tx, own)).toBe(slug);
+		});
+	});
+
+	it("refuses an account that is not linked to a person", async () => {
+		await withActionTransaction(async (tx) => {
+			await signIn(tx, "user");
+
+			const state = await updateOwnPersonAction(
+				createActionStateInitial(),
+				toFormData({ name: "Edited Name", sortName: "Edited Name" }),
+			);
+			expect(state.status).toBe("error");
 		});
 	});
 });

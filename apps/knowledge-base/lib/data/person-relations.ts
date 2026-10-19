@@ -114,3 +114,45 @@ export async function getPersonRelationRoleOptions(
 export type PersonRelationRoleOption = Awaited<
 	ReturnType<typeof getPersonRelationRoleOptions>
 >[number];
+
+/**
+ * The current relations of one person, with the organisational unit's name, for showing someone
+ * their own roles. `personDocumentId` is the person's `entities.id`.
+ */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export async function getCurrentRelationsOfPerson(personDocumentId: string) {
+	return db
+		.select({
+			id: schema.personsToOrganisationalUnits.id,
+			roleType: schema.personRoleTypes.type,
+			unitName: schema.organisationalUnits.name,
+			unitType: schema.organisationalUnitTypes.type,
+		})
+		.from(schema.personsToOrganisationalUnits)
+		.innerJoin(
+			schema.personRoleTypes,
+			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+		)
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(
+				schema.documentLifecycle.documentId,
+				schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+			),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.where(
+			and(
+				eq(schema.personsToOrganisationalUnits.personDocumentId, personDocumentId),
+				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
+			),
+		)
+		.orderBy(schema.organisationalUnits.name);
+}

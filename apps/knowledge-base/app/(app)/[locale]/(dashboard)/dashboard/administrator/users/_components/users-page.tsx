@@ -77,6 +77,10 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 	const [, startImpersonationTransition] = useTransition();
 	const [, startResendInvitationTransition] = useTransition();
 
+	function canImpersonate(item: Readonly<{ id: string; role: string }>): boolean {
+		return item.id !== currentUserId && item.role !== "admin";
+	}
+
 	return (
 		<Fragment>
 			<EntityListHeader
@@ -158,51 +162,58 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 									>
 										{t("Edit")}
 									</RowActionsMenu.Link>
-									<RowActionsMenu.Separator />
-									<RowActionsMenu.Action
-										icon={<UserIcon className="me-2 block-4 inline-4" />}
-										/**
-										 * Admin accounts are excluded by the auth service too; disabling here only
-										 * saves the round trip.
-										 */
-										isDisabled={item.id === currentUserId || item.role === "admin"}
-										onAction={() => {
-											startImpersonationTransition(async () => {
-												const error = await runAction(
-													() => startImpersonationAction(item.id),
-													t("Could not sign in as this user. Please try again."),
-												);
-												if (error != null) {
-													queue.add({ title: error }, { timeout: 5000 });
-												}
-											});
-										}}
-									>
-										{t("Sign in as this user")}
-									</RowActionsMenu.Action>
-									<RowActionsMenu.Action
-										icon={<EnvelopeIcon className="me-2 block-4 inline-4" />}
-										isDisabled={
-											!item.isInvitationPending ||
-											(!currentUserCanManageAdmins && item.role === "admin")
-										}
-										onAction={() => {
-											startResendInvitationTransition(async () => {
-												const error = await runAction(
-													() => resendUserInvitationAction(item.id),
-													t("Could not send the invitation. Please try again."),
-												);
-												queue.add(
-													{
-														title: error ?? t("Invitation sent to {email}.", { email: item.email }),
-													},
-													{ timeout: 5000 },
-												);
-											});
-										}}
-									>
-										{t("Resend invitation")}
-									</RowActionsMenu.Action>
+									{/*
+									 * Offered only where they can apply: nobody can sign in as an admin account (the
+									 * auth service refuses it too) or as themselves, and only a pending invitation can
+									 * be resent. Edit and delete stay visible, disabled, when a permission is missing.
+									 */}
+									{canImpersonate(item) || item.isInvitationPending ? (
+										<Fragment>
+											<RowActionsMenu.Separator />
+											{canImpersonate(item) ? (
+												<RowActionsMenu.Action
+													icon={<UserIcon className="me-2 block-4 inline-4" />}
+													onAction={() => {
+														startImpersonationTransition(async () => {
+															const error = await runAction(
+																() => startImpersonationAction(item.id),
+																t("Could not sign in as this user. Please try again."),
+															);
+															if (error != null) {
+																queue.add({ title: error }, { timeout: 5000 });
+															}
+														});
+													}}
+												>
+													{t("Sign in as this user")}
+												</RowActionsMenu.Action>
+											) : null}
+											{item.isInvitationPending ? (
+												<RowActionsMenu.Action
+													icon={<EnvelopeIcon className="me-2 block-4 inline-4" />}
+													isDisabled={!currentUserCanManageAdmins && item.role === "admin"}
+													onAction={() => {
+														startResendInvitationTransition(async () => {
+															const error = await runAction(
+																() => resendUserInvitationAction(item.id),
+																t("Could not send the invitation. Please try again."),
+															);
+															queue.add(
+																{
+																	title:
+																		error ??
+																		t("Invitation sent to {email}.", { email: item.email }),
+																},
+																{ timeout: 5000 },
+															);
+														});
+													}}
+												>
+													{t("Resend invitation")}
+												</RowActionsMenu.Action>
+											) : null}
+										</Fragment>
+									) : null}
 									<RowActionsMenu.Separator />
 									<RowActionsMenu.Action
 										danger={true}
