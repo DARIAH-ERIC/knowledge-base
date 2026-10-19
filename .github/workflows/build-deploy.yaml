@@ -22,6 +22,7 @@ jobs:
       has_changes: ${{ steps.changes.outputs.has_changes }}
       repository: ${{ steps.repository.outputs.repository }}
       turbo_version: ${{ steps.turbo.outputs.turbo_version }}
+      pnpm_version: ${{ steps.pnpm.outputs.pnpm_version }}
 
     steps:
       - name: Checkout repository
@@ -52,6 +53,18 @@ jobs:
         run:
           echo "turbo_version=$(awk '/^catalogs:/{c=1} c&&/^    turbo:/{t=1} t&&/version:/{print $2; exit}' pnpm-lock.yaml)" >>
           $GITHUB_OUTPUT
+
+      - name: Resolve pnpm version
+        id: pnpm
+        # Read the pnpm version pinned in `package.json` so the Dockerfile installs the same version
+        # as the repo (passed via the PNPM_VERSION build arg). `devEngines.packageManager` (an
+        # object or an array of them) takes precedence over the `packageManager` field.
+        run: |
+          pnpm_version="$(jq -r '
+            ([.devEngines.packageManager // empty] | flatten | map(select(.name == "pnpm"))[0].version)
+            // (.packageManager | split("@")[1] | split("+")[0])
+          ' package.json)"
+          echo "pnpm_version=${pnpm_version}" >> $GITHUB_OUTPUT
 
       - name: Detect affected apps
         id: changes
@@ -144,6 +157,7 @@ jobs:
           tags: "${{ steps.meta.outputs.tags }}"
           labels: "${{ steps.meta.outputs.labels }}"
           build-args: |
+            "PNPM_VERSION=${{ needs.config.outputs.pnpm_version }}"
             "TURBO_VERSION=${{ needs.config.outputs.turbo_version }}"
             "NEXT_PUBLIC_APP_BASE_URL=${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
             "NEXT_PUBLIC_APP_BOTS=disabled"
@@ -258,6 +272,7 @@ jobs:
           tags: "${{ steps.meta-migrate.outputs.tags }}"
           labels: "${{ steps.meta-migrate.outputs.labels }}"
           build-args: |
+            "PNPM_VERSION=${{ needs.config.outputs.pnpm_version }}"
             "TURBO_VERSION=${{ needs.config.outputs.turbo_version }}"
           secrets: |
             "TURBO_TEAM=${{ vars.TURBO_TEAM }}"
