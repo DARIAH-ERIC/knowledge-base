@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createCipheriv, createHash, randomBytes } from "node:crypto";
 
 import { type Transaction, createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
@@ -2429,6 +2429,56 @@ export class DatabaseService {
 		}
 
 		return user;
+	}
+
+	/**
+	 * A signed-in user linked to the given person, for tests that need a persona of their own rather
+	 * than one from global setup. Mints a session the same way global setup does and returns its
+	 * token, for the test to set as the `session` cookie. Name it with the worker prefix so
+	 * `cleanupWorkerUsers` removes it (its sessions cascade).
+	 */
+	async createSignedInUser(params: {
+		name: string;
+		email: string;
+		personDocumentId: string | null;
+		role?: "admin" | "user";
+	}): Promise<{ id: string; sessionToken: string }> {
+		const encryptionKey = Buffer.from(env.AUTH_ENCRYPTION_KEY, "hex");
+		function encrypt(data: Buffer): Buffer {
+			const iv = randomBytes(16);
+			const cipher = createCipheriv("aes-128-gcm", encryptionKey, iv);
+			return Buffer.concat([iv, cipher.update(data), cipher.final(), cipher.getAuthTag()]);
+		}
+
+		const [user] = await this.db
+			.insert(schema.users)
+			.values({
+				email: params.email,
+				name: params.name,
+				passwordHash: "not-a-real-hash",
+				role: params.role ?? "user",
+				isEmailVerified: true,
+				// Without a registered second factor the dashboard sends the user to set one up.
+				twoFactorTotpKey: encrypt(randomBytes(20)),
+				twoFactorRecoveryCode: encrypt(Buffer.from("E2ETESTRECOVERYCODE1", "utf-8")),
+				personDocumentId: params.personDocumentId,
+			})
+			.returning({ id: schema.users.id });
+		if (user == null) {
+			throw new Error("Failed to create user.");
+		}
+
+		const sessionId = randomBytes(32).toString("hex");
+		const sessionSecret = randomBytes(32).toString("hex");
+		await this.db.insert(schema.sessions).values({
+			id: sessionId,
+			secretHash: createHash("sha-256").update(sessionSecret).digest(),
+			userId: user.id,
+			expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+			isTwoFactorVerified: true,
+		});
+
+		return { id: user.id, sessionToken: `${sessionId}.${sessionSecret}` };
 	}
 
 	async countUsersByEmail(email: string): Promise<number> {

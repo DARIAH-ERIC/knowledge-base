@@ -76,7 +76,7 @@ test.describe("impersonation", () => {
 		await expect(page.getByRole("heading", { name: "Users" })).toBeVisible();
 	});
 
-	test("should refuse to impersonate another admin", async ({ createAdminUsersPage }) => {
+	test("should not offer to impersonate another admin", async ({ createAdminUsersPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const usersPage = createAdminUsersPage(workerIndex);
 
@@ -92,7 +92,9 @@ test.describe("impersonation", () => {
 		await usersPage.searchByName(name);
 		const action = await usersPage.openImpersonationRowAction(name);
 
-		await expect(action).toBeDisabled();
+		// The menu is open (Edit is there), but signing in as an admin account is not offered.
+		await expect(usersPage.page.getByRole("menuitem", { name: "Edit" })).toBeVisible();
+		await expect(action).toHaveCount(0);
 	});
 
 	/**

@@ -36,7 +36,7 @@ export function ReportingCampaignForm(props: Readonly<ReportingCampaignFormProps
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const [selectedStatus, setSelectedStatus] = useState<string>(campaign?.status ?? "open");
+	const [selectedStatus, setSelectedStatus] = useState<string>(campaign?.status ?? "draft");
 
 	return (
 		<FormLayout>

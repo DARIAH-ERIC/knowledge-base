@@ -2,6 +2,7 @@ import { Heading } from "@dariah-eric/ui/heading";
 import { getExtracted } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
 
+import { CurrentCampaignOverview } from "@/app/(app)/[locale]/(dashboard)/dashboard/(index)/_components/current-campaign-overview";
 import {
 	Header,
 	HeaderContent,
@@ -9,9 +10,16 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { getUserReportingScope } from "@/lib/data/reporting";
 
 export default async function DashboardPage(): Promise<ReactNode> {
 	const { user } = await assertAuthenticated();
+
+	if (user.role !== "admin") {
+		const scope = await getUserReportingScope(user);
+
+		return <CurrentCampaignOverview scope={scope} userName={user.name} />;
+	}
 
 	const t = await getExtracted();
 

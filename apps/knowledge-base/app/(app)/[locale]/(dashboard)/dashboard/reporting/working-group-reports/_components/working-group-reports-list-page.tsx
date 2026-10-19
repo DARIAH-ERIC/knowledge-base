@@ -1,4 +1,3 @@
-import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { EmptyState } from "@dariah-eric/ui/empty-state";
 import { getExtracted } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
@@ -9,15 +8,16 @@ import {
 	HeaderDescription,
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import {
+	ReportHistoryList,
+	formatReportStatus,
+	isReportHistoryItemEditable,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-history-list";
 import type { WorkingGroupReportHistoryItem } from "@/lib/data/reporting";
 
 interface WorkingGroupReportsListPageProps {
 	isAdmin: boolean;
 	reports: Array<WorkingGroupReportHistoryItem>;
-}
-
-function formatStatus(status: string): string {
-	return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
 export async function WorkingGroupReportsListPage(
@@ -42,38 +42,20 @@ export async function WorkingGroupReportsListPage(
 					title={t("No reports found")}
 				/>
 			) : (
-				<ul className="mx-(--layout-padding) divide-y rounded-lg border">
-					{reports.map((report) => {
-						// Mirrors `isReportEditable` (lib/auth/permissions): admins always; otherwise
-						// only while the report is a `draft` and its campaign is `open`.
-						const isEditable =
-							isAdmin || (report.reportStatus === "draft" && report.campaignStatus === "open");
-
-						return (
-							<li
-								key={report.reportId}
-								className="flex items-center justify-between gap-x-4 px-4 py-3"
-							>
-								<div className="flex flex-col gap-y-0.5">
-									<span className="text-sm font-medium">{report.workingGroupName}</span>
-									<span className="text-xs text-muted-fg">
-										{report.campaignYear} &middot; {formatStatus(report.reportStatus)}
-									</span>
-								</div>
-								<div className="flex items-center gap-x-2">
-									<ButtonLink href={report.reportHref} intent="plain" size="sm">
-										{t("View")}
-									</ButtonLink>
-									{isEditable ? (
-										<ButtonLink href={`${report.reportHref}/edit`} intent="plain" size="sm">
-											{t("Edit")}
-										</ButtonLink>
-									) : null}
-								</div>
-							</li>
-						);
+				<ReportHistoryList
+					className="mx-(--layout-padding) mbs-8"
+					items={reports.map((report) => {
+						return {
+							id: report.reportId,
+							title: report.workingGroupName,
+							description: `${String(report.campaignYear)} · ${formatReportStatus(report.reportStatus)}`,
+							href: report.reportHref,
+							editHref: isReportHistoryItemEditable(report, isAdmin)
+								? `${report.reportHref}/edit`
+								: null,
+						};
 					})}
-				</ul>
+				/>
 			)}
 		</Fragment>
 	);

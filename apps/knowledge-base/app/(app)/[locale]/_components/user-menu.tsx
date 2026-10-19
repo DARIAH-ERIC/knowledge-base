@@ -19,6 +19,7 @@ import {
 	DocumentTextIcon as IconDocumentation,
 	InformationCircleIcon as IconImprint,
 	ShieldCheckIcon as IconPrivacyPolicy,
+	UserCircleIcon as IconProfile,
 	Cog6ToothIcon as IconSettings,
 	ArrowLeftStartOnRectangleIcon as IconSignOut,
 	ScaleIcon as IconTermsOfUse,
@@ -35,6 +36,8 @@ interface UserMenuProps {
 	user: {
 		name: string;
 		email: string;
+		/** Set when the account is linked to a person, whose details the user may then edit. */
+		personDocumentId?: string | null;
 	};
 }
 
@@ -61,6 +64,13 @@ export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 					<IconDashboard />
 					<MenuLabel>{t("Dashboard")}</MenuLabel>
 				</MenuItem>
+
+				{user.personDocumentId != null ? (
+					<MenuItem href="/dashboard/profile">
+						<IconProfile />
+						<MenuLabel>{t("Your profile")}</MenuLabel>
+					</MenuItem>
+				) : null}
 
 				<MenuItem href="/auth/settings">
 					<IconSettings />
