@@ -2799,9 +2799,21 @@ msgid "Next"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
+msgctxt "mR_SkK"
+msgid "Drop file here"
+msgstr "Drop file here"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
 msgctxt "ylLD-l"
 msgid "Choose file..."
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
+msgctxt "bkxI50"
+msgid "or drag and drop a file here"
+msgstr "or drag and drop a file here"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx

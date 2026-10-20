@@ -19,8 +19,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/u
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
+import cn from "clsx/lite";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState, useState } from "react";
+import { Fragment, type ReactNode, useActionState, useRef, useState } from "react";
+import {
+	DropZone,
+	type DropZoneProps,
+	type FileDropItem,
+	isFileDropItem,
+} from "react-aria-components";
 
 import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
 import { CaptionField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/caption-field";
@@ -45,6 +52,7 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 	const [fileMimeType, setFileMimeType] = useState<string | null>(null);
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [selectedPrefix, setSelectedPrefix] = useState<AssetPrefix>("images");
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const acceptedFileTypes = selectedPrefix === "documents" ? documentMimeTypes : imageMimeTypes;
 
@@ -56,6 +64,52 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 		setFileName(null);
 		setFileMimeType(null);
 		setFileError(null);
+	}
+
+	function handleFile(file: File, input: HTMLInputElement) {
+		if (file.size > imageSizeLimit) {
+			input.value = "";
+			resetFile();
+			setFileError(
+				t("The selected file is too large. Choose a file smaller than {size}.", {
+					size: formatFileSize(imageSizeLimit),
+				}),
+			);
+			return;
+		}
+		if (filePreview != null) {
+			URL.revokeObjectURL(filePreview);
+		}
+		setFileError(null);
+		setFileName(file.name);
+		setFileMimeType(file.type);
+		setFilePreview(URL.createObjectURL(file));
+	}
+
+	const getDropOperation: NonNullable<DropZoneProps["getDropOperation"]> = (types) =>
+		acceptedFileTypes.some((mimeType) => types.has(mimeType)) ? "copy" : "cancel";
+
+	const handleDrop: NonNullable<DropZoneProps["onDrop"]> = (event) => {
+		const item = event.items
+			.filter(isFileDropItem)
+			.find((item) => (acceptedFileTypes as ReadonlyArray<string>).includes(item.type));
+		if (item == null) {
+			return;
+		}
+		void handleDroppedFile(item);
+	};
+
+	async function handleDroppedFile(item: FileDropItem) {
+		const file = await item.getFile();
+		const input = fileInputRef.current;
+		if (input == null) {
+			return;
+		}
+		// The form submits the native input, so the dropped file has to end up in its `files`.
+		const dataTransfer = new DataTransfer();
+		dataTransfer.items.add(file);
+		input.files = dataTransfer.files;
+		handleFile(file, input);
 	}
 
 	function handleOpenChange(open: boolean) {
@@ -129,46 +183,47 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 									{"*"}
 								</span>
 							</label>
-							<input
-								key={selectedPrefix}
-								accept={acceptedFileTypes.join(",")}
-								className="block text-sm inline-full file:me-4 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-fg hover:file:bg-secondary/80 focus:outline-none"
-								name="file"
-								onChange={(e) => {
-									const file = e.target.files?.[0];
-									if (file != null) {
-										if (file.size > imageSizeLimit) {
-											e.target.value = "";
-											resetFile();
-											setFileError(
-												t("The selected file is too large. Choose a file smaller than {size}.", {
-													size: formatFileSize(imageSizeLimit),
-												}),
-											);
-											return;
+							<DropZone
+								aria-label={t("Drop file here")}
+								className={(renderProps) =>
+									cn(
+										"flex flex-col gap-y-2 rounded-lg border border-dashed border-border p-4 outline-hidden",
+										renderProps.isDropTarget && "border-primary bg-primary/5",
+										renderProps.isFocusVisible && "ring-3 ring-ring/20",
+									)
+								}
+								getDropOperation={getDropOperation}
+								onDrop={handleDrop}
+							>
+								<input
+									key={selectedPrefix}
+									ref={fileInputRef}
+									accept={acceptedFileTypes.join(",")}
+									className="block text-sm inline-full file:me-4 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-fg hover:file:bg-secondary/80 focus:outline-none"
+									name="file"
+									onChange={(e) => {
+										const file = e.target.files?.[0];
+										if (file != null) {
+											handleFile(file, e.target);
 										}
-										if (filePreview != null) {
-											URL.revokeObjectURL(filePreview);
-										}
-										setFileError(null);
-										setFileName(file.name);
-										setFileMimeType(file.type);
-										setFilePreview(URL.createObjectURL(file));
-									}
-								}}
-								required={true}
-								type="file"
-							/>
-							{filePreview != null && fileName != null && (
-								<AssetPreview
-									alt={fileName}
-									className="mbs-1 rounded-lg block-24 inline-24"
-									imageClassName="object-contain"
-									mimeType={fileMimeType ?? undefined}
-									src={filePreview}
-									storageKey={fileName}
+									}}
+									required={true}
+									type="file"
 								/>
-							)}
+								{filePreview == null ? (
+									<p className="text-sm text-muted-fg">{t("or drag and drop a file here")}</p>
+								) : null}
+								{filePreview != null && fileName != null && (
+									<AssetPreview
+										alt={fileName}
+										className="mbs-1 rounded-lg block-24 inline-24"
+										imageClassName="object-contain"
+										mimeType={fileMimeType ?? undefined}
+										src={filePreview}
+										storageKey={fileName}
+									/>
+								)}
+							</DropZone>
 							{fileError != null ? (
 								<p className="text-sm text-danger" role="alert">
 									{fileError}

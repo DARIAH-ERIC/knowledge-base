@@ -35,7 +35,13 @@ import {
 	useState,
 	useTransition,
 } from "react";
-import { FileTrigger, type Selection } from "react-aria-components";
+import {
+	DropZone,
+	type DropZoneProps,
+	FileTrigger,
+	type Selection,
+	isFileDropItem,
+} from "react-aria-components";
 
 import { useAssetPermissions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-permissions-context";
 import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
@@ -325,7 +331,23 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	}
 
 	function handleFileChoose(files: FileList | null) {
-		const file = files?.[0] ?? null;
+		handleFile(files?.[0] ?? null);
+	}
+
+	const getDropOperation: NonNullable<DropZoneProps["getDropOperation"]> = (types) =>
+		acceptedFileTypes.some((mimeType) => types.has(mimeType)) ? "copy" : "cancel";
+
+	const handleDrop: NonNullable<DropZoneProps["onDrop"]> = (event) => {
+		const item = event.items
+			.filter(isFileDropItem)
+			.find((item) => acceptedFileTypes.includes(item.type));
+		if (item == null) {
+			return;
+		}
+		void item.getFile().then(handleFile);
+	};
+
+	function handleFile(file: File | null) {
 		if (pendingFileUrl != null) {
 			URL.revokeObjectURL(pendingFileUrl);
 		}
@@ -672,7 +694,18 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 									<div className="flex flex-col gap-4">
 										<FormStatus state={uploadState} />
 
-										<div className="flex flex-wrap items-start gap-4">
+										<DropZone
+											aria-label={t("Drop file here")}
+											className={(renderProps) =>
+												cn(
+													"flex flex-wrap items-center gap-4 rounded-lg border border-dashed border-border p-4 outline-hidden",
+													renderProps.isDropTarget && "border-primary bg-primary/5",
+													renderProps.isFocusVisible && "ring-3 ring-ring/20",
+												)
+											}
+											getDropOperation={getDropOperation}
+											onDrop={handleDrop}
+										>
 											<FileTrigger
 												acceptedFileTypes={acceptedFileTypes}
 												onSelect={handleFileChoose}
@@ -681,6 +714,10 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 													{t("Choose file...")}
 												</Button>
 											</FileTrigger>
+
+											{pendingFile == null ? (
+												<p className="text-sm text-muted-fg">{t("or drag and drop a file here")}</p>
+											) : null}
 
 											{pendingFileUrl != null && pendingFile != null ? (
 												<AssetPreview
@@ -692,7 +729,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 													storageKey={pendingFile.name}
 												/>
 											) : null}
-										</div>
+										</DropZone>
 
 										{pendingFile != null ? (
 											<p className="text-sm text-muted-fg">{pendingFile.name}</p>

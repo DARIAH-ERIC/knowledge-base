@@ -1,6 +1,15 @@
 import { E2E_TEST_ASSET_LABEL } from "@/e2e/lib/fixtures/database-service";
+import { dropFile } from "@/e2e/lib/fixtures/drop-file";
 import { clickHydrated } from "@/e2e/lib/fixtures/hydration";
 import { expect, test } from "@/e2e/lib/test";
+
+const svgImage = {
+	name: "dropped.svg",
+	mimeType: "image/svg+xml",
+	buffer: Buffer.from(
+		'<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40"><rect width="80" height="40" fill="teal"/></svg>',
+	),
+};
 
 /** A host whose image picker offers several prefixes, defaulting to `images`. */
 const MULTI_PREFIX_HOST_PATH = "/en/dashboard/website/events/create";
@@ -126,5 +135,36 @@ test.describe("media library dialog", () => {
 		await expect(dialog.getByLabel("Label")).toHaveValue("");
 		await expect(dialog.getByLabel("Alt text")).toHaveValue("");
 		await expect(dialog.getByText("Invalid or missing fields.")).toBeHidden();
+	});
+
+	test("accepts an image dropped onto the upload tab", async ({ createAssetsPage }) => {
+		const assetsPage = createAssetsPage();
+
+		const dialog = await assetsPage.openMediaLibraryDialog(MULTI_PREFIX_HOST_PATH);
+		await clickHydrated(dialog.getByRole("tab", { name: "Upload" }));
+		await expect(dialog.getByText("or drag and drop a file here")).toBeVisible();
+
+		await dropFile(dialog, svgImage);
+
+		await expect(dialog.getByText(svgImage.name)).toBeVisible();
+		await expect(dialog.getByText("or drag and drop a file here")).toBeHidden();
+		await expect(dialog.getByRole("button", { name: "Upload", exact: true })).toBeEnabled();
+	});
+
+	test("ignores a dropped file of a type it does not accept", async ({ createAssetsPage }) => {
+		const assetsPage = createAssetsPage();
+
+		const dialog = await assetsPage.openMediaLibraryDialog(MULTI_PREFIX_HOST_PATH);
+		await clickHydrated(dialog.getByRole("tab", { name: "Upload" }));
+
+		await dropFile(dialog, {
+			name: "not-an-image.txt",
+			mimeType: "text/plain",
+			buffer: Buffer.from("not an image"),
+		});
+
+		await expect(dialog.getByText("not-an-image.txt")).toBeHidden();
+		await expect(dialog.getByText("or drag and drop a file here")).toBeVisible();
+		await expect(dialog.getByRole("button", { name: "Upload", exact: true })).toBeDisabled();
 	});
 });
