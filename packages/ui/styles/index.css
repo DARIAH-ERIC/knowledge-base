@@ -912,15 +912,20 @@
 			margin-top: 0;
 		}
 
-		&:where(h2 + *) {
+		/**
+		 * Pull body content up to its heading, but not a following heading at the same or a higher
+		 * level: that starts a new section (e.g. an empty agenda slot followed by the next one) and
+		 * keeps its own top margin.
+		 */
+		&:where(h2 + :not(h2)) {
 			margin-top: 0;
 		}
 
-		&:where(h3 + *) {
+		&:where(h3 + :not(h2, h3)) {
 			margin-top: 0;
 		}
 
-		&:where(h4 + *) {
+		&:where(h4 + :not(h2, h3, h4)) {
 			margin-top: 0;
 		}
 
@@ -1155,15 +1160,15 @@
 			margin-top: 0;
 		}
 
-		&:where(h2 + *) {
+		&:where(h2 + :not(h2)) {
 			margin-top: 0;
 		}
 
-		&:where(h3 + *) {
+		&:where(h3 + :not(h2, h3)) {
 			margin-top: 0;
 		}
 
-		&:where(h4 + *) {
+		&:where(h4 + :not(h2, h3, h4)) {
 			margin-top: 0;
 		}
 
@@ -1391,15 +1396,15 @@
 			margin-top: 0;
 		}
 
-		&:where(h2 + *):not(:where([class~="not-richtext"], [class~="not-richtext"] *)) {
+		&:where(h2 + :not(h2)):not(:where([class~="not-richtext"], [class~="not-richtext"] *)) {
 			margin-top: 0;
 		}
 
-		&:where(h3 + *):not(:where([class~="not-richtext"], [class~="not-richtext"] *)) {
+		&:where(h3 + :not(h2, h3)):not(:where([class~="not-richtext"], [class~="not-richtext"] *)) {
 			margin-top: 0;
 		}
 
-		&:where(h4 + *):not(:where([class~="not-richtext"], [class~="not-richtext"] *)) {
+		&:where(h4 + :not(h2, h3, h4)):not(:where([class~="not-richtext"], [class~="not-richtext"] *)) {
 			margin-top: 0;
 		}
 
@@ -1642,15 +1647,15 @@
 			margin-top: 0;
 		}
 
-		&:where(h2 + *) {
+		&:where(h2 + :not(h2)) {
 			margin-top: 0;
 		}
 
-		&:where(h3 + *) {
+		&:where(h3 + :not(h2, h3)) {
 			margin-top: 0;
 		}
 
-		&:where(h4 + *) {
+		&:where(h4 + :not(h2, h3, h4)) {
 			margin-top: 0;
 		}
 
