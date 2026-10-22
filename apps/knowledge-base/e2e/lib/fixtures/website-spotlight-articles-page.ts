@@ -110,14 +110,14 @@ export class WebsiteSpotlightArticlesPage {
 	 * The table's caption, which holds both the caption editor and — once applied — the caption as a
 	 * reader sees it. It is a `<caption>` element rather than a paragraph above the table so that it
 	 * names the table for a screen reader, and it is also the scope every caption locator needs: the
-	 * outer toolbar carries its own Bold, Link and Apply controls.
+	 * outer toolbar carries its own Italic, Link and Apply controls.
 	 */
 	tableCaption(): Locator {
 		return this.contentBlockEditor().locator("caption");
 	}
 
 	/**
-	 * Write a caption exercising everything it can hold: a bold run, a link over text the author
+	 * Write a caption exercising everything it can hold: an italic run, a link over text the author
 	 * typed, and a footnote of its own.
 	 *
 	 * The link is applied over a selection walked back from the caret rather than over a click-made
@@ -125,7 +125,7 @@ export class WebsiteSpotlightArticlesPage {
 	 * different feature and would not prove the mark survives on an author's words.
 	 */
 	async addTableCaption(options: {
-		boldPrefix: string;
+		italicPrefix: string;
 		linkText: string;
 		linkUrl: string;
 		footnote: string;
@@ -136,12 +136,12 @@ export class WebsiteSpotlightArticlesPage {
 		const captionEditor = caption.getByRole("textbox", { name: "Table caption" });
 		await captionEditor.click();
 
-		const bold = caption.getByRole("button", { name: "Bold", exact: true });
-		await bold.click();
-		await expect(bold).toHaveAttribute("aria-pressed", "true");
-		await this.page.keyboard.type(options.boldPrefix);
-		await bold.click();
-		await expect(bold).toHaveAttribute("aria-pressed", "false");
+		const italic = caption.getByRole("button", { name: "Italic", exact: true });
+		await italic.click();
+		await expect(italic).toHaveAttribute("aria-pressed", "true");
+		await this.page.keyboard.type(options.italicPrefix);
+		await italic.click();
+		await expect(italic).toHaveAttribute("aria-pressed", "false");
 
 		/** The separator is typed on its own, so each run's text is exactly what is asserted on. */
 		await this.page.keyboard.type(" ");
@@ -191,12 +191,12 @@ export class WebsiteSpotlightArticlesPage {
 	 * the same empty `<sup>` the prose uses, numbered by a counter.
 	 */
 	async expectTableCaption(options: {
-		boldPrefix: string;
+		italicPrefix: string;
 		linkText: string;
 		linkUrl: string;
 	}): Promise<void> {
 		const caption = this.tableCaption();
-		await expect(caption.locator("strong")).toHaveText(options.boldPrefix);
+		await expect(caption.locator("em")).toHaveText(options.italicPrefix);
 		await expect(caption.locator("a")).toHaveText(options.linkText);
 		await expect(caption.locator("a")).toHaveAttribute("href", options.linkUrl);
 		await expect(caption.locator("sup[data-footnote]")).toHaveCount(1);

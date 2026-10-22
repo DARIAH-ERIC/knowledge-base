@@ -258,7 +258,7 @@ test.describe("website spotlight articles admin", () => {
 
 		const title = `${spotlightArticlesPage.workerPrefix} Table Caption ${randomUUID()}`;
 		const headers: [string, string] = [`Term ${randomUUID()}`, `Meaning ${randomUUID()}`];
-		const boldPrefix = `Table 1 ${randomUUID()}:`;
+		const italicPrefix = `Table 1 ${randomUUID()}:`;
 		const linkText = `the report ${randomUUID()}`;
 		const linkUrl = "https://example.com/report";
 		const footnote = `Figures as of 2026 ${randomUUID()}`;
@@ -270,8 +270,8 @@ test.describe("website spotlight articles admin", () => {
 		await spotlightArticlesPage.addContentBlock(`Caption intro ${randomUUID()}`);
 
 		await spotlightArticlesPage.insertTableAtEnd(headers);
-		await spotlightArticlesPage.addTableCaption({ boldPrefix, linkText, linkUrl, footnote });
-		await spotlightArticlesPage.expectTableCaption({ boldPrefix, linkText, linkUrl });
+		await spotlightArticlesPage.addTableCaption({ italicPrefix, linkText, linkUrl, footnote });
+		await spotlightArticlesPage.expectTableCaption({ italicPrefix, linkText, linkUrl });
 
 		await spotlightArticlesPage.submitForm();
 
@@ -292,7 +292,7 @@ test.describe("website spotlight articles admin", () => {
 			const caption = table?.attrs?.caption as JSONContent | null | undefined;
 			expect(caption).toBeDefined();
 
-			expect(marksOn(caption!, boldPrefix).map(({ type }) => type)).toContain("bold");
+			expect(marksOn(caption!, italicPrefix).map(({ type }) => type)).toContain("italic");
 
 			const link = marksOn(caption!, linkText).find(({ type }) => type === "link");
 			expect(link?.attrs).toMatchObject({ href: linkUrl });
@@ -310,7 +310,7 @@ test.describe("website spotlight articles admin", () => {
 		await spotlightArticlesPage.gotoEditFromDetails();
 
 		/** The editor rebuilds the caption from the stored attribute, marks and marker included. */
-		await spotlightArticlesPage.expectTableCaption({ boldPrefix, linkText, linkUrl });
+		await spotlightArticlesPage.expectTableCaption({ italicPrefix, linkText, linkUrl });
 
 		await spotlightArticlesPage.submitForm();
 
