@@ -36,6 +36,10 @@ describe("the schema", () => {
 	it("has no node that keeps an image's src", () => {
 		expect(schema.nodes.image).toBeUndefined();
 	});
+
+	it("has no underline mark, which only a link carries", () => {
+		expect(schema.marks.underline).toBeUndefined();
+	});
 });
 
 describe("parsePastedImage", () => {

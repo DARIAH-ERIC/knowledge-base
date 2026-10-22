@@ -77,6 +77,11 @@ export interface RichTextAction {
 	 * it.
 	 */
 	isActive?: boolean;
+	/**
+	 * Greys out a toolbar toggle whose mark the schema refuses at the cursor, e.g. bold in a heading.
+	 * Disabled rather than hidden, so the toolbar keeps its layout as the cursor moves.
+	 */
+	isDisabled?: boolean;
 	/** Hides the action where the schema would refuse it, e.g. a table inside a table. */
 	isAvailable?: () => boolean;
 	run: () => void;
@@ -91,6 +96,9 @@ export interface RichTextActiveState {
 	isBold: boolean | undefined;
 	isItalic: boolean | undefined;
 	isCode: boolean | undefined;
+	canBold: boolean | undefined;
+	canItalic: boolean | undefined;
+	canCode: boolean | undefined;
 	isParagraph: boolean | undefined;
 	isLeadIn: boolean | undefined;
 	isHeading2: boolean | undefined;
@@ -112,6 +120,9 @@ export function selectRichTextActiveState(ctx: { editor: Editor | null }): RichT
 		isBold: ctx.editor?.isActive("bold"),
 		isItalic: ctx.editor?.isActive("italic"),
 		isCode: ctx.editor?.isActive("code"),
+		canBold: ctx.editor?.can().toggleBold(),
+		canItalic: ctx.editor?.can().toggleItalic(),
+		canCode: ctx.editor?.can().toggleCode(),
 		isParagraph: ctx.editor?.isActive("paragraph"),
 		isLeadIn: ctx.editor?.isActive("leadIn"),
 		isHeading2: ctx.editor?.isActive("heading", { level: 2 }),
@@ -170,6 +181,7 @@ export function useRichTextActions({
 				label: t("Bold"),
 				icon: BoldIcon,
 				isActive: activeState?.isBold,
+				isDisabled: activeState?.canBold === false,
 				run() {
 					editor.chain().focus().toggleBold().run();
 				},
@@ -180,6 +192,7 @@ export function useRichTextActions({
 				label: t("Italic"),
 				icon: ItalicIcon,
 				isActive: activeState?.isItalic,
+				isDisabled: activeState?.canItalic === false,
 				run() {
 					editor.chain().focus().toggleItalic().run();
 				},
@@ -190,6 +203,7 @@ export function useRichTextActions({
 				label: t("Code"),
 				icon: CodeIcon,
 				isActive: activeState?.isCode,
+				isDisabled: activeState?.canCode === false,
 				run() {
 					editor.chain().focus().toggleCode().run();
 				},

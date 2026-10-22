@@ -44,6 +44,13 @@ function marksOf(slice: Slice): Array<Array<string>> {
  * A caption is one line: the editor swallows Enter, and every renderer walks a document of a single
  * paragraph. Paste is the way around the key handler, so this guard is what holds the shape.
  */
+describe("the caption schema", () => {
+	test("has neither bold nor underline", () => {
+		assert.notProperty(schema.marks, "bold");
+		assert.notProperty(schema.marks, "underline");
+	});
+});
+
 describe("pasting into a caption", () => {
 	test("runs several pasted paragraphs onto one line", () => {
 		const pasted = paste([paragraph(text("First para")), paragraph(text("Second para"))]);
@@ -68,11 +75,11 @@ describe("pasting into a caption", () => {
 
 	test("keeps the marks on the runs it joins", () => {
 		const pasted = paste([
-			paragraph(text("bold", ["bold"])),
+			paragraph(text("italic", ["italic"])),
 			paragraph(text("link", ["link"]), text(" plain")),
 		]);
 
-		assert.deepEqual(marksOf(pasted), [["bold"], [], ["link"], []]);
+		assert.deepEqual(marksOf(pasted), [["italic"], [], ["link"], []]);
 	});
 
 	test("joins with an unmarked space, so a link cannot grow past its text", () => {

@@ -2,14 +2,14 @@ import type { JSONContent } from "@tiptap/core";
 import { eq, inArray } from "drizzle-orm";
 
 import type { Database, Transaction } from "./index";
-import { normalizeRichTextDocument } from "./rich-text-normalize";
+import { normalizeInlineRichTextDocument, normalizeRichTextDocument } from "./rich-text-normalize";
 import * as schema from "./schema";
 
 /**
  * Detects and rewrites rich-text content that {@link normalizeRichTextDocument} would tidy (empty
- * spacer paragraphs, stray `<br>`/whitespace, `&nbsp;`, imported HTML attributes, bold headings).
- * Shared by the `@dariah-eric/maintenance` cli and the admin dashboard, so both normalise
- * identically.
+ * spacer paragraphs, stray `<br>`/whitespace, `&nbsp;`, imported HTML attributes, underline, bold
+ * headings, bold captions). Shared by the `@dariah-eric/maintenance` cli and the admin dashboard,
+ * so both normalise identically.
  *
  * Every block that stores richtext is covered, wherever it keeps it: the prose of a `rich_text` or
  * `media_text` block, and the captions on `image`, `media_text`, `embed`, `hero` and `gallery`
@@ -87,9 +87,9 @@ interface BlockCleanup {
  * The normalised documents of one row's richtext columns, and whether any of them moved.
  *
  * Only the columns that changed are returned, so an update writes the caption it tidied without
- * touching the prose beside it.
+ * touching the prose beside it. A `caption` is an inline document, normalised by the inline rules.
  */
-function normalizeColumns<T extends Record<string, JSONContent | null>>(
+function normalizeColumns<T extends Partial<Record<"caption" | "content", JSONContent | null>>>(
 	columns: T,
 ): { changed: boolean; values: { [K in keyof T]?: JSONContent } } {
 	const values: { [K in keyof T]?: JSONContent } = {};
@@ -100,7 +100,10 @@ function normalizeColumns<T extends Record<string, JSONContent | null>>(
 			continue;
 		}
 
-		const normalized = normalizeRichTextDocument(value);
+		const normalized =
+			name === "caption"
+				? normalizeInlineRichTextDocument(value)
+				: normalizeRichTextDocument(value);
 
 		if (stableStringify(normalized) !== stableStringify(value)) {
 			values[name as keyof T] = normalized;
@@ -283,7 +286,7 @@ async function computeCleanups(db: Database | Transaction): Promise<Array<BlockC
 						return [];
 					}
 
-					const caption = normalizeRichTextDocument(item.caption);
+					const caption = normalizeInlineRichTextDocument(item.caption);
 
 					return stableStringify(caption) === stableStringify(item.caption)
 						? []

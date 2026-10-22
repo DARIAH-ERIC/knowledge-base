@@ -1,7 +1,11 @@
 import type { JSONContent } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 
-import { normalizeRichTextDocument } from "./rich-text-normalize";
+import {
+	normalizeInlineRichTextDocument,
+	normalizeRichTextDocument,
+	normalizeRichTextSlice,
+} from "./rich-text-normalize";
 
 function doc(...content: Array<JSONContent>): JSONContent {
 	return { type: "doc", content };
@@ -328,6 +332,39 @@ describe("normalizeRichTextDocument", () => {
 			return doc({ type: "paragraph", content: [{ type: "text", text }] });
 		}
 
+		it("takes bold off a caption and a footnote note, which the inline editor cannot hold", () => {
+			const input = doc({
+				type: "paragraph",
+				content: [
+					{ type: "text", text: "See" },
+					{
+						type: "footnote",
+						attrs: {
+							content: doc({
+								type: "paragraph",
+								content: [{ type: "text", marks: [{ type: "bold" }], text: "Note" }],
+							}),
+						},
+					},
+				],
+			});
+
+			expect(normalizeRichTextDocument(input)).toStrictEqual(
+				doc({
+					type: "paragraph",
+					content: [
+						{ type: "text", text: "See" },
+						{
+							type: "footnote",
+							attrs: {
+								content: doc({ type: "paragraph", content: [{ type: "text", text: "Note" }] }),
+							},
+						},
+					],
+				}),
+			);
+		});
+
 		it("cleans an image caption the way it cleans prose", () => {
 			const input = doc({
 				type: "assetImage",
@@ -482,5 +519,211 @@ describe("normalizeRichTextDocument", () => {
 
 			expect(normalizeRichTextDocument(once)).toStrictEqual(once);
 		});
+	});
+});
+
+describe("normalizeRichTextSlice", () => {
+	function paragraph(text?: string): JSONContent {
+		return text == null
+			? { type: "paragraph" }
+			: { type: "paragraph", content: [{ type: "text", text }] };
+	}
+
+	it("applies the document's rules to whole nodes", () => {
+		expect(
+			normalizeRichTextSlice(
+				[paragraph("One"), paragraph(" "), paragraph(), paragraph("Two ")],
+				0,
+				0,
+			),
+		).toStrictEqual([paragraph("One"), paragraph("Two")]);
+	});
+
+	it("drops spacer paragraphs between the open edges", () => {
+		expect(
+			normalizeRichTextSlice(
+				[paragraph("One"), paragraph(), paragraph("Two"), paragraph(" "), paragraph("Three")],
+				1,
+				1,
+			),
+		).toStrictEqual([paragraph("One"), paragraph("Two"), paragraph("Three")]);
+	});
+
+	it("keeps the whitespace on an open side, where the paste meets the author's text", () => {
+		expect(normalizeRichTextSlice([paragraph(" pasted text ")], 1, 1)).toStrictEqual([
+			paragraph(" pasted text "),
+		]);
+		expect(normalizeRichTextSlice([paragraph(" first "), paragraph(" last ")], 1, 1)).toStrictEqual(
+			[paragraph(" first"), paragraph("last ")],
+		);
+	});
+
+	it("keeps an empty paragraph on an open edge", () => {
+		expect(normalizeRichTextSlice([paragraph("One"), paragraph()], 1, 1)).toStrictEqual([
+			paragraph("One"),
+			paragraph(),
+		]);
+		// Open only at its start: its end is a paragraph break, where a space means nothing.
+		expect(normalizeRichTextSlice([paragraph(" "), paragraph("One")], 1, 1)).toStrictEqual([
+			paragraph(),
+			paragraph("One"),
+		]);
+	});
+
+	it("still cleans inside an open node", () => {
+		expect(
+			normalizeRichTextSlice(
+				[
+					{
+						type: "paragraph",
+						content: [
+							{ type: "text", text: "One " },
+							{ type: "hardBreak" },
+							{ type: "hardBreak" },
+							{ type: "text", text: "two" },
+						],
+					},
+				],
+				1,
+				1,
+			),
+		).toStrictEqual([
+			{
+				type: "paragraph",
+				content: [
+					{ type: "text", text: "One " },
+					{ type: "hardBreak" },
+					{ type: "text", text: "two" },
+				],
+			},
+		]);
+	});
+
+	it("keeps the open path down a nested edge, and only that path", () => {
+		function list(...items: Array<Array<JSONContent>>): JSONContent {
+			return {
+				type: "bulletList",
+				content: items.map((content) => {
+					return { type: "listItem", content };
+				}),
+			};
+		}
+
+		expect(
+			normalizeRichTextSlice([list([paragraph()], [paragraph()], [paragraph("Kept")])], 3, 0),
+		).toStrictEqual([list([paragraph()], [paragraph("Kept")])]);
+	});
+
+	it("strips bold from a pasted heading", () => {
+		expect(
+			normalizeRichTextSlice(
+				[
+					{
+						type: "heading",
+						attrs: { level: 2 },
+						content: [{ type: "text", marks: [{ type: "bold" }], text: "Title" }],
+					},
+				],
+				1,
+				1,
+			),
+		).toStrictEqual([
+			{ type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Title" }] },
+		]);
+	});
+});
+
+describe("underline", () => {
+	it("is taken off text, a caption's included, merging the text it split", () => {
+		const input = doc(
+			{
+				type: "paragraph",
+				content: [
+					{ type: "text", text: "An " },
+					{ type: "text", marks: [{ type: "underline" }], text: "underlined" },
+					{ type: "text", marks: [{ type: "underline" }, { type: "italic" }], text: " word" },
+				],
+			},
+			{
+				type: "assetImage",
+				attrs: {
+					caption: doc({
+						type: "paragraph",
+						content: [{ type: "text", marks: [{ type: "underline" }], text: "Caption" }],
+					}),
+				},
+			},
+		);
+
+		const once = normalizeRichTextDocument(input);
+
+		expect(once).toStrictEqual(
+			doc(
+				{
+					type: "paragraph",
+					content: [
+						{ type: "text", text: "An underlined" },
+						{ type: "text", marks: [{ type: "italic" }], text: " word" },
+					],
+				},
+				{
+					type: "assetImage",
+					attrs: {
+						caption: doc({ type: "paragraph", content: [{ type: "text", text: "Caption" }] }),
+					},
+				},
+			),
+		);
+		expect(normalizeRichTextDocument(once)).toStrictEqual(once);
+	});
+
+	it("is taken off a pasted slice", () => {
+		expect(
+			normalizeRichTextSlice(
+				[
+					{
+						type: "paragraph",
+						content: [{ type: "text", marks: [{ type: "underline" }], text: " x" }],
+					},
+				],
+				1,
+				1,
+			),
+		).toStrictEqual([{ type: "paragraph", content: [{ type: "text", text: " x" }] }]);
+	});
+});
+
+describe("normalizeInlineRichTextDocument", () => {
+	it("takes bold off, merging the text it split", () => {
+		const input = doc({
+			type: "paragraph",
+			content: [
+				{ type: "text", text: "A " },
+				{ type: "text", marks: [{ type: "bold" }], text: "bold" },
+				{ type: "text", marks: [{ type: "bold" }, { type: "italic" }], text: " word" },
+			],
+		});
+
+		const once = normalizeInlineRichTextDocument(input);
+
+		expect(once).toStrictEqual(
+			doc({
+				type: "paragraph",
+				content: [
+					{ type: "text", text: "A bold" },
+					{ type: "text", marks: [{ type: "italic" }], text: " word" },
+				],
+			}),
+		);
+		expect(normalizeInlineRichTextDocument(once)).toStrictEqual(once);
+	});
+
+	it("keeps bold in the prose a caption sits beside", () => {
+		const input = doc({
+			type: "paragraph",
+			content: [{ type: "text", marks: [{ type: "bold" }], text: "Kept" }],
+		});
+
+		expect(normalizeRichTextDocument(input)).toStrictEqual(input);
 	});
 });

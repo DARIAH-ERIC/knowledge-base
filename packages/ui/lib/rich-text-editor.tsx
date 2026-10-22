@@ -98,7 +98,9 @@ import {
 } from "@/lib/rich-text-block-attrs";
 import { FootnotePasteGuard } from "@/lib/rich-text-footnote";
 import { FootnoteNode, inlineFootnoteExtensions } from "@/lib/rich-text-footnote-node";
+import { HeadingWithoutBold } from "@/lib/rich-text-heading";
 import { PastedImageGuard, parsePastedImage } from "@/lib/rich-text-image-paste";
+import { PastedContentNormalizer } from "@/lib/rich-text-paste-normalize";
 import {
 	type SlashCommandHandlers,
 	SlashCommandMenu,
@@ -2910,11 +2912,15 @@ export function createRichTextExtensions(
 		// The link mark comes from `LinkWithTargets` below instead, which extends it to carry asset
 		// targets; two link extensions would collide on the same mark name.
 		StarterKit.configure({
-			heading: { levels: [2, 3, 4] },
+			// Replaced by `HeadingWithoutBold` below.
+			heading: false,
 			link: false,
+			// Underline marks a link on the website; on any other text it reads as one.
+			underline: false,
 			// Replaced by `DocumentWithContainers` below, which widens the top level to take containers.
 			document: false,
 		}),
+		HeadingWithoutBold.configure({ levels: [2, 3, 4] }),
 		DocumentWithContainers,
 		// Normalise typography as authors type. Keep the unambiguous substitutions (smart
 		// quotes/apostrophes, `--` → em dash, `...` → ellipsis) and disable the rest, which corrupt
@@ -3018,6 +3024,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			...(hasFootnotes ? [] : [FootnotePasteGuard]),
 			// A placeholder is only useful where its panel can open a picker to fill it.
 			PastedImageGuard.configure({ withPlaceholders: renderImagePicker != null }),
+			PastedContentNormalizer,
 		],
 		[renderImagePicker, renderAssetMetadata, isEditable, hasFootnotes, slashCommandHandlersRef],
 	);
@@ -3438,6 +3445,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							aria-label={action.label}
 							icon={action.icon}
 							isActive={action.isActive}
+							isDisabled={action.isDisabled}
 							key={action.id}
 							onClick={action.run}
 						/>

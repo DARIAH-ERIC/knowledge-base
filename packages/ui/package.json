@@ -116,6 +116,7 @@
 		"@internationalized/date": "catalog:",
 		"@react-aria/utils": "catalog:",
 		"@tiptap/core": "catalog:",
+		"@tiptap/extension-heading": "catalog:",
 		"@tiptap/extension-link": "catalog:",
 		"@tiptap/extension-table": "catalog:",
 		"@tiptap/extension-typography": "catalog:",

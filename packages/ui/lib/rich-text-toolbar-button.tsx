@@ -10,6 +10,7 @@ export interface RichTextEditorToolbarButtonProps {
 	"aria-label": string;
 	icon: ComponentType<{ className?: string }>;
 	isActive?: boolean;
+	isDisabled?: boolean;
 	onClick: () => void;
 }
 
@@ -17,6 +18,7 @@ export function RichTextEditorToolbarButton({
 	"aria-label": ariaLabel,
 	icon: Icon,
 	isActive,
+	isDisabled,
 	onClick,
 }: Readonly<RichTextEditorToolbarButtonProps>): ReactNode {
 	return (
@@ -28,7 +30,9 @@ export function RichTextEditorToolbarButton({
 				className={twMerge(
 					"relative inline-flex items-center justify-center rounded-md text-muted-fg transition-colors block-8 inline-8 hover:text-fg focus:ring-2 focus:ring-ring focus:outline-none",
 					isActive === true && "bg-primary-subtle/50 text-fg",
+					"disabled:opacity-50 disabled:hover:text-muted-fg",
 				)}
+				isDisabled={isDisabled}
 				onPress={() => {
 					onClick();
 				}}
