@@ -3,15 +3,47 @@ import type { JSONContent } from "@tiptap/core";
 /**
  * Normalises a TipTap (rich-text) document into clean, semantic JSON. Removes authoring oddities
  * that accumulate from pasting or an old CMS import: headings that were really bolded paragraphs,
- * `<br>` used for layout, `&nbsp;` sprinkled as spacing, empty spacer paragraphs, and
- * presentational HTML attributes (`class`, `rel`, `target`) copied from source markup.
+ * `<br>` used for layout, `&nbsp;` sprinkled as spacing, empty spacer paragraphs, underlined text
+ * (underline marks a link, so it is never the author's to apply), and presentational HTML
+ * attributes (`class`, `rel`, `target`) copied from source markup. Captions and footnote notes lose
+ * bold altogether (see {@link normalizeInlineRichTextDocument}).
  *
  * The transform is pure and idempotent: running it twice yields the same document, and a document
  * with no oddities is returned structurally unchanged (so callers can diff to skip no-op writes).
- * Shared by the `@dariah-eric/maintenance` cli and the admin dashboard.
+ * Shared by the `@dariah-eric/maintenance` cli and the admin dashboard, and — through
+ * {@link normalizeRichTextSlice} — by the editor's paste handling, which applies the same rules as
+ * content arrives.
  */
 
 const NON_BREAKING_SPACE = /\u00A0/g;
+
+/**
+ * How far a node is cut open on each side. `0` is a whole node; `n` is a node whose start (or end)
+ * was cut, along with its first (or last) `n - 1` descendants. Only a pasted slice has open nodes —
+ * a stored document is whole throughout.
+ *
+ * An open node continues the text it is pasted into, so it is never dropped and its open side is
+ * never trimmed: an empty open paragraph is where the paste meets the cursor, and a space at its
+ * open edge separates the pasted text from the author's own.
+ */
+interface OpenDepth {
+	start: number;
+	end: number;
+}
+
+const CLOSED: OpenDepth = { start: 0, end: 0 };
+
+function isOpen(open: OpenDepth): boolean {
+	return open.start > 0 || open.end > 0;
+}
+
+/** The open depth of the child at `index` of `count` siblings, inside a node open by `open`. */
+function childOpenDepth(open: OpenDepth, index: number, count: number): OpenDepth {
+	return {
+		start: index === 0 ? Math.max(open.start - 1, 0) : 0,
+		end: index === count - 1 ? Math.max(open.end - 1, 0) : 0,
+	};
+}
 
 function stripImportedHtmlAttributes(attrs: JSONContent["attrs"]): JSONContent["attrs"] {
 	if (
@@ -99,9 +131,9 @@ function isRichTextDocument(value: unknown): value is JSONContent {
  */
 function normalizeAttributeValue(value: unknown): unknown {
 	if (isRichTextDocument(value)) {
-		/* A nested document is cleaned by the same walk as the one holding it — a caption is prose,
-		   written in the same editors, so it is normalised by the same rules. */
-		return cleanNode(value) ?? { type: "doc", content: [] };
+		/* Every document kept in an attribute is a caption or a footnote note, written in the inline
+		   editor — normalised by the prose rules, with that editor's narrower set of marks. */
+		return normalizeInlineRichTextDocument(value);
 	}
 
 	if (Array.isArray(value)) {
@@ -155,6 +187,15 @@ function stripMark(node: JSONContent, mark: string): JSONContent {
 	return marks.length > 0 ? { ...rest, marks } : rest;
 }
 
+/** Removes a mark type from every text node in a subtree. */
+function stripMarkDeep(node: JSONContent, mark: string): JSONContent {
+	const stripped = stripMark(node, mark);
+	if (stripped.content == null) {
+		return stripped;
+	}
+	return { ...stripped, content: stripped.content.map((child) => stripMarkDeep(child, mark)) };
+}
+
 /** Merges consecutive text nodes that carry identical marks into a single node. */
 function mergeAdjacentText(children: Array<JSONContent>): Array<JSONContent> {
 	const out: Array<JSONContent> = [];
@@ -176,11 +217,12 @@ function mergeAdjacentText(children: Array<JSONContent>): Array<JSONContent> {
  * - Paragraphs: collapse consecutive `<br>` to one and drop `<br>` at the edges, but keep a single
  *   intentional mid-text line break;
  * - Both: collapse whitespace-only text nodes, drop whitespace/`<br>` at the edges, and trim the
- *   outer edges of the first/last text node.
+ *   outer edges of the first/last text node — except on a side cut open by a paste.
  */
 function normalizeInlineChildren(
 	children: Array<JSONContent>,
 	container: "heading" | "paragraph",
+	open: OpenDepth,
 ): Array<JSONContent> {
 	let nodes = children;
 
@@ -199,21 +241,24 @@ function normalizeInlineChildren(
 	nodes = nodes.map((node) => (isWhitespaceText(node) ? { type: "text", text: " " } : node));
 	nodes = mergeAdjacentText(nodes);
 
-	// Trim the edges: drop leading/trailing hard breaks and whitespace-only text until stable.
-	while (nodes[0] != null && (isHardBreak(nodes[0]) || isWhitespaceText(nodes[0]))) {
-		nodes = nodes.slice(1);
+	// Trim the edges: drop leading/trailing hard breaks and whitespace-only text until stable, then
+	// the outer whitespace of the remaining first/last text node.
+	if (open.start === 0) {
+		while (nodes[0] != null && (isHardBreak(nodes[0]) || isWhitespaceText(nodes[0]))) {
+			nodes = nodes.slice(1);
+		}
+		if (nodes[0]?.type === "text") {
+			nodes = [{ ...nodes[0], text: (nodes[0].text ?? "").replace(/^\s+/, "") }, ...nodes.slice(1)];
+		}
 	}
-	while (nodes.at(-1) != null && (isHardBreak(nodes.at(-1)) || isWhitespaceText(nodes.at(-1)))) {
-		nodes = nodes.slice(0, -1);
-	}
-
-	// Trim the outer whitespace of the remaining first/last text node.
-	if (nodes[0]?.type === "text") {
-		nodes = [{ ...nodes[0], text: (nodes[0].text ?? "").replace(/^\s+/, "") }, ...nodes.slice(1)];
-	}
-	const last = nodes.at(-1);
-	if (last?.type === "text") {
-		nodes = [...nodes.slice(0, -1), { ...last, text: (last.text ?? "").replace(/\s+$/, "") }];
+	if (open.end === 0) {
+		while (nodes.at(-1) != null && (isHardBreak(nodes.at(-1)) || isWhitespaceText(nodes.at(-1)))) {
+			nodes = nodes.slice(0, -1);
+		}
+		const last = nodes.at(-1);
+		if (last?.type === "text") {
+			nodes = [...nodes.slice(0, -1), { ...last, text: (last.text ?? "").replace(/\s+$/, "") }];
+		}
 	}
 
 	return mergeAdjacentText(nodes);
@@ -231,9 +276,10 @@ const KEEP_PLACEHOLDER_WHEN_EMPTY = new Set(["tableCell", "tableHeader"]);
 
 /**
  * Recursively cleans a node. Returns `null` when the node should be dropped: an emptied paragraph
- * or heading, or a list/list-item/blockquote that cleaning has left with no content.
+ * or heading, or a list/list-item/blockquote that cleaning has left with no content — unless the
+ * node is cut open (see {@link OpenDepth}).
  */
-function cleanNode(node: JSONContent): JSONContent | null {
+function cleanNode(node: JSONContent, open: OpenDepth = CLOSED): JSONContent | null {
 	const cleanedNode = normalizeNestedDocuments(stripImportedHtmlAttributesFromNode(node));
 
 	if (cleanedNode.type === "text") {
@@ -246,8 +292,12 @@ function cleanNode(node: JSONContent): JSONContent | null {
 		const children = (cleanedNode.content ?? [])
 			.map((child) => cleanNode(child))
 			.filter((child): child is JSONContent => child != null);
-		const normalized = normalizeInlineChildren(children, cleanedNode.type);
+		const normalized = normalizeInlineChildren(children, cleanedNode.type, open);
 		if (normalized.length === 0) {
+			if (isOpen(open)) {
+				const { content: _content, ...rest } = cleanedNode;
+				return rest;
+			}
 			return null;
 		}
 		return { ...cleanedNode, content: normalized };
@@ -258,14 +308,12 @@ function cleanNode(node: JSONContent): JSONContent | null {
 		return cleanedNode;
 	}
 
-	const children = cleanedNode.content
-		.map((child) => cleanNode(child))
-		.filter((child): child is JSONContent => child != null);
+	const children = cleanNodes(cleanedNode.content, open);
 
 	// Drop containers that cleaning has left empty — an empty bullet, list, or quote is noise.
 	// `doc` is never dropped; it stays as an empty document for the caller to handle.
 	if (children.length === 0 && cleanedNode.type != null) {
-		if (DROP_WHEN_EMPTY.has(cleanedNode.type)) {
+		if (DROP_WHEN_EMPTY.has(cleanedNode.type) && !isOpen(open)) {
 			return null;
 		}
 		if (KEEP_PLACEHOLDER_WHEN_EMPTY.has(cleanedNode.type)) {
@@ -276,10 +324,49 @@ function cleanNode(node: JSONContent): JSONContent | null {
 	return { ...cleanedNode, content: children };
 }
 
+/** Cleans a run of siblings inside a parent open by `open`, dropping the ones cleaned away. */
+function cleanNodes(nodes: Array<JSONContent>, open: OpenDepth): Array<JSONContent> {
+	return nodes
+		.map((node, index) => cleanNode(node, childOpenDepth(open, index, nodes.length)))
+		.filter((node): node is JSONContent => node != null);
+}
+
 /**
  * Normalises a TipTap document. Pure and idempotent; a document without oddities is returned
  * structurally identical so callers can `JSON.stringify`-diff to avoid no-op writes.
  */
 export function normalizeRichTextDocument(doc: JSONContent): JSONContent {
-	return cleanNode(doc) ?? { type: "doc", content: [] };
+	return cleanNode(stripMarkDeep(doc, "underline")) ?? { type: "doc", content: [] };
+}
+
+/**
+ * Normalises an inline document: a caption, or the note a footnote marker carries. The rules are a
+ * document's, and bold goes too — the inline editor has no bold mark, since emphasis in a caption
+ * or a note is the website's styling, not the author's. A bold mark left in a stored caption would
+ * not merely linger: the editor cannot parse a mark its schema lacks, and opens the caption empty.
+ *
+ * Bold is stripped before the walk, so the text it split is merged by it, and a second pass changes
+ * nothing.
+ */
+export function normalizeInlineRichTextDocument(doc: JSONContent): JSONContent {
+	return normalizeRichTextDocument(stripMarkDeep(doc, "bold"));
+}
+
+/**
+ * Normalises the top-level nodes of a pasted slice, cut open `openStart` levels deep at its start
+ * and `openEnd` at its end (ProseMirror's `Slice`). The rules are the document's, except along the
+ * open edges, which stay where the paste meets the surrounding text (see {@link OpenDepth}).
+ *
+ * The slice's open depths stay valid for the result: no node on an open edge is dropped.
+ */
+export function normalizeRichTextSlice(
+	content: Array<JSONContent>,
+	openStart: number,
+	openEnd: number,
+): Array<JSONContent> {
+	// The slice's top-level nodes are the children of a parent open one level further.
+	return cleanNodes(
+		content.map((node) => stripMarkDeep(node, "underline")),
+		{ start: openStart + 1, end: openEnd + 1 },
+	);
 }

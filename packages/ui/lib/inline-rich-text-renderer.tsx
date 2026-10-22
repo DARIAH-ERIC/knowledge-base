@@ -6,9 +6,7 @@ function renderText(node: JSONContent, key: number): ReactNode {
 	let element: ReactNode = node.text ?? "";
 
 	for (const mark of node.marks ?? []) {
-		if (mark.type === "bold") {
-			element = <strong>{element}</strong>;
-		} else if (mark.type === "italic") {
+		if (mark.type === "italic") {
 			element = <em>{element}</em>;
 		} else if (mark.type === "link") {
 			const href = mark.attrs?.href as string | undefined;
@@ -80,8 +78,8 @@ interface InlineRichTextRendererProps {
 
 /**
  * Read-only, server-compatible renderer for inline caption richtext. Walks the constrained `{ doc >
- * paragraph > text }` shape produced by {@link InlineRichTextEditor} and renders bold, italic and
- * link marks. Kept as a static serializer (rather than a headless editor instance) so captions in
+ * paragraph > text }` shape produced by {@link InlineRichTextEditor} and renders its italic and link
+ * marks. Kept as a static serializer (rather than a headless editor instance) so captions in
  * lists/tables don't each mount a Tiptap editor.
  */
 export function InlineRichTextRenderer(props: Readonly<InlineRichTextRendererProps>): ReactNode {

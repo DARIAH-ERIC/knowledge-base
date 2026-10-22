@@ -5,7 +5,7 @@ import { Fragment, type Node as ProseMirrorNode, type Schema, Slice } from "@tip
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
-import { BoldIcon, ItalicIcon, LinkIcon, SuperscriptIcon } from "lucide-react";
+import { ItalicIcon, LinkIcon, SuperscriptIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
@@ -14,6 +14,7 @@ import { Button } from "@/lib/button";
 import { Input } from "@/lib/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
 import { FootnotePasteGuard } from "@/lib/rich-text-footnote";
+import { PastedContentNormalizer } from "@/lib/rich-text-paste-normalize";
 import { RichTextEditorToolbarButton } from "@/lib/rich-text-toolbar-button";
 import { Tooltip, TooltipContent } from "@/lib/tooltip";
 
@@ -141,8 +142,10 @@ const SingleLinePasteGuard = Extension.create({
 });
 
 /**
- * Extension set for the inline caption editor: a single paragraph carrying only bold, italic and
- * link marks. Everything block-producing that StarterKit ships (headings, lists, blockquote, code
+ * Extension set for the inline caption editor: a single paragraph carrying only italic and link
+ * marks. No bold: emphasis in a caption or a footnote note is the website's styling, not the
+ * author's — and a pasted `<b>` parses as plain text. No underline, as in the block editor: it
+ * marks a link. Everything block-producing that StarterKit ships (headings, lists, blockquote, code
  * block, horizontal rule, hard break) is disabled so captions stay a single line of formatted text,
  * and the output JSON matches the `{ doc > paragraph > text }` shape used everywhere captions are
  * rendered.
@@ -156,6 +159,8 @@ export function createInlineRichTextExtensions(extensions: Extensions = []): Ext
 
 	return [
 		StarterKit.configure({
+			bold: false,
+			underline: false,
 			heading: false,
 			bulletList: false,
 			orderedList: false,
@@ -183,6 +188,8 @@ export function createInlineRichTextExtensions(extensions: Extensions = []): Ext
 			},
 		}),
 		SingleLinePasteGuard,
+		// A caption is pasted into from the same sources as the prose around it.
+		PastedContentNormalizer,
 		...(hasFootnotes ? [] : [FootnotePasteGuard]),
 		...extensions,
 	];
@@ -245,7 +252,6 @@ export function InlineRichTextEditor(props: Readonly<InlineRichTextEditorProps>)
 		editor,
 		selector(ctx) {
 			return {
-				isBold: ctx.editor?.isActive("bold"),
 				isItalic: ctx.editor?.isActive("italic"),
 				isLink: ctx.editor?.isActive("link"),
 				linkHref: ctx.editor?.getAttributes("link").href as string | undefined,
@@ -328,14 +334,6 @@ export function InlineRichTextEditor(props: Readonly<InlineRichTextEditorProps>)
 		>
 			{isEditable ? (
 				<div className="flex flex-wrap items-center gap-0.5 border-be border-border bg-muted px-2 py-1">
-					<RichTextEditorToolbarButton
-						aria-label={t("Bold")}
-						icon={BoldIcon}
-						isActive={activeState?.isBold}
-						onClick={() => {
-							editor.chain().focus().toggleBold().run();
-						}}
-					/>
 					<RichTextEditorToolbarButton
 						aria-label={t("Italic")}
 						icon={ItalicIcon}
