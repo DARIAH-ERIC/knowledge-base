@@ -52,6 +52,17 @@ export class WebsiteFundingCallsPage {
 		await this.contentBlockEditor().fill(text);
 	}
 
+	/**
+	 * Open the content editor's "Insert" menu. Its image and document-link items are only there when
+	 * the form hands the editor the media library.
+	 */
+	async openContentBlockInsertMenu(): Promise<Locator> {
+		await this.page.getByRole("button", { name: "Insert", exact: true }).click();
+		const menu = this.page.getByRole("menu");
+		await menu.waitFor({ state: "visible" });
+		return menu;
+	}
+
 	async updateContentBlockText(text: string): Promise<void> {
 		const editor = this.contentBlockEditor();
 		await editor.clear();

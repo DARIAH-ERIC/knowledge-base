@@ -45,6 +45,22 @@ test.describe("website opportunities admin", () => {
 		await expect(opportunitiesPage.page.getByText("Please select an image.")).toBeVisible();
 	});
 
+	test("should offer images and document links in the content editor", async ({
+		createWebsiteOpportunitiesPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const opportunitiesPage = createWebsiteOpportunitiesPage(workerIndex);
+
+		await opportunitiesPage.gotoCreate();
+		await opportunitiesPage.addContentBlock("E2E opportunity content");
+
+		const menu = await opportunitiesPage.openContentBlockInsertMenu();
+		await expect(menu.getByRole("menuitem", { name: "Image", exact: true })).toBeVisible();
+		await expect(
+			menu.getByRole("menuitem", { name: "Link to document", exact: true }),
+		).toBeVisible();
+	});
+
 	test("should create an opportunity", async ({ createWebsiteOpportunitiesPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const opportunitiesPage = createWebsiteOpportunitiesPage(workerIndex);

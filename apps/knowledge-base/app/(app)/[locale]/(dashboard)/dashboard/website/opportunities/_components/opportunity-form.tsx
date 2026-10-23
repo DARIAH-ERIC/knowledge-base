@@ -201,7 +201,7 @@ export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNod
 					>
 						{t("Display table of contents")}
 					</Checkbox>
-					<ContentBlocks items={contentBlocks ?? []} />
+					<ContentBlocks initialAssets={initialAssets} items={contentBlocks ?? []} />
 				</FormSection>
 
 				<Separator className="my-6" />
