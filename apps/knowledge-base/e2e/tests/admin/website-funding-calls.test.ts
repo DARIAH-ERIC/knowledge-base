@@ -39,6 +39,22 @@ test.describe("website funding calls admin", () => {
 		await expect(fundingCallsPage.page.getByText("Please select an image.")).toBeVisible();
 	});
 
+	test("should offer images and document links in the content editor", async ({
+		createWebsiteFundingCallsPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const fundingCallsPage = createWebsiteFundingCallsPage(workerIndex);
+
+		await fundingCallsPage.gotoCreate();
+		await fundingCallsPage.addContentBlock("E2E funding call content");
+
+		const menu = await fundingCallsPage.openContentBlockInsertMenu();
+		await expect(menu.getByRole("menuitem", { name: "Image", exact: true })).toBeVisible();
+		await expect(
+			menu.getByRole("menuitem", { name: "Link to document", exact: true }),
+		).toBeVisible();
+	});
+
 	test("should create a funding call", async ({ createWebsiteFundingCallsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const fundingCallsPage = createWebsiteFundingCallsPage(workerIndex);
