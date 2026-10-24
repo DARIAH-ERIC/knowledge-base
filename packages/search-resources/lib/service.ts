@@ -52,15 +52,23 @@ export interface FetchSearchResourcesParams {
 export interface SyncSearchResourcesResult {
 	count: number;
 	/**
-	 * Stale documents that could not be removed from the index. Ingest failures are not counted here
-	 * — those throw and fail the whole job. A non-zero count means content that no longer exists
-	 * stays findable in search until the next successful run.
+	 * Stale documents that could not be removed from the website index. The resources index is
+	 * rebuilt and swapped in whole, so it has none. Ingest failures are not counted here — those
+	 * throw and fail the whole job. A non-zero count means content that no longer exists stays
+	 * findable in search until the next successful run.
 	 */
 	failedCount: number;
 	/** The ids behind {@link SyncSearchResourcesResult.failedCount}. */
 	failedDeletions: Array<StaleDocumentDeletion>;
 	websiteCount: number;
 }
+
+/**
+ * The resources index is only swapped for a rebuild holding at least this share of the documents it
+ * currently has. A sharper drop more likely means an upstream api quietly returned less than it
+ * should, and swapping would make those resources unfindable until the next run.
+ */
+const minRetainedDocumentRatio = 0.5;
 
 /** A stale search document that could not be deleted. */
 export interface StaleDocumentDeletion {
@@ -206,34 +214,6 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		});
 	}
 
-	async function getExistingResourceDocumentIds(): Promise<Set<string>> {
-		const documentIds = new Set<string>();
-		let page = 1;
-		let totalPages;
-
-		do {
-			const result = await searchService.collections.resources.search({
-				filterBy: externalSourcesFilter,
-				page,
-				perPage: 250,
-				query: "*",
-			});
-
-			if (result.isErr()) {
-				throw result.error;
-			}
-
-			for (const item of result.value.items) {
-				documentIds.add(item.document.id);
-			}
-
-			totalPages = result.value.pagination.totalPages;
-			page += 1;
-		} while (page <= totalPages);
-
-		return documentIds;
-	}
-
 	async function getExistingWebsiteResourceDocumentIds(): Promise<Set<string>> {
 		const documentIds = new Set<string>();
 		let page = 1;
@@ -267,7 +247,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		deleteDocument: (documentId: string) => Promise<Result<void, unknown>>;
 		collection: string;
 		existingDocumentIds: Set<string>;
-		logContext: "resource" | "website resource";
+		logContext: "website resource";
 	}): Promise<Array<StaleDocumentDeletion>> {
 		const { collection, currentDocuments, deleteDocument, existingDocumentIds, logContext } =
 			params;
@@ -301,14 +281,27 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		const sourceData = await fetchSearchIndexResourceSourceData(options);
 		const resources = createResourceDocuments(sourceData);
 		const websiteDocuments = createWebsiteResourceDocuments(resources);
-		const [existingResourceDocumentIds, existingWebsiteResourceDocumentIds] = await Promise.all([
-			getExistingResourceDocumentIds(),
-			getExistingWebsiteResourceDocumentIds(),
-		]);
+		const existingWebsiteResourceDocumentIds = await getExistingWebsiteResourceDocumentIds();
 
-		const resourcesIngestResult = await search.collections.resources.ingest(resources);
-		if (resourcesIngestResult.isErr()) {
-			throw resourcesIngestResult.error;
+		const indexedResourceCountResult = await search.collections.resources.count();
+		if (indexedResourceCountResult.isErr()) {
+			throw indexedResourceCountResult.error;
+		}
+
+		const indexedResourceCount = indexedResourceCountResult.value;
+		if (resources.length < indexedResourceCount * minRetainedDocumentRatio) {
+			throw new Error(
+				`Refusing to replace the resources index: the rebuild has ${String(resources.length)} documents, the current index ${String(indexedResourceCount)}. If the drop is expected, reset the resources collection and sync again.`,
+			);
+		}
+
+		/**
+		 * Rebuilt rather than updated in place: the new collection is swapped in whole, which drops
+		 * stale documents along with it and applies schema changes.
+		 */
+		const resourcesReplaceResult = await search.collections.resources.replace(resources);
+		if (resourcesReplaceResult.isErr()) {
+			throw resourcesReplaceResult.error;
 		}
 
 		const websiteIngestResult = await search.collections.website.ingest(websiteDocuments);
@@ -316,16 +309,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 			throw websiteIngestResult.error;
 		}
 
-		const resourceFailedDeletions = await deleteStaleDocuments({
-			collection: "resources",
-			currentDocuments: resources,
-			deleteDocument(documentId) {
-				return search.collections.resources.delete(documentId);
-			},
-			existingDocumentIds: existingResourceDocumentIds,
-			logContext: "resource",
-		});
-		const websiteFailedDeletions = await deleteStaleDocuments({
+		const failedDeletions = await deleteStaleDocuments({
 			collection: "website",
 			currentDocuments: websiteDocuments,
 			deleteDocument(documentId) {
@@ -334,8 +318,6 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 			existingDocumentIds: existingWebsiteResourceDocumentIds,
 			logContext: "website resource",
 		});
-
-		const failedDeletions = [...resourceFailedDeletions, ...websiteFailedDeletions];
 
 		return {
 			count: resources.length,
