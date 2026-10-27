@@ -4,7 +4,9 @@ name: Scheduled sync
 # `POST /api/admin-tasks/[kind]`. A green run only means the job was started; its outcome is shown
 # on the admin tasks page. Runs are staggered so the website search index sync picks up services
 # changed by the SSHOC ingest. Schedules are in UTC, off the full hour, because GitHub delays
-# scheduled runs when load is high at the top of the hour.
+# scheduled runs when load is high at the top of the hour. Scheduled runs always use the workflow
+# file on the default branch, and start the task on every environment; a non-production environment
+# which does not set `DEPLOY_ENVIRONMENT` (and would fall back to repository-level values) is skipped.
 
 on:
   schedule:
@@ -21,12 +23,28 @@ on:
           - ingest_sshoc_services
           - sync_resources_search_index
           - sync_website_search_index
+      environment:
+        description: "Environment to start the admin task on"
+        required: true
+        type: choice
+        options:
+          - production
+          - development
 
 jobs:
   trigger:
-    name: Start admin task
+    name: Start admin task / ${{ matrix.environment }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', inputs.environment)) || fromJSON('["production", "development"]') }}
+
+    environment:
+      name: ${{ matrix.environment }}
+      deployment: false
 
     steps:
       - name: Start admin task
@@ -40,6 +58,14 @@ jobs:
         run: |
           set -eu
           test -n "$KIND"
+          if [ "${{ vars.DEPLOY_ENVIRONMENT }}" != "${{ matrix.environment }}" ]; then
+            if [ "${{ matrix.environment }}" = "production" ]; then
+              echo "::error::The production environment must set the DEPLOY_ENVIRONMENT variable."
+              exit 1
+            fi
+            echo "::notice::${{ matrix.environment }} is not configured, skipping."
+            exit 0
+          fi
           status=$(
             curl --silent --show-error --output response.json --write-out "%{http_code}" \
               --retry 3 --retry-all-errors --retry-delay 10 \
