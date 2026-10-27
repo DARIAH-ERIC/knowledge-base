@@ -177,12 +177,6 @@ msgstr ""
 
 #: ../../packages/ui/lib/inline-rich-text-editor.tsx
 #: ../../packages/ui/lib/rich-text-actions.tsx
-msgctxt "ui.Dkkmwm"
-msgid "Bold"
-msgstr ""
-
-#: ../../packages/ui/lib/inline-rich-text-editor.tsx
-#: ../../packages/ui/lib/rich-text-actions.tsx
 msgctxt "ui.g2V-es"
 msgid "Italic"
 msgstr ""
@@ -218,6 +212,11 @@ msgstr ""
 #: ../../packages/ui/lib/pagination.tsx
 msgctxt "ui.N8BBfe"
 msgid "Last page"
+msgstr ""
+
+#: ../../packages/ui/lib/rich-text-actions.tsx
+msgctxt "ui.Dkkmwm"
+msgid "Bold"
 msgstr ""
 
 #: ../../packages/ui/lib/rich-text-actions.tsx
@@ -3385,6 +3384,11 @@ msgstr ""
 msgctxt "wTNySU"
 msgid "by"
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx
+msgctxt "DPJjsI"
+msgid "scheduled"
+msgstr "scheduled"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/admin-task-card.tsx
 msgctxt "EQpfkS"
