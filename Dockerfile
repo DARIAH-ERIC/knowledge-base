@@ -160,49 +160,32 @@ ARG NEXT_PUBLIC_TYPESENSE_PORT
 ARG NEXT_PUBLIC_TYPESENSE_PROTOCOL
 ARG NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY
 COPY --from=app-prune /app/out/full/ .
-RUN --mount=type=secret,id=API_ACCESS_TOKEN,env=API_ACCESS_TOKEN \
-    --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
-    --mount=type=secret,id=AUTH_SIGN_UP,env=AUTH_SIGN_UP \
-    --mount=type=secret,id=BACKGROUND_JOBS_API_SECRET,env=BACKGROUND_JOBS_API_SECRET \
-    --mount=type=secret,id=CORDIS_API_KEY,env=CORDIS_API_KEY \
-    --mount=type=secret,id=CORDIS_API_BASE_URL,env=CORDIS_API_BASE_URL \
-    --mount=type=secret,id=DATABASE_HOST,env=DATABASE_HOST \
-    --mount=type=secret,id=DATABASE_NAME,env=DATABASE_NAME \
-    --mount=type=secret,id=DATABASE_PASSWORD,env=DATABASE_PASSWORD \
-    --mount=type=secret,id=DATABASE_PORT,env=DATABASE_PORT \
-    --mount=type=secret,id=DATABASE_USER,env=DATABASE_USER \
-    --mount=type=secret,id=EMAIL_ADDRESS,env=EMAIL_ADDRESS \
-    --mount=type=secret,id=EMAIL_SMTP_PORT,env=EMAIL_SMTP_PORT \
-    --mount=type=secret,id=EMAIL_SMTP_SERVER,env=EMAIL_SMTP_SERVER \
-    --mount=type=secret,id=IMGPROXY_BASE_URL,env=IMGPROXY_BASE_URL \
-    --mount=type=secret,id=IMGPROXY_KEY,env=IMGPROXY_KEY \
-    --mount=type=secret,id=IMGPROXY_PORT,env=IMGPROXY_PORT \
-    --mount=type=secret,id=IMGPROXY_SALT,env=IMGPROXY_SALT \
-    --mount=type=secret,id=MAILCHIMP_API_BASE_URL,env=MAILCHIMP_API_BASE_URL \
-    --mount=type=secret,id=MAILCHIMP_API_KEY,env=MAILCHIMP_API_KEY \
-    --mount=type=secret,id=MAILCHIMP_CAMPAIGN_FOLDER_ID,env=MAILCHIMP_CAMPAIGN_FOLDER_ID \
-    --mount=type=secret,id=MAILCHIMP_LIST_ID,env=MAILCHIMP_LIST_ID \
-    --mount=type=secret,id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,env=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY \
-    --mount=type=secret,id=OPENAIRE_API_BASE_URL,env=OPENAIRE_API_BASE_URL \
-    --mount=type=secret,id=REVALIDATION_WEBHOOK_SECRET,env=REVALIDATION_WEBHOOK_SECRET \
-    --mount=type=secret,id=REVALIDATION_WEBHOOK_URL,env=REVALIDATION_WEBHOOK_URL \
-    --mount=type=secret,id=S3_ACCESS_KEY,env=S3_ACCESS_KEY \
-    --mount=type=secret,id=S3_BUCKET_NAME,env=S3_BUCKET_NAME \
-    --mount=type=secret,id=S3_HOST,env=S3_HOST \
-    --mount=type=secret,id=S3_PORT,env=S3_PORT \
-    --mount=type=secret,id=S3_PROTOCOL,env=S3_PROTOCOL \
-    --mount=type=secret,id=S3_SECRET_KEY,env=S3_SECRET_KEY \
-    --mount=type=secret,id=SSHOC_MARKETPLACE_API_BASE_URL,env=SSHOC_MARKETPLACE_API_BASE_URL \
-    --mount=type=secret,id=SSHOC_MARKETPLACE_BASE_URL,env=SSHOC_MARKETPLACE_BASE_URL \
-    --mount=type=secret,id=SSHOC_MARKETPLACE_PASSWORD,env=SSHOC_MARKETPLACE_PASSWORD \
-    --mount=type=secret,id=SSHOC_MARKETPLACE_USER,env=SSHOC_MARKETPLACE_USER \
-    --mount=type=secret,id=TYPESENSE_ADMIN_API_KEY,env=TYPESENSE_ADMIN_API_KEY \
-    --mount=type=secret,id=TURBO_TEAM,env=TURBO_TEAM \
+# Runtime secrets are not passed into the image. Next.js imports route modules while building,
+# and some of them create clients from server-side environment variables on import, so the
+# required ones get throwaway placeholders here. The real values are only set at runtime.
+RUN --mount=type=secret,id=TURBO_TEAM,env=TURBO_TEAM \
     --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN \
-		--mount=type=secret,id=UNR_DATABASE_DIRECT_URL,env=UNR_DATABASE_DIRECT_URL \
-		--mount=type=secret,id=UNR_S3_BUCKET_NAME,env=UNR_S3_BUCKET_NAME \
-    --mount=type=secret,id=ZOTERO_API_KEY,env=ZOTERO_API_KEY \
-    --mount=type=secret,id=ZOTERO_API_BASE_URL,env=ZOTERO_API_BASE_URL \
+    AUTH_ENCRYPTION_KEY="00000000000000000000000000000000" \
+    DATABASE_HOST="localhost" \
+    DATABASE_NAME="placeholder" \
+    DATABASE_PASSWORD="placeholder" \
+    DATABASE_PORT="5432" \
+    DATABASE_USER="placeholder" \
+    EMAIL_ADDRESS="placeholder@example.com" \
+    EMAIL_SMTP_PORT="25" \
+    EMAIL_SMTP_SERVER="localhost" \
+    IMGPROXY_BASE_URL="http://localhost" \
+    IMGPROXY_KEY="placeholder" \
+    IMGPROXY_SALT="placeholder" \
+    MAILCHIMP_API_BASE_URL="http://localhost" \
+    MAILCHIMP_API_KEY="placeholder" \
+    MAILCHIMP_LIST_ID="placeholder" \
+    S3_ACCESS_KEY="placeholder" \
+    S3_BUCKET_NAME="placeholder" \
+    S3_HOST="localhost" \
+    S3_PORT="9000" \
+    S3_SECRET_KEY="placeholder" \
+    TYPESENSE_ADMIN_API_KEY="placeholder" \
     pnpm exec turbo run build --filter=@dariah-eric/knowledge-base
 
 # serve
