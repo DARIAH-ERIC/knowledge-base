@@ -163,6 +163,7 @@ COPY --from=app-prune /app/out/full/ .
 RUN --mount=type=secret,id=API_ACCESS_TOKEN,env=API_ACCESS_TOKEN \
     --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
     --mount=type=secret,id=AUTH_SIGN_UP,env=AUTH_SIGN_UP \
+    --mount=type=secret,id=BACKGROUND_JOBS_API_SECRET,env=BACKGROUND_JOBS_API_SECRET \
     --mount=type=secret,id=CORDIS_API_KEY,env=CORDIS_API_KEY \
     --mount=type=secret,id=CORDIS_API_BASE_URL,env=CORDIS_API_BASE_URL \
     --mount=type=secret,id=DATABASE_HOST,env=DATABASE_HOST \
@@ -191,7 +192,6 @@ RUN --mount=type=secret,id=API_ACCESS_TOKEN,env=API_ACCESS_TOKEN \
     --mount=type=secret,id=S3_PORT,env=S3_PORT \
     --mount=type=secret,id=S3_PROTOCOL,env=S3_PROTOCOL \
     --mount=type=secret,id=S3_SECRET_KEY,env=S3_SECRET_KEY \
-    --mount=type=secret,id=SEARCH_SYNC_API_SECRET,env=SEARCH_SYNC_API_SECRET \
     --mount=type=secret,id=SSHOC_MARKETPLACE_API_BASE_URL,env=SSHOC_MARKETPLACE_API_BASE_URL \
     --mount=type=secret,id=SSHOC_MARKETPLACE_BASE_URL,env=SSHOC_MARKETPLACE_BASE_URL \
     --mount=type=secret,id=SSHOC_MARKETPLACE_PASSWORD,env=SSHOC_MARKETPLACE_PASSWORD \
