@@ -10,6 +10,7 @@ import { v7 as uuidv7 } from "uuid";
 import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
+import type { DocumentOrPolicyAlias } from "@/routes/documents-policies/schemas";
 import { eq } from "@/services/db/sql";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
@@ -278,6 +279,129 @@ describe("documents-policies", () => {
 				expect(data.some((node) => node.type === "item" && node.id === items[1]!.version.id)).toBe(
 					false,
 				);
+			});
+		});
+	});
+
+	describe("GET /api/documents-policies/aliases/:key", () => {
+		it("should return the published entry the alias points to", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(1);
+				await seed(db, items);
+
+				const item = items.at(0)!;
+
+				await db.delete(schema.documentPolicyAliases);
+				await db
+					.insert(schema.documentPolicyAliases)
+					.values({ key: "statutes", entityId: item.entity.id });
+
+				const response = await client["documents-policies"].aliases[":key"].$get({
+					param: { key: "statutes" },
+				});
+
+				expect(response.status).toBe(200);
+
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as DocumentOrPolicyAlias;
+
+				expect(data).toMatchObject({
+					key: "statutes",
+					entity: { slug: item.entity.slug },
+					link: null,
+				});
+				expect(data.document?.url).toMatch(
+					new RegExp(`/api/v1/documents-policies/slugs/${item.entity.slug}/document$`),
+				);
+			});
+		});
+
+		it("should return the external link of a link entry", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const linkUrl = f.internet.url();
+				const items = createItems(1);
+				await seed(db, items, { linkUrl });
+
+				await db.delete(schema.documentPolicyAliases);
+				await db
+					.insert(schema.documentPolicyAliases)
+					.values({ key: "internal-rules-of-procedure", entityId: items.at(0)!.entity.id });
+
+				const response = await client["documents-policies"].aliases[":key"].$get({
+					param: { key: "internal-rules-of-procedure" },
+				});
+
+				expect(response.status).toBe(200);
+
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as DocumentOrPolicyAlias;
+
+				expect(data.document).toBeNull();
+				expect(data.link).toStrictEqual({ url: linkUrl });
+			});
+		});
+
+		it("should return 404 when the alias is not set", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				await db.delete(schema.documentPolicyAliases);
+
+				const response = await client["documents-policies"].aliases[":key"].$get({
+					param: { key: "statutes" },
+				});
+
+				expect(response.status).toBe(404);
+			});
+		});
+
+		it("should return 404 when the entry has no published version", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(1);
+				await seed(db, items);
+
+				const item = items.at(0)!;
+
+				const draft = await db.query.entityStatus.findFirst({
+					columns: { id: true },
+					where: { type: "draft" },
+				});
+				assert(draft, "No entity status in database.");
+
+				await db
+					.update(schema.entityVersions)
+					.set({ statusId: draft.id })
+					.where(eq(schema.entityVersions.id, item.version.id));
+
+				await db.delete(schema.documentPolicyAliases);
+				await db
+					.insert(schema.documentPolicyAliases)
+					.values({ key: "statutes", entityId: item.entity.id });
+
+				const response = await client["documents-policies"].aliases[":key"].$get({
+					param: { key: "statutes" },
+				});
+
+				expect(response.status).toBe(404);
+			});
+		});
+
+		it("should return 400 for an unknown alias", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const response = await client["documents-policies"].aliases[":key"].$get({
+					// @ts-expect-error -- Intentionally invalid value.
+					param: { key: "bylaws" },
+				});
+
+				expect(response.status).toBe(400);
 			});
 		});
 	});

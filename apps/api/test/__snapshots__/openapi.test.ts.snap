@@ -21,6 +21,18 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "type": "string",
         },
       },
+      "GetDocumentOrPolicyByAliasParams": {
+        "in": "path",
+        "name": "key",
+        "required": true,
+        "schema": {
+          "enum": [
+            "internal-rules-of-procedure",
+            "statutes",
+          ],
+          "type": "string",
+        },
+      },
       "GetDocumentOrPolicyByIdParams": {
         "in": "path",
         "name": "id",
@@ -465,6 +477,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "description": "A slice of the data this api serves. Every operation lists the tags it reads under \`x-cache-tags\`; the \`revalidate\` webhook delivers the tags a content change touched.",
         "enum": [
           "assets",
+          "document-aliases",
           "documents-policies",
           "events",
           "featured-entities",
@@ -4048,6 +4061,72 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "entity",
           "publishedAt",
           "group",
+        ],
+        "type": "object",
+      },
+      "DocumentOrPolicyAlias": {
+        "description": "Document or policy alias",
+        "properties": {
+          "document": {
+            "anyOf": [
+              {
+                "properties": {
+                  "url": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "url",
+                ],
+                "type": "object",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "entity": {
+            "properties": {
+              "slug": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "slug",
+            ],
+            "type": "object",
+          },
+          "key": {
+            "enum": [
+              "internal-rules-of-procedure",
+              "statutes",
+            ],
+            "type": "string",
+          },
+          "link": {
+            "anyOf": [
+              {
+                "properties": {
+                  "url": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "url",
+                ],
+                "type": "object",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+        },
+        "required": [
+          "key",
+          "entity",
+          "document",
+          "link",
         ],
         "type": "object",
       },
@@ -22253,6 +22332,57 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "documents-policies",
         ],
         "x-cache-tags": [
+          "documents-policies",
+        ],
+      },
+    },
+    "/api/v1/documents-policies/aliases/{key}": {
+      "get": {
+        "description": "Retrieve the published document or policy an alias, such as the current statutes, points to. Not found when the alias is not set.",
+        "operationId": "getDocumentOrPolicyByAlias",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GetDocumentOrPolicyByAliasParams",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentOrPolicyAlias",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse",
+                },
+              },
+            },
+            "description": "Not Found",
+          },
+        },
+        "summary": "Get document or policy by alias",
+        "tags": [
+          "documents-policies",
+        ],
+        "x-cache-tags": [
+          "document-aliases",
           "documents-policies",
         ],
       },

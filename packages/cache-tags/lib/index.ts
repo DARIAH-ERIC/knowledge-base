@@ -13,6 +13,7 @@
 
 export const cacheTags = [
 	"assets",
+	"document-aliases",
 	"documents-policies",
 	"events",
 	"featured-entities",
