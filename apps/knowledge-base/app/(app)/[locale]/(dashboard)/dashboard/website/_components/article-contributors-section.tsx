@@ -172,7 +172,12 @@ export function ArticleContributorsSection(
 			)}
 
 			<FormLayout variant="stacked">
-				<Form action={formAction} className="flex flex-col gap-y-6" state={state}>
+				<Form
+					action={formAction}
+					className="flex flex-col gap-y-6"
+					resetOnSuccess={true}
+					state={state}
+				>
 					<FormSection
 						description={t("Add a person as a contributor to this article.")}
 						title={t("Add contributor")}

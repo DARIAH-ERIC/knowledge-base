@@ -16,7 +16,7 @@ export function NewsletterSubscriptionForm(): ReactNode {
 	const [state, action] = useActionState(subscribeNewsletterAction, createActionStateInitial());
 
 	return (
-		<Form action={action} className="grid gap-y-6" state={state}>
+		<Form action={action} className="grid gap-y-6" resetOnSuccess={true} state={state}>
 			<FormStatus state={state} />
 
 			<TextField autoComplete="email" isRequired={true} name="email" type="email">

@@ -2,7 +2,7 @@
 
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { FieldError, Label } from "@dariah-eric/ui/field";
-import { Form } from "@dariah-eric/ui/form";
+import { Form, getResetKeyOnError } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { SubmitButton } from "@dariah-eric/ui/submit-button";
@@ -16,6 +16,8 @@ export function SignInForm(): ReactNode {
 	const t = useExtracted();
 
 	const [state, action] = useActionState(signInAction, createActionStateInitial());
+	/** Password fields are emptied after a failed submission. */
+	const passwordKey = getResetKeyOnError(state);
 
 	return (
 		<Form action={action} className="flex flex-col gap-y-6" state={state}>
@@ -27,7 +29,13 @@ export function SignInForm(): ReactNode {
 				<Input />
 			</TextField>
 
-			<TextField autoComplete="current-password" isRequired={true} name="password" type="password">
+			<TextField
+				key={`password-${passwordKey}`}
+				autoComplete="current-password"
+				isRequired={true}
+				name="password"
+				type="password"
+			>
 				<Label>{t("Password")}</Label>
 				<FieldError />
 				<Input />

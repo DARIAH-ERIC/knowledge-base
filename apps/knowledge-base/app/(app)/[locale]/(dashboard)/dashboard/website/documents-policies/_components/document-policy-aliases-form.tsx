@@ -6,7 +6,12 @@ import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import {
+	SearchableSelect,
+	SearchableSelectContent,
+	SearchableSelectInput,
+	SearchableSelectItem,
+} from "@dariah-eric/ui/searchable-select";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -100,24 +105,26 @@ function AliasSelect(props: Readonly<AliasSelectProps>): ReactNode {
 
 	return (
 		<Fragment>
-			<Select
+			<SearchableSelect
 				onChange={(key) => {
 					setValue(key == null || key === "none" ? null : String(key));
 				}}
 				value={value ?? "none"}
 			>
 				<Label>{label}</Label>
-				<SelectTrigger />
+				<SearchableSelectInput placeholder={t("Search documents and policies...")} />
 				<FieldError />
-				<SelectContent>
-					<SelectItem id="none">{t("None")}</SelectItem>
+				<SearchableSelectContent>
+					<SearchableSelectItem id="none" textValue={t("None")}>
+						{t("None")}
+					</SearchableSelectItem>
 					{options.map((option) => (
-						<SelectItem key={option.id} id={option.id}>
+						<SearchableSelectItem key={option.id} id={option.id} textValue={option.title}>
 							{option.title}
-						</SelectItem>
+						</SearchableSelectItem>
 					))}
-				</SelectContent>
-			</Select>
+				</SearchableSelectContent>
+			</SearchableSelect>
 			{value != null ? <input name={name} type="hidden" value={value} /> : null}
 		</Fragment>
 	);

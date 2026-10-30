@@ -70,7 +70,7 @@ export function CampaignQuestionsForm(props: Readonly<CampaignQuestionsFormProps
 			)}
 
 			<FormLayout variant="stacked">
-				<Form action={action} className="flex flex-col gap-y-6" state={state}>
+				<Form action={action} className="flex flex-col gap-y-6" resetOnSuccess={true} state={state}>
 					<input name="campaignId" type="hidden" value={campaignId} />
 
 					<FormSection title={t("Add question")}>

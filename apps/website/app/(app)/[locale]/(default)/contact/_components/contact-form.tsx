@@ -16,7 +16,7 @@ export function ContactForm(): ReactNode {
 	const [state, action] = useActionState(sendContactFormEmailAction, createActionStateInitial());
 
 	return (
-		<Form action={action} className="flex flex-col gap-y-8" state={state}>
+		<Form action={action} className="flex flex-col gap-y-8" resetOnSuccess={true} state={state}>
 			<FormStatus state={state} />
 
 			<TextField autoComplete="email" isRequired={true} name="email" type="email">

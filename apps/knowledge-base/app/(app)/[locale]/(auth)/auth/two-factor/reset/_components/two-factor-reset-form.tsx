@@ -18,7 +18,7 @@ export function TwoFactorResetForm(): ReactNode {
 	const [state, action] = useActionState(resetTwoFactorAction, createActionStateInitial());
 
 	return (
-		<Form action={action} className="flex flex-col gap-y-6" state={state}>
+		<Form action={action} className="flex flex-col gap-y-6" resetOnError={true} state={state}>
 			<FormStatus state={state} />
 
 			<TextField isRequired={true} name="code">

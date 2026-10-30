@@ -78,7 +78,12 @@ export function WorkingGroupReportEventsForm(
 
 			<section className="flex flex-col gap-y-3">
 				<h2 className="text-sm font-semibold text-fg">{t("Add event")}</h2>
-				<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
+				<Form
+					action={action}
+					className="flex flex-col gap-y-4 max-inline-sm"
+					resetOnSuccess={true}
+					state={state}
+				>
 					<input name="workingGroupReportId" type="hidden" value={report.id} />
 
 					<TextField isRequired={true} name="title">

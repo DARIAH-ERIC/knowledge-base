@@ -356,7 +356,12 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 
 				{roleOptions.length > 0 && (
 					<FormLayout variant="stacked">
-						<Form action={formAction} className="flex flex-col gap-y-6" state={state}>
+						<Form
+							action={formAction}
+							className="flex flex-col gap-y-6"
+							resetOnSuccess={true}
+							state={state}
+						>
 							<FormSection
 								description={t("Add a new contribution to an organisational unit.")}
 								title={t("Add contribution")}

@@ -4168,6 +4168,33 @@ export class DatabaseService {
 		});
 	}
 
+	async getDocumentPolicyAliasEntityId(key: schema.DocumentPolicyAliasKey): Promise<string | null> {
+		const [row] = await this.db
+			.select({ entityId: schema.documentPolicyAliases.entityId })
+			.from(schema.documentPolicyAliases)
+			.where(eq(schema.documentPolicyAliases.key, key));
+
+		return row?.entityId ?? null;
+	}
+
+	/** Points an alias to an entity, or removes it with `null`. */
+	async setDocumentPolicyAlias(
+		key: schema.DocumentPolicyAliasKey,
+		entityId: string | null,
+	): Promise<void> {
+		if (entityId == null) {
+			await this.db
+				.delete(schema.documentPolicyAliases)
+				.where(eq(schema.documentPolicyAliases.key, key));
+			return;
+		}
+
+		await this.db
+			.insert(schema.documentPolicyAliases)
+			.values({ key, entityId })
+			.onConflictDoUpdate({ target: schema.documentPolicyAliases.key, set: { entityId } });
+	}
+
 	async getDocumentOrPolicyByTitle(title: string): Promise<{
 		/** The asset the item points to; `null` for an external link. */
 		documentId: string | null;
