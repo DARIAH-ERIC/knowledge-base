@@ -16,11 +16,11 @@ CREATE TABLE IF NOT EXISTS "document_policy_aliases" (
 
 --> statement-breakpoint
 ALTER TABLE "document_policy_aliases"
-	DROP CONSTRAINT IF EXISTS "document_policy_aliases_entity_id_entities_id_fk";
+	DROP CONSTRAINT IF EXISTS "document_policy_aliases_entity_id_entities_id_fkey";
 
 --> statement-breakpoint
 ALTER TABLE "document_policy_aliases"
-	ADD CONSTRAINT "document_policy_aliases_entity_id_entities_id_fk"
+	ADD CONSTRAINT "document_policy_aliases_entity_id_entities_id_fkey"
 	FOREIGN KEY ("entity_id") REFERENCES "entities"("id") ON DELETE CASCADE;
 
 --> statement-breakpoint
