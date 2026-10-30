@@ -1,5 +1,3 @@
-// oxlint-disable node/no-process-env
-
 import { createServer } from "node:http";
 
 import { assert, log } from "@acdh-oeaw/lib";
@@ -10,13 +8,13 @@ import { assert, log } from "@acdh-oeaw/lib";
  * running, so every dispatch would fail and flood the server logs with errors. This stand-in
  * listens on the webhook port and answers every request with `204`, mirroring how we mock the
  * analytics endpoint in `@/e2e/lib/test`.
+ *
+ * The port is passed as the first argument by `getWebhookMockServer` in the playwright config.
  */
 
-const webhookUrl = process.env.REVALIDATION_WEBHOOK_URL;
+const port = Number(process.argv[2]);
 
-assert(webhookUrl != null, "REVALIDATION_WEBHOOK_URL is not set.");
-
-const port = Number(new URL(webhookUrl).port) || 3002;
+assert(Number.isInteger(port) && port > 0, "Pass the port to listen on as the first argument.");
 
 const server = createServer((request, response) => {
 	// Drain the request body so the client sees a clean completion.
