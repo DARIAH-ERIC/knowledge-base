@@ -35,9 +35,7 @@ export async function getDocumentsPolicies(params: GetDocumentsPoliciesParams) {
 					},
 				},
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),

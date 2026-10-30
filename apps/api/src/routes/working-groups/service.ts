@@ -14,7 +14,17 @@ import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { mapSocialMedia, socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
-import { type SQLWrapper, alias, and, count, eq, exists, not, sql } from "@/services/db/sql";
+import {
+	EmptyFilter,
+	type SQLWrapper,
+	alias,
+	and,
+	count,
+	eq,
+	exists,
+	not,
+	sql,
+} from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 interface GetWorkingGroupsParams {
@@ -84,7 +94,7 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 						type: "published",
 					},
 				},
-				RAW: status != null ? (t) => buildStatusFilter(db, t.id, status) : undefined,
+				RAW: status != null ? (t) => buildStatusFilter(db, t.id, status) : EmptyFilter,
 			},
 			columns: {
 				id: true,
@@ -423,9 +433,7 @@ export async function getWorkingGroupSlugs(
 				},
 				image: imageAssetColumns,
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),

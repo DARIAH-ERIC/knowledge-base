@@ -15,6 +15,8 @@ const dariahEuSlug = "dariah-eu";
  */
 function getEricContactDetails(db: Database | Transaction) {
 	return db.query.organisationalUnits.findFirst({
+		// See `socialMediaByPosition`.
+		strategy: "basic",
 		where: {
 			entityVersion: {
 				status: {
