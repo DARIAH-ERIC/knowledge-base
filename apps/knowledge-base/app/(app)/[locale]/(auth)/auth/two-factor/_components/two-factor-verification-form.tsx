@@ -18,7 +18,7 @@ export function TwoFactorVerificationForm(): ReactNode {
 	const [state, action] = useActionState(verifyTwoFactorAction, createActionStateInitial());
 
 	return (
-		<Form action={action} className="flex flex-col gap-y-6" state={state}>
+		<Form action={action} className="flex flex-col gap-y-6" resetOnError={true} state={state}>
 			<FormStatus state={state} />
 
 			<TextField autoComplete="one-time-code" autoFocus={true} isRequired={true} name="code">

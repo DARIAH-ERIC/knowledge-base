@@ -36,7 +36,7 @@ body:
       label: Environment
       description: |
         Examples:
-          - **OS**: Ubuntu 24.04
+          - **OS**: Ubuntu 26.04
           - **Browser**: Firefox
           - **Version**: 144
       value: |

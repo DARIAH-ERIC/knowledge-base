@@ -9,7 +9,16 @@ import { generateImageUrl, imageAssetColumns, withResolvedCaption } from "@/lib/
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { FundingCallStatus } from "@/routes/funding-calls/schemas";
-import { type SQL, type SQLWrapper, count, desc, eq, or, sql } from "@/services/db/sql";
+import {
+	EmptyFilter,
+	type SQL,
+	type SQLWrapper,
+	count,
+	desc,
+	eq,
+	or,
+	sql,
+} from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 interface GetFundingCallsParams {
@@ -55,7 +64,7 @@ export async function getFundingCalls(db: Database | Transaction, params: GetFun
 						type: "published",
 					},
 				},
-				RAW: statuses.length > 0 ? (t) => buildStatusFilter(t.duration, statuses) : undefined,
+				RAW: statuses.length > 0 ? (t) => buildStatusFilter(t.duration, statuses) : EmptyFilter,
 			},
 			columns: {
 				imageCaption: true,
@@ -211,9 +220,7 @@ export async function getFundingCallSlugs(
 					},
 				},
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),

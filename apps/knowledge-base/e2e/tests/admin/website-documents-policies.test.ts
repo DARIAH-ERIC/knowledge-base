@@ -250,6 +250,41 @@ test.describe("website documents-policies admin", () => {
 		expect(updated).toMatchObject({ summary: null, url: null });
 	});
 
+	test("should keep the selected stable links after saving", async ({
+		createWebsiteDocumentsPoliciesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const docPoliciesPage = createWebsiteDocumentsPoliciesPage(workerIndex);
+
+		const title = `${docPoliciesPage.workerPrefix} Statutes ${randomUUID()}`;
+		/** Aliases are global, so the previous one is restored afterwards. */
+		const previousEntityId = await db.getDocumentPolicyAliasEntityId("statutes");
+
+		await docPoliciesPage.gotoCreate();
+		await docPoliciesPage.fillTitle(title);
+		await docPoliciesPage.selectKind("External link");
+		await docPoliciesPage.fillLinkUrl("https://example.com/statutes");
+		await docPoliciesPage.submitForm();
+		await docPoliciesPage.searchByTitle(title);
+		await docPoliciesPage.gotoDetailsFromList(title);
+		await docPoliciesPage.publishItem();
+
+		await docPoliciesPage.gotoStableLinks();
+		await docPoliciesPage.selectStableLink("Current statutes", title);
+		await docPoliciesPage.saveStableLinks();
+
+		/** A successful save must not reset the select to its value at mount. */
+		await expect(docPoliciesPage.stableLinkSelect("Current statutes")).toHaveValue(title);
+
+		const created = await db.getDocumentOrPolicyByTitle(title);
+		await expect
+			.poll(async () => db.getDocumentPolicyAliasEntityId("statutes"))
+			.toBe(created?.entityId);
+
+		await db.setDocumentPolicyAlias("statutes", previousEntityId);
+	});
+
 	test("should delete a document or policy", async ({ createWebsiteDocumentsPoliciesPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const docPoliciesPage = createWebsiteDocumentsPoliciesPage(workerIndex);

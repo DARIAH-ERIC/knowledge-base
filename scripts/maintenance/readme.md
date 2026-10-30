@@ -1,7 +1,7 @@
 # @dariah-eric/maintenance
 
 Recurring **data-cleanup** operations that modify data — distinct from `@dariah-eric/audit` (read-only
-checks, never mutates) and `@dariah-eric/migrate` (one-off import transforms). Each script runs as a
+checks, never mutates). Each script runs as a
 dry run by default and only mutates when passed `--apply`.
 
 For the `data:clean:*` scripts the detection and mutation logic is the **same shared implementation**

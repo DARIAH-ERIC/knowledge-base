@@ -55,9 +55,7 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 				image: imageAssetColumns,
 				socialMedia: personSocialMediaQuery,
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),
@@ -192,9 +190,7 @@ export async function getPersonSlugs(db: Database | Transaction, params: GetPers
 					},
 				},
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),

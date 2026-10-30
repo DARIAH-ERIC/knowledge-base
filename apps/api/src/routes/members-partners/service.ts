@@ -34,6 +34,8 @@ export async function getMembersAndPartners(
 
 	const [items, aggregate] = await Promise.all([
 		db.query.membersAndPartners.findMany({
+			// See `socialMediaByPosition`.
+			strategy: "basic",
 			where: {
 				entityVersion: {
 					status: {
@@ -526,6 +528,8 @@ async function getNationalConsortium(
 	},
 ) {
 	const item = await db.query.organisationalUnits.findFirst({
+		// See `socialMediaByPosition`.
+		strategy: "basic",
 		where: {
 			entityVersion: {
 				status: {
@@ -707,6 +711,8 @@ export async function getMemberOrPartnerById(
 
 	const [item, fields, relatedEntities, relatedResources] = await Promise.all([
 		db.query.membersAndPartners.findFirst({
+			// See `socialMediaByPosition`.
+			strategy: "basic",
 			where: {
 				id,
 				entityVersion: {
@@ -866,9 +872,7 @@ export async function getMemberOrPartnerSlugs(
 				},
 				image: imageAssetColumns,
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),
@@ -904,6 +908,8 @@ export async function getMemberOrPartnerBySlug(
 	const { slug } = params;
 
 	const item = await db.query.membersAndPartners.findFirst({
+		// See `socialMediaByPosition`.
+		strategy: "basic",
 		where: {
 			entityVersion: {
 				status: {

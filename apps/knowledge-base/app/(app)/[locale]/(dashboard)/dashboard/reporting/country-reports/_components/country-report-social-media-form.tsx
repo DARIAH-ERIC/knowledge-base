@@ -279,7 +279,12 @@ function AddExistingAccountForm(props: Readonly<AddExistingAccountFormProps>): R
 	return (
 		<section className="flex flex-col gap-y-3">
 			<h3 className="text-sm font-semibold text-fg">{t("Add an existing account")}</h3>
-			<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
+			<Form
+				action={action}
+				className="flex flex-col gap-y-4 max-inline-sm"
+				resetOnSuccess={true}
+				state={state}
+			>
 				<input name="countryReportId" type="hidden" value={reportId} />
 
 				<Select
@@ -339,7 +344,12 @@ function CreateAccountForm(props: Readonly<CreateAccountFormProps>): ReactNode {
 			<p className="text-sm text-muted-fg max-inline-md">
 				{t("For an account not yet in the system, e.g. a website set up for a specific event.")}
 			</p>
-			<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
+			<Form
+				action={action}
+				className="flex flex-col gap-y-4 max-inline-sm"
+				resetOnSuccess={true}
+				state={state}
+			>
 				<input name="countryReportId" type="hidden" value={reportId} />
 
 				<TextField isRequired={true} name="name">

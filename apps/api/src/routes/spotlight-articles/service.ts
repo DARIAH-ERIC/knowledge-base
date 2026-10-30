@@ -57,9 +57,7 @@ export async function getSpotlightArticles(
 				},
 				image: imageAssetColumns,
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(t.publicationDate), desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { publicationDate: "desc", entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),
@@ -288,9 +286,7 @@ export async function getSpotlightArticleSlugs(
 				},
 				image: imageAssetColumns,
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(t.publicationDate), desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { publicationDate: "desc", entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),

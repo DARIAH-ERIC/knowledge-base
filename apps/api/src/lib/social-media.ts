@@ -2,7 +2,13 @@ import type * as schema from "@dariah-eric/database/schema";
 
 import { type SQL, type asc, sql } from "@/services/db/sql";
 
-/** Order a many-to-many social-media relation by its junction row. */
+/**
+ * Order a many-to-many social-media relation by its junction row.
+ *
+ * The junction's `position` is only in scope when drizzle does not wrap the relation in a subquery,
+ * which it does when the relation also has a `RAW` filter (e.g. `activeSocialMedia`). Root queries
+ * combining both have to opt out with `strategy: "basic"`.
+ */
 export const socialMediaByPosition = {
 	orderBy(
 		_table: typeof schema.socialMedia,

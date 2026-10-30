@@ -344,7 +344,12 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 
 				{statusOptions.length > 0 && (
 					<FormLayout variant="stacked">
-						<Form action={formAction} className="flex flex-col gap-y-6" state={state}>
+						<Form
+							action={formAction}
+							className="flex flex-col gap-y-6"
+							resetOnSuccess={true}
+							state={state}
+						>
 							<FormSection
 								description={t("Add a new relation to another organisational unit.")}
 								title={t("Add relation")}
