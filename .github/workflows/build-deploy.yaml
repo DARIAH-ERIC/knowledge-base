@@ -53,7 +53,7 @@ jobs:
       - name: Set up pnpm and node.js
         uses: pnpm/setup@v3
         with:
-          runtime: node@24
+          runtime: node@26
           install: false
 
       - name: Set lowercase repository name
