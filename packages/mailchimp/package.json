@@ -29,6 +29,6 @@
 		"@dariah-eric/request": "workspace:^"
 	},
 	"engines": {
-		"node": "24.x"
+		"node": "26.x"
 	}
 }

@@ -81,7 +81,7 @@ jobs:
       - name: Set up pnpm and node.js
         uses: pnpm/setup@v3
         with:
-          runtime: node@24
+          runtime: node@26
           install: false
 
       - name: Resolve Playwright version
@@ -113,7 +113,7 @@ jobs:
       - name: Set up pnpm and node.js, install dependencies
         uses: pnpm/setup@v3
         with:
-          runtime: node@24
+          runtime: node@26
           cache: true
           require-lockfile: true
 
@@ -135,7 +135,7 @@ jobs:
       - name: Set up pnpm and node.js, install dependencies
         uses: pnpm/setup@v3
         with:
-          runtime: node@24
+          runtime: node@26
           cache: true
           require-lockfile: true
 
@@ -199,7 +199,7 @@ jobs:
       - name: Set up pnpm and node.js, install dependencies
         uses: pnpm/setup@v3
         with:
-          runtime: node@24
+          runtime: node@26
           cache: true
           require-lockfile: true
 
@@ -326,7 +326,7 @@ jobs:
       - name: Set up pnpm and node.js, install dependencies
         uses: pnpm/setup@v3
         with:
-          runtime: node@24
+          runtime: node@26
           cache: true
           require-lockfile: true
 
