@@ -5,9 +5,9 @@ name: Release pull request
 # The pull request lists the unreleased squash commits; the repository uses the pull request title
 # and body as the merge commit message, so the list ends up in `main`'s history.
 #
-# Pull requests opened with the workflow token do not trigger other workflows, so `Validate` does not
-# run on the release pull request itself. The same commits were validated on `development`, and
-# `Validate` runs again on the push to `main` before anything is deployed.
+# `Validate` does not run on the release pull request itself: its `pull_request` trigger only covers
+# pull requests into `development`. The same commits were validated on `development`, and `Validate`
+# runs again on the push to `main` before anything is deployed.
 
 concurrency:
   group: "${{ github.workflow }}"

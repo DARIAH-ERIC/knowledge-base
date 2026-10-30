@@ -5,10 +5,12 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/development' }}
 
 on:
+  # Only pull requests into `development`: the only pull request into `main` is the release pull
+  # request, whose commits were already validated on `development` and are validated again on the
+  # push to `main` before deploying.
   pull_request:
     branches:
       - development
-      - main
   push:
     branches:
       - development
