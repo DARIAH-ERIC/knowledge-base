@@ -7452,6 +7452,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       },
       "GetNavigationResponse": {
         "$ref": "#/components/schemas/NavigationMenuList",
+        "description": "List of navigation menus with items",
       },
       "GetNewsItemSlugsResponse": {
         "description": "Paginated list of news item slugs",
@@ -7719,6 +7720,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       },
       "GetSiteMetadataResponse": {
         "$ref": "#/components/schemas/SiteMetadata",
+        "description": "Site metadata",
       },
       "GetSitemapResponse": {
         "description": "All website urls derived from published content",
@@ -7844,6 +7846,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       },
       "GetStatisticsResponse": {
         "$ref": "#/components/schemas/GetStatistics",
+        "description": "statistics for organisational units",
       },
       "GetWorkingGroupSlugsResponse": {
         "description": "Paginated list of working group slugs",
