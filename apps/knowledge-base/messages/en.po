@@ -8983,6 +8983,11 @@ msgctxt "nwYGQF"
 msgid "Stable links"
 msgstr "Stable links"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-aliases-form.tsx
+msgctxt "6M75Yq"
+msgid "Search documents and policies..."
+msgstr "Search documents and policies..."
+
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-create-dialog.tsx
 msgctxt "7NPc78"
 msgid "Create a new document group."

@@ -24,7 +24,7 @@ export function TwoFactorSetUpForm(props: Readonly<TwoFactorSetUpFormProps>): Re
 	const [state, action] = useActionState(setupTwoFactorAction, createActionStateInitial());
 
 	return (
-		<Form action={action} className="flex flex-col gap-y-6" state={state}>
+		<Form action={action} className="flex flex-col gap-y-6" resetOnError={true} state={state}>
 			<FormStatus state={state} />
 
 			<input hidden={true} name="key" readOnly={true} required={true} value={encodedTotpKey} />

@@ -2,7 +2,7 @@
 
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { FieldError, Label } from "@dariah-eric/ui/field";
-import { Form } from "@dariah-eric/ui/form";
+import { Form, getResetKeyOnError } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { SubmitButton } from "@dariah-eric/ui/submit-button";
@@ -16,24 +16,39 @@ export function UpdatePasswordForm(): ReactNode {
 	const t = useExtracted();
 
 	const [state, action] = useActionState(updatePasswordAction, createActionStateInitial());
+	/** Password fields are emptied after a failed submission. */
+	const passwordKey = getResetKeyOnError(state);
 
 	return (
-		<Form action={action} className="flex flex-col gap-y-6" state={state}>
+		<Form action={action} className="flex flex-col gap-y-6" resetOnSuccess={true} state={state}>
 			<FormStatus state={state} />
 
-			<TextField autoComplete="current-password" isRequired={true} name="password" type="password">
+			<TextField
+				key={`password-${passwordKey}`}
+				autoComplete="current-password"
+				isRequired={true}
+				name="password"
+				type="password"
+			>
 				<Label>{t("Current password")}</Label>
 				<FieldError />
 				<Input />
 			</TextField>
 
-			<TextField autoComplete="new-password" isRequired={true} name="new-password" type="password">
+			<TextField
+				key={`new-password-${passwordKey}`}
+				autoComplete="new-password"
+				isRequired={true}
+				name="new-password"
+				type="password"
+			>
 				<Label>{t("New password")}</Label>
 				<FieldError />
 				<Input />
 			</TextField>
 
 			<TextField
+				key={`new-password-confirmation-${passwordKey}`}
 				autoComplete="new-password"
 				isRequired={true}
 				name="new-password-confirmation"
