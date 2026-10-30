@@ -23,13 +23,6 @@ const validate = define({
 		NEXT_PUBLIC_APP_MATOMO_ID: v.optional(
 			v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		),
-		NEXT_PUBLIC_APP_SENTRY_DSN: v.optional(v.pipe(v.string(), v.nonEmpty())),
-		NEXT_PUBLIC_APP_SENTRY_ORG: v.optional(v.pipe(v.string(), v.nonEmpty())),
-		NEXT_PUBLIC_APP_SENTRY_DATA_COLLECTION: v.optional(
-			v.picklist(["disabled", "enabled"]),
-			"disabled",
-		),
-		NEXT_PUBLIC_APP_SENTRY_PROJECT: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		NEXT_PUBLIC_APP_SERVICE_ID: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
 		NEXT_PUBLIC_TYPESENSE_WEBSITE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
@@ -43,7 +36,6 @@ const validate = define({
 		NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY: v.optional(v.pipe(v.string(), v.nonEmpty())),
 	}),
 	envVars: v.object({
-		APP_SENTRY_AUTH_TOKEN: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		AUTH_ENCRYPTION_KEY: v.pipe(v.string(), v.length(32)),
 		AUTH_SIGN_UP: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 		BACKGROUND_JOBS_API_SECRET: v.optional(v.pipe(v.string(), v.nonEmpty())),
@@ -103,7 +95,6 @@ const validate = define({
 
 export const env = validate({
 	environment: {
-		APP_SENTRY_AUTH_TOKEN: process.env.APP_SENTRY_AUTH_TOKEN,
 		AUTH_ENCRYPTION_KEY: process.env.AUTH_ENCRYPTION_KEY,
 		AUTH_SIGN_UP: process.env.AUTH_SIGN_UP,
 		BACKGROUND_JOBS_API_SECRET: process.env.BACKGROUND_JOBS_API_SECRET,
@@ -138,10 +129,6 @@ export const env = validate({
 		NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL: process.env.NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL,
 		NEXT_PUBLIC_APP_MATOMO_BASE_URL: process.env.NEXT_PUBLIC_APP_MATOMO_BASE_URL,
 		NEXT_PUBLIC_APP_MATOMO_ID: process.env.NEXT_PUBLIC_APP_MATOMO_ID,
-		NEXT_PUBLIC_APP_SENTRY_DSN: process.env.NEXT_PUBLIC_APP_SENTRY_DSN,
-		NEXT_PUBLIC_APP_SENTRY_ORG: process.env.NEXT_PUBLIC_APP_SENTRY_ORG,
-		NEXT_PUBLIC_APP_SENTRY_DATA_COLLECTION: process.env.NEXT_PUBLIC_APP_SENTRY_DATA_COLLECTION,
-		NEXT_PUBLIC_APP_SENTRY_PROJECT: process.env.NEXT_PUBLIC_APP_SENTRY_PROJECT,
 		NEXT_PUBLIC_APP_SERVICE_ID: process.env.NEXT_PUBLIC_APP_SERVICE_ID,
 		NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME:
 			process.env.NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME,
