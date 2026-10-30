@@ -184,7 +184,7 @@ jobs:
             "PNPM_VERSION=${{ needs.config.outputs.pnpm_version }}"
             "TURBO_VERSION=${{ needs.config.outputs.turbo_version }}"
             "NEXT_PUBLIC_APP_BASE_URL=${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
-            "NEXT_PUBLIC_APP_BOTS=disabled"
+            "NEXT_PUBLIC_APP_BOTS=${{ vars.NEXT_PUBLIC_APP_BOTS }}"
             "NEXT_PUBLIC_APP_GOOGLE_SITE_VERIFICATION=${{ vars.NEXT_PUBLIC_APP_GOOGLE_SITE_VERIFICATION }}"
             "NEXT_PUBLIC_APP_IMPRINT_CUSTOM_CONFIG=disabled"
             "NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL=${{ vars.NEXT_PUBLIC_IMPRINT_SERVICE_BASE_URL }}"
