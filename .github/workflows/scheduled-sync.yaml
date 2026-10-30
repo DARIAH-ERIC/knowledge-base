@@ -4,9 +4,13 @@ name: Scheduled sync
 # `POST /api/admin-tasks/[kind]`. A green run only means the job was started; its outcome is shown
 # on the admin tasks page. Runs are staggered so the website search index sync picks up services
 # changed by the SSHOC ingest. Schedules are in UTC, off the full hour, because GitHub delays
-# scheduled runs when load is high at the top of the hour. Scheduled runs always use the workflow
-# file on the default branch, and start the task on every environment; a non-production environment
-# which does not set `DEPLOY_ENVIRONMENT` (and would fall back to repository-level values) is skipped.
+# scheduled runs when load is high at the top of the hour.
+#
+# Scheduled runs always use the workflow file on the default branch (`development`). The `production`
+# environment only accepts jobs from `main`, so a scheduled run starts the task on `development`
+# directly and dispatches this workflow on `main` for `production`. A manual run must be started from
+# the environment's branch. A non-production environment which does not set `DEPLOY_ENVIRONMENT`
+# (and would fall back to repository-level values) is skipped.
 
 on:
   schedule:
@@ -31,7 +35,31 @@ on:
           - production
           - development
 
+env:
+  KIND: ${{ github.event_name == 'workflow_dispatch' && inputs.kind ||
+    github.event.schedule == '26 2 * * *' && 'ingest_sshoc_services' ||
+    github.event.schedule == '26 3 * * *' && 'sync_resources_search_index' ||
+    github.event.schedule == '26 4 * * *' && 'sync_website_search_index' || '' }}
+
 jobs:
+  dispatch-production:
+    name: Dispatch admin task / production
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      actions: write
+
+    steps:
+      - name: Dispatch on main
+        env:
+          GH_TOKEN: "${{ github.token }}"
+        run: |
+          set -eu
+          test -n "$KIND"
+          gh workflow run "${{ github.workflow }}" --repo "${{ github.repository }}" --ref main \
+            --field kind="$KIND" --field environment=production
+
   trigger:
     name: Start admin task / ${{ matrix.environment }}
     runs-on: ubuntu-24.04
@@ -40,7 +68,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', inputs.environment)) || fromJSON('["production", "development"]') }}
+        environment: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', inputs.environment)) || fromJSON('["development"]') }}
 
     environment:
       name: ${{ matrix.environment }}
@@ -51,10 +79,6 @@ jobs:
         env:
           BASE_URL: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
           SECRET: "${{ secrets.K8S_SECRET_BACKGROUND_JOBS_API_SECRET }}"
-          KIND: ${{ github.event_name == 'workflow_dispatch' && inputs.kind ||
-            github.event.schedule == '26 2 * * *' && 'ingest_sshoc_services' ||
-            github.event.schedule == '26 3 * * *' && 'sync_resources_search_index' ||
-            github.event.schedule == '26 4 * * *' && 'sync_website_search_index' || '' }}
         run: |
           set -eu
           test -n "$KIND"
