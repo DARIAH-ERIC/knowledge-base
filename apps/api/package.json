@@ -38,7 +38,6 @@
 		"@opentelemetry/instrumentation-http": "catalog:",
 		"@opentelemetry/sdk-node": "catalog:",
 		"@opentelemetry/sdk-trace-base": "catalog:",
-		"@sentry/node": "catalog:",
 		"@valibot/to-json-schema": "catalog:",
 		"better-result": "catalog:",
 		"hono": "catalog:",

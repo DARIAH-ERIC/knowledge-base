@@ -41,7 +41,6 @@
 		"@dariah-eric/search": "workspace:^",
 		"@dariah-eric/ui": "workspace:^",
 		"@react-aria/utils": "catalog:",
-		"@sentry/nextjs": "catalog:",
 		"@valibot/i18n": "catalog:",
 		"client-only": "catalog:",
 		"clsx": "catalog:",

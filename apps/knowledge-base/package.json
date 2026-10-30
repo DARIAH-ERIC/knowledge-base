@@ -58,7 +58,6 @@
 		"@internationalized/date": "catalog:",
 		"@opentelemetry/sdk-trace-base": "catalog:",
 		"@react-aria/utils": "catalog:",
-		"@sentry/nextjs": "catalog:",
 		"@sindresorhus/slugify": "catalog:",
 		"@tiptap/core": "catalog:",
 		"@tiptap/html": "catalog:",
