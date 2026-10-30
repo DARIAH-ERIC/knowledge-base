@@ -30,7 +30,7 @@ export async function generateMetadata(
 export default async function DashboardWebsiteDocumentsPoliciesPage(
 	_props: Readonly<DashboardWebsiteDocumentsPoliciesPageProps>,
 ): Promise<ReactNode> {
-	const [groups, documents, { items: initialAssets }] = await Promise.all([
+	const [groups, documents, { items: initialAssets }, aliasRows] = await Promise.all([
 		db.query.documentPolicyGroups.findMany({
 			orderBy: { position: "asc" },
 		}),
@@ -109,6 +109,7 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 			.where(latestEditableEntityVersionWhere())
 			.orderBy(asc(schema.documentsPolicies.position)),
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "documents" }),
+		db.query.documentPolicyAliases.findMany({ columns: { key: true, entityId: true } }),
 	]);
 
 	const documentsShaped = documents.map(({ slug, entityId, document, ...rest }) => {
@@ -126,8 +127,29 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 	});
 	const ungrouped = documentsShaped.filter((document) => document.groupId == null);
 
+	/** Only published entries can be an alias target, as in the api. */
+	const aliasOptions = documentsShaped
+		.filter((document) => document.isPublished)
+		.map((document) => {
+			return { id: document.entityVersion.entity.id, title: document.title };
+		})
+		.toSorted((a, b) => a.title.localeCompare(b.title));
+
+	/** An alias whose entry is no longer published resolves to nothing, as in the api. */
+	const aliasTarget = (key: schema.DocumentPolicyAliasKey) => {
+		const entityId = aliasRows.find((row) => row.key === key)?.entityId;
+		return aliasOptions.some((option) => option.id === entityId) ? (entityId ?? null) : null;
+	};
+
+	const aliases = {
+		statutes: aliasTarget("statutes"),
+		"internal-rules-of-procedure": aliasTarget("internal-rules-of-procedure"),
+	};
+
 	return (
 		<DocumentsPoliciesPage
+			aliasOptions={aliasOptions}
+			aliases={aliases}
 			groups={groupsWithDocuments}
 			initialAssets={initialAssets}
 			ungrouped={ungrouped}

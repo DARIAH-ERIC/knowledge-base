@@ -1150,6 +1150,7 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-data-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-questions-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-aliases-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/featured/_components/featured-items-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx
@@ -1936,6 +1937,7 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-questions-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-aliases-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/featured/_components/featured-items-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx
@@ -7697,6 +7699,7 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-aliases-form.tsx
 msgctxt "450Fty"
 msgid "None"
 msgstr ""
@@ -8959,6 +8962,27 @@ msgctxt "Sprtdj"
 msgid "Please select a document."
 msgstr ""
 
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-aliases-form.tsx
+msgctxt "DY7sPf"
+msgid "Current statutes"
+msgstr "Current statutes"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-aliases-form.tsx
+msgctxt "ObyQZq"
+msgid "Current internal rules of procedure"
+msgstr "Current internal rules of procedure"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-aliases-form.tsx
+msgctxt "XMxm58"
+msgid "The published documents or policies the website serves at its stable statutes and internal rules of procedure urls."
+msgstr "The published documents or policies the website serves at its stable statutes and internal rules of procedure urls."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-aliases-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx
+msgctxt "nwYGQF"
+msgid "Stable links"
+msgstr "Stable links"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-create-dialog.tsx
 msgctxt "7NPc78"
 msgid "Create a new document group."
@@ -9046,6 +9070,11 @@ msgid "New document"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx
+msgctxt "vBlT6y"
+msgid "Documents"
+msgstr "Documents"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx
 msgctxt "HcYTMM"
 msgid "Ungrouped"
 msgstr ""
@@ -9069,6 +9098,16 @@ msgstr ""
 msgctxt "vJcVs_"
 msgid "Could not delete group. Please try again."
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-policy-aliases.action.ts
+msgctxt "eeqJDf"
+msgid "Stable links must point to published documents or policies."
+msgstr "Stable links must point to published documents or policies."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-policy-aliases.action.ts
+msgctxt "LC_smN"
+msgid "Stable links saved."
+msgstr "Stable links saved."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/[slug]/details/page.tsx
 msgctxt "r92oVu"

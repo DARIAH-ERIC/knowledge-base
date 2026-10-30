@@ -1,9 +1,11 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
 import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import { Link } from "@dariah-eric/ui/link";
+import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
 import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import {
 	ChevronDownIcon,
@@ -15,7 +17,15 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
+import {
+	type ComponentProps,
+	Fragment,
+	type ReactNode,
+	startTransition,
+	useState,
+	useTransition,
+} from "react";
+import type { Key } from "react-aria-components";
 
 import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
 import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
@@ -28,6 +38,10 @@ import {
 	type DocumentOrPolicyDialogItem,
 	DocumentOrPolicyFormDialog,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog";
+import {
+	DocumentPolicyAliasesForm,
+	useDocumentPolicyAliasLabels,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-aliases-form";
 import { DocumentPolicyGroupCreateDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-create-dialog";
 import { DocumentPolicyGroupEditDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-edit-dialog";
 import { deleteDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/delete-document-or-policy.action";
@@ -51,6 +65,8 @@ interface GroupWithDocuments extends Pick<schema.DocumentPolicyGroup, "id" | "la
 }
 
 interface DocumentsPoliciesPageProps {
+	aliases: ComponentProps<typeof DocumentPolicyAliasesForm>["aliases"];
+	aliasOptions: ComponentProps<typeof DocumentPolicyAliasesForm>["options"];
 	groups: Array<GroupWithDocuments>;
 	ungrouped: Array<DocumentItem>;
 	initialAssets: Array<{ key: string; label: string; url: string }>;
@@ -58,6 +74,8 @@ interface DocumentsPoliciesPageProps {
 
 interface DocumentRowProps {
 	item: DocumentItem;
+	/** Labels of the aliases, such as the current statutes, that point to this item. */
+	aliasLabels: Array<string>;
 	isFirst: boolean;
 	isLast: boolean;
 	onEdit: (item: DocumentOrPolicyDialogItem) => void;
@@ -66,7 +84,7 @@ interface DocumentRowProps {
 }
 
 function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
-	const { item, isFirst, isLast, onEdit, onDelete, onMove } = props;
+	const { item, aliasLabels, isFirst, isLast, onEdit, onDelete, onMove } = props;
 
 	const t = useExtracted();
 
@@ -75,6 +93,11 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 			<div className="flex flex-1 items-center gap-x-2 min-inline-0">
 				<EntityLifecycleStatusBadge hasDraft={item.hasDraft} isPublished={item.isPublished} />
 				<span className="text-sm font-medium">{item.title}</span>
+				{aliasLabels.map((label) => (
+					<Badge key={label} intent="info">
+						{label}
+					</Badge>
+				))}
 				{item.linkUrl != null ? (
 					<LinkIcon
 						aria-label={t("External link")}
@@ -156,6 +179,8 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 
 interface DocumentSectionProps {
 	label: string;
+	/** Alias labels keyed by the entity id they point to. */
+	aliasLabelsByEntityId: ReadonlyMap<string, Array<string>>;
 	groupId: string | null;
 	items: Array<DocumentItem>;
 	isFirstGroup?: boolean;
@@ -174,6 +199,7 @@ interface DocumentSectionProps {
 function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 	const {
 		label,
+		aliasLabelsByEntityId,
 		groupId,
 		items,
 		isFirstGroup,
@@ -260,6 +286,7 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 					{items.map((item, index) => (
 						<DocumentRow
 							key={item.id}
+							aliasLabels={aliasLabelsByEntityId.get(item.entityVersion.entity.id) ?? []}
 							isFirst={index === 0}
 							isLast={index === items.length - 1}
 							item={item}
@@ -288,7 +315,7 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 }
 
 export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps>): ReactNode {
-	const { groups, ungrouped, initialAssets } = props;
+	const { aliases, aliasOptions, groups, ungrouped, initialAssets } = props;
 
 	const t = useExtracted();
 
@@ -310,6 +337,19 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 	const [isGroupDeletePending, startGroupDeleteTransition] = useTransition();
 	const [groupToEdit, setGroupToEdit] = useState<{ id: string; label: string } | null>(null);
 	const [moveError, setMoveError] = useState<string | null>(null);
+	const [selectedTab, setSelectedTab] = useState<Key>("documents");
+
+	const aliasLabels = useDocumentPolicyAliasLabels();
+	const aliasLabelsByEntityId = new Map<string, Array<string>>();
+	for (const key of Object.keys(aliasLabels) as Array<schema.DocumentPolicyAliasKey>) {
+		const entityId = aliases[key];
+		if (entityId != null) {
+			aliasLabelsByEntityId.set(entityId, [
+				...(aliasLabelsByEntityId.get(entityId) ?? []),
+				aliasLabels[key],
+			]);
+		}
+	}
 
 	function move(action: () => Promise<unknown>) {
 		setMoveError(null);
@@ -340,61 +380,78 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 			/>
 			<ActionErrorAlert className="mbe-4" message={moveError} />
 
-			<div className="p-(--layout-padding)">
-				{groups.map((group, groupIndex) => (
-					<DocumentSection
-						key={group.id}
-						groupId={group.id}
-						groups={allGroups}
-						initialAssets={initialAssets}
-						isFirstGroup={groupIndex === 0}
-						isLastGroup={groupIndex === groups.length - 1}
-						items={group.documentsPolicies}
-						label={group.label}
-						onAddDocument={(gid) => {
-							setDialogState({ isOpen: true, item: null, initialGroupId: gid });
-						}}
-						onDeleteDocument={(id) => {
-							setDocumentToDelete(id);
-						}}
-						onDeleteGroup={(id) => {
-							setGroupToDelete(id);
-						}}
-						onEditDocument={(item) => {
-							setDialogState({ isOpen: true, item });
-						}}
-						onEditGroup={(group) => {
-							setGroupToEdit(group);
-						}}
-						onMoveDocument={(id, direction) => {
-							move(() => moveDocumentOrPolicyAction(id, direction));
-						}}
-						onMoveGroup={(id, direction) => {
-							move(() => moveDocumentPolicyGroupAction(id, direction));
-						}}
-					/>
-				))}
+			<Tabs onSelectionChange={setSelectedTab} selectedKey={selectedTab}>
+				<TabList aria-label={t("Documents and policies")}>
+					<Tab id="documents">{t("Documents")}</Tab>
+					<Tab id="stable-links">{t("Stable links")}</Tab>
+				</TabList>
 
-				<DocumentSection
-					groupId={null}
-					groups={allGroups}
-					initialAssets={initialAssets}
-					items={ungrouped}
-					label={t("Ungrouped")}
-					onAddDocument={(gid) => {
-						setDialogState({ isOpen: true, item: null, initialGroupId: gid });
-					}}
-					onDeleteDocument={(id) => {
-						setDocumentToDelete(id);
-					}}
-					onEditDocument={(item) => {
-						setDialogState({ isOpen: true, item });
-					}}
-					onMoveDocument={(id, direction) => {
-						move(() => moveDocumentOrPolicyAction(id, direction));
-					}}
-				/>
-			</div>
+				<TabPanel id="documents">
+					<div className="p-(--layout-padding)">
+						{groups.map((group, groupIndex) => (
+							<DocumentSection
+								key={group.id}
+								aliasLabelsByEntityId={aliasLabelsByEntityId}
+								groupId={group.id}
+								groups={allGroups}
+								initialAssets={initialAssets}
+								isFirstGroup={groupIndex === 0}
+								isLastGroup={groupIndex === groups.length - 1}
+								items={group.documentsPolicies}
+								label={group.label}
+								onAddDocument={(gid) => {
+									setDialogState({ isOpen: true, item: null, initialGroupId: gid });
+								}}
+								onDeleteDocument={(id) => {
+									setDocumentToDelete(id);
+								}}
+								onDeleteGroup={(id) => {
+									setGroupToDelete(id);
+								}}
+								onEditDocument={(item) => {
+									setDialogState({ isOpen: true, item });
+								}}
+								onEditGroup={(group) => {
+									setGroupToEdit(group);
+								}}
+								onMoveDocument={(id, direction) => {
+									move(() => moveDocumentOrPolicyAction(id, direction));
+								}}
+								onMoveGroup={(id, direction) => {
+									move(() => moveDocumentPolicyGroupAction(id, direction));
+								}}
+							/>
+						))}
+
+						<DocumentSection
+							aliasLabelsByEntityId={aliasLabelsByEntityId}
+							groupId={null}
+							groups={allGroups}
+							initialAssets={initialAssets}
+							items={ungrouped}
+							label={t("Ungrouped")}
+							onAddDocument={(gid) => {
+								setDialogState({ isOpen: true, item: null, initialGroupId: gid });
+							}}
+							onDeleteDocument={(id) => {
+								setDocumentToDelete(id);
+							}}
+							onEditDocument={(item) => {
+								setDialogState({ isOpen: true, item });
+							}}
+							onMoveDocument={(id, direction) => {
+								move(() => moveDocumentOrPolicyAction(id, direction));
+							}}
+						/>
+					</div>
+				</TabPanel>
+
+				<TabPanel id="stable-links">
+					<div className="p-(--layout-padding)">
+						<DocumentPolicyAliasesForm aliases={aliases} options={aliasOptions} />
+					</div>
+				</TabPanel>
+			</Tabs>
 
 			<DocumentPolicyGroupEditDialog
 				group={groupToEdit}

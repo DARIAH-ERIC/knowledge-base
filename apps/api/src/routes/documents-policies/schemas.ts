@@ -172,3 +172,34 @@ export const GetDocumentOrPolicyBySlug = {
 	),
 	ResponseSchema: DocumentOrPolicySchema,
 };
+
+/**
+ * The published documents-policies entry an alias currently points to, with the same
+ * `document`/`link` target as on `DocumentOrPolicyBase`, so a consumer can redirect to it without a
+ * second request.
+ */
+export const DocumentOrPolicyAliasSchema = v.pipe(
+	v.object({
+		...v.pick(schema.DocumentPolicyAliasSelectSchema, ["key"]).entries,
+		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		/** Download url of the uploaded file. `null` when the item is an external link. */
+		document: v.nullable(v.object({ url: v.string() })),
+		/** The external page the item points to. `null` when the item is an uploaded document. */
+		link: v.nullable(v.object({ url: v.string() })),
+	}),
+	v.description("Document or policy alias"),
+	v.metadata({ ref: "DocumentOrPolicyAlias" }),
+);
+
+export type DocumentOrPolicyAlias = v.InferOutput<typeof DocumentOrPolicyAliasSchema>;
+
+export const GetDocumentOrPolicyByAlias = {
+	ParamsSchema: v.pipe(
+		v.object({
+			key: v.picklist(schema.documentPolicyAliasKeysEnum),
+		}),
+		v.description("Get document or policy by alias params"),
+		v.metadata({ ref: "GetDocumentOrPolicyByAliasParams" }),
+	),
+	ResponseSchema: DocumentOrPolicyAliasSchema,
+};

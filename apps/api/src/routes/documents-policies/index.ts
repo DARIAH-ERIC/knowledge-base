@@ -3,12 +3,14 @@ import { Readable } from "node:stream";
 import { assert } from "@acdh-oeaw/lib";
 
 import { getContentDispositionHeader } from "@/lib/asset-download";
+import { withTarget } from "@/lib/document-or-policy-target";
 import { createRouter } from "@/lib/factory";
 import { describeRoute } from "@/lib/openapi/describe-route";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, NOT_FOUND } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
 import {
+	GetDocumentOrPolicyByAlias,
 	GetDocumentOrPolicyById,
 	GetDocumentOrPolicyBySlug,
 	GetDocumentOrPolicyDocumentById,
@@ -18,6 +20,7 @@ import {
 	GetDocumentsPoliciesTree,
 } from "@/routes/documents-policies/schemas";
 import {
+	getDocumentOrPolicyByAlias,
 	getDocumentOrPolicyById,
 	getDocumentOrPolicyBySlug,
 	getDocumentOrPolicyDocument,
@@ -26,27 +29,6 @@ import {
 	getDocumentsPolicies,
 	getDocumentsPoliciesTree,
 } from "@/routes/documents-policies/service";
-import { env } from "~/config/env.config";
-
-function documentUrl(slug: string) {
-	return new URL(`/api/v1/documents-policies/slugs/${slug}/document`, env.API_BASE_URL).href;
-}
-
-/**
- * Replaces the stored target columns with what a client follows: a download url for an uploaded
- * document, or the external link. Exactly one of `document` and `link` is set.
- */
-function withTarget<
-	T extends { documentId: string | null; linkUrl: string | null; entity: { slug: string } },
->(item: T) {
-	const { documentId, linkUrl, ...rest } = item;
-
-	return {
-		...rest,
-		document: documentId != null ? { url: documentUrl(item.entity.slug) } : null,
-		link: linkUrl != null ? { url: linkUrl } : null,
-	};
-}
 
 export const router = createRouter()
 	/** GET /api/documents-policies */
@@ -165,6 +147,50 @@ export const router = createRouter()
 			const data = await getDocumentOrPolicySlugs(db, { limit, offset });
 
 			const payload = await validate(GetDocumentOrPolicySlugs.ResponseSchema, data, 500);
+
+			return c.json(payload);
+		},
+	)
+
+	/** GET /api/documents-policies/aliases/:key */
+	.get(
+		"/aliases/:key",
+		describeRoute({
+			tags: ["documents-policies"],
+			summary: "Get document or policy by alias",
+			description:
+				"Retrieve the published document or policy an alias, such as the current statutes, points to. Not found when the alias is not set.",
+			operationId: "getDocumentOrPolicyByAlias",
+			"x-cache-tags": ["document-aliases", "documents-policies"],
+			responses: {
+				200: {
+					description: "Success response",
+					content: {
+						"application/json": {
+							schema: resolver(GetDocumentOrPolicyByAlias.ResponseSchema),
+						},
+					},
+				},
+				...BAD_REQUEST,
+				...NOT_FOUND,
+			},
+		}),
+		validator("param", GetDocumentOrPolicyByAlias.ParamsSchema),
+		async (c) => {
+			const { key } = c.req.valid("param");
+
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const result = await getDocumentOrPolicyByAlias(db, { key });
+
+			if (result == null) {
+				return c.notFound();
+			}
+
+			const data = withTarget(result);
+
+			const payload = await validate(GetDocumentOrPolicyByAlias.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
