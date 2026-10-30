@@ -13,7 +13,7 @@ import {
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
-import { count, eq, not, sql } from "@/services/db/sql";
+import { EmptyFilter, count, eq, not, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 function mapItem<
@@ -74,9 +74,11 @@ export async function getDariahProjects(
 					status != null
 						? (t) => {
 								const durationContainsNow = sql`${t.duration} @> NOW()::TIMESTAMPTZ`;
-								return status === "active" ? durationContainsNow : not(durationContainsNow);
+								return status === "active"
+									? durationContainsNow
+									: sql`not (${durationContainsNow})`;
 							}
-						: undefined,
+						: EmptyFilter,
 			},
 			columns: {
 				id: true,
@@ -296,9 +298,7 @@ export async function getDariahProjectSlugs(
 					},
 				},
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),

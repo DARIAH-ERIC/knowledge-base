@@ -300,7 +300,7 @@ export async function mergeDuplicateAssets(
 	await db.transaction(async (tx) => {
 		for (const asset of stale) {
 			for (const column of foreignKeys) {
-				const result = await tx.execute(sql`
+				const result = await tx.execute<Record<string, unknown>>(sql`
 					update ${qualifiedTable(column)} set ${sql.identifier(column.column)} = ${canonical.id}
 					where ${sql.identifier(column.column)} = ${asset.id} returning 1
 				`);
