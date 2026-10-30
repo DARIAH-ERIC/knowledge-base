@@ -43,7 +43,6 @@ const validate = define({
 		NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY: v.optional(v.pipe(v.string(), v.nonEmpty())),
 	}),
 	envVars: v.object({
-		APP_SENTRY_AUTH_TOKEN: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		AUTH_ENCRYPTION_KEY: v.pipe(v.string(), v.length(32)),
 		AUTH_SIGN_UP: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 		BACKGROUND_JOBS_API_SECRET: v.optional(v.pipe(v.string(), v.nonEmpty())),
@@ -103,7 +102,6 @@ const validate = define({
 
 export const env = validate({
 	environment: {
-		APP_SENTRY_AUTH_TOKEN: process.env.APP_SENTRY_AUTH_TOKEN,
 		AUTH_ENCRYPTION_KEY: process.env.AUTH_ENCRYPTION_KEY,
 		AUTH_SIGN_UP: process.env.AUTH_SIGN_UP,
 		BACKGROUND_JOBS_API_SECRET: process.env.BACKGROUND_JOBS_API_SECRET,
