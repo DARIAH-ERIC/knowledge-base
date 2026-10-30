@@ -1,0 +1,62 @@
+name: Release pull request
+
+# Keeps one open pull request from `development` to `main` while `development` has changes that are
+# not in production. Merging it (the `main` ruleset only allows merge commits) deploys to production.
+# The pull request lists the unreleased squash commits; the repository uses the pull request title
+# and body as the merge commit message, so the list ends up in `main`'s history.
+#
+# Pull requests opened with the workflow token do not trigger other workflows, so `Validate` does not
+# run on the release pull request itself. The same commits were validated on `development`, and
+# `Validate` runs again on the push to `main` before anything is deployed.
+
+concurrency:
+  group: "${{ github.workflow }}"
+  cancel-in-progress: false
+
+on:
+  push:
+    branches:
+      - development
+  workflow_dispatch:
+
+jobs:
+  release-pr:
+    name: Open or update release pull request
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          filter: "blob:none"
+
+      - name: Open or update pull request
+        env:
+          GH_TOKEN: "${{ github.token }}"
+        run: |
+          set -eu
+
+          commits="$(git log --reverse --no-merges --format='- %s' origin/main..origin/development)"
+
+          if [ -z "$commits" ]; then
+            echo "Nothing to release."
+            exit 0
+          fi
+
+          body="$(printf 'Merging this pull request deploys the following changes to production.\n\n%s\n' "$commits")"
+
+          number="$(gh pr list --repo "${{ github.repository }}" --base main --head development \
+            --state open --json number --jq '.[0].number // empty')"
+
+          if [ -n "$number" ]; then
+            gh pr edit "$number" --repo "${{ github.repository }}" --body "$body"
+            echo "Updated release pull request #${number}."
+          else
+            gh pr create --repo "${{ github.repository }}" --base main --head development \
+              --title "release: development to production" --body "$body"
+          fi
