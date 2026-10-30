@@ -64,7 +64,6 @@
 		"@sindresorhus/slugify": "catalog:",
 		"@types/node": "catalog:",
 		"@types/pg": "catalog:",
-		"concurrently": "catalog:",
 		"drizzle-dbml-generator": "catalog:",
 		"drizzle-kit": "catalog:",
 		"drizzle-seed": "catalog:",

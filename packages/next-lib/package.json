@@ -19,7 +19,6 @@
 		"types:check": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@acdh-oeaw/lib": "catalog:",
 		"@dariah-eric/configs": "workspace:^",
 		"@dariah-eric/rate-limiter": "workspace:^",
 		"@types/node": "catalog:",
@@ -30,7 +29,6 @@
 		"valibot": "catalog:"
 	},
 	"peerDependencies": {
-		"@acdh-oeaw/lib": "catalog:",
 		"@dariah-eric/rate-limiter": "workspace:^",
 		"better-result": "catalog:",
 		"next": "catalog:",
