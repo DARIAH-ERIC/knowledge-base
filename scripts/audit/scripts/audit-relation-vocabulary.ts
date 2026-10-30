@@ -15,9 +15,9 @@ import { env } from "../config/env.config";
  *
  * The allowed-relations tables are only consulted by the edit UI to decide which relations to
  * offer; they are **not** enforced at the database level (nothing in the relation tables references
- * them, no trigger checks them). So bulk imports and migrations (see `scripts/migrate`) can — and
- * did — write combinations the UI would never produce, e.g. a _country_ recorded as
- * `is_cooperating_partner_of` DARIAH-EU (`migrate-unr.ts` creates this for UNR
+ * them, no trigger checks them). So bulk imports and migrations (like the one-off WordPress and UNR
+ * imports) can — and did — write combinations the UI would never produce, e.g. a _country_ recorded
+ * as `is_cooperating_partner_of` DARIAH-EU (the UNR import created this for UNR
  * "cooperating_partnership" countries), while the vocabulary only allows an _institution_ to be a
  * cooperating partner of an eric.
  *
