@@ -427,3 +427,62 @@ export async function getDocumentOrPolicyBySlug(
 
 	return { ...flattenEntityVersion(item), ...fields };
 }
+
+//
+
+interface GetDocumentOrPolicyByAliasParams {
+	key: schema.DocumentPolicyAliasKey;
+}
+
+/**
+ * The published version of the entry the alias points to. `null` when the alias is not set, or the
+ * entry has no published version.
+ */
+export async function getDocumentOrPolicyByAlias(
+	db: Database | Transaction,
+	params: GetDocumentOrPolicyByAliasParams,
+) {
+	const { key } = params;
+
+	const item = await db.query.documentPolicyAliases.findFirst({
+		where: { key },
+		columns: { key: true, entityId: true },
+	});
+
+	if (item == null) {
+		return null;
+	}
+
+	const documentOrPolicy = await db.query.documentsPolicies.findFirst({
+		where: {
+			entityVersion: {
+				status: {
+					type: "published",
+				},
+				entityId: item.entityId,
+			},
+		},
+		columns: {
+			documentId: true,
+			linkUrl: true,
+		},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
+				},
+			},
+		},
+	});
+
+	if (documentOrPolicy == null) {
+		return null;
+	}
+
+	const { entityVersion, ...rest } = documentOrPolicy;
+
+	return { key: item.key, ...rest, entity: entityVersion.entity };
+}
