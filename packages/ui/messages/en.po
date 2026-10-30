@@ -177,12 +177,6 @@ msgstr ""
 
 #: lib/inline-rich-text-editor.tsx
 #: lib/rich-text-actions.tsx
-msgctxt "ui.Dkkmwm"
-msgid "Bold"
-msgstr ""
-
-#: lib/inline-rich-text-editor.tsx
-#: lib/rich-text-actions.tsx
 msgctxt "ui.g2V-es"
 msgid "Italic"
 msgstr ""
@@ -218,6 +212,11 @@ msgstr ""
 #: lib/pagination.tsx
 msgctxt "ui.N8BBfe"
 msgid "Last page"
+msgstr ""
+
+#: lib/rich-text-actions.tsx
+msgctxt "ui.Dkkmwm"
+msgid "Bold"
 msgstr ""
 
 #: lib/rich-text-actions.tsx
