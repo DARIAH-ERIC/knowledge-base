@@ -31,32 +31,76 @@ function getRequestHost(url: string): string {
 	}
 }
 
-/** Reduce a thrown background-job error to a structured {@link BackgroundJobError}. */
-export function toBackgroundJobError(error: unknown): BackgroundJobError {
-	if (HttpError.is(error)) {
-		const { status, statusText } = error.response;
-		return { kind: "http", host: getRequestHost(error.request.url), status, statusText };
+/** How far to follow `cause` links, as a guard against cycles. */
+const MAX_CAUSE_DEPTH = 10;
+
+/** Upper bound for a persisted `unknown` message, so a huge payload cannot bloat the row. */
+const MAX_MESSAGE_LENGTH = 2000;
+
+/**
+ * The error followed by its `cause` chain. `better-result` wraps errors rather than replacing them:
+ * `unwrap()` throws a `Panic` and a `TaggedError` such as `SearchError` keeps what it caught, both
+ * with the original error as `cause`.
+ */
+function getCauseChain(error: unknown): Array<unknown> {
+	const chain: Array<unknown> = [];
+	let current: unknown = error;
+
+	while (current != null && chain.length < MAX_CAUSE_DEPTH && !chain.includes(current)) {
+		chain.push(current);
+		// oxlint-disable-next-line unicorn/no-instanceof-builtins
+		current = current instanceof Error ? current.cause : undefined;
 	}
-	if (TimeoutError.is(error)) {
-		return { kind: "timeout", host: getRequestHost(error.request.url) };
-	}
-	if (NetworkError.is(error)) {
-		return { kind: "network", host: getRequestHost(error.request.url) };
-	}
-	if (ParseError.is(error)) {
-		return { kind: "parse", host: getRequestHost(error.request.url) };
-	}
-	if (AbortError.is(error)) {
-		return { kind: "abort", host: getRequestHost(error.request.url) };
-	}
+
+	return chain;
+}
+
+function describeError(error: unknown): string {
 	// oxlint-disable-next-line unicorn/no-instanceof-builtins
 	if (error instanceof Error) {
-		return { kind: "unknown", message: error.message.length > 0 ? error.message : error.name };
+		return error.message.length > 0 ? error.message : error.name;
 	}
 	if (typeof error === "string") {
-		return { kind: "unknown", message: error };
+		return error;
 	}
-	return { kind: "unknown", message: JSON.stringify(error) };
+	return JSON.stringify(error) ?? String(error);
+}
+
+/**
+ * Reduce a thrown background-job error to a structured {@link BackgroundJobError}. A request error
+ * anywhere in the `cause` chain is reported as such; anything else keeps the messages of the whole
+ * chain, since the outer error (e.g. `SearchError`) often names only the layer that failed.
+ */
+export function toBackgroundJobError(error: unknown): BackgroundJobError {
+	const chain = getCauseChain(error);
+
+	for (const link of chain) {
+		if (HttpError.is(link)) {
+			const { status, statusText } = link.response;
+			return { kind: "http", host: getRequestHost(link.request.url), status, statusText };
+		}
+		if (TimeoutError.is(link)) {
+			return { kind: "timeout", host: getRequestHost(link.request.url) };
+		}
+		if (NetworkError.is(link)) {
+			return { kind: "network", host: getRequestHost(link.request.url) };
+		}
+		if (ParseError.is(link)) {
+			return { kind: "parse", host: getRequestHost(link.request.url) };
+		}
+		if (AbortError.is(link)) {
+			return { kind: "abort", host: getRequestHost(link.request.url) };
+		}
+	}
+
+	const messages = [...new Set(chain.map(describeError))];
+	const message = messages.length > 0 ? messages.join(": ") : describeError(error);
+
+	return {
+		kind: "unknown",
+		message:
+			message.length > MAX_MESSAGE_LENGTH ? `${message.slice(0, MAX_MESSAGE_LENGTH)}…` : message,
+	};
 }
 
 /**
