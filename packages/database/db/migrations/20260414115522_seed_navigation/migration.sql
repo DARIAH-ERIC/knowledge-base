@@ -1,7 +1,25 @@
 -- Site metadata
-INSERT INTO "site_metadata" ("id", "title", "description")
-VALUES (1, 'DARIAH-EU', 'The pan-European infrastructure for arts and humanities scholars.')
-ON CONFLICT ("id") DO NOTHING;
+-- `title` was later split into `name` and `short_name`
+-- (20261102120000_add_site_metadata_short_name). A fresh database set up with `db:push` already
+-- has the new columns when this seed runs, so insert into whichever columns exist.
+DO $$
+BEGIN
+	IF EXISTS (
+		SELECT 1
+		FROM information_schema.columns
+		WHERE table_schema = current_schema()
+			AND table_name = 'site_metadata'
+			AND column_name = 'title'
+	) THEN
+		INSERT INTO "site_metadata" ("id", "title", "description")
+		VALUES (1, 'DARIAH-EU', 'The pan-European infrastructure for arts and humanities scholars.')
+		ON CONFLICT ("id") DO NOTHING;
+	ELSE
+		INSERT INTO "site_metadata" ("id", "name", "short_name", "description")
+		VALUES (1, 'DARIAH-EU', 'DARIAH-EU', 'The pan-European infrastructure for arts and humanities scholars.')
+		ON CONFLICT ("id") DO NOTHING;
+	END IF;
+END $$;
 
 --> statement-breakpoint
 
