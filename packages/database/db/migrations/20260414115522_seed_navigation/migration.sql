@@ -12,11 +12,11 @@ BEGIN
 			AND column_name = 'title'
 	) THEN
 		INSERT INTO "site_metadata" ("id", "title", "description")
-		VALUES (1, 'DARIAH-EU', 'The pan-European infrastructure for arts and humanities scholars.')
+		VALUES (1, 'DARIAH-EU', 'Digital Research Infrastructure for the Arts and Humanities')
 		ON CONFLICT ("id") DO NOTHING;
 	ELSE
 		INSERT INTO "site_metadata" ("id", "name", "short_name", "description")
-		VALUES (1, 'DARIAH-EU', 'DARIAH-EU', 'The pan-European infrastructure for arts and humanities scholars.')
+		VALUES (1, 'Digital Research Infrastructure for the Arts and Humanities', 'DARIAH-EU', 'Digital Research Infrastructure for the Arts and Humanities')
 		ON CONFLICT ("id") DO NOTHING;
 	END IF;
 END $$;
