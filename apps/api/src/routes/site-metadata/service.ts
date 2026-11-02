@@ -59,7 +59,8 @@ export async function getSiteMetadata(db: Database | Transaction) {
 	const [item, eric] = await Promise.all([
 		db.query.siteMetadata.findFirst({
 			columns: {
-				title: true,
+				name: true,
+				shortName: true,
 				description: true,
 				ogTitle: true,
 				ogDescription: true,
@@ -79,6 +80,7 @@ export async function getSiteMetadata(db: Database | Transaction) {
 
 	return {
 		...item,
+		title: item.shortName,
 		ogImage,
 		email: eric?.email ?? null,
 		socialMedia: eric != null ? mapSocialMedia(eric.socialMedia) : [],

@@ -33,7 +33,8 @@ export const updateSiteMetadataAction = createMutationAction({
 			.insert(schema.siteMetadata)
 			.values({
 				id: 1,
-				title: input.title,
+				name: input.name,
+				shortName: input.shortName,
 				description: input.description,
 				ogTitle: input.ogTitle,
 				ogDescription: input.ogDescription,
@@ -42,7 +43,8 @@ export const updateSiteMetadataAction = createMutationAction({
 			.onConflictDoUpdate({
 				target: schema.siteMetadata.id,
 				set: {
-					title: input.title,
+					name: input.name,
+					shortName: input.shortName,
 					description: input.description,
 					ogTitle: input.ogTitle,
 					ogDescription: input.ogDescription,

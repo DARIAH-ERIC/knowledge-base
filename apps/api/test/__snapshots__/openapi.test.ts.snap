@@ -18801,6 +18801,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               },
             ],
           },
+          "name": {
+            "type": "string",
+          },
           "ogDescription": {
             "anyOf": [
               {
@@ -18830,6 +18833,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "type": "null",
               },
             ],
+          },
+          "shortName": {
+            "type": "string",
           },
           "socialMedia": {
             "items": {
@@ -18909,14 +18915,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "type": "array",
           },
           "title": {
+            "description": "Deprecated: use \`shortName\`.",
             "type": "string",
           },
         },
         "required": [
-          "title",
+          "name",
+          "shortName",
           "description",
           "ogTitle",
           "ogDescription",
+          "title",
           "ogImage",
           "email",
           "socialMedia",
