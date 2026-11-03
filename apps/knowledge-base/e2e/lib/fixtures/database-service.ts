@@ -188,9 +188,9 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Upserts the singleton site_metadata row, setting `featuredItemIds` (and ensuring title +
-	 * description exist so the form can be saved without filling them). Used to put the page into a
-	 * known state before/after the featured-items tests.
+	 * Upserts the singleton site_metadata row, setting `featuredItemIds` (and ensuring name, short
+	 * name and description exist so the form can be saved without filling them). Used to put the page
+	 * into a known state before/after the featured-items tests.
 	 */
 	async resetSiteMetadataFeaturedItems(
 		featuredItemIds: { news?: Array<string>; events?: Array<string> } = {},
@@ -201,7 +201,8 @@ export class DatabaseService {
 			.insert(schema.siteMetadata)
 			.values({
 				id: 1,
-				title: "E2E Site Title",
+				name: "E2E Site Name",
+				shortName: "E2E Site",
 				description: "E2E Site Description",
 				featuredItemIds: value,
 			})
@@ -4166,6 +4167,33 @@ export class DatabaseService {
 				.delete(schema.documentPolicyGroups)
 				.where(inArray(schema.documentPolicyGroups.id, groupIds));
 		});
+	}
+
+	async getDocumentPolicyAliasEntityId(key: schema.DocumentPolicyAliasKey): Promise<string | null> {
+		const [row] = await this.db
+			.select({ entityId: schema.documentPolicyAliases.entityId })
+			.from(schema.documentPolicyAliases)
+			.where(eq(schema.documentPolicyAliases.key, key));
+
+		return row?.entityId ?? null;
+	}
+
+	/** Points an alias to an entity, or removes it with `null`. */
+	async setDocumentPolicyAlias(
+		key: schema.DocumentPolicyAliasKey,
+		entityId: string | null,
+	): Promise<void> {
+		if (entityId == null) {
+			await this.db
+				.delete(schema.documentPolicyAliases)
+				.where(eq(schema.documentPolicyAliases.key, key));
+			return;
+		}
+
+		await this.db
+			.insert(schema.documentPolicyAliases)
+			.values({ key, entityId })
+			.onConflictDoUpdate({ target: schema.documentPolicyAliases.key, set: { entityId } });
 	}
 
 	async getDocumentOrPolicyByTitle(title: string): Promise<{

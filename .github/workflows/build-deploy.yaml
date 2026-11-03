@@ -11,7 +11,7 @@ on:
 jobs:
   config:
     name: Detect changed apps
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     # `main` deploys to production, everything else to the development instance. The environment
     # supplies the variables and secrets; `deployment: false` reads them without recording a
@@ -50,15 +50,11 @@ jobs:
           fetch-depth: 0
           filter: "blob:none"
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
+      - name: Set up pnpm and node.js
+        uses: pnpm/setup@v3
         with:
-          cache: true
-
-      - name: Use node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24.x
+          runtime: node@26
+          install: false
 
       - name: Set lowercase repository name
         id: repository
@@ -132,7 +128,7 @@ jobs:
     name: Build and push docker images
     needs: [config]
     if: needs.config.outputs.has_changes == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
 
     # `NEXT_PUBLIC_` variables are inlined at build time, so images are built per environment.
@@ -207,7 +203,7 @@ jobs:
     name: Build and push docker images
     needs: [config]
     if: needs.config.outputs.has_changes == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
 
     permissions:

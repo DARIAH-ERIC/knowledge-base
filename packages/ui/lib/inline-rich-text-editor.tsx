@@ -17,6 +17,7 @@ import { FootnotePasteGuard } from "@/lib/rich-text-footnote";
 import { PastedContentNormalizer } from "@/lib/rich-text-paste-normalize";
 import { RichTextEditorToolbarButton } from "@/lib/rich-text-toolbar-button";
 import { Tooltip, TooltipContent } from "@/lib/tooltip";
+import { useFormReset } from "@/lib/use-form-reset";
 
 interface InlineRichTextEditorProps {
 	"aria-describedby"?: string;
@@ -261,6 +262,17 @@ export function InlineRichTextEditor(props: Readonly<InlineRichTextEditorProps>)
 
 	const [editorJson, setEditorJson] = useState<JSONContent | undefined>(initialContent);
 
+	const fieldRef = useRef<HTMLDivElement | null>(null);
+
+	/** A form reset restores the content at mount, as it does for react-aria fields. */
+	useFormReset(fieldRef, initialContent, (content) => {
+		editor?.commands.setContent(content ?? "", { emitUpdate: false });
+		setEditorJson(content);
+		if (editor != null) {
+			onChange?.(editor.getJSON());
+		}
+	});
+
 	const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
 	const [linkHrefInput, setLinkHrefInput] = useState("");
 	const savedSelectionRef = useRef<{ from: number; to: number } | null>(null);
@@ -330,6 +342,7 @@ export function InlineRichTextEditor(props: Readonly<InlineRichTextEditorProps>)
 
 	return (
 		<div
+			ref={fieldRef}
 			className={twMerge("relative overflow-clip rounded-lg border border-input bg-bg", className)}
 		>
 			{isEditable ? (

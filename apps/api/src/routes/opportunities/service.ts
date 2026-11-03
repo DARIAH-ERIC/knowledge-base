@@ -10,6 +10,7 @@ import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { OpportunitySource, OpportunityStatus } from "@/routes/opportunities/schemas";
 import {
+	EmptyFilter,
 	type SQL,
 	type SQLWrapper,
 	and,
@@ -69,7 +70,7 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 						type: "published",
 					},
 				},
-				RAW: statuses.length > 0 ? (t) => buildStatusFilter(t.duration, statuses) : undefined,
+				RAW: statuses.length > 0 ? (t) => buildStatusFilter(t.duration, statuses) : EmptyFilter,
 				source:
 					sources.length > 0
 						? {
@@ -77,7 +78,7 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 									in: sources,
 								},
 							}
-						: undefined,
+						: EmptyFilter,
 			},
 			columns: {
 				imageCaption: true,
@@ -251,9 +252,7 @@ export async function getOpportunitySlugs(
 					},
 				},
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),

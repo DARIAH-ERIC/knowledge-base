@@ -10,8 +10,8 @@ import { type EntityStatusType, groupByEntityVersion } from "../lib/entity-versi
 
 /**
  * Promotes a _presentational_ floated `image` block into a _semantic_ `media_text` block for the
- * named news items — the opt-in, human-vetted counterpart to `backfill-image-alignment`. Use it
- * where the image and the text beside it genuinely belong together (a portrait next to a bio, a
+ * named news items — the opt-in, human-vetted step after floats were restored from WordPress. Use
+ * it where the image and the text beside it genuinely belong together (a portrait next to a bio, a
  * logo next to a working-group blurb) rather than the image merely being floated for size.
  *
  * Slugs are passed as positional arguments. By default it prompts once per floated image (showing

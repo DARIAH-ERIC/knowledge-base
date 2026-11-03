@@ -1,7 +1,7 @@
 # @dariah-eric/audit
 
-Read-only data-integrity checks against the knowledge-base database. Unlike `@dariah-eric/migrate`
-(one-off data transformations) and `@dariah-eric/seed` (local fixtures), these scripts are meant to
+Read-only data-integrity checks against the knowledge-base database. Unlike `@dariah-eric/seed`
+(local fixtures), these scripts are meant to
 run repeatedly — locally, in ci, or on a schedule — against live data. They never modify data; each
 script prints findings, writes a tsv report to `.cache/`, and exits non-zero when findings exist.
 

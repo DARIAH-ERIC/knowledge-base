@@ -260,7 +260,12 @@ function AddExistingServiceForm(props: Readonly<AddExistingServiceFormProps>): R
 	return (
 		<section className="flex flex-col gap-y-3">
 			<h3 className="text-sm font-semibold text-fg">{t("Add an existing service")}</h3>
-			<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
+			<Form
+				action={action}
+				className="flex flex-col gap-y-4 max-inline-sm"
+				resetOnSuccess={true}
+				state={state}
+			>
 				<input name="countryReportId" type="hidden" value={reportId} />
 
 				<Select

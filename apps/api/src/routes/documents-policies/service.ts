@@ -55,14 +55,7 @@ export async function getDocumentsPolicies(
 					},
 				},
 			},
-			orderBy(t, { asc, sql }) {
-				return [
-					asc(sql`CASE WHEN "group"."r" IS NULL THEN 1 ELSE 0 END`),
-					asc(sql`("group"."r" ->> 'position')::integer`),
-					asc(t.position),
-					asc(t.id),
-				];
-			},
+			orderBy: { group: { position: "asc" }, position: "asc", id: "asc" },
 			limit,
 			offset,
 		}),
@@ -266,9 +259,7 @@ export async function getDocumentOrPolicySlugs(
 					},
 				},
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),

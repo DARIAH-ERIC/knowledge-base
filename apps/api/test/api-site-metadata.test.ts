@@ -11,20 +11,21 @@ import { createTestClient } from "~/test/lib/create-test-client";
 import { withTransaction } from "~/test/lib/with-transaction";
 
 async function seed(db: Database) {
-	const title = f.company.name();
+	const name = f.company.name();
+	const shortName = f.company.buzzNoun();
 	const description = f.lorem.paragraph();
 	const ogTitle = f.lorem.sentence();
 	const ogDescription = f.lorem.sentence();
 
 	await db
 		.insert(schema.siteMetadata)
-		.values({ title, description, ogTitle, ogDescription })
+		.values({ name, shortName, description, ogTitle, ogDescription })
 		.onConflictDoUpdate({
 			target: schema.siteMetadata.id,
-			set: { title, description, ogTitle, ogDescription },
+			set: { name, shortName, description, ogTitle, ogDescription },
 		});
 
-	return { title, description, ogTitle, ogDescription };
+	return { name, shortName, description, ogTitle, ogDescription };
 }
 
 /** The published DARIAH-EU ERIC version, seeded by migration in every database. */
@@ -102,7 +103,7 @@ describe("site-metadata", () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db);
 
-				const { title, ogTitle } = await seed(db);
+				const { name, shortName, description, ogTitle, ogDescription } = await seed(db);
 
 				const response = await client["site-metadata"].$get();
 
@@ -111,16 +112,16 @@ describe("site-metadata", () => {
 				/** @see {@link https://github.com/honojs/hono/issues/2280} */
 				const data = (await response.json()) as SiteMetadata;
 
-				expect(data).toMatchObject({ title, ogTitle });
+				expect(data).toMatchObject({ name, shortName, description, ogTitle, ogDescription });
 				expect(data.ogImage).toBeNull();
 			});
 		});
 
-		it("should return seeded title when metadata exists", async () => {
+		it("should return the short name as the deprecated title", async () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db);
 
-				const { title } = await seed(db);
+				const { shortName } = await seed(db);
 
 				const response = await client["site-metadata"].$get();
 
@@ -129,7 +130,7 @@ describe("site-metadata", () => {
 				/** @see {@link https://github.com/honojs/hono/issues/2280} */
 				const data = (await response.json()) as SiteMetadata;
 
-				expect(data).toMatchObject({ title });
+				expect(data.title).toBe(shortName);
 			});
 		});
 	});

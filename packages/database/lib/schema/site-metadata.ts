@@ -21,7 +21,10 @@ export const siteMetadata = p.snakeCase.table(
 	"site_metadata",
 	{
 		id: p.integer("id").primaryKey().default(1),
-		title: p.text("title").notNull(),
+		/** Full name, e.g. "Digital Research Infrastructure for the Arts and Humanities". */
+		name: p.text("name").notNull(),
+		/** Short name, e.g. "DARIAH-EU", for where the full name would be too long. */
+		shortName: p.text("short_name").notNull(),
 		description: p.text("description").notNull(),
 		ogTitle: p.text("og_title"),
 		ogDescription: p.text("og_description"),

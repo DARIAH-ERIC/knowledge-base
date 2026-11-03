@@ -9,7 +9,7 @@ import { generateImageUrl, imageAssetColumns } from "@/lib/images";
 import { getPublishedProjectPartners } from "@/lib/project-partners";
 import { socialMediaByPosition } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
-import { count, eq, not, sql } from "@/services/db/sql";
+import { EmptyFilter, count, eq, not, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 interface GetProjectsParams {
@@ -35,9 +35,11 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 					status != null
 						? (t) => {
 								const durationContainsNow = sql`${t.duration} @> NOW()::TIMESTAMPTZ`;
-								return status === "active" ? durationContainsNow : not(durationContainsNow);
+								return status === "active"
+									? durationContainsNow
+									: sql`not (${durationContainsNow})`;
 							}
-						: undefined,
+						: EmptyFilter,
 			},
 			columns: {
 				id: true,
@@ -79,9 +81,7 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 					},
 				},
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),
@@ -264,9 +264,7 @@ export async function getProjectSlugs(db: Database | Transaction, params: GetPro
 					},
 				},
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),

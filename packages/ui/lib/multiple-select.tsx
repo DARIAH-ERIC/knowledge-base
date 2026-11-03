@@ -73,6 +73,14 @@ export function MultipleSelect<T extends OptionBase>(
 
 	const t = useExtracted("ui");
 
+	/**
+	 * On a form reset, react-aria returns a single select to its value at mount, but a multiple
+	 * select without `defaultValue` to no selection at all. Its value at mount makes both behave the
+	 * same.
+	 */
+	// oxlint-disable-next-line react/hook-use-state -- initial value only, never updated.
+	const [valueAtMount] = useState(rest.value);
+
 	const triggerRef = useRef<HTMLDivElement | null>(null);
 	const [triggerWidth, setTriggerWidth] = useState<string | undefined>();
 
@@ -105,6 +113,7 @@ export function MultipleSelect<T extends OptionBase>(
 		<Select
 			className={cx(fieldStyles({ className: "group/select" }), className)}
 			data-slot="control"
+			defaultValue={valueAtMount}
 			name={name}
 			selectionMode="multiple"
 			{...rest}

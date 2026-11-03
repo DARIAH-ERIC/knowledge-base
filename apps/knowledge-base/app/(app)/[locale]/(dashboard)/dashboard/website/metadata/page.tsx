@@ -43,7 +43,8 @@ export default async function DashboardWebsiteMetadataPage(
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 		db.query.siteMetadata.findFirst({
 			columns: {
-				title: true,
+				name: true,
+				shortName: true,
 				description: true,
 				ogTitle: true,
 				ogDescription: true,
@@ -65,7 +66,8 @@ export default async function DashboardWebsiteMetadataPage(
 	const siteMetadata =
 		siteMetadataRow != null
 			? {
-					title: siteMetadataRow.title,
+					name: siteMetadataRow.name,
+					shortName: siteMetadataRow.shortName,
 					description: siteMetadataRow.description,
 					ogTitle: siteMetadataRow.ogTitle,
 					ogDescription: siteMetadataRow.ogDescription,

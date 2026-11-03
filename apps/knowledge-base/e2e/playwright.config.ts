@@ -86,6 +86,9 @@ function getConfig():
 /**
  * Server actions dispatch revalidation webhooks via `after()`. The real endpoint is not available
  * during e2e tests, so we run a stand-in that answers with `204` to keep the server logs clean.
+ *
+ * Only a webhook url on an explicit localhost port can be stood in for; any other url is left to
+ * fail as it would in development.
  */
 function getWebhookMockServer(): WebServer | undefined {
 	// oxlint-disable-next-line node/no-process-env
@@ -95,10 +98,16 @@ function getWebhookMockServer(): WebServer | undefined {
 		return undefined;
 	}
 
-	const port = Number(new URL(webhookUrl).port) || 3002;
+	const url = new URL(webhookUrl);
+
+	if (url.hostname !== "localhost" || url.port === "") {
+		return undefined;
+	}
+
+	const port = Number(url.port);
 
 	return {
-		command: `tsx ${join(import.meta.dirname, "lib/webhook-mock-server.ts")}`,
+		command: `tsx ${join(import.meta.dirname, "lib/webhook-mock-server.ts")} ${String(port)}`,
 		port,
 		reuseExistingServer: !isCI,
 	};

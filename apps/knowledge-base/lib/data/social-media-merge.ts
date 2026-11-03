@@ -74,7 +74,7 @@ async function assertNoKpiConflicts(
 	source: string,
 	target: string,
 ): Promise<void> {
-	const conflicts = await tx.execute(sql`
+	const conflicts = await tx.execute<Record<string, unknown>>(sql`
 		select 1
 		from country_report_social_media_kpis s
 		join country_report_social_media_kpis t
@@ -117,7 +117,7 @@ async function repointLinks(
 	addToMergeSummary(
 		summary,
 		table,
-		await tx.execute(sql`
+		await tx.execute<never>(sql`
 		delete from ${linkTable} src
 		where src.social_media_id = ${source} and exists (
 			select 1 from ${linkTable} tgt
@@ -129,7 +129,7 @@ async function repointLinks(
 	addToMergeSummary(
 		summary,
 		table,
-		await tx.execute(sql`
+		await tx.execute<never>(sql`
 		update ${linkTable} set social_media_id = ${target} where social_media_id = ${source}
 	`),
 	);

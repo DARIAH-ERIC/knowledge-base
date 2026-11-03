@@ -2,7 +2,7 @@
 
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { FieldError, Label } from "@dariah-eric/ui/field";
-import { Form } from "@dariah-eric/ui/form";
+import { Form, getResetKeyOnError } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { SubmitButton } from "@dariah-eric/ui/submit-button";
@@ -16,18 +16,27 @@ export function ResetPasswordForm(): ReactNode {
 	const t = useExtracted();
 
 	const [state, action] = useActionState(resetPasswordAction, createActionStateInitial());
+	/** Password fields are emptied after a failed submission. */
+	const passwordKey = getResetKeyOnError(state);
 
 	return (
 		<Form action={action} className="flex flex-col gap-y-6" state={state}>
 			<FormStatus state={state} />
 
-			<TextField autoComplete="new-password" isRequired={true} name="password" type="password">
+			<TextField
+				key={`password-${passwordKey}`}
+				autoComplete="new-password"
+				isRequired={true}
+				name="password"
+				type="password"
+			>
 				<Label>{t("Password")}</Label>
 				<FieldError />
 				<Input />
 			</TextField>
 
 			<TextField
+				key={`password-confirmation-${passwordKey}`}
 				autoComplete="new-password"
 				isRequired={true}
 				name="password-confirmation"

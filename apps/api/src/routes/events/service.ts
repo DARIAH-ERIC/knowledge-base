@@ -373,9 +373,7 @@ export async function getEventSlugs(db: Database | Transaction, params: GetEvent
 				},
 				image: imageAssetColumns,
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
-			},
+			orderBy: { entityVersion: { updatedAt: "desc" } },
 			limit,
 			offset,
 		}),

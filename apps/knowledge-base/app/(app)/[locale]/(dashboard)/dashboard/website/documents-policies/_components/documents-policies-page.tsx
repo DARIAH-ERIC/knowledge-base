@@ -92,19 +92,22 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 		<div className="flex items-center gap-x-2 rounded-md p-2 hover:bg-muted/50">
 			<div className="flex flex-1 items-center gap-x-2 min-inline-0">
 				<EntityLifecycleStatusBadge hasDraft={item.hasDraft} isPublished={item.isPublished} />
-				<span className="text-sm font-medium">{item.title}</span>
-				{aliasLabels.map((label) => (
-					<Badge key={label} intent="info">
-						{label}
-					</Badge>
-				))}
-				{item.linkUrl != null ? (
-					<LinkIcon
-						aria-label={t("External link")}
-						className="shrink-0 text-muted-fg block-4 inline-4"
-						role="img"
-					/>
-				) : null}
+				{/* Badges wrap below the title as a whole, instead of breaking their labels. */}
+				<div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-inline-0">
+					<span className="text-sm font-medium">{item.title}</span>
+					{aliasLabels.map((label) => (
+						<Badge key={label} className="whitespace-nowrap" intent="info">
+							{label}
+						</Badge>
+					))}
+					{item.linkUrl != null ? (
+						<LinkIcon
+							aria-label={t("External link")}
+							className="shrink-0 text-muted-fg block-4 inline-4"
+							role="img"
+						/>
+					) : null}
+				</div>
 			</div>
 
 			<div className="flex shrink-0 items-center gap-x-1">

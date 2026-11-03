@@ -29,7 +29,6 @@
 	},
 	"forwardPorts": [
 		3001,
-		3002,
 		3003,
 		"imgproxy:8080",
 		"mailpit:1025",
@@ -43,9 +42,6 @@
 	"portsAttributes": {
 		"3001": {
 			"label": "DARIAH Knowledge Base"
-		},
-		"3002": {
-			"label": "DARIAH Website"
 		},
 		"3003": {
 			"label": "DARIAH Knowledge Base API"

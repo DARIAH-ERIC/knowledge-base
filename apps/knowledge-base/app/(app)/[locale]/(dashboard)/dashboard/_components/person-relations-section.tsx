@@ -472,7 +472,12 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 
 				{roleOptions.length > 0 && (
 					<FormLayout variant="stacked">
-						<Form action={formAction} className="flex flex-col gap-y-6" state={state}>
+						<Form
+							action={formAction}
+							className="flex flex-col gap-y-6"
+							resetOnSuccess={true}
+							state={state}
+						>
 							<FormSection
 								description={t("Add a person to this organisational unit.")}
 								title={t("Add person")}

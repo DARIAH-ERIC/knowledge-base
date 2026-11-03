@@ -18,6 +18,17 @@ export interface FormProps<
 	TValidationErrors extends object = ValidationErrors,
 > extends AriaFormProps {
 	children: ReactNode;
+	/**
+	 * Reset the form after a failed action. Only for forms whose input is useless after an error,
+	 * e.g. a one-time code. To empty only some fields, e.g. passwords, see `getResetKeyOnError`.
+	 */
+	resetOnError?: boolean;
+	/**
+	 * Reset the form after a successful action. Only for forms which stay mounted to add another
+	 * item, e.g. a contact form or an inline "add" form. An edit form must not reset: its fields
+	 * already show the saved values, and react-aria fields reset to their value at mount.
+	 */
+	resetOnSuccess?: boolean;
 	state: ActionState<TData, TValidationErrors>;
 }
 
@@ -25,20 +36,31 @@ export interface FormProps<
  * React resets a form once its `action` has run, whatever the result, which would discard the
  * user's input whenever the server rejects it. So submissions are dispatched from `onSubmit`
  * instead, which React does not follow with a reset (while `useFormStatus` still reports the
- * pending submission), and the form is reset only after a successful action.
+ * pending submission). The form is reset only when `resetOnSuccess` or `resetOnError` is set.
  */
 export function Form<TData = unknown, TValidationErrors extends object = ValidationErrors>(
 	props: Readonly<FormProps<TData, TValidationErrors>>,
 ): ReactNode {
-	const { action, children, onSubmit, state, ...rest } = props;
+	const {
+		action,
+		children,
+		onSubmit,
+		resetOnError = false,
+		resetOnSuccess = false,
+		state,
+		...rest
+	} = props;
 
 	const formRef = useRef<HTMLFormElement>(null);
 
 	useLayoutEffect(() => {
-		if (isActionStateSuccess(state)) {
+		if (
+			(resetOnSuccess && isActionStateSuccess(state)) ||
+			(resetOnError && isActionStateError(state))
+		) {
 			formRef.current?.reset();
 		}
-	}, [state]);
+	}, [resetOnError, resetOnSuccess, state]);
 
 	const onSubmitForm: NonNullable<AriaFormProps["onSubmit"]> = (event) => {
 		onSubmit?.(event);
@@ -90,4 +112,14 @@ export function Form<TData = unknown, TValidationErrors extends object = Validat
 			</AriaForm>
 		</FormContext.Provider>
 	);
+}
+
+/**
+ * A key which changes after each failed action. Fields keyed with it remount empty, e.g. password
+ * fields, which should not keep a rejected password while the other fields keep their input.
+ */
+export function getResetKeyOnError<TData, TValidationErrors extends object>(
+	state: ActionState<TData, TValidationErrors>,
+): string {
+	return isActionStateError(state) ? state.id : "";
 }

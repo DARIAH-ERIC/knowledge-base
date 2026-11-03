@@ -7452,6 +7452,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       },
       "GetNavigationResponse": {
         "$ref": "#/components/schemas/NavigationMenuList",
+        "description": "List of navigation menus with items",
       },
       "GetNewsItemSlugsResponse": {
         "description": "Paginated list of news item slugs",
@@ -7719,6 +7720,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       },
       "GetSiteMetadataResponse": {
         "$ref": "#/components/schemas/SiteMetadata",
+        "description": "Site metadata",
       },
       "GetSitemapResponse": {
         "description": "All website urls derived from published content",
@@ -7844,6 +7846,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       },
       "GetStatisticsResponse": {
         "$ref": "#/components/schemas/GetStatistics",
+        "description": "statistics for organisational units",
       },
       "GetWorkingGroupSlugsResponse": {
         "description": "Paginated list of working group slugs",
@@ -18798,6 +18801,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               },
             ],
           },
+          "name": {
+            "type": "string",
+          },
           "ogDescription": {
             "anyOf": [
               {
@@ -18827,6 +18833,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                 "type": "null",
               },
             ],
+          },
+          "shortName": {
+            "type": "string",
           },
           "socialMedia": {
             "items": {
@@ -18906,14 +18915,17 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "type": "array",
           },
           "title": {
+            "description": "Deprecated: use \`shortName\`.",
             "type": "string",
           },
         },
         "required": [
-          "title",
+          "name",
+          "shortName",
           "description",
           "ogTitle",
           "ogDescription",
+          "title",
           "ogImage",
           "email",
           "socialMedia",

@@ -112,7 +112,12 @@ export function CountryReportClaimedContributorsForm(
 			{availableContributions.length > 0 && (
 				<section className="flex flex-col gap-y-3">
 					<h3 className="text-sm font-semibold text-fg">{t("Add contributor")}</h3>
-					<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
+					<Form
+						action={action}
+						className="flex flex-col gap-y-4 max-inline-sm"
+						resetOnSuccess={true}
+						state={state}
+					>
 						<input name="countryReportId" type="hidden" value={report.id} />
 
 						<SearchableSelect

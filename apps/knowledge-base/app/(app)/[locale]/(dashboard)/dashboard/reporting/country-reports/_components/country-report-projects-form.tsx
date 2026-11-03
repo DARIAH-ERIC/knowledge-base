@@ -101,7 +101,12 @@ export function CountryReportProjectsForm(
 			{availableProjects.length > 0 && (
 				<section className="flex flex-col gap-y-3">
 					<h2 className="text-sm font-semibold text-fg">{t("Add project contribution")}</h2>
-					<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
+					<Form
+						action={action}
+						className="flex flex-col gap-y-4 max-inline-sm"
+						resetOnSuccess={true}
+						state={state}
+					>
 						<input name="countryReportId" type="hidden" value={report.id} />
 
 						<Select

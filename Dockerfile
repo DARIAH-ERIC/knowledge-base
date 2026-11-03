@@ -3,7 +3,7 @@
 # base
 # -------------------------------------------------------------------------------------------------
 
-FROM node:24-alpine AS base
+FROM node:26-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME/bin:$PNPM_HOME:$PATH"
 ENV CI=true
@@ -15,13 +15,13 @@ ENV pnpm_config_verify_deps_before_run=false
 # node.js from v25. The version is supplied as a build arg (resolved from the `packageManager` field
 # in CI), so the image runs the same pnpm the repo pins.
 ARG PNPM_VERSION
-RUN npm install --global "pnpm@${PNPM_VERSION}"
+RUN : "${PNPM_VERSION:?build arg is required}" && npm install --global "pnpm@${PNPM_VERSION}"
 # `turbo prune` runs before `pnpm install`, so it needs a turbo binary available up front. The version
 # is supplied as a build arg (resolved from the lockfile in CI) instead of installing the floating
 # latest, so prune is reproducible and matches the repo turbo used via `pnpm exec turbo` in the build
 # stages.
 ARG TURBO_VERSION
-RUN pnpm add --global "turbo@${TURBO_VERSION}"
+RUN : "${TURBO_VERSION:?build arg is required}" && pnpm add --global "turbo@${TURBO_VERSION}"
 
 # source
 # -------------------------------------------------------------------------------------------------

@@ -405,7 +405,7 @@ async function repointPersonRelationEndpoint(
 		addToMergeSummary(
 			summary,
 			table,
-			await tx.execute(sql`
+			await tx.execute<never>(sql`
 				with duplicates as (${duplicates})
 				delete from ${reportTable} r
 				using duplicates d
@@ -429,7 +429,7 @@ async function repointPersonRelationEndpoint(
 		addToMergeSummary(
 			summary,
 			table,
-			await tx.execute(sql`
+			await tx.execute<never>(sql`
 				with duplicates as (${duplicates})
 				update ${reportTable} r
 				set person_to_org_unit_id = d.target_id
@@ -442,7 +442,7 @@ async function repointPersonRelationEndpoint(
 	addToMergeSummary(
 		summary,
 		"persons_to_organisational_units",
-		await tx.execute(sql`
+		await tx.execute<never>(sql`
 			with duplicates as (${duplicates})
 			delete from persons_to_organisational_units
 			where id in (select source_id from duplicates)
@@ -452,7 +452,7 @@ async function repointPersonRelationEndpoint(
 	addToMergeSummary(
 		summary,
 		"persons_to_organisational_units",
-		await tx.execute(sql`
+		await tx.execute<never>(sql`
 			update persons_to_organisational_units
 			set ${endpointColumn} = ${target}
 			where ${endpointColumn} = ${source}
@@ -493,7 +493,7 @@ async function assertNoFrozenReportRoleConflicts(
 		const reportTable = sql.identifier(table);
 		const reportColumn = sql.identifier(report);
 		const frozenRoleColumn = sql.identifier(frozenRole);
-		const conflict = await tx.execute(sql`
+		const conflict = await tx.execute<Record<string, unknown>>(sql`
 			with duplicates as (${duplicates})
 			select 1
 			from ${reportTable} r

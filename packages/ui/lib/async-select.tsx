@@ -22,6 +22,7 @@ import {
 	type AsyncOptionsFetchPage,
 	useAsyncOptions,
 } from "@/lib/use-async-options";
+import { useFormReset } from "@/lib/use-form-reset";
 
 const defaultPageSize = 20;
 
@@ -108,6 +109,15 @@ function AsyncSelectInner<T extends AsyncOption>(
 		}
 	}, []);
 	useResizeObserver({ ref: triggerRef, onResize });
+
+	/** A form reset restores the selection at mount, as it does for react-aria fields. */
+	useFormReset(triggerRef, selectedItem, (initialItem) => {
+		if (initialItem != null) {
+			onSelect(initialItem);
+		} else {
+			onClear?.();
+		}
+	});
 
 	const {
 		displayedItems,

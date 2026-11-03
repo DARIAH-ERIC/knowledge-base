@@ -57,11 +57,9 @@
 		"@heroicons/react": "catalog:",
 		"@internationalized/date": "catalog:",
 		"@opentelemetry/sdk-trace-base": "catalog:",
-		"@react-aria/utils": "catalog:",
 		"@sindresorhus/slugify": "catalog:",
 		"@tiptap/core": "catalog:",
 		"@tiptap/html": "catalog:",
-		"@tiptap/starter-kit": "catalog:",
 		"@tiptap/static-renderer": "catalog:",
 		"@valibot/i18n": "catalog:",
 		"@vercel/otel": "catalog:",
@@ -70,7 +68,6 @@
 		"clsx": "catalog:",
 		"is-network-error": "catalog:",
 		"lucide-react": "catalog:",
-		"motion": "catalog:",
 		"next": "catalog:",
 		"next-intl": "catalog:",
 		"nodemailer": "catalog:",
@@ -80,14 +77,10 @@
 		"react-aria-components": "catalog:",
 		"react-dom": "catalog:",
 		"react-schemaorg": "catalog:",
-		"server-nodejs-only": "catalog:",
 		"server-only": "catalog:",
 		"sharp": "catalog:",
-		"sonner": "catalog:",
 		"tailwind-merge": "catalog:",
-		"tailwind-variants": "catalog:",
 		"uqr": "catalog:",
-		"use-debounce": "catalog:",
 		"uuid": "catalog:",
 		"valibot": "catalog:"
 	},
@@ -122,6 +115,6 @@
 		"extends": "@dariah-eric/configs/stylelint/base"
 	},
 	"engines": {
-		"node": "24.x"
+		"node": "26.x"
 	}
 }

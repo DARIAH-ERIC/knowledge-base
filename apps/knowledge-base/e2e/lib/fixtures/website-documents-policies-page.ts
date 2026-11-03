@@ -2,7 +2,7 @@ import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
-import { clickHydrated } from "@/e2e/lib/fixtures/hydration";
+import { clickHydrated, selectTab } from "@/e2e/lib/fixtures/hydration";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/website/documents-policies";
@@ -334,6 +334,31 @@ export class WebsiteDocumentsPoliciesPage {
 
 	versionSelectorPublishedLink(): Locator {
 		return this.page.getByRole("link", { name: "Published" });
+	}
+
+	// ---------------------------------------------------------------------------
+	// List page — stable links tab
+	// ---------------------------------------------------------------------------
+
+	async gotoStableLinks(): Promise<void> {
+		await this.goto();
+		await selectTab(this.page.getByRole("tab", { name: "Stable links" }));
+	}
+
+	stableLinkSelect(label: string): Locator {
+		return this.page.getByRole("combobox", { name: label });
+	}
+
+	async selectStableLink(label: string, title: string): Promise<void> {
+		await this.stableLinkSelect(label).fill(title);
+		await this.page.getByRole("option", { name: title, exact: true }).click();
+	}
+
+	async saveStableLinks(): Promise<void> {
+		await this.page.getByRole("button", { name: "Save", exact: true }).click();
+		await expect(
+			this.page.getByRole("status").filter({ hasText: "Stable links saved." }),
+		).toBeVisible();
 	}
 
 	// ---------------------------------------------------------------------------

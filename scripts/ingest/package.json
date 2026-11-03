@@ -38,7 +38,6 @@
 		"@dariah-eric/search-resources": "workspace:^",
 		"@dariah-eric/search-website": "workspace:^",
 		"@dariah-eric/sshoc-services": "workspace:^",
-		"@dariah-eric/storage": "workspace:^",
 		"@types/node": "catalog:",
 		"better-result": "catalog:",
 		"remark-parse": "catalog:",

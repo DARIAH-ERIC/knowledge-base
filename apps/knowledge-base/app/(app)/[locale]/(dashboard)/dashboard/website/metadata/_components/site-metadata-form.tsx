@@ -3,7 +3,7 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError, Label } from "@dariah-eric/ui/field";
+import { Description, FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
@@ -26,7 +26,10 @@ import { updateSiteMetadataAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 interface SiteMetadataFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	siteMetadata:
-		| (Pick<schema.SiteMetadata, "title" | "description" | "ogTitle" | "ogDescription"> & {
+		| (Pick<
+				schema.SiteMetadata,
+				"name" | "shortName" | "description" | "ogTitle" | "ogDescription"
+		  > & {
 				ogImage: SelectedImage | null;
 		  })
 		| null;
@@ -50,12 +53,32 @@ export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactN
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
 				<FormSection
-					description={t("Default title and description for the website.")}
+					description={t("Default name and description for the website.")}
 					title={t("Details")}
 				>
-					<TextField defaultValue={siteMetadata?.title ?? undefined} isRequired={true} name="title">
-						<Label>{t("Title")}</Label>
+					<TextField defaultValue={siteMetadata?.name ?? undefined} isRequired={true} name="name">
+						<Label>{t("Name")}</Label>
 						<Input />
+						<Description>
+							{t(
+								"The full name, shown in the title of the home page and when the website is installed as an app.",
+							)}
+						</Description>
+						<FieldError />
+					</TextField>
+
+					<TextField
+						defaultValue={siteMetadata?.shortName ?? undefined}
+						isRequired={true}
+						name="shortName"
+					>
+						<Label>{t("Short name")}</Label>
+						<Input />
+						<Description>
+							{t(
+								"Shown after the title of every page, as the site name in search results and link previews, and under the app icon.",
+							)}
+						</Description>
 						<FieldError />
 					</TextField>
 
@@ -80,7 +103,7 @@ export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactN
 				>
 					<TextField defaultValue={siteMetadata?.ogTitle ?? undefined} name="ogTitle">
 						<Label>{t("OG title")}</Label>
-						<Input placeholder={siteMetadata?.title ?? t("Defaults to title")} />
+						<Input placeholder={siteMetadata?.name ?? t("Defaults to name")} />
 						<FieldError />
 					</TextField>
 

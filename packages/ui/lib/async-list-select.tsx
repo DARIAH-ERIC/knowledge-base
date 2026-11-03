@@ -30,6 +30,7 @@ import {
 	type AsyncOptionsFetchPage,
 	useAsyncOptions,
 } from "@/lib/use-async-options";
+import { useFormReset } from "@/lib/use-form-reset";
 
 const defaultPageSize = 20;
 const emptySelectedItems: Array<never> = [];
@@ -117,8 +118,12 @@ function AsyncListSelectInner<T extends AsyncOption>(
 
 	const t = useExtracted("ui");
 
+	const fieldRef = useRef<HTMLDivElement | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
 	const [localSelectedItems, setLocalSelectedItems] = useState<Array<T>>(emptySelectedItems);
+
+	/** A form reset restores the selection at mount, as it does for react-aria fields. */
+	useFormReset(fieldRef, value, onChange);
 
 	const {
 		displayedItems,
@@ -203,7 +208,11 @@ function AsyncListSelectInner<T extends AsyncOption>(
 			: t("Could not load options.");
 
 	return (
-		<div className={fieldStyles({ className: "group/select space-y-2" })} data-slot="control">
+		<div
+			ref={fieldRef}
+			className={fieldStyles({ className: "group/select space-y-2" })}
+			data-slot="control"
+		>
 			{label != null ? <Label>{label}</Label> : null}
 
 			{resolvedSelectedItems.length > 0 ? (

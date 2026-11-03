@@ -109,6 +109,7 @@ import {
 import { RichTextEditorToolbarButton } from "@/lib/rich-text-toolbar-button";
 import { ToggleGroup, ToggleGroupItem } from "@/lib/toggle-group";
 import { Tooltip, TooltipContent } from "@/lib/tooltip";
+import { useFormReset } from "@/lib/use-form-reset";
 
 type RichTextSize = "sm" | "md" | "lg";
 
@@ -3182,6 +3183,17 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const [editorJson, setEditorJson] = useState<JSONContent | undefined>(initialContent);
 
+	const fieldRef = useRef<HTMLDivElement | null>(null);
+
+	/** A form reset restores the content at mount, as it does for react-aria fields. */
+	useFormReset(fieldRef, initialContent, (content) => {
+		editor?.commands.setContent(content ?? "", { emitUpdate: false });
+		setEditorJson(content);
+		if (editor != null) {
+			onChange?.(editor.getJSON());
+		}
+	});
+
 	/**
 	 * The document's notes, in the order their markers are numbered in. Shown as a list under the
 	 * editor because that is where a reader meets them — a marker in the prose carries only its
@@ -3404,6 +3416,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	return (
 		<div
+			ref={fieldRef}
 			className={twMerge("relative overflow-clip rounded-lg border border-input bg-bg", className)}
 		>
 			{isEditable ? (
