@@ -1059,6 +1059,7 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-menu-create-dialog.tsx
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx
 msgctxt "HAlOn1"
@@ -1577,7 +1578,6 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx
@@ -9418,9 +9418,24 @@ msgid "Website dashboard - Impact case studies"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx
-msgctxt "JteUB5"
-msgid "Default title and description for the website."
-msgstr ""
+msgctxt "0s3qKD"
+msgid "Default name and description for the website."
+msgstr "Default name and description for the website."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx
+msgctxt "uC6sjb"
+msgid "The full name, shown in the title of the home page and when the website is installed as an app."
+msgstr "The full name, shown in the title of the home page and when the website is installed as an app."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx
+msgctxt "1-5343"
+msgid "Short name"
+msgstr "Short name"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx
+msgctxt "Z70xwm"
+msgid "Shown after the title of every page, as the site name in search results and link previews, and under the app icon."
+msgstr "Shown after the title of every page, as the site name in search results and link previews, and under the app icon."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx
 msgctxt "sDfPR-"
@@ -9438,9 +9453,9 @@ msgid "OG title"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx
-msgctxt "akvaaI"
-msgid "Defaults to title"
-msgstr ""
+msgctxt "k922y0"
+msgid "Defaults to name"
+msgstr "Defaults to name"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx
 msgctxt "iU44zV"

@@ -111,7 +111,8 @@ describe("featured entities", () => {
 					.insert(schema.siteMetadata)
 					.values({
 						id: 1,
-						title: "Featured entities test",
+						name: "Featured entities test",
+						shortName: "Featured",
 						description: "Featured entities test",
 						featuredItemIds: {
 							news: [opportunity.versionId, fundingCall.versionId, newsItem.versionId],
