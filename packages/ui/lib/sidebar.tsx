@@ -155,7 +155,8 @@ export function SidebarProvider(props: Readonly<SidebarProviderProps>): ReactNod
 		};
 	}, [toggleSidebar, shortcut]);
 
-	const state = open ? "expanded" : "collapsed";
+	/** The mobile sheet always shows the full sidebar, however collapsed the desktop one is. */
+	const state = isMobile || open ? "expanded" : "collapsed";
 
 	const contextValue = useMemo<SidebarContextProps>(() => {
 		return {
@@ -409,8 +410,8 @@ export interface SidebarSectionGroupProps extends ComponentProps<"section"> {}
 export function SidebarSectionGroup(props: Readonly<SidebarSectionGroupProps>): ReactNode {
 	const { className, ...rest } = props;
 
-	const { state, isMobile } = useSidebar();
-	const collapsed = state === "collapsed" && !isMobile;
+	const { state } = useSidebar();
+	const collapsed = state === "collapsed";
 
 	return (
 		<section
@@ -473,8 +474,8 @@ export interface SidebarItemProps extends Omit<ComponentProps<typeof Link>, "chi
 export function SidebarItem(props: Readonly<SidebarItemProps>): ReactNode {
 	const { isCurrent, tooltip, children, badge, className, ...rest } = props;
 
-	const { state, isMobile } = useSidebar();
-	const isCollapsed = state === "collapsed" && !isMobile;
+	const { state } = useSidebar();
+	const isCollapsed = state === "collapsed";
 
 	const link = (
 		<Link
@@ -805,9 +806,9 @@ export function SidebarRail(props: Readonly<SidebarRailProps>): ReactNode {
 export interface SidebarLabelProps extends ComponentProps<typeof AriaText> {}
 
 export function SidebarLabel({ className, ref, ...props }: Readonly<SidebarLabelProps>): ReactNode {
-	const { state, isMobile } = useSidebar();
+	const { state } = useSidebar();
 
-	const collapsed = state === "collapsed" && !isMobile;
+	const collapsed = state === "collapsed";
 
 	if (!collapsed) {
 		return (
