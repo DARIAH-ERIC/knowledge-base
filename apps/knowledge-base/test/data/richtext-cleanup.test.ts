@@ -1,7 +1,9 @@
 import { assert } from "@acdh-oeaw/lib";
 import {
 	cleanRichText,
+	cleanSummaries,
 	findRichTextNeedingCleanup,
+	findSummariesNeedingCleanup,
 } from "@dariah-eric/database/richtext-cleanup-service";
 import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
@@ -304,6 +306,73 @@ describe("richtext cleanup", () => {
 
 			expect(block?.content).toStrictEqual(prose);
 			expect(block?.caption).toStrictEqual(tidy("Media caption"));
+		});
+	});
+});
+
+describe("summary cleanup", () => {
+	/** A draft news version with the given summary, last updated at a known time. */
+	async function seedNewsItem(tx: Transaction, summary: string, updatedAt: Date): Promise<string> {
+		const entityType = await tx.query.entityTypes.findFirst({
+			where: { type: "news" },
+			columns: { id: true },
+		});
+		assert(entityType, "news entity type not found in database");
+
+		const title = f.lorem.sentence();
+		const { versionId } = await createDraftDocument(tx, entityType.id, slugify(title));
+		const asset = await getAsset(tx);
+
+		await tx.insert(schema.news).values({
+			id: versionId,
+			title,
+			summary,
+			publicationDate: new Date("2025-01-15T00:00:00.000Z"),
+			imageId: asset.id,
+			updatedAt,
+		});
+
+		return versionId;
+	}
+
+	it("rewrites the summaries it reports, and reports them no more", async () => {
+		await withTransaction(async (tx) => {
+			const updatedAt = new Date("2025-02-01T00:00:00.000Z");
+			const untidyId = await seedNewsItem(tx, "One\u00A0two\u00A0three", updatedAt);
+			const tidyId = await seedNewsItem(tx, "One two three", updatedAt);
+
+			const { entries } = await findSummariesNeedingCleanup(tx);
+			const versionIds = entries.map((entry) => entry.versionId);
+
+			expect(versionIds).toContain(untidyId);
+			expect(versionIds).not.toContain(tidyId);
+
+			const result = await cleanSummaries(tx, [untidyId]);
+
+			expect(result).toStrictEqual({ cleanedCount: 1, skippedIds: [] });
+
+			const row = await tx.query.news.findFirst({
+				where: { id: untidyId },
+				columns: { summary: true, updatedAt: true },
+			});
+
+			expect(row).toStrictEqual({ summary: "One two three", updatedAt });
+
+			const after = await findSummariesNeedingCleanup(tx);
+
+			expect(after.entries.map((entry) => entry.versionId)).not.toContain(untidyId);
+		});
+	});
+
+	it("skips a summary that no longer needs cleanup", async () => {
+		await withTransaction(async (tx) => {
+			const updatedAt = new Date("2025-02-01T00:00:00.000Z");
+			const tidyId = await seedNewsItem(tx, "One two three", updatedAt);
+
+			await expect(cleanSummaries(tx, [tidyId])).resolves.toStrictEqual({
+				cleanedCount: 0,
+				skippedIds: [tidyId],
+			});
 		});
 	});
 });

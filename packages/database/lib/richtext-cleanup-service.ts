@@ -1,8 +1,12 @@
 import type { JSONContent } from "@tiptap/core";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, like } from "drizzle-orm";
 
 import type { Database, Transaction } from "./index";
-import { normalizeInlineRichTextDocument, normalizeRichTextDocument } from "./rich-text-normalize";
+import {
+	normalizeInlineRichTextDocument,
+	normalizeRichTextDocument,
+	replaceNonBreakingSpaces,
+} from "./rich-text-normalize";
 import * as schema from "./schema";
 
 /**
@@ -23,6 +27,9 @@ import * as schema from "./schema";
  *
  * The one richtext outside a content block is an asset's own caption, edited in the media library.
  * Its findings would not be content blocks, so they are not reported here.
+ *
+ * An entity's `summary` is plain text, but it is pasted into from the same sources: see
+ * {@link findSummariesNeedingCleanup}.
  */
 
 /**
@@ -403,6 +410,149 @@ export async function cleanRichText(
 						entityType: cleanup.block.entityType,
 						fieldName: cleanup.block.fieldName,
 						status: cleanup.block.status,
+					},
+				};
+			}),
+		);
+	});
+
+	return { cleanedCount: applicable.length, skippedIds };
+}
+
+/**
+ * Every table with a `summary` column. They differ only in columns this service does not touch, so
+ * they are typed as one of them: a union of tables has no callable `update`.
+ */
+const summaryTables = [
+	schema.documentsPolicies,
+	schema.events,
+	schema.fundingCalls,
+	schema.impactCaseStudies,
+	schema.news,
+	schema.opportunities,
+	schema.organisationalUnits,
+	schema.pages,
+	schema.projects,
+	schema.spotlightArticles,
+] as unknown as Array<typeof schema.news>;
+
+/** JSON-serializable, like {@link RichTextCleanupBlock}. */
+export interface SummaryCleanupEntry {
+	/** The entity version the summary belongs to: a draft and its published version each have one. */
+	versionId: string;
+	entityId: string;
+	entityType: string;
+	entityLabel: string | null;
+	entitySlug: string;
+	/** Lifecycle status of the entity version (e.g. `draft`, `published`). */
+	status: string;
+}
+
+export interface SummaryCleanupResult {
+	entries: Array<SummaryCleanupEntry>;
+	total: number;
+}
+
+interface SummaryCleanup {
+	entry: SummaryCleanupEntry;
+	write: (tx: Transaction) => Promise<unknown>;
+}
+
+async function computeSummaryCleanups(db: Database | Transaction): Promise<Array<SummaryCleanup>> {
+	const cleanups: Array<SummaryCleanup> = [];
+
+	for (const table of summaryTables) {
+		const rows = await db
+			.select({
+				versionId: table.id,
+				summary: table.summary,
+				updatedAt: table.updatedAt,
+				entityId: schema.entities.id,
+				entityLabel: schema.entities.label,
+				entitySlug: schema.entities.slug,
+				entityType: schema.entityTypes.type,
+				status: schema.entityStatus.type,
+			})
+			.from(table)
+			.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, table.id))
+			.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+			.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
+			.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+			.where(like(table.summary, "%\u00A0%"));
+
+		for (const { summary, updatedAt, ...entry } of rows) {
+			cleanups.push({
+				entry,
+				// A space is not an edit, so `updatedAt` stays what it was rather than moving on update.
+				write: (tx) =>
+					tx
+						.update(table)
+						.set({ summary: replaceNonBreakingSpaces(summary), updatedAt })
+						.where(eq(table.id, entry.versionId)),
+			});
+		}
+	}
+
+	return cleanups;
+}
+
+/** Finds the summaries, of every entity version, that hold a non-breaking space. */
+export async function findSummariesNeedingCleanup(
+	db: Database | Transaction,
+): Promise<SummaryCleanupResult> {
+	const cleanups = await computeSummaryCleanups(db);
+
+	const entries = cleanups
+		.map((cleanup) => cleanup.entry)
+		.toSorted(
+			(a, b) =>
+				a.entityType.localeCompare(b.entityType) ||
+				(a.entityLabel ?? a.entitySlug).localeCompare(b.entityLabel ?? b.entitySlug) ||
+				a.status.localeCompare(b.status) ||
+				a.versionId.localeCompare(b.versionId),
+		);
+
+	return { entries, total: entries.length };
+}
+
+/**
+ * Rewrites the summaries of the given entity versions, but only those which _still_ need cleanup at
+ * call time, as in {@link cleanRichText}. Writes one `update` audit event per rewritten summary.
+ */
+export async function cleanSummaries(
+	db: Database | Transaction,
+	versionIds: Array<string>,
+	options: CleanRichTextOptions = {},
+): Promise<CleanRichTextResult> {
+	const { actorUserId = null } = options;
+
+	const requested = new Set(versionIds);
+	const cleanups = await computeSummaryCleanups(db);
+	const applicable = cleanups.filter((cleanup) => requested.has(cleanup.entry.versionId));
+	const applicableIds = new Set(applicable.map((cleanup) => cleanup.entry.versionId));
+	const skippedIds = versionIds.filter((id) => !applicableIds.has(id));
+
+	if (applicable.length === 0) {
+		return { cleanedCount: 0, skippedIds };
+	}
+
+	await db.transaction(async (tx) => {
+		for (const cleanup of applicable) {
+			await cleanup.write(tx);
+		}
+
+		await tx.insert(schema.auditLogs).values(
+			applicable.map(({ entry }) => {
+				return {
+					action: "update" as const,
+					actorUserId,
+					subjectType: entry.entityType,
+					subjectId: entry.entityId,
+					subjectLabel: entry.entityLabel,
+					summary: {
+						cleanup: "normalize_summary",
+						status: entry.status,
+						versionId: entry.versionId,
 					},
 				};
 			}),

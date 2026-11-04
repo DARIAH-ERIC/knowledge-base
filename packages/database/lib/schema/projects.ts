@@ -68,8 +68,14 @@ export type Project = typeof projects.$inferSelect;
 export type ProjectInput = typeof projects.$inferInsert;
 
 export const ProjectSelectSchema = createSelectSchema(projects, { duration: f.TimestampRange });
-export const ProjectInsertSchema = createInsertSchema(projects, { duration: f.TimestampRange });
-export const ProjectUpdateSchema = createUpdateSchema(projects, { duration: f.TimestampRange });
+export const ProjectInsertSchema = createInsertSchema(projects, {
+	duration: f.TimestampRange,
+	summary: f.plainText,
+});
+export const ProjectUpdateSchema = createUpdateSchema(projects, {
+	duration: f.TimestampRange,
+	summary: f.plainText,
+});
 
 /**
  * Document-level relation: a project's partner organisational unit in a given role. Both endpoints

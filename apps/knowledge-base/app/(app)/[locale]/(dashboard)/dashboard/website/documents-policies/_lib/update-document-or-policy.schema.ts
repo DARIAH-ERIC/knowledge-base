@@ -4,13 +4,14 @@ import * as v from "valibot";
 import { DocumentOrPolicyTargetInputEntries } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/document-or-policy-target.schema";
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
 import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
+import { OptionalSummaryInputSchema } from "@/lib/summary-input";
 
 export const UpdateDocumentOrPolicyActionInputSchema = v.pipe(
 	v.object({
 		slug: EntitySlugInputSchema,
 		documentId: v.pipe(v.string(), v.uuid()),
 		...v.pick(DocumentOrPolicyUpdateSchema, ["title"]).entries,
-		summary: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
+		summary: OptionalSummaryInputSchema,
 		url: v.nullish(v.pipe(v.string(), v.url()), null),
 		groupId: v.optional(v.pipe(v.string(), v.uuid())),
 		...DocumentOrPolicyTargetInputEntries,

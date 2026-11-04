@@ -43,5 +43,9 @@ export type NewsItem = typeof news.$inferSelect;
 export type NewsItemInput = typeof news.$inferInsert;
 
 export const NewsItemSelectSchema = createSelectSchema(news);
-export const NewsItemInsertSchema = createInsertSchema(news);
-export const NewsItemUpdateSchema = createUpdateSchema(news);
+export const NewsItemInsertSchema = createInsertSchema(news, {
+	summary: f.plainText,
+});
+export const NewsItemUpdateSchema = createUpdateSchema(news, {
+	summary: f.plainText,
+});

@@ -2,7 +2,8 @@ import * as p from "drizzle-orm/pg-core";
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 
-import { timestampRange, timestampRangeSchema } from "./fields";
+import { plainText, timestampRange, timestampRangeSchema } from "./fields";
+import { NewsItemUpdateSchema, OrganisationalUnitInsertSchema } from "./schema";
 
 const table = p.pgTable("ranges", {
 	required: timestampRange("required"),
@@ -82,5 +83,26 @@ describe("timestampRangeSchema", () => {
 
 	it("should reject a start after the end", () => {
 		expect(v.is(timestampRangeSchema(), { start: end, end: start })).toBe(false);
+	});
+});
+
+describe("plainText", () => {
+	it("should replace non-breaking spaces", () => {
+		expect(v.parse(plainText(v.string()), "2026,\u00A0https://doi.org")).toBe(
+			"2026, https://doi.org",
+		);
+	});
+
+	it("should apply to a required summary column", () => {
+		const schema = v.pick(NewsItemUpdateSchema, ["summary"]);
+
+		expect(v.parse(schema, { summary: "a\u00A0b" })).toStrictEqual({ summary: "a b" });
+	});
+
+	it("should keep a nullable summary column nullable", () => {
+		const schema = v.pick(OrganisationalUnitInsertSchema, ["summary"]);
+
+		expect(v.parse(schema, { summary: "a\u00A0b" })).toStrictEqual({ summary: "a b" });
+		expect(v.parse(schema, { summary: null })).toStrictEqual({ summary: null });
 	});
 });

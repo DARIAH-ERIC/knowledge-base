@@ -6,12 +6,13 @@ import * as v from "valibot";
 
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
 import { EntitySlugInputSchema } from "@/lib/entity-slug-input";
+import { OptionalSummaryInputSchema } from "@/lib/summary-input";
 
 export const UpdateCountryActionInputSchema = v.object({
 	slug: EntitySlugInputSchema,
 	...v.pick(OrganisationalUnitSelectSchema, ["id"]).entries,
 	...v.pick(OrganisationalUnitUpdateSchema, ["name", "summary"]).entries,
-	summary: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
+	summary: OptionalSummaryInputSchema,
 	acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	documentId: v.pipe(v.string(), v.uuid()),
 	imageKey: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),

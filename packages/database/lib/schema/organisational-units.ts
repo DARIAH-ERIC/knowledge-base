@@ -85,8 +85,12 @@ export type OrganisationalUnit = typeof organisationalUnits.$inferSelect;
 export type OrganisationalUnitInput = typeof organisationalUnits.$inferInsert;
 
 export const OrganisationalUnitSelectSchema = createSelectSchema(organisationalUnits);
-export const OrganisationalUnitInsertSchema = createInsertSchema(organisationalUnits);
-export const OrganisationalUnitUpdateSchema = createUpdateSchema(organisationalUnits);
+export const OrganisationalUnitInsertSchema = createInsertSchema(organisationalUnits, {
+	summary: f.plainText,
+});
+export const OrganisationalUnitUpdateSchema = createUpdateSchema(organisationalUnits, {
+	summary: f.plainText,
+});
 
 /**
  * Document-level relation: a directed relation between two organisational units (e.g. is_member_of,

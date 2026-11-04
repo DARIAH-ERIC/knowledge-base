@@ -1,6 +1,7 @@
 import * as v from "valibot";
 
 import { partnerInstitutionStatusTypes } from "@/lib/data/wizard-preflight";
+import { OptionalSummaryInputSchema } from "@/lib/summary-input";
 
 /**
  * One guided form, one submit: everything the partner-institution wizard collects across its steps
@@ -17,7 +18,7 @@ export const CreatePartnerInstitutionActionInputSchema = v.pipe(
 		name: v.pipe(v.string(), v.nonEmpty()),
 		acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 		ror: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
-		summary: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
+		summary: OptionalSummaryInputSchema,
 		countryDocumentId: v.pipe(v.string(), v.uuid()),
 		locatedInStart: v.pipe(v.string(), v.isoDate(), v.toDate()),
 		statusType: v.picklist(partnerInstitutionStatusTypes),
