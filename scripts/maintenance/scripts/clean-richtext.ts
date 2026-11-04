@@ -5,8 +5,11 @@ import { log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
 import {
 	type RichTextCleanupBlock,
+	type SummaryCleanupEntry,
 	cleanRichText,
+	cleanSummaries,
 	findRichTextNeedingCleanup,
+	findSummariesNeedingCleanup,
 } from "@dariah-eric/database/richtext-cleanup-service";
 
 import { env } from "../config/env.config";
@@ -14,11 +17,14 @@ import { env } from "../config/env.config";
 /**
  * Normalises rich-text content (`rich_text` blocks and `accordion` items): drops empty spacer
  * paragraphs, stray `<br>`/whitespace and `&nbsp;`, strips imported HTML attributes and bold marks
- * on headings. Dry run by default; pass `--apply` to rewrite them.
+ * on headings. Also replaces `&nbsp;` in the plain-text `summary` of every entity version. Dry run
+ * by default; pass `--apply` to rewrite them.
  *
- * Detection and rewriting are the exact same shared implementation the admin dashboard's
- * Maintenance page uses (`@dariah-eric/database/richtext-cleanup-service`), so the two never
- * diverge.
+ * Detection and rewriting of content blocks are the exact same shared implementation the admin
+ * dashboard's Maintenance page uses (`@dariah-eric/database/richtext-cleanup-service`), so the two
+ * never diverge. The dashboard does not offer the summary cleanup.
+ *
+ * Rewriting does not reach the search index: run the website index sync afterwards.
  *
  * @example
  * 	pnpm run data:clean:richtext
@@ -27,6 +33,7 @@ import { env } from "../config/env.config";
 
 const cacheFolderPath = path.join(process.cwd(), ".cache");
 const reportFilePath = path.join(cacheFolderPath, "richtext-cleanup.tsv");
+const summaryReportFilePath = path.join(cacheFolderPath, "summary-cleanup.tsv");
 
 const db = createDatabaseService({
 	connection: {
@@ -46,6 +53,25 @@ function toTsvCell(value: number | string | null): string {
 	return String(value).replaceAll("\t", " ").replaceAll(/\r?\n/g, " ");
 }
 
+async function writeTsv(
+	filePath: string,
+	columns: ReadonlyArray<string>,
+	rows: Array<Array<number | string | null>>,
+): Promise<void> {
+	const lines = rows.map((row) => row.map((value) => toTsvCell(value)).join("\t"));
+
+	await fs.mkdir(cacheFolderPath, { recursive: true });
+	await fs.writeFile(
+		filePath,
+		`${columns.join("\t")}\n${lines.join("\n")}${lines.length > 0 ? "\n" : ""}`,
+		{ encoding: "utf-8" },
+	);
+}
+
+function toTitle(entry: { entityLabel: string | null; entitySlug: string }): string {
+	return (entry.entityLabel ?? entry.entitySlug).replaceAll(/\s+/g, " ").trim();
+}
+
 async function writeReport(blocks: Array<RichTextCleanupBlock>): Promise<void> {
 	const columns = [
 		"entity_type",
@@ -57,27 +83,31 @@ async function writeReport(blocks: Array<RichTextCleanupBlock>): Promise<void> {
 		"position",
 		"content_block_id",
 	] as const;
-	const rows = blocks.map((block) =>
-		[
-			block.entityType,
-			block.entityId,
-			(block.entityLabel ?? block.entitySlug).replaceAll(/\s+/g, " ").trim(),
-			block.status,
-			block.fieldName,
-			block.blockType,
-			block.position,
-			block.contentBlockId,
-		]
-			.map((value) => toTsvCell(value))
-			.join("\t"),
-	);
+	const rows = blocks.map((block) => [
+		block.entityType,
+		block.entityId,
+		toTitle(block),
+		block.status,
+		block.fieldName,
+		block.blockType,
+		block.position,
+		block.contentBlockId,
+	]);
 
-	await fs.mkdir(cacheFolderPath, { recursive: true });
-	await fs.writeFile(
-		reportFilePath,
-		`${columns.join("\t")}\n${rows.join("\n")}${rows.length > 0 ? "\n" : ""}`,
-		{ encoding: "utf-8" },
-	);
+	await writeTsv(reportFilePath, columns, rows);
+}
+
+async function writeSummaryReport(entries: Array<SummaryCleanupEntry>): Promise<void> {
+	const columns = ["entity_type", "entity_id", "title", "status", "version_id"] as const;
+	const rows = entries.map((entry) => [
+		entry.entityType,
+		entry.entityId,
+		toTitle(entry),
+		entry.status,
+		entry.versionId,
+	]);
+
+	await writeTsv(summaryReportFilePath, columns, rows);
 }
 
 async function main(): Promise<void> {
@@ -96,18 +126,38 @@ async function main(): Promise<void> {
 		`Found ${String(total)} content block(s) to normalise across ${String(affectedEntities)} entity/entities. Report: ${reportFilePath}`,
 	);
 
-	if (!apply || total === 0) {
+	const { entries, total: summaryTotal } = await findSummariesNeedingCleanup(db);
+	await writeSummaryReport(entries);
+
+	log.success(
+		`Found ${String(summaryTotal)} summary/summaries to normalise. Report: ${summaryReportFilePath}`,
+	);
+
+	if (!apply) {
 		return;
 	}
 
-	const result = await cleanRichText(
-		db,
-		blocks.map((block) => block.contentBlockId),
-	);
+	if (total > 0) {
+		const result = await cleanRichText(
+			db,
+			blocks.map((block) => block.contentBlockId),
+		);
 
-	log.info(
-		`Normalised ${String(result.cleanedCount)} block(s); ${String(result.skippedIds.length)} skipped (no longer changed).`,
-	);
+		log.info(
+			`Normalised ${String(result.cleanedCount)} block(s); ${String(result.skippedIds.length)} skipped (no longer changed).`,
+		);
+	}
+
+	if (summaryTotal > 0) {
+		const result = await cleanSummaries(
+			db,
+			entries.map((entry) => entry.versionId),
+		);
+
+		log.info(
+			`Normalised ${String(result.cleanedCount)} summary/summaries; ${String(result.skippedIds.length)} skipped (no longer changed).`,
+		);
+	}
 }
 
 try {

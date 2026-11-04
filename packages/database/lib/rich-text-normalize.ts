@@ -17,6 +17,11 @@ import type { JSONContent } from "@tiptap/core";
 
 const NON_BREAKING_SPACE = /\u00A0/g;
 
+/** Spacing is the website's to set, so a non-breaking space copied from a source is not kept. */
+export function replaceNonBreakingSpaces(text: string): string {
+	return text.replaceAll(NON_BREAKING_SPACE, " ");
+}
+
 /**
  * How far a node is cut open on each side. `0` is a whole node; `n` is a node whose start (or end)
  * was cut, along with its first (or last) `n - 1` descendants. Only a pasted slice has open nodes —
@@ -283,7 +288,7 @@ function cleanNode(node: JSONContent, open: OpenDepth = CLOSED): JSONContent | n
 	const cleanedNode = normalizeNestedDocuments(stripImportedHtmlAttributesFromNode(node));
 
 	if (cleanedNode.type === "text") {
-		return { ...cleanedNode, text: (cleanedNode.text ?? "").replace(NON_BREAKING_SPACE, " ") };
+		return { ...cleanedNode, text: replaceNonBreakingSpaces(cleanedNode.text ?? "") };
 	}
 
 	// Paragraphs and headings are handled here even without a `content` key, so that empty spacer

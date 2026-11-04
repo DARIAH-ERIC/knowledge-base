@@ -45,8 +45,12 @@ export type ImpactCaseStudy = typeof impactCaseStudies.$inferSelect;
 export type ImpactCaseStudyInput = typeof impactCaseStudies.$inferInsert;
 
 export const ImpactCaseStudySelectSchema = createSelectSchema(impactCaseStudies);
-export const ImpactCaseStudyInsertSchema = createInsertSchema(impactCaseStudies);
-export const ImpactCaseStudyUpdateSchema = createUpdateSchema(impactCaseStudies);
+export const ImpactCaseStudyInsertSchema = createInsertSchema(impactCaseStudies, {
+	summary: f.plainText,
+});
+export const ImpactCaseStudyUpdateSchema = createUpdateSchema(impactCaseStudies, {
+	summary: f.plainText,
+});
 
 export const articleContributorRolesEnum = ["author", "editor", "contributor"] as const;
 export type ArticleContributorRole = (typeof articleContributorRolesEnum)[number];

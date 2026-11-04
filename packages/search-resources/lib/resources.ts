@@ -4,6 +4,7 @@ import type { SearchItem } from "@dariah-eric/client-sshoc";
 import type { ZenodoRecord } from "@dariah-eric/client-zenodo";
 // NOTE: zotero source temporarily disabled (see note below). To re-enable, restore these imports.
 // import type { ZoteroCollection, ZoteroJsonItem } from "@dariah-eric/client-zotero";
+import { replaceNonBreakingSpaces } from "@dariah-eric/database/rich-text-normalize";
 import type { ResourceDocument, WebsiteDocument } from "@dariah-eric/search";
 
 import { createCampusCurriculum, createCampusResource } from "./campus";
@@ -90,7 +91,7 @@ export function createSearchIndexResourceDocuments(
 		episciencesPapers.map((entry) => [entry.docId, entry.paper]),
 	);
 
-	return [
+	const documents = [
 		...sshocItems.map((item) => createSshocItem(item, sshocMarketplaceBaseUrl, orgUnits)),
 		...campusResources.map((item) => createCampusResource(item)),
 		...campusCurricula.map((item) => createCampusCurriculum(item)),
@@ -106,6 +107,11 @@ export function createSearchIndexResourceDocuments(
 		// 	.filter((item) => isZoteroItemInCollection(item))
 		// 	.map((item) => createZoteroItem(item, zoteroCollectionLookup, orgUnits)),
 	];
+
+	// Sources copy `&nbsp;` into their abstracts, where it glues words to long urls.
+	return documents.map((document) => {
+		return { ...document, description: replaceNonBreakingSpaces(document.description) };
+	});
 }
 
 export function createWebsiteResourceDocument(resource: ResourceDocument): WebsiteDocument {

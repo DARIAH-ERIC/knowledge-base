@@ -76,7 +76,9 @@ export const OpportunitySelectSchema = createSelectSchema(opportunities, {
 });
 export const OpportunityInsertSchema = createInsertSchema(opportunities, {
 	duration: f.TimestampRange,
+	summary: f.plainText,
 });
 export const OpportunityUpdateSchema = createUpdateSchema(opportunities, {
 	duration: f.TimestampRange,
+	summary: f.plainText,
 });

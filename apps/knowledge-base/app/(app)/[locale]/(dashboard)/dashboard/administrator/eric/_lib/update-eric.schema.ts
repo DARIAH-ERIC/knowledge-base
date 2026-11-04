@@ -5,11 +5,12 @@ import {
 import * as v from "valibot";
 
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
+import { OptionalSummaryInputSchema } from "@/lib/summary-input";
 
 export const UpdateEricActionInputSchema = v.object({
 	...v.pick(OrganisationalUnitSelectSchema, ["id"]).entries,
 	...v.pick(OrganisationalUnitUpdateSchema, ["name", "summary"]).entries,
-	summary: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
+	summary: OptionalSummaryInputSchema,
 	acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	email: v.nullish(v.pipe(v.string(), v.email()), null),
 	ror: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
