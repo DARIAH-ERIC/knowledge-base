@@ -10,9 +10,9 @@ import {
 	type TextProps,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
-import { tv } from "tailwind-variants";
 
 import { cx } from "@/lib/primitive";
+import { tv } from "@/lib/tv";
 
 export const labelStyles = tv({
 	base: [
