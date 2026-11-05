@@ -4,6 +4,7 @@ import * as p from "drizzle-orm/pg-core";
 import * as v from "valibot";
 
 import { now } from "./functions";
+import { replaceNonBreakingSpaces } from "./rich-text-normalize";
 
 export function timestamp(name: string) {
 	return p.timestamp(name, {
@@ -22,6 +23,11 @@ export function timestamps() {
 			.$onUpdate(() => now()),
 		// deletedAt: timestamp("deleted_at"),
 	};
+}
+
+/** Refines a plain-text column, which no editor tidies, as it is written. */
+export function plainText(schema: v.GenericSchema<string>) {
+	return v.pipe(schema, v.transform(replaceNonBreakingSpaces));
 }
 
 type RangeBound = "required" | "optional";

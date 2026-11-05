@@ -46,8 +46,12 @@ export type SpotlightArticle = typeof spotlightArticles.$inferSelect;
 export type SpotlightArticleInput = typeof spotlightArticles.$inferInsert;
 
 export const SpotlightArticleSelectSchema = createSelectSchema(spotlightArticles);
-export const SpotlightArticleInsertSchema = createInsertSchema(spotlightArticles);
-export const SpotlightArticleUpdateSchema = createUpdateSchema(spotlightArticles);
+export const SpotlightArticleInsertSchema = createInsertSchema(spotlightArticles, {
+	summary: f.plainText,
+});
+export const SpotlightArticleUpdateSchema = createUpdateSchema(spotlightArticles, {
+	summary: f.plainText,
+});
 
 /**
  * Document-level relation: a spotlight article's contributors. Both endpoints reference

@@ -42,5 +42,9 @@ export type Page = typeof pages.$inferSelect;
 export type PageInput = typeof pages.$inferInsert;
 
 export const PageSelectSchema = createSelectSchema(pages);
-export const PageInsertSchema = createInsertSchema(pages);
-export const PageUpdateSchema = createUpdateSchema(pages);
+export const PageInsertSchema = createInsertSchema(pages, {
+	summary: f.plainText,
+});
+export const PageUpdateSchema = createUpdateSchema(pages, {
+	summary: f.plainText,
+});

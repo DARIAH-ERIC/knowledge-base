@@ -49,7 +49,9 @@ export const FundingCallSelectSchema = createSelectSchema(fundingCalls, {
 });
 export const FundingCallInsertSchema = createInsertSchema(fundingCalls, {
 	duration: f.TimestampRange,
+	summary: f.plainText,
 });
 export const FundingCallUpdateSchema = createUpdateSchema(fundingCalls, {
 	duration: f.TimestampRange,
+	summary: f.plainText,
 });

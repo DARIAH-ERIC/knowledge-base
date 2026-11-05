@@ -1,5 +1,7 @@
 import type { HTMLAttributes, ReactNode } from "react";
-import { type VariantProps, tv } from "tailwind-variants";
+import type { VariantProps } from "tailwind-variants/lite";
+
+import { tv } from "@/lib/tv";
 
 export const badgeStyles = tv({
 	base: [

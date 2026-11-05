@@ -9,9 +9,9 @@ import {
 	composeRenderProps,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
-import { tv } from "tailwind-variants";
 
 import { cx } from "@/lib/primitive";
+import { tv } from "@/lib/tv";
 
 type ToggleSize = "xs" | "sm" | "md" | "lg" | "sq-xs" | "sq-sm" | "sq-md" | "sq-lg";
 

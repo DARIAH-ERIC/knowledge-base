@@ -16,7 +16,8 @@ import {
 	composeRenderProps,
 } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
-import { tv } from "tailwind-variants";
+
+import { tv } from "@/lib/tv";
 
 import { Keyboard } from "./keyboard";
 

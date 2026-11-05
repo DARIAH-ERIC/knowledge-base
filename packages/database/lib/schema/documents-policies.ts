@@ -41,5 +41,9 @@ export type DocumentOrPolicy = typeof documentsPolicies.$inferSelect;
 export type DocumentOrPolicyInput = typeof documentsPolicies.$inferInsert;
 
 export const DocumentOrPolicySelectSchema = createSelectSchema(documentsPolicies);
-export const DocumentOrPolicyInsertSchema = createInsertSchema(documentsPolicies);
-export const DocumentOrPolicyUpdateSchema = createUpdateSchema(documentsPolicies);
+export const DocumentOrPolicyInsertSchema = createInsertSchema(documentsPolicies, {
+	summary: f.plainText,
+});
+export const DocumentOrPolicyUpdateSchema = createUpdateSchema(documentsPolicies, {
+	summary: f.plainText,
+});

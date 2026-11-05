@@ -187,6 +187,7 @@ export function ColumnChart(props: Readonly<ColumnChartProps>): ReactNode {
 							const inset = isTopOfStack ? 0 : Math.min(surfaceGap, segmentHeight);
 							const drawnHeight = segmentHeight - inset;
 
+							// oxlint-disable-next-line react/immutability -- false positive, see oxc-project/oxc#28401
 							stackedOffset += segmentHeight;
 
 							if (drawnHeight <= 0) {
