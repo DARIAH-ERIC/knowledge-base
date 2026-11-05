@@ -2967,6 +2967,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "name": {
             "type": "string",
           },
+          "ror": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "socialMedia": {
             "items": {
               "properties": {
@@ -3015,6 +3025,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "id",
           "acronym",
           "name",
+          "ror",
           "socialMedia",
           "type",
         ],

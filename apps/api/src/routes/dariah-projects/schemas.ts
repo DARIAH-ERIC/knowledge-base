@@ -12,7 +12,7 @@ import {
 
 export const DariahProjectOrganisationalUnitsSchema = v.pipe(
 	v.object({
-		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "acronym", "name"]).entries,
+		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "acronym", "name", "ror"]).entries,
 		socialMedia: v.array(
 			v.object({
 				url: v.string(),
