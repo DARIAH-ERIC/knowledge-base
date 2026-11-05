@@ -431,6 +431,34 @@ describe("dariah-projects", () => {
 			});
 		});
 
+		it.each(["https://ror.org/05n09v162", null])(
+			"should return ror %s for project institutions",
+			async (ror) => {
+				await withTransaction(async (db) => {
+					const client = createTestClient(db);
+
+					const { dariahItems, umbrellaUnitId } = await seed(db, 1);
+
+					await db
+						.update(schema.organisationalUnits)
+						.set({ ror })
+						.where(eq(schema.organisationalUnits.id, umbrellaUnitId));
+
+					const response = await client["dariah-projects"][":id"].$get({
+						param: { id: dariahItems.at(0)!.project.id },
+					});
+
+					expect(response.status).toBe(200);
+
+					/** @see {@link https://github.com/honojs/hono/issues/2280} */
+					const data = (await response.json()) as DariahProject;
+
+					expect(data.participants).toHaveLength(1);
+					expect(data.participants[0]).toMatchObject({ id: umbrellaUnitId, ror });
+				});
+			},
+		);
+
 		it("should return 404 for a project not linked to eric", async () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db);
