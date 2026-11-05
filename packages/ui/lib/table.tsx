@@ -215,11 +215,13 @@ export function TableHeader<T extends object>(props: Readonly<TableHeaderProps<T
 			)}
 			{selectionBehavior === "toggle" && (
 				<AriaColumn
+					allowsArrowNavigation={true}
 					className={twMerge(
 						"first:ps-(--gutter,--spacing(2))",
 						bleed !== true && "sm:first:ps-1 sm:last:pe-1",
 					)}
 					data-slot="table-column"
+					focusMode="child"
 				>
 					{selectionMode === "multiple" && <Checkbox slot="selection" />}
 				</AriaColumn>
@@ -314,7 +316,7 @@ export function TableRow<T extends object>(props: Readonly<TableRowProps<T>>): R
 				</TableCell>
 			)}
 			{selectionBehavior === "toggle" && (
-				<TableCell className="px-0">
+				<TableCell allowsArrowNavigation={true} className="px-0" focusMode="child">
 					<Checkbox slot="selection" />
 				</TableCell>
 			)}

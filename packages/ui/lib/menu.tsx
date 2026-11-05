@@ -20,7 +20,7 @@ import {
 	composeRenderProps,
 } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
-import { type VariantProps, tv } from "tailwind-variants";
+import type { VariantProps } from "tailwind-variants/lite";
 
 import {
 	DropdownDescription,
@@ -32,6 +32,7 @@ import {
 } from "@/lib/dropdown";
 import { PopoverContent, type PopoverContentProps } from "@/lib/popover";
 import { cx } from "@/lib/primitive";
+import { tv } from "@/lib/tv";
 
 import { UiContext } from "./ui-provider";
 

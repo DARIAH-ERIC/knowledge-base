@@ -5,7 +5,7 @@ import {
 	Button as ButtonPrimitive,
 	type ButtonProps as ButtonPrimitiveProps,
 } from "react-aria-components";
-import type { VariantProps } from "tailwind-variants";
+import type { VariantProps } from "tailwind-variants/lite";
 
 import { buttonStyles } from "@/lib/button-styles";
 import { cx } from "@/lib/primitive";

@@ -417,8 +417,7 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 	const meta = useMetadata();
 	const t = useExtracted();
 
-	/** On mobile the sidebar is shown as a sheet at full width, however collapsed the desktop one is. */
-	const isCollapsed = state === "collapsed" && !isMobile;
+	const isCollapsed = state === "collapsed";
 
 	/** Close the mobile sheet after navigating. */
 	const lastPathnameRef = useRef(pathname);
