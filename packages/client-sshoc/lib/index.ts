@@ -192,6 +192,14 @@ export interface ItemContributorDto {
 	role: ActorRoleDto;
 }
 
+export interface SourceDto {
+	id: number;
+	label: string;
+	url: string;
+	urlTemplate: string;
+	lastHarvestedDate?: string;
+}
+
 export interface SearchItem {
 	id: number;
 	persistentId: string;
@@ -205,6 +213,7 @@ export interface SearchItem {
 	status: ItemStatus;
 	owner: string;
 	accessibleAt?: Array<string>;
+	sources: Array<SourceDto>;
 	thumbnailId?: string;
 }
 
