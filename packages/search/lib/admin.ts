@@ -1,5 +1,5 @@
 import { Result } from "better-result";
-import { Client, type CollectionCreateSchema, Errors } from "typesense";
+import { Client, type CollectionCreateSchema, type CollectionSchema, Errors } from "typesense";
 
 import { type ResourceDocument, resourcesCollection } from "./collections/resources";
 import { type WebsiteDocument, websiteCollection } from "./collections/website";
@@ -28,9 +28,19 @@ export interface CreateSearchAdminServiceParams {
 	};
 }
 
+/**
+ * The most documents per source that a rebuild is measured against. Stored on each collection, so
+ * it survives swaps and resets, and only an explicit override can lower it.
+ */
+export type DocumentBaseline = Record<string, number>;
+
 interface VersionedCollection {
 	name: string;
 	version: number;
+}
+
+interface CollectionMetadata {
+	document_baseline: DocumentBaseline;
 }
 
 function getCollectionVersion(alias: string, collectionName: string): number | null {
@@ -103,11 +113,12 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 	async function createVersionedCollection(
 		alias: string,
 		schema: (name: string) => CollectionCreateSchema,
+		metadata?: CollectionMetadata,
 	): Promise<VersionedCollection> {
 		const version = Date.now();
 		const name = `${alias}_${String(version)}`;
 
-		await client.collections().create(schema(name));
+		await client.collections().create({ ...schema(name), metadata });
 
 		return { name, version };
 	}
@@ -117,12 +128,21 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 		collection: VersionedCollection,
 		previous: string | null,
 	): Promise<void> {
+		const previousVersion = previous != null ? getCollectionVersion(alias, previous) : null;
+
+		if (previousVersion == null) {
+			return;
+		}
+
 		const olderVersions = (await client.collections().retrieve())
 			.map((item) => {
 				return { ...item, version: getCollectionVersion(alias, item.name) };
 			})
-			/** Newer versions are left alone: they may belong to a rebuild that is still running. */
-			.filter((item) => item.version != null && item.version < collection.version)
+			/**
+			 * Anything newer than the previous target has never been live, so it may belong to a rebuild
+			 * that is still running. If it was abandoned instead, the next swap drops it.
+			 */
+			.filter((item) => item.version != null && item.version <= previousVersion)
 			.toSorted((a, b) => b.version! - a.version!);
 
 		/** After a reset the previous version is empty, which makes it useless for a rollback. */
@@ -142,6 +162,17 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 	 */
 	async function swapAlias(alias: string, collection: VersionedCollection): Promise<void> {
 		const previous = await getAliasTarget(alias);
+		const previousVersion = previous != null ? getCollectionVersion(alias, previous) : null;
+
+		if (previousVersion != null && previousVersion > collection.version) {
+			/** Nothing points at this collection, and swapping it in would move the alias backwards. */
+			await client
+				.collections(collection.name)
+				.delete()
+				.catch(() => undefined);
+
+			throw new Error(`A newer rebuild of "${alias}" finished first: ${String(previous)}.`);
+		}
 
 		if (previous == null && (await collectionExists(alias))) {
 			/**
@@ -178,17 +209,53 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 		await swapAlias(alias, await createVersionedCollection(alias, schema));
 	}
 
-	async function countDocuments(alias: string): Promise<number> {
+	async function retrieveCollection(name: string): Promise<CollectionSchema | null> {
 		try {
-			const collection = await client.collections(alias).retrieve();
-			return collection.num_documents;
+			return await client.collections(name).retrieve();
 		} catch (error) {
 			if (error instanceof Errors.ObjectNotFound) {
-				return 0;
+				return null;
 			}
 
 			throw error;
 		}
+	}
+
+	/** The live collection, or after a reset emptied it, the newest older one with documents. */
+	async function getLastCollectionWithDocuments(alias: string): Promise<CollectionSchema | null> {
+		const live = await retrieveCollection(alias);
+
+		if (live == null || live.num_documents > 0) {
+			return live;
+		}
+
+		const liveVersion = getCollectionVersion(alias, live.name);
+
+		if (liveVersion == null) {
+			return null;
+		}
+
+		const older = (await client.collections().retrieve())
+			.map((item) => {
+				return { item, version: getCollectionVersion(alias, item.name) };
+			})
+			.filter(
+				({ item, version }) => version != null && version < liveVersion && item.num_documents > 0,
+			)
+			.toSorted((a, b) => b.version! - a.version!);
+
+		return older[0]?.item ?? null;
+	}
+
+	async function countDocumentsBySource(collectionName: string): Promise<DocumentBaseline> {
+		const { facet_counts } = await client
+			.collections<ResourceDocument>(collectionName)
+			.documents()
+			.search({ facet_by: "source", max_facet_values: 100, per_page: 0, q: "*" });
+
+		const counts = facet_counts?.find((facet) => facet.field_name === "source")?.counts ?? [];
+
+		return Object.fromEntries(counts.map(({ count, value }) => [value, count]));
 	}
 
 	return {
@@ -236,10 +303,22 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 					});
 				},
 
-				count(): Promise<Result<number, SearchCollectionError>> {
+				/**
+				 * Read from the last collection with documents, so a reset does not lower it. Collections
+				 * without a stored baseline are measured by what they hold.
+				 */
+				getBaseline(): Promise<Result<DocumentBaseline, SearchCollectionError>> {
 					return Result.tryPromise({
-						try() {
-							return countDocuments(collections.resources);
+						async try() {
+							const collection = await getLastCollectionWithDocuments(collections.resources);
+
+							if (collection == null) {
+								return {};
+							}
+
+							const metadata = collection.metadata as Partial<CollectionMetadata> | undefined;
+
+							return metadata?.document_baseline ?? (await countDocumentsBySource(collection.name));
 						},
 						catch(cause) {
 							return new SearchCollectionError({ cause });
@@ -255,11 +334,18 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 				 */
 				replace(
 					documents: Array<ResourceDocument>,
+					baseline: DocumentBaseline,
 				): Promise<Result<void, SearchCollectionError | SearchImportError>> {
 					return Result.gen(async function* () {
 						const collection = yield* await Result.tryPromise({
 							try() {
-								return createVersionedCollection(collections.resources, resourcesCollection.schema);
+								return createVersionedCollection(
+									collections.resources,
+									resourcesCollection.schema,
+									{
+										document_baseline: baseline,
+									},
+								);
 							},
 							catch(cause) {
 								return new SearchCollectionError({ cause });

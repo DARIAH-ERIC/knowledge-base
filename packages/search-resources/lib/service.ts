@@ -10,9 +10,10 @@ import {
 	type WebsiteDocument,
 	resourceSources,
 } from "@dariah-eric/search";
-import type { SearchAdminService } from "@dariah-eric/search/admin";
+import type { DocumentBaseline, SearchAdminService } from "@dariah-eric/search/admin";
 import { Result } from "better-result";
 
+import { countDocumentsBySource, findSourceDrops, raiseBaseline } from "./drop-guard";
 import {
 	type EpisciencesPaperEntry,
 	type OrgUnitResourceLookups,
@@ -67,13 +68,6 @@ export interface SyncSearchResourcesResult {
 	failedDeletions: Array<StaleDocumentDeletion>;
 	websiteCount: number;
 }
-
-/**
- * The resources index is only swapped for a rebuild holding at least this share of the documents it
- * currently has. A sharper drop more likely means an upstream api quietly returned less than it
- * should, and swapping would make those resources unfindable until the next run.
- */
-const minRetainedDocumentRatio = 0.5;
 
 /** A stale search document that could not be deleted. */
 export interface StaleDocumentDeletion {
@@ -280,34 +274,48 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		return failedDeletions;
 	}
 
+	/** Refuses a rebuild that lost too much of a source, and returns the baseline to store with it. */
+	async function checkBaseline(rebuiltCounts: DocumentBaseline): Promise<DocumentBaseline> {
+		const baselineResult = await search.collections.resources.getBaseline();
+		if (baselineResult.isErr()) {
+			throw baselineResult.error;
+		}
+
+		const baseline = baselineResult.value;
+		const drops = findSourceDrops(baseline, rebuiltCounts);
+
+		if (drops.length > 0) {
+			const summary = drops
+				.map(
+					(drop) =>
+						`${drop.source} (${String(drop.rebuilt)} of ${String(drop.baseline)} documents)`,
+				)
+				.join(", ");
+
+			throw new Error(
+				`Refusing to replace the resources index, too many documents are missing from: ${summary}. If the drop is expected, run \`data:ingest:search:resources\` with \`--force\`.`,
+			);
+		}
+
+		return raiseBaseline(baseline, rebuiltCounts);
+	}
+
 	async function syncSearchResources(
 		options?: SyncSearchResourcesParams,
 	): Promise<SyncSearchResourcesResult> {
 		const sourceData = await fetchSearchIndexResourceSourceData(options);
 		const resources = createResourceDocuments(sourceData);
 		const websiteDocuments = createWebsiteResourceDocuments(resources);
+		const rebuiltCounts = countDocumentsBySource(resources);
+		const baseline = options?.force === true ? rebuiltCounts : await checkBaseline(rebuiltCounts);
+
 		const existingWebsiteResourceDocumentIds = await getExistingWebsiteResourceDocumentIds();
-
-		const indexedResourceCountResult = await search.collections.resources.count();
-		if (indexedResourceCountResult.isErr()) {
-			throw indexedResourceCountResult.error;
-		}
-
-		const indexedResourceCount = indexedResourceCountResult.value;
-		if (
-			options?.force !== true &&
-			resources.length < indexedResourceCount * minRetainedDocumentRatio
-		) {
-			throw new Error(
-				`Refusing to replace the resources index: the rebuild has ${String(resources.length)} documents, the current index ${String(indexedResourceCount)}. If the drop is expected, run \`data:ingest:search:resources\` with \`--force\`.`,
-			);
-		}
 
 		/**
 		 * Rebuilt rather than updated in place: the new collection is swapped in whole, which drops
 		 * stale documents along with it and applies schema changes.
 		 */
-		const resourcesReplaceResult = await search.collections.resources.replace(resources);
+		const resourcesReplaceResult = await search.collections.resources.replace(resources, baseline);
 		if (resourcesReplaceResult.isErr()) {
 			throw resourcesReplaceResult.error;
 		}
