@@ -4,12 +4,7 @@ import type { EpisciencesClient, EpisciencesSearchDocument } from "@dariah-eric/
 import type { SshocClient } from "@dariah-eric/client-sshoc";
 import type { ZenodoClient } from "@dariah-eric/client-zenodo";
 import type { ZoteroClient } from "@dariah-eric/client-zotero";
-import {
-	type ResourceDocument,
-	type SearchService,
-	type WebsiteDocument,
-	resourceSources,
-} from "@dariah-eric/search";
+import { type SearchService, type WebsiteDocument, resourceSources } from "@dariah-eric/search";
 import type { DocumentBaseline, SearchAdminService } from "@dariah-eric/search/admin";
 import { Result } from "better-result";
 
@@ -241,15 +236,10 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		return documentIds;
 	}
 
-	async function deleteStaleDocuments(params: {
-		currentDocuments: Array<ResourceDocument | WebsiteDocument>;
-		deleteDocument: (documentId: string) => Promise<Result<void, unknown>>;
-		collection: string;
-		existingDocumentIds: Set<string>;
-		logContext: "website resource";
-	}): Promise<Array<StaleDocumentDeletion>> {
-		const { collection, currentDocuments, deleteDocument, existingDocumentIds, logContext } =
-			params;
+	async function deleteStaleWebsiteDocuments(
+		currentDocuments: Array<WebsiteDocument>,
+		existingDocumentIds: Set<string>,
+	): Promise<Array<StaleDocumentDeletion>> {
 		const currentDocumentIds = new Set(currentDocuments.map((document) => document.id));
 
 		const failedDeletions: Array<StaleDocumentDeletion> = [];
@@ -259,15 +249,15 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				continue;
 			}
 
-			const result = await deleteDocument(documentId);
+			const result = await search.collections.website.delete(documentId);
 
 			if (result.isErr()) {
-				log.error(`Failed to delete stale ${logContext} search document.`, {
+				log.error("Failed to delete stale website resource search document.", {
 					documentId,
 					error: result.error,
 				});
 
-				failedDeletions.push({ collection, documentId });
+				failedDeletions.push({ collection: "website", documentId });
 			}
 		}
 
@@ -325,15 +315,10 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 			throw websiteIngestResult.error;
 		}
 
-		const failedDeletions = await deleteStaleDocuments({
-			collection: "website",
-			currentDocuments: websiteDocuments,
-			deleteDocument(documentId) {
-				return search.collections.website.delete(documentId);
-			},
-			existingDocumentIds: existingWebsiteResourceDocumentIds,
-			logContext: "website resource",
-		});
+		const failedDeletions = await deleteStaleWebsiteDocuments(
+			websiteDocuments,
+			existingWebsiteResourceDocumentIds,
+		);
 
 		return {
 			count: resources.length,

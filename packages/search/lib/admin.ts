@@ -392,6 +392,7 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 					});
 				},
 
+				/** For seeding only: the next rebuild drops whatever is written through the alias. */
 				ingest(documents: Array<ResourceDocument>): Promise<Result<void, SearchImportError>> {
 					return Result.tryPromise({
 						async try() {
@@ -406,6 +407,7 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 					});
 				},
 
+				/** For seeding only: the next rebuild drops whatever is written through the alias. */
 				upsert(document: ResourceDocument): Promise<Result<void, SearchDocumentUpsertError>> {
 					return Result.tryPromise({
 						async try() {
@@ -416,20 +418,6 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 						},
 						catch(cause) {
 							return new SearchDocumentUpsertError({ cause });
-						},
-					});
-				},
-
-				delete(documentId: string): Promise<Result<void, SearchDocumentDeleteError>> {
-					return Result.tryPromise({
-						async try() {
-							await client
-								.collections<ResourceDocument>(collections.resources)
-								.documents(documentId)
-								.delete();
-						},
-						catch(cause) {
-							return new SearchDocumentDeleteError({ cause });
 						},
 					});
 				},
