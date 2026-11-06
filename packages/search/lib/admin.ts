@@ -112,6 +112,25 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 		return { name, version };
 	}
 
+	async function dropStaleVersions(
+		alias: string,
+		collection: VersionedCollection,
+		previous: string | null,
+	): Promise<void> {
+		const stale = (await client.collections().retrieve()).filter((item) => {
+			if (item.name === previous) {
+				return false;
+			}
+
+			const version = getCollectionVersion(alias, item.name);
+
+			/** Newer versions are left alone: they may belong to a rebuild that is still running. */
+			return version != null && version < collection.version;
+		});
+
+		await Promise.allSettled(stale.map((item) => client.collections(item.name).delete()));
+	}
+
 	/**
 	 * Points the alias at the collection, then drops the versions older than it — except the one the
 	 * alias pointed at before, which is kept so a bad rebuild can be rolled back by pointing the
@@ -130,22 +149,11 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 
 		await patientClient.aliases().upsert(alias, { collection_name: collection.name });
 
-		const stale = (await client.collections().retrieve()).filter((item) => {
-			if (item.name === previous) {
-				return false;
-			}
-
-			const version = getCollectionVersion(alias, item.name);
-
-			/** Newer versions are left alone: they may belong to a rebuild that is still running. */
-			return version != null && version < collection.version;
-		});
-
 		/**
-		 * Stale versions only take up space, and the next swap retries them, so failing to drop one
-		 * does not fail the swap.
+		 * Stale versions only take up space, and the next swap retries them, so failing to drop them
+		 * does not fail the swap: by now the alias already points at the new collection.
 		 */
-		await Promise.allSettled(stale.map((item) => client.collections(item.name).delete()));
+		await dropStaleVersions(alias, collection, previous).catch(() => undefined);
 	}
 
 	async function createAliasedCollection(
