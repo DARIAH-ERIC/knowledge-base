@@ -1,6 +1,8 @@
+import type { ImageCaptionMode } from "@dariah-eric/database/image-captions";
 import * as schema from "@dariah-eric/database/schema";
 
-import type { EntityRef, PublicRelatedEntityType } from "@/lib/schemas";
+import { type Image, generateImageUrl, toImageAsset, withResolvedCaption } from "@/lib/images";
+import type { EntityRef, PublicRelatedEntityType, RelatedEntity } from "@/lib/schemas";
 import {
 	getCountrySlugsByOrganisationalUnitDocumentId,
 	getWebsiteHref,
@@ -8,6 +10,7 @@ import {
 import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, asc, eq, inArray, notInArray, sql } from "@/services/db/sql";
 import { search } from "@/services/search";
+import { imageWidth } from "~/config/api.config";
 
 /**
  * Resolve a (published/draft) entity version id to its owning document id (`entities.id`). Returns
@@ -128,11 +131,121 @@ export async function getEntityRefsByDocumentId(
 	);
 }
 
+/**
+ * The images of the public entities with the given document ids, keyed by document id. An entity
+ * without an image, or of a type which has none, simply has no entry.
+ *
+ * Separate from {@link getEntityRefsByDocumentId} because a reference is also what rich-text links
+ * and positions resolve to, and those have no use for an image.
+ */
+async function getEntityImagesByDocumentId(
+	db: Database | Transaction,
+	documentIds: Array<string>,
+): Promise<Map<string, Image>> {
+	if (documentIds.length === 0) {
+		return new Map();
+	}
+
+	const publishedEntityVersions = alias(schema.entityVersions, "published_entity_versions");
+	const publishedEntityStatus = alias(schema.entityStatus, "published_entity_status");
+
+	// A version belongs to exactly one of these tables, so at most one of the joins below matches.
+	const imageId = sql`
+		COALESCE(
+			${schema.news.imageId},
+			${schema.events.imageId},
+			${schema.pages.imageId},
+			${schema.opportunities.imageId},
+			${schema.fundingCalls.imageId},
+			${schema.impactCaseStudies.imageId},
+			${schema.spotlightArticles.imageId},
+			${schema.persons.imageId},
+			${schema.organisationalUnits.imageId},
+			${schema.projects.imageId}
+		)
+	`;
+
+	const rows = await db
+		.select({
+			id: publishedEntityVersions.entityId,
+			key: schema.assets.key,
+			alt: schema.assets.alt,
+			caption: schema.assets.caption,
+			mimeType: schema.assets.mimeType,
+			width: schema.assets.width,
+			height: schema.assets.height,
+			aspectRatio: schema.assets.aspectRatio,
+			focalPointX: schema.assets.focalPointX,
+			focalPointY: schema.assets.focalPointY,
+			licenseName: schema.licenses.name,
+			licenseUrl: schema.licenses.url,
+			imageCaption: sql`
+				COALESCE(
+					${schema.news.imageCaption},
+					${schema.events.imageCaption},
+					${schema.pages.imageCaption},
+					${schema.opportunities.imageCaption},
+					${schema.fundingCalls.imageCaption},
+					${schema.impactCaseStudies.imageCaption},
+					${schema.spotlightArticles.imageCaption},
+					${schema.persons.imageCaption}
+				)
+			`
+				.mapWith(schema.news.imageCaption)
+				.as("image_caption"),
+			// Organisational units and projects have no caption choice, so they inherit the asset's.
+			imageCaptionMode: sql<ImageCaptionMode>`
+				COALESCE(
+					${schema.news.imageCaptionMode},
+					${schema.events.imageCaptionMode},
+					${schema.pages.imageCaptionMode},
+					${schema.opportunities.imageCaptionMode},
+					${schema.fundingCalls.imageCaptionMode},
+					${schema.impactCaseStudies.imageCaptionMode},
+					${schema.spotlightArticles.imageCaptionMode},
+					${schema.persons.imageCaptionMode},
+					'inherit'
+				)
+			`.as("image_caption_mode"),
+		})
+		.from(publishedEntityVersions)
+		.innerJoin(
+			publishedEntityStatus,
+			and(
+				eq(publishedEntityVersions.statusId, publishedEntityStatus.id),
+				eq(publishedEntityStatus.type, "published"),
+			),
+		)
+		.leftJoin(schema.news, eq(publishedEntityVersions.id, schema.news.id))
+		.leftJoin(schema.events, eq(publishedEntityVersions.id, schema.events.id))
+		.leftJoin(schema.pages, eq(publishedEntityVersions.id, schema.pages.id))
+		.leftJoin(schema.opportunities, eq(publishedEntityVersions.id, schema.opportunities.id))
+		.leftJoin(schema.fundingCalls, eq(publishedEntityVersions.id, schema.fundingCalls.id))
+		.leftJoin(schema.impactCaseStudies, eq(publishedEntityVersions.id, schema.impactCaseStudies.id))
+		.leftJoin(schema.spotlightArticles, eq(publishedEntityVersions.id, schema.spotlightArticles.id))
+		.leftJoin(schema.persons, eq(publishedEntityVersions.id, schema.persons.id))
+		.leftJoin(
+			schema.organisationalUnits,
+			eq(publishedEntityVersions.id, schema.organisationalUnits.id),
+		)
+		.leftJoin(schema.projects, eq(publishedEntityVersions.id, schema.projects.id))
+		.innerJoin(schema.assets, eq(schema.assets.id, imageId))
+		.leftJoin(schema.licenses, eq(schema.licenses.id, schema.assets.licenseId))
+		.where(inArray(publishedEntityVersions.entityId, documentIds));
+
+	return new Map(
+		rows.map((row) => [
+			row.id,
+			generateImageUrl(withResolvedCaption(toImageAsset(row), row), imageWidth.preview),
+		]),
+	);
+}
+
 /** The entities related to `entityId`, in the order an editor arranged them. */
 export async function getRelatedEntities(
 	db: Database | Transaction,
 	entityId: string,
-): Promise<Array<EntityRef>> {
+): Promise<Array<RelatedEntity>> {
 	const documentId = await resolveDocumentId(db, entityId);
 
 	const related = await db
@@ -144,14 +257,19 @@ export async function getRelatedEntities(
 			asc(schema.entitiesToEntities.relatedEntityId),
 		);
 
-	const refs = await getEntityRefsByDocumentId(
-		db,
-		related.map((row) => row.relatedEntityId),
-	);
+	const relatedEntityIds = related.map((row) => row.relatedEntityId);
+
+	const [refs, images] = await Promise.all([
+		getEntityRefsByDocumentId(db, relatedEntityIds),
+		getEntityImagesByDocumentId(db, relatedEntityIds),
+	]);
 
 	// A relation whose target is unpublished or non-public resolves to nothing and drops out, exactly
 	// as it did when the filter lived in the join.
-	return related.map((row) => refs.get(row.relatedEntityId)).filter((ref) => ref != null);
+	return relatedEntityIds.flatMap((id) => {
+		const ref = refs.get(id);
+		return ref == null ? [] : [{ ...ref, image: images.get(id) ?? null }];
+	});
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
