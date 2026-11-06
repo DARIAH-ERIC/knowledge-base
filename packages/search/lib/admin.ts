@@ -55,13 +55,35 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 		connectionTimeoutSeconds: 5,
 	});
 
-	/** Also true for an alias, since typesense resolves aliases when retrieving a collection. */
-	async function collectionExists(name: string): Promise<boolean> {
+	/**
+	 * For the calls a swap cannot afford to lose: dropping a large collection can outlast the default
+	 * timeout, and once a pre-alias collection is gone, searches fail until the alias is in place.
+	 */
+	const patientClient = new Client({
+		apiKey,
+		nodes,
+		connectionTimeoutSeconds: 60,
+		numRetries: 5,
+		retryIntervalSeconds: 1,
+	});
+
+	/**
+	 * Also true for an alias, since typesense resolves aliases when retrieving a collection. Throws
+	 * when typesense cannot answer: treating that as "does not exist" would swap an empty collection
+	 * over live data.
+	 */
+	function collectionExists(name: string): Promise<boolean> {
+		return client.collections(name).exists();
+	}
+
+	async function deleteLegacyCollection(name: string): Promise<void> {
 		try {
-			await client.collections(name).retrieve();
-			return true;
-		} catch {
-			return false;
+			await patientClient.collections(name).delete();
+		} catch (error) {
+			/** A retry after a timed out delete finds the collection already gone. */
+			if (!(error instanceof Errors.ObjectNotFound)) {
+				throw error;
+			}
 		}
 	}
 
@@ -103,10 +125,10 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 			 * A collection created before collections were aliased. An alias cannot share its name with a
 			 * collection, so it has to go before the alias can take its place.
 			 */
-			await client.collections(alias).delete();
+			await deleteLegacyCollection(alias);
 		}
 
-		await client.aliases().upsert(alias, { collection_name: collection.name });
+		await patientClient.aliases().upsert(alias, { collection_name: collection.name });
 
 		const stale = (await client.collections().retrieve()).filter((item) => {
 			if (item.name === previous) {
