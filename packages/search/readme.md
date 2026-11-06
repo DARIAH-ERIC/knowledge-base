@@ -10,13 +10,17 @@ the alias.
 - **resources** is rebuilt on every sync: a new collection is filled from scratch and the alias is
   swapped to it at once. That drops stale documents and applies schema changes, with no window where
   search sees an empty or half-built index. A rebuild holding less than half the documents of the
-  current one is refused, since that more likely means an upstream api returned too little.
+  current one is refused, since that more likely means an upstream api returned too little. If the
+  drop is expected, run `pnpm data:ingest:search:resources --force`: it skips the local cache, and
+  the current collection stays live until the rebuild is ready. Scheduled syncs never skip this
+  check.
 - **website** is updated in place, because the dashboard writes to it on every publish and those
   writes would be lost if a rebuild were swapped in underneath them. `search:collections:reset`
   swaps in an empty collection with the current schema, which then needs a full ingest.
 
-Each swap keeps the collection the alias pointed at before and drops older versions. To roll back,
-point the alias at the previous collection again:
+Each swap keeps the collection the alias pointed at before, as well as the newest older one with
+documents, and drops the rest. The latter matters after a reset, when the collection the alias
+pointed at before is empty. To roll back, point the alias at a kept collection again:
 
 ```sh
 curl -X PUT "$TYPESENSE_URL/aliases/<alias>" \

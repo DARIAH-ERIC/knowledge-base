@@ -49,6 +49,11 @@ export interface FetchSearchResourcesParams {
 	cache?: SearchResourcesCache;
 }
 
+export interface SyncSearchResourcesParams extends FetchSearchResourcesParams {
+	/** Swap in the rebuild even if it holds far fewer documents than the current index. */
+	force?: boolean;
+}
+
 export interface SyncSearchResourcesResult {
 	count: number;
 	/**
@@ -276,7 +281,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 	}
 
 	async function syncSearchResources(
-		options?: FetchSearchResourcesParams,
+		options?: SyncSearchResourcesParams,
 	): Promise<SyncSearchResourcesResult> {
 		const sourceData = await fetchSearchIndexResourceSourceData(options);
 		const resources = createResourceDocuments(sourceData);
@@ -289,9 +294,12 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		}
 
 		const indexedResourceCount = indexedResourceCountResult.value;
-		if (resources.length < indexedResourceCount * minRetainedDocumentRatio) {
+		if (
+			options?.force !== true &&
+			resources.length < indexedResourceCount * minRetainedDocumentRatio
+		) {
 			throw new Error(
-				`Refusing to replace the resources index: the rebuild has ${String(resources.length)} documents, the current index ${String(indexedResourceCount)}. If the drop is expected, reset the resources collection and sync again.`,
+				`Refusing to replace the resources index: the rebuild has ${String(resources.length)} documents, the current index ${String(indexedResourceCount)}. If the drop is expected, run \`data:ingest:search:resources\` with \`--force\`.`,
 			);
 		}
 

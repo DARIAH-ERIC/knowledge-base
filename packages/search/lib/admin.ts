@@ -117,24 +117,28 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 		collection: VersionedCollection,
 		previous: string | null,
 	): Promise<void> {
-		const stale = (await client.collections().retrieve()).filter((item) => {
-			if (item.name === previous) {
-				return false;
-			}
-
-			const version = getCollectionVersion(alias, item.name);
-
+		const olderVersions = (await client.collections().retrieve())
+			.map((item) => {
+				return { ...item, version: getCollectionVersion(alias, item.name) };
+			})
 			/** Newer versions are left alone: they may belong to a rebuild that is still running. */
-			return version != null && version < collection.version;
-		});
+			.filter((item) => item.version != null && item.version < collection.version)
+			.toSorted((a, b) => b.version! - a.version!);
+
+		/** After a reset the previous version is empty, which makes it useless for a rollback. */
+		const lastWithDocuments = olderVersions.find((item) => item.num_documents > 0);
+
+		const stale = olderVersions.filter(
+			(item) => item.name !== previous && item.name !== lastWithDocuments?.name,
+		);
 
 		await Promise.allSettled(stale.map((item) => client.collections(item.name).delete()));
 	}
 
 	/**
 	 * Points the alias at the collection, then drops the versions older than it — except the one the
-	 * alias pointed at before, which is kept so a bad rebuild can be rolled back by pointing the
-	 * alias back at it.
+	 * alias pointed at before and the newest one with documents, which are kept so a bad rebuild can
+	 * be rolled back by pointing the alias back at them.
 	 */
 	async function swapAlias(alias: string, collection: VersionedCollection): Promise<void> {
 		const previous = await getAliasTarget(alias);
