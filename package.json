@@ -64,8 +64,8 @@
 		"npm-run-all2": "catalog:",
 		"oxfmt": "catalog:",
 		"oxlint": "catalog:",
-		"oxlint-tsgolint": "catalog:",
 		"stylelint": "catalog:",
+		"tsrs": "catalog:",
 		"turbo": "catalog:",
 		"typescript": "catalog:"
 	},

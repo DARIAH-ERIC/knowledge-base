@@ -44,8 +44,8 @@
 		"eslint-plugin-turbo": "catalog:",
 		"oxfmt": "catalog:",
 		"oxlint": "catalog:",
-		"oxlint-tsgolint": "catalog:",
 		"stylelint": "catalog:",
+		"tsrs": "catalog:",
 		"typescript": "catalog:"
 	},
 	"peerDependencies": {
@@ -57,8 +57,8 @@
 		"eslint-plugin-turbo": "catalog:",
 		"oxfmt": "catalog:",
 		"oxlint": "catalog:",
-		"oxlint-tsgolint": "catalog:",
 		"stylelint": "catalog:",
+		"tsrs": "catalog:",
 		"typescript": "catalog:"
 	},
 	"peerDependenciesMeta": {
