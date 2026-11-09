@@ -71,7 +71,7 @@ export function PageItemDetails(props: Readonly<PageItemDetailsProps>): ReactNod
 
 	return (
 		<Fragment>
-			<div className="flex items-center justify-between">
+			<div className="flex flex-wrap items-center justify-between gap-3">
 				<VersionSelector
 					draftHref={`/dashboard/website/pages/${pageItem.entityVersion.entity.slug}/details`}
 					hasDraft={hasDraft}

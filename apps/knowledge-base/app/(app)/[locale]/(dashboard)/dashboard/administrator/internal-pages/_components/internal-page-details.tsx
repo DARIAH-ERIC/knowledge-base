@@ -43,7 +43,7 @@ export function InternalPageDetails(props: Readonly<InternalPageDetailsProps>): 
 
 	return (
 		<Fragment>
-			<div className="flex items-center justify-between">
+			<div className="flex flex-wrap items-center justify-between gap-3">
 				<VersionSelector
 					draftHref={`/dashboard/administrator/internal-pages/${internalPage.entityVersion.entity.slug}/details`}
 					hasDraft={hasDraft}

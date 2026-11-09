@@ -65,7 +65,7 @@ export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNod
 
 	return (
 		<Fragment>
-			<div className="flex items-center justify-between">
+			<div className="flex flex-wrap items-center justify-between gap-3">
 				<VersionSelector
 					draftHref={`/dashboard/website/news/${newsItem.entityVersion.entity.slug}/details`}
 					hasDraft={hasDraft}
