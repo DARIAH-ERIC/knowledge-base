@@ -76,7 +76,7 @@ export function SpotlightArticleDetails(props: Readonly<SpotlightArticleDetailsP
 
 	return (
 		<Fragment>
-			<div className="flex items-center justify-between">
+			<div className="flex flex-wrap items-center justify-between gap-3">
 				<VersionSelector
 					draftHref={`/dashboard/website/spotlight-articles/${spotlightArticle.entityVersion.entity.slug}/details`}
 					hasDraft={hasDraft}

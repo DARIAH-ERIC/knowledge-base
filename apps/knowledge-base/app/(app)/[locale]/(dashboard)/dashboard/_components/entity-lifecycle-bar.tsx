@@ -55,8 +55,8 @@ export function EntityLifecycleBar(props: Readonly<EntityLifecycleBarProps>): Re
 	}
 
 	return (
-		<div className="flex items-center gap-x-3">
-			<Badge intent={badgeIntent} isCircle={false}>
+		<div className="flex flex-wrap items-center gap-3">
+			<Badge className="whitespace-nowrap" intent={badgeIntent} isCircle={false}>
 				{badgeLabel}
 			</Badge>
 
