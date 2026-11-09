@@ -76,7 +76,7 @@ export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsPro
 
 	return (
 		<Fragment>
-			<div className="flex items-center justify-between">
+			<div className="flex flex-wrap items-center justify-between gap-3">
 				<VersionSelector
 					draftHref={`/dashboard/website/impact-case-studies/${impactCaseStudy.entityVersion.entity.slug}/details`}
 					hasDraft={hasDraft}

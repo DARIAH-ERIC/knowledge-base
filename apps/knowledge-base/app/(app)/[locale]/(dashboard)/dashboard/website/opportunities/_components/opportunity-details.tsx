@@ -73,7 +73,7 @@ export function OpportunityDetails(props: Readonly<OpportunityDetailsProps>): Re
 
 	return (
 		<Fragment>
-			<div className="flex items-center justify-between">
+			<div className="flex flex-wrap items-center justify-between gap-3">
 				<VersionSelector
 					draftHref={`/dashboard/website/opportunities/${opportunity.entityVersion.entity.slug}/details`}
 					hasDraft={hasDraft}
