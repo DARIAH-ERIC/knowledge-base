@@ -292,6 +292,11 @@ msgid "Callout"
 msgstr ""
 
 #: lib/rich-text-actions.tsx
+msgctxt "ui.eJXiLH"
+msgid "Quote with attribution"
+msgstr "Quote with attribution"
+
+#: lib/rich-text-actions.tsx
 msgctxt "ui.ryK3qR"
 msgid "Accordion"
 msgstr ""
