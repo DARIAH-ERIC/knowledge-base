@@ -292,6 +292,11 @@ msgid "Callout"
 msgstr ""
 
 #: ../../packages/ui/lib/rich-text-actions.tsx
+msgctxt "ui.eJXiLH"
+msgid "Quote with attribution"
+msgstr "Quote with attribution"
+
+#: ../../packages/ui/lib/rich-text-actions.tsx
 msgctxt "ui.ryK3qR"
 msgid "Accordion"
 msgstr ""
@@ -1407,6 +1412,7 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-link-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/person-picker-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx
@@ -2847,6 +2853,48 @@ msgctxt "iS7BYy"
 msgid "Showing <strong>{start, number}</strong> to <strong>{end, number}</strong> of <strong>{total, number}</strong> results"
 msgstr ""
 
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/person-picker-dialog.tsx
+msgctxt "5NGtVk"
+msgid "The byline shows the person's current name and portrait."
+msgstr "The byline shows the person's current name and portrait."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/person-picker-dialog.tsx
+msgctxt "KCZtz-"
+msgid "Add a person"
+msgstr "Add a person"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/person-picker-dialog.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/wizard-review.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-check.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section.tsx
+msgctxt "1mnmBr"
+msgid "Person"
+msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/person-picker-dialog.tsx
+msgctxt "n8dAw3"
+msgid "Search for a person…"
+msgstr "Search for a person…"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/person-picker-dialog.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-questions-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
+msgctxt "2_2yg-"
+msgid "Add"
+msgstr ""
+
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
 msgctxt "mGKpXh"
 msgid "Could not load the current person details. Please try again."
@@ -2865,20 +2913,6 @@ msgstr "Could not load the current person details. Please try again."
 #: app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/edit/_components/delegated-working-group-edit-form.tsx
 msgctxt "Tpy00S"
 msgid "People"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/country-role-wizard.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/guided-forms/_components/wizard-review.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/inactive-unit-relations-check.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/paired-relations-check.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section.tsx
-msgctxt "1mnmBr"
-msgid "Person"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
@@ -6580,17 +6614,6 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
 msgctxt "snh6R6"
 msgid "Label (optional)"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-questions-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
-msgctxt "2_2yg-"
-msgid "Add"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx

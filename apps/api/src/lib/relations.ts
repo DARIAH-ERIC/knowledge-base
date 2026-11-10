@@ -137,10 +137,13 @@ export async function getEntityRefsByDocumentId(
  *
  * Separate from {@link getEntityRefsByDocumentId} because a reference is also what rich-text links
  * and positions resolve to, and those have no use for an image.
+ *
+ * Signed at `width`: preview cards by default, `imageWidth.avatar` for a quote author's portrait.
  */
-async function getEntityImagesByDocumentId(
+export async function getEntityImagesByDocumentId(
 	db: Database | Transaction,
 	documentIds: Array<string>,
+	width: number = imageWidth.preview,
 ): Promise<Map<string, Image>> {
 	if (documentIds.length === 0) {
 		return new Map();
@@ -236,7 +239,7 @@ async function getEntityImagesByDocumentId(
 	return new Map(
 		rows.map((row) => [
 			row.id,
-			generateImageUrl(withResolvedCaption(toImageAsset(row), row), imageWidth.preview),
+			generateImageUrl(withResolvedCaption(toImageAsset(row), row), width),
 		]),
 	);
 }

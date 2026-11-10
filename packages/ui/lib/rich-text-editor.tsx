@@ -100,7 +100,13 @@ import { FootnotePasteGuard } from "@/lib/rich-text-footnote";
 import { FootnoteNode, inlineFootnoteExtensions } from "@/lib/rich-text-footnote-node";
 import { HeadingWithoutBold } from "@/lib/rich-text-heading";
 import { PastedImageGuard, parsePastedImage } from "@/lib/rich-text-image-paste";
+import { blockPanelFooterClassName, useContainerDraggable } from "@/lib/rich-text-node-chrome";
 import { PastedContentNormalizer } from "@/lib/rich-text-paste-normalize";
+import {
+	QuoteHostContext,
+	QuoteNode,
+	type QuotePersonPickerRenderer,
+} from "@/lib/rich-text-quote-node";
 import {
 	type SlashCommandHandlers,
 	SlashCommandMenu,
@@ -181,6 +187,11 @@ interface RichTextEditorProps {
 	renderLinkTargetSummary?: (
 		target: { kind: "asset"; assetKey: string } | { kind: "entity"; entityId: string },
 	) => ReactNode;
+	/**
+	 * Picker a quote's attribution panel opens, to credit a person in the knowledge base rather than
+	 * a typed-in name. Without one, quotes can still be attributed by name.
+	 */
+	renderPersonPicker?: QuotePersonPickerRenderer;
 }
 
 export type InsertImage = (
@@ -298,14 +309,6 @@ function BlockNodeSurface({
 		</NodeViewWrapper>
 	);
 }
-
-/**
- * Footer of a block edit panel. Its buttons act on the block as a whole rather than on the setting
- * directly above them, so they sit below a rule which spans the full panel — the panel's own `p-4`
- * is reversed out and then reapplied.
- */
-const blockPanelFooterClassName =
-	"-ms-4 -me-4 mbs-1 flex items-center gap-x-2 border-bs border-border px-4 pbs-3";
 
 function getEmbedUrl(url: string): string {
 	const watchMatch = /youtube\.com\/watch\?.*?v=([\w-]+)/.exec(url);
@@ -609,37 +612,6 @@ function createEmbedNode(hasFootnotes = false): Node {
 			));
 		},
 	});
-}
-
-/**
- * Marks a container node's DOM as draggable, and hands back the ref to put on its
- * `NodeViewWrapper`.
- *
- * ProseMirror sets `draggable` itself only for nodes with no content hole (see `NodeViewDesc`), so
- * a container — whose body is editable prose — never gets it. Without the attribute the browser
- * fires no `dragstart`, tiptap's `data-drag-handle` handling never runs, and the block cannot be
- * moved at all. The same reason `BlockNodeSurface` sets it for the atoms it wraps.
- *
- * Cleared while the node is not draggable — a read-only editor, or a settings panel the author is
- * filling in — so a drag can never start from a form.
- */
-function useContainerDraggable(isDraggable: boolean): RefObject<HTMLDivElement | null> {
-	const wrapperRef = useRef<HTMLDivElement>(null);
-
-	useLayoutEffect(() => {
-		const nodeViewContainer = wrapperRef.current?.parentElement;
-		if (nodeViewContainer == null) {
-			return;
-		}
-
-		if (isDraggable) {
-			nodeViewContainer.setAttribute("draggable", "true");
-		} else {
-			nodeViewContainer.removeAttribute("draggable");
-		}
-	}, [isDraggable]);
-
-	return wrapperRef;
 }
 
 /**
@@ -2971,6 +2943,7 @@ export function createRichTextExtensions(
 		),
 		createEmbedNode(options?.hasFootnotes),
 		CalloutNode,
+		QuoteNode,
 		LeadInNode,
 		AccordionNode,
 		AccordionItemNode,
@@ -2999,6 +2972,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		renderDocumentPicker,
 		renderEntityPicker,
 		renderLinkTargetSummary,
+		renderPersonPicker,
 	} = props;
 
 	const t = useExtracted("ui");
@@ -3006,6 +2980,10 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 	const initialContent = useMemo(() => normalizeInitialContent(content), [content]);
 
 	const slashCommandHandlersRef = useRef<SlashCommandHandlers | null>(null);
+
+	const quoteHost = useMemo(() => {
+		return { renderImagePicker, renderPersonPicker };
+	}, [renderImagePicker, renderPersonPicker]);
 
 	/**
 	 * Whether this field takes footnotes at all — the same opt-in that puts the action in the toolbar
@@ -3736,7 +3714,9 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					value={JSON.stringify(editorJson ?? { type: "doc", content: [] })}
 				/>
 			)}
-			<EditorContent editor={editor} />
+			<QuoteHostContext value={quoteHost}>
+				<EditorContent editor={editor} />
+			</QuoteHostContext>
 			{footnotes.length > 0 ? (
 				<div className="border-bs border-border bg-muted/40 px-4 py-3">
 					<h3 className="text-xs font-medium tracking-wide text-muted-fg uppercase">
