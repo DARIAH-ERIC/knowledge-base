@@ -97,7 +97,7 @@ test.describe("reporting campaigns admin", () => {
 
 		await campaignsPage.gotoContributions(campaignId!);
 		await campaignsPage.fillByLabel("National coordinator", "100");
-		await campaignsPage.fillByLabel("National coordinator (deputy)", "50");
+		await campaignsPage.fillByLabel("National coordinator deputy", "50");
 		await campaignsPage.fillByLabel("JRC chair", "80");
 		await campaignsPage.fillByLabel("NCC chair", "70");
 		await campaignsPage.fillByLabel("Working group chair", "60");
@@ -210,10 +210,7 @@ test.describe("reporting campaigns admin", () => {
 		const campaignYear = 3100 + workerIndex;
 		const campaignsPage = createAdminReportingCampaignsPage(workerIndex);
 
-		// Previous tab-form tests wrote rows to FK-constrained sub-tables. Clean
-		// them up so the app's simple DELETE action can succeed.
-		await db.cleanupCampaignSubTables(campaignId!);
-
+		// The campaign still has the amounts the tab-form tests saved: they are deleted with it.
 		await campaignsPage.goto();
 		await campaignsPage.searchByYear(campaignYear);
 		await expect(campaignsPage.rowByYear(campaignYear)).toBeVisible();
