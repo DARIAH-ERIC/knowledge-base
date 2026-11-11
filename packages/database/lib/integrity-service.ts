@@ -1883,6 +1883,231 @@ export async function checkHeadingHierarchy(
 }
 
 /**
+ * Data-integrity check for media nodes left inside stored rich text. The editor's media nodes
+ * (`assetImage`, `galleryBlock`, `mediaTextBlock`, `embedBlock`) only become typed content blocks —
+ * with a real asset reference the public api can resolve into a url, alt text and licence — when
+ * the editor's splitter finds them at the top of a document or of a callout/accordion panel. One
+ * placed inside a list item, blockquote or table cell is stored as-is inside the `rich_text` (or
+ * `media_text`) json, where nothing resolves it. Legacy tiptap `image` nodes are reported too: the
+ * stock extension is gone, so any left behind are equally unrenderable.
+ *
+ * Read-only and not auto-fixable: whether a nested placement should be supported, lifted out, or
+ * reported to an editor is a product decision, and this check exists to inform it. Every occurrence
+ * is reported with the innermost container it sits in, so the counts read directly as a node-type ×
+ * container matrix.
+ */
+
+export const richTextMediaNodeTypes = [
+	"assetImage",
+	"embedBlock",
+	"galleryBlock",
+	"mediaTextBlock",
+	"image",
+] as const;
+
+export type RichTextMediaNodeType = (typeof richTextMediaNodeTypes)[number];
+
+/**
+ * The innermost container a media node sits in. `top_level`: directly in the stored document (the
+ * splitter should have turned it into a block). `other`: nested, but in none of the containers this
+ * check knows — the `path` says where.
+ */
+export type RichTextMediaContext =
+	| "blockquote"
+	| "list_item"
+	| "other"
+	| "table_cell"
+	| "top_level";
+
+export interface RichTextMediaOccurrence {
+	nodeType: RichTextMediaNodeType;
+	context: RichTextMediaContext;
+	/** Ancestor node types from the document root down, excluding `doc` itself. */
+	path: Array<string>;
+	/** What the node points at, so an editor can recognise it: an image key, an embed url, etc. */
+	reference: string;
+}
+
+const mediaNodeTypeSet = new Set<string>(richTextMediaNodeTypes);
+
+const containerContexts: ReadonlyMap<string, RichTextMediaContext> = new Map([
+	["blockquote", "blockquote"],
+	["listItem", "list_item"],
+	["tableCell", "table_cell"],
+	["tableHeader", "table_cell"],
+]);
+
+function describeMediaReference(nodeType: RichTextMediaNodeType, node: JSONContent): string {
+	const attrs = node.attrs ?? {};
+
+	switch (nodeType) {
+		case "assetImage":
+		case "mediaTextBlock": {
+			return typeof attrs.imageKey === "string" ? attrs.imageKey : "";
+		}
+		case "embedBlock": {
+			return typeof attrs.url === "string" ? attrs.url : "";
+		}
+		case "galleryBlock": {
+			const count = Array.isArray(attrs.items) ? attrs.items.length : 0;
+			return `${String(count)} item(s)`;
+		}
+		case "image": {
+			// A legacy `image` src may be a whole data uri; the start is enough to recognise it.
+			const src = typeof attrs.src === "string" ? attrs.src : "";
+			return src.length > 120 ? `${src.slice(0, 120)}…` : src;
+		}
+	}
+}
+
+/** Collects every media node in a stored tiptap document, in reading order, with where it sits. */
+export function collectRichTextMedia(
+	doc: JSONContent | null | undefined,
+): Array<RichTextMediaOccurrence> {
+	const occurrences: Array<RichTextMediaOccurrence> = [];
+
+	function walk(node: JSONContent, path: Array<string>): void {
+		if (node.type != null && mediaNodeTypeSet.has(node.type)) {
+			let context: RichTextMediaContext = path.length === 0 ? "top_level" : "other";
+			for (const ancestor of path.toReversed()) {
+				const mapped = containerContexts.get(ancestor);
+				if (mapped != null) {
+					context = mapped;
+					break;
+				}
+			}
+			const nodeType = node.type as RichTextMediaNodeType;
+			occurrences.push({
+				nodeType,
+				context,
+				path,
+				reference: describeMediaReference(nodeType, node),
+			});
+		}
+
+		if (Array.isArray(node.content)) {
+			// A media node's own content (a media-text body) can hold further media; keep walking.
+			const childPath = node.type === "doc" || node.type == null ? path : [...path, node.type];
+			for (const child of node.content) {
+				walk(child, childPath);
+			}
+		}
+	}
+
+	if (doc != null) {
+		walk(doc, []);
+	}
+	return occurrences;
+}
+
+export interface RichTextMediaFinding extends RichTextMediaOccurrence {
+	entityId: string;
+	entityType: string;
+	entityLabel: string | null;
+	entitySlug: string;
+	fieldName: string;
+	/** Lifecycle status of the owning entity version (e.g. `draft`, `published`). */
+	status: string;
+	/** The content block whose stored json holds the node. */
+	blockType: "media_text" | "rich_text";
+	/** The container block it is nested in (`callout`, `accordion_item`), or `null` at field level. */
+	parentBlockType: string | null;
+	position: number;
+	contentBlockId: string;
+}
+
+export interface RichTextMediaCheckResult {
+	findings: Array<RichTextMediaFinding>;
+	errors: Array<string>;
+}
+
+export async function checkRichTextMedia(
+	db: Database | Transaction,
+): Promise<RichTextMediaCheckResult> {
+	const findings: Array<RichTextMediaFinding> = [];
+	const errors: Array<string> = [];
+
+	try {
+		const rows = await db
+			.select({
+				contentBlockId: schema.contentBlocks.id,
+				position: schema.contentBlocks.position,
+				parentBlockType: parentContentBlockTypes.type,
+				richTextContent: schema.richTextContentBlocks.content,
+				mediaTextContent: schema.mediaTextContentBlocks.content,
+				entityId: schema.entities.id,
+				entityLabel: schema.entities.label,
+				entitySlug: schema.entities.slug,
+				entityType: schema.entityTypes.type,
+				fieldName: schema.entityTypesFieldsNames.fieldName,
+				status: schema.entityStatus.type,
+			})
+			.from(schema.contentBlocks)
+			.innerJoin(schema.fields, eq(schema.fields.id, schema.contentBlocks.fieldId))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.entityTypesFieldsNames.id, schema.fields.fieldNameId),
+			)
+			.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.fields.entityVersionId))
+			.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+			.innerJoin(schema.entityTypes, eq(schema.entityTypes.id, schema.entities.typeId))
+			.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+			.leftJoin(
+				schema.richTextContentBlocks,
+				eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(
+				schema.mediaTextContentBlocks,
+				eq(schema.mediaTextContentBlocks.id, schema.contentBlocks.id),
+			)
+			.leftJoin(parentContentBlocks, eq(parentContentBlocks.id, schema.contentBlocks.parentBlockId))
+			.leftJoin(
+				parentContentBlockTypes,
+				eq(parentContentBlockTypes.id, parentContentBlocks.typeId),
+			);
+
+		for (const row of rows) {
+			const sources = [
+				{ blockType: "rich_text", content: row.richTextContent },
+				{ blockType: "media_text", content: row.mediaTextContent },
+			] as const;
+
+			for (const { blockType, content } of sources) {
+				for (const occurrence of collectRichTextMedia(content)) {
+					findings.push({
+						...occurrence,
+						entityId: row.entityId,
+						entityType: row.entityType,
+						entityLabel: row.entityLabel,
+						entitySlug: row.entitySlug,
+						fieldName: row.fieldName,
+						status: row.status,
+						blockType,
+						parentBlockType: row.parentBlockType,
+						position: row.position,
+						contentBlockId: row.contentBlockId,
+					});
+				}
+			}
+		}
+	} catch (error) {
+		// oxlint-disable-next-line unicorn/no-instanceof-builtins
+		errors.push(error instanceof Error ? error.message : String(error));
+	}
+
+	findings.sort(
+		(a, b) =>
+			a.entityType.localeCompare(b.entityType) ||
+			(a.entityLabel ?? a.entitySlug).localeCompare(b.entityLabel ?? b.entitySlug) ||
+			a.status.localeCompare(b.status) ||
+			a.fieldName.localeCompare(b.fieldName) ||
+			a.position - b.position,
+	);
+
+	return { findings, errors };
+}
+
+/**
  * Heuristics which surface **candidate** duplicate documents — the same person, institution or
  * project entered twice, usually because a bulk import and a hand-authored entry met, or because
  * two editors created the same entry independently.

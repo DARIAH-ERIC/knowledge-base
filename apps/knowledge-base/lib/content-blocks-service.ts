@@ -21,7 +21,7 @@ import { getEntityRelationOptionsByIds } from "@/lib/data/relations";
 import { type Transaction, db } from "@/lib/db";
 import { and, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
-import { hasEmbeddedImage } from "@/lib/rich-text-images";
+import { hasEmbeddedMedia } from "@/lib/rich-text-images";
 import { UserFacingError } from "@/lib/user-facing-error";
 
 async function getAssetIdByKey(tx: Transaction, key: string): Promise<string | null> {
@@ -150,8 +150,8 @@ export async function upsertTypedContentBlock(
 			// Strip spacer paragraphs first, so a block left holding nothing else is recognised as empty
 			// and removed rather than stored as a run of blank lines.
 			const content = withoutBlankParagraphs(block.content ?? {});
-			if (hasEmbeddedImage(content)) {
-				throw new UserFacingError("rich-text-embedded-image");
+			if (hasEmbeddedMedia(content)) {
+				throw new UserFacingError("rich-text-embedded-media");
 			}
 			if (isEmptyRichTextDocument(content)) {
 				await tx.delete(schema.contentBlocks).where(eq(schema.contentBlocks.id, blockId));
@@ -357,8 +357,8 @@ export async function upsertTypedContentBlock(
 
 			const side = block.content?.side ?? "start";
 			const content = cleanRequiredBody(block.content?.content);
-			if (hasEmbeddedImage(content)) {
-				throw new UserFacingError("rich-text-embedded-image");
+			if (hasEmbeddedMedia(content)) {
+				throw new UserFacingError("rich-text-embedded-media");
 			}
 			const caption = block.content?.caption ?? null;
 			const captionMode = block.content?.captionMode ?? (caption != null ? "override" : "inherit");

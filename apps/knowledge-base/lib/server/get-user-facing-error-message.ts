@@ -31,7 +31,7 @@ interface ErrorMessages {
 	relationEndBeforeStart: string;
 	relationNotEndable: string;
 	relationPeriodOverlap: string;
-	richTextEmbeddedImage: string;
+	richTextEmbeddedMedia: string;
 	serviceKpiConflict: string;
 	slugTooLong: string;
 	socialMediaKpiConflict: string;
@@ -124,8 +124,8 @@ export async function getUserFacingErrorMessage(
 			case "relation-period-overlap": {
 				return messages.relationPeriodOverlap;
 			}
-			case "rich-text-embedded-image": {
-				return messages.richTextEmbeddedImage;
+			case "rich-text-embedded-media": {
+				return messages.richTextEmbeddedMedia;
 			}
 			case "service-kpi-conflict": {
 				return messages.serviceKpiConflict;
@@ -199,8 +199,8 @@ async function getErrorMessages(options: GetUserFacingErrorMessageOptions): Prom
 		),
 		invitationEmailNotSent: t("The invitation email could not be sent. Please try again."),
 		invitationNotPending: t("This user has already accepted their invitation."),
-		richTextEmbeddedImage: t(
-			"The text contains an image that is not in the media library, for example one pasted from another website. Upload it to the media library and add it as an image block, or remove it.",
+		richTextEmbeddedMedia: t(
+			"The text contains an image or other media that cannot be stored there, for example an image pasted from another website, or media inside a list, quote or table. Upload images to the media library and add media as separate blocks, or remove it.",
 		),
 		missingDariahEric: t(
 			"The DARIAH-EU organisational unit could not be found, so this relation cannot be recorded.",

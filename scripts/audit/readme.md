@@ -60,5 +60,15 @@ Expect false positives at the low end, mostly units which legitimately share a w
 and its national consortium) or share a naming pattern (`"X members working time for …"`). The
 signals and weights live in `@dariah-eric/database/integrity-service`.
 
+### `data:audit:rich-text-media`
+
+Finds media nodes (`assetImage`, `galleryBlock`, `mediaTextBlock`, `embedBlock`, legacy `image`) left inside stored `rich_text` and `media_text` json. The editor's splitter only turns media into typed content blocks at the top of a document or of a callout/accordion panel; one placed in a list item, blockquote or table cell is stored as an editor node, and the public api passes it through with no resolved url or licence.
+
+Prints a node-type × container matrix (`list_item`, `blockquote`, `table_cell`, `top_level`, `other`; all versions, published share in brackets), then each occurrence with its ancestor path. The report goes to `.cache/rich-text-media-findings.tsv`.
+
+```bash
+pnpm --filter @dariah-eric/audit run data:audit:rich-text-media
+```
+
 Requires `DATABASE_HOST`, `DATABASE_NAME`, `DATABASE_PASSWORD`, `DATABASE_PORT`, `DATABASE_USER` in
 the environment.

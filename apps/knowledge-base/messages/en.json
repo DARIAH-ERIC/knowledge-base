@@ -1700,7 +1700,7 @@
   "p94UAR": "An image block has no image from the media library. Pick an image for it, or remove the block.",
   "bK-L0p": "The invitation email could not be sent. Please try again.",
   "hxkVK5": "This user has already accepted their invitation.",
-  "_q8nPI": "The text contains an image that is not in the media library, for example one pasted from another website. Upload it to the media library and add it as an image block, or remove it.",
+  "KdI727": "The text contains an image or other media that cannot be stored there, for example an image pasted from another website, or media inside a list, quote or table. Upload images to the media library and add media as separate blocks, or remove it.",
   "UxrCFa": "The DARIAH-EU organisational unit could not be found, so this relation cannot be recorded.",
   "pJL6Fh": "The governance body this role must also be recorded against could not be found.",
   "6L0TeR": "This relation already exists during an overlapping period. Adjust the dates and try again.",

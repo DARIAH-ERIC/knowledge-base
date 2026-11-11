@@ -1,16 +1,16 @@
 import type { JSONContent } from "@tiptap/core";
 import { describe, expect, it } from "vitest";
 
-import { hasEmbeddedImage } from "@/lib/rich-text-images";
+import { hasEmbeddedMedia } from "@/lib/rich-text-images";
 
 function paragraph(text: string): JSONContent {
 	return { type: "paragraph", content: [{ type: "text", text }] };
 }
 
-describe("hasEmbeddedImage", () => {
+describe("hasEmbeddedMedia", () => {
 	it("finds a pasted image at the top level", () => {
 		expect(
-			hasEmbeddedImage({
+			hasEmbeddedMedia({
 				type: "doc",
 				content: [
 					paragraph("Text."),
@@ -22,7 +22,7 @@ describe("hasEmbeddedImage", () => {
 
 	it("finds an asset image nested in a list, where no image block can hold it", () => {
 		expect(
-			hasEmbeddedImage({
+			hasEmbeddedMedia({
 				type: "doc",
 				content: [
 					{
@@ -39,8 +39,30 @@ describe("hasEmbeddedImage", () => {
 		).toBe(true);
 	});
 
+	it.each(["galleryBlock", "mediaTextBlock", "embedBlock"])(
+		"finds a %s nested in a table cell, which the editor's schema does not allow",
+		(type) => {
+			expect(
+				hasEmbeddedMedia({
+					type: "doc",
+					content: [
+						{
+							type: "table",
+							content: [
+								{
+									type: "tableRow",
+									content: [{ type: "tableCell", content: [{ type: "paragraph" }, { type }] }],
+								},
+							],
+						},
+					],
+				}),
+			).toBe(true);
+		},
+	);
+
 	it("accepts text without images", () => {
-		expect(hasEmbeddedImage({ type: "doc", content: [paragraph("Only text.")] })).toBe(false);
-		expect(hasEmbeddedImage(null)).toBe(false);
+		expect(hasEmbeddedMedia({ type: "doc", content: [paragraph("Only text.")] })).toBe(false);
+		expect(hasEmbeddedMedia(null)).toBe(false);
 	});
 });

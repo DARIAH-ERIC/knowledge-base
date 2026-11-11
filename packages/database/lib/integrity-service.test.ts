@@ -16,6 +16,7 @@ import {
 	buildMutuallyExclusiveUnitRelationFindings,
 	classifyRelationPair,
 	collectHeadings,
+	collectRichTextMedia,
 	countryMembershipRules,
 	findHeadingHierarchyViolations,
 	findOverlappingPeriods,
@@ -1039,6 +1040,126 @@ describe("collectHeadings", () => {
 	it("returns no headings for an empty or missing document", () => {
 		expect(collectHeadings(null)).toStrictEqual([]);
 		expect(collectHeadings({ type: "doc" })).toStrictEqual([]);
+	});
+});
+
+describe("collectRichTextMedia", () => {
+	const paragraph = (text: string): JSONContent => {
+		return { type: "paragraph", content: [{ type: "text", text }] };
+	};
+	const image = (imageKey: string): JSONContent => {
+		return { type: "assetImage", attrs: { imageKey } };
+	};
+
+	it("reports media inside a list item, blockquote and table cell with their container", () => {
+		const doc: JSONContent = {
+			type: "doc",
+			content: [
+				{
+					type: "bulletList",
+					content: [{ type: "listItem", content: [paragraph("Item"), image("in-list")] }],
+				},
+				{ type: "blockquote", content: [{ type: "embedBlock", attrs: { url: "https://x.test" } }] },
+				{
+					type: "table",
+					content: [
+						{
+							type: "tableRow",
+							content: [
+								{ type: "tableHeader", content: [image("in-header")] },
+								{
+									type: "tableCell",
+									content: [{ type: "galleryBlock", attrs: { items: [{}, {}] } }],
+								},
+							],
+						},
+					],
+				},
+			],
+		};
+
+		expect(collectRichTextMedia(doc)).toStrictEqual([
+			{
+				nodeType: "assetImage",
+				context: "list_item",
+				path: ["bulletList", "listItem"],
+				reference: "in-list",
+			},
+			{
+				nodeType: "embedBlock",
+				context: "blockquote",
+				path: ["blockquote"],
+				reference: "https://x.test",
+			},
+			{
+				nodeType: "assetImage",
+				context: "table_cell",
+				path: ["table", "tableRow", "tableHeader"],
+				reference: "in-header",
+			},
+			{
+				nodeType: "galleryBlock",
+				context: "table_cell",
+				path: ["table", "tableRow", "tableCell"],
+				reference: "2 item(s)",
+			},
+		]);
+	});
+
+	it("names the innermost container when they nest", () => {
+		const doc: JSONContent = {
+			type: "doc",
+			content: [
+				{
+					type: "blockquote",
+					content: [
+						{
+							type: "orderedList",
+							content: [{ type: "listItem", content: [image("deep")] }],
+						},
+					],
+				},
+			],
+		};
+
+		expect(collectRichTextMedia(doc).map((occurrence) => occurrence.context)).toStrictEqual([
+			"list_item",
+		]);
+	});
+
+	it("reports top-level media and legacy image nodes, and walks into media-text bodies", () => {
+		const doc: JSONContent = {
+			type: "doc",
+			content: [
+				{ type: "image", attrs: { src: `data:image/png;base64,${"A".repeat(200)}` } },
+				{
+					type: "mediaTextBlock",
+					attrs: { imageKey: "media-text" },
+					content: [
+						{
+							type: "bulletList",
+							content: [{ type: "listItem", content: [image("in-media-text")] }],
+						},
+					],
+				},
+			],
+		};
+
+		const occurrences = collectRichTextMedia(doc);
+
+		expect(occurrences.map(({ nodeType, context }) => [nodeType, context])).toStrictEqual([
+			["image", "top_level"],
+			["mediaTextBlock", "top_level"],
+			["assetImage", "list_item"],
+		]);
+		expect(occurrences[0]!.reference).toHaveLength(121);
+		expect(occurrences[2]!.path).toStrictEqual(["mediaTextBlock", "bulletList", "listItem"]);
+	});
+
+	it("reports nothing for prose-only, empty or missing documents", () => {
+		expect(collectRichTextMedia({ type: "doc", content: [paragraph("Text")] })).toStrictEqual([]);
+		expect(collectRichTextMedia({ type: "doc" })).toStrictEqual([]);
+		expect(collectRichTextMedia(null)).toStrictEqual([]);
 	});
 });
 

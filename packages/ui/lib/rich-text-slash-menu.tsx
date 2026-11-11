@@ -104,6 +104,10 @@ function isSameTrigger(a: SlashCommandTrigger | null, b: SlashCommandTrigger | n
  *
  * Without this the menu would offer blocks the schema then refuses: a media and text body holds
  * only paragraphs and lists, and a table cell holds no table.
+ *
+ * Splitting stops at an isolating node. A list or a blockquote splits cleanly around an inserted
+ * block, but a table would come apart into two tables, and a media and text block or a quote with a
+ * byline would be duplicated — so behind one of those, only what it can hold itself is offered.
  */
 export function canInsertBlock(editor: Editor, typeName: string): boolean {
 	const type = editor.schema.nodes[typeName];
@@ -117,8 +121,13 @@ export function canInsertBlock(editor: Editor, typeName: string): boolean {
 	for (let depth = $from.depth; depth >= 0; depth -= 1) {
 		const index = $from.index(depth);
 
-		if ($from.node(depth).canReplaceWith(index, index, type)) {
+		const node = $from.node(depth);
+
+		if (node.canReplaceWith(index, index, type)) {
 			return true;
+		}
+		if (depth > 0 && node.type.spec.isolating === true) {
+			return false;
 		}
 	}
 
