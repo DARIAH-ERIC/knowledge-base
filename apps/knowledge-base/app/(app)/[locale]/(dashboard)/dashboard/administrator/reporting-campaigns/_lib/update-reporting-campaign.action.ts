@@ -4,7 +4,6 @@ import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 
-import { findOtherOpenCampaign } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/find-other-open-campaign";
 import { UpdateReportingCampaignActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/update-reporting-campaign.schema";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -33,25 +32,14 @@ export const updateReportingCampaignAction = createMutationAction({
 			});
 		}
 
-		if (input.status === "open") {
-			const openCampaign = await findOtherOpenCampaign(input.id);
-			if (openCampaign != null) {
-				return createActionStateError({
-					message: t(
-						"The {year} campaign is still open. Close it before opening another campaign.",
-						{ year: String(openCampaign.year) },
-					),
-				});
-			}
-		}
-
 		return undefined;
 	},
 
 	async mutate(tx, input) {
 		await tx
 			.update(schema.reportingCampaigns)
-			.set({ year: input.year, status: input.status })
+			// Status changes go through the launch and close actions, which have their own checks.
+			.set({ year: input.year })
 			.where(eq(schema.reportingCampaigns.id, input.id));
 
 		return { subjectId: input.id };

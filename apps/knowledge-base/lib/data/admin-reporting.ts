@@ -7,6 +7,7 @@ import { forbidden } from "next/navigation";
 
 import { hasDariahCommissionedEvent } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/calculate-operational-cost";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { getPublishedCountries } from "@/lib/data/reporting-campaign-readiness";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import {
@@ -1329,7 +1330,7 @@ export async function getReportingCampaignHeaderForAdmin(
 
 	return db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true, year: true },
+		columns: { id: true, year: true, status: true },
 	});
 }
 
@@ -1353,7 +1354,7 @@ export async function getReportingCampaignEventAmountsForAdmin(
 
 	return db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true },
+		columns: { id: true, status: true },
 		with: {
 			eventAmounts: {
 				columns: { eventType: true, amount: true },
@@ -1371,25 +1372,14 @@ export async function getReportingCampaignCountryThresholdsForAdmin(
 	const [campaign, countries] = await Promise.all([
 		db.query.reportingCampaigns.findFirst({
 			where: { id },
-			columns: { id: true },
+			columns: { id: true, status: true },
 			with: {
 				countryThresholds: {
 					columns: { countryDocumentId: true, amount: true },
 				},
 			},
 		}),
-		db
-			// thresholds are keyed by country document id; return the document id.
-			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
-			.from(schema.organisationalUnits)
-			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.innerJoin(
-				schema.organisationalUnitTypes,
-				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
-			)
-			.where(and(publishedEntityVersionWhere(), eq(schema.organisationalUnitTypes.type, "country")))
-			.orderBy(schema.organisationalUnits.name),
+		getPublishedCountries(),
 	]);
 
 	return { campaign, countries };
@@ -1403,7 +1393,7 @@ export async function getReportingCampaignContributionAmountsForAdmin(
 
 	return db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true },
+		columns: { id: true, status: true },
 		with: {
 			contributionAmounts: {
 				columns: { roleType: true, amount: true },
@@ -1420,7 +1410,7 @@ export async function getReportingCampaignQuestionsForAdmin(
 
 	return db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true },
+		columns: { id: true, status: true },
 		with: {
 			workingGroupReportQuestions: {
 				columns: { id: true, question: true, position: true },
@@ -1438,7 +1428,7 @@ export async function getReportingCampaignServiceSizesForAdmin(
 
 	return db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true },
+		columns: { id: true, status: true },
 		with: {
 			serviceSizes: {
 				columns: { serviceSize: true, visitsThreshold: true, amount: true },
@@ -1455,7 +1445,7 @@ export async function getReportingCampaignSocialMediaAmountsForAdmin(
 
 	return db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true },
+		columns: { id: true, status: true },
 		with: {
 			socialMediaAmounts: {
 				columns: { category: true, amount: true },

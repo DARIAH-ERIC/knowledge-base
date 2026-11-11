@@ -40,6 +40,7 @@ export default async function DashboardAdministratorCampaignEventsPage(
 		<CampaignEventAmountsForm
 			amounts={campaign.eventAmounts}
 			campaignId={id}
+			isLocked={campaign.status === "closed"}
 			formAction={upsertCampaignEventAmountsAction}
 		/>
 	);

@@ -7,7 +7,7 @@ import { ReportingCampaignForm } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { updateReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/update-reporting-campaign.action";
 
 interface ReportingCampaignEditFormProps {
-	campaign: Pick<schema.ReportingCampaign, "id" | "year" | "status">;
+	campaign: Pick<schema.ReportingCampaign, "id" | "year">;
 }
 
 export function ReportingCampaignEditForm(
@@ -15,11 +15,5 @@ export function ReportingCampaignEditForm(
 ): ReactNode {
 	const { campaign } = props;
 
-	return (
-		<ReportingCampaignForm
-			key={campaign.status}
-			campaign={campaign}
-			formAction={updateReportingCampaignAction}
-		/>
-	);
+	return <ReportingCampaignForm campaign={campaign} formAction={updateReportingCampaignAction} />;
 }

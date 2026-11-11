@@ -22,12 +22,14 @@ interface CampaignEventAmountsFormProps {
 	campaignId: string;
 	amounts: Array<Pick<schema.ReportingCampaignEventAmount, "eventType" | "amount">>;
 	formAction: ServerAction;
+	/** Closed campaigns are read-only. */
+	isLocked?: boolean;
 }
 
 export function CampaignEventAmountsForm(
 	props: Readonly<CampaignEventAmountsFormProps>,
 ): ReactNode {
-	const { campaignId, amounts, formAction } = props;
+	const { campaignId, amounts, formAction, isLocked = false } = props;
 
 	const t = useExtracted();
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
@@ -39,56 +41,60 @@ export function CampaignEventAmountsForm(
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
 				<input name="id" type="hidden" value={campaignId} />
 
-				<FormSection title={t("Event amounts")}>
-					<TextField defaultValue={amountMap.small ?? undefined} name="small" type="number">
-						<Label>{t("Small events")}</Label>
-						<Input min={0} step="0.01" />
-						<FieldError />
-					</TextField>
+				<fieldset className="flex flex-col gap-y-6 min-inline-0" disabled={isLocked}>
+					<FormSection title={t("Event amounts")}>
+						<TextField defaultValue={amountMap.small ?? undefined} name="small" type="number">
+							<Label>{t("Small events")}</Label>
+							<Input min={0} step="0.01" />
+							<FieldError />
+						</TextField>
 
-					<TextField defaultValue={amountMap.medium ?? undefined} name="medium" type="number">
-						<Label>{t("Medium events")}</Label>
-						<Input min={0} step="0.01" />
-						<FieldError />
-					</TextField>
+						<TextField defaultValue={amountMap.medium ?? undefined} name="medium" type="number">
+							<Label>{t("Medium events")}</Label>
+							<Input min={0} step="0.01" />
+							<FieldError />
+						</TextField>
 
-					<TextField defaultValue={amountMap.large ?? undefined} name="large" type="number">
-						<Label>{t("Large events")}</Label>
-						<Input min={0} step="0.01" />
-						<FieldError />
-					</TextField>
+						<TextField defaultValue={amountMap.large ?? undefined} name="large" type="number">
+							<Label>{t("Large events")}</Label>
+							<Input min={0} step="0.01" />
+							<FieldError />
+						</TextField>
 
-					<TextField
-						defaultValue={amountMap.very_large ?? undefined}
-						name="very_large"
-						type="number"
-					>
-						<Label>{t("Very large events")}</Label>
-						<Input min={0} step="0.01" />
-						<FieldError />
-					</TextField>
+						<TextField
+							defaultValue={amountMap.very_large ?? undefined}
+							name="very_large"
+							type="number"
+						>
+							<Label>{t("Very large events")}</Label>
+							<Input min={0} step="0.01" />
+							<FieldError />
+						</TextField>
 
-					<TextField
-						defaultValue={amountMap.dariah_commissioned ?? undefined}
-						name="dariah_commissioned"
-						type="number"
-					>
-						<Label>{t("DARIAH commissioned event")}</Label>
-						<Input min={0} step="0.01" />
-						<FieldError />
-					</TextField>
-				</FormSection>
+						<TextField
+							defaultValue={amountMap.dariah_commissioned ?? undefined}
+							name="dariah_commissioned"
+							type="number"
+						>
+							<Label>{t("DARIAH commissioned event")}</Label>
+							<Input min={0} step="0.01" />
+							<FieldError />
+						</TextField>
+					</FormSection>
+				</fieldset>
 
-				<Button className="self-start" isPending={isPending} type="submit">
-					{isPending ? (
-						<Fragment>
-							<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-							<span aria-hidden={true}>{t("Saving...")}</span>
-						</Fragment>
-					) : (
-						t("Save")
-					)}
-				</Button>
+				{!isLocked && (
+					<Button className="self-start" isPending={isPending} type="submit">
+						{isPending ? (
+							<Fragment>
+								<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+								<span aria-hidden={true}>{t("Saving...")}</span>
+							</Fragment>
+						) : (
+							t("Save")
+						)}
+					</Button>
+				)}
 
 				<FormStatus className="self-start" state={state} />
 			</Form>

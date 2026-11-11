@@ -3,6 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+import { checkCampaignEditable } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness";
 import { assertNotReferencedByReports } from "@/lib/data/report-references";
 import { eq } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
@@ -19,6 +20,10 @@ export const deleteWorkingGroupReportQuestionAction = createMutationAction({
 	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
 	redirect: ({ input }) =>
 		`/dashboard/administrator/reporting-campaigns/${input.campaignId}/edit/questions`,
+
+	preCheck({ input }) {
+		return checkCampaignEditable(input.campaignId);
+	},
 
 	async mutate(tx, input) {
 		// Answers record what a report said, so a question a report has answered stays.

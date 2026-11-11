@@ -39,6 +39,7 @@ export default async function DashboardAdministratorCampaignQuestionsPage(
 	return (
 		<CampaignQuestionsForm
 			campaignId={id}
+			isLocked={campaign.status === "closed"}
 			createAction={createWorkingGroupReportQuestionAction}
 			questions={campaign.workingGroupReportQuestions}
 		/>

@@ -39,6 +39,7 @@ export default async function DashboardAdministratorCampaignCountriesPage(
 	return (
 		<CampaignCountryThresholdsForm
 			campaignId={id}
+			isLocked={campaign.status === "closed"}
 			countries={countries}
 			formAction={upsertCampaignCountryThresholdsAction}
 			thresholds={campaign.countryThresholds}

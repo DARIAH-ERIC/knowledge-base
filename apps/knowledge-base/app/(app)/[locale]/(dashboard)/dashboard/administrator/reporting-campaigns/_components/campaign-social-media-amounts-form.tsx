@@ -22,12 +22,14 @@ interface CampaignSocialMediaAmountsFormProps {
 	campaignId: string;
 	amounts: Array<Pick<schema.ReportingCampaignSocialMediaAmount, "category" | "amount">>;
 	formAction: ServerAction;
+	/** Closed campaigns are read-only. */
+	isLocked?: boolean;
 }
 
 export function CampaignSocialMediaAmountsForm(
 	props: Readonly<CampaignSocialMediaAmountsFormProps>,
 ): ReactNode {
-	const { campaignId, amounts, formAction } = props;
+	const { campaignId, amounts, formAction, isLocked = false } = props;
 
 	const t = useExtracted();
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
@@ -39,30 +41,34 @@ export function CampaignSocialMediaAmountsForm(
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
 				<input name="id" type="hidden" value={campaignId} />
 
-				<FormSection title={t("Social media amounts")}>
-					<TextField defaultValue={amountMap.website ?? undefined} name="website" type="number">
-						<Label>{t("Website")}</Label>
-						<Input min={0} step="0.01" />
-						<FieldError />
-					</TextField>
+				<fieldset className="flex flex-col gap-y-6 min-inline-0" disabled={isLocked}>
+					<FormSection title={t("Social media amounts")}>
+						<TextField defaultValue={amountMap.website ?? undefined} name="website" type="number">
+							<Label>{t("Website")}</Label>
+							<Input min={0} step="0.01" />
+							<FieldError />
+						</TextField>
 
-					<TextField defaultValue={amountMap.other ?? undefined} name="other" type="number">
-						<Label>{t("Other")}</Label>
-						<Input min={0} step="0.01" />
-						<FieldError />
-					</TextField>
-				</FormSection>
+						<TextField defaultValue={amountMap.other ?? undefined} name="other" type="number">
+							<Label>{t("Other")}</Label>
+							<Input min={0} step="0.01" />
+							<FieldError />
+						</TextField>
+					</FormSection>
+				</fieldset>
 
-				<Button className="self-start" isPending={isPending} type="submit">
-					{isPending ? (
-						<Fragment>
-							<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-							<span aria-hidden={true}>{t("Saving...")}</span>
-						</Fragment>
-					) : (
-						t("Save")
-					)}
-				</Button>
+				{!isLocked && (
+					<Button className="self-start" isPending={isPending} type="submit">
+						{isPending ? (
+							<Fragment>
+								<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+								<span aria-hidden={true}>{t("Saving...")}</span>
+							</Fragment>
+						) : (
+							t("Save")
+						)}
+					</Button>
+				)}
 
 				<FormStatus className="self-start" state={state} />
 			</Form>

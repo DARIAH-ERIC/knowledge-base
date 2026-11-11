@@ -5,6 +5,7 @@ import type { JSONContent } from "@tiptap/core";
 import { getExtracted } from "next-intl/server";
 import * as v from "valibot";
 
+import { checkCampaignEditable } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 const CreateWorkingGroupReportQuestionSchema = v.object({
@@ -28,6 +29,10 @@ export const createWorkingGroupReportQuestionAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "reporting_campaigns" },
 	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
+
+	preCheck({ input }) {
+		return checkCampaignEditable(input.campaignId);
+	},
 
 	async mutate(tx, input) {
 		const t = await getExtracted();

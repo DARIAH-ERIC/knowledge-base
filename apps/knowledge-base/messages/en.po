@@ -3256,7 +3256,6 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaign-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
@@ -6834,42 +6833,6 @@ msgctxt "ihs3ng"
 msgid "Contribution amounts"
 msgstr ""
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-contribution-amounts-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels.ts
-msgctxt "VY1v4U"
-msgid "National coordinator"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-contribution-amounts-form.tsx
-msgctxt "6u284c"
-msgid "National coordinator deputy"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-contribution-amounts-form.tsx
-msgctxt "OSpzwh"
-msgid "National representative"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-contribution-amounts-form.tsx
-msgctxt "iihcsa"
-msgid "National representative deputy"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-contribution-amounts-form.tsx
-msgctxt "Dn3lpk"
-msgid "WG chair"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-contribution-amounts-form.tsx
-msgctxt "q4vbYV"
-msgid "WG vice-chair"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-contribution-amounts-form.tsx
-msgctxt "WbmYgl"
-msgid "WG member"
-msgstr ""
-
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-country-thresholds-form.tsx
 msgctxt "aVfQOp"
 msgid "Country thresholds"
@@ -7066,6 +7029,56 @@ msgctxt "nBgfHI"
 msgid "Could not delete reporting campaign. Please try again."
 msgstr ""
 
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
+msgctxt "D_TTL8"
+msgid "Events: {count} event amounts are missing."
+msgstr "Events: {count} event amounts are missing."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
+msgctxt "K-UKP2"
+msgid "Social media: {count} amounts are missing."
+msgstr "Social media: {count} amounts are missing."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
+msgctxt "eCIGs0"
+msgid "Contributions: {count} role amounts are missing."
+msgstr "Contributions: {count} role amounts are missing."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
+msgctxt "ah5TeC"
+msgid "Services: {count} service size amounts are missing."
+msgstr "Services: {count} service size amounts are missing."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
+msgctxt "4LUn41"
+msgid "Services: {count} visit thresholds are missing."
+msgstr "Services: {count} visit thresholds are missing."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
+msgctxt "1IMzzt"
+msgid "Countries: {count} of {total} countries have no threshold, so their reports cannot be compared against one."
+msgstr "Countries: {count} of {total} countries have no threshold, so their reports cannot be compared against one."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
+msgctxt "Fieko1"
+msgid "Questions: working group reports will have no questions to answer."
+msgstr "Questions: working group reports will have no questions to answer."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
+msgctxt "hFRwlk"
+msgid "Campaign not found."
+msgstr "Campaign not found."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
+msgctxt "z10Tnd"
+msgid "The campaign cannot be opened yet."
+msgstr "The campaign cannot be opened yet."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
+msgctxt "55b7IW"
+msgid "This campaign is closed and can no longer be changed."
+msgstr "This campaign is closed and can no longer be changed."
+
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/close-reporting-campaign.action.ts
 msgctxt "q3Ffvs"
 msgid "Campaign cannot be closed."
@@ -7076,12 +7089,6 @@ msgstr ""
 msgctxt "oP9f_N"
 msgid "A campaign for this year already exists."
 msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/create-reporting-campaign.action.ts
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/update-reporting-campaign.action.ts
-msgctxt "iblK8Z"
-msgid "The {year} campaign is still open. Close it before opening another campaign."
-msgstr "The {year} campaign is still open. Close it before opening another campaign."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/create-working-group-report-question.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/add-country-report-service.action.ts
@@ -7120,6 +7127,11 @@ msgctxt "jBPD-m"
 msgid "Administrator dashboard - Campaign event amounts"
 msgstr ""
 
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/layout.tsx
+msgctxt "jciP4W"
+msgid "This campaign is closed. Its amounts and questions are read-only, because its reports were assessed against them."
+msgstr "This campaign is closed. Its amounts and questions are read-only, because its reports were assessed against them."
+
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/questions/page.tsx
 msgctxt "TmeIoJ"
 msgid "Administrator dashboard - Campaign questions"
@@ -7134,6 +7146,16 @@ msgstr ""
 msgctxt "wiofrC"
 msgid "Administrator dashboard - Campaign settings"
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx
+msgctxt "rVuN0K"
+msgid "Set these amounts before launching the campaign:"
+msgstr "Set these amounts before launching the campaign:"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx
+msgctxt "Pcd_L3"
+msgid "You can launch the campaign, but check these first:"
+msgstr "You can launch the campaign, but check these first:"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx
 msgctxt "ncaGLo"
@@ -8523,6 +8545,11 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/confirm-working-group-report.action.ts
 msgctxt "RCzYOb"
 msgid "Only a submitted report can be accepted. Refresh the page and try again."
+msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels.ts
+msgctxt "VY1v4U"
+msgid "National coordinator"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels.ts

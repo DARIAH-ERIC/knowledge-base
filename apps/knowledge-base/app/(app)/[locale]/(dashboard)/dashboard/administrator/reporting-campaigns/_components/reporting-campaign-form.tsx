@@ -1,7 +1,6 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { reportingCampaignStatusEnum } from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -9,10 +8,9 @@ import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState, useState } from "react";
+import { Fragment, type ReactNode, useActionState } from "react";
 
 import {
 	FormLayout,
@@ -21,14 +19,10 @@ import {
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface ReportingCampaignFormProps {
-	campaign?: Pick<schema.ReportingCampaign, "id" | "year" | "status">;
+	campaign?: Pick<schema.ReportingCampaign, "id" | "year">;
 	/** Pre-filled year for a new campaign; ignored when editing an existing one. */
 	defaultYear?: number;
 	formAction: ServerAction;
-}
-
-function formatStatus(status: string): string {
-	return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
 export function ReportingCampaignForm(props: Readonly<ReportingCampaignFormProps>): ReactNode {
@@ -39,8 +33,6 @@ export function ReportingCampaignForm(props: Readonly<ReportingCampaignFormProps
 	const t = useExtracted();
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
-
-	const [selectedStatus, setSelectedStatus] = useState<string>(campaign?.status ?? "draft");
 
 	return (
 		<FormLayout>
@@ -56,26 +48,6 @@ export function ReportingCampaignForm(props: Readonly<ReportingCampaignFormProps
 						<Input />
 						<FieldError />
 					</TextField>
-
-					<Select
-						isRequired={true}
-						onChange={(key) => {
-							setSelectedStatus(key == null ? "" : String(key));
-						}}
-						value={selectedStatus || null}
-					>
-						<Label>{t("Status")}</Label>
-						<SelectTrigger />
-						<FieldError />
-						<SelectContent>
-							{reportingCampaignStatusEnum.map((status) => (
-								<SelectItem key={status} id={status}>
-									{formatStatus(status)}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-					<input name="status" type="hidden" value={selectedStatus} />
 				</FormSection>
 
 				{campaign != null && <input name="id" type="hidden" value={campaign.id} />}

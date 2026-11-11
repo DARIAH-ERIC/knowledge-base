@@ -3,6 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import { getExtracted } from "next-intl/server";
 
+import { checkCampaignEditable } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness";
 import { UpsertCampaignCountryThresholdsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-country-thresholds.schema";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
@@ -11,6 +12,10 @@ export const upsertCampaignCountryThresholdsAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "reporting_campaigns" },
 	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
+
+	preCheck({ input }) {
+		return checkCampaignEditable(input.id);
+	},
 
 	async mutate(tx, input) {
 		const t = await getExtracted();
