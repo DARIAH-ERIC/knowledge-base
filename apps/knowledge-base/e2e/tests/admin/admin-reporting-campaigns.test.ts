@@ -27,8 +27,7 @@ test.describe("reporting campaigns admin", () => {
 
 		await campaignsPage.gotoCreate();
 		await campaignsPage.fillYear(campaignYear);
-		// New campaigns start as drafts: opening one is what "Launch" is for, and only one campaign
-		// may be open at a time (the seed and other suites keep campaigns open).
+		// New campaigns always start as drafts: opening one is what "Launch" is for.
 		await campaignsPage.submitCreateForm();
 
 		const created = await db.getReportingCampaignByYear(campaignYear);
@@ -36,6 +35,7 @@ test.describe("reporting campaigns admin", () => {
 		expect(created).toMatchObject({ year: campaignYear, status: "draft" });
 		campaignId = created!.id;
 
+		await campaignsPage.goto();
 		await campaignsPage.searchByYear(campaignYear);
 		await expect(campaignsPage.rowByYear(campaignYear)).toBeVisible();
 	});
@@ -47,41 +47,25 @@ test.describe("reporting campaigns admin", () => {
 
 		await campaignsPage.gotoSettings(campaignId!);
 		await campaignsPage.fillYear(updatedYear);
-		await campaignsPage.selectStatus("closed");
-		await campaignsPage.submitCreateForm();
+		await campaignsPage.submitSettingsForm();
 
 		const updated = await db.getReportingCampaignById(campaignId!);
 		expect(updated).not.toBeNull();
-		expect(updated).toMatchObject({ year: updatedYear, status: "closed" });
+		expect(updated).toMatchObject({ year: updatedYear, status: "draft" });
 	});
 
-	test("should refuse to open a second campaign", async ({
+	test("should not launch a campaign with missing amounts", async ({
 		createAdminReportingCampaignsPage,
-		db,
 	}) => {
 		const workerIndex = test.info().workerIndex;
 		const campaignsPage = createAdminReportingCampaignsPage(workerIndex);
-		// Another campaign this worker owns is open; the seed and other suites may keep more open.
-		const otherOpenCampaign = await db.createOpenCampaign(3950 + workerIndex);
 
-		try {
-			await campaignsPage.gotoSettings(campaignId!);
-			await campaignsPage.selectStatus("open");
-			// Refused, so the form stays put instead of redirecting like `submitCreateForm` expects.
-			await waitForActionSuccess({
-				page: campaignsPage.page,
-				trigger: () => clickHydrated(campaignsPage.page.getByRole("button", { name: "Save" })),
-			});
+		await campaignsPage.gotoSettings(campaignId!);
 
-			await expect(
-				campaignsPage.page.getByText(
-					/campaign is still open\. Close it before opening another campaign\./,
-				),
-			).toBeVisible();
-			expect(await db.getReportingCampaignById(campaignId!)).toMatchObject({ status: "closed" });
-		} finally {
-			await db.deleteReportingCampaign(otherOpenCampaign.id);
-		}
+		await expect(
+			campaignsPage.page.getByText("Set these amounts before launching the campaign:"),
+		).toBeVisible();
+		await expect(campaignsPage.launchButton).toBeDisabled();
 	});
 
 	test("should set event amounts", async ({ createAdminReportingCampaignsPage, db }) => {
@@ -113,14 +97,22 @@ test.describe("reporting campaigns admin", () => {
 
 		await campaignsPage.gotoContributions(campaignId!);
 		await campaignsPage.fillByLabel("National coordinator", "100");
-		await campaignsPage.fillByLabel("National coordinator deputy", "50");
+		await campaignsPage.fillByLabel("National coordinator (deputy)", "50");
+		await campaignsPage.fillByLabel("JRC chair", "80");
+		await campaignsPage.fillByLabel("NCC chair", "70");
+		await campaignsPage.fillByLabel("Working group chair", "60");
+		await campaignsPage.fillByLabel("JRC member", "40");
 		await campaignsPage.saveTabForm();
 
 		const amounts = await db.getCampaignContributionAmounts(campaignId!);
 		const byRole = Object.fromEntries(amounts.map((a) => [a.roleType, a.amount]));
-		expect(byRole).toMatchObject({
+		expect(byRole).toStrictEqual({
 			national_coordinator: 100,
 			national_coordinator_deputy: 50,
+			is_chair_of_jrc: 80,
+			is_chair_of_ncc: 70,
+			is_chair_of_wg: 60,
+			is_member_of_jrc: 40,
 		});
 	});
 
@@ -129,14 +121,14 @@ test.describe("reporting campaigns admin", () => {
 		const campaignsPage = createAdminReportingCampaignsPage(workerIndex);
 
 		await campaignsPage.gotoServices(campaignId!);
-		await campaignsPage.fillByLabel("Small — visits threshold", "1000");
-		await campaignsPage.fillByLabel("Small — amount", "10");
-		await campaignsPage.fillByLabel("Medium — visits threshold", "5000");
-		await campaignsPage.fillByLabel("Medium — amount", "20");
-		await campaignsPage.fillByLabel("Large — visits threshold", "10000");
-		await campaignsPage.fillByLabel("Large — amount", "30");
-		await campaignsPage.fillByLabel("Very large — visits threshold", "50000");
-		await campaignsPage.fillByLabel("Very large — amount", "40");
+		await campaignsPage.fillByLabel("Small: visits threshold", "1000");
+		await campaignsPage.fillByLabel("Small: amount", "10");
+		await campaignsPage.fillByLabel("Medium: visits threshold", "5000");
+		await campaignsPage.fillByLabel("Medium: amount", "20");
+		await campaignsPage.fillByLabel("Large: visits threshold", "10000");
+		await campaignsPage.fillByLabel("Large: amount", "30");
+		await campaignsPage.fillByLabel("Very large: visits threshold", "50000");
+		await campaignsPage.fillByLabel("Very large: amount", "40");
 		await campaignsPage.fillByLabel("Core service amount", "5");
 		await campaignsPage.saveTabForm();
 
@@ -165,6 +157,52 @@ test.describe("reporting campaigns admin", () => {
 		const amounts = await db.getCampaignSocialMediaAmounts(campaignId!);
 		const byCategory = Object.fromEntries(amounts.map((a) => [a.category, a.amount]));
 		expect(byCategory).toMatchObject({ website: 200, other: 100 });
+	});
+
+	test("should refuse to launch a campaign while another one is open", async ({
+		createAdminReportingCampaignsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const campaignsPage = createAdminReportingCampaignsPage(workerIndex);
+		// Another campaign this worker owns is open; the seed and other suites may keep more open,
+		// which is also why this suite cannot launch its campaign successfully.
+		const otherOpenCampaign = await db.createOpenCampaign(3950 + workerIndex);
+
+		try {
+			await campaignsPage.gotoSettings(campaignId!);
+			// Every amount is set now, so only the other open campaign stands in the way.
+			await expect(campaignsPage.launchButton).toBeEnabled();
+			// Refused, so the page stays put instead of redirecting.
+			await waitForActionSuccess({
+				page: campaignsPage.page,
+				trigger: () => clickHydrated(campaignsPage.launchButton),
+			});
+
+			await expect(
+				campaignsPage.page.getByText(
+					/campaign is still open\. Close it before launching another campaign\./,
+				),
+			).toBeVisible();
+			expect(await db.getReportingCampaignById(campaignId!)).toMatchObject({ status: "draft" });
+		} finally {
+			await db.deleteReportingCampaign(otherOpenCampaign.id);
+		}
+	});
+
+	test("should make a closed campaign read-only", async ({
+		createAdminReportingCampaignsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const campaignsPage = createAdminReportingCampaignsPage(workerIndex);
+
+		await db.closeReportingCampaign(campaignId!);
+
+		await campaignsPage.gotoEvents(campaignId!);
+		await expect(campaignsPage.page.getByText(/This campaign is closed\./)).toBeVisible();
+		await expect(campaignsPage.page.getByLabel("Small events", { exact: true })).toBeDisabled();
+		await expect(campaignsPage.page.getByRole("button", { name: "Save" })).toBeHidden();
 	});
 
 	test("should delete a reporting campaign", async ({ createAdminReportingCampaignsPage, db }) => {

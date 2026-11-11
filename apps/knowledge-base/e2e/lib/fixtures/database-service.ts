@@ -1908,6 +1908,14 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
+	/** Closes a campaign directly; e2e cannot launch one, since other campaigns stay open. */
+	async closeReportingCampaign(id: string): Promise<void> {
+		await this.db
+			.update(schema.reportingCampaigns)
+			.set({ status: "closed" })
+			.where(eq(schema.reportingCampaigns.id, id));
+	}
+
 	async cleanupCampaignSubTables(id: string): Promise<void> {
 		const wgReportRows = await this.db
 			.select({ id: schema.workingGroupReports.id })

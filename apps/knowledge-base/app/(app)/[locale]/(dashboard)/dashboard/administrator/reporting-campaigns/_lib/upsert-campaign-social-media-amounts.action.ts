@@ -4,6 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { reportingCampaignSocialMediaCategoryEnum } from "@dariah-eric/database/schema";
 import { getExtracted } from "next-intl/server";
 
+import { checkCampaignEditable } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness";
 import { UpsertCampaignSocialMediaAmountsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-social-media-amounts.schema";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
@@ -12,6 +13,10 @@ export const upsertCampaignSocialMediaAmountsAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "reporting_campaigns" },
 	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
+
+	preCheck({ input }) {
+		return checkCampaignEditable(input.id);
+	},
 
 	async mutate(tx, input) {
 		const t = await getExtracted();

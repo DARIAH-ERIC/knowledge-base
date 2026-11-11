@@ -12,8 +12,9 @@ import { eq } from "@/lib/db/sql";
 import { withTransaction } from "@/test/lib/with-transaction";
 
 /**
- * Reporting campaigns are annual, so at most one is open at a time. The launch, create and update
- * actions each refuse to open a second one.
+ * Reporting campaigns are annual, so at most one is open at a time. Campaigns are created as drafts
+ * and only the launch action opens one: it refuses to open a second one, or a campaign whose
+ * amounts are not all set. A closed campaign's amounts and questions can no longer be changed.
  *
  * The actions write through the shared `db`. Route it to the test's transaction (the actions' own
  * `db.transaction` calls nest as savepoints), so everything is rolled back with it.
@@ -78,6 +79,12 @@ const { launchReportingCampaignAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/launch-reporting-campaign.action");
 const { updateReportingCampaignAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/update-reporting-campaign.action");
+const { upsertCampaignEventAmountsAction } =
+	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-event-amounts.action");
+const { copyWorkingGroupReportQuestionsAction } =
+	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/copy-working-group-report-questions.action");
+const { createWorkingGroupReportQuestionAction } =
+	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/create-working-group-report-question.action");
 
 type Tx = Transaction;
 type CampaignStatus = (typeof schema.reportingCampaignStatusEnum)[number];
@@ -136,6 +143,47 @@ async function seedCampaign(tx: Tx, status: CampaignStatus, year = unusedYear())
 	return row.id;
 }
 
+/** Sets every amount the launch checks require; thresholds and questions are left empty. */
+async function seedCampaignAmounts(tx: Tx, campaignId: string): Promise<void> {
+	await tx.insert(schema.reportingCampaignEventAmounts).values(
+		schema.reportingCampaignEventTypeEnum.map((eventType) => {
+			return {
+				campaignId,
+				eventType,
+				amount: 1,
+			};
+		}),
+	);
+	await tx.insert(schema.reportingCampaignSocialMediaAmounts).values(
+		schema.reportingCampaignSocialMediaCategoryEnum.map((category) => {
+			return {
+				campaignId,
+				category,
+				amount: 1,
+			};
+		}),
+	);
+	await tx.insert(schema.reportingCampaignContributionAmounts).values(
+		schema.reportingCampaignContributionRoleEnum.map((roleType) => {
+			return {
+				campaignId,
+				roleType,
+				amount: 1,
+			};
+		}),
+	);
+	await tx.insert(schema.reportingCampaignServiceSizes).values(
+		schema.serviceSizeEnum.map((serviceSize, index) => {
+			return {
+				campaignId,
+				serviceSize,
+				visitsThreshold: serviceSize === "small" || serviceSize === "core" ? null : index * 100,
+				amount: 1,
+			};
+		}),
+	);
+}
+
 async function getStatus(tx: Tx, id: string): Promise<CampaignStatus | undefined> {
 	const row = await tx.query.reportingCampaigns.findFirst({
 		where: { id },
@@ -156,6 +204,7 @@ describe("at most one open reporting campaign", () => {
 	it("launches a draft campaign when no other campaign is open", async () => {
 		await withAdminTransaction(async (tx) => {
 			const draft = await seedCampaign(tx, "draft");
+			await seedCampaignAmounts(tx, draft);
 
 			const state = await launchReportingCampaignAction(
 				createActionStateInitial(),
@@ -170,6 +219,22 @@ describe("at most one open reporting campaign", () => {
 		await withAdminTransaction(async (tx) => {
 			await seedCampaign(tx, "open");
 			const draft = await seedCampaign(tx, "draft");
+			await seedCampaignAmounts(tx, draft);
+
+			const state = await launchReportingCampaignAction(
+				createActionStateInitial(),
+				toFormData({ id: draft }),
+			);
+			expect(state.status).toBe("error");
+			expect(await getStatus(tx, draft)).toBe("draft");
+		});
+	});
+});
+
+describe("opening a campaign requires its amounts", () => {
+	it("refuses to launch a draft campaign with missing amounts", async () => {
+		await withAdminTransaction(async (tx) => {
+			const draft = await seedCampaign(tx, "draft");
 
 			const state = await launchReportingCampaignAction(
 				createActionStateInitial(),
@@ -180,55 +245,181 @@ describe("at most one open reporting campaign", () => {
 		});
 	});
 
-	it("refuses to create an open campaign while another one is open, but not a draft", async () => {
+	it("refuses a service size without a visit threshold", async () => {
 		await withAdminTransaction(async (tx) => {
-			await seedCampaign(tx, "open");
-			const openYear = unusedYear();
-			const draftYear = openYear + 1;
+			const draft = await seedCampaign(tx, "draft");
+			await seedCampaignAmounts(tx, draft);
+			await tx
+				.update(schema.reportingCampaignServiceSizes)
+				.set({ visitsThreshold: null })
+				.where(eq(schema.reportingCampaignServiceSizes.campaignId, draft));
 
-			const refused = await createReportingCampaignAction(
+			const state = await launchReportingCampaignAction(
 				createActionStateInitial(),
-				toFormData({ year: String(openYear), status: "open" }),
+				toFormData({ id: draft }),
 			);
-			expect(refused.status).toBe("error");
+			expect(state.status).toBe("error");
+			expect(await getStatus(tx, draft)).toBe("draft");
+		});
+	});
+});
+
+describe("closed campaigns are read-only", () => {
+	const question = JSON.stringify({
+		type: "doc",
+		content: [{ type: "paragraph", content: [{ type: "text", text: "Question?" }] }],
+	});
+
+	it("refuses to change the amounts or questions of a closed campaign", async () => {
+		await withAdminTransaction(async (tx) => {
+			const closed = await seedCampaign(tx, "closed");
+
+			const amounts = await upsertCampaignEventAmountsAction(
+				createActionStateInitial(),
+				toFormData({ id: closed, small: "10" }),
+			);
+			expect(amounts.status).toBe("error");
 			expect(
-				await tx.query.reportingCampaigns.findFirst({ where: { year: openYear } }),
+				await tx.query.reportingCampaignEventAmounts.findFirst({ where: { campaignId: closed } }),
 			).toBeUndefined();
 
-			const created = await createReportingCampaignAction(
+			const added = await createWorkingGroupReportQuestionAction(
 				createActionStateInitial(),
-				toFormData({ year: String(draftYear), status: "draft" }),
+				toFormData({ campaignId: closed, question }),
 			);
-			expect(created.status, JSON.stringify(created)).toBe("success");
+			expect(added.status).toBe("error");
+			expect(
+				await tx.query.workingGroupReportQuestions.findFirst({ where: { campaignId: closed } }),
+			).toBeUndefined();
 		});
 	});
 
-	it("refuses to set a campaign to open while another one is open", async () => {
+	it("lets the amounts and questions of an open campaign be changed", async () => {
 		await withAdminTransaction(async (tx) => {
-			await seedCampaign(tx, "open");
+			const open = await seedCampaign(tx, "open");
+
+			const amounts = await upsertCampaignEventAmountsAction(
+				createActionStateInitial(),
+				toFormData({ id: open, small: "10" }),
+			);
+			expect(amounts.status, JSON.stringify(amounts)).toBe("success");
+
+			const added = await createWorkingGroupReportQuestionAction(
+				createActionStateInitial(),
+				toFormData({ campaignId: open, question }),
+			);
+			expect(added.status, JSON.stringify(added)).toBe("success");
+		});
+	});
+});
+
+describe("only the launch and close actions change a campaign's status", () => {
+	it("creates campaigns as drafts, whatever status is submitted", async () => {
+		await withAdminTransaction(async (tx) => {
+			const year = unusedYear();
+
+			const state = await createReportingCampaignAction(
+				createActionStateInitial(),
+				toFormData({ year: String(year), status: "open" }),
+			);
+			expect(state.status, JSON.stringify(state)).toBe("success");
+			const created = await tx.query.reportingCampaigns.findFirst({
+				where: { year },
+				columns: { status: true },
+			});
+			expect(created?.status).toBe("draft");
+		});
+	});
+
+	it("updates the year but ignores a submitted status", async () => {
+		await withAdminTransaction(async (tx) => {
 			const year = unusedYear();
 			const closed = await seedCampaign(tx, "closed", year);
 
 			const state = await updateReportingCampaignAction(
 				createActionStateInitial(),
-				toFormData({ id: closed, year: String(year), status: "open" }),
+				toFormData({ id: closed, year: String(year + 1), status: "draft" }),
 			);
-			expect(state.status).toBe("error");
-			expect(await getStatus(tx, closed)).toBe("closed");
+			expect(state.status, JSON.stringify(state)).toBe("success");
+			const updated = await tx.query.reportingCampaigns.findFirst({
+				where: { id: closed },
+				columns: { status: true, year: true },
+			});
+			expect(updated).toEqual({ status: "closed", year: year + 1 });
+		});
+	});
+});
+
+describe("copying questions from the previous campaign", () => {
+	function questionContent(text: string) {
+		return { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text }] }] };
+	}
+
+	async function seedQuestions(tx: Tx, campaignId: string, texts: Array<string>): Promise<void> {
+		await tx.insert(schema.workingGroupReportQuestions).values(
+			texts.map((text, index) => {
+				return { campaignId, question: questionContent(text), position: index + 1 };
+			}),
+		);
+	}
+
+	async function getQuestionTexts(tx: Tx, campaignId: string): Promise<Array<string>> {
+		const rows = await tx.query.workingGroupReportQuestions.findMany({
+			where: { campaignId },
+			columns: { question: true },
+			orderBy: { position: "asc" },
+		});
+		return rows.map((row) => JSON.stringify(row.question));
+	}
+
+	it("copies the questions of the latest earlier campaign, in order", async () => {
+		await withAdminTransaction(async (tx) => {
+			const year = unusedYear();
+			const older = await seedCampaign(tx, "closed", year - 2);
+			const previous = await seedCampaign(tx, "closed", year - 1);
+			const draft = await seedCampaign(tx, "draft", year);
+			await seedQuestions(tx, older, ["Older?"]);
+			await seedQuestions(tx, previous, ["First?", "Second?"]);
+
+			const state = await copyWorkingGroupReportQuestionsAction(
+				createActionStateInitial(),
+				toFormData({ campaignId: draft }),
+			);
+			expect(state.status, JSON.stringify(state)).toBe("success");
+			expect(await getQuestionTexts(tx, draft)).toStrictEqual(await getQuestionTexts(tx, previous));
 		});
 	});
 
-	it("lets the open campaign itself be saved while it stays open", async () => {
+	it("refuses to copy into a campaign that already has questions", async () => {
 		await withAdminTransaction(async (tx) => {
 			const year = unusedYear();
-			const open = await seedCampaign(tx, "open", year);
+			const previous = await seedCampaign(tx, "closed", year - 1);
+			const draft = await seedCampaign(tx, "draft", year);
+			await seedQuestions(tx, previous, ["Previous?"]);
+			await seedQuestions(tx, draft, ["Own?"]);
 
-			const state = await updateReportingCampaignAction(
+			const state = await copyWorkingGroupReportQuestionsAction(
 				createActionStateInitial(),
-				toFormData({ id: open, year: String(year + 1), status: "open" }),
+				toFormData({ campaignId: draft }),
 			);
-			expect(state.status, JSON.stringify(state)).toBe("success");
-			expect(await getStatus(tx, open)).toBe("open");
+			expect(state.status).toBe("error");
+			expect(await getQuestionTexts(tx, draft)).toHaveLength(1);
+		});
+	});
+
+	it("refuses to copy into a closed campaign", async () => {
+		await withAdminTransaction(async (tx) => {
+			const year = unusedYear();
+			const previous = await seedCampaign(tx, "closed", year - 1);
+			const closed = await seedCampaign(tx, "closed", year);
+			await seedQuestions(tx, previous, ["Previous?"]);
+
+			const state = await copyWorkingGroupReportQuestionsAction(
+				createActionStateInitial(),
+				toFormData({ campaignId: closed }),
+			);
+			expect(state.status).toBe("error");
+			expect(await getQuestionTexts(tx, closed)).toHaveLength(0);
 		});
 	});
 });

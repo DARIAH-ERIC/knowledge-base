@@ -6,6 +6,7 @@ import { openActionsMenu } from "@/e2e/lib/fixtures/actions-menu";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/administrator/reporting-campaigns";
+const SETTINGS_PATHNAME = new RegExp(`^${BASE_PATH}/[^/]+/edit/settings$`);
 
 export class AdminReportingCampaignsPage {
 	readonly page: Page;
@@ -67,16 +68,18 @@ export class AdminReportingCampaignsPage {
 		await input.fill(String(year));
 	}
 
-	async selectStatus(status: string): Promise<void> {
-		const label = status.charAt(0).toUpperCase() + status.slice(1);
-		const control = this.page
-			.locator('[data-slot="control"]')
-			.filter({ has: this.page.getByText("Status", { exact: true }) });
-		await control.locator("button").click();
-		await this.page.getByRole("option", { name: label }).click();
+	/** A new campaign opens on its settings, whose checklist lists the amounts still to set. */
+	async submitCreateForm(): Promise<void> {
+		await waitForActionRedirect({
+			page: this.page,
+			redirectPathname: SETTINGS_PATHNAME,
+			trigger: async () => {
+				await this.page.getByRole("button", { name: "Save" }).click();
+			},
+		});
 	}
 
-	async submitCreateForm(): Promise<void> {
+	async submitSettingsForm(): Promise<void> {
 		await waitForActionRedirect({
 			page: this.page,
 			redirectPathname: BASE_PATH,
@@ -84,6 +87,10 @@ export class AdminReportingCampaignsPage {
 				await this.page.getByRole("button", { name: "Save" }).click();
 			},
 		});
+	}
+
+	get launchButton(): Locator {
+		return this.page.getByRole("button", { name: "Launch campaign" });
 	}
 
 	// ---------------------------------------------------------------------------

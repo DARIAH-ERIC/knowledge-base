@@ -5,6 +5,7 @@ import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 import * as v from "valibot";
 
+import { checkCampaignReadyToOpen } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness";
 import { findOtherOpenCampaign } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/find-other-open-campaign";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -38,7 +39,7 @@ export const launchReportingCampaignAction = createMutationAction({
 				),
 			});
 		}
-		return undefined;
+		return checkCampaignReadyToOpen(input.id);
 	},
 
 	async mutate(tx, input) {

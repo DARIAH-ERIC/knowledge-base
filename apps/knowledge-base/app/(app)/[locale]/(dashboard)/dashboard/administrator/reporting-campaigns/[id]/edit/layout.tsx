@@ -1,3 +1,5 @@
+import { Note } from "@dariah-eric/ui/note";
+import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -27,6 +29,8 @@ export default async function CampaignEditLayout(
 		notFound();
 	}
 
+	const t = await getExtracted();
+
 	return (
 		<div>
 			<Header>
@@ -38,6 +42,13 @@ export default async function CampaignEditLayout(
 
 			<div className="flex flex-col gap-y-6 px-(--layout-padding) pbs-6">
 				<CampaignStepNav campaignId={id} />
+				{campaign.status === "closed" && (
+					<Note intent="info">
+						{t(
+							"This campaign is closed. Its amounts and questions are read-only, because its reports were assessed against them.",
+						)}
+					</Note>
+				)}
 				{children}
 			</div>
 		</div>
