@@ -173,11 +173,31 @@ export interface DeleteUnusedAssetsResult {
 }
 
 /**
+ * Whether `error`, or anything in its `cause` chain (drizzle wraps the driver's), is a foreign-key
+ * violation.
+ */
+function isForeignKeyViolation(error: unknown): boolean {
+	let current: unknown = error;
+	for (let depth = 0; depth < 5 && typeof current === "object" && current != null; depth += 1) {
+		if ((current as { code?: unknown }).code === "23503") {
+			return true;
+		}
+		current = (current as { cause?: unknown }).cause;
+	}
+	return false;
+}
+
+/**
  * Prunes the given assets from object storage and the database. Only assets which are _still_
  * unused at call time are deleted — the unused set is recomputed here rather than trusting the
- * caller's ids, so a reference added in the meantime protects the asset. Object storage is not
- * transactional, so each asset's object is removed first and its database row (plus a `delete`
- * audit event) only after; a backup or storage failure leaves the row intact and is reported.
+ * caller's ids, so a reference added in the meantime protects the asset.
+ *
+ * Object storage is not transactional, so each asset is backed up first, and its object is removed
+ * inside the transaction that deletes its row (plus a `delete` audit event), after the row. A
+ * reference saved after the recomputation — caught by a foreign key, including the ones
+ * `content_block_assets` derives from rich text — then fails the row delete before the object is
+ * touched, and the asset is skipped; a backup or storage failure rolls the row back and is
+ * reported.
  */
 export async function deleteUnusedAssets(
 	db: Database | Transaction,
@@ -199,25 +219,30 @@ export async function deleteUnusedAssets(
 	for (const asset of deletable) {
 		try {
 			await onBeforeDelete?.(asset);
-			await deleteObject(asset.key);
 		} catch {
 			failedIds.push(asset.id);
 			continue;
 		}
 
-		await db.transaction(async (tx) => {
-			await tx.delete(schema.assets).where(eq(schema.assets.id, asset.id));
-			await tx.insert(schema.auditLogs).values({
-				action: "delete",
-				actorUserId,
-				subjectType: "assets",
-				subjectId: asset.id,
-				// Snapshotted, not left to be resolved on read: the assets row is gone by then, so the
-				// audit log would otherwise only be able to show the bare uuid.
-				subjectLabel: asset.label,
-				summary: { key: asset.key, size: asset.size },
+		try {
+			await db.transaction(async (tx) => {
+				await tx.delete(schema.assets).where(eq(schema.assets.id, asset.id));
+				await tx.insert(schema.auditLogs).values({
+					action: "delete",
+					actorUserId,
+					subjectType: "assets",
+					subjectId: asset.id,
+					// Snapshotted, not left to be resolved on read: the assets row is gone by then, so the
+					// audit log would otherwise only be able to show the bare uuid.
+					subjectLabel: asset.label,
+					summary: { key: asset.key, size: asset.size },
+				});
+				await deleteObject(asset.key);
 			});
-		});
+		} catch (error) {
+			(isForeignKeyViolation(error) ? skippedIds : failedIds).push(asset.id);
+			continue;
+		}
 
 		deletedCount += 1;
 		reclaimedSize += asset.size ?? 0;

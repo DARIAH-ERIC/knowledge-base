@@ -62,7 +62,7 @@ signals and weights live in `@dariah-eric/database/integrity-service`.
 
 ### `data:audit:rich-text-media`
 
-Finds media nodes (`assetImage`, `galleryBlock`, `mediaTextBlock`, `embedBlock`, legacy `image`) left inside stored `rich_text` and `media_text` json. The editor's splitter only turns media into typed content blocks at the top of a document or of a callout/accordion panel; one placed in a list item, blockquote or table cell is stored as an editor node, and the public api passes it through with no resolved url or licence.
+Finds media nodes (`assetImage`, `galleryBlock`, `mediaTextBlock`, `embedBlock`, legacy `image`) left inside stored `rich_text` and `media_text` json where they may not be. The editor's splitter turns media into typed content blocks at the top of a document or of a callout/accordion panel. The one nested placement it allows, an image with an asset key directly inside a list item or plain blockquote, is not reported: its key has a foreign key through `content_block_assets`, and the api resolves it in place.
 
 Prints a node-type × container matrix (`list_item`, `blockquote`, `table_cell`, `top_level`, `other`; all versions, published share in brackets), then each occurrence with its ancestor path. The report goes to `.cache/rich-text-media-findings.tsv`.
 

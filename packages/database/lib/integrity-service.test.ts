@@ -20,6 +20,7 @@ import {
 	countryMembershipRules,
 	findHeadingHierarchyViolations,
 	findOverlappingPeriods,
+	isAllowedNestedImage,
 	isRelationInconsistentWithInactiveUnit,
 	isUnitInactive,
 	mergeAdjacentDurations,
@@ -1160,6 +1161,48 @@ describe("collectRichTextMedia", () => {
 		expect(collectRichTextMedia({ type: "doc", content: [paragraph("Text")] })).toStrictEqual([]);
 		expect(collectRichTextMedia({ type: "doc" })).toStrictEqual([]);
 		expect(collectRichTextMedia(null)).toStrictEqual([]);
+	});
+});
+
+describe("isAllowedNestedImage", () => {
+	it("allows an image with a key directly inside a list item or blockquote", () => {
+		const doc: JSONContent = {
+			type: "doc",
+			content: [
+				{
+					type: "bulletList",
+					content: [
+						{
+							type: "listItem",
+							content: [
+								{ type: "paragraph" },
+								{ type: "assetImage", attrs: { imageKey: "images/a.jpg" } },
+								{ type: "assetImage", attrs: { imageKey: null } },
+							],
+						},
+					],
+				},
+				{ type: "blockquote", content: [{ type: "embedBlock", attrs: { url: "https://x.test" } }] },
+				{
+					type: "table",
+					content: [
+						{
+							type: "tableRow",
+							content: [
+								{
+									type: "tableCell",
+									content: [{ type: "assetImage", attrs: { imageKey: "images/b.jpg" } }],
+								},
+							],
+						},
+					],
+				},
+			],
+		};
+
+		expect(
+			collectRichTextMedia(doc).map((occurrence) => isAllowedNestedImage(occurrence)),
+		).toStrictEqual([true, false, false, false]);
 	});
 });
 

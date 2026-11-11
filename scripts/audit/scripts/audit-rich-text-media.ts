@@ -13,10 +13,11 @@ import {
 import { env } from "../config/env.config";
 
 /**
- * Finds media nodes left inside stored rich text — an image, gallery, media-text or embed placed in
- * a list item, blockquote or table cell, which the editor's splitter does not turn into a typed
- * content block, so the public api passes it through with nothing resolved. Legacy tiptap `image`
- * nodes are reported too.
+ * Finds media nodes left inside stored rich text where they may not be — a gallery, media-text or
+ * embed anywhere in a body, or an image anywhere but directly inside a list item or a plain
+ * blockquote (the one nested placement the editor allows, resolved by the api). The editor's
+ * splitter turns media elsewhere into typed content blocks, so these did not come from it as they
+ * are. Legacy tiptap `image` nodes are reported too.
  *
  * Prints a node-type × container matrix (all versions, with the published share in brackets), then
  * every occurrence; the full list goes to a tsv report. The check logic lives in

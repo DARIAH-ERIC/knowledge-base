@@ -4,6 +4,11 @@ import {
 	collectLinkTargetEntityIds,
 } from "@dariah-eric/database/link-targets";
 import {
+	collectNestedImageKeys,
+	mapNestedImages,
+	stripNestedImageDisplayAttrs,
+} from "@dariah-eric/database/nested-images";
+import {
 	annotatePlaceholderValues,
 	collectPlaceholderValueKinds,
 } from "@dariah-eric/database/placeholder-values";
@@ -19,10 +24,35 @@ import { imageGridOptions } from "@/config/assets.config";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { getEntityRelationOptionsByIds } from "@/lib/data/relations";
 import { type Transaction, db } from "@/lib/db";
-import { and, eq, sql } from "@/lib/db/sql";
+import { and, eq, inArray, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { hasEmbeddedMedia } from "@/lib/rich-text-images";
 import { UserFacingError } from "@/lib/user-facing-error";
+
+/**
+ * Prepares a `rich_text` or `media_text` body for storage: drops what a nested image only carries
+ * for display, and refuses media the body may not hold, or an image whose key names no asset (the
+ * trigger deriving `content_block_assets` would give it no row, and no foreign key).
+ */
+async function toStoredBody(tx: Transaction, content: JSONContent): Promise<JSONContent> {
+	const stored = stripNestedImageDisplayAttrs(content);
+	if (hasEmbeddedMedia(stored)) {
+		throw new UserFacingError("rich-text-embedded-media");
+	}
+
+	const keys = [...collectNestedImageKeys(stored)];
+	if (keys.length > 0) {
+		const found = await tx
+			.select({ key: schema.assets.key })
+			.from(schema.assets)
+			.where(inArray(schema.assets.key, keys));
+		if (found.length !== keys.length) {
+			throw new UserFacingError("rich-text-embedded-media");
+		}
+	}
+
+	return stored;
+}
 
 async function getAssetIdByKey(tx: Transaction, key: string): Promise<string | null> {
 	const asset = await tx.query.assets.findFirst({
@@ -149,10 +179,7 @@ export async function upsertTypedContentBlock(
 		case "rich_text": {
 			// Strip spacer paragraphs first, so a block left holding nothing else is recognised as empty
 			// and removed rather than stored as a run of blank lines.
-			const content = withoutBlankParagraphs(block.content ?? {});
-			if (hasEmbeddedMedia(content)) {
-				throw new UserFacingError("rich-text-embedded-media");
-			}
+			const content = await toStoredBody(tx, withoutBlankParagraphs(block.content ?? {}));
 			if (isEmptyRichTextDocument(content)) {
 				await tx.delete(schema.contentBlocks).where(eq(schema.contentBlocks.id, blockId));
 				break;
@@ -356,10 +383,7 @@ export async function upsertTypedContentBlock(
 			}
 
 			const side = block.content?.side ?? "start";
-			const content = cleanRequiredBody(block.content?.content);
-			if (hasEmbeddedMedia(content)) {
-				throw new UserFacingError("rich-text-embedded-media");
-			}
+			const content = await toStoredBody(tx, cleanRequiredBody(block.content?.content));
 			const caption = block.content?.caption ?? null;
 			const captionMode = block.content?.captionMode ?? (caption != null ? "override" : "inherit");
 
@@ -820,6 +844,11 @@ export async function getEntityContentBlocks(
 		};
 	});
 
+	const nestedImageAssets = await getNestedImageAssets([
+		richTextContentBlocks.map((row) => row.content),
+		mediaTextContentBlockRows.map((row) => row.content),
+	]);
+
 	const mediaTextContentBlocks = mediaTextContentBlockRows.map((row) => {
 		const { url: imageUrl } = images.generateSignedImageUrl({
 			key: row.imageKey,
@@ -837,7 +866,7 @@ export async function getEntityContentBlocks(
 				alt: row.alt,
 				assetCaption: row.assetCaption,
 				side: row.side,
-				content: row.content,
+				content: withNestedImageDisplayAttrs(row.content, nestedImageAssets),
 				caption: row.caption,
 				captionMode: row.captionMode,
 			},
@@ -847,7 +876,14 @@ export async function getEntityContentBlocks(
 	return nestContentBlocks([
 		...calloutContentBlocks,
 		...richTextContentBlocks.map((row) => {
-			return { ...row, content: withQuoteAuthorImageUrls(row.content), type: "rich_text" as const };
+			return {
+				...row,
+				content: withNestedImageDisplayAttrs(
+					withQuoteAuthorImageUrls(row.content),
+					nestedImageAssets,
+				),
+				type: "rich_text" as const,
+			};
 		}),
 		...imageContentBlocks,
 		...embedContentBlocks,
@@ -858,6 +894,53 @@ export async function getEntityContentBlocks(
 		...accordionItemContentBlocks,
 		...mediaTextContentBlocks,
 	]);
+}
+
+interface NestedImageAsset {
+	alt: string | null;
+	caption: JSONContent | null;
+}
+
+/** The alt text and caption of every asset a nested image in `values` refers to, by key. */
+async function getNestedImageAssets(values: unknown): Promise<Map<string, NestedImageAsset>> {
+	const keys = [...collectNestedImageKeys(values)];
+	if (keys.length === 0) {
+		return new Map();
+	}
+
+	const rows = await db
+		.select({ key: schema.assets.key, alt: schema.assets.alt, caption: schema.assets.caption })
+		.from(schema.assets)
+		.where(inArray(schema.assets.key, keys));
+
+	return new Map(
+		rows.map((row) => [row.key, { alt: row.alt, caption: row.caption ?? null }] as const),
+	);
+}
+
+/**
+ * Puts on every image nested in a list item or blockquote what the editor shows for it — a signed
+ * url, and its asset's alt text and caption — the way an image block's are loaded. Only the key,
+ * caption and caption mode are stored; the save path drops the rest again.
+ */
+function withNestedImageDisplayAttrs<T extends JSONContent | undefined>(
+	content: T,
+	assets: ReadonlyMap<string, NestedImageAsset>,
+): T {
+	return mapNestedImages(content, (attrs) => {
+		const key = attrs.imageKey;
+		if (typeof key !== "string" || key === "") {
+			return attrs;
+		}
+		const asset = assets.get(key);
+		const { url } = images.generateSignedImageUrl({ key, options: imageGridOptions });
+		return {
+			...attrs,
+			imageUrl: url,
+			alt: asset?.alt ?? null,
+			assetCaption: asset?.caption ?? null,
+		};
+	});
 }
 
 /**
