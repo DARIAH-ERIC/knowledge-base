@@ -22,6 +22,8 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface ReportingCampaignFormProps {
 	campaign?: Pick<schema.ReportingCampaign, "id" | "year" | "status">;
+	/** Pre-filled year for a new campaign; ignored when editing an existing one. */
+	defaultYear?: number;
 	formAction: ServerAction;
 }
 
@@ -30,7 +32,9 @@ function formatStatus(status: string): string {
 }
 
 export function ReportingCampaignForm(props: Readonly<ReportingCampaignFormProps>): ReactNode {
-	const { campaign, formAction } = props;
+	const { campaign, defaultYear, formAction } = props;
+
+	const year = campaign?.year ?? defaultYear;
 
 	const t = useExtracted();
 
@@ -43,7 +47,7 @@ export function ReportingCampaignForm(props: Readonly<ReportingCampaignFormProps
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
 				<FormSection description={t("Enter the campaign details.")} title={t("Details")}>
 					<TextField
-						defaultValue={campaign?.year != null ? String(campaign.year) : undefined}
+						defaultValue={year != null ? String(year) : undefined}
 						isRequired={true}
 						name="year"
 						type="number"

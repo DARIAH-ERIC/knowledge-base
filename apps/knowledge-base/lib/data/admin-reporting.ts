@@ -420,6 +420,23 @@ export async function getWorkingGroupReportCreateDataForAdmin(currentUser: Pick<
 	return { campaigns, workingGroups };
 }
 
+/**
+ * Suggests the year for a new campaign: the year after the latest existing campaign, or the current
+ * year when there are none yet.
+ */
+export async function getReportingCampaignCreateDataForAdmin(currentUser: Pick<User, "role">) {
+	assertAdminUser(currentUser);
+
+	const latest = await db.query.reportingCampaigns.findFirst({
+		orderBy: { year: "desc" },
+		columns: { year: true },
+	});
+
+	const defaultYear = latest != null ? latest.year + 1 : new Date().getFullYear();
+
+	return { defaultYear };
+}
+
 export async function getReportingCampaignsForAdmin(
 	currentUser: Pick<User, "role">,
 	params: Readonly<GetReportingCampaignsListParams>,
