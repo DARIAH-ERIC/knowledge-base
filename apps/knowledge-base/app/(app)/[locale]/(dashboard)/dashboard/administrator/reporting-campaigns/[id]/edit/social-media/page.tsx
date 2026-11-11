@@ -41,6 +41,11 @@ export default async function DashboardAdministratorCampaignSocialMediaPage(
 			amounts={campaign.socialMediaAmounts}
 			campaignId={id}
 			isLocked={campaign.status === "closed"}
+			previous={
+				campaign.previous != null
+					? { year: campaign.previous.year, amounts: campaign.previous.socialMediaAmounts }
+					: null
+			}
 			formAction={upsertCampaignSocialMediaAmountsAction}
 		/>
 	);

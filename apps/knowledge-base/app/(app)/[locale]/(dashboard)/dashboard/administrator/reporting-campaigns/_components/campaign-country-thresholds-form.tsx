@@ -3,12 +3,9 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
-import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
 
@@ -16,6 +13,12 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import {
+	CampaignAmountField,
+	type CampaignFieldValues,
+	CopyFromPreviousCampaignButton,
+	useCopyFromPreviousCampaign,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-amount-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface Country {
@@ -23,25 +26,46 @@ interface Country {
 	name: string;
 }
 
+type CountryThreshold = Pick<
+	schema.ReportingCampaignCountryThreshold,
+	"countryDocumentId" | "amount"
+>;
+
 interface CampaignCountryThresholdsFormProps {
 	campaignId: string;
 	countries: Array<Country>;
-	thresholds: Array<Pick<schema.ReportingCampaignCountryThreshold, "countryDocumentId" | "amount">>;
+	thresholds: Array<CountryThreshold>;
+	/** The latest campaign before this one, if any. */
+	previous: { year: number; thresholds: Array<CountryThreshold> } | null;
 	formAction: ServerAction;
 	/** Closed campaigns are read-only. */
 	isLocked?: boolean;
 }
 
+function getFieldName(countryDocumentId: string): string {
+	return `amounts.${countryDocumentId}`;
+}
+
+/** Keys the rows like the form's inputs. */
+function toFieldValues(rows: Array<CountryThreshold>): CampaignFieldValues {
+	return Object.fromEntries(
+		rows.map((row) => [getFieldName(row.countryDocumentId), String(row.amount)]),
+	);
+}
+
 export function CampaignCountryThresholdsForm(
 	props: Readonly<CampaignCountryThresholdsFormProps>,
 ): ReactNode {
-	const { campaignId, countries, thresholds, formAction, isLocked = false } = props;
+	const { campaignId, countries, thresholds, previous, formAction, isLocked = false } = props;
 
 	const t = useExtracted();
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const thresholdMap = Object.fromEntries(
-		thresholds.map((th) => [th.countryDocumentId, String(th.amount)]),
+	const previousValues =
+		previous != null ? { year: previous.year, values: toFieldValues(previous.thresholds) } : null;
+	const { containerRef, fieldsKey, defaultValues, copiedCount, copy } = useCopyFromPreviousCampaign(
+		toFieldValues(thresholds),
+		previousValues,
 	);
 
 	return (
@@ -49,19 +73,29 @@ export function CampaignCountryThresholdsForm(
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
 				<input name="id" type="hidden" value={campaignId} />
 
-				<fieldset className="flex flex-col gap-y-6 min-inline-0" disabled={isLocked}>
+				{!isLocked && (
+					<CopyFromPreviousCampaignButton
+						copiedCount={copiedCount}
+						onCopy={copy}
+						previous={previousValues}
+					/>
+				)}
+
+				<fieldset
+					key={fieldsKey}
+					ref={containerRef}
+					className="flex flex-col gap-y-6 min-inline-0"
+					disabled={isLocked}
+				>
 					<FormSection title={t("Country thresholds")}>
 						{countries.map((country) => (
-							<TextField
+							<CampaignAmountField
 								key={country.id}
-								defaultValue={thresholdMap[country.id]}
-								name={`amounts.${country.id}`}
-								type="number"
-							>
-								<Label>{country.name}</Label>
-								<Input min={0} step="0.01" />
-								<FieldError />
-							</TextField>
+								defaultValue={defaultValues[getFieldName(country.id)]}
+								label={country.name}
+								name={getFieldName(country.id)}
+								previous={previousValues}
+							/>
 						))}
 					</FormSection>
 				</fieldset>

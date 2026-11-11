@@ -40,6 +40,11 @@ export default async function DashboardAdministratorCampaignServicesPage(
 		<CampaignServiceSizesForm
 			campaignId={id}
 			isLocked={campaign.status === "closed"}
+			previous={
+				campaign.previous != null
+					? { year: campaign.previous.year, sizes: campaign.previous.serviceSizes }
+					: null
+			}
 			formAction={upsertCampaignServiceSizesAction}
 			sizes={campaign.serviceSizes}
 		/>

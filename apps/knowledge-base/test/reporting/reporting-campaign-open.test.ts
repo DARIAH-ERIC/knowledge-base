@@ -81,6 +81,8 @@ const { updateReportingCampaignAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/update-reporting-campaign.action");
 const { upsertCampaignEventAmountsAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-event-amounts.action");
+const { copyWorkingGroupReportQuestionsAction } =
+	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/copy-working-group-report-questions.action");
 const { createWorkingGroupReportQuestionAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/create-working-group-report-question.action");
 
@@ -344,6 +346,80 @@ describe("only the launch and close actions change a campaign's status", () => {
 				columns: { status: true, year: true },
 			});
 			expect(updated).toEqual({ status: "closed", year: year + 1 });
+		});
+	});
+});
+
+describe("copying questions from the previous campaign", () => {
+	function questionContent(text: string) {
+		return { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text }] }] };
+	}
+
+	async function seedQuestions(tx: Tx, campaignId: string, texts: Array<string>): Promise<void> {
+		await tx.insert(schema.workingGroupReportQuestions).values(
+			texts.map((text, index) => {
+				return { campaignId, question: questionContent(text), position: index + 1 };
+			}),
+		);
+	}
+
+	async function getQuestionTexts(tx: Tx, campaignId: string): Promise<Array<string>> {
+		const rows = await tx.query.workingGroupReportQuestions.findMany({
+			where: { campaignId },
+			columns: { question: true },
+			orderBy: { position: "asc" },
+		});
+		return rows.map((row) => JSON.stringify(row.question));
+	}
+
+	it("copies the questions of the latest earlier campaign, in order", async () => {
+		await withAdminTransaction(async (tx) => {
+			const year = unusedYear();
+			const older = await seedCampaign(tx, "closed", year - 2);
+			const previous = await seedCampaign(tx, "closed", year - 1);
+			const draft = await seedCampaign(tx, "draft", year);
+			await seedQuestions(tx, older, ["Older?"]);
+			await seedQuestions(tx, previous, ["First?", "Second?"]);
+
+			const state = await copyWorkingGroupReportQuestionsAction(
+				createActionStateInitial(),
+				toFormData({ campaignId: draft }),
+			);
+			expect(state.status, JSON.stringify(state)).toBe("success");
+			expect(await getQuestionTexts(tx, draft)).toStrictEqual(await getQuestionTexts(tx, previous));
+		});
+	});
+
+	it("refuses to copy into a campaign that already has questions", async () => {
+		await withAdminTransaction(async (tx) => {
+			const year = unusedYear();
+			const previous = await seedCampaign(tx, "closed", year - 1);
+			const draft = await seedCampaign(tx, "draft", year);
+			await seedQuestions(tx, previous, ["Previous?"]);
+			await seedQuestions(tx, draft, ["Own?"]);
+
+			const state = await copyWorkingGroupReportQuestionsAction(
+				createActionStateInitial(),
+				toFormData({ campaignId: draft }),
+			);
+			expect(state.status).toBe("error");
+			expect(await getQuestionTexts(tx, draft)).toHaveLength(1);
+		});
+	});
+
+	it("refuses to copy into a closed campaign", async () => {
+		await withAdminTransaction(async (tx) => {
+			const year = unusedYear();
+			const previous = await seedCampaign(tx, "closed", year - 1);
+			const closed = await seedCampaign(tx, "closed", year);
+			await seedQuestions(tx, previous, ["Previous?"]);
+
+			const state = await copyWorkingGroupReportQuestionsAction(
+				createActionStateInitial(),
+				toFormData({ campaignId: closed }),
+			);
+			expect(state.status).toBe("error");
+			expect(await getQuestionTexts(tx, closed)).toHaveLength(0);
 		});
 	});
 });

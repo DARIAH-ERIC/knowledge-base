@@ -121,14 +121,14 @@ test.describe("reporting campaigns admin", () => {
 		const campaignsPage = createAdminReportingCampaignsPage(workerIndex);
 
 		await campaignsPage.gotoServices(campaignId!);
-		await campaignsPage.fillByLabel("Small — visits threshold", "1000");
-		await campaignsPage.fillByLabel("Small — amount", "10");
-		await campaignsPage.fillByLabel("Medium — visits threshold", "5000");
-		await campaignsPage.fillByLabel("Medium — amount", "20");
-		await campaignsPage.fillByLabel("Large — visits threshold", "10000");
-		await campaignsPage.fillByLabel("Large — amount", "30");
-		await campaignsPage.fillByLabel("Very large — visits threshold", "50000");
-		await campaignsPage.fillByLabel("Very large — amount", "40");
+		await campaignsPage.fillByLabel("Small: visits threshold", "1000");
+		await campaignsPage.fillByLabel("Small: amount", "10");
+		await campaignsPage.fillByLabel("Medium: visits threshold", "5000");
+		await campaignsPage.fillByLabel("Medium: amount", "20");
+		await campaignsPage.fillByLabel("Large: visits threshold", "10000");
+		await campaignsPage.fillByLabel("Large: amount", "30");
+		await campaignsPage.fillByLabel("Very large: visits threshold", "50000");
+		await campaignsPage.fillByLabel("Very large: amount", "40");
 		await campaignsPage.fillByLabel("Core service amount", "5");
 		await campaignsPage.saveTabForm();
 

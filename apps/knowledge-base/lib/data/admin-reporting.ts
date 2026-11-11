@@ -1352,15 +1352,24 @@ export async function getReportingCampaignEventAmountsForAdmin(
 ) {
 	assertAdminUser(currentUser);
 
-	return db.query.reportingCampaigns.findFirst({
+	const campaign = await db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true, status: true },
-		with: {
-			eventAmounts: {
-				columns: { eventType: true, amount: true },
-			},
-		},
+		columns: { id: true, status: true, year: true },
+		with: { eventAmounts: { columns: { eventType: true, amount: true } } },
 	});
+
+	if (campaign == null) {
+		return undefined;
+	}
+
+	const previous = await db.query.reportingCampaigns.findFirst({
+		where: { year: { lt: campaign.year } },
+		orderBy: { year: "desc" },
+		columns: { year: true },
+		with: { eventAmounts: { columns: { eventType: true, amount: true } } },
+	});
+
+	return { ...campaign, previous: previous ?? null };
 }
 
 export async function getReportingCampaignCountryThresholdsForAdmin(
@@ -1372,17 +1381,23 @@ export async function getReportingCampaignCountryThresholdsForAdmin(
 	const [campaign, countries] = await Promise.all([
 		db.query.reportingCampaigns.findFirst({
 			where: { id },
-			columns: { id: true, status: true },
-			with: {
-				countryThresholds: {
-					columns: { countryDocumentId: true, amount: true },
-				},
-			},
+			columns: { id: true, status: true, year: true },
+			with: { countryThresholds: { columns: { countryDocumentId: true, amount: true } } },
 		}),
 		getPublishedCountries(),
 	]);
 
-	return { campaign, countries };
+	const previous =
+		campaign != null
+			? await db.query.reportingCampaigns.findFirst({
+					where: { year: { lt: campaign.year } },
+					orderBy: { year: "desc" },
+					columns: { year: true },
+					with: { countryThresholds: { columns: { countryDocumentId: true, amount: true } } },
+				})
+			: undefined;
+
+	return { campaign, countries, previous: previous ?? null };
 }
 
 export async function getReportingCampaignContributionAmountsForAdmin(
@@ -1391,15 +1406,24 @@ export async function getReportingCampaignContributionAmountsForAdmin(
 ) {
 	assertAdminUser(currentUser);
 
-	return db.query.reportingCampaigns.findFirst({
+	const campaign = await db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true, status: true },
-		with: {
-			contributionAmounts: {
-				columns: { roleType: true, amount: true },
-			},
-		},
+		columns: { id: true, status: true, year: true },
+		with: { contributionAmounts: { columns: { roleType: true, amount: true } } },
 	});
+
+	if (campaign == null) {
+		return undefined;
+	}
+
+	const previous = await db.query.reportingCampaigns.findFirst({
+		where: { year: { lt: campaign.year } },
+		orderBy: { year: "desc" },
+		columns: { year: true },
+		with: { contributionAmounts: { columns: { roleType: true, amount: true } } },
+	});
+
+	return { ...campaign, previous: previous ?? null };
 }
 
 export async function getReportingCampaignQuestionsForAdmin(
@@ -1408,9 +1432,9 @@ export async function getReportingCampaignQuestionsForAdmin(
 ) {
 	assertAdminUser(currentUser);
 
-	return db.query.reportingCampaigns.findFirst({
+	const campaign = await db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true, status: true },
+		columns: { id: true, status: true, year: true },
 		with: {
 			workingGroupReportQuestions: {
 				columns: { id: true, question: true, position: true },
@@ -1418,6 +1442,24 @@ export async function getReportingCampaignQuestionsForAdmin(
 			},
 		},
 	});
+
+	if (campaign == null) {
+		return undefined;
+	}
+
+	const previous = await db.query.reportingCampaigns.findFirst({
+		where: { year: { lt: campaign.year } },
+		orderBy: { year: "desc" },
+		columns: { year: true },
+		with: {
+			workingGroupReportQuestions: {
+				columns: { id: true, question: true, position: true },
+				orderBy: { position: "asc" },
+			},
+		},
+	});
+
+	return { ...campaign, previous: previous ?? null };
 }
 
 export async function getReportingCampaignServiceSizesForAdmin(
@@ -1426,15 +1468,24 @@ export async function getReportingCampaignServiceSizesForAdmin(
 ) {
 	assertAdminUser(currentUser);
 
-	return db.query.reportingCampaigns.findFirst({
+	const campaign = await db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true, status: true },
-		with: {
-			serviceSizes: {
-				columns: { serviceSize: true, visitsThreshold: true, amount: true },
-			},
-		},
+		columns: { id: true, status: true, year: true },
+		with: { serviceSizes: { columns: { serviceSize: true, visitsThreshold: true, amount: true } } },
 	});
+
+	if (campaign == null) {
+		return undefined;
+	}
+
+	const previous = await db.query.reportingCampaigns.findFirst({
+		where: { year: { lt: campaign.year } },
+		orderBy: { year: "desc" },
+		columns: { year: true },
+		with: { serviceSizes: { columns: { serviceSize: true, visitsThreshold: true, amount: true } } },
+	});
+
+	return { ...campaign, previous: previous ?? null };
 }
 
 export async function getReportingCampaignSocialMediaAmountsForAdmin(
@@ -1443,13 +1494,22 @@ export async function getReportingCampaignSocialMediaAmountsForAdmin(
 ) {
 	assertAdminUser(currentUser);
 
-	return db.query.reportingCampaigns.findFirst({
+	const campaign = await db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true, status: true },
-		with: {
-			socialMediaAmounts: {
-				columns: { category: true, amount: true },
-			},
-		},
+		columns: { id: true, status: true, year: true },
+		with: { socialMediaAmounts: { columns: { category: true, amount: true } } },
 	});
+
+	if (campaign == null) {
+		return undefined;
+	}
+
+	const previous = await db.query.reportingCampaigns.findFirst({
+		where: { year: { lt: campaign.year } },
+		orderBy: { year: "desc" },
+		columns: { year: true },
+		with: { socialMediaAmounts: { columns: { category: true, amount: true } } },
+	});
+
+	return { ...campaign, previous: previous ?? null };
 }

@@ -3,12 +3,9 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
-import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
 
@@ -16,35 +13,54 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import {
+	CampaignAmountField,
+	type CampaignFieldValues,
+	CopyFromPreviousCampaignButton,
+	useCopyFromPreviousCampaign,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-amount-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
+
+type ServiceSize = Pick<
+	schema.ReportingCampaignServiceSize,
+	"serviceSize" | "visitsThreshold" | "amount"
+>;
 
 interface CampaignServiceSizesFormProps {
 	campaignId: string;
-	sizes: Array<
-		Pick<schema.ReportingCampaignServiceSize, "serviceSize" | "visitsThreshold" | "amount">
-	>;
+	sizes: Array<ServiceSize>;
+	/** The latest campaign before this one, if any. */
+	previous: { year: number; sizes: Array<ServiceSize> } | null;
 	formAction: ServerAction;
 	/** Closed campaigns are read-only. */
 	isLocked?: boolean;
 }
 
+/** Keys the rows like the form's inputs. */
+function toFieldValues(rows: Array<ServiceSize>): CampaignFieldValues {
+	const values: CampaignFieldValues = {};
+	for (const row of rows) {
+		values[`${row.serviceSize}_amount`] = String(row.amount);
+		if (row.visitsThreshold != null) {
+			values[`${row.serviceSize}_threshold`] = String(row.visitsThreshold);
+		}
+	}
+	return values;
+}
+
 export function CampaignServiceSizesForm(
 	props: Readonly<CampaignServiceSizesFormProps>,
 ): ReactNode {
-	const { campaignId, sizes, formAction, isLocked = false } = props;
+	const { campaignId, sizes, previous, formAction, isLocked = false } = props;
 
 	const t = useExtracted();
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const sizeMap = Object.fromEntries(
-		sizes.map((s) => [
-			s.serviceSize,
-			{
-				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-				amount: s.amount != null ? String(s.amount) : undefined,
-				threshold: s.visitsThreshold != null ? String(s.visitsThreshold) : undefined,
-			},
-		]),
+	const previousValues =
+		previous != null ? { year: previous.year, values: toFieldValues(previous.sizes) } : null;
+	const { containerRef, fieldsKey, defaultValues, copiedCount, copy } = useCopyFromPreviousCampaign(
+		toFieldValues(sizes),
+		previousValues,
 	);
 
 	return (
@@ -52,91 +68,89 @@ export function CampaignServiceSizesForm(
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
 				<input name="id" type="hidden" value={campaignId} />
 
-				<fieldset className="flex flex-col gap-y-6 min-inline-0" disabled={isLocked}>
+				{!isLocked && (
+					<CopyFromPreviousCampaignButton
+						copiedCount={copiedCount}
+						onCopy={copy}
+						previous={previousValues}
+					/>
+				)}
+
+				<fieldset
+					key={fieldsKey}
+					ref={containerRef}
+					className="flex flex-col gap-y-6 min-inline-0"
+					disabled={isLocked}
+				>
 					<FormSection title={t("Tiered service sizes")}>
-						<TextField defaultValue={sizeMap.small?.threshold} name="small_threshold" type="number">
-							<Label>{t("Small — visits threshold")}</Label>
-							<Input min={0} />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["small_threshold"]}
+							kind="count"
+							label={t("Small: visits threshold")}
+							name={"small_threshold"}
+							previous={previousValues}
+						/>
 
-						<TextField
-							defaultValue={sizeMap.small?.amount ?? undefined}
-							name="small_amount"
-							type="number"
-						>
-							<Label>{t("Small — amount")}</Label>
-							<Input min={0} step="0.01" />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["small_amount"]}
+							label={t("Small: amount")}
+							name={"small_amount"}
+							previous={previousValues}
+						/>
 
-						<TextField
-							defaultValue={sizeMap.medium?.threshold}
-							name="medium_threshold"
-							type="number"
-						>
-							<Label>{t("Medium — visits threshold")}</Label>
-							<Input min={0} />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["medium_threshold"]}
+							kind="count"
+							label={t("Medium: visits threshold")}
+							name={"medium_threshold"}
+							previous={previousValues}
+						/>
 
-						<TextField
-							defaultValue={sizeMap.medium?.amount ?? undefined}
-							name="medium_amount"
-							type="number"
-						>
-							<Label>{t("Medium — amount")}</Label>
-							<Input min={0} step="0.01" />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["medium_amount"]}
+							label={t("Medium: amount")}
+							name={"medium_amount"}
+							previous={previousValues}
+						/>
 
-						<TextField defaultValue={sizeMap.large?.threshold} name="large_threshold" type="number">
-							<Label>{t("Large — visits threshold")}</Label>
-							<Input min={0} />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["large_threshold"]}
+							kind="count"
+							label={t("Large: visits threshold")}
+							name={"large_threshold"}
+							previous={previousValues}
+						/>
 
-						<TextField
-							defaultValue={sizeMap.large?.amount ?? undefined}
-							name="large_amount"
-							type="number"
-						>
-							<Label>{t("Large — amount")}</Label>
-							<Input min={0} step="0.01" />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["large_amount"]}
+							label={t("Large: amount")}
+							name={"large_amount"}
+							previous={previousValues}
+						/>
 
-						<TextField
-							defaultValue={sizeMap.very_large?.threshold}
-							name="very_large_threshold"
-							type="number"
-						>
-							<Label>{t("Very large — visits threshold")}</Label>
-							<Input min={0} />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["very_large_threshold"]}
+							kind="count"
+							label={t("Very large: visits threshold")}
+							name={"very_large_threshold"}
+							previous={previousValues}
+						/>
 
-						<TextField
-							defaultValue={sizeMap.very_large?.amount ?? undefined}
-							name="very_large_amount"
-							type="number"
-						>
-							<Label>{t("Very large — amount")}</Label>
-							<Input min={0} step="0.01" />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["very_large_amount"]}
+							label={t("Very large: amount")}
+							name={"very_large_amount"}
+							previous={previousValues}
+						/>
 					</FormSection>
 
 					<FormSection title={t("Core services")}>
-						<TextField
-							defaultValue={sizeMap.core?.amount ?? undefined}
-							name="core_amount"
-							type="number"
-						>
-							<Label>{t("Core service amount")}</Label>
-							<Input min={0} step="0.01" />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["core_amount"]}
+							label={t("Core service amount")}
+							name={"core_amount"}
+							previous={previousValues}
+						/>
 					</FormSection>
 				</fieldset>
 

@@ -41,6 +41,11 @@ export default async function DashboardAdministratorCampaignContributionsPage(
 			amounts={campaign.contributionAmounts}
 			campaignId={id}
 			isLocked={campaign.status === "closed"}
+			previous={
+				campaign.previous != null
+					? { year: campaign.previous.year, amounts: campaign.previous.contributionAmounts }
+					: null
+			}
 			formAction={upsertCampaignContributionAmountsAction}
 		/>
 	);

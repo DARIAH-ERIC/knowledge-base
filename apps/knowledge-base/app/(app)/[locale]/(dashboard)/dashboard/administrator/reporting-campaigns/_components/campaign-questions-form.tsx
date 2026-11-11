@@ -15,6 +15,7 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { copyWorkingGroupReportQuestionsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/copy-working-group-report-questions.action";
 import { deleteWorkingGroupReportQuestionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/delete-working-group-report-question.action";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
@@ -22,12 +23,14 @@ interface CampaignQuestionsFormProps {
 	campaignId: string;
 	questions: Array<Pick<schema.WorkingGroupReportQuestion, "id" | "question" | "position">>;
 	createAction: ServerAction;
+	/** The latest campaign before this one and how many questions it had, if any. */
+	previous: { year: number; questionCount: number } | null;
 	/** Closed campaigns are read-only. */
 	isLocked?: boolean;
 }
 
 export function CampaignQuestionsForm(props: Readonly<CampaignQuestionsFormProps>): ReactNode {
-	const { campaignId, questions, createAction, isLocked = false } = props;
+	const { campaignId, questions, createAction, previous, isLocked = false } = props;
 
 	const t = useExtracted();
 	const [state, action, isPending] = useActionState(createAction, createActionStateInitial());
@@ -35,7 +38,24 @@ export function CampaignQuestionsForm(props: Readonly<CampaignQuestionsFormProps
 	return (
 		<div className="flex flex-col gap-y-8 max-inline-3xl">
 			{questions.length === 0 ? (
-				<p className="text-sm text-muted-fg">{t("No questions yet.")}</p>
+				<div className="flex flex-col items-start gap-y-3">
+					<p className="text-sm text-muted-fg">{t("No questions yet.")}</p>
+					{!isLocked && previous != null && previous.questionCount > 0 && (
+						<ActionForm action={copyWorkingGroupReportQuestionsAction}>
+							{(isPending) => (
+								<Fragment>
+									<input name="campaignId" type="hidden" value={campaignId} />
+									<Button intent="secondary" isPending={isPending} size="sm" type="submit">
+										{t("Copy {count} questions from {year}", {
+											count: String(previous.questionCount),
+											year: String(previous.year),
+										})}
+									</Button>
+								</Fragment>
+							)}
+						</ActionForm>
+					)}
+				</div>
 			) : (
 				<ol className="flex flex-col gap-y-4">
 					{questions.map((q) => (

@@ -3,12 +3,9 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
-import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
 
@@ -16,70 +13,100 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import {
+	CampaignAmountField,
+	type CampaignFieldValues,
+	CopyFromPreviousCampaignButton,
+	useCopyFromPreviousCampaign,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-amount-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
+
+type EventAmount = Pick<schema.ReportingCampaignEventAmount, "eventType" | "amount">;
 
 interface CampaignEventAmountsFormProps {
 	campaignId: string;
-	amounts: Array<Pick<schema.ReportingCampaignEventAmount, "eventType" | "amount">>;
+	amounts: Array<EventAmount>;
+	/** The latest campaign before this one, if any. */
+	previous: { year: number; amounts: Array<EventAmount> } | null;
 	formAction: ServerAction;
 	/** Closed campaigns are read-only. */
 	isLocked?: boolean;
 }
 
+/** Keys the rows like the form's inputs. */
+function toFieldValues(rows: Array<EventAmount>): CampaignFieldValues {
+	return Object.fromEntries(rows.map((row) => [row.eventType, String(row.amount)]));
+}
+
 export function CampaignEventAmountsForm(
 	props: Readonly<CampaignEventAmountsFormProps>,
 ): ReactNode {
-	const { campaignId, amounts, formAction, isLocked = false } = props;
+	const { campaignId, amounts, previous, formAction, isLocked = false } = props;
 
 	const t = useExtracted();
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const amountMap = Object.fromEntries(amounts.map((a) => [a.eventType, String(a.amount)]));
+	const previousValues =
+		previous != null ? { year: previous.year, values: toFieldValues(previous.amounts) } : null;
+	const { containerRef, fieldsKey, defaultValues, copiedCount, copy } = useCopyFromPreviousCampaign(
+		toFieldValues(amounts),
+		previousValues,
+	);
 
 	return (
 		<FormLayout variant="stacked">
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
 				<input name="id" type="hidden" value={campaignId} />
 
-				<fieldset className="flex flex-col gap-y-6 min-inline-0" disabled={isLocked}>
+				{!isLocked && (
+					<CopyFromPreviousCampaignButton
+						copiedCount={copiedCount}
+						onCopy={copy}
+						previous={previousValues}
+					/>
+				)}
+
+				<fieldset
+					key={fieldsKey}
+					ref={containerRef}
+					className="flex flex-col gap-y-6 min-inline-0"
+					disabled={isLocked}
+				>
 					<FormSection title={t("Event amounts")}>
-						<TextField defaultValue={amountMap.small ?? undefined} name="small" type="number">
-							<Label>{t("Small events")}</Label>
-							<Input min={0} step="0.01" />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["small"]}
+							label={t("Small events")}
+							name={"small"}
+							previous={previousValues}
+						/>
 
-						<TextField defaultValue={amountMap.medium ?? undefined} name="medium" type="number">
-							<Label>{t("Medium events")}</Label>
-							<Input min={0} step="0.01" />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["medium"]}
+							label={t("Medium events")}
+							name={"medium"}
+							previous={previousValues}
+						/>
 
-						<TextField defaultValue={amountMap.large ?? undefined} name="large" type="number">
-							<Label>{t("Large events")}</Label>
-							<Input min={0} step="0.01" />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["large"]}
+							label={t("Large events")}
+							name={"large"}
+							previous={previousValues}
+						/>
 
-						<TextField
-							defaultValue={amountMap.very_large ?? undefined}
-							name="very_large"
-							type="number"
-						>
-							<Label>{t("Very large events")}</Label>
-							<Input min={0} step="0.01" />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["very_large"]}
+							label={t("Very large events")}
+							name={"very_large"}
+							previous={previousValues}
+						/>
 
-						<TextField
-							defaultValue={amountMap.dariah_commissioned ?? undefined}
-							name="dariah_commissioned"
-							type="number"
-						>
-							<Label>{t("DARIAH commissioned event")}</Label>
-							<Input min={0} step="0.01" />
-							<FieldError />
-						</TextField>
+						<CampaignAmountField
+							defaultValue={defaultValues["dariah_commissioned"]}
+							label={t("DARIAH commissioned event")}
+							name={"dariah_commissioned"}
+							previous={previousValues}
+						/>
 					</FormSection>
 				</fieldset>
 
