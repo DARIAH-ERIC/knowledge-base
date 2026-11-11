@@ -6926,9 +6926,9 @@ msgid "Adding..."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
-msgctxt "Pb5SOL"
-msgid "Tiered service sizes"
-msgstr ""
+msgctxt "1u43xp"
+msgid "Visits thresholds"
+msgstr "Visits thresholds"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
 msgctxt "IQbRCI"
@@ -6936,19 +6936,9 @@ msgid "Small: visits threshold"
 msgstr "Small: visits threshold"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
-msgctxt "Pj58sQ"
-msgid "Small: amount"
-msgstr "Small: amount"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
 msgctxt "o6Uhc4"
 msgid "Medium: visits threshold"
 msgstr "Medium: visits threshold"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
-msgctxt "JvUkXQ"
-msgid "Medium: amount"
-msgstr "Medium: amount"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
 msgctxt "iulXuG"
@@ -6956,14 +6946,29 @@ msgid "Large: visits threshold"
 msgstr "Large: visits threshold"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
-msgctxt "NwA4nC"
-msgid "Large: amount"
-msgstr "Large: amount"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
 msgctxt "U7OP0T"
 msgid "Very large: visits threshold"
 msgstr "Very large: visits threshold"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
+msgctxt "yvmXEl"
+msgid "Tiered service amounts"
+msgstr "Tiered service amounts"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
+msgctxt "Pj58sQ"
+msgid "Small: amount"
+msgstr "Small: amount"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
+msgctxt "JvUkXQ"
+msgid "Medium: amount"
+msgstr "Medium: amount"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
+msgctxt "NwA4nC"
+msgid "Large: amount"
+msgstr "Large: amount"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
 msgctxt "D7rvtG"
@@ -8588,9 +8593,9 @@ msgid "National coordinator"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels.ts
-msgctxt "mjGMsh"
-msgid "National coordinator (deputy)"
-msgstr ""
+msgctxt "6u284c"
+msgid "National coordinator deputy"
+msgstr "National coordinator deputy"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels.ts
 msgctxt "BJh-6B"

@@ -82,19 +82,12 @@ export function CampaignServiceSizesForm(
 					className="flex flex-col gap-y-6 min-inline-0"
 					disabled={isLocked}
 				>
-					<FormSection title={t("Tiered service sizes")}>
+					<FormSection title={t("Visits thresholds")}>
 						<CampaignAmountField
 							defaultValue={defaultValues["small_threshold"]}
 							kind="count"
 							label={t("Small: visits threshold")}
 							name={"small_threshold"}
-							previous={previousValues}
-						/>
-
-						<CampaignAmountField
-							defaultValue={defaultValues["small_amount"]}
-							label={t("Small: amount")}
-							name={"small_amount"}
 							previous={previousValues}
 						/>
 
@@ -107,13 +100,6 @@ export function CampaignServiceSizesForm(
 						/>
 
 						<CampaignAmountField
-							defaultValue={defaultValues["medium_amount"]}
-							label={t("Medium: amount")}
-							name={"medium_amount"}
-							previous={previousValues}
-						/>
-
-						<CampaignAmountField
 							defaultValue={defaultValues["large_threshold"]}
 							kind="count"
 							label={t("Large: visits threshold")}
@@ -122,17 +108,33 @@ export function CampaignServiceSizesForm(
 						/>
 
 						<CampaignAmountField
-							defaultValue={defaultValues["large_amount"]}
-							label={t("Large: amount")}
-							name={"large_amount"}
-							previous={previousValues}
-						/>
-
-						<CampaignAmountField
 							defaultValue={defaultValues["very_large_threshold"]}
 							kind="count"
 							label={t("Very large: visits threshold")}
 							name={"very_large_threshold"}
+							previous={previousValues}
+						/>
+					</FormSection>
+
+					<FormSection title={t("Tiered service amounts")}>
+						<CampaignAmountField
+							defaultValue={defaultValues["small_amount"]}
+							label={t("Small: amount")}
+							name={"small_amount"}
+							previous={previousValues}
+						/>
+
+						<CampaignAmountField
+							defaultValue={defaultValues["medium_amount"]}
+							label={t("Medium: amount")}
+							name={"medium_amount"}
+							previous={previousValues}
+						/>
+
+						<CampaignAmountField
+							defaultValue={defaultValues["large_amount"]}
+							label={t("Large: amount")}
+							name={"large_amount"}
 							previous={previousValues}
 						/>
 

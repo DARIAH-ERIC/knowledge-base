@@ -651,7 +651,7 @@ export const workingGroupReportQuestions = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => reportingCampaigns.id),
+			.references(() => reportingCampaigns.id, { onDelete: "cascade" }),
 		question: p.jsonb("question").$type<JSONContent>().notNull(),
 		position: p.integer("position").notNull(),
 	},
@@ -709,7 +709,7 @@ export const reportingCampaignEventAmounts = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => reportingCampaigns.id),
+			.references(() => reportingCampaigns.id, { onDelete: "cascade" }),
 		eventType: p.text("event_type", { enum: reportingCampaignEventTypeEnum }).notNull(),
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
@@ -741,7 +741,7 @@ export const reportingCampaignSocialMediaAmounts = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => reportingCampaigns.id),
+			.references(() => reportingCampaigns.id, { onDelete: "cascade" }),
 		category: p.text("category", { enum: reportingCampaignSocialMediaCategoryEnum }).notNull(),
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
@@ -773,7 +773,7 @@ export const reportingCampaignContributionAmounts = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => reportingCampaigns.id),
+			.references(() => reportingCampaigns.id, { onDelete: "cascade" }),
 		roleType: p.text("role_type", { enum: reportingCampaignContributionRoleEnum }).notNull(),
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
@@ -807,7 +807,7 @@ export const reportingCampaignServiceSizes = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => reportingCampaigns.id),
+			.references(() => reportingCampaigns.id, { onDelete: "cascade" }),
 		serviceSize: p.text("service_size", { enum: serviceSizeEnum }).notNull(),
 		visitsThreshold: p.integer("visits_threshold"),
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
@@ -838,7 +838,7 @@ export const reportingCampaignCountryThresholds = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => reportingCampaigns.id),
+			.references(() => reportingCampaigns.id, { onDelete: "cascade" }),
 		// Document-level: references the country's `entities.id`, not a version id.
 		countryDocumentId: p
 			.uuid("country_document_id")

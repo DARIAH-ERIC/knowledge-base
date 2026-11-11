@@ -7,7 +7,7 @@ import { forbidden } from "next/navigation";
 
 import { hasDariahCommissionedEvent } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/calculate-operational-cost";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
-import { getPublishedCountries } from "@/lib/data/reporting-campaign-readiness";
+import { getReportingCountries } from "@/lib/data/reporting-campaign-readiness";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import {
@@ -1384,7 +1384,7 @@ export async function getReportingCampaignCountryThresholdsForAdmin(
 			columns: { id: true, status: true, year: true },
 			with: { countryThresholds: { columns: { countryDocumentId: true, amount: true } } },
 		}),
-		getPublishedCountries(),
+		getReportingCountries(),
 	]);
 
 	const previous =
