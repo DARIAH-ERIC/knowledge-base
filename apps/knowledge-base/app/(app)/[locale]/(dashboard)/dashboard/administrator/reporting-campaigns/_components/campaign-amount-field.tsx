@@ -3,9 +3,12 @@
 import { Button } from "@dariah-eric/ui/button";
 import { Description, FieldError, Label } from "@dariah-eric/ui/field";
 import { Input } from "@dariah-eric/ui/input";
-import { TextField } from "@dariah-eric/ui/text-field";
+import { NumberField } from "@dariah-eric/ui/number-field";
 import { useExtracted, useFormatter } from "next-intl";
 import { type ReactNode, type RefObject, useRef, useState } from "react";
+
+const currencyFormatOptions = { style: "currency", currency: "EUR" } as const;
+const countFormatOptions = { maximumFractionDigits: 0 } as const;
 
 /** Field values keyed by input name; missing or `undefined` means "not set". */
 export type CampaignFieldValues = Partial<Record<string, string>>;
@@ -32,24 +35,31 @@ export function CampaignAmountField(props: Readonly<CampaignAmountFieldProps>): 
 	const format = useFormatter();
 
 	const previousValue = previous?.values[name];
+	const formatOptions = kind === "amount" ? currencyFormatOptions : countFormatOptions;
 
+	/**
+	 * `NumberField` submits the raw number through a hidden input named `name`, so the form data and
+	 * `useCopyFromPreviousCampaign` see plain numbers, not the formatted text.
+	 */
 	return (
-		<TextField defaultValue={defaultValue} name={name} type="number">
+		<NumberField
+			defaultValue={defaultValue != null ? Number(defaultValue) : undefined}
+			formatOptions={formatOptions}
+			minValue={0}
+			name={name}
+		>
 			<Label>{label}</Label>
-			<Input min={0} step={kind === "amount" ? "0.01" : "1"} />
+			<Input />
 			{previous != null && previousValue != null && (
 				<Description>
 					{t("{year}: {value}", {
 						year: String(previous.year),
-						value:
-							kind === "amount"
-								? format.number(Number(previousValue), { style: "currency", currency: "EUR" })
-								: format.number(Number(previousValue)),
+						value: format.number(Number(previousValue), formatOptions),
 					})}
 				</Description>
 			)}
 			<FieldError />
-		</TextField>
+		</NumberField>
 	);
 }
 

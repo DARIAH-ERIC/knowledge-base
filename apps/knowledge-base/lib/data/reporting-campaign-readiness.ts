@@ -8,7 +8,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
+import { and, eq, exists, inArray, sql } from "@/lib/db/sql";
 
 /** Service sizes matched by visit count; "small" is the floor, so it needs no threshold. */
 const serviceSizesRequiringVisitsThreshold = ["medium", "large", "very_large"] as const;
@@ -29,8 +29,26 @@ export interface ReportingCampaignReadiness {
 	isReady: boolean;
 }
 
-/** Published countries, keyed by document id (which is what campaign thresholds reference). */
-export async function getPublishedCountries(): Promise<Array<{ id: string; name: string }>> {
+/**
+ * Published countries that are currently a member or observer of DARIAH, keyed by document id
+ * (which is what campaign thresholds reference). Only these countries file country reports.
+ */
+export async function getReportingCountries(): Promise<Array<{ id: string; name: string }>> {
+	const memberOrObserverRelation = db
+		.select({ id: schema.organisationalUnitsRelations.id })
+		.from(schema.organisationalUnitsRelations)
+		.innerJoin(
+			schema.organisationalUnitStatus,
+			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+		)
+		.where(
+			and(
+				eq(schema.organisationalUnitsRelations.unitDocumentId, schema.entityVersions.entityId),
+				inArray(schema.organisationalUnitStatus.status, ["is_member_of", "is_observer_of"]),
+				sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
+			),
+		);
+
 	return db
 		.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
 		.from(schema.organisationalUnits)
@@ -40,7 +58,13 @@ export async function getPublishedCountries(): Promise<Array<{ id: string; name:
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 		)
-		.where(and(publishedEntityVersionWhere(), eq(schema.organisationalUnitTypes.type, "country")))
+		.where(
+			and(
+				publishedEntityVersionWhere(),
+				eq(schema.organisationalUnitTypes.type, "country"),
+				exists(memberOrObserverRelation),
+			),
+		)
 		.orderBy(schema.organisationalUnits.name);
 }
 
@@ -64,7 +88,7 @@ export async function getReportingCampaignReadiness(
 				workingGroupReportQuestions: { columns: { id: true } },
 			},
 		}),
-		getPublishedCountries(),
+		getReportingCountries(),
 	]);
 
 	if (campaign == null) {
