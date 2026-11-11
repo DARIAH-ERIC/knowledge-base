@@ -100,6 +100,7 @@ import { FootnotePasteGuard } from "@/lib/rich-text-footnote";
 import { FootnoteNode, inlineFootnoteExtensions } from "@/lib/rich-text-footnote-node";
 import { HeadingWithoutBold } from "@/lib/rich-text-heading";
 import { PastedImageGuard, parsePastedImage } from "@/lib/rich-text-image-paste";
+import { MediaPasteGuard, mediaGroup } from "@/lib/rich-text-media-placement";
 import { blockPanelFooterClassName, useContainerDraggable } from "@/lib/rich-text-node-chrome";
 import { PastedContentNormalizer } from "@/lib/rich-text-paste-normalize";
 import {
@@ -565,7 +566,8 @@ function EmbedNodeView({
 function createEmbedNode(hasFootnotes = false): Node {
 	return Node.create({
 		name: "embedBlock",
-		group: "block",
+		// `media`, not `block`: see {@link DocumentWithContainers}.
+		group: mediaGroup,
 		atom: true,
 		draggable: true,
 		selectable: true,
@@ -796,7 +798,8 @@ export const CalloutNode = Node.create({
 	// of that group is what makes a callout inside a callout — or inside an accordion panel —
 	// impossible in the schema rather than merely discouraged. The document node accepts both groups.
 	group: "container",
-	content: "block+",
+	// Media too: a container's body is split into typed child blocks, just like a document.
+	content: `(block | ${mediaGroup})+`,
 	// `defining` keeps the callout when its content is replaced by a paste; `isolating` stops
 	// backspace at the start of the body from lifting the prose out into the block above.
 	defining: true,
@@ -917,7 +920,8 @@ export const AccordionItemNode = Node.create({
 	name: "accordionItem",
 	// In no group at all: an item is only ever reachable through `accordionBlock`'s content spec, so
 	// it cannot be dropped into a document — or into a callout — on its own.
-	content: "block+",
+	// Media too: a panel's body is split into typed child blocks, just like a document.
+	content: `(block | ${mediaGroup})+`,
 	defining: true,
 	isolating: true,
 	draggable: true,
@@ -1001,17 +1005,28 @@ export const AccordionNode = Node.create({
 });
 
 /**
- * The document, widened to take containers as well as ordinary blocks.
+ * The document, widened to take containers and media as well as ordinary blocks.
  *
  * StarterKit's own `doc` accepts `block+`, and containers are deliberately not in that group (see
  * {@link CalloutNode}) — so without this a callout could not sit at the top level either. Naming
  * both groups here is what draws the line in the schema: containers are legal in a document, and
  * nowhere else.
+ *
+ * Media nodes (`assetImage`, `galleryBlock`, `mediaTextBlock`, `embedBlock`) are kept out of
+ * `block` for the same reason. On save, the document is split into content blocks, and each media
+ * node becomes a typed block with a foreign key to its asset — but only where the splitter looks:
+ * the top level here, and the bodies of callouts and accordion panels. Lists, quotes, table cells
+ * and media-text bodies accept `block` content, so a media node in the `block` group could sit
+ * inside one, where it would stay an editor node inside a `rich_text` block, with no asset
+ * reference the api can resolve. A separate group allowed only in those three places makes that
+ * impossible: an insert from inside a list or blockquote splits it and lands between the halves.
+ * Tables, media-text bodies and quotes with a byline must not be split; see
+ * `rich-text-media-placement` for how inserts and pastes are kept out of them.
  */
 const DocumentWithContainers = Node.create({
 	name: "doc",
 	topNode: true,
-	content: "(block | container)+",
+	content: `(block | ${mediaGroup} | container)+`,
 });
 
 /**
@@ -1687,7 +1702,8 @@ function createAssetImageNode(
 ): Node {
 	return Node.create({
 		name: "assetImage",
-		group: "block",
+		// `media`, not `block`: see {@link DocumentWithContainers}.
+		group: mediaGroup,
 		atom: true,
 		draggable: true,
 		selectable: true,
@@ -2007,7 +2023,8 @@ function createMediaTextNode(
 ): Node {
 	return Node.create({
 		name: "mediaTextBlock",
-		group: "block",
+		// `media`, not `block`: see {@link DocumentWithContainers}.
+		group: mediaGroup,
 		// Prose only. The body is a passage bound to the image — a speaker bio, typically — so
 		// excluding headings keeps the document outline meaningful and makes a heading nested inside
 		// a media block impossible by construction rather than something the toolbar has to police.
@@ -2518,7 +2535,8 @@ function createGalleryNode(
 ): Node {
 	return Node.create({
 		name: "galleryBlock",
-		group: "block",
+		// `media`, not `block`: see {@link DocumentWithContainers}.
+		group: mediaGroup,
 		atom: true,
 		draggable: true,
 		selectable: true,
@@ -3004,6 +3022,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			// A placeholder is only useful where its panel can open a picker to fill it.
 			PastedImageGuard.configure({ withPlaceholders: renderImagePicker != null }),
 			PastedContentNormalizer,
+			MediaPasteGuard,
 		],
 		[renderImagePicker, renderAssetMetadata, isEditable, hasFootnotes, slashCommandHandlersRef],
 	);

@@ -20,7 +20,7 @@ export type UserFacingErrorKind =
 	| "relation-end-before-start"
 	| "relation-not-endable"
 	| "relation-period-overlap"
-	| "rich-text-embedded-image"
+	| "rich-text-embedded-media"
 	| "service-kpi-conflict"
 	| "slug-too-long"
 	| "social-media-kpi-conflict"
