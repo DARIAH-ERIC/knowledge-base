@@ -107,7 +107,11 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.leftJoin(schema.assets, eq(schema.documentsPolicies.documentId, schema.assets.id))
 			.where(latestEditableEntityVersionWhere())
-			.orderBy(asc(schema.documentsPolicies.position)),
+			.orderBy(
+				asc(schema.documentsPolicies.position),
+				asc(schema.documentsPolicies.title),
+				asc(schema.entities.id),
+			),
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "documents" }),
 		db.query.documentPolicyAliases.findMany({ columns: { key: true, entityId: true } }),
 	]);

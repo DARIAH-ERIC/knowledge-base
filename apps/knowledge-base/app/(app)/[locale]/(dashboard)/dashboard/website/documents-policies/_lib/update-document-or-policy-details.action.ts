@@ -4,8 +4,9 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { resolveDocumentOrPolicyTarget } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/resolve-document-or-policy-target";
 import { UpdateDocumentOrPolicyDetailsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.schema";
+import { getNextDocumentPolicyPosition } from "@/lib/data/documents-policies-order";
 import { getDocumentIdForVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
-import { eq, isNull } from "@/lib/db/sql";
+import { eq } from "@/lib/db/sql";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
@@ -35,16 +36,7 @@ export const updateDocumentOrPolicyDetailsAction = createMutationAction<
 		let newPosition: number | undefined;
 
 		if (current != null && current.groupId !== newGroupId) {
-			const siblings = await tx
-				.select({ id: schema.documentsPolicies.id })
-				.from(schema.documentsPolicies)
-				.where(
-					newGroupId != null
-						? eq(schema.documentsPolicies.groupId, newGroupId)
-						: isNull(schema.documentsPolicies.groupId),
-				);
-
-			newPosition = siblings.length;
+			newPosition = await getNextDocumentPolicyPosition(tx, newGroupId);
 		}
 
 		await tx

@@ -2,7 +2,11 @@
 
 import * as schema from "@dariah-eric/database/schema";
 
-import { eq, isNull } from "@/lib/db/sql";
+import {
+	getDocumentPolicyOrder,
+	setDocumentPolicyOrder,
+} from "@/lib/data/documents-policies-order";
+import { eq } from "@/lib/db/sql";
 import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
@@ -24,20 +28,7 @@ export const deleteDocumentPolicyGroupAction = createCommandAction({
 			.set({ groupId: null })
 			.where(eq(schema.documentsPolicies.groupId, id));
 
-		const ungrouped = await tx
-			.select({ id: schema.documentsPolicies.id })
-			.from(schema.documentsPolicies)
-			.where(isNull(schema.documentsPolicies.groupId))
-			.orderBy(schema.documentsPolicies.position);
-
-		await Promise.all(
-			ungrouped.map((doc, index) =>
-				tx
-					.update(schema.documentsPolicies)
-					.set({ position: index })
-					.where(eq(schema.documentsPolicies.id, doc.id)),
-			),
-		);
+		await setDocumentPolicyOrder(tx, null, await getDocumentPolicyOrder(tx, null));
 
 		await tx.delete(schema.documentPolicyGroups).where(eq(schema.documentPolicyGroups.id, id));
 
