@@ -35,6 +35,7 @@ const campaign: OperationalCostCampaignData = {
 		{ serviceSize: "small", visitsThreshold: null, amount: 6875 }, // 1 PM + 25%
 		{ serviceSize: "medium", visitsThreshold: 7000, amount: 20625 }, // 3 PM + 25%
 		{ serviceSize: "large", visitsThreshold: 170000, amount: 41250 }, // 6 PM + 25%
+		{ serviceSize: "important", visitsThreshold: null, amount: 61875 }, // 9 PM + 25%
 		{ serviceSize: "core", visitsThreshold: null, amount: 82500 }, // 12 PM + 25%
 	],
 	countryThresholds: [
@@ -90,12 +91,14 @@ describe("calculateOperationalCost", () => {
 						serviceId: "svc-small",
 						name: "Small service",
 						serviceType: "community",
+						isImportant: false,
 						kpis: [{ kpi: "visits", value: 5000 }],
 					},
 					{
 						serviceId: "svc-large",
 						name: "Large service",
 						serviceType: "community",
+						isImportant: false,
 						kpis: [{ kpi: "visits", value: 200000 }],
 					},
 				],
@@ -178,18 +181,21 @@ describe("calculateOperationalCost", () => {
 						serviceId: "a",
 						name: "Below medium",
 						serviceType: "community",
+						isImportant: false,
 						kpis: [{ kpi: "visits", value: 6999 }],
 					},
 					{
 						serviceId: "b",
 						name: "Medium",
 						serviceType: "community",
+						isImportant: false,
 						kpis: [{ kpi: "visits", value: 7000 }],
 					},
 					{
 						serviceId: "c",
 						name: "Large",
 						serviceType: "community",
+						isImportant: false,
 						kpis: [{ kpi: "visits", value: 170000 }],
 					},
 					// No visits KPI → treated as 0 visits → smallest size.
@@ -197,6 +203,7 @@ describe("calculateOperationalCost", () => {
 						serviceId: "d",
 						name: "No visits",
 						serviceType: "community",
+						isImportant: false,
 						kpis: [{ kpi: "downloads", value: 999999 }],
 					},
 				],
@@ -223,12 +230,14 @@ describe("calculateOperationalCost", () => {
 						serviceId: "core-low-visits",
 						name: "Core service",
 						serviceType: "core",
+						isImportant: false,
 						kpis: [{ kpi: "visits", value: 12 }],
 					},
 					{
 						serviceId: "community-high-visits",
 						name: "Community service",
 						serviceType: "community",
+						isImportant: false,
 						kpis: [{ kpi: "visits", value: 200000 }],
 					},
 				],
@@ -239,6 +248,73 @@ describe("calculateOperationalCost", () => {
 		expect(byKey.get("services-core")).toMatchObject({ quantity: 1, unitAmount: 82500 });
 		expect(byKey.get("services-large")).toMatchObject({ quantity: 1, unitAmount: 41250 });
 		expect(result.total).toBe(82500 + 41250);
+	});
+
+	it("counts services marked important with the important lump sum regardless of visits", () => {
+		const result = calculateOperationalCost(
+			makeInput({
+				services: [
+					{
+						serviceId: "important-no-visits",
+						name: "Important service without visits",
+						serviceType: "community",
+						isImportant: true,
+						kpis: [],
+					},
+					{
+						serviceId: "important-many-visits",
+						name: "Important service with many visits",
+						serviceType: "community",
+						isImportant: true,
+						kpis: [{ kpi: "visits", value: 200000 }],
+					},
+					{
+						serviceId: "core-marked-important",
+						name: "Core service marked important",
+						serviceType: "core",
+						isImportant: true,
+						kpis: [],
+					},
+				],
+			}),
+		);
+
+		const byKey = new Map(result.lines.map((line) => [line.key, line]));
+		expect(byKey.get("services-important")).toMatchObject({
+			label: "Important services",
+			quantity: 2,
+			unitAmount: 61875,
+		});
+		expect(byKey.get("services-core")).toMatchObject({ quantity: 1, unitAmount: 82500 });
+		expect(byKey.has("services-large")).toBe(false);
+	});
+
+	it("never matches the important size by visits", () => {
+		const result = calculateOperationalCost(
+			makeInput({
+				campaign: {
+					...campaign,
+					serviceSizes: [
+						...campaign.serviceSizes.filter((size) => size.serviceSize !== "important"),
+						// A leftover threshold must not pull unmarked services into the important size.
+						{ serviceSize: "important", visitsThreshold: 500000, amount: 61875 },
+					],
+				},
+				services: [
+					{
+						serviceId: "many-visits",
+						name: "Service with many visits",
+						serviceType: "community",
+						isImportant: false,
+						kpis: [{ kpi: "visits", value: 900000 }],
+					},
+				],
+			}),
+		);
+
+		const byKey = new Map(result.lines.map((line) => [line.key, line]));
+		expect(byKey.get("services-large")).toMatchObject({ quantity: 1 });
+		expect(byKey.has("services-important")).toBe(false);
 	});
 
 	it("returns a null threshold when the country has no configured threshold", () => {

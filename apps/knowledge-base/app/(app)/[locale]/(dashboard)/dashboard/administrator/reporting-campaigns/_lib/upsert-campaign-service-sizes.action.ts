@@ -37,9 +37,10 @@ export const upsertCampaignServiceSizesAction = createMutationAction({
 				amount: input.large_amount,
 			},
 			{
-				serviceSize: "very_large" as const,
-				threshold: input.very_large_threshold,
-				amount: input.very_large_amount,
+				// Marked by the country reporter, not matched by visits.
+				serviceSize: "important" as const,
+				threshold: undefined,
+				amount: input.important_amount,
 			},
 		];
 

@@ -1,9 +1,9 @@
 /**
  * Service sizes matched by visit count, smallest first. "small" needs a threshold too: services
  * below it get no size, so they drop out of the operational cost (an explicit 0 counts every
- * service).
+ * service). Important and core services are not matched by visits.
  */
-export const serviceSizesWithVisitsThreshold = ["small", "medium", "large", "very_large"] as const;
+export const serviceSizesWithVisitsThreshold = ["small", "medium", "large"] as const;
 
 export type ServiceSizeWithVisitsThreshold = (typeof serviceSizesWithVisitsThreshold)[number];
 

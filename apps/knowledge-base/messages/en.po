@@ -6951,11 +6951,6 @@ msgid "Large: visits threshold"
 msgstr "Large: visits threshold"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
-msgctxt "U7OP0T"
-msgid "Very large: visits threshold"
-msgstr "Very large: visits threshold"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
 msgctxt "yvmXEl"
 msgid "Tiered service amounts"
 msgstr "Tiered service amounts"
@@ -6976,9 +6971,19 @@ msgid "Large: amount"
 msgstr "Large: amount"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
-msgctxt "D7rvtG"
-msgid "Very large: amount"
-msgstr "Very large: amount"
+msgctxt "9IShMk"
+msgid "Services the country reporter marks as important, for example because of the investment in them, whatever their number of visits."
+msgstr "Services the country reporter marks as important, for example because of the investment in them, whatever their number of visits."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
+msgctxt "yKBl3q"
+msgid "Important services"
+msgstr "Important services"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
+msgctxt "P8julp"
+msgid "Important service amount"
+msgstr "Important service amount"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
 msgctxt "rnzaqG"
@@ -7090,9 +7095,9 @@ msgid "Services: {count} visit thresholds are missing."
 msgstr "Services: {count} visit thresholds are missing."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
-msgctxt "_maXvL"
-msgid "Services: visit thresholds must increase from small to very large."
-msgstr "Services: visit thresholds must increase from small to very large."
+msgctxt "8y7R59"
+msgid "Services: visit thresholds must increase from small to large."
+msgstr "Services: visit thresholds must increase from small to large."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
 msgctxt "1IMzzt"
@@ -8393,20 +8398,34 @@ msgid "The services this report covers. Add the relevant metrics per service —
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
+msgctxt "Cvwzdz"
+msgid "Small, medium and large services are counted by their number of visits. Mark a service as important when it matters, for example because of the investment in it, but does not track visits or does not reach the large threshold."
+msgstr "Small, medium and large services are counted by their number of visits. Mark a service as important when it matters, for example because of the investment in it, but does not track visits or does not reach the large threshold."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
 msgctxt "dnUQR8"
 msgid "No services added yet."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
-msgctxt "WzghkD"
-msgid "Save metrics"
-msgstr ""
+msgctxt "R7SdmP"
+msgid "Save services"
+msgstr "Save services"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
 msgctxt "spfr9v"
 msgid "Remove service"
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
+msgctxt "1kXeTj"
+msgid "Core service: counted with the core service amount."
+msgstr "Core service: counted with the core service amount."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
+msgctxt "U3_4XV"
+msgid "Important service"
+msgstr "Important service"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
@@ -8427,6 +8446,11 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
 msgctxt "Gn5DCM"
 msgid "No social media accounts added yet."
+msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
+msgctxt "WzghkD"
+msgid "Save metrics"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx

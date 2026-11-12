@@ -100,6 +100,9 @@ export async function getCarriedOverReportServices(
 export interface ReportServiceWithKpis extends CountryService {
 	/** The membership row id (`country_report_services.id`), used to remove the service. */
 	membershipId: string;
+	/** Core services are sized by their type, so they cannot be marked important. */
+	isCore: boolean;
+	isImportant: boolean;
 	kpis: Array<{ kpi: ServiceKpiCategory; value: number }>;
 }
 
@@ -109,8 +112,8 @@ export async function getCountryReportServices(
 ): Promise<Array<ReportServiceWithKpis>> {
 	const memberships = await db.query.countryReportServices.findMany({
 		where: { countryReportId },
-		columns: { id: true, serviceId: true },
-		with: { service: { columns: { name: true } } },
+		columns: { id: true, serviceId: true, isImportant: true },
+		with: { service: { columns: { name: true }, with: { type: { columns: { type: true } } } } },
 	});
 
 	const kpiRows = await db.query.countryReportServiceKpis.findMany({
@@ -130,6 +133,8 @@ export async function getCountryReportServices(
 				id: membership.serviceId,
 				membershipId: membership.id,
 				name: membership.service.name,
+				isCore: membership.service.type.type === "core",
+				isImportant: membership.isImportant,
 				kpis: kpisByService.get(membership.serviceId) ?? [],
 			};
 		})
