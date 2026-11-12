@@ -88,6 +88,9 @@ const { copyWorkingGroupReportQuestionsAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/copy-working-group-report-questions.action");
 const { createWorkingGroupReportQuestionAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/create-working-group-report-question.action");
+const { createDraftDocument, createPublishedDocument } =
+	await import("@/lib/data/entity-lifecycle");
+const { getDariahEricDocumentId } = await import("@/lib/data/unit-relations");
 
 type Tx = Transaction;
 type CampaignStatus = (typeof schema.reportingCampaignStatusEnum)[number];
@@ -563,6 +566,202 @@ describe("copying questions from the previous campaign", () => {
 			);
 			expect(state.status).toBe("error");
 			expect(await getQuestionTexts(tx, closed)).toHaveLength(0);
+		});
+	});
+});
+
+describe("launching a campaign creates its reports", () => {
+	type UnitType = "country" | "working_group";
+
+	/** Seeds an organisational unit, published unless `isDraft`, and returns its document id. */
+	async function seedUnit(tx: Tx, type: UnitType, isDraft = false): Promise<string> {
+		const entityType = await tx.query.entityTypes.findFirst({
+			where: { type: "organisational_units" },
+			columns: { id: true },
+		});
+		const unitType = await tx.query.organisationalUnitTypes.findFirst({
+			where: { type },
+			columns: { id: true },
+		});
+		assert(entityType);
+		assert(unitType);
+
+		const create = isDraft ? createDraftDocument : createPublishedDocument;
+		const { documentId, versionId } = await create(
+			tx,
+			entityType.id,
+			`test-${type}-${randomUUID()}`,
+		);
+		await tx.insert(schema.organisationalUnits).values({
+			id: versionId,
+			name: `Test ${type} ${documentId.slice(0, 8)}`,
+			typeId: unitType.id,
+		});
+		return documentId;
+	}
+
+	/** Relates `unitDocumentId` to DARIAH ERIC from `start` until `end` (open-ended when omitted). */
+	async function seedEricRelation(
+		tx: Tx,
+		unitDocumentId: string,
+		status: (typeof schema.organisationalUnitStatusEnum)[number],
+		start: string,
+		end?: string,
+	): Promise<void> {
+		const ericDocumentId = await getDariahEricDocumentId(tx);
+		const relationStatus = await tx.query.organisationalUnitStatus.findFirst({
+			where: { status },
+			columns: { id: true },
+		});
+		assert(ericDocumentId, "DARIAH ERIC not seeded");
+		assert(relationStatus);
+
+		await tx.insert(schema.organisationalUnitsRelations).values({
+			unitDocumentId,
+			relatedUnitDocumentId: ericDocumentId,
+			status: relationStatus.id,
+			duration: { start: new Date(start), end: end != null ? new Date(end) : undefined },
+		});
+	}
+
+	async function getCountryReports(tx: Tx, campaignId: string) {
+		return tx.query.countryReports.findMany({
+			where: { campaignId },
+			columns: { countryDocumentId: true, status: true },
+		});
+	}
+
+	async function getWorkingGroupReports(tx: Tx, campaignId: string) {
+		return tx.query.workingGroupReports.findMany({
+			where: { campaignId },
+			columns: { workingGroupDocumentId: true, status: true },
+		});
+	}
+
+	it("creates a draft report for every country and working group active in the campaign year", async () => {
+		await withAdminTransaction(async (tx) => {
+			const year = unusedYear();
+			const draft = await seedCampaign(tx, "draft", year);
+			await seedCampaignAmounts(tx, draft);
+
+			const member = await seedUnit(tx, "country");
+			await seedEricRelation(tx, member, "is_member_of", `${year - 3}-01-01`);
+			const observerUntilMarch = await seedUnit(tx, "country");
+			await seedEricRelation(
+				tx,
+				observerUntilMarch,
+				"is_observer_of",
+				`${year - 3}-01-01`,
+				`${year}-03-01`,
+			);
+			const memberFromOctober = await seedUnit(tx, "country");
+			await seedEricRelation(tx, memberFromOctober, "is_member_of", `${year}-10-01`);
+
+			const memberUntilLastYear = await seedUnit(tx, "country");
+			await seedEricRelation(
+				tx,
+				memberUntilLastYear,
+				"is_member_of",
+				`${year - 3}-01-01`,
+				`${year}-01-01`,
+			);
+			const memberFromNextYear = await seedUnit(tx, "country");
+			await seedEricRelation(tx, memberFromNextYear, "is_member_of", `${year + 1}-01-01`);
+			const cooperatingPartner = await seedUnit(tx, "country");
+			await seedEricRelation(
+				tx,
+				cooperatingPartner,
+				"is_cooperating_partner_of",
+				`${year - 3}-01-01`,
+			);
+			const unpublished = await seedUnit(tx, "country", true);
+			await seedEricRelation(tx, unpublished, "is_member_of", `${year - 3}-01-01`);
+
+			const activeWorkingGroup = await seedUnit(tx, "working_group");
+			await seedEricRelation(tx, activeWorkingGroup, "is_part_of", `${year - 3}-01-01`);
+			const workingGroupUntilJune = await seedUnit(tx, "working_group");
+			await seedEricRelation(
+				tx,
+				workingGroupUntilJune,
+				"is_part_of",
+				`${year - 3}-01-01`,
+				`${year}-06-01`,
+			);
+			const endedWorkingGroup = await seedUnit(tx, "working_group");
+			await seedEricRelation(
+				tx,
+				endedWorkingGroup,
+				"is_part_of",
+				`${year - 3}-01-01`,
+				`${year - 1}-06-01`,
+			);
+
+			const readiness = await getReportingCampaignReadiness(draft);
+			assert(readiness);
+
+			const state = await launchReportingCampaignAction(
+				createActionStateInitial(),
+				toFormData({ id: draft }),
+			);
+			expect(state.status, JSON.stringify(state)).toBe("success");
+			expect(await getStatus(tx, draft)).toBe("open");
+
+			const countryReports = await getCountryReports(tx, draft);
+			const reportedCountries = countryReports.map((report) => report.countryDocumentId);
+			expect(reportedCountries).toEqual(
+				expect.arrayContaining([member, observerUntilMarch, memberFromOctober]),
+			);
+			for (const ineligible of [
+				memberUntilLastYear,
+				memberFromNextYear,
+				cooperatingPartner,
+				unpublished,
+			]) {
+				expect(reportedCountries).not.toContain(ineligible);
+			}
+			expect(new Set(reportedCountries).size).toBe(countryReports.length);
+			expect(countryReports).toHaveLength(readiness.countryCount);
+
+			const workingGroupReports = await getWorkingGroupReports(tx, draft);
+			const reportedWorkingGroups = workingGroupReports.map(
+				(report) => report.workingGroupDocumentId,
+			);
+			expect(reportedWorkingGroups).toEqual(
+				expect.arrayContaining([activeWorkingGroup, workingGroupUntilJune]),
+			);
+			expect(reportedWorkingGroups).not.toContain(endedWorkingGroup);
+			expect(new Set(reportedWorkingGroups).size).toBe(workingGroupReports.length);
+			expect(workingGroupReports).toHaveLength(readiness.workingGroupCount);
+
+			expect(
+				[...countryReports, ...workingGroupReports].every((report) => report.status === "draft"),
+			).toBe(true);
+		});
+	});
+
+	it("keeps the campaign a draft without reports when creating a report fails", async () => {
+		await withAdminTransaction(async (tx) => {
+			const year = unusedYear();
+			const draft = await seedCampaign(tx, "draft", year);
+			await seedCampaignAmounts(tx, draft);
+
+			const member = await seedUnit(tx, "country");
+			await seedEricRelation(tx, member, "is_member_of", `${year - 3}-01-01`);
+			const workingGroup = await seedUnit(tx, "working_group");
+			await seedEricRelation(tx, workingGroup, "is_part_of", `${year - 3}-01-01`);
+			// A report that already exists makes creating the launch's report for the same working group fail.
+			await tx
+				.insert(schema.workingGroupReports)
+				.values({ campaignId: draft, workingGroupDocumentId: workingGroup });
+
+			const state = await launchReportingCampaignAction(
+				createActionStateInitial(),
+				toFormData({ id: draft }),
+			);
+			expect(state.status).toBe("error");
+			expect(await getStatus(tx, draft)).toBe("draft");
+			expect(await getCountryReports(tx, draft)).toHaveLength(0);
+			expect(await getWorkingGroupReports(tx, draft)).toHaveLength(1);
 		});
 	});
 });

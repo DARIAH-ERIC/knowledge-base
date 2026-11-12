@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { type Database, type Transaction, db } from "@/lib/db";
 
 /**
  * The social media account ids covered by a previous working group report — used to carry the
@@ -7,8 +7,9 @@ import { db } from "@/lib/db";
  */
 export async function getCarriedOverWorkingGroupReportSocialMedia(
 	previousReportId: string,
+	queryDb: Database | Transaction = db,
 ): Promise<Array<string>> {
-	const rows = await db.query.workingGroupReportSocialMedia.findMany({
+	const rows = await queryDb.query.workingGroupReportSocialMedia.findMany({
 		where: { workingGroupReportId: previousReportId },
 		columns: { socialMediaId: true },
 	});
