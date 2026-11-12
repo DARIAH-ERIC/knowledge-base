@@ -7213,6 +7213,11 @@ msgid "You can launch the campaign, but check these first:"
 msgstr "You can launch the campaign, but check these first:"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx
+msgctxt "5r3Dzg"
+msgid "Launching the campaign creates draft reports for {countries} countries and {workingGroups} working groups."
+msgstr "Launching the campaign creates draft reports for {countries} countries and {workingGroups} working groups."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx
 msgctxt "ncaGLo"
 msgid "Launch campaign"
 msgstr ""

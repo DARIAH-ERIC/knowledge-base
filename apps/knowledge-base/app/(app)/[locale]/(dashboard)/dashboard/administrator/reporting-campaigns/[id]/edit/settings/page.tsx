@@ -84,6 +84,18 @@ export default async function DashboardAdministratorCampaignSettingsPage(
 					</Note>
 				)}
 
+				{readiness != null && (
+					<p className="text-sm text-muted-fg">
+						{t(
+							"Launching the campaign creates draft reports for {countries} countries and {workingGroups} working groups.",
+							{
+								countries: String(readiness.countryCount),
+								workingGroups: String(readiness.workingGroupCount),
+							},
+						)}
+					</p>
+				)}
+
 				<div className="flex gap-x-3">
 					{campaign.status === "draft" && (
 						<CampaignStatusActionForm

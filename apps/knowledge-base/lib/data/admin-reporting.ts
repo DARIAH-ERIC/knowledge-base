@@ -1378,14 +1378,13 @@ export async function getReportingCampaignCountryThresholdsForAdmin(
 ) {
 	assertAdminUser(currentUser);
 
-	const [campaign, countries] = await Promise.all([
-		db.query.reportingCampaigns.findFirst({
-			where: { id },
-			columns: { id: true, status: true, year: true },
-			with: { countryThresholds: { columns: { countryDocumentId: true, amount: true } } },
-		}),
-		getReportingCountries(),
-	]);
+	const campaign = await db.query.reportingCampaigns.findFirst({
+		where: { id },
+		columns: { id: true, status: true, year: true },
+		with: { countryThresholds: { columns: { countryDocumentId: true, amount: true } } },
+	});
+	// Thresholds are needed for every country that files a report for the campaign year.
+	const countries = campaign != null ? await getReportingCountries(campaign.year) : [];
 
 	const previous =
 		campaign != null
