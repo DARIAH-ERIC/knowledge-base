@@ -6,10 +6,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { hasDariahCommissionedEvent } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/calculate-operational-cost";
-import {
-	getReportingCountries,
-	getReportingWorkingGroups,
-} from "@/lib/data/reporting-campaign-readiness";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { getReportingCountries } from "@/lib/data/reporting-campaign-readiness";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import {
@@ -260,31 +258,30 @@ export async function getCountryReportForAdmin(currentUser: Pick<User, "role">, 
 	return { ...report, country: report.country };
 }
 
-/**
- * The open campaign (at most one) and the countries that report for its year but have no report in
- * it yet. Launching a campaign creates these reports; this covers relations entered afterwards.
- */
 export async function getCountryReportCreateDataForAdmin(currentUser: Pick<User, "role">) {
 	assertAdminUser(currentUser);
 
-	const campaigns = await db.query.reportingCampaigns.findMany({
-		where: { status: "open" },
-		orderBy: { year: "desc" },
-		columns: { id: true, year: true },
-		with: { countryReports: { columns: { countryDocumentId: true } } },
-	});
-	const campaign = campaigns[0];
+	const [campaigns, countries] = await Promise.all([
+		db.query.reportingCampaigns.findMany({
+			where: { status: "open" },
+			orderBy: { year: "desc" },
+			columns: { id: true, year: true },
+		}),
+		db
+			// reports are keyed by document id; return the country's document id.
+			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.where(and(publishedEntityVersionWhere(), eq(schema.organisationalUnitTypes.type, "country")))
+			.orderBy(schema.organisationalUnits.name),
+	]);
 
-	if (campaign == null) {
-		return { campaigns: [], countries: [] };
-	}
-
-	const reported = new Set(campaign.countryReports.map((report) => report.countryDocumentId));
-	const countries = (await getReportingCountries(campaign.year)).filter(
-		(country) => !reported.has(country.id),
-	);
-
-	return { campaigns: [{ id: campaign.id, year: campaign.year }], countries };
+	return { campaigns, countries };
 }
 
 export async function getWorkingGroupReportsForAdmin(
@@ -393,34 +390,35 @@ export async function getWorkingGroupReportForAdmin(currentUser: Pick<User, "rol
 	return { ...report, workingGroup: report.workingGroup };
 }
 
-/**
- * The open campaign (at most one) and the working groups that report for its year but have no
- * report in it yet. Launching a campaign creates these reports; this covers relations entered
- * afterwards.
- */
 export async function getWorkingGroupReportCreateDataForAdmin(currentUser: Pick<User, "role">) {
 	assertAdminUser(currentUser);
 
-	const campaigns = await db.query.reportingCampaigns.findMany({
-		where: { status: "open" },
-		orderBy: { year: "desc" },
-		columns: { id: true, year: true },
-		with: { workingGroupReports: { columns: { workingGroupDocumentId: true } } },
-	});
-	const campaign = campaigns[0];
+	const [campaigns, workingGroups] = await Promise.all([
+		db.query.reportingCampaigns.findMany({
+			where: { status: "open" },
+			orderBy: { year: "desc" },
+			columns: { id: true, year: true },
+		}),
+		db
+			// reports are keyed by document id; return the working group's document id.
+			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.where(
+				and(
+					publishedEntityVersionWhere(),
+					eq(schema.organisationalUnitTypes.type, "working_group"),
+				),
+			)
+			.orderBy(schema.organisationalUnits.name),
+	]);
 
-	if (campaign == null) {
-		return { campaigns: [], workingGroups: [] };
-	}
-
-	const reported = new Set(
-		campaign.workingGroupReports.map((report) => report.workingGroupDocumentId),
-	);
-	const workingGroups = (await getReportingWorkingGroups(campaign.year)).filter(
-		(workingGroup) => !reported.has(workingGroup.id),
-	);
-
-	return { campaigns: [{ id: campaign.id, year: campaign.year }], workingGroups };
+	return { campaigns, workingGroups };
 }
 
 /**
