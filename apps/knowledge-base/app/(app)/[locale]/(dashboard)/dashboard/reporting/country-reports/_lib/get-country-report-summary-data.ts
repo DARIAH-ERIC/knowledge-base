@@ -80,6 +80,7 @@ export interface CountryReportSummaryData {
 		serviceId: string;
 		name: string;
 		serviceType: string;
+		isImportant: boolean;
 		costBucket: string | null;
 		kpis: Array<{ kpi: string; value: number }>;
 	}>;
@@ -150,6 +151,16 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 				with: {
 					socialMedia: {
 						columns: { name: true, url: true },
+						with: { type: { columns: { type: true } } },
+					},
+				},
+			},
+			services: {
+				columns: { serviceId: true },
+				where: { isImportant: true },
+				with: {
+					service: {
+						columns: { name: true },
 						with: { type: { columns: { type: true } } },
 					},
 				},
@@ -277,14 +288,29 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 
 	const serviceMap = new Map<
 		string,
-		{ name: string; serviceType: string; kpis: Array<{ kpi: string; value: number }> }
+		{
+			name: string;
+			serviceType: string;
+			isImportant: boolean;
+			kpis: Array<{ kpi: string; value: number }>;
+		}
 	>();
+	// Important services count even without any KPI, since they are not sized by visits.
+	for (const row of report.services) {
+		serviceMap.set(row.serviceId, {
+			name: row.service.name,
+			serviceType: row.service.type.type,
+			isImportant: true,
+			kpis: [],
+		});
+	}
 	for (const row of report.serviceKpis) {
 		const existing = serviceMap.get(row.serviceId);
 		if (existing == null) {
 			serviceMap.set(row.serviceId, {
 				name: row.service.name,
 				serviceType: row.service.type.type,
+				isImportant: false,
 				kpis: [{ kpi: row.kpi, value: row.value }],
 			});
 		} else {

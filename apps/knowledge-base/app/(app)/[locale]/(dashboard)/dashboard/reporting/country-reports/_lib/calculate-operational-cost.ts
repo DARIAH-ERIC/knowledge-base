@@ -52,6 +52,8 @@ export interface OperationalCostInput {
 		serviceId: string;
 		name: string;
 		serviceType: string;
+		/** Marked as important by the country reporter. */
+		isImportant: boolean;
 		kpis: Array<{ kpi: string; value: number }>;
 	}>;
 	campaign: OperationalCostCampaignData;
@@ -61,6 +63,15 @@ export interface OperationalCostInput {
 type Service = OperationalCostInput["services"][number];
 type ServiceSize = OperationalCostCampaignData["serviceSizes"][number];
 
+/** Sizes matched by visit count. Important and core services are not matched by visits. */
+const serviceSizesMatchedByVisits = new Set(["small", "medium", "large"]);
+
+/**
+ * Core services are sized by their service type, and important services are marked by the country
+ * reporter (some services matter, e.g. in terms of investment, but do not track visits or do not
+ * reach the large threshold). All others are matched by visits: a service counts as the largest
+ * size whose threshold it reaches.
+ */
 export function getOperationalCostServiceSize(
 	service: Service,
 	serviceSizes: Array<ServiceSize>,
@@ -69,10 +80,14 @@ export function getOperationalCostServiceSize(
 		return serviceSizes.find((candidate) => candidate.serviceSize === "core");
 	}
 
+	if (service.isImportant) {
+		return serviceSizes.find((candidate) => candidate.serviceSize === "important");
+	}
+
 	const visits = service.kpis.find((kpi) => kpi.kpi === "visits")?.value ?? 0;
 
 	return serviceSizes
-		.filter((candidate) => candidate.serviceSize !== "core")
+		.filter((candidate) => serviceSizesMatchedByVisits.has(candidate.serviceSize))
 		.toSorted((left, right) => (right.visitsThreshold ?? 0) - (left.visitsThreshold ?? 0))
 		.find((candidate) => visits >= (candidate.visitsThreshold ?? 0));
 }

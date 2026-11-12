@@ -445,6 +445,12 @@ export const countryReportServices = p.snakeCase.table(
 			.uuid("service_id")
 			.notNull()
 			.references(() => services.id),
+		/**
+		 * Marked by the country reporter. Important services are hand-selected rather than matched by a
+		 * visits threshold, for services that matter but do not track visits or do not reach the large
+		 * threshold.
+		 */
+		isImportant: p.boolean("is_important").notNull().default(false),
 	},
 	(t) => [p.unique().on(t.countryReportId, t.serviceId)],
 );
@@ -798,7 +804,12 @@ export const ReportingCampaignContributionAmountInsertSchema = createInsertSchem
 	reportingCampaignContributionAmounts,
 );
 
-export const serviceSizeEnum = ["small", "medium", "large", "very_large", "core"] as const;
+/**
+ * Small, medium and large services are matched by visits threshold; important services are marked
+ * by the country reporter, and core services by their service type. The database check still allows
+ * the former "very_large" value, see the `add_important_services` migration.
+ */
+export const serviceSizeEnum = ["small", "medium", "large", "important", "core"] as const;
 
 export const reportingCampaignServiceSizes = p.snakeCase.table(
 	"reporting_campaign_service_sizes",

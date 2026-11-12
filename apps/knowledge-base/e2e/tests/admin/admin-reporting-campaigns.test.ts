@@ -127,8 +127,7 @@ test.describe("reporting campaigns admin", () => {
 		await campaignsPage.fillByLabel("Medium: amount", "20");
 		await campaignsPage.fillByLabel("Large: visits threshold", "10000");
 		await campaignsPage.fillByLabel("Large: amount", "30");
-		await campaignsPage.fillByLabel("Very large: visits threshold", "50000");
-		await campaignsPage.fillByLabel("Very large: amount", "40");
+		await campaignsPage.fillByLabel("Important service amount", "40");
 		await campaignsPage.fillByLabel("Core service amount", "5");
 		await campaignsPage.saveTabForm();
 
@@ -140,7 +139,7 @@ test.describe("reporting campaigns admin", () => {
 			small: { threshold: 1000, amount: 10 },
 			medium: { threshold: 5000, amount: 20 },
 			large: { threshold: 10000, amount: 30 },
-			very_large: { threshold: 50000, amount: 40 },
+			important: { threshold: null, amount: 40 },
 			core: { amount: 5 },
 		});
 	});

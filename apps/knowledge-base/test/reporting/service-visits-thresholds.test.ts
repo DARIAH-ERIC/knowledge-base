@@ -10,7 +10,6 @@ describe("getUnorderedVisitsThresholds", () => {
 			["small", 0],
 			["medium", 1000],
 			["large", 5000],
-			["very_large", 10_000],
 		]);
 		expect(getUnorderedVisitsThresholds(thresholds)).toEqual([]);
 	});
@@ -20,7 +19,6 @@ describe("getUnorderedVisitsThresholds", () => {
 			["small", 0],
 			["medium", 10_000],
 			["large", 5000],
-			["very_large", 20_000],
 		]);
 		expect(getUnorderedVisitsThresholds(thresholds)).toEqual(["large"]);
 	});
@@ -42,12 +40,22 @@ describe("getUnorderedVisitsThresholds", () => {
 		expect(getUnorderedVisitsThresholds(thresholds)).toEqual(["large"]);
 	});
 
+	it("ignores sizes that are not matched by visits", () => {
+		const thresholds = new Map<string, number | null>([
+			["small", 0],
+			["medium", 1000],
+			["large", 5000],
+			["important", 10],
+			["core", 1],
+		]);
+		expect(getUnorderedVisitsThresholds(thresholds)).toEqual([]);
+	});
+
 	it("skips sizes without a threshold", () => {
 		const thresholds = new Map<string, number | null>([
 			["small", null],
 			["medium", 1000],
 			["large", null],
-			["very_large", 5000],
 		]);
 		expect(getUnorderedVisitsThresholds(thresholds)).toEqual([]);
 	});

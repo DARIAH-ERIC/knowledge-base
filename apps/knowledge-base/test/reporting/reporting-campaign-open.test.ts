@@ -180,7 +180,7 @@ async function seedCampaignAmounts(tx: Tx, campaignId: string): Promise<void> {
 			return {
 				campaignId,
 				serviceSize,
-				visitsThreshold: serviceSize === "core" ? null : index * 100,
+				visitsThreshold: serviceSize === "core" || serviceSize === "important" ? null : index * 100,
 				amount: 1,
 			};
 		}),
@@ -299,12 +299,7 @@ describe("service size visit thresholds", () => {
 			const draft = await seedCampaign(tx, "draft");
 			const readiness = await getReportingCampaignReadiness(draft);
 
-			expect(readiness?.missing.visitsThresholds).toEqual([
-				"small",
-				"medium",
-				"large",
-				"very_large",
-			]);
+			expect(readiness?.missing.visitsThresholds).toEqual(["small", "medium", "large"]);
 		});
 	});
 
@@ -377,6 +372,37 @@ describe("service size visit thresholds", () => {
 				where: { campaignId: draft },
 			});
 			expect(rows).toHaveLength(0);
+		});
+	});
+});
+
+describe("important services", () => {
+	it("launches without a visits threshold for important services", async () => {
+		await withAdminTransaction(async (tx) => {
+			const draft = await seedCampaign(tx, "draft");
+			await seedCampaignAmounts(tx, draft);
+
+			const readiness = await getReportingCampaignReadiness(draft);
+			expect(readiness?.missing.visitsThresholds).toEqual([]);
+			expect(readiness?.isReady).toBe(true);
+		});
+	});
+
+	it("saves the important amount without a visits threshold", async () => {
+		await withAdminTransaction(async (tx) => {
+			const draft = await seedCampaign(tx, "draft");
+
+			const state = await upsertCampaignServiceSizesAction(
+				createActionStateInitial(),
+				toFormData({ id: draft, important_amount: "50" }),
+			);
+			expect(state.status, JSON.stringify(state)).toBe("success");
+
+			const rows = await tx.query.reportingCampaignServiceSizes.findMany({
+				where: { campaignId: draft },
+				columns: { serviceSize: true, visitsThreshold: true, amount: true },
+			});
+			expect(rows).toEqual([{ serviceSize: "important", visitsThreshold: null, amount: 50 }]);
 		});
 	});
 });

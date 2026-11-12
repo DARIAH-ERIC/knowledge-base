@@ -111,14 +111,6 @@ export function CampaignServiceSizesForm(
 							name={"large_threshold"}
 							previous={previousValues}
 						/>
-
-						<CampaignAmountField
-							defaultValue={defaultValues["very_large_threshold"]}
-							kind="count"
-							label={t("Very large: visits threshold")}
-							name={"very_large_threshold"}
-							previous={previousValues}
-						/>
 					</FormSection>
 
 					<FormSection title={t("Tiered service amounts")}>
@@ -142,11 +134,18 @@ export function CampaignServiceSizesForm(
 							name={"large_amount"}
 							previous={previousValues}
 						/>
+					</FormSection>
 
+					<FormSection
+						description={t(
+							"Services the country reporter marks as important, for example because of the investment in them, whatever their number of visits.",
+						)}
+						title={t("Important services")}
+					>
 						<CampaignAmountField
-							defaultValue={defaultValues["very_large_amount"]}
-							label={t("Very large: amount")}
-							name={"very_large_amount"}
+							defaultValue={defaultValues["important_amount"]}
+							label={t("Important service amount")}
+							name={"important_amount"}
 							previous={previousValues}
 						/>
 					</FormSection>

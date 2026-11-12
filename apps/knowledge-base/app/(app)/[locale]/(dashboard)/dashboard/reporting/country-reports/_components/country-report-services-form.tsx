@@ -2,6 +2,7 @@
 
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
+import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
@@ -18,7 +19,7 @@ import type {
 } from "@/lib/data/report-services";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
-/** Id linking the per-service KPI inputs (rendered inside service cards) to the single Save form. */
+/** Id linking the per-service inputs (rendered inside service cards) to the single Save form. */
 const KPI_FORM_ID = "country-report-service-kpis-form";
 
 function formatKpi(kpi: string): string {
@@ -63,6 +64,11 @@ export function CountryReportServicesForm(
 						"The services this report covers. Add the relevant metrics per service — you only need to fill in the numbers you have.",
 					)}
 				</p>
+				<p className="text-sm text-muted-fg max-inline-md">
+					{t(
+						"Small, medium and large services are counted by their number of visits. Mark a service as important when it matters, for example because of the investment in it, but does not track visits or does not reach the large threshold.",
+					)}
+				</p>
 			</div>
 
 			{services.length > 0 ? (
@@ -99,7 +105,7 @@ export function CountryReportServicesForm(
 								<span aria-hidden={true}>{t("Saving...")}</span>
 							</Fragment>
 						) : (
-							t("Save metrics")
+							t("Save services")
 						)}
 					</Button>
 					<FormStatus className="self-start" state={saveState} />
@@ -133,6 +139,7 @@ function ServiceCard(props: Readonly<ServiceCardProps>): ReactNode {
 	const { service, reportId, kpiCategories, deleteAction } = props;
 
 	const t = useExtracted();
+	const [isImportant, setIsImportant] = useState(service.isImportant);
 	const [metrics, setMetrics] = useState<Array<MetricRow>>(() =>
 		service.kpis.map((kpi) => {
 			return { kpi: kpi.kpi, value: String(kpi.value) };
@@ -178,6 +185,21 @@ function ServiceCard(props: Readonly<ServiceCardProps>): ReactNode {
 					)}
 				</ActionForm>
 			</div>
+
+			{service.isCore ? (
+				<p className="text-sm text-muted-fg">
+					{t("Core service: counted with the core service amount.")}
+				</p>
+			) : (
+				<Fragment>
+					<Checkbox isSelected={isImportant} onChange={setIsImportant}>
+						{t("Important service")}
+					</Checkbox>
+					{isImportant && (
+						<input form={KPI_FORM_ID} name={`important.${service.id}`} type="hidden" value="on" />
+					)}
+				</Fragment>
+			)}
 
 			{metrics.length > 0 && (
 				<ul className="flex flex-col gap-y-2">

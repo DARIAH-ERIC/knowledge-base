@@ -14,15 +14,13 @@ function isThresholdOrdered(
 		small_threshold?: number | undefined;
 		medium_threshold?: number | undefined;
 		large_threshold?: number | undefined;
-		very_large_threshold?: number | undefined;
 	},
-	size: "medium" | "large" | "very_large",
+	size: "medium" | "large",
 ): boolean {
 	const thresholds = new Map([
 		["small", input.small_threshold],
 		["medium", input.medium_threshold],
 		["large", input.large_threshold],
-		["very_large", input.very_large_threshold],
 	]);
 	return !getUnorderedVisitsThresholds(thresholds).includes(size);
 }
@@ -41,8 +39,7 @@ export const UpsertCampaignServiceSizesActionInputSchema = v.pipe(
 		medium_amount: nullableAmount,
 		large_threshold: nullableThreshold,
 		large_amount: nullableAmount,
-		very_large_threshold: nullableThreshold,
-		very_large_amount: nullableAmount,
+		important_amount: nullableAmount,
 		core_amount: nullableAmount,
 	}),
 	v.forward(
@@ -71,14 +68,6 @@ export const UpsertCampaignServiceSizesActionInputSchema = v.pipe(
 	),
 	v.forward(
 		v.partialCheck(
-			[["very_large_threshold"], ["very_large_amount"]],
-			(input) => input.very_large_threshold == null || input.very_large_amount != null,
-			thresholdWithoutAmountMessage,
-		),
-		["very_large_amount"],
-	),
-	v.forward(
-		v.partialCheck(
 			[["small_threshold"], ["medium_threshold"]],
 			(input) => isThresholdOrdered(input, "medium"),
 			unorderedThresholdMessage,
@@ -92,13 +81,5 @@ export const UpsertCampaignServiceSizesActionInputSchema = v.pipe(
 			unorderedThresholdMessage,
 		),
 		["large_threshold"],
-	),
-	v.forward(
-		v.partialCheck(
-			[["small_threshold"], ["medium_threshold"], ["large_threshold"], ["very_large_threshold"]],
-			(input) => isThresholdOrdered(input, "very_large"),
-			unorderedThresholdMessage,
-		),
-		["very_large_threshold"],
 	),
 );
