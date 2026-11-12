@@ -5,10 +5,10 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { CreateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy.schema";
 import { resolveDocumentOrPolicyTarget } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/resolve-document-or-policy-target";
+import { getNextDocumentPolicyPosition } from "@/lib/data/documents-policies-order";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
 import { createDraftDocumentWithSlug, publishVersion } from "@/lib/data/entity-lifecycle";
 import { ensureEntityVersionField, insertContentBlockTree } from "@/lib/data/entity-version-fields";
-import { eq, isNull } from "@/lib/db/sql";
 import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -41,14 +41,7 @@ export const createDocumentOrPolicyAction = createMutationAction<
 
 		const target = await resolveDocumentOrPolicyTarget(tx, input);
 
-		const siblings = await tx
-			.select({ id: schema.documentsPolicies.id })
-			.from(schema.documentsPolicies)
-			.where(
-				input.groupId != null
-					? eq(schema.documentsPolicies.groupId, input.groupId)
-					: isNull(schema.documentsPolicies.groupId),
-			);
+		const position = await getNextDocumentPolicyPosition(tx, input.groupId ?? null);
 
 		await tx.insert(schema.documentsPolicies).values({
 			id: versionId,
@@ -56,7 +49,7 @@ export const createDocumentOrPolicyAction = createMutationAction<
 			title: input.title,
 			summary: input.summary,
 			groupId: input.groupId ?? null,
-			position: siblings.length,
+			position,
 		});
 
 		const contentField = await ensureEntityVersionField(tx, versionId, "description");
