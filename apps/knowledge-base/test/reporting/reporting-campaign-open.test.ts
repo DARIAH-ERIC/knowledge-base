@@ -600,7 +600,10 @@ describe("launching a campaign creates its reports", () => {
 		return documentId;
 	}
 
-	/** Relates `unitDocumentId` to DARIAH ERIC from `start` until `end` (open-ended when omitted). */
+	/**
+	 * Relates `unitDocumentId` to DARIAH ERIC from `start` until `end` inclusive (open-ended when
+	 * omitted).
+	 */
 	async function seedEricRelation(
 		tx: Tx,
 		unitDocumentId: string,
@@ -657,13 +660,15 @@ describe("launching a campaign creates its reports", () => {
 			const memberFromOctober = await seedUnit(tx, "country");
 			await seedEricRelation(tx, memberFromOctober, "is_member_of", `${year}-10-01`);
 
+			// Durations are inclusive, and editors enter calendar dates: leaving at the end of last year
+			// is stored as an end on 31 December.
 			const memberUntilLastYear = await seedUnit(tx, "country");
 			await seedEricRelation(
 				tx,
 				memberUntilLastYear,
 				"is_member_of",
 				`${year - 3}-01-01`,
-				`${year}-01-01`,
+				`${year - 1}-12-31`,
 			);
 			const memberFromNextYear = await seedUnit(tx, "country");
 			await seedEricRelation(tx, memberFromNextYear, "is_member_of", `${year + 1}-01-01`);
