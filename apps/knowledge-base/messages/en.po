@@ -6926,6 +6926,11 @@ msgid "Adding..."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
+msgctxt "TOC5iN"
+msgid "Each threshold is the minimum number of visits for that size: a service counts as the largest size whose threshold it reaches. Services below the small threshold are not counted, so enter 0 to count every service."
+msgstr "Each threshold is the minimum number of visits for that size: a service counts as the largest size whose threshold it reaches. Services below the small threshold are not counted, so enter 0 to count every service."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
 msgctxt "1u43xp"
 msgid "Visits thresholds"
 msgstr "Visits thresholds"
@@ -7085,6 +7090,11 @@ msgid "Services: {count} visit thresholds are missing."
 msgstr "Services: {count} visit thresholds are missing."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
+msgctxt "_maXvL"
+msgid "Services: visit thresholds must increase from small to very large."
+msgstr "Services: visit thresholds must increase from small to very large."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness.ts
 msgctxt "1IMzzt"
 msgid "Countries: {count} of {total} countries have no threshold, so their reports cannot be compared against one."
 msgstr "Countries: {count} of {total} countries have no threshold, so their reports cannot be compared against one."
@@ -7188,9 +7198,9 @@ msgid "Administrator dashboard - Campaign settings"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx
-msgctxt "rVuN0K"
-msgid "Set these amounts before launching the campaign:"
-msgstr "Set these amounts before launching the campaign:"
+msgctxt "317bMD"
+msgid "Fix these before launching the campaign:"
+msgstr "Fix these before launching the campaign:"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx
 msgctxt "Pcd_L3"

@@ -63,7 +63,7 @@ test.describe("reporting campaigns admin", () => {
 		await campaignsPage.gotoSettings(campaignId!);
 
 		await expect(
-			campaignsPage.page.getByText("Set these amounts before launching the campaign:"),
+			campaignsPage.page.getByText("Fix these before launching the campaign:"),
 		).toBeVisible();
 		await expect(campaignsPage.launchButton).toBeDisabled();
 	});

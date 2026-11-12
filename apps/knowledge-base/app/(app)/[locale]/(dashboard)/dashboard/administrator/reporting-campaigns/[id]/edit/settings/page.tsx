@@ -64,7 +64,7 @@ export default async function DashboardAdministratorCampaignSettingsPage(
 
 				{readinessMessages != null && readinessMessages.errors.length > 0 && (
 					<Note intent="danger">
-						<p>{t("Set these amounts before launching the campaign:")}</p>
+						<p>{t("Fix these before launching the campaign:")}</p>
 						<ul className="list-disc ps-5">
 							{readinessMessages.errors.map((message) => (
 								<li key={message}>{message}</li>

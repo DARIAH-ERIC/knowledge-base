@@ -56,6 +56,9 @@ export async function getCampaignReadinessMessages(
 			}),
 		);
 	}
+	if (readiness.unorderedVisitsThresholds.length > 0) {
+		errors.push(t("Services: visit thresholds must increase from small to very large."));
+	}
 
 	if (readiness.countriesWithoutThreshold > 0) {
 		warnings.push(
