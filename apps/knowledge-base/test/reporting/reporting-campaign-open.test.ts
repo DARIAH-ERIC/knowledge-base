@@ -6,9 +6,10 @@ import * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { describe, expect, it, vi } from "vitest";
 
+import { getReportingCampaignReadiness } from "@/lib/data/reporting-campaign-readiness";
 import type * as DbModule from "@/lib/db";
 import type { Transaction } from "@/lib/db";
-import { eq } from "@/lib/db/sql";
+import { and, eq } from "@/lib/db/sql";
 import { withTransaction } from "@/test/lib/with-transaction";
 
 /**
@@ -81,6 +82,8 @@ const { updateReportingCampaignAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/update-reporting-campaign.action");
 const { upsertCampaignEventAmountsAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-event-amounts.action");
+const { upsertCampaignServiceSizesAction } =
+	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-service-sizes.action");
 const { copyWorkingGroupReportQuestionsAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/copy-working-group-report-questions.action");
 const { createWorkingGroupReportQuestionAction } =
@@ -143,7 +146,7 @@ async function seedCampaign(tx: Tx, status: CampaignStatus, year = unusedYear())
 	return row.id;
 }
 
-/** Sets every amount the launch checks require; thresholds and questions are left empty. */
+/** Sets every amount the launch checks require; country thresholds and questions are left empty. */
 async function seedCampaignAmounts(tx: Tx, campaignId: string): Promise<void> {
 	await tx.insert(schema.reportingCampaignEventAmounts).values(
 		schema.reportingCampaignEventTypeEnum.map((eventType) => {
@@ -177,7 +180,7 @@ async function seedCampaignAmounts(tx: Tx, campaignId: string): Promise<void> {
 			return {
 				campaignId,
 				serviceSize,
-				visitsThreshold: serviceSize === "small" || serviceSize === "core" ? null : index * 100,
+				visitsThreshold: serviceSize === "core" ? null : index * 100,
 				amount: 1,
 			};
 		}),
@@ -260,6 +263,120 @@ describe("opening a campaign requires its amounts", () => {
 			);
 			expect(state.status).toBe("error");
 			expect(await getStatus(tx, draft)).toBe("draft");
+		});
+	});
+});
+
+describe("service size visit thresholds", () => {
+	it("refuses to launch without a threshold for small services", async () => {
+		await withAdminTransaction(async (tx) => {
+			const draft = await seedCampaign(tx, "draft");
+			await seedCampaignAmounts(tx, draft);
+			await tx
+				.update(schema.reportingCampaignServiceSizes)
+				.set({ visitsThreshold: null })
+				.where(
+					and(
+						eq(schema.reportingCampaignServiceSizes.campaignId, draft),
+						eq(schema.reportingCampaignServiceSizes.serviceSize, "small"),
+					),
+				);
+
+			const state = await launchReportingCampaignAction(
+				createActionStateInitial(),
+				toFormData({ id: draft }),
+			);
+			expect(state.status).toBe("error");
+			expect(state.status === "error" ? state.message : "").toContain(
+				"Services: {count} visit thresholds are missing.",
+			);
+			expect(await getStatus(tx, draft)).toBe("draft");
+		});
+	});
+
+	it("reports missing thresholds even when the service size has no amount either", async () => {
+		await withAdminTransaction(async (tx) => {
+			const draft = await seedCampaign(tx, "draft");
+			const readiness = await getReportingCampaignReadiness(draft);
+
+			expect(readiness?.missing.visitsThresholds).toEqual([
+				"small",
+				"medium",
+				"large",
+				"very_large",
+			]);
+		});
+	});
+
+	it("refuses to launch with thresholds out of order", async () => {
+		await withAdminTransaction(async (tx) => {
+			const draft = await seedCampaign(tx, "draft");
+			await seedCampaignAmounts(tx, draft);
+			await tx
+				.update(schema.reportingCampaignServiceSizes)
+				.set({ visitsThreshold: 0 })
+				.where(
+					and(
+						eq(schema.reportingCampaignServiceSizes.campaignId, draft),
+						eq(schema.reportingCampaignServiceSizes.serviceSize, "large"),
+					),
+				);
+
+			const readiness = await getReportingCampaignReadiness(draft);
+			expect(readiness?.unorderedVisitsThresholds).toEqual(["large"]);
+
+			const state = await launchReportingCampaignAction(
+				createActionStateInitial(),
+				toFormData({ id: draft }),
+			);
+			expect(state.status).toBe("error");
+			expect(await getStatus(tx, draft)).toBe("draft");
+		});
+	});
+
+	it("refuses to save thresholds out of order", async () => {
+		await withAdminTransaction(async (tx) => {
+			const draft = await seedCampaign(tx, "draft");
+
+			const state = await upsertCampaignServiceSizesAction(
+				createActionStateInitial(),
+				toFormData({
+					id: draft,
+					medium_threshold: "10000",
+					medium_amount: "20",
+					large_threshold: "5000",
+					large_amount: "30",
+				}),
+			);
+			expect(state.status).toBe("error");
+			expect(state.status === "error" ? state.validationErrors : undefined).toHaveProperty(
+				"large_threshold",
+			);
+
+			const rows = await tx.query.reportingCampaignServiceSizes.findMany({
+				where: { campaignId: draft },
+			});
+			expect(rows).toHaveLength(0);
+		});
+	});
+
+	it("refuses to save a threshold without its amount", async () => {
+		await withAdminTransaction(async (tx) => {
+			const draft = await seedCampaign(tx, "draft");
+
+			const state = await upsertCampaignServiceSizesAction(
+				createActionStateInitial(),
+				toFormData({ id: draft, medium_threshold: "5000" }),
+			);
+			expect(state.status).toBe("error");
+			expect(state.status === "error" ? state.validationErrors : undefined).toHaveProperty(
+				"medium_amount",
+			);
+
+			const rows = await tx.query.reportingCampaignServiceSizes.findMany({
+				where: { campaignId: draft },
+			});
+			expect(rows).toHaveLength(0);
 		});
 	});
 });

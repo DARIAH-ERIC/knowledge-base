@@ -9,9 +9,11 @@ import * as schema from "@dariah-eric/database/schema";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { and, eq, exists, inArray, sql } from "@/lib/db/sql";
-
-/** Service sizes matched by visit count; "small" is the floor, so it needs no threshold. */
-const serviceSizesRequiringVisitsThreshold = ["medium", "large", "very_large"] as const;
+import {
+	type ServiceSizeWithVisitsThreshold,
+	getUnorderedVisitsThresholds,
+	serviceSizesWithVisitsThreshold,
+} from "@/lib/service-visits-thresholds";
 
 export interface ReportingCampaignReadiness {
 	/** Lump sums the operational cost calculation needs; a missing one silently counts as zero. */
@@ -20,12 +22,20 @@ export interface ReportingCampaignReadiness {
 		socialMediaCategories: Array<(typeof reportingCampaignSocialMediaCategoryEnum)[number]>;
 		contributionRoles: Array<(typeof reportingCampaignContributionRoleEnum)[number]>;
 		serviceSizes: Array<(typeof serviceSizeEnum)[number]>;
-		visitsThresholds: Array<(typeof serviceSizesRequiringVisitsThreshold)[number]>;
+		visitsThresholds: Array<ServiceSizeWithVisitsThreshold>;
 	};
+	/**
+	 * Sizes whose visits threshold is not above the next smaller size's. Sizes are matched by
+	 * threshold, not by name, so out of order they would be billed as the wrong size.
+	 */
+	unorderedVisitsThresholds: Array<ServiceSizeWithVisitsThreshold>;
 	countryCount: number;
 	countriesWithoutThreshold: number;
 	questionCount: number;
-	/** Whether every required amount is set. Country thresholds and questions only warn. */
+	/**
+	 * Whether every required amount is set and the visits thresholds increase. Country thresholds and
+	 * questions only warn.
+	 */
 	isReady: boolean;
 }
 
@@ -114,18 +124,23 @@ export async function getReportingCampaignReadiness(
 			(key) => !contributionRoles.has(key),
 		),
 		serviceSizes: serviceSizeEnum.filter((key) => !serviceSizes.has(key)),
-		visitsThresholds: serviceSizesRequiringVisitsThreshold.filter(
-			(key) => serviceSizes.has(key) && serviceSizes.get(key) == null,
+		visitsThresholds: serviceSizesWithVisitsThreshold.filter(
+			(key) => serviceSizes.get(key) == null,
 		),
 	};
 
+	const unorderedVisitsThresholds = getUnorderedVisitsThresholds(serviceSizes);
+
 	return {
 		missing,
+		unorderedVisitsThresholds,
 		countryCount: countries.length,
 		countriesWithoutThreshold: countries.filter(
 			(country) => !countriesWithThreshold.has(country.id),
 		).length,
 		questionCount: campaign.workingGroupReportQuestions.length,
-		isReady: Object.values(missing).every((keys) => keys.length === 0),
+		isReady:
+			Object.values(missing).every((keys) => keys.length === 0) &&
+			unorderedVisitsThresholds.length === 0,
 	};
 }

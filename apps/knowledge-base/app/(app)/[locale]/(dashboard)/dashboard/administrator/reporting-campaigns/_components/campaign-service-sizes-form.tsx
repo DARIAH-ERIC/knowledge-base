@@ -82,7 +82,12 @@ export function CampaignServiceSizesForm(
 					className="flex flex-col gap-y-6 min-inline-0"
 					disabled={isLocked}
 				>
-					<FormSection title={t("Visits thresholds")}>
+					<FormSection
+						description={t(
+							"Each threshold is the minimum number of visits for that size: a service counts as the largest size whose threshold it reaches. Services below the small threshold are not counted, so enter 0 to count every service.",
+						)}
+						title={t("Visits thresholds")}
+					>
 						<CampaignAmountField
 							defaultValue={defaultValues["small_threshold"]}
 							kind="count"
