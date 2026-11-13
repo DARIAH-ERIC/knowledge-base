@@ -105,6 +105,7 @@ export interface CountryReportData {
 
 export interface CountryReportHeaderData {
 	id: string;
+	status: string;
 	country: { name: string };
 	campaign: { year: number };
 }
@@ -391,7 +392,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 async function getCountryReportHeader(id: string): Promise<CountryReportHeaderData | null> {
 	const report = await db.query.countryReports.findFirst({
 		where: { id },
-		columns: { id: true },
+		columns: { id: true, status: true },
 		with: {
 			campaign: { columns: { year: true } },
 			country: { columns: { name: true } },
@@ -407,6 +408,7 @@ async function getCountryReportHeader(id: string): Promise<CountryReportHeaderDa
 
 	return {
 		id: report.id,
+		status: report.status,
 		country: report.country,
 		campaign: report.campaign,
 	};

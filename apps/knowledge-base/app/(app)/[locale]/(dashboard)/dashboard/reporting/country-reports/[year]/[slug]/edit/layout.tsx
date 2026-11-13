@@ -8,6 +8,7 @@ import {
 	HeaderDescription,
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import { AcceptedReportEditWarning } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/accepted-report-edit-warning";
 import { ReportEditGuard } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-edit-guard";
 import { CountryReportStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-step-nav";
 import { getCountryReportHeaderForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
@@ -64,6 +65,7 @@ export default async function CountryReportEditLayout(
 
 			<div className="flex flex-col gap-y-6 px-(--layout-padding) pbs-6 max-inline-4xl">
 				<ReportEditGuard>
+					<AcceptedReportEditWarning status={report.status} variant="reporting" />
 					<CountryReportStepNav
 						editBasePath={getCountryReportEditHref(Number(routeYear), slug)}
 						variant="reporting"

@@ -8182,6 +8182,16 @@ msgctxt "Bq9ad5"
 msgid "To change your roles, contact your national coordinator or the DARIAH office."
 msgstr "To change your roles, contact your national coordinator or the DARIAH office."
 
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/accepted-report-edit-warning.tsx
+msgctxt "cLr2pR"
+msgid "This report has already been accepted. Any change you save here alters the accepted report. To have the reporters revise it instead, set its status back to draft on the Status tab."
+msgstr "This report has already been accepted. Any change you save here alters the accepted report. To have the reporters revise it instead, set its status back to draft on the Status tab."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/accepted-report-edit-warning.tsx
+msgctxt "LkI1ab"
+msgid "This report has already been accepted. Any change you save here alters the accepted report. To have the reporters revise it instead, set its status back to draft in the administrator dashboard."
+msgstr "This report has already been accepted. Any change you save here alters the accepted report. To have the reporters revise it instead, set its status back to draft in the administrator dashboard."
+
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-comments-section.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx
 msgctxt "z8XEBy"
