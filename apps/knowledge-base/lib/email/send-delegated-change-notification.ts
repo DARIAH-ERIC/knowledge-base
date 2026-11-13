@@ -287,9 +287,17 @@ export async function sendRelationChangeNotification(params: {
 	});
 }
 
-/** Notifies that a coordinator or chair created a person or institution, saved as a draft. */
+type CreatedDraftEntityKind = "institution" | "person" | "project";
+
+const createdDraftEntityKindLabels: Record<CreatedDraftEntityKind, string> = {
+	institution: "Institution",
+	person: "Person",
+	project: "Project",
+};
+
+/** Notifies that a coordinator or chair created a person, institution or project, saved as a draft. */
 export async function sendDraftEntityCreatedNotification(params: {
-	kind: "person" | "institution";
+	kind: CreatedDraftEntityKind;
 	name: string;
 	slug: string | null;
 	actor: Actor;
@@ -304,9 +312,9 @@ export async function sendDraftEntityCreatedNotification(params: {
 	const href =
 		slug == null
 			? null
-			: kind === "person"
-				? getEntityDetailHref({ entityType: "persons", slug })
-				: getOrganisationalUnitDetailHref("institution", slug);
+			: kind === "institution"
+				? getOrganisationalUnitDetailHref("institution", slug)
+				: getEntityDetailHref({ entityType: kind === "person" ? "persons" : "projects", slug });
 
 	await send({
 		actor,
@@ -314,7 +322,7 @@ export async function sendDraftEntityCreatedNotification(params: {
 		lines: [
 			`A new ${kind} was created by ${actor.name} <${actor.email}>.`,
 			"",
-			`${kind === "person" ? "Person" : "Institution"}: ${name}`,
+			`${createdDraftEntityKindLabels[kind]}: ${name}`,
 			"",
 			`The ${kind} is saved as a draft and is not shown on the website, nor are its relations, until an administrator publishes it.`,
 			"",
@@ -357,11 +365,11 @@ export async function notifyRelationChange(params: {
 }
 
 /**
- * Notifies that a coordinator or chair created a draft person or institution. Call it after the
- * transaction committed.
+ * Notifies that a coordinator or chair created a draft person, institution or project. Call it
+ * after the transaction committed.
  */
 export async function notifyDraftEntityCreated(params: {
-	kind: "person" | "institution";
+	kind: CreatedDraftEntityKind;
 	documentId: string;
 	name: string;
 	user: User | null;

@@ -32,19 +32,196 @@ import { RichTextContentBlocksField } from "@/app/(app)/[locale]/(dashboard)/das
 import { SocialMediaRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
+type ProjectFormValues = Pick<
+	schema.Project,
+	"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
+> & {
+	descriptionContentBlocks?: Array<ContentBlock>;
+	entityVersion: {
+		entity: Pick<schema.Entity, "id" | "slug">;
+		status: Pick<schema.EntityStatus, "id" | "type">;
+	};
+	scope: Pick<schema.ProjectScope, "id" | "scope">;
+} & { image: SelectedImage | null };
+
+interface ProjectFormFieldsProps {
+	initialAssets: Array<{ key: string; label: string; url: string }>;
+	project?: ProjectFormValues;
+	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
+	isPublished?: boolean;
+	/** `false` on delegated (non-admin) forms: choosing the public URL is an administrator task. */
+	showSlug?: boolean;
+	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
+	initialSocialMediaItems: Array<AsyncOption>;
+	initialSocialMediaTotal: number;
+	selectedSocialMediaItems?: Array<AsyncOption>;
+	initialSocialMediaIds?: Array<string>;
+}
+
+/**
+ * The fields of a project, without the surrounding form and the admin-only relation fields. Shared
+ * by `ProjectForm` and the sheet that creates a project from the country report projects step.
+ */
+export function ProjectFormFields(props: Readonly<ProjectFormFieldsProps>): ReactNode {
+	const {
+		initialAssets,
+		project,
+		scopes,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
+		selectedSocialMediaItems,
+		initialSocialMediaIds,
+		isPublished,
+		showSlug = true,
+	} = props;
+
+	const t = useExtracted();
+
+	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(project?.image ?? null);
+
+	return (
+		<Fragment>
+			<FormSection description={t("Enter the project details.")} title={t("Details")}>
+				<TextField defaultValue={project?.name} isRequired={true} name="name">
+					<Label>{t("Name")}</Label>
+					<Input />
+					<FieldError />
+				</TextField>
+
+				<TextField defaultValue={project?.acronym ?? undefined} name="acronym">
+					<Label>{t("Acronym")}</Label>
+					<Input />
+					<FieldError />
+				</TextField>
+
+				<NumberField
+					defaultValue={project?.funding ?? undefined}
+					formatOptions={{ currency: "EUR", style: "currency" }}
+					name="funding"
+				>
+					<Label>{t("Funding")}</Label>
+					<Input />
+					<Description>{t("Enter the funding amount in euros.")}</Description>
+					<FieldError />
+				</NumberField>
+
+				<TextField defaultValue={project?.topic ?? undefined} name="topic">
+					<Label>{t("Topic")}</Label>
+					<Input />
+					<FieldError />
+				</TextField>
+
+				<TextField defaultValue={project?.call ?? undefined} name="call">
+					<Label>{t("Call")}</Label>
+					<Input />
+					<FieldError />
+				</TextField>
+
+				<DatePicker
+					defaultValue={
+						project != null
+							? new CalendarDate(
+									project.duration.start.getUTCFullYear(),
+									project.duration.start.getUTCMonth() + 1,
+									project.duration.start.getUTCDate(),
+								)
+							: undefined
+					}
+					granularity="day"
+					isRequired={true}
+					name="duration.start"
+				>
+					<Label>{t("Start date")}</Label>
+					<DatePickerTrigger />
+					<FieldError />
+				</DatePicker>
+
+				<DatePicker
+					defaultValue={
+						project?.duration.end != null
+							? new CalendarDate(
+									project.duration.end.getUTCFullYear(),
+									project.duration.end.getUTCMonth() + 1,
+									project.duration.end.getUTCDate(),
+								)
+							: undefined
+					}
+					granularity="day"
+					name="duration.end"
+				>
+					<Label>{t("End date")}</Label>
+					<DatePickerTrigger />
+					<FieldError />
+				</DatePicker>
+
+				<Select defaultValue={project?.scope.id ?? undefined} isRequired={true} name="scopeId">
+					<Label>{t("Scope")}</Label>
+					<SelectTrigger />
+					<FieldError />
+					<SelectContent>
+						{scopes.map((item) => (
+							<SelectItem key={item.id} id={item.id}>
+								{item.scope}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+
+				<TextField defaultValue={project?.summary ?? undefined} name="summary">
+					<Label>{t("Summary")}</Label>
+					<TextArea rows={5} />
+					<FieldError />
+				</TextField>
+
+				{showSlug ? (
+					<EntitySlugField isPublished={isPublished} slug={project?.entityVersion.entity.slug} />
+				) : null}
+			</FormSection>
+
+			<Separator className="my-6" />
+
+			<FormSection description={t("Select or upload an image.")} title={t("Image")}>
+				<ImageSelectField
+					allowRemove={true}
+					defaultPrefix="logos"
+					initialAssets={initialAssets}
+					onChange={setSelectedImage}
+					prefixes={["logos"]}
+					selectedImage={selectedImage}
+				/>
+			</FormSection>
+
+			<Separator className="my-6" />
+
+			<FormSection
+				description={t("Add a short description.")}
+				title={t("Description")}
+				variant="stacked"
+			>
+				<RichTextContentBlocksField
+					aria-label={t("Description")}
+					initialBlocks={project?.descriptionContentBlocks}
+					initialAssets={initialAssets}
+					name="description"
+				/>
+			</FormSection>
+
+			<Separator className="my-6" />
+
+			<SocialMediaRelationsFields
+				description={t("Link social media accounts to this project.")}
+				initialSocialMediaIds={initialSocialMediaIds}
+				initialSocialMediaItems={initialSocialMediaItems}
+				initialSocialMediaTotal={initialSocialMediaTotal}
+				selectedSocialMediaItems={selectedSocialMediaItems}
+			/>
+		</Fragment>
+	);
+}
+
 interface ProjectFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
-	project?: Pick<
-		schema.Project,
-		"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
-	> & {
-		descriptionContentBlocks?: Array<ContentBlock>;
-		entityVersion: {
-			entity: Pick<schema.Entity, "id" | "slug">;
-			status: Pick<schema.EntityStatus, "id" | "type">;
-		};
-		scope: Pick<schema.ProjectScope, "id" | "scope">;
-	} & { image: SelectedImage | null };
+	project?: ProjectFormValues;
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
 	formAction: ServerAction;
@@ -88,141 +265,17 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(project?.image ?? null);
-
 	return (
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
-				<FormSection description={t("Enter the project details.")} title={t("Details")}>
-					<TextField defaultValue={project?.name} isRequired={true} name="name">
-						<Label>{t("Name")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-
-					<TextField defaultValue={project?.acronym ?? undefined} name="acronym">
-						<Label>{t("Acronym")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-
-					<NumberField
-						defaultValue={project?.funding ?? undefined}
-						formatOptions={{ currency: "EUR", style: "currency" }}
-						name="funding"
-					>
-						<Label>{t("Funding")}</Label>
-						<Input />
-						<Description>{t("Enter the funding amount in euros.")}</Description>
-						<FieldError />
-					</NumberField>
-
-					<TextField defaultValue={project?.topic ?? undefined} name="topic">
-						<Label>{t("Topic")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-
-					<TextField defaultValue={project?.call ?? undefined} name="call">
-						<Label>{t("Call")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
-
-					<DatePicker
-						defaultValue={
-							project != null
-								? new CalendarDate(
-										project.duration.start.getUTCFullYear(),
-										project.duration.start.getUTCMonth() + 1,
-										project.duration.start.getUTCDate(),
-									)
-								: undefined
-						}
-						granularity="day"
-						isRequired={true}
-						name="duration.start"
-					>
-						<Label>{t("Start date")}</Label>
-						<DatePickerTrigger />
-						<FieldError />
-					</DatePicker>
-
-					<DatePicker
-						defaultValue={
-							project?.duration.end != null
-								? new CalendarDate(
-										project.duration.end.getUTCFullYear(),
-										project.duration.end.getUTCMonth() + 1,
-										project.duration.end.getUTCDate(),
-									)
-								: undefined
-						}
-						granularity="day"
-						name="duration.end"
-					>
-						<Label>{t("End date")}</Label>
-						<DatePickerTrigger />
-						<FieldError />
-					</DatePicker>
-
-					<Select defaultValue={project?.scope.id ?? undefined} isRequired={true} name="scopeId">
-						<Label>{t("Scope")}</Label>
-						<SelectTrigger />
-						<FieldError />
-						<SelectContent>
-							{scopes.map((item) => (
-								<SelectItem key={item.id} id={item.id}>
-									{item.scope}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-
-					<TextField defaultValue={project?.summary ?? undefined} name="summary">
-						<Label>{t("Summary")}</Label>
-						<TextArea rows={5} />
-						<FieldError />
-					</TextField>
-
-					<EntitySlugField isPublished={isPublished} slug={project?.entityVersion.entity.slug} />
-				</FormSection>
-
-				<Separator className="my-6" />
-
-				<FormSection description={t("Select or upload an image.")} title={t("Image")}>
-					<ImageSelectField
-						allowRemove={true}
-						defaultPrefix="logos"
-						initialAssets={initialAssets}
-						onChange={setSelectedImage}
-						prefixes={["logos"]}
-						selectedImage={selectedImage}
-					/>
-				</FormSection>
-
-				<Separator className="my-6" />
-
-				<FormSection
-					description={t("Add a short description.")}
-					title={t("Description")}
-					variant="stacked"
-				>
-					<RichTextContentBlocksField
-						aria-label={t("Description")}
-						initialBlocks={project?.descriptionContentBlocks}
-						initialAssets={initialAssets}
-						name="description"
-					/>
-				</FormSection>
-
-				<Separator className="my-6" />
-
-				<SocialMediaRelationsFields
-					description={t("Link social media accounts to this project.")}
+				<ProjectFormFields
+					initialAssets={initialAssets}
 					initialSocialMediaIds={initialSocialMediaIds}
 					initialSocialMediaItems={initialSocialMediaItems}
 					initialSocialMediaTotal={initialSocialMediaTotal}
+					isPublished={isPublished}
+					project={project}
+					scopes={scopes}
 					selectedSocialMediaItems={selectedSocialMediaItems}
 				/>
 
