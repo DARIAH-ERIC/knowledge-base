@@ -21,10 +21,12 @@ interface ReportScreenCommentFormProps {
 	reportId: string;
 	reportType: ReportScreenCommentType;
 	screenKey: ReportScreenCommentKey;
+	/** Heading and editor label; defaults to "Comment" (each edit screen has a single comment). */
+	title?: string;
 }
 
 export function ReportScreenCommentForm(props: Readonly<ReportScreenCommentFormProps>): ReactNode {
-	const { comment, reportId, reportType, screenKey } = props;
+	const { comment, reportId, reportType, screenKey, title } = props;
 
 	const t = useExtracted();
 	const [state, action, isPending] = useActionState(
@@ -32,16 +34,18 @@ export function ReportScreenCommentForm(props: Readonly<ReportScreenCommentFormP
 		createActionStateInitial(),
 	);
 
+	const heading = title ?? t("Comment");
+
 	return (
 		<section className="flex flex-col gap-y-4 border-bs pbs-6">
-			<h2 className="text-sm font-semibold text-fg">{t("Comment")}</h2>
+			<h2 className="text-sm font-semibold text-fg">{heading}</h2>
 
 			<Form action={action} className="flex flex-col gap-y-4 max-inline-3xl" state={state}>
 				<input name="reportId" type="hidden" value={reportId} />
 				<input name="reportType" type="hidden" value={reportType} />
 				<input name="screenKey" type="hidden" value={screenKey} />
 
-				<RichTextEditor aria-label={t("Comment")} content={comment ?? undefined} name="comment" />
+				<RichTextEditor aria-label={heading} content={comment ?? undefined} name="comment" />
 
 				<Button className="self-start" isPending={isPending} type="submit">
 					{isPending ? (

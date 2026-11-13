@@ -1,3 +1,4 @@
+import { getLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -10,11 +11,14 @@ import {
 import { ReportEditGuard } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-edit-guard";
 import { WorkingGroupReportStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-step-nav";
 import { getWorkingGroupReportHeaderForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
+import { isReportEditable } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import {
 	getWorkingGroupReportEditHref,
+	getWorkingGroupReportHref,
 	resolveWorkingGroupReportId,
 } from "@/lib/data/reporting-urls";
+import { redirect } from "@/lib/navigation/navigation";
 
 interface WorkingGroupReportEditLayoutProps extends LayoutProps<"/[locale]/dashboard/reporting/working-group-reports/[year]/[slug]/edit"> {}
 
@@ -37,6 +41,14 @@ export default async function WorkingGroupReportEditLayout(
 		notFound();
 	}
 	const report = result.data;
+
+	// Submitted or accepted reports (and closed campaigns) are view-only for reporters: send a typed or
+	// bookmarked edit URL to the report itself instead of showing forms whose saves are rejected.
+	// Comments stay possible there. Admins can always edit, so `isReportEditable` lets them through.
+	if (!(await isReportEditable(user, { type: "working_group_report", id }))) {
+		const locale = await getLocale();
+		redirect({ href: getWorkingGroupReportHref(Number(routeYear), slug), locale });
+	}
 
 	return (
 		<div>

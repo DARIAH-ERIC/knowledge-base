@@ -19,6 +19,7 @@ import {
 import { getReportScreenComments } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_lib/report-screen-comments";
 import { CountryReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary";
 import { getCountryReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
+import { can, isReportEditable } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { resolveCountryReportId } from "@/lib/data/reporting-urls";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -61,9 +62,19 @@ export default async function DashboardReportingCountryReportPage(
 	const report = result.data;
 
 	const t = await getExtracted();
-	const comments = await getReportScreenComments("country", report.id);
+	const reportResource = { type: "country_report", id: report.id } as const;
+	const [comments, canUpdate, isEditable] = await Promise.all([
+		getReportScreenComments("country", report.id),
+		can(user, "update", reportResource),
+		isReportEditable(user, reportResource),
+	]);
+	// Once the report can no longer be edited (e.g. after submitting), its edit forms redirect here,
+	// so reporters keep adding comments on this page instead.
+	const canComment = canUpdate && !isEditable;
 	const commentSectionLinks =
-		comments.length > 0 ? [{ id: reportCommentsSectionId, label: t("Comments") }] : [];
+		comments.length > 0 || canComment
+			? [{ id: reportCommentsSectionId, label: t("Comments") }]
+			: [];
 
 	return (
 		<div>
@@ -98,7 +109,10 @@ export default async function DashboardReportingCountryReportPage(
 
 			<div className="mbs-8 flex flex-col gap-y-10 px-(--layout-padding) max-inline-4xl">
 				<CountryReportSummary data={report.summary} extraSectionLinks={commentSectionLinks} />
-				<ReportCommentsSection comments={comments} />
+				<ReportCommentsSection
+					comments={comments}
+					editable={canComment ? { reportId: report.id, reportType: "country" } : undefined}
+				/>
 			</div>
 		</div>
 	);

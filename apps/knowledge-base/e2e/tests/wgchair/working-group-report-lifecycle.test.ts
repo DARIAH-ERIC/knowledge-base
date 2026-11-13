@@ -47,8 +47,11 @@ test.describe("working group report lifecycle (chair)", () => {
 		// Wait out the dialog's exit animation: until then its "Submit report" button also matches.
 		await expect(dialog).toBeHidden();
 
+		// The submitted report is view-only for the chair, so the redirect after submitting lands on the
+		// report itself, which has no re-submit affordance.
+		await expect(page).toHaveURL(`/en/dashboard/reporting/working-group-reports/${year!}/${slug!}`);
 		await expect(page.getByRole("button", { name: "Submit report" })).toBeHidden();
-		await expect(page.getByText("Submitted", { exact: true })).toBeVisible();
+		await expect(page.getByText(`Campaign ${year!} · Submitted`)).toBeVisible();
 
 		const updated = await db.getWorkingGroupReportById(reportId!);
 		expect(updated).toMatchObject({ status: "submitted" });
@@ -57,14 +60,10 @@ test.describe("working group report lifecycle (chair)", () => {
 	test("editing is frozen once the report is submitted", async ({ page }) => {
 		await page.goto(`/en/dashboard/reporting/working-group-reports/${year!}/${slug!}/edit/data`);
 
-		await page.getByLabel("Number of members").fill("12");
-		// Scope to the data form: the screen also renders a comment section with its own "Save".
-		await page
-			.locator("form")
-			.filter({ has: page.getByLabel("Number of members") })
-			.getByRole("button", { name: "Save" })
-			.click();
-
-		await expect(page).toHaveURL(/\/en\/dashboard$/);
+		// A typed edit URL of a submitted report redirects to the report itself: no edit forms, but
+		// comments can still be added there.
+		await expect(page).toHaveURL(`/en/dashboard/reporting/working-group-reports/${year!}/${slug!}`);
+		await expect(page.getByLabel("Number of members")).toHaveCount(0);
+		await expect(page.getByRole("textbox", { name: "Data", exact: true })).toBeVisible();
 	});
 });
