@@ -8517,6 +8517,12 @@ msgid "Create and add"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-step-nav.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-step-nav.tsx
+msgctxt "PwaN2o"
+msgid "Welcome"
+msgstr "Welcome"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-step-nav.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-step-nav.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx
@@ -8641,6 +8647,48 @@ msgstr ""
 msgctxt "96OHmf"
 msgid "This report has been accepted."
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-welcome-screen.tsx
+msgctxt "77lFjT"
+msgid "Welcome to the {year} country report"
+msgstr "Welcome to the {year} country report"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-welcome-screen.tsx
+msgctxt "ZxWR3V"
+msgid "This report collects the activities of {country} and its national consortium for the reporting campaign. Each tab covers one section of the report, and several sections are prefilled with data from the knowledge base."
+msgstr "This report collects the activities of {country} and its national consortium for the reporting campaign. Each tab covers one section of the report, and several sections are prefilled with data from the knowledge base."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-welcome-screen.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-welcome-screen.tsx
+msgctxt "Rc0Cho"
+msgid "Work through the tabs one by one. When everything is complete, review the report on the Summary tab and submit it from there."
+msgstr "Work through the tabs one by one. When everything is complete, review the report on the Summary tab and submit it from there."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-welcome-screen.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-welcome-screen.tsx
+msgctxt "o9QvTP"
+msgid "Before you start"
+msgstr "Before you start"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-welcome-screen.tsx
+msgctxt "PA4jBB"
+msgid "Parts of this report are based on the details of your national consortium in the knowledge base, such as its people and partner institutions. Please make sure this information is up to date before you fill in the report."
+msgstr "Parts of this report are based on the details of your national consortium in the knowledge base, such as its people and partner institutions. Please make sure this information is up to date before you fill in the report."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-welcome-screen.tsx
+msgctxt "wFcWpZ"
+msgid "Edit national consortium details"
+msgstr "Edit national consortium details"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-welcome-screen.tsx
+msgctxt "TK6Jf1"
+msgid "You cannot edit these details yourself. If something is out of date, please contact your national coordinator."
+msgstr "You cannot edit these details yourself. If something is out of date, please contact your national coordinator."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-welcome-screen.tsx
+msgctxt "3Gsi9I"
+msgid "View national consortium details"
+msgstr "View national consortium details"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/add-country-report-service.action.ts
 msgctxt "zg8BYa"
@@ -8793,6 +8841,11 @@ msgctxt "4noL8o"
 msgid "Dashboard - Country report summary"
 msgstr ""
 
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/welcome/page.tsx
+msgctxt "CZuseU"
+msgid "Dashboard - Country report welcome"
+msgstr "Dashboard - Country report welcome"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/page.tsx
 msgctxt "DtXXAf"
 msgid "Dashboard - Country report"
@@ -8813,6 +8866,36 @@ msgstr ""
 msgctxt "Xzfuic"
 msgid "No questions have been added for this campaign yet."
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-welcome-screen.tsx
+msgctxt "Ghq25U"
+msgid "Welcome to the {year} working group report"
+msgstr "Welcome to the {year} working group report"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-welcome-screen.tsx
+msgctxt "xtg7GT"
+msgid "This report collects the activities of the {workingGroup} working group for the reporting campaign. Each tab covers one section of the report, and several sections are prefilled with data from the knowledge base."
+msgstr "This report collects the activities of the {workingGroup} working group for the reporting campaign. Each tab covers one section of the report, and several sections are prefilled with data from the knowledge base."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-welcome-screen.tsx
+msgctxt "S9-KLG"
+msgid "Parts of this report are based on the details of your working group in the knowledge base, such as its chairs and members. Please make sure this information is up to date before you fill in the report."
+msgstr "Parts of this report are based on the details of your working group in the knowledge base, such as its chairs and members. Please make sure this information is up to date before you fill in the report."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-welcome-screen.tsx
+msgctxt "vUpQ6p"
+msgid "Edit working group details"
+msgstr "Edit working group details"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-welcome-screen.tsx
+msgctxt "e5d99D"
+msgid "You cannot edit these details yourself. If something is out of date, please contact your working group chairs."
+msgstr "You cannot edit these details yourself. If something is out of date, please contact your working group chairs."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-welcome-screen.tsx
+msgctxt "TbBal4"
+msgid "View working group details"
+msgstr "View working group details"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-chairs-snapshot-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx
@@ -8931,6 +9014,11 @@ msgstr ""
 msgctxt "Hv6DBn"
 msgid "Dashboard - Working group report summary"
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/welcome/page.tsx
+msgctxt "zBu1Ex"
+msgid "Dashboard - Working group report welcome"
+msgstr "Dashboard - Working group report welcome"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/page.tsx
 msgctxt "EDjyDk"
