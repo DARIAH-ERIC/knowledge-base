@@ -17,6 +17,7 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
+import { NameWithDraftBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-badge";
 import { useCompensationRoleLabel } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels";
 import type { CompensationRole } from "@/lib/data/report-contributions";
 import type { ServerAction } from "@/lib/server/create-server-action";
@@ -32,6 +33,7 @@ interface ClaimedContribution {
 	id: string;
 	personToOrgUnitId: string;
 	personName: string;
+	personIsDraft: boolean;
 	organisationalUnitName: string;
 	compensationRole: CompensationRole | null;
 }
@@ -78,7 +80,12 @@ export function CountryReportClaimedContributorsForm(
 								className="flex items-start justify-between gap-x-4 px-4 py-3"
 							>
 								<div className="flex flex-col gap-y-1">
-									<p className="text-sm font-medium text-fg">{contribution.personName}</p>
+									<p className="text-sm font-medium text-fg">
+										<NameWithDraftBadge
+											isDraft={contribution.personIsDraft}
+											name={contribution.personName}
+										/>
+									</p>
 									<div className="flex flex-wrap items-center gap-2">
 										{roleLabel != null && <Badge intent="secondary">{roleLabel}</Badge>}
 										<span className="text-xs text-muted-fg">

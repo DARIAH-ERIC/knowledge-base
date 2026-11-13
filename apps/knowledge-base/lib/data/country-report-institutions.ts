@@ -39,13 +39,15 @@ export interface CountryReportInstitutionSummaryRow {
 	id: string;
 	organisationalUnitDocumentId: string;
 	representationType: CountryReportInstitutionRepresentation | null;
-	organisationalUnit: { name: string; acronym: string | null } | null;
+	/** `isDraft`: never published, so the institution does not appear on the website yet. */
+	organisationalUnit: { name: string; acronym: string | null; isDraft?: boolean } | null;
 }
 
 export interface CountryReportInstitutionSummaryItem {
 	id: string;
 	name: string;
 	acronym: string | null;
+	isDraft: boolean;
 	representationTypes: Array<CountryReportInstitutionRepresentation>;
 }
 
@@ -61,6 +63,7 @@ export function groupCountryReportInstitutionSummaryRows(
 				id: row.id,
 				name: row.organisationalUnit?.name ?? "",
 				acronym: row.organisationalUnit?.acronym ?? null,
+				isDraft: row.organisationalUnit?.isDraft ?? false,
 				representationTypes:
 					row.representationType == null
 						? []
@@ -109,6 +112,7 @@ export async function getCountryReportInstitutionRows(
 			representationType: schema.countryReportInstitutions.representationType,
 			name: schema.organisationalUnits.name,
 			acronym: schema.organisationalUnits.acronym,
+			isDraft: sql<boolean>`${lifecycle.publishedId} IS NULL`,
 		})
 		.from(schema.countryReportInstitutions)
 		.leftJoin(
@@ -127,7 +131,8 @@ export async function getCountryReportInstitutionRows(
 			id: row.id,
 			organisationalUnitDocumentId: row.organisationalUnitDocumentId,
 			representationType: row.representationType,
-			organisationalUnit: row.name != null ? { name: row.name, acronym: row.acronym } : null,
+			organisationalUnit:
+				row.name != null ? { name: row.name, acronym: row.acronym, isDraft: row.isDraft } : null,
 		};
 	});
 }

@@ -9,6 +9,7 @@ import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
 
+import { NameWithDraftBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-badge";
 import type { WorkingGroupChairRole } from "@/lib/data/working-group-report-chairs";
 import { LocaleLink } from "@/lib/navigation/navigation";
 import type { ServerAction } from "@/lib/server/create-server-action";
@@ -16,6 +17,7 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface SnapshotChair {
 	id: string;
 	personName: string;
+	personIsDraft?: boolean;
 	personSlug: string | null;
 	chairRole: WorkingGroupChairRole;
 	isCurrent: boolean;
@@ -24,6 +26,7 @@ interface SnapshotChair {
 interface MissingSnapshotChair {
 	personToOrgUnitId: string;
 	personName: string;
+	personIsDraft?: boolean;
 	personSlug: string;
 	chairRole: WorkingGroupChairRole;
 }
@@ -68,7 +71,9 @@ export function WorkingGroupReportChairsSnapshotForm(
 					{chairs.map((chair) => (
 						<li key={chair.id} className="flex items-start justify-between gap-x-4 px-4 py-3">
 							<div className="flex flex-col gap-y-1">
-								<p className="text-sm font-medium text-fg">{chair.personName}</p>
+								<p className="text-sm font-medium text-fg">
+									<NameWithDraftBadge isDraft={chair.personIsDraft} name={chair.personName} />
+								</p>
 								<div className="flex flex-wrap items-center gap-2">
 									<Badge intent="secondary">
 										{chair.chairRole === "is_vice_chair_of" ? t("Vice chair") : t("Chair")}
@@ -104,7 +109,9 @@ export function WorkingGroupReportChairsSnapshotForm(
 								className="flex items-start justify-between gap-x-4 px-4 py-3"
 							>
 								<div className="flex flex-col gap-y-1">
-									<p className="text-sm font-medium text-fg">{chair.personName}</p>
+									<p className="text-sm font-medium text-fg">
+										<NameWithDraftBadge isDraft={chair.personIsDraft} name={chair.personName} />
+									</p>
 									<Badge intent="info">
 										{chair.chairRole === "is_vice_chair_of" ? t("Vice chair") : t("Chair")}
 									</Badge>

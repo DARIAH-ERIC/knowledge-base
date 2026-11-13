@@ -9,6 +9,7 @@ import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
 
+import { NameWithDraftBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-badge";
 import type { CountryReportInstitutionRepresentation } from "@/lib/data/unit-relations";
 import { LocaleLink } from "@/lib/navigation/navigation";
 import type { ServerAction } from "@/lib/server/create-server-action";
@@ -18,6 +19,8 @@ interface ListedInstitution {
 	documentId: string;
 	name: string;
 	acronym: string | null;
+	/** Never published: the institution does not appear on the website yet. */
+	isDraft: boolean;
 	slug: string | null;
 	/** Frozen at capture; empty for rows captured before representation type was tracked. */
 	representationTypes: Array<CountryReportInstitutionRepresentation>;
@@ -31,6 +34,7 @@ interface MissingInstitution {
 	institutionDocumentId: string;
 	name: string;
 	acronym: string | null;
+	isDraft: boolean;
 	slug: string;
 	representationTypes: Array<CountryReportInstitutionRepresentation>;
 }
@@ -149,7 +153,10 @@ export function CountryReportInstitutionsForm(
 							>
 								<div className="flex flex-col gap-y-1">
 									<p className="text-sm font-medium text-fg">
-										{institutionLabel(institution.name, institution.acronym)}
+										<NameWithDraftBadge
+											isDraft={institution.isDraft}
+											name={institutionLabel(institution.name, institution.acronym)}
+										/>
 									</p>
 									<div className="flex flex-wrap items-center gap-2">
 										{institution.representationTypes.map((type) => {
@@ -203,7 +210,10 @@ export function CountryReportInstitutionsForm(
 							>
 								<div className="flex flex-col gap-y-1">
 									<p className="text-sm font-medium text-fg">
-										{institutionLabel(institution.name, institution.acronym)}
+										<NameWithDraftBadge
+											isDraft={institution.isDraft}
+											name={institutionLabel(institution.name, institution.acronym)}
+										/>
 									</p>
 									<div className="flex flex-wrap items-center gap-2">
 										{institution.representationTypes.map((type) => {

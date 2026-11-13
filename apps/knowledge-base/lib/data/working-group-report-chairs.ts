@@ -9,6 +9,8 @@ export interface WorkingGroupChairCandidate {
 	personToOrgUnitId: string;
 	personName: string;
 	personSlug: string;
+	/** Never published: the person does not appear on the website yet. */
+	personIsDraft?: boolean;
 	chairRole: WorkingGroupChairRole;
 }
 
@@ -35,6 +37,7 @@ export async function getWorkingGroupChairCandidates(
 			personToOrgUnitId: schema.personsToOrganisationalUnits.id,
 			personName: schema.persons.name,
 			personSlug: personEntities.slug,
+			personIsDraft: sql<boolean>`${personLifecycle.publishedId} IS NULL`,
 			chairRole: schema.personRoleTypes.type,
 		})
 		.from(schema.personsToOrganisationalUnits)
@@ -113,6 +116,7 @@ export async function getWorkingGroupReportChairs(
 			personToOrgUnitId: schema.workingGroupReportChairs.personToOrgUnitId,
 			personName: schema.persons.name,
 			personSlug: personEntities.slug,
+			personIsDraft: sql<boolean>`${personLifecycle.publishedId} IS NULL`,
 			chairRole: schema.workingGroupReportChairs.chairRole,
 		})
 		.from(schema.workingGroupReportChairs)

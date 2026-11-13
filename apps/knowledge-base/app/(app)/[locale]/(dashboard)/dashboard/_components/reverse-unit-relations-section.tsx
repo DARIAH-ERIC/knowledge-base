@@ -41,6 +41,11 @@ import {
 } from "react";
 
 import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
+import {
+	type DraftAwareOption,
+	NameWithDraftBadge,
+	renderDraftAwareOption,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-badge";
 import { EntityFormSheet } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-sheet";
 import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
@@ -227,7 +232,7 @@ export function ReverseUnitRelationsSection(
 	const [selectedStatusId, setSelectedStatusId] = useState<string | null>(
 		singleStatus?.statusId ?? null,
 	);
-	const [selectedUnitItem, setSelectedUnitItem] = useState<AsyncOption | null>(null);
+	const [selectedUnitItem, setSelectedUnitItem] = useState<DraftAwareOption | null>(null);
 
 	const table = useClientTable({
 		items: localRelations,
@@ -277,6 +282,7 @@ export function ReverseUnitRelationsSection(
 							unitName: sourceUnit.name,
 							unitSlug: "",
 							unitType: sourceUnitType,
+							unitIsDraft: sourceUnit.isDraft ?? false,
 							duration: {
 								start: new Date(data.durationStart),
 								...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
@@ -411,8 +417,8 @@ export function ReverseUnitRelationsSection(
 							{(relation) => (
 								<TableRow id={relation.id}>
 									<TableCell>
-										<div className="truncate max-inline-80" title={relation.unitName}>
-											{relation.unitName}
+										<div className="max-inline-80">
+											<NameWithDraftBadge isDraft={relation.unitIsDraft} name={relation.unitName} />
 										</div>
 									</TableCell>
 									{hasStatusChoice ? (
@@ -524,6 +530,7 @@ export function ReverseUnitRelationsSection(
 								<input name="statusId" type="hidden" value={selectedStatusId ?? ""} />
 
 								<AsyncSelect
+									renderItem={renderDraftAwareOption}
 									aria-label={messages.memberLabel}
 									emptyMessage={t("No related units found.")}
 									fetchPage={(params) =>
@@ -704,6 +711,7 @@ export function ReverseUnitRelationsSection(
 						) : null}
 						<input name="statusId" type="hidden" value={editStatusId ?? ""} />
 						<AsyncSelect
+							renderItem={renderDraftAwareOption}
 							aria-label={messages.memberLabel}
 							emptyMessage={t("No related units found.")}
 							fetchPage={(params) =>
@@ -834,7 +842,8 @@ export function ReverseUnitRelationsSection(
 					isOpen={isCreateUnitOpen}
 					onOpenChange={setIsCreateUnitOpen}
 					onSuccess={(data: AsyncOption) => {
-						setSelectedUnitItem({ id: data.id, name: data.name });
+						// A unit created here is always a draft until an administrator publishes it.
+						setSelectedUnitItem({ id: data.id, name: data.name, isDraft: true });
 					}}
 					submitLabel={createSourceUnit.submitLabel}
 					title={createSourceUnit.title}

@@ -61,6 +61,8 @@ export interface CountryReportSummaryData {
 	contributions: Array<{
 		id: string;
 		personName: string;
+		/** Never published: the person does not appear on the website yet. */
+		personIsDraft: boolean;
 		orgUnitName: string;
 		orgUnitType: string;
 		roleType: string;
@@ -197,6 +199,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			id: schema.countryReportContributions.id,
 			storedRole: schema.countryReportContributions.contributionRole,
 			personName: schema.persons.name,
+			personIsDraft: sql<boolean>`${personDocumentLifecycle.publishedId} IS NULL`,
 			orgUnitName: schema.organisationalUnits.name,
 			orgUnitSlug: organisationalUnitEntities.slug,
 			orgUnitType: schema.organisationalUnitTypes.type,
@@ -248,6 +251,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			return {
 				id: row.id,
 				personName: row.personName,
+				personIsDraft: row.personIsDraft,
 				orgUnitName: row.orgUnitName,
 				orgUnitType: row.orgUnitType,
 				roleType: row.roleType,

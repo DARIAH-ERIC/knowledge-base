@@ -365,10 +365,16 @@ export async function getContributionPersonOptions(
 				id: schema.entityVersions.entityId,
 				name: schema.persons.name,
 				sortName: schema.persons.sortName,
+				/** Never published; only possible when `includeDrafts` is set. */
+				isDraft: sql<boolean>`${schema.documentLifecycle.publishedId} IS NULL`,
 			})
 			.from(schema.persons)
 			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.documentId, schema.entityVersions.entityId),
+			)
 			.where(where)
 			.orderBy(schema.persons.sortName)
 			.limit(limit)

@@ -86,6 +86,7 @@ export async function CountryReportInstitutionsScreen(
 			documentId: string;
 			name: string;
 			acronym: string | null;
+			isDraft: boolean;
 			slug: string | null;
 			representationTypes: Array<CountryReportInstitutionRepresentation>;
 			isCurrent: boolean;
@@ -103,6 +104,7 @@ export async function CountryReportInstitutionsScreen(
 				documentId: institution.organisationalUnitDocumentId,
 				name: institution.organisationalUnit?.name ?? current?.name ?? "",
 				acronym: institution.organisationalUnit?.acronym ?? current?.acronym ?? null,
+				isDraft: institution.organisationalUnit?.isDraft ?? current?.isDraft ?? false,
 				slug:
 					slugByDocumentId.get(institution.organisationalUnitDocumentId) ?? current?.slug ?? null,
 				// Frozen at capture; may be empty for rows captured before representation type was tracked.

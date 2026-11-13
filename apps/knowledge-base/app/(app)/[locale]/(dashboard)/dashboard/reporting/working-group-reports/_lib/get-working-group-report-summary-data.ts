@@ -80,7 +80,12 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 		summary: {
 			numberOfMembers: report.numberOfMembers,
 			chairs: chairs.map((chair) => {
-				return { id: chair.id, personName: chair.personName, roleType: chair.chairRole };
+				return {
+					id: chair.id,
+					personName: chair.personName,
+					personIsDraft: chair.personIsDraft ?? false,
+					roleType: chair.chairRole,
+				};
 			}),
 			socialMedia: report.socialMedia,
 			events: report.events,
