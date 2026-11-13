@@ -1449,7 +1449,6 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
 msgctxt "G_yZLu"
 msgid "Remove"
 msgstr ""
@@ -2192,7 +2191,6 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-step-nav.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx
 #: app/(app)/[locale]/(default)/_components/default-footer.tsx
 msgctxt "ZEEVQX"
 msgid "Social media"
@@ -2892,7 +2890,6 @@ msgstr "Search for a person…"
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
 msgctxt "2_2yg-"
 msgid "Add"
 msgstr ""
@@ -6940,7 +6937,6 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
 msgctxt "Nvr5Ce"
 msgid "Adding..."
 msgstr ""
@@ -7177,7 +7173,6 @@ msgstr "Enter a question."
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-project-contribution.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-social-media.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-event.action.ts
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-social-media.action.ts
 msgctxt "-_0rdf"
 msgid "Added."
 msgstr ""
@@ -7614,7 +7609,6 @@ msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/social-media/page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
 msgctxt "TwyMau"
 msgid "Account"
 msgstr ""
@@ -8509,7 +8503,6 @@ msgid "Add an existing account"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
 msgctxt "VSmsWL"
 msgid "Search accounts..."
 msgstr "Search accounts..."
@@ -8726,7 +8719,6 @@ msgid "This service is already listed."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/add-country-report-social-media.action.ts
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-social-media.action.ts
 msgctxt "-eQkjv"
 msgid "This account is already listed."
 msgstr ""
@@ -8986,21 +8978,6 @@ msgstr "Question {number}"
 msgctxt "3BU43Q"
 msgid "Answer to question {number}"
 msgstr "Answer to question {number}"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
-msgctxt "F-bP20"
-msgid "Social media accounts"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
-msgctxt "sZ6YAZ"
-msgid "Add social media account"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
-msgctxt "7X1psl"
-msgid "No social media accounts linked to this working group."
-msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx
 msgctxt "P3sLui"

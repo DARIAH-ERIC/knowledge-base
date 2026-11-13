@@ -13,10 +13,6 @@ import {
 export interface WorkingGroupReportSummaryData {
 	numberOfMembers: number | null;
 	chairs: Array<{ id: string; personName: string; personIsDraft?: boolean; roleType: string }>;
-	socialMedia: Array<{
-		id: string;
-		socialMedia: { name: string; url: string };
-	}>;
 	events: Array<{
 		id: string;
 		title: string;
@@ -51,7 +47,6 @@ export async function WorkingGroupReportSummary(
 
 	const dataLabel = t("Working group data");
 	const chairsLabel = t("Chairs");
-	const socialMediaLabel = t("Social media");
 	const eventsLabel = t("Events");
 	const questionsLabel = t("Questions");
 
@@ -61,10 +56,6 @@ export async function WorkingGroupReportSummary(
 
 	if (data.chairs.length > 0) {
 		sectionLinks.push({ id: "working-group-report-chairs", label: chairsLabel });
-	}
-
-	if (data.socialMedia.length > 0) {
-		sectionLinks.push({ id: "working-group-report-social-media", label: socialMediaLabel });
 	}
 
 	if (data.events.length > 0) {
@@ -106,26 +97,6 @@ export async function WorkingGroupReportSummary(
 									<p className="text-xs text-muted-fg">
 										{chair.roleType === "is_vice_chair_of" ? t("Vice chair") : t("Chair")}
 									</p>
-								</li>
-							))}
-						</ul>
-					</ReportSummarySection>
-				)}
-
-				{data.socialMedia.length > 0 && (
-					<ReportSummarySection id="working-group-report-social-media" title={socialMediaLabel}>
-						<ul className="divide-y rounded-md border max-inline-sm">
-							{data.socialMedia.map((item) => (
-								<li key={item.id} className="px-4 py-3">
-									<p className="text-sm font-medium text-fg">{item.socialMedia.name}</p>
-									<a
-										className="text-xs text-muted-fg underline"
-										href={item.socialMedia.url}
-										rel="noreferrer"
-										target="_blank"
-									>
-										{item.socialMedia.url}
-									</a>
 								</li>
 							))}
 						</ul>
