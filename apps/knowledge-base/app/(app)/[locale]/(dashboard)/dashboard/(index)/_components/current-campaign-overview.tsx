@@ -9,6 +9,7 @@ import {
 	HeaderDescription,
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import { isReportHistoryItemEditable } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-history-list";
 import type { CountryReportScope, WorkingGroupReportScope } from "@/lib/data/reporting";
 
 interface CurrentCampaignOverviewProps {
@@ -18,6 +19,15 @@ interface CurrentCampaignOverviewProps {
 		workingGroupReports: Array<WorkingGroupReportScope>;
 		countryReports: Array<CountryReportScope>;
 	};
+}
+
+/**
+ * Whether the user can still edit the report. The overview only lists reports of the open campaign,
+ * so this is the reports tabs' rule (`isReportHistoryItemEditable`) with an open campaign:
+ * submitted and accepted reports are view-only.
+ */
+function isEditable(report: Readonly<{ status: string }>): boolean {
+	return isReportHistoryItemEditable({ reportStatus: report.status, campaignStatus: "open" });
 }
 
 function formatStatus(status: string): string {
@@ -174,14 +184,26 @@ export async function CurrentCampaignOverview(
 														<div className="flex flex-col gap-y-0.5">
 															<span className="text-sm font-medium">{report.workingGroupName}</span>
 															<span className="text-xs text-muted-fg">
-																{report.canConfirm
-																	? t("You can confirm this report.")
-																	: t("You can edit this report.")}
+																{!isEditable(report)
+																	? t("You can view this report.")
+																	: report.canConfirm
+																		? t("You can confirm this report.")
+																		: t("You can edit this report.")}
 															</span>
 														</div>
-														<ButtonLink href={`${report.reportHref}/edit`} intent="plain" size="sm">
-															{t("Open")}
-														</ButtonLink>
+														{isEditable(report) ? (
+															<ButtonLink
+																href={`${report.reportHref}/edit`}
+																intent="plain"
+																size="sm"
+															>
+																{t("Open")}
+															</ButtonLink>
+														) : (
+															<ButtonLink href={report.reportHref} intent="plain" size="sm">
+																{t("View")}
+															</ButtonLink>
+														)}
 													</li>
 												))}
 											</ul>
@@ -225,14 +247,26 @@ export async function CurrentCampaignOverview(
 														<div className="flex flex-col gap-y-0.5">
 															<span className="text-sm font-medium">{report.countryName}</span>
 															<span className="text-xs text-muted-fg">
-																{report.canConfirm
-																	? t("You can confirm this report.")
-																	: t("You can edit this report.")}
+																{!isEditable(report)
+																	? t("You can view this report.")
+																	: report.canConfirm
+																		? t("You can confirm this report.")
+																		: t("You can edit this report.")}
 															</span>
 														</div>
-														<ButtonLink href={`${report.reportHref}/edit`} intent="plain" size="sm">
-															{t("Open")}
-														</ButtonLink>
+														{isEditable(report) ? (
+															<ButtonLink
+																href={`${report.reportHref}/edit`}
+																intent="plain"
+																size="sm"
+															>
+																{t("Open")}
+															</ButtonLink>
+														) : (
+															<ButtonLink href={report.reportHref} intent="plain" size="sm">
+																{t("View")}
+															</ButtonLink>
+														)}
 													</li>
 												))}
 											</ul>

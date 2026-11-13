@@ -3376,6 +3376,11 @@ msgid "{count} reports"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/(index)/_components/current-campaign-overview.tsx
+msgctxt "PlhxTg"
+msgid "You can view this report."
+msgstr "You can view this report."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/(index)/_components/current-campaign-overview.tsx
 msgctxt "cIkGwi"
 msgid "You can confirm this report."
 msgstr ""
@@ -3389,6 +3394,33 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx
 msgctxt "JfG49w"
 msgid "Open"
+msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/(index)/_components/current-campaign-overview.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-pages-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-history-list.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx
+msgctxt "FgydNe"
+msgid "View"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/(index)/_components/current-campaign-overview.tsx
@@ -3767,32 +3799,6 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
 msgctxt "TLrvIO"
 msgid "Observer"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/eric/_components/eric-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-pages-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-history-list.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx
-msgctxt "FgydNe"
-msgid "View"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx
