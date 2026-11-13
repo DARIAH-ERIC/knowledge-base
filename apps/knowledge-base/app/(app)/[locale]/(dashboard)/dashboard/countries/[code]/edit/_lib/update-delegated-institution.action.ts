@@ -5,10 +5,8 @@ import * as v from "valibot";
 
 import { UpdateInstitutionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/update-institution.schema";
 import { assertCanEditCountryInstitution } from "@/app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/authorize-country-institution-relation";
-import { updateDraftDocumentSlug } from "@/lib/data/entity-lifecycle";
 import { checkSshocMarketplaceActorIdAvailable } from "@/lib/data/sshoc-marketplace-actor-id";
 import { updateManagedOrganisationalUnitDraft } from "@/lib/data/update-managed-organisational-unit";
-import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 // Related entities and resources are curated by admins, so the delegated form does not offer them;
@@ -39,14 +37,9 @@ export const updateDelegatedInstitutionAction = createMutationAction({
 	async mutate(tx, input) {
 		const t = await getExtracted();
 
+		// The slug is not saved here: choosing the public URL is an administrator task, so a slug
+		// submitted from the delegated form is ignored.
 		await updateManagedOrganisationalUnitDraft(tx, input);
-
-		// The form only offers the slug while the document is draft-only; `updateDraftDocumentSlug`
-		// re-checks that server-side, so a forged submission cannot rename a published page.
-		const requestedSlug = getRequestedSlug(input.slug);
-		if (requestedSlug != null) {
-			await updateDraftDocumentSlug(tx, input.documentId, requestedSlug);
-		}
 
 		return {
 			subjectId: input.documentId,

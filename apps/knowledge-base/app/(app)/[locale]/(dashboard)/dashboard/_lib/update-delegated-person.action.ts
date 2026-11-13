@@ -6,7 +6,6 @@ import * as v from "valibot";
 import { assertCanEditPerson } from "@/app/(app)/[locale]/(dashboard)/dashboard/_lib/authorize-delegated-person";
 import { UpdatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.schema";
 import { updatePersonDraft } from "@/lib/data/save-person-draft";
-import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 const UpdateDelegatedPersonActionInputSchema = v.object({
@@ -33,7 +32,9 @@ export const updateDelegatedPersonAction = createMutationAction({
 		const t = await getExtracted();
 		await updatePersonDraft(tx, input.documentId, {
 			...input,
-			requestedSlug: getRequestedSlug(input.slug),
+			// Choosing the public URL is an administrator task, so a slug submitted from a delegated form is
+			// ignored: the person keeps their slug.
+			requestedSlug: null,
 		});
 		return {
 			subjectId: input.documentId,

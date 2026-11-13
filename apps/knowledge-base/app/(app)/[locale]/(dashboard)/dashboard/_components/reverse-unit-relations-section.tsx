@@ -839,6 +839,7 @@ export function ReverseUnitRelationsSection(
 					title={createSourceUnit.title}
 				>
 					<InstitutionFormFields
+						showSlug={false}
 						initialAssets={createSourceUnit.initialAssets}
 						initialSocialMediaItems={createSourceUnit.initialSocialMediaItems}
 						initialSocialMediaTotal={createSourceUnit.initialSocialMediaTotal}
@@ -874,6 +875,7 @@ export function ReverseUnitRelationsSection(
 				>
 					{editUnitFields != null ? (
 						<InstitutionFormFields
+							showSlug={false}
 							initialAssets={editSourceUnit.initialAssets}
 							initialSocialMediaIds={editUnitFields.socialMediaIds}
 							initialSocialMediaItems={editSourceUnit.initialSocialMediaItems}

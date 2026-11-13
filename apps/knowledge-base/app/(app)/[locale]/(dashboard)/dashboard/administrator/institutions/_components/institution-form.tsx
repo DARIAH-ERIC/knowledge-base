@@ -38,6 +38,8 @@ interface InstitutionFormFieldsProps {
 	} & { image: SelectedImage | null };
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
+	/** `false` on delegated (non-admin) forms: choosing the public URL is an administrator task. */
+	showSlug?: boolean;
 	initialSocialMediaIds?: Array<string>;
 	initialSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
 	initialSocialMediaTotal?: number;
@@ -58,6 +60,7 @@ export function InstitutionFormFields(props: Readonly<InstitutionFormFieldsProps
 		initialSocialMediaTotal,
 		selectedSocialMediaItems,
 		isPublished,
+		showSlug = true,
 	} = props;
 
 	const t = useExtracted();
@@ -107,7 +110,12 @@ export function InstitutionFormFields(props: Readonly<InstitutionFormFieldsProps
 					<FieldError />
 				</TextField>
 
-				<EntitySlugField isPublished={isPublished} slug={institution?.entityVersion.entity.slug} />
+				{showSlug ? (
+					<EntitySlugField
+						isPublished={isPublished}
+						slug={institution?.entityVersion.entity.slug}
+					/>
+				) : null}
 			</FormSection>
 
 			<Separator className="my-6" />

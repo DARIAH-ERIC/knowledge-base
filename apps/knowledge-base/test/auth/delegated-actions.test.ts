@@ -460,3 +460,55 @@ describe("people editing their own person", () => {
 		});
 	});
 });
+
+describe("delegated forms cannot choose slugs", () => {
+	async function getSlug(tx: Tx, documentId: string): Promise<string | undefined> {
+		const row = await tx.query.entities.findFirst({
+			where: { id: documentId },
+			columns: { slug: true },
+		});
+		return row?.slug;
+	}
+
+	it("ignores a slug submitted when a coordinator edits a person", async () => {
+		await withActionTransaction(async (tx) => {
+			const { country } = await seedCoordinatedCountry(tx);
+			// Draft-only, which is when a slug can still be changed at all.
+			const person = await seedPerson(tx);
+			await relate(tx, person, country, "national_representative");
+			const slug = await getSlug(tx, person);
+
+			const state = await updateDelegatedPersonAction(
+				createActionStateInitial(),
+				toFormData({
+					documentId: person,
+					name: "Edited Name",
+					sortName: "Edited Name",
+					slug: "chosen-by-coordinator",
+				}),
+			);
+			expect(state.status, JSON.stringify(state)).toBe("success");
+			expect(await getSlug(tx, person)).toBe(slug);
+		});
+	});
+
+	it("ignores a slug submitted when a coordinator edits an institution", async () => {
+		await withActionTransaction(async (tx) => {
+			const { country } = await seedCoordinatedCountry(tx);
+			const institution = await seedUnit(tx, "institution");
+			await locateIn(tx, institution, country);
+			const slug = await getSlug(tx, institution);
+
+			const state = await updateDelegatedInstitutionAction(
+				createActionStateInitial(),
+				toFormData({
+					documentId: institution,
+					name: "Edited Institution",
+					slug: "chosen-by-coordinator",
+				}),
+			);
+			expect(state.status, JSON.stringify(state)).toBe("success");
+			expect(await getSlug(tx, institution)).toBe(slug);
+		});
+	});
+});

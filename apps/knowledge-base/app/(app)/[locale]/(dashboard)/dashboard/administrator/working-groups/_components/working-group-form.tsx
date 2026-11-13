@@ -38,6 +38,8 @@ interface WorkingGroupFormProps {
 	formId?: string;
 	/** Whether the edited entity is published, which freezes its slug. Unused when creating. */
 	isPublished?: boolean;
+	/** `false` on delegated (non-admin) forms: choosing the public URL is an administrator task. */
+	showSlug?: boolean;
 	formAction: ServerAction;
 	initialSocialMediaIds?: Array<string>;
 	initialSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
@@ -61,6 +63,7 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 		showSaveAndPublish,
 		children,
 		isPublished,
+		showSlug = true,
 	} = props;
 
 	const t = useExtracted();
@@ -107,10 +110,12 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 						<FieldError />
 					</TextField>
 
-					<EntitySlugField
-						isPublished={isPublished}
-						slug={workingGroup?.entityVersion.entity.slug}
-					/>
+					{showSlug ? (
+						<EntitySlugField
+							isPublished={isPublished}
+							slug={workingGroup?.entityVersion.entity.slug}
+						/>
+					) : null}
 				</FormSection>
 
 				<Separator className="my-6" />

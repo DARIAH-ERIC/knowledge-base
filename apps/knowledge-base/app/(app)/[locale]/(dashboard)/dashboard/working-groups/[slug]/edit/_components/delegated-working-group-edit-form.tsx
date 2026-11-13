@@ -76,6 +76,7 @@ export function DelegatedWorkingGroupEditForm(
 					shouldPreserveState={true}
 				>
 					<WorkingGroupForm
+						showSlug={false}
 						formAction={updateDelegatedWorkingGroupAction}
 						formId="delegated-working-group-edit-form"
 						initialAssets={initialAssets}
