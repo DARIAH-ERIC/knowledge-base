@@ -42,6 +42,10 @@ test.describe("working group report lifecycle (chair)", () => {
 		await expect(submitButton).toBeVisible();
 
 		await submitButton.click();
+		const dialog = page.getByRole("alertdialog", { name: "Submit this report?" });
+		await dialog.getByRole("button", { name: "Submit report" }).click();
+		// Wait out the dialog's exit animation: until then its "Submit report" button also matches.
+		await expect(dialog).toBeHidden();
 
 		await expect(page.getByRole("button", { name: "Submit report" })).toBeHidden();
 		await expect(page.getByText("Submitted", { exact: true })).toBeVisible();

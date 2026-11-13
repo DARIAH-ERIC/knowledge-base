@@ -49,7 +49,18 @@ test.describe("country report lifecycle (national coordinator)", () => {
 		const submitButton = page.getByRole("button", { name: "Submit report" });
 		await expect(submitButton).toBeVisible();
 
+		// Submitting asks for confirmation first; cancelling leaves the draft alone.
 		await submitButton.click();
+		const dialog = page.getByRole("alertdialog", { name: "Submit this report?" });
+		await expect(dialog).toBeVisible();
+		await dialog.getByRole("button", { name: "Cancel" }).click();
+		await expect(dialog).toBeHidden();
+		expect(await db.getCountryReportById(reportId!)).toMatchObject({ status: "draft" });
+
+		await submitButton.click();
+		await dialog.getByRole("button", { name: "Submit report" }).click();
+		// Wait out the dialog's exit animation: until then its "Submit report" button also matches.
+		await expect(dialog).toBeHidden();
 
 		// After the action redirects back to the summary screen the report is submitted and there is no
 		// re-submit affordance.
