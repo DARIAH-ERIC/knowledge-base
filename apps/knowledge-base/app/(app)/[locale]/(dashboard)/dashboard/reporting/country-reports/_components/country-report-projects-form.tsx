@@ -7,21 +7,27 @@ import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
+import { NumberField } from "@dariah-eric/ui/number-field";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
-import { TextField } from "@dariah-eric/ui/text-field";
-import { useExtracted } from "next-intl";
+import {
+	SearchableSelect,
+	SearchableSelectContent,
+	SearchableSelectInput,
+	SearchableSelectItem,
+} from "@dariah-eric/ui/searchable-select";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
 import { LocaleLink } from "@/lib/navigation/navigation";
+import { euroFormatOptions } from "@/lib/number-format-options";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface Contribution {
 	id: string;
 	amountEuros: number;
 	projectDocumentId: string;
-	project: Pick<schema.Project, "name"> | null;
+	project: Pick<schema.Project, "duration" | "name"> | null;
 }
 
 interface CountryReportProjectsFormProps {
@@ -43,6 +49,7 @@ export function CountryReportProjectsForm(
 	const { report, allProjects, canManageRelations, addAction, deleteAction } = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
 	const [state, action, isPending] = useActionState(addAction, createActionStateInitial());
 	const [selectedProjectId, setSelectedProjectId] = useState<string>("");
 
@@ -71,8 +78,23 @@ export function CountryReportProjectsForm(
 							>
 								<div>
 									<p className="text-sm font-medium text-fg">{contribution.project?.name ?? ""}</p>
+									{contribution.project != null && (
+										<p className="text-xs text-muted-fg">
+											{t("Duration")}:{" "}
+											{contribution.project.duration.end != null
+												? format.dateTimeRange(
+														contribution.project.duration.start,
+														contribution.project.duration.end,
+														{ dateStyle: "short" },
+													)
+												: format.dateTime(contribution.project.duration.start, {
+														dateStyle: "short",
+													})}
+										</p>
+									)}
 									<p className="text-xs text-muted-fg">
-										{t("Total funding amount (EUR)")}: {contribution.amountEuros.toLocaleString()}
+										{t("Total funding amount")}:{" "}
+										{format.number(contribution.amountEuros, euroFormatOptions)}
 									</p>
 								</div>
 								<ActionForm action={deleteAction}>
@@ -109,7 +131,7 @@ export function CountryReportProjectsForm(
 					>
 						<input name="countryReportId" type="hidden" value={report.id} />
 
-						<Select
+						<SearchableSelect
 							isRequired={true}
 							onChange={(key) => {
 								setSelectedProjectId(key == null ? "" : String(key));
@@ -117,23 +139,28 @@ export function CountryReportProjectsForm(
 							value={selectedProjectId || null}
 						>
 							<Label>{t("Project")}</Label>
-							<SelectTrigger />
+							<SearchableSelectInput placeholder={t("Search projects...")} />
 							<FieldError />
-							<SelectContent>
+							<SearchableSelectContent>
 								{availableProjects.map((project) => (
-									<SelectItem key={project.id} id={project.id}>
+									<SearchableSelectItem key={project.id} id={project.id} textValue={project.name}>
 										{project.name}
-									</SelectItem>
+									</SearchableSelectItem>
 								))}
-							</SelectContent>
-						</Select>
+							</SearchableSelectContent>
+						</SearchableSelect>
 						<input name="projectDocumentId" type="hidden" value={selectedProjectId} />
 
-						<TextField isRequired={true} name="amountEuros" type="number">
-							<Label>{t("Total funding amount (EUR)")}</Label>
-							<Input min={0} step="0.01" />
+						<NumberField
+							formatOptions={euroFormatOptions}
+							isRequired={true}
+							minValue={0}
+							name="amountEuros"
+						>
+							<Label>{t("Total funding amount")}</Label>
+							<Input />
 							<FieldError />
-						</TextField>
+						</NumberField>
 
 						<Button className="self-start" isPending={isPending} type="submit">
 							{isPending ? (

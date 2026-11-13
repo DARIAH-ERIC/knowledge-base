@@ -8,6 +8,12 @@ import { Description, FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import {
+	SearchableSelect,
+	SearchableSelectContent,
+	SearchableSelectInput,
+	SearchableSelectItem,
+} from "@dariah-eric/ui/searchable-select";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
@@ -81,7 +87,7 @@ export function CountryReportCreateForm(props: Readonly<CountryReportCreateFormP
 						</Select>
 						<input name="campaignId" type="hidden" value={selectedCampaignId} />
 
-						<Select
+						<SearchableSelect
 							isRequired={true}
 							onChange={(key) => {
 								setSelectedCountryId(key == null ? "" : String(key));
@@ -89,21 +95,21 @@ export function CountryReportCreateForm(props: Readonly<CountryReportCreateFormP
 							value={selectedCountryId || null}
 						>
 							<Label>{t("Country")}</Label>
-							<SelectTrigger />
+							<SearchableSelectInput placeholder={t("Search countries...")} />
 							{selectedCampaignId !== "" && countries.length === 0 && (
 								<Description>
 									{t("Every country that reports for this campaign already has a report.")}
 								</Description>
 							)}
 							<FieldError />
-							<SelectContent>
+							<SearchableSelectContent>
 								{countries.map((country) => (
-									<SelectItem key={country.id} id={country.id}>
+									<SearchableSelectItem key={country.id} id={country.id} textValue={country.name}>
 										{country.name}
-									</SelectItem>
+									</SearchableSelectItem>
 								))}
-							</SelectContent>
-						</Select>
+							</SearchableSelectContent>
+						</SearchableSelect>
 						<input name="countryId" type="hidden" value={selectedCountryId} />
 
 						<Select

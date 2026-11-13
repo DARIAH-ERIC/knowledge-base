@@ -138,13 +138,13 @@ export function CampaignServiceSizesForm(
 
 					<FormSection
 						description={t(
-							"Services the country reporter marks as important, for example because of the investment in them, whatever their number of visits.",
+							"Services the country reporter marks as resource-intensive, for example because of the investment in them, whatever their number of visits.",
 						)}
-						title={t("Important services")}
+						title={t("Resource-intensive services")}
 					>
 						<CampaignAmountField
 							defaultValue={defaultValues["important_amount"]}
-							label={t("Important service amount")}
+							label={t("Resource-intensive service amount")}
 							name={"important_amount"}
 							previous={previousValues}
 						/>

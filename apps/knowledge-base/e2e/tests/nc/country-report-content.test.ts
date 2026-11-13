@@ -86,7 +86,8 @@ test.describe("country report content (national coordinator)", () => {
 	test("adds and removes a curated service membership", async ({ db, page }) => {
 		await page.goto(`/en/dashboard/reporting/country-reports/${year!}/${slug!}/edit/services`);
 
-		await page.getByRole("button", { name: "Service" }).click();
+		// The service picker is searchable; ArrowDown opens the full list without typing a query.
+		await page.getByRole("combobox", { name: "Service" }).press("ArrowDown");
 		const option = page.getByRole("option").first();
 		const serviceName = await option.textContent();
 		expect(serviceName).not.toBeNull();
@@ -94,7 +95,7 @@ test.describe("country report content (national coordinator)", () => {
 		await page.getByRole("button", { name: "Add", exact: true }).click();
 
 		// Assert against the membership card, not the page: the picker keeps the selected service in its
-		// combobox label (and a hidden native <option>), which would otherwise also match the name.
+		// search input, which would otherwise also match the name.
 		const serviceCard = page.getByRole("listitem").filter({ hasText: serviceName! });
 		await expect(serviceCard).toBeVisible();
 		expect(await db.getCountryReportServiceIds(reportId!)).toHaveLength(1);

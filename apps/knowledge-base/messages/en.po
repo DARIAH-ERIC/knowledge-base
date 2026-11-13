@@ -4065,6 +4065,11 @@ msgid "Select the campaign and country for this report."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-create-form.tsx
+msgctxt "37zpJw"
+msgid "Search countries..."
+msgstr "Search countries..."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-create-form.tsx
 msgctxt "gf-H7u"
 msgid "Every country that reports for this campaign already has a report."
 msgstr "Every country that reports for this campaign already has a report."
@@ -6713,6 +6718,7 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx
@@ -6977,19 +6983,19 @@ msgid "Large: amount"
 msgstr "Large: amount"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
-msgctxt "9IShMk"
-msgid "Services the country reporter marks as important, for example because of the investment in them, whatever their number of visits."
-msgstr "Services the country reporter marks as important, for example because of the investment in them, whatever their number of visits."
+msgctxt "fF7_-F"
+msgid "Services the country reporter marks as resource-intensive, for example because of the investment in them, whatever their number of visits."
+msgstr "Services the country reporter marks as resource-intensive, for example because of the investment in them, whatever their number of visits."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
-msgctxt "yKBl3q"
-msgid "Important services"
-msgstr "Important services"
+msgctxt "xHKynD"
+msgid "Resource-intensive services"
+msgstr "Resource-intensive services"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
-msgctxt "P8julp"
-msgid "Important service amount"
-msgstr "Important service amount"
+msgctxt "3iQhNK"
+msgid "Resource-intensive service amount"
+msgstr "Resource-intensive service amount"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
 msgctxt "rnzaqG"
@@ -7948,6 +7954,11 @@ msgid "Select the campaign and working group for this report."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form.tsx
+msgctxt "7J9GuR"
+msgid "Search working groups..."
+msgstr "Search working groups..."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form.tsx
 msgctxt "XyGmU2"
 msgid "Every working group that reports for this campaign already has a report."
 msgstr "Every working group that reports for this campaign already has a report."
@@ -8394,14 +8405,19 @@ msgid "Manage projects"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
-msgctxt "wX34Ef"
-msgid "Total funding amount (EUR)"
-msgstr ""
+msgctxt "rp3xC6"
+msgid "Total funding amount"
+msgstr "Total funding amount"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
 msgctxt "tXaLlr"
 msgid "Add project contribution"
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
+msgctxt "Dw9Bae"
+msgid "Search projects..."
+msgstr "Search projects..."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
 msgctxt "OPeXEU"
@@ -8439,9 +8455,9 @@ msgid "Core service: counted with the core service amount."
 msgstr "Core service: counted with the core service amount."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
-msgctxt "U3_4XV"
-msgid "Important service"
-msgstr "Important service"
+msgctxt "YK7s4Q"
+msgid "Resource-intensive service"
+msgstr "Resource-intensive service"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
@@ -8453,6 +8469,11 @@ msgstr ""
 msgctxt "P_oSs1"
 msgid "Add an existing service"
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
+msgctxt "NEClMF"
+msgid "Search services..."
+msgstr "Search services..."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
 msgctxt "Z4VSlt"
@@ -8473,6 +8494,12 @@ msgstr ""
 msgctxt "c4Bnfs"
 msgid "Add an existing account"
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
+msgctxt "VSmsWL"
+msgid "Search accounts..."
+msgstr "Search accounts..."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
 msgctxt "6BK1pe"

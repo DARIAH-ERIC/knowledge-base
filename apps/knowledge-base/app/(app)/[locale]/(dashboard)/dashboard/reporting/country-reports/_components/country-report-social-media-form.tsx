@@ -1,12 +1,20 @@
 "use client";
 
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
+import { NumberField } from "@dariah-eric/ui/number-field";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import {
+	SearchableSelect,
+	SearchableSelectContent,
+	SearchableSelectInput,
+	SearchableSelectItem,
+} from "@dariah-eric/ui/searchable-select";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
@@ -18,7 +26,9 @@ import type {
 	ReportSocialMediaAccount,
 	SocialMediaKpiCategory,
 } from "@/lib/data/report-social-media";
+import { countFormatOptions } from "@/lib/number-format-options";
 import type { ServerAction } from "@/lib/server/create-server-action";
+import { getSocialMediaTypeLabel } from "@/lib/social-media-type-label";
 
 /** Id linking the per-account KPI inputs (rendered inside account cards) to the single Save form. */
 const KPI_FORM_ID = "country-report-social-media-kpis-form";
@@ -176,7 +186,10 @@ function AccountCard(props: Readonly<AccountCardProps>): ReactNode {
 		<div className="flex flex-col gap-y-4 rounded-md border border-border p-4">
 			<div className="flex items-start justify-between gap-x-4">
 				<div className="flex flex-col gap-y-0.5">
-					<p className="text-sm font-medium text-fg">{account.name}</p>
+					<div className="flex flex-wrap items-center gap-2">
+						<p className="text-sm font-medium text-fg">{account.name}</p>
+						<Badge intent="secondary">{getSocialMediaTypeLabel(account.type)}</Badge>
+					</div>
 					<p className="text-xs text-muted-fg">{account.url}</p>
 				</div>
 				<ActionForm action={deleteAction}>
@@ -205,21 +218,25 @@ function AccountCard(props: Readonly<AccountCardProps>): ReactNode {
 							<label
 								className="shrink-0 text-sm text-fg inline-40"
 								htmlFor={`${account.id}-${metric.kpi}`}
+								id={`${account.id}-${metric.kpi}-label`}
 							>
 								{formatKpi(metric.kpi)}
 							</label>
-							<input
-								className="rounded-md border border-border bg-bg px-2 py-1 text-sm text-fg inline-32"
+							<NumberField
+								aria-labelledby={`${account.id}-${metric.kpi}-label`}
+								className="shrink-0 inline-40"
 								form={KPI_FORM_ID}
+								formatOptions={countFormatOptions}
 								id={`${account.id}-${metric.kpi}`}
-								min={0}
+								minValue={0}
 								name={`kpis.${account.socialMediaId}.${metric.kpi}`}
-								onChange={(event) => {
-									setValue(metric.kpi, event.target.value);
+								onChange={(value) => {
+									setValue(metric.kpi, Number.isNaN(value) ? "" : String(value));
 								}}
-								type="number"
-								value={metric.value}
-							/>
+								value={metric.value === "" ? Number.NaN : Number(metric.value)}
+							>
+								<Input />
+							</NumberField>
 							<Button
 								intent="plain"
 								onPress={() => {
@@ -287,7 +304,7 @@ function AddExistingAccountForm(props: Readonly<AddExistingAccountFormProps>): R
 			>
 				<input name="countryReportId" type="hidden" value={reportId} />
 
-				<Select
+				<SearchableSelect
 					isRequired={true}
 					onChange={(key) => {
 						setSelectedId(key == null ? "" : String(key));
@@ -295,17 +312,21 @@ function AddExistingAccountForm(props: Readonly<AddExistingAccountFormProps>): R
 					value={selectedId || null}
 				>
 					<Label>{t("Account")}</Label>
-					<SelectTrigger />
+					<SearchableSelectInput placeholder={t("Search accounts...")} />
 					<FieldError />
-					<SelectContent>
+					<SearchableSelectContent>
 						{availableAccounts.map((account) => (
-							<SelectItem key={account.id} id={account.id}>
+							<SearchableSelectItem
+								key={account.id}
+								id={account.id}
+								textValue={`${account.name} (${account.url})`}
+							>
 								{account.name}
 								{` (${account.url})`}
-							</SelectItem>
+							</SearchableSelectItem>
 						))}
-					</SelectContent>
-				</Select>
+					</SearchableSelectContent>
+				</SearchableSelect>
 				<input name="socialMediaId" type="hidden" value={selectedId} />
 
 				<Button className="self-start" isPending={isPending} type="submit">

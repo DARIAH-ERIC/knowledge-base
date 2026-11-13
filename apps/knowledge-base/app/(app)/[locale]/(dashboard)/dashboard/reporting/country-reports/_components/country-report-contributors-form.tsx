@@ -7,8 +7,8 @@ import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
+import { NumberField } from "@dariah-eric/ui/number-field";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
 
@@ -16,6 +16,7 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { countFormatOptions } from "@/lib/number-format-options";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface CountryReportContributorsFormProps {
@@ -37,17 +38,16 @@ export function CountryReportContributorsForm(
 				<input name="id" type="hidden" value={report.id} />
 
 				<FormSection title={t("Total contributors")}>
-					<TextField
-						defaultValue={
-							report.totalContributors != null ? String(report.totalContributors) : undefined
-						}
+					<NumberField
+						defaultValue={report.totalContributors ?? undefined}
+						formatOptions={countFormatOptions}
+						minValue={0}
 						name="totalContributors"
-						type="number"
 					>
 						<Label>{t("Total contributors to national node")}</Label>
-						<Input min={0} />
+						<Input />
 						<FieldError />
-					</TextField>
+					</NumberField>
 				</FormSection>
 
 				<Button className="self-start" isPending={isPending} type="submit">

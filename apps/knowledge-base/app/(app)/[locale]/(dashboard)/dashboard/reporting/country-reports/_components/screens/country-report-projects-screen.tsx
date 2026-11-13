@@ -35,7 +35,7 @@ export async function CountryReportProjectsScreen(
 						projectContributions: {
 							columns: { id: true, amountEuros: true, projectDocumentId: true },
 							with: {
-								project: { columns: { name: true } },
+								project: { columns: { name: true, duration: true } },
 							},
 						},
 					},
