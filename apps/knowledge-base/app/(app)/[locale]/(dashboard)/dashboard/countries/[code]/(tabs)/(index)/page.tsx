@@ -9,6 +9,7 @@ import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getOrganisationalUnitEditData } from "@/lib/data/admin-organisational-units";
 import { resolveSelectedDetailVersion } from "@/lib/data/entity-detail-view";
+import { getPersonRelations } from "@/lib/data/person-relations";
 import { getUserOrganisationalUnitScopes } from "@/lib/data/user-organisational-units";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -43,12 +44,16 @@ export default async function CountryPage(props: Readonly<CountryPageProps>): Pr
 		notFound();
 	}
 
-	const data = await getOrganisationalUnitEditData({
-		slug: consortium.slug,
-		unitType: "national_consortium",
-		versionId: versionState.versionId,
-		publishedVersionId: versionState.publishedId,
-	});
+	const [data, personRelations] = await Promise.all([
+		getOrganisationalUnitEditData({
+			slug: consortium.slug,
+			unitType: "national_consortium",
+			versionId: versionState.versionId,
+			publishedVersionId: versionState.publishedId,
+		}),
+		/** People are related to the country document, not the national consortium. */
+		getPersonRelations(country.documentId),
+	]);
 	if (data == null) {
 		notFound();
 	}
@@ -74,6 +79,7 @@ export default async function CountryPage(props: Readonly<CountryPageProps>): Pr
 			hasDraft={country.canEdit && versionState.hasDraftChanges}
 			isPublished={versionState.publishedId != null}
 			nationalConsortium={{ ...data.unit, image }}
+			people={{ relations: personRelations, targetName: country.name }}
 			relations={data.relations}
 			selectedRelatedEntities={data.selectedRelatedEntities}
 			selectedRelatedResources={data.selectedRelatedResources}

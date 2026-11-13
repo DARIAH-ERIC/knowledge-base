@@ -2907,6 +2907,7 @@ msgstr "Could not load the current person details. Please try again."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-edit-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-edit-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-details.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-edit-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_components/delegated-country-edit-form.tsx

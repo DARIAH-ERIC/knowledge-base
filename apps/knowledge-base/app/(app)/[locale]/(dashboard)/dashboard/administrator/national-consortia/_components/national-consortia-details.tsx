@@ -16,6 +16,7 @@ import { RelationLink } from "@/app/(app)/[locale]/(dashboard)/dashboard/_compon
 import { RelationStatement } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-statement";
 import { RelationTypeSuffix } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/relation-type-suffix";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import type { PersonRelation } from "@/lib/data/person-relations";
 import type { UnitRelation } from "@/lib/data/unit-relations";
 import { getEntityDetailHref, getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
 import { formatRoleType } from "@/lib/format-role-type";
@@ -48,6 +49,11 @@ interface NationalConsortiumDetailsProps {
 		url?: string;
 		description?: string;
 	}>;
+	/**
+	 * People related to the country the consortium belongs to. Omitted on the admin details page,
+	 * where people are managed on the country itself.
+	 */
+	people?: { relations: Array<PersonRelation>; targetName: string };
 	relations: Array<UnitRelation>;
 	publishAction?: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
@@ -64,6 +70,7 @@ export function NationalConsortiumDetails(
 		hasDraft,
 		isPublished,
 		nationalConsortium,
+		people,
 		relations,
 		publishAction,
 		discardDraftAction,
@@ -209,6 +216,36 @@ export function NationalConsortiumDetails(
 						</ul>
 					) : null}
 				</DescriptionDetails>
+
+				{people != null ? (
+					<Fragment>
+						<DescriptionTerm>{t("People")}</DescriptionTerm>
+						<DescriptionDetails>
+							{people.relations.length > 0 ? (
+								<ul className="flex flex-col gap-1">
+									{people.relations.map((relation) => (
+										<RelationStatement
+											key={relation.id}
+											source={relation.personName}
+											sourceHref={
+												enableAdminEntityLinks
+													? getEntityDetailHref({
+															entityType: "persons",
+															slug: relation.personSlug,
+														})
+													: undefined
+											}
+											relation={formatRoleType(relation.roleType)}
+											target={people.targetName}
+											targetType={formatRoleType(relation.targetUnitType)}
+											duration={relation.duration}
+										/>
+									))}
+								</ul>
+							) : null}
+						</DescriptionDetails>
+					</Fragment>
+				) : null}
 
 				<DescriptionTerm>{t("Relations")}</DescriptionTerm>
 				<DescriptionDetails>
