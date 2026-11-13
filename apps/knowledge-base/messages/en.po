@@ -1685,6 +1685,7 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-removed-services-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/service-details.tsx
@@ -4032,6 +4033,7 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-kpis-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-project-contributions-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-removed-services-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx
@@ -7337,6 +7339,61 @@ msgctxt "IG3dPW"
 msgid "No matching project contributions were found."
 msgstr ""
 
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-removed-services-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
+msgctxt "-N7MYs"
+msgid "Removed services"
+msgstr "Removed services"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-removed-services-page.tsx
+msgctxt "PPtotF"
+msgid "See which services a country reported in the previous campaign year but no longer reports. Services that are no longer live are not carried over into new reports."
+msgstr "See which services a country reported in the previous campaign year but no longer reports. Services that are no longer live are not carried over into new reports."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-removed-services-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/services/page.tsx
+msgctxt "iRxN4D"
+msgid "Search by service"
+msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-removed-services-page.tsx
+msgctxt "DmfMyc"
+msgid "{count} removed services"
+msgstr "{count} removed services"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-removed-services-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/services/page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
+msgctxt "n7yYXG"
+msgid "Service"
+msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-removed-services-page.tsx
+msgctxt "wkwYOh"
+msgid "Service status"
+msgstr "Service status"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-removed-services-page.tsx
+msgctxt "O4MJE8"
+msgid "Removed in"
+msgstr "Removed in"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-removed-services-page.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
+msgctxt "gj_Mzf"
+msgid "Report status"
+msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-removed-services-page.tsx
+msgctxt "Z9NtwL"
+msgid "{previous} → {current}"
+msgstr "{previous} → {current}"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-removed-services-page.tsx
+msgctxt "OmVPr0"
+msgid "No removed services were found."
+msgstr "No removed services were found."
+
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx
 msgctxt "E3WVSO"
 msgid "1 contribution from 1 country report"
@@ -7527,11 +7584,6 @@ msgid "All countries"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
-msgctxt "gj_Mzf"
-msgid "Report status"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
 msgctxt "fvK8Qi"
 msgid "All statuses"
 msgstr ""
@@ -7571,6 +7623,11 @@ msgctxt "fZIhor"
 msgid "Administrator dashboard - Reported project contributions"
 msgstr ""
 
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/removed-services/page.tsx
+msgctxt "f2D7H9"
+msgid "Administrator dashboard - Removed services"
+msgstr "Administrator dashboard - Removed services"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/services/page.tsx
 msgctxt "XEd54C"
 msgid "Administrator dashboard - Reported service KPIs"
@@ -7579,17 +7636,6 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/services/page.tsx
 msgctxt "crYopk"
 msgid "See which country reported which service in which campaign year, and the values behind each KPI."
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/services/page.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
-msgctxt "n7yYXG"
-msgid "Service"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/services/page.tsx
-msgctxt "iRxN4D"
-msgid "Search by service"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/services/page.tsx
