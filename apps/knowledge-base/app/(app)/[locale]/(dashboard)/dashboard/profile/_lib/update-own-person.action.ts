@@ -6,6 +6,11 @@ import * as v from "valibot";
 
 import { UpdatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.schema";
 import { updatePersonDraft } from "@/lib/data/save-person-draft";
+import {
+	isDelegatedChange,
+	notifyChangesAwaitingReview,
+	startsPendingChanges,
+} from "@/lib/email/send-delegated-change-notification";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 const UpdateOwnPersonActionInputSchema = v.object({
@@ -33,15 +38,32 @@ export const updateOwnPersonAction = createMutationAction({
 		}
 		return undefined;
 	},
+	postCommit({ result, ctx }) {
+		if (result.postCommitData?.startsReview !== true) {
+			return;
+		}
+		return notifyChangesAwaitingReview({
+			kind: "person",
+			documentId: result.subjectId,
+			user: ctx.user,
+			realUser: ctx.realUser,
+			locale: ctx.locale,
+		});
+	},
 	async mutate(tx, input, ctx) {
 		const t = await getExtracted();
 		const documentId = ctx.user.personDocumentId;
 		if (documentId == null) {
 			throw new Error("Expected the account to be linked to a person.");
 		}
+		// Notified once per round of changes: only the save that starts them.
+		const startsReview =
+			isDelegatedChange(ctx.user, ctx.realUser) && (await startsPendingChanges(tx, documentId));
+
 		await updatePersonDraft(tx, documentId, { ...input, requestedSlug: null });
 		return {
 			subjectId: documentId,
+			postCommitData: { startsReview },
 			auditSummary: { lifecycle: "draft" },
 			successMessage: t("Your changes were saved and will be published after review."),
 		};

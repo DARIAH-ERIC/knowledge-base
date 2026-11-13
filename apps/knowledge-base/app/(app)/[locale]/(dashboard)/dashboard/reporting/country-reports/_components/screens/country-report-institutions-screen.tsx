@@ -7,6 +7,7 @@ import { CountryReportInstitutionsForm } from "@/app/(app)/[locale]/(dashboard)/
 import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { refreshCountryReportInstitutionsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/refresh-country-report-institutions.action";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { getCountryReportInstitutionRows } from "@/lib/data/country-report-institutions";
 import {
 	type CountryReportInstitutionRepresentation,
 	getCurrentPartnerInstitutions,
@@ -44,12 +45,6 @@ export async function CountryReportInstitutionsScreen(
 				columns: { id: true, countryDocumentId: true },
 				with: {
 					campaign: { columns: { year: true } },
-					institutions: {
-						columns: { id: true, organisationalUnitDocumentId: true, representationType: true },
-						with: {
-							organisationalUnit: { columns: { name: true, acronym: true } },
-						},
-					},
 				},
 			}),
 		"update",
@@ -64,6 +59,7 @@ export async function CountryReportInstitutionsScreen(
 	}
 
 	const { year } = report.campaign;
+	const snapshotRows = await getCountryReportInstitutionRows(report.id);
 
 	// The country's current partner institutions for the reporting year — the truth the snapshot is
 	// reviewed against.
@@ -73,7 +69,7 @@ export async function CountryReportInstitutionsScreen(
 	);
 
 	// Resolve slugs for the snapshot institutions (for the "edit on the institution" links).
-	const snapshotDocumentIds = report.institutions.map((i) => i.organisationalUnitDocumentId);
+	const snapshotDocumentIds = snapshotRows.map((i) => i.organisationalUnitDocumentId);
 	const slugRows =
 		snapshotDocumentIds.length > 0
 			? await db
@@ -90,6 +86,7 @@ export async function CountryReportInstitutionsScreen(
 			documentId: string;
 			name: string;
 			acronym: string | null;
+			isDraft: boolean;
 			slug: string | null;
 			representationTypes: Array<CountryReportInstitutionRepresentation>;
 			isCurrent: boolean;
@@ -97,7 +94,7 @@ export async function CountryReportInstitutionsScreen(
 		}
 	>();
 
-	for (const institution of report.institutions) {
+	for (const institution of snapshotRows) {
 		const current = currentByDocumentId.get(institution.organisationalUnitDocumentId) ?? null;
 		const existing = institutionsByDocumentId.get(institution.organisationalUnitDocumentId);
 
@@ -107,6 +104,7 @@ export async function CountryReportInstitutionsScreen(
 				documentId: institution.organisationalUnitDocumentId,
 				name: institution.organisationalUnit?.name ?? current?.name ?? "",
 				acronym: institution.organisationalUnit?.acronym ?? current?.acronym ?? null,
+				isDraft: institution.organisationalUnit?.isDraft ?? current?.isDraft ?? false,
 				slug:
 					slugByDocumentId.get(institution.organisationalUnitDocumentId) ?? current?.slug ?? null,
 				// Frozen at capture; may be empty for rows captured before representation type was tracked.

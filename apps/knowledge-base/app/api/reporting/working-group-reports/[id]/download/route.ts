@@ -45,9 +45,6 @@ export async function GET(
 				chairs: report.summary.chairs.map((c) => {
 					return { name: c.personName, role: c.roleType };
 				}),
-				socialMedia: report.summary.socialMedia.map((s) => {
-					return { name: s.socialMedia.name, url: s.socialMedia.url };
-				}),
 				events: report.summary.events.map((e) => {
 					return { title: e.title, date: e.date, url: e.url, role: e.role };
 				}),

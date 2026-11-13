@@ -30,6 +30,13 @@ const screenKeysByReportType: Record<
 	working_group: ["confirm", "data", "events", "questions"],
 };
 
+/** The screens of a report type that take a comment, in tab order. */
+export function getReportScreenCommentKeys(
+	reportType: ReportScreenCommentType,
+): ReadonlyArray<ReportScreenCommentKey> {
+	return screenKeysByReportType[reportType];
+}
+
 export async function getReportScreenComment(
 	reportType: ReportScreenCommentType,
 	reportId: string,

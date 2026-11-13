@@ -11,6 +11,8 @@ export interface ReportSocialMediaAccount {
 	socialMediaId: string;
 	name: string;
 	url: string;
+	/** Raw type token (e.g. `linkedin`); see `getSocialMediaTypeLabel` for display. */
+	type: (typeof schema.socialMediaTypesEnum)[number];
 	kpis: Array<{ kpi: SocialMediaKpiCategory; value: number }>;
 }
 
@@ -24,7 +26,12 @@ export async function getCountryReportSocialMedia(
 	const memberships = await db.query.countryReportSocialMedia.findMany({
 		where: { countryReportId },
 		columns: { id: true, socialMediaId: true },
-		with: { socialMedia: { columns: { name: true, url: true } } },
+		with: {
+			socialMedia: {
+				columns: { name: true, url: true },
+				with: { type: { columns: { type: true } } },
+			},
+		},
 	});
 
 	const kpiRows = await db.query.countryReportSocialMediaKpis.findMany({
@@ -45,6 +52,7 @@ export async function getCountryReportSocialMedia(
 				socialMediaId: membership.socialMediaId,
 				name: membership.socialMedia.name,
 				url: membership.socialMedia.url,
+				type: membership.socialMedia.type.type,
 				kpis: kpisByAccount.get(membership.socialMediaId) ?? [],
 			};
 		})

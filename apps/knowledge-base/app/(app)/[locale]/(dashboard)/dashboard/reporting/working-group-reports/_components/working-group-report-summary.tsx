@@ -2,6 +2,7 @@ import type { JSONContent } from "@tiptap/core";
 import { getExtracted, getFormatter } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { NameWithDraftBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-badge";
 import { RichTextView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-view";
 import {
 	ReportSummaryNav,
@@ -11,11 +12,7 @@ import {
 
 export interface WorkingGroupReportSummaryData {
 	numberOfMembers: number | null;
-	chairs: Array<{ id: string; personName: string; roleType: string }>;
-	socialMedia: Array<{
-		id: string;
-		socialMedia: { name: string; url: string };
-	}>;
+	chairs: Array<{ id: string; personName: string; personIsDraft?: boolean; roleType: string }>;
 	events: Array<{
 		id: string;
 		title: string;
@@ -39,13 +36,6 @@ interface WorkingGroupReportSummaryProps {
 	extraSectionLinks?: ReadonlyArray<ReportSummarySectionLink>;
 }
 
-function formatRole(role: string): string {
-	return role
-		.replaceAll("_", " ")
-		.replace(/^is /, "")
-		.replaceAll(/\b\w/g, (c) => c.toUpperCase());
-}
-
 export async function WorkingGroupReportSummary(
 	props: Readonly<WorkingGroupReportSummaryProps>,
 ): Promise<ReactNode> {
@@ -57,7 +47,6 @@ export async function WorkingGroupReportSummary(
 
 	const dataLabel = t("Working group data");
 	const chairsLabel = t("Chairs");
-	const socialMediaLabel = t("Social media");
 	const eventsLabel = t("Events");
 	const questionsLabel = t("Questions");
 
@@ -67,10 +56,6 @@ export async function WorkingGroupReportSummary(
 
 	if (data.chairs.length > 0) {
 		sectionLinks.push({ id: "working-group-report-chairs", label: chairsLabel });
-	}
-
-	if (data.socialMedia.length > 0) {
-		sectionLinks.push({ id: "working-group-report-social-media", label: socialMediaLabel });
 	}
 
 	if (data.events.length > 0) {
@@ -106,28 +91,12 @@ export async function WorkingGroupReportSummary(
 						<ul className="divide-y rounded-md border max-inline-sm">
 							{data.chairs.map((chair) => (
 								<li key={chair.id} className="px-4 py-3">
-									<p className="text-sm font-medium text-fg">{chair.personName}</p>
-									<p className="text-xs text-muted-fg">{formatRole(chair.roleType)}</p>
-								</li>
-							))}
-						</ul>
-					</ReportSummarySection>
-				)}
-
-				{data.socialMedia.length > 0 && (
-					<ReportSummarySection id="working-group-report-social-media" title={socialMediaLabel}>
-						<ul className="divide-y rounded-md border max-inline-sm">
-							{data.socialMedia.map((item) => (
-								<li key={item.id} className="px-4 py-3">
-									<p className="text-sm font-medium text-fg">{item.socialMedia.name}</p>
-									<a
-										className="text-xs text-muted-fg underline"
-										href={item.socialMedia.url}
-										rel="noreferrer"
-										target="_blank"
-									>
-										{item.socialMedia.url}
-									</a>
+									<p className="text-sm font-medium text-fg">
+										<NameWithDraftBadge isDraft={chair.personIsDraft} name={chair.personName} />
+									</p>
+									<p className="text-xs text-muted-fg">
+										{chair.roleType === "is_vice_chair_of" ? t("Vice chair") : t("Chair")}
+									</p>
 								</li>
 							))}
 						</ul>

@@ -2,6 +2,10 @@ import { getExtracted } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
 
 import {
+	DraftBadge,
+	NameWithDraftBadge,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-badge";
+import {
 	ReportSummaryNav,
 	ReportSummarySection,
 	type ReportSummarySectionLink,
@@ -194,7 +198,9 @@ export async function CountryReportSummary(
 						<ul className="mbe-4 divide-y rounded-md border">
 							{data.contributions.map((c) => (
 								<li key={c.id} className="px-4 py-3">
-									<p className="text-sm font-medium text-fg">{c.personName}</p>
+									<p className="text-sm font-medium text-fg">
+										<NameWithDraftBadge isDraft={c.personIsDraft} name={c.personName} />
+									</p>
 									<p className="text-xs text-muted-fg">
 										{formatRole(c.roleType)}
 										{" · "}
@@ -229,6 +235,11 @@ export async function CountryReportSummary(
 											{institution.acronym != null && (
 												<span className="ms-2 text-muted-fg">({institution.acronym})</span>
 											)}
+											{institution.isDraft ? (
+												<span className="ms-2 inline-block">
+													<DraftBadge />
+												</span>
+											) : null}
 										</p>
 										{representationTypes != null && (
 											<p className="text-xs text-muted-fg">{representationTypes}</p>
@@ -362,7 +373,9 @@ export async function CountryReportSummary(
 						<ul className="divide-y rounded-md border">
 							{data.projectContributions.map((p) => (
 								<li key={p.id} className="flex items-center justify-between gap-x-4 px-4 py-3">
-									<span className="text-sm font-medium text-fg">{p.projectName}</span>
+									<span className="text-sm font-medium text-fg min-inline-0">
+										<NameWithDraftBadge isDraft={p.projectIsDraft} name={p.projectName} />
+									</span>
 									<span className="shrink-0 text-sm text-muted-fg">
 										{eurFormatter.format(p.amountEuros)}
 									</span>

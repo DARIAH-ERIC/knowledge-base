@@ -5,10 +5,13 @@ import * as v from "valibot";
 
 import { UpdateInstitutionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/update-institution.schema";
 import { assertCanEditCountryInstitution } from "@/app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/authorize-country-institution-relation";
-import { updateDraftDocumentSlug } from "@/lib/data/entity-lifecycle";
 import { checkSshocMarketplaceActorIdAvailable } from "@/lib/data/sshoc-marketplace-actor-id";
 import { updateManagedOrganisationalUnitDraft } from "@/lib/data/update-managed-organisational-unit";
-import { getRequestedSlug } from "@/lib/entity-slug-input";
+import {
+	isDelegatedChange,
+	notifyChangesAwaitingReview,
+	startsPendingChanges,
+} from "@/lib/email/send-delegated-change-notification";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 // Related entities and resources are curated by admins, so the delegated form does not offer them;
@@ -36,20 +39,33 @@ export const updateDelegatedInstitutionAction = createMutationAction({
 			excludeDocumentId: input.documentId,
 		});
 	},
-	async mutate(tx, input) {
+	postCommit({ result, ctx }) {
+		if (result.postCommitData?.startsReview !== true) {
+			return;
+		}
+		return notifyChangesAwaitingReview({
+			kind: "institution",
+			documentId: result.subjectId,
+			user: ctx.user,
+			realUser: ctx.realUser,
+			locale: ctx.locale,
+		});
+	},
+	async mutate(tx, input, ctx) {
 		const t = await getExtracted();
 
-		await updateManagedOrganisationalUnitDraft(tx, input);
+		// Notified once per round of changes: only the save that starts them.
+		const startsReview =
+			isDelegatedChange(ctx.user, ctx.realUser) &&
+			(await startsPendingChanges(tx, input.documentId));
 
-		// The form only offers the slug while the document is draft-only; `updateDraftDocumentSlug`
-		// re-checks that server-side, so a forged submission cannot rename a published page.
-		const requestedSlug = getRequestedSlug(input.slug);
-		if (requestedSlug != null) {
-			await updateDraftDocumentSlug(tx, input.documentId, requestedSlug);
-		}
+		// The slug is not saved here: choosing the public URL is an administrator task, so a slug
+		// submitted from the delegated form is ignored.
+		await updateManagedOrganisationalUnitDraft(tx, input);
 
 		return {
 			subjectId: input.documentId,
+			postCommitData: { startsReview },
 			auditSummary: { lifecycle: "draft" },
 			successMessage: t("Institution saved as draft."),
 			successData: { name: input.name },

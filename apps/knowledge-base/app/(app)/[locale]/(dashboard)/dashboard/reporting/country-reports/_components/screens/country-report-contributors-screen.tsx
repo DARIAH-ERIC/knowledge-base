@@ -84,6 +84,7 @@ export async function CountryReportContributorsScreen(
 			id: contribution.id,
 			personName: contribution.personName,
 			personSlug: contribution.personSlug,
+			personIsDraft: contribution.personIsDraft,
 			compensationRole: contribution.compensationRole,
 			isCurrent: snapshotCandidateIds.has(contribution.personToOrgUnitId),
 		};
@@ -95,6 +96,7 @@ export async function CountryReportContributorsScreen(
 				personToOrgUnitId: candidate.personToOrgUnitId,
 				personName: candidate.personName,
 				personSlug: candidate.personSlug,
+				personIsDraft: candidate.personIsDraft,
 				compensationRole: candidate.compensationRole,
 			};
 		});

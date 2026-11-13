@@ -78,8 +78,8 @@ test.describe("country people and institutions (delegated national coordinator)"
 		await gotoEdit(page);
 		await selectTab(page.getByRole("tab", { name: "People" }));
 
-		await page.getByRole("button", { name: "Add new person" }).click();
-		const dialog = page.getByRole("dialog", { name: "Add new person" });
+		await page.getByRole("button", { name: "Create new person" }).click();
+		const dialog = page.getByRole("dialog", { name: "Create new person" });
 		await dialog.getByLabel("Name", { exact: true }).fill(name);
 		await dialog.getByRole("textbox", { name: "Sort name" }).fill(sortName);
 		await dialog.getByRole("textbox", { name: "Email", exact: true }).fill(email);
@@ -160,8 +160,8 @@ test.describe("country people and institutions (delegated national coordinator)"
 		await gotoEdit(page);
 		await selectTab(page.getByRole("tab", { name: "People" }));
 
-		await page.getByRole("button", { name: "Add new person" }).click();
-		const dialog = page.getByRole("dialog", { name: "Add new person" });
+		await page.getByRole("button", { name: "Create new person" }).click();
+		const dialog = page.getByRole("dialog", { name: "Create new person" });
 		await dialog.getByLabel("Name", { exact: true }).fill(name);
 		await dialog.getByRole("textbox", { name: "Sort name" }).fill(sortName);
 		await dialog.getByRole("button", { name: "Create person" }).click();
@@ -201,8 +201,8 @@ test.describe("country people and institutions (delegated national coordinator)"
 
 		// Create a new (draft) institution; the create action also adds the `is_located_in` edge and
 		// selects it in the picker.
-		await page.getByRole("button", { name: "Add new institution" }).click();
-		const dialog = page.getByRole("dialog", { name: "Add new institution" });
+		await page.getByRole("button", { name: "Create new institution" }).click();
+		const dialog = page.getByRole("dialog", { name: "Create new institution" });
 		await dialog.getByLabel("Name", { exact: true }).fill(name);
 		await dialog.getByRole("textbox", { name: "Acronym", exact: true }).fill(acronym);
 		await dialog.getByRole("button", { name: "Create institution" }).click();
@@ -297,8 +297,8 @@ test.describe("country people and institutions (delegated national coordinator)"
 
 		// Creating the draft institution also adds its `is_located_in` edge to the country, so it is in
 		// scope for the country-scoped picker even without completing a partner relation.
-		await page.getByRole("button", { name: "Add new institution" }).click();
-		const dialog = page.getByRole("dialog", { name: "Add new institution" });
+		await page.getByRole("button", { name: "Create new institution" }).click();
+		const dialog = page.getByRole("dialog", { name: "Create new institution" });
 		await dialog.getByLabel("Name", { exact: true }).fill(name);
 		await dialog.getByRole("button", { name: "Create institution" }).click();
 		await dialog.waitFor({ state: "hidden" });

@@ -1,5 +1,6 @@
 import { assert } from "@acdh-oeaw/lib";
 import type { User } from "@dariah-eric/auth";
+import { isEmptyRichTextDocument } from "@dariah-eric/database/rich-text";
 
 import type { WorkingGroupReportSummaryData } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
 import { type Action, can } from "@/lib/auth/permissions";
@@ -17,6 +18,7 @@ export interface WorkingGroupReportData {
 
 export interface WorkingGroupReportHeaderData {
 	id: string;
+	status: string;
 	workingGroup: { name: string };
 	campaign: { year: number };
 }
@@ -38,10 +40,6 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 		with: {
 			campaign: { columns: { year: true, status: true } },
 			workingGroup: { columns: { name: true } },
-			socialMedia: {
-				columns: { id: true },
-				with: { socialMedia: { columns: { name: true, url: true } } },
-			},
 			events: {
 				columns: { id: true, title: true, date: true, url: true, role: true },
 				orderBy: { date: "asc" },
@@ -79,15 +77,22 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 		summary: {
 			numberOfMembers: report.numberOfMembers,
 			chairs: chairs.map((chair) => {
-				return { id: chair.id, personName: chair.personName, roleType: chair.chairRole };
+				return {
+					id: chair.id,
+					personName: chair.personName,
+					personIsDraft: chair.personIsDraft ?? false,
+					roleType: chair.chairRole,
+				};
 			}),
-			socialMedia: report.socialMedia,
 			events: report.events,
 			questions: questions.map((q) => {
 				return {
 					id: q.id,
 					question: q.question,
-					answer: answerMap.get(q.id) ?? null,
+					// Older saves stored empty documents for unanswered questions.
+					answer: isEmptyRichTextDocument(answerMap.get(q.id))
+						? null
+						: (answerMap.get(q.id) ?? null),
 				};
 			}),
 		},
@@ -99,7 +104,7 @@ async function getWorkingGroupReportHeader(
 ): Promise<WorkingGroupReportHeaderData | null> {
 	const report = await db.query.workingGroupReports.findFirst({
 		where: { id },
-		columns: { id: true },
+		columns: { id: true, status: true },
 		with: {
 			campaign: { columns: { year: true } },
 			workingGroup: { columns: { name: true } },
@@ -115,6 +120,7 @@ async function getWorkingGroupReportHeader(
 
 	return {
 		id: report.id,
+		status: report.status,
 		workingGroup: report.workingGroup,
 		campaign: report.campaign,
 	};

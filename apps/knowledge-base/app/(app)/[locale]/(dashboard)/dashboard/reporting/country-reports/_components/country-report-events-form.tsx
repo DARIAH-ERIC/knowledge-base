@@ -7,6 +7,7 @@ import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
+import { NumberField } from "@dariah-eric/ui/number-field";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
@@ -17,6 +18,7 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { countFormatOptions } from "@/lib/number-format-options";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface CountryReportEventsFormProps {
@@ -45,47 +47,49 @@ export function CountryReportEventsForm(props: Readonly<CountryReportEventsFormP
 				<input name="id" type="hidden" value={report.id} />
 
 				<FormSection title={t("Event counts")}>
-					<TextField
-						defaultValue={report.smallEvents != null ? String(report.smallEvents) : undefined}
+					<NumberField
+						defaultValue={report.smallEvents ?? undefined}
+						formatOptions={countFormatOptions}
+						minValue={0}
 						name="smallEvents"
-						type="number"
 					>
 						<Label>{t("Small events")}</Label>
-						<Input min={0} />
+						<Input />
 						<FieldError />
-					</TextField>
+					</NumberField>
 
-					<TextField
-						defaultValue={report.mediumEvents != null ? String(report.mediumEvents) : undefined}
+					<NumberField
+						defaultValue={report.mediumEvents ?? undefined}
+						formatOptions={countFormatOptions}
+						minValue={0}
 						name="mediumEvents"
-						type="number"
 					>
 						<Label>{t("Medium events")}</Label>
-						<Input min={0} />
+						<Input />
 						<FieldError />
-					</TextField>
+					</NumberField>
 
-					<TextField
-						defaultValue={report.largeEvents != null ? String(report.largeEvents) : undefined}
+					<NumberField
+						defaultValue={report.largeEvents ?? undefined}
+						formatOptions={countFormatOptions}
+						minValue={0}
 						name="largeEvents"
-						type="number"
 					>
 						<Label>{t("Large events")}</Label>
-						<Input min={0} />
+						<Input />
 						<FieldError />
-					</TextField>
+					</NumberField>
 
-					<TextField
-						defaultValue={
-							report.veryLargeEvents != null ? String(report.veryLargeEvents) : undefined
-						}
+					<NumberField
+						defaultValue={report.veryLargeEvents ?? undefined}
+						formatOptions={countFormatOptions}
+						minValue={0}
 						name="veryLargeEvents"
-						type="number"
 					>
 						<Label>{t("Very large events")}</Label>
-						<Input min={0} />
+						<Input />
 						<FieldError />
-					</TextField>
+					</NumberField>
 				</FormSection>
 
 				<FormSection title={t("DARIAH commissioned event")}>

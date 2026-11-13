@@ -12,6 +12,8 @@ interface ActionFormProps {
 	/** Receives the pending flag, so the submit button can show progress. */
 	children: (isPending: boolean) => ReactNode;
 	className?: string;
+	/** Lets a submit button outside the form (e.g. in a dialog portal) target it via `form`. */
+	id?: string;
 }
 
 /**
@@ -21,12 +23,16 @@ interface ActionFormProps {
  * render it through a small client wrapper (e.g. `ReportActionForm`).
  */
 export function ActionForm(props: Readonly<ActionFormProps>): ReactNode {
-	const { action, children, className } = props;
+	const { action, children, className, id } = props;
 
 	const [state, formAction, isPending] = useActionState(action, createActionStateInitial());
 
 	return (
-		<form action={formAction} className={twMerge("flex flex-col items-start gap-y-2", className)}>
+		<form
+			action={formAction}
+			className={twMerge("flex flex-col items-start gap-y-2", className)}
+			id={id}
+		>
 			{children(isPending)}
 			<FormStatus state={state} />
 		</form>

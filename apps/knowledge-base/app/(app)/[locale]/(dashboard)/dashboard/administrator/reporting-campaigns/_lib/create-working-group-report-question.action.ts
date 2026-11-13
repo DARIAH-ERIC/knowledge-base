@@ -1,6 +1,8 @@
 "use server";
 
+import { isEmptyRichTextDocument } from "@dariah-eric/database/rich-text";
 import * as schema from "@dariah-eric/database/schema";
+import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import type { JSONContent } from "@tiptap/core";
 import { getExtracted } from "next-intl/server";
 import * as v from "valibot";
@@ -30,7 +32,15 @@ export const createWorkingGroupReportQuestionAction = createMutationAction({
 	audit: { action: "create", subjectType: "reporting_campaigns" },
 	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
 
-	preCheck({ input }) {
+	async preCheck({ input }) {
+		// The editor submits an empty document rather than an empty string when nothing was typed.
+		// Checked here rather than in the schema so the message shows in the form status: the editor
+		// is not a field that could display a field error.
+		if (isEmptyRichTextDocument(input.question)) {
+			const t = await getExtracted();
+			return createActionStateError({ message: t("Enter a question.") });
+		}
+
 		return checkCampaignEditable(input.campaignId);
 	},
 

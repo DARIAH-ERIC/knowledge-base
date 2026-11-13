@@ -53,6 +53,13 @@ export async function CountryReportSummaryScreen(
 					{canConfirm && report.status === "draft" && report.campaign.status === "open" && (
 						<ReportActionForm
 							action={submitCountryReportAction}
+							confirmation={{
+								title: t("Submit this report?"),
+								description: t(
+									"Once the report is submitted, you can no longer make changes to it. Please check that every section is complete before you submit.",
+								),
+								confirmLabel: t("Submit report"),
+							}}
 							label={t("Submit report")}
 							reportId={report.id}
 						/>

@@ -6,6 +6,11 @@ import * as schema from "@dariah-eric/database/schema";
 import { assertCanManageCountryInstitutionRelation } from "@/app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/authorize-country-institution-relation";
 import { resolveAuditSubjectLabel } from "@/lib/data/audit-log";
 import { eq } from "@/lib/db/sql";
+import {
+	describeUnitRelation,
+	isDelegatedChange,
+	sendRelationChangeNotification,
+} from "@/lib/email/send-delegated-change-notification";
 import { createCommandAction } from "@/lib/server/create-command-action";
 import { UserFacingError } from "@/lib/user-facing-error";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
@@ -35,14 +40,27 @@ export const deleteDelegatedUnitRelationAction = createCommandAction({
 		// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
 		const subjectLabel = await resolveAuditSubjectLabel("unit_relations", id, tx);
 
+		// Described while the row still exists, for the notification sent after the commit.
+		const deletedRelation = isDelegatedChange(ctx.user, ctx.realUser)
+			? await describeUnitRelation(id, tx)
+			: null;
+
 		await tx
 			.delete(schema.organisationalUnitsRelations)
 			.where(eq(schema.organisationalUnitsRelations.id, id));
 
-		return { subjectId: id, subjectLabel };
+		return { subjectId: id, subjectLabel, deletedRelation };
 	},
 
-	async postCommit() {
+	async postCommit({ result, ctx }) {
 		await dispatchWebhook({ tags: ["members-partners", "working-groups"] });
+		if (result.deletedRelation != null && ctx.user != null) {
+			await sendRelationChangeNotification({
+				change: "deleted",
+				relation: result.deletedRelation,
+				actor: ctx.user,
+				locale: ctx.locale,
+			});
+		}
 	},
 });

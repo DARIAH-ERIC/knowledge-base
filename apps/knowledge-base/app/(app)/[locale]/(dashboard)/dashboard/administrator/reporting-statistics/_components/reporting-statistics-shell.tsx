@@ -121,6 +121,11 @@ export function ReportingStatisticsShell(
 			path: `${basePath}/services`,
 		},
 		{
+			href: toTabHref(`${basePath}/removed-services`),
+			label: t("Removed services"),
+			path: `${basePath}/removed-services`,
+		},
+		{
 			href: toTabHref(`${basePath}/social-media`),
 			label: t("Social media"),
 			path: `${basePath}/social-media`,

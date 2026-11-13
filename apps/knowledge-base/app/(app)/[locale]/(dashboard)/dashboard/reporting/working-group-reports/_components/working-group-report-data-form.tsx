@@ -7,11 +7,12 @@ import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
+import { NumberField } from "@dariah-eric/ui/number-field";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
 
+import { countFormatOptions } from "@/lib/number-format-options";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface WorkingGroupReportDataFormProps {
@@ -31,15 +32,16 @@ export function WorkingGroupReportDataForm(
 		<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
 			<input name="id" type="hidden" value={report.id} />
 
-			<TextField
-				defaultValue={report.numberOfMembers != null ? String(report.numberOfMembers) : undefined}
+			<NumberField
+				defaultValue={report.numberOfMembers ?? undefined}
+				formatOptions={countFormatOptions}
+				minValue={0}
 				name="numberOfMembers"
-				type="number"
 			>
 				<Label>{t("Number of members")}</Label>
-				<Input min={0} />
+				<Input />
 				<FieldError />
-			</TextField>
+			</NumberField>
 
 			<Button className="self-start" isPending={isPending} type="submit">
 				{isPending ? (

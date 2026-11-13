@@ -6,7 +6,15 @@ import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
+import { Input } from "@dariah-eric/ui/input";
+import { NumberField } from "@dariah-eric/ui/number-field";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import {
+	SearchableSelect,
+	SearchableSelectContent,
+	SearchableSelectInput,
+	SearchableSelectItem,
+} from "@dariah-eric/ui/searchable-select";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
@@ -17,6 +25,7 @@ import type {
 	ReportServiceWithKpis,
 	ServiceKpiCategory,
 } from "@/lib/data/report-services";
+import { countFormatOptions } from "@/lib/number-format-options";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 /** Id linking the per-service inputs (rendered inside service cards) to the single Save form. */
@@ -193,7 +202,7 @@ function ServiceCard(props: Readonly<ServiceCardProps>): ReactNode {
 			) : (
 				<Fragment>
 					<Checkbox isSelected={isImportant} onChange={setIsImportant}>
-						{t("Important service")}
+						{t("Resource-intensive service")}
 					</Checkbox>
 					{isImportant && (
 						<input form={KPI_FORM_ID} name={`important.${service.id}`} type="hidden" value="on" />
@@ -208,21 +217,25 @@ function ServiceCard(props: Readonly<ServiceCardProps>): ReactNode {
 							<label
 								className="shrink-0 text-sm text-fg inline-40"
 								htmlFor={`${service.id}-${metric.kpi}`}
+								id={`${service.id}-${metric.kpi}-label`}
 							>
 								{formatKpi(metric.kpi)}
 							</label>
-							<input
-								className="rounded-md border border-border bg-bg px-2 py-1 text-sm text-fg inline-32"
+							<NumberField
+								aria-labelledby={`${service.id}-${metric.kpi}-label`}
+								className="shrink-0 inline-40"
 								form={KPI_FORM_ID}
+								formatOptions={countFormatOptions}
 								id={`${service.id}-${metric.kpi}`}
-								min={0}
+								minValue={0}
 								name={`kpis.${service.id}.${metric.kpi}`}
-								onChange={(event) => {
-									setValue(metric.kpi, event.target.value);
+								onChange={(value) => {
+									setValue(metric.kpi, Number.isNaN(value) ? "" : String(value));
 								}}
-								type="number"
-								value={metric.value}
-							/>
+								value={metric.value === "" ? Number.NaN : Number(metric.value)}
+							>
+								<Input />
+							</NumberField>
 							<Button
 								intent="plain"
 								onPress={() => {
@@ -290,7 +303,7 @@ function AddExistingServiceForm(props: Readonly<AddExistingServiceFormProps>): R
 			>
 				<input name="countryReportId" type="hidden" value={reportId} />
 
-				<Select
+				<SearchableSelect
 					isRequired={true}
 					onChange={(key) => {
 						setSelectedId(key == null ? "" : String(key));
@@ -298,16 +311,16 @@ function AddExistingServiceForm(props: Readonly<AddExistingServiceFormProps>): R
 					value={selectedId || null}
 				>
 					<Label>{t("Service")}</Label>
-					<SelectTrigger />
+					<SearchableSelectInput placeholder={t("Search services...")} />
 					<FieldError />
-					<SelectContent>
+					<SearchableSelectContent>
 						{availableServices.map((service) => (
-							<SelectItem key={service.id} id={service.id}>
+							<SearchableSelectItem key={service.id} id={service.id} textValue={service.name}>
 								{service.name}
-							</SelectItem>
+							</SearchableSelectItem>
 						))}
-					</SelectContent>
-				</Select>
+					</SearchableSelectContent>
+				</SearchableSelect>
 				<input name="serviceId" type="hidden" value={selectedId} />
 
 				<Button className="self-start" isPending={isPending} type="submit">

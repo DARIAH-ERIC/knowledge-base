@@ -12,7 +12,7 @@ interface CountryReportStepNavProps {
 	/** The `/edit` base path; per-screen routes are appended to it. */
 	editBasePath: string;
 	/**
-	 * - `reporting`: the user-facing flow.
+	 * - `reporting`: the user-facing flow; starts with a "Welcome" tab.
 	 * - `admin`: starts with a "Status" tab (status editor at the edit index) and has no confirm step.
 	 */
 	variant: "admin" | "reporting";
@@ -24,7 +24,9 @@ export function CountryReportStepNav(props: Readonly<CountryReportStepNavProps>)
 	const t = useExtracted();
 
 	const steps: Array<ReportStep> = [
-		...(variant === "admin" ? [{ href: editBasePath, label: t("Status") }] : []),
+		...(variant === "admin"
+			? [{ href: editBasePath, label: t("Status") }]
+			: [{ href: `${editBasePath}/welcome`, label: t("Welcome") }]),
 		{ href: `${editBasePath}/contributors`, label: t("Contributors") },
 		{ href: `${editBasePath}/institutions`, label: t("Institutions") },
 		{ href: `${editBasePath}/events`, label: t("Events") },

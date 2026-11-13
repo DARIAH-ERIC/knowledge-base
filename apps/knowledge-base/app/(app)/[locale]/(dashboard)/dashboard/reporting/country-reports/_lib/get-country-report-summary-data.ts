@@ -10,8 +10,10 @@ import {
 import { type Action, can } from "@/lib/auth/permissions";
 import {
 	type CountryReportInstitutionSummaryItem,
+	getCountryReportInstitutionRows,
 	groupCountryReportInstitutionSummaryRows,
 } from "@/lib/data/country-report-institutions";
+import { getCountryReportProjectContributionRows } from "@/lib/data/country-report-projects";
 import { classifyCompensationRole } from "@/lib/data/report-contributions";
 import { db } from "@/lib/db";
 import { alias, eq, sql } from "@/lib/db/sql";
@@ -60,6 +62,8 @@ export interface CountryReportSummaryData {
 	contributions: Array<{
 		id: string;
 		personName: string;
+		/** Never published: the person does not appear on the website yet. */
+		personIsDraft: boolean;
 		orgUnitName: string;
 		orgUnitType: string;
 		roleType: string;
@@ -87,6 +91,8 @@ export interface CountryReportSummaryData {
 	projectContributions: Array<{
 		id: string;
 		projectName: string;
+		/** Never published: the project does not appear on the website yet. */
+		projectIsDraft: boolean;
 		amountEuros: number;
 	}>;
 }
@@ -102,6 +108,7 @@ export interface CountryReportData {
 
 export interface CountryReportHeaderData {
 	id: string;
+	status: string;
 	country: { name: string };
 	campaign: { year: number };
 }
@@ -139,13 +146,6 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 				},
 			},
 			country: { columns: { name: true } },
-			institutions: {
-				columns: { id: true, organisationalUnitDocumentId: true, representationType: true },
-				with: {
-					organisationalUnit: { columns: { name: true, acronym: true } },
-				},
-				orderBy: { organisationalUnitDocumentId: "asc" },
-			},
 			socialMediaKpis: {
 				columns: { socialMediaId: true, kpi: true, value: true },
 				with: {
@@ -174,19 +174,17 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 					},
 				},
 			},
-			projectContributions: {
-				columns: { id: true, amountEuros: true },
-				with: {
-					project: { columns: { name: true } },
-				},
-				orderBy: { projectDocumentId: "asc" },
-			},
 		},
 	});
 
 	if (report == null) {
 		return null;
 	}
+
+	const institutionRows = await getCountryReportInstitutionRows(report.id);
+	// Projects resolve draft-first, so a project a coordinator created and reported before an
+	// administrator published it is still named.
+	const projectContributionRows = await getCountryReportProjectContributionRows(report.id);
 
 	// Claimed contributions are document-level person↔org relations; resolve each endpoint to its
 	// latest editable version for display.
@@ -201,6 +199,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			id: schema.countryReportContributions.id,
 			storedRole: schema.countryReportContributions.contributionRole,
 			personName: schema.persons.name,
+			personIsDraft: sql<boolean>`${personDocumentLifecycle.publishedId} IS NULL`,
 			orgUnitName: schema.organisationalUnits.name,
 			orgUnitSlug: organisationalUnitEntities.slug,
 			orgUnitType: schema.organisationalUnitTypes.type,
@@ -252,6 +251,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			return {
 				id: row.id,
 				personName: row.personName,
+				personIsDraft: row.personIsDraft,
 				orgUnitName: row.orgUnitName,
 				orgUnitType: row.orgUnitType,
 				roleType: row.roleType,
@@ -329,7 +329,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 		veryLargeEvents: report.veryLargeEvents,
 		dariahCommissionedEvent: report.dariahCommissionedEvent,
 		reusableOutcomes: report.reusableOutcomes,
-		institutions: groupCountryReportInstitutionSummaryRows(report.institutions),
+		institutions: groupCountryReportInstitutionSummaryRows(institutionRows),
 		contributions: reportContributions,
 		socialMediaAccounts: Array.from(socialMediaMap.entries()).map(([socialMediaId, data]) => {
 			return { socialMediaId, ...data };
@@ -337,10 +337,11 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 		services: Array.from(serviceMap.entries()).map(([serviceId, data]) => {
 			return { serviceId, ...data };
 		}),
-		projectContributions: report.projectContributions.map((p) => {
+		projectContributions: projectContributionRows.map((p) => {
 			return {
 				id: p.id,
 				projectName: p.project?.name ?? "",
+				projectIsDraft: p.project?.isDraft ?? false,
 				amountEuros: p.amountEuros,
 			};
 		}),
@@ -391,7 +392,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 async function getCountryReportHeader(id: string): Promise<CountryReportHeaderData | null> {
 	const report = await db.query.countryReports.findFirst({
 		where: { id },
-		columns: { id: true },
+		columns: { id: true, status: true },
 		with: {
 			campaign: { columns: { year: true } },
 			country: { columns: { name: true } },
@@ -407,6 +408,7 @@ async function getCountryReportHeader(id: string): Promise<CountryReportHeaderDa
 
 	return {
 		id: report.id,
+		status: report.status,
 		country: report.country,
 		campaign: report.campaign,
 	};

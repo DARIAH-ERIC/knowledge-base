@@ -6,7 +6,7 @@ import * as v from "valibot";
 import { CreatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.schema";
 import { assertCan } from "@/lib/auth/permissions";
 import { createPersonDraft } from "@/lib/data/save-person-draft";
-import { getRequestedSlug } from "@/lib/entity-slug-input";
+import { notifyDraftEntityCreated } from "@/lib/email/send-delegated-change-notification";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 const CreateDelegatedPersonActionInputSchema = v.object({
@@ -31,11 +31,23 @@ export const createDelegatedPersonAction = createMutationAction({
 			id: input.organisationalUnitDocumentId,
 		});
 	},
+	postCommit({ result, input, ctx }) {
+		return notifyDraftEntityCreated({
+			kind: "person",
+			documentId: result.subjectId,
+			name: input.name,
+			user: ctx.user,
+			realUser: ctx.realUser,
+			locale: ctx.locale,
+		});
+	},
 	async mutate(tx, input) {
 		const t = await getExtracted();
 		const { documentId } = await createPersonDraft(tx, {
 			...input,
-			requestedSlug: getRequestedSlug(input.slug),
+			// Choosing the public URL is an administrator task, so a slug submitted from a delegated form is
+			// ignored: the slug is generated from the name.
+			requestedSlug: null,
 		});
 		return {
 			subjectId: documentId,

@@ -88,6 +88,10 @@ const { copyWorkingGroupReportQuestionsAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/copy-working-group-report-questions.action");
 const { createWorkingGroupReportQuestionAction } =
 	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/create-working-group-report-question.action");
+const { deleteWorkingGroupReportQuestionAction } =
+	await import("@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/delete-working-group-report-question.action");
+const { upsertWorkingGroupReportAnswersAction } =
+	await import("@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/upsert-working-group-report-answers.action");
 const { createDraftDocument, createPublishedDocument } =
 	await import("@/lib/data/entity-lifecycle");
 const { getDariahEricDocumentId } = await import("@/lib/data/unit-relations");
@@ -188,6 +192,31 @@ async function seedCampaignAmounts(tx: Tx, campaignId: string): Promise<void> {
 			};
 		}),
 	);
+}
+
+type UnitType = "country" | "working_group";
+
+/** Seeds an organisational unit, published unless `isDraft`, and returns its document id. */
+async function seedUnit(tx: Tx, type: UnitType, isDraft = false): Promise<string> {
+	const entityType = await tx.query.entityTypes.findFirst({
+		where: { type: "organisational_units" },
+		columns: { id: true },
+	});
+	const unitType = await tx.query.organisationalUnitTypes.findFirst({
+		where: { type },
+		columns: { id: true },
+	});
+	assert(entityType);
+	assert(unitType);
+
+	const create = isDraft ? createDraftDocument : createPublishedDocument;
+	const { documentId, versionId } = await create(tx, entityType.id, `test-${type}-${randomUUID()}`);
+	await tx.insert(schema.organisationalUnits).values({
+		id: versionId,
+		name: `Test ${type} ${documentId.slice(0, 8)}`,
+		typeId: unitType.id,
+	});
+	return documentId;
 }
 
 async function getStatus(tx: Tx, id: string): Promise<CampaignStatus | undefined> {
@@ -459,6 +488,143 @@ describe("closed campaigns are read-only", () => {
 	});
 });
 
+describe("campaign questions", () => {
+	it("refuses an empty question, as the editor submits it", async () => {
+		await withAdminTransaction(async (tx) => {
+			const open = await seedCampaign(tx, "open");
+
+			for (const content of [
+				[],
+				[{ type: "paragraph" }],
+				[{ type: "paragraph", content: [{ type: "text", text: "   " }] }],
+			]) {
+				const added = await createWorkingGroupReportQuestionAction(
+					createActionStateInitial(),
+					toFormData({ campaignId: open, question: JSON.stringify({ type: "doc", content }) }),
+				);
+				expect(added.status, JSON.stringify(added)).toBe("error");
+				expect(added.status === "error" ? added.message : "").toBe("Enter a question.");
+			}
+
+			expect(
+				await tx.query.workingGroupReportQuestions.findFirst({ where: { campaignId: open } }),
+			).toBeUndefined();
+		});
+	});
+
+	const emptyDocument = { type: "doc", content: [{ type: "paragraph" }] };
+	const answeredDocument = {
+		type: "doc",
+		content: [{ type: "paragraph", content: [{ type: "text", text: "An answer." }] }],
+	};
+
+	async function seedQuestion(tx: Tx, campaignId: string, position: number, question: object) {
+		const [row] = await tx
+			.insert(schema.workingGroupReportQuestions)
+			.values({ campaignId, question, position })
+			.returning({ id: schema.workingGroupReportQuestions.id });
+		assert(row);
+		return row.id;
+	}
+
+	async function seedWorkingGroupReport(tx: Tx, campaignId: string): Promise<string> {
+		const workingGroup = await seedUnit(tx, "working_group");
+		const [row] = await tx
+			.insert(schema.workingGroupReports)
+			.values({ campaignId, workingGroupDocumentId: workingGroup })
+			.returning({ id: schema.workingGroupReports.id });
+		assert(row);
+		return row.id;
+	}
+
+	async function getAnswers(tx: Tx, reportId: string) {
+		return tx.query.workingGroupReportAnswers.findMany({
+			where: { workingGroupReportId: reportId },
+			columns: { questionId: true },
+		});
+	}
+
+	it("stores no answer for an unanswered question, and drops a cleared answer", async () => {
+		await withAdminTransaction(async (tx) => {
+			const open = await seedCampaign(tx, "open");
+			const answered = await seedQuestion(tx, open, 1, answeredDocument);
+			const unanswered = await seedQuestion(tx, open, 2, answeredDocument);
+			const report = await seedWorkingGroupReport(tx, open);
+
+			const saved = await upsertWorkingGroupReportAnswersAction(
+				createActionStateInitial(),
+				toFormData({
+					id: report,
+					[`answers.${answered}`]: JSON.stringify(answeredDocument),
+					[`answers.${unanswered}`]: JSON.stringify(emptyDocument),
+				}),
+			);
+			expect(saved.status, JSON.stringify(saved)).toBe("success");
+			expect(await getAnswers(tx, report)).toEqual([{ questionId: answered }]);
+
+			const cleared = await upsertWorkingGroupReportAnswersAction(
+				createActionStateInitial(),
+				toFormData({ id: report, [`answers.${answered}`]: JSON.stringify(emptyDocument) }),
+			);
+			expect(cleared.status, JSON.stringify(cleared)).toBe("success");
+			expect(await getAnswers(tx, report)).toEqual([]);
+		});
+	});
+
+	it("deletes a question whose only answers are empty, but keeps an answered one", async () => {
+		await withAdminTransaction(async (tx) => {
+			const draft = await seedCampaign(tx, "draft");
+			const blank = await seedQuestion(tx, draft, 1, emptyDocument);
+			const answered = await seedQuestion(tx, draft, 2, answeredDocument);
+			const report = await seedWorkingGroupReport(tx, draft);
+			await tx.insert(schema.workingGroupReportAnswers).values([
+				{ workingGroupReportId: report, questionId: blank, answer: emptyDocument },
+				{ workingGroupReportId: report, questionId: answered, answer: answeredDocument },
+			]);
+
+			const deleted = await deleteWorkingGroupReportQuestionAction(
+				createActionStateInitial(),
+				toFormData({ id: blank, campaignId: draft }),
+			);
+			expect(deleted.status, JSON.stringify(deleted)).toBe("success");
+
+			const kept = await deleteWorkingGroupReportQuestionAction(
+				createActionStateInitial(),
+				toFormData({ id: answered, campaignId: draft }),
+			);
+			expect(kept.status).toBe("error");
+
+			const remaining = await tx.query.workingGroupReportQuestions.findMany({
+				where: { campaignId: draft },
+				columns: { id: true },
+			});
+			expect(remaining).toEqual([{ id: answered }]);
+		});
+	});
+
+	it("skips empty questions when copying from the previous campaign", async () => {
+		await withAdminTransaction(async (tx) => {
+			const year = unusedYear();
+			const previous = await seedCampaign(tx, "closed", year - 1);
+			await seedQuestion(tx, previous, 1, emptyDocument);
+			await seedQuestion(tx, previous, 2, answeredDocument);
+			const draft = await seedCampaign(tx, "draft", year);
+
+			const copied = await copyWorkingGroupReportQuestionsAction(
+				createActionStateInitial(),
+				toFormData({ campaignId: draft }),
+			);
+			expect(copied.status, JSON.stringify(copied)).toBe("success");
+
+			const questions = await tx.query.workingGroupReportQuestions.findMany({
+				where: { campaignId: draft },
+				columns: { position: true, question: true },
+			});
+			expect(questions).toEqual([{ position: 1, question: answeredDocument }]);
+		});
+	});
+});
+
 describe("only the launch and close actions change a campaign's status", () => {
 	it("creates campaigns as drafts, whatever status is submitted", async () => {
 		await withAdminTransaction(async (tx) => {
@@ -571,35 +737,6 @@ describe("copying questions from the previous campaign", () => {
 });
 
 describe("launching a campaign creates its reports", () => {
-	type UnitType = "country" | "working_group";
-
-	/** Seeds an organisational unit, published unless `isDraft`, and returns its document id. */
-	async function seedUnit(tx: Tx, type: UnitType, isDraft = false): Promise<string> {
-		const entityType = await tx.query.entityTypes.findFirst({
-			where: { type: "organisational_units" },
-			columns: { id: true },
-		});
-		const unitType = await tx.query.organisationalUnitTypes.findFirst({
-			where: { type },
-			columns: { id: true },
-		});
-		assert(entityType);
-		assert(unitType);
-
-		const create = isDraft ? createDraftDocument : createPublishedDocument;
-		const { documentId, versionId } = await create(
-			tx,
-			entityType.id,
-			`test-${type}-${randomUUID()}`,
-		);
-		await tx.insert(schema.organisationalUnits).values({
-			id: versionId,
-			name: `Test ${type} ${documentId.slice(0, 8)}`,
-			typeId: unitType.id,
-		});
-		return documentId;
-	}
-
 	/**
 	 * Relates `unitDocumentId` to DARIAH ERIC from `start` until `end` inclusive (open-ended when
 	 * omitted).

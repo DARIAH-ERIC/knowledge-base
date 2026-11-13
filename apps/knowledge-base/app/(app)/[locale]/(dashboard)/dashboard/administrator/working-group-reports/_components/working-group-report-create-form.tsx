@@ -8,6 +8,12 @@ import { Description, FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import {
+	SearchableSelect,
+	SearchableSelectContent,
+	SearchableSelectInput,
+	SearchableSelectItem,
+} from "@dariah-eric/ui/searchable-select";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
@@ -83,7 +89,7 @@ export function WorkingGroupReportCreateForm(
 						</Select>
 						<input name="campaignId" type="hidden" value={selectedCampaignId} />
 
-						<Select
+						<SearchableSelect
 							isRequired={true}
 							onChange={(key) => {
 								setSelectedWorkingGroupId(key == null ? "" : String(key));
@@ -91,21 +97,25 @@ export function WorkingGroupReportCreateForm(
 							value={selectedWorkingGroupId || null}
 						>
 							<Label>{t("Working group")}</Label>
-							<SelectTrigger />
+							<SearchableSelectInput placeholder={t("Search working groups...")} />
 							{selectedCampaignId !== "" && workingGroups.length === 0 && (
 								<Description>
 									{t("Every working group that reports for this campaign already has a report.")}
 								</Description>
 							)}
 							<FieldError />
-							<SelectContent>
+							<SearchableSelectContent>
 								{workingGroups.map((workingGroup) => (
-									<SelectItem key={workingGroup.id} id={workingGroup.id}>
+									<SearchableSelectItem
+										key={workingGroup.id}
+										id={workingGroup.id}
+										textValue={workingGroup.name}
+									>
 										{workingGroup.name}
-									</SelectItem>
+									</SearchableSelectItem>
 								))}
-							</SelectContent>
-						</Select>
+							</SearchableSelectContent>
+						</SearchableSelect>
 						<input name="workingGroupId" type="hidden" value={selectedWorkingGroupId} />
 
 						<Select

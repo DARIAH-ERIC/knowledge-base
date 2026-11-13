@@ -5,9 +5,6 @@ import type { ReactNode } from "react";
 import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { WorkingGroupReportChairsSnapshotForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-chairs-snapshot-form";
 import { WorkingGroupReportDataForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-data-form";
-import { WorkingGroupReportSocialMediaForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form";
-import { createWorkingGroupReportSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-social-media.action";
-import { deleteWorkingGroupReportSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/delete-working-group-report-social-media.action";
 import { getAuthorizedWorkingGroupReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { refreshWorkingGroupReportChairsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/refresh-working-group-report-chairs.action";
 import { updateWorkingGroupReportDataAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/update-working-group-report-data.action";
@@ -44,18 +41,7 @@ export async function WorkingGroupReportDataScreen(
 				},
 				with: {
 					campaign: { columns: { year: true } },
-					socialMedia: {
-						columns: { id: true, socialMediaId: true },
-						with: {
-							socialMedia: { columns: { id: true, name: true, url: true } },
-						},
-					},
-					workingGroup: {
-						columns: { id: true },
-						with: {
-							socialMedia: { columns: { id: true, name: true, url: true } },
-						},
-					},
+					workingGroup: { columns: { id: true } },
 				},
 			}),
 		"update",
@@ -82,11 +68,6 @@ export async function WorkingGroupReportDataScreen(
 
 	const t = await getExtracted();
 
-	const claimedSocialMediaIds = new Set(report.socialMedia.map((s) => s.socialMediaId));
-	const availableSocialMedia = report.workingGroup.socialMedia.filter(
-		(s) => !claimedSocialMediaIds.has(s.id),
-	);
-
 	return (
 		<div className="flex flex-col gap-y-12">
 			<section className="flex flex-col gap-y-4">
@@ -103,16 +84,6 @@ export async function WorkingGroupReportDataScreen(
 				missing={missingChairs}
 				refreshAction={refreshWorkingGroupReportChairsAction}
 				workingGroupReportId={report.id}
-			/>
-
-			<WorkingGroupReportSocialMediaForm
-				addAction={createWorkingGroupReportSocialMediaAction}
-				availableSocialMedia={availableSocialMedia}
-				deleteAction={deleteWorkingGroupReportSocialMediaAction}
-				report={{
-					id: report.id,
-					socialMedia: report.socialMedia,
-				}}
 			/>
 
 			<ReportScreenCommentSection

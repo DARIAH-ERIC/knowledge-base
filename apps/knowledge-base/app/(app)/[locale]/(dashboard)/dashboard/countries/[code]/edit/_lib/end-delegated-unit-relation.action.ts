@@ -5,6 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { assertCanManageCountryInstitutionRelation } from "@/app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_lib/authorize-country-institution-relation";
 import { eq } from "@/lib/db/sql";
+import { notifyRelationChange } from "@/lib/email/send-delegated-change-notification";
 import { createCommandAction } from "@/lib/server/create-command-action";
 import { UserFacingError } from "@/lib/user-facing-error";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
@@ -43,7 +44,15 @@ export const endDelegatedUnitRelationAction = createCommandAction({
 		return { subjectId: id, auditSummary: { end } };
 	},
 
-	async postCommit() {
+	async postCommit({ args: [id], ctx }) {
 		await dispatchWebhook({ tags: ["members-partners", "working-groups"] });
+		await notifyRelationChange({
+			kind: "institution",
+			relationId: id,
+			change: "ended",
+			user: ctx.user,
+			realUser: ctx.realUser,
+			locale: ctx.locale,
+		});
 	},
 });

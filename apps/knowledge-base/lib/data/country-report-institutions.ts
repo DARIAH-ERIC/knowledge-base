@@ -1,3 +1,8 @@
+import * as schema from "@dariah-eric/database/schema";
+
+import { type Database, type Transaction, db } from "@/lib/db";
+import { alias, asc, eq, sql } from "@/lib/db/sql";
+
 export const countryReportInstitutionRepresentationPrecedence = {
 	is_national_coordinating_institution_in: 1,
 	is_national_representative_institution_in: 2,
@@ -34,13 +39,15 @@ export interface CountryReportInstitutionSummaryRow {
 	id: string;
 	organisationalUnitDocumentId: string;
 	representationType: CountryReportInstitutionRepresentation | null;
-	organisationalUnit: { name: string; acronym: string | null } | null;
+	/** `isDraft`: never published, so the institution does not appear on the website yet. */
+	organisationalUnit: { name: string; acronym: string | null; isDraft?: boolean } | null;
 }
 
 export interface CountryReportInstitutionSummaryItem {
 	id: string;
 	name: string;
 	acronym: string | null;
+	isDraft: boolean;
 	representationTypes: Array<CountryReportInstitutionRepresentation>;
 }
 
@@ -56,6 +63,7 @@ export function groupCountryReportInstitutionSummaryRows(
 				id: row.id,
 				name: row.organisationalUnit?.name ?? "",
 				acronym: row.organisationalUnit?.acronym ?? null,
+				isDraft: row.organisationalUnit?.isDraft ?? false,
 				representationTypes:
 					row.representationType == null
 						? []
@@ -80,5 +88,51 @@ export function groupCountryReportInstitutionSummaryRows(
 			Number.MAX_VALUE;
 
 		return leftTypeOrder - rightTypeOrder || left.name.localeCompare(right.name);
+	});
+}
+
+/**
+ * The institution rows of a country report's snapshot, each with the institution's name and
+ * acronym.
+ *
+ * Names resolve draft-first (`COALESCE(draftId, publishedId)`), like every other reporting lookup:
+ * coordinators can create a partner institution and report it before an administrator publishes it,
+ * and a published-only lookup would leave such an institution without a name.
+ */
+export async function getCountryReportInstitutionRows(
+	countryReportId: string,
+	queryDb: Database | Transaction = db,
+): Promise<Array<CountryReportInstitutionSummaryRow>> {
+	const lifecycle = alias(schema.documentLifecycle, "country_report_institution_lifecycle");
+
+	const rows = await queryDb
+		.select({
+			id: schema.countryReportInstitutions.id,
+			organisationalUnitDocumentId: schema.countryReportInstitutions.organisationalUnitDocumentId,
+			representationType: schema.countryReportInstitutions.representationType,
+			name: schema.organisationalUnits.name,
+			acronym: schema.organisationalUnits.acronym,
+			isDraft: sql<boolean>`${lifecycle.publishedId} IS NULL`,
+		})
+		.from(schema.countryReportInstitutions)
+		.leftJoin(
+			lifecycle,
+			eq(lifecycle.documentId, schema.countryReportInstitutions.organisationalUnitDocumentId),
+		)
+		.leftJoin(
+			schema.organisationalUnits,
+			sql`${schema.organisationalUnits.id} = COALESCE(${lifecycle.draftId}, ${lifecycle.publishedId})`,
+		)
+		.where(eq(schema.countryReportInstitutions.countryReportId, countryReportId))
+		.orderBy(asc(schema.countryReportInstitutions.organisationalUnitDocumentId));
+
+	return rows.map((row) => {
+		return {
+			id: row.id,
+			organisationalUnitDocumentId: row.organisationalUnitDocumentId,
+			representationType: row.representationType,
+			organisationalUnit:
+				row.name != null ? { name: row.name, acronym: row.acronym, isDraft: row.isDraft } : null,
+		};
 	});
 }

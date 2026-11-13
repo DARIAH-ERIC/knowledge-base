@@ -310,13 +310,15 @@ async function getCountryExternalResourceSnapshotCapture(
 
 	switch (section) {
 		case "country_sshoc_resources": {
-			const filterBy = `source:=ssh-open-marketplace && type:=[${[
+			/**
+			 * Services are excluded: country reports record service KPIs on the services ingested from
+			 * SSHOC into the knowledge base, so they are not listed again in this snapshot.
+			 */
+			const filterBy = `source:=ssh-open-marketplace && type:=${listFilterValues([
 				"software",
 				"training-material",
 				"workflow",
-			]
-				.map((value) => quoteFilterValue(value))
-				.join(",")}] && ${nationalConsortiaFilter(consortiumSlugs)}`;
+			])} && ${nationalConsortiaFilter(consortiumSlugs)}`;
 			const items =
 				consortiumSlugs.length === 0
 					? []
@@ -348,7 +350,16 @@ async function getWorkingGroupExternalResourceSnapshotCapture(
 
 	switch (section) {
 		case "working_group_sshoc_resources": {
-			const filterBy = `source:=ssh-open-marketplace && working_groups:=${workingGroupFilter}`;
+			/**
+			 * Unlike country reports, services are included: working groups record no service KPIs, so
+			 * their services come straight from the SSHOC snapshot.
+			 */
+			const filterBy = `source:=ssh-open-marketplace && type:=${listFilterValues([
+				"software",
+				"service",
+				"training-material",
+				"workflow",
+			])} && working_groups:=${workingGroupFilter}`;
 			const items =
 				slug == null
 					? []

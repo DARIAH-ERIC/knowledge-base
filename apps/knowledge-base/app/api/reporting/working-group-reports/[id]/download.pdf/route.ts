@@ -125,18 +125,10 @@ export async function GET(
 				blocks.push({
 					kind: "itemList",
 					items: summary.chairs.map((chair) => {
-						return { primary: chair.personName, secondary: formatRole(chair.roleType) };
-					}),
-				});
-			}
-
-			// Social media
-			if (summary.socialMedia.length > 0) {
-				blocks.push({ kind: "heading", text: "Social media" });
-				blocks.push({
-					kind: "itemList",
-					items: summary.socialMedia.map((item) => {
-						return { primary: item.socialMedia.name, secondary: item.socialMedia.url };
+						return {
+							primary: chair.personName,
+							secondary: chair.roleType === "is_vice_chair_of" ? "Vice chair" : "Chair",
+						};
 					}),
 				});
 			}

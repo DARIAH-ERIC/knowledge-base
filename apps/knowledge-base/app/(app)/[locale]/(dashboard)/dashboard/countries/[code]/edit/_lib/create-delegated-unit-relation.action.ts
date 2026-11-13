@@ -5,6 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import * as v from "valibot";
 
 import { CreateUnitRelationActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-unit-relation.schema";
@@ -12,6 +13,7 @@ import { assertCanManageCountryInstitutionRelation } from "@/app/(app)/[locale]/
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { db } from "@/lib/db";
 import { isExclusionViolation } from "@/lib/db/errors";
+import { notifyRelationChange } from "@/lib/email/send-delegated-change-notification";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
@@ -24,7 +26,7 @@ import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
  */
 export const createDelegatedUnitRelationAction = createServerAction(
 	{ requireAuth: true },
-	async function createDelegatedUnitRelationAction(state, formData, { user }) {
+	async function createDelegatedUnitRelationAction(state, formData, { user, realUser }) {
 		const locale = await getLocale();
 		const t = await getExtracted();
 
@@ -78,6 +80,17 @@ export const createDelegatedUnitRelationAction = createServerAction(
 
 			revalidatePath("/[locale]/dashboard/countries", "layout");
 			await dispatchWebhook({ tags: ["members-partners", "working-groups"] });
+			// Best-effort, after the response: tell the office about changes coordinators make.
+			after(() =>
+				notifyRelationChange({
+					kind: "institution",
+					relationId: row.id,
+					change: "added",
+					user,
+					realUser,
+					locale,
+				}),
+			);
 
 			return createActionStateSuccess({
 				data: {

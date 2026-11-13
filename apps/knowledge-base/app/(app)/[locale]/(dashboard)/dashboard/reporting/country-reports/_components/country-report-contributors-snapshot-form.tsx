@@ -9,6 +9,7 @@ import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
 
+import { NameWithDraftBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-badge";
 import { useCompensationRoleLabel } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/contribution-role-labels";
 import type { CompensationRole } from "@/lib/data/report-contributions";
 import { LocaleLink } from "@/lib/navigation/navigation";
@@ -18,6 +19,7 @@ interface SnapshotContributor {
 	id: string;
 	personName: string;
 	personSlug: string | null;
+	personIsDraft: boolean;
 	compensationRole: CompensationRole | null;
 	isCurrent: boolean;
 }
@@ -26,6 +28,7 @@ interface MissingSnapshotContributor {
 	personToOrgUnitId: string;
 	personName: string;
 	personSlug: string;
+	personIsDraft: boolean;
 	compensationRole: CompensationRole;
 }
 
@@ -78,7 +81,12 @@ export function CountryReportContributorsSnapshotForm(
 								className="flex items-start justify-between gap-x-4 px-4 py-3"
 							>
 								<div className="flex flex-col gap-y-1">
-									<p className="text-sm font-medium text-fg">{contributor.personName}</p>
+									<p className="text-sm font-medium text-fg">
+										<NameWithDraftBadge
+											isDraft={contributor.personIsDraft}
+											name={contributor.personName}
+										/>
+									</p>
 									<div className="flex flex-wrap items-center gap-2">
 										{roleLabel != null && <Badge intent="secondary">{roleLabel}</Badge>}
 										{!contributor.isCurrent && (
@@ -115,7 +123,12 @@ export function CountryReportContributorsSnapshotForm(
 								className="flex items-start justify-between gap-x-4 px-4 py-3"
 							>
 								<div className="flex flex-col gap-y-1">
-									<p className="text-sm font-medium text-fg">{contributor.personName}</p>
+									<p className="text-sm font-medium text-fg">
+										<NameWithDraftBadge
+											isDraft={contributor.personIsDraft}
+											name={contributor.personName}
+										/>
+									</p>
 									<div className="flex flex-wrap items-center gap-2">
 										<Badge intent="info">
 											{getCompensationRoleLabel(contributor.compensationRole)}

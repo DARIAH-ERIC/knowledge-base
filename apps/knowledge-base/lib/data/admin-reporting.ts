@@ -24,6 +24,7 @@ import {
 	desc,
 	eq,
 	inArray,
+	notExists,
 	sql,
 } from "@/lib/db/sql";
 import type { ListSortDirection } from "@/lib/server/list-search-params";
@@ -1327,6 +1328,168 @@ export async function getReportingSocialMediaKpisForAdmin(
 		total: aggregate[0]?.total ?? 0,
 		totalValue: reportingKpiTotalValue(params.kpi, aggregate[0]?.totalValue),
 	};
+}
+
+export type ReportingRemovedServicesSort = "campaignYear" | "country" | "service";
+
+interface GetReportingRemovedServicesParams
+	extends GetReportingListParams, ReportingStatisticsFilters {
+	dir?: ListSortDirection;
+	sort?: ReportingRemovedServicesSort;
+}
+
+export interface ReportingRemovedServiceRow {
+	id: string;
+	/** The campaign year whose report no longer lists the service. */
+	campaignYear: number;
+	countryName: string;
+	serviceId: string;
+	/** Internal services have no SSHOC marketplace id, and live under a separate admin screen. */
+	serviceIsInternal: boolean;
+	serviceName: string;
+	/** The service's current status — a non-live service is not carried over into a new report. */
+	serviceStatus: string;
+	serviceType: string;
+	/** Status of the campaign-year report the service is missing from. */
+	status: string;
+}
+
+export interface ReportingRemovedServicesData {
+	data: Array<ReportingRemovedServiceRow>;
+	total: number;
+}
+
+/**
+ * Services a country listed in its previous year's report but no longer lists in the following
+ * year's report, one row per (country, campaign year, service).
+ *
+ * "Previous year" is `year - 1`, matching how a new report seeds its services from last year's (see
+ * `createCountryReport`). A service only counts as removed once the later report exists — a country
+ * that has not started its report yet has removed nothing. The shared filters apply to the later
+ * report: the campaign year is the year the service went missing, the status that report's status.
+ */
+export async function getReportingRemovedServicesForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetReportingRemovedServicesParams>,
+): Promise<ReportingRemovedServicesData> {
+	assertAdminUser(currentUser);
+
+	const {
+		campaignYear,
+		countryName,
+		dir = "desc",
+		limit,
+		offset,
+		q,
+		sort = "campaignYear",
+		status,
+	} = params;
+
+	const countryLifecycle = alias(schema.documentLifecycle, "country_document_lifecycle");
+	const previousReports = alias(schema.countryReports, "previous_country_reports");
+	const previousCampaigns = alias(schema.reportingCampaigns, "previous_reporting_campaigns");
+	const currentMemberships = alias(schema.countryReportServices, "current_country_report_services");
+
+	/**
+	 * Starts from the previous year's memberships and pairs each with the same country's report for
+	 * the following campaign year. The unaliased `countryReports`/`reportingCampaigns` are that later
+	 * report, so the shared filters and sort read from it directly.
+	 */
+	function withJoins<TQuery extends PgSelect>(query: TQuery) {
+		return query
+			.innerJoin(
+				previousReports,
+				eq(previousReports.id, schema.countryReportServices.countryReportId),
+			)
+			.innerJoin(previousCampaigns, eq(previousCampaigns.id, previousReports.campaignId))
+			.innerJoin(
+				schema.reportingCampaigns,
+				eq(schema.reportingCampaigns.year, sql`${previousCampaigns.year} + 1`),
+			)
+			.innerJoin(
+				schema.countryReports,
+				and(
+					eq(schema.countryReports.campaignId, schema.reportingCampaigns.id),
+					eq(schema.countryReports.countryDocumentId, previousReports.countryDocumentId),
+				),
+			)
+			.innerJoin(
+				countryLifecycle,
+				eq(countryLifecycle.documentId, schema.countryReports.countryDocumentId),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				joinLatestEditableVersion(
+					schema.organisationalUnits.id,
+					countryLifecycle.publishedId,
+					countryLifecycle.draftId,
+				),
+			)
+			.innerJoin(schema.services, eq(schema.services.id, schema.countryReportServices.serviceId))
+			.innerJoin(schema.serviceTypes, eq(schema.serviceTypes.id, schema.services.typeId))
+			.innerJoin(schema.serviceStatuses, eq(schema.serviceStatuses.id, schema.services.statusId));
+	}
+
+	const where = and(
+		notExists(
+			db
+				.select({ id: currentMemberships.id })
+				.from(currentMemberships)
+				.where(
+					and(
+						eq(currentMemberships.countryReportId, schema.countryReports.id),
+						eq(currentMemberships.serviceId, schema.countryReportServices.serviceId),
+					),
+				),
+		),
+		campaignYear != null ? eq(schema.reportingCampaigns.year, campaignYear) : undefined,
+		countryName != null && countryName !== ""
+			? eq(schema.organisationalUnits.name, countryName)
+			: undefined,
+		status != null ? eq(schema.countryReports.status, status) : undefined,
+		matchesAllTerms(q, schema.services.name),
+	);
+
+	const direction = dir === "asc" ? asc : desc;
+	const primaryOrderBy = {
+		campaignYear: direction(schema.reportingCampaigns.year),
+		country: direction(schema.organisationalUnits.name),
+		service: direction(schema.services.name),
+	}[sort];
+
+	const [data, aggregate] = await Promise.all([
+		withJoins(
+			db
+				.select({
+					// The previous year's membership row, which is unique per (country, year, service).
+					id: schema.countryReportServices.id,
+					campaignYear: schema.reportingCampaigns.year,
+					countryName: schema.organisationalUnits.name,
+					serviceId: schema.services.id,
+					serviceIsInternal: sql<boolean>`${schema.services.sshocMarketplaceId} IS NULL`,
+					serviceName: schema.services.name,
+					serviceStatus: schema.serviceStatuses.status,
+					serviceType: schema.serviceTypes.type,
+					status: schema.countryReports.status,
+				})
+				.from(schema.countryReportServices)
+				.$dynamic(),
+		)
+			.where(where)
+			.orderBy(
+				primaryOrderBy,
+				asc(schema.organisationalUnits.name),
+				asc(schema.services.name),
+				asc(schema.countryReportServices.id),
+			)
+			.limit(limit)
+			.offset(offset),
+		withJoins(db.select({ total: count() }).from(schema.countryReportServices).$dynamic()).where(
+			where,
+		),
+	]);
+
+	return { data, total: aggregate[0]?.total ?? 0 };
 }
 
 export async function getReportingCampaignHeaderForAdmin(
