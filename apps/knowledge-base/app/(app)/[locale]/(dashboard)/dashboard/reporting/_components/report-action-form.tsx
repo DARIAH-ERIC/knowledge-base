@@ -3,7 +3,15 @@
 import { Button } from "@dariah-eric/ui/button";
 import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useId, useState } from "react";
+import {
+	Fragment,
+	type ReactNode,
+	type RefObject,
+	useEffect,
+	useId,
+	useRef,
+	useState,
+} from "react";
 
 import { ActionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-form";
 import type { ServerAction } from "@/lib/server/create-server-action";
@@ -63,48 +71,65 @@ function ConfirmedSubmitButton(props: Readonly<ConfirmedSubmitButtonProps>): Rea
 
 	const t = useExtracted();
 	const [isOpen, setIsOpen] = useState(false);
-	const [wasPending, setWasPending] = useState(isPending);
-
-	/**
-	 * Close the dialog once the submission settles. On success the page revalidates and this button
-	 * goes away; on failure the error shows below the button, which the dialog would otherwise
-	 * cover.
-	 */
-	if (isPending !== wasPending) {
-		setWasPending(isPending);
-		if (!isPending) {
-			setIsOpen(false);
-		}
-	}
+	const isConfirmedRef = useRef(false);
 
 	return (
 		<Fragment>
 			<Button
+				isPending={isPending}
 				onPress={() => {
 					setIsOpen(true);
 				}}
 			>
 				{label}
 			</Button>
-			<ModalContent
-				isOpen={isOpen}
-				onOpenChange={(open) => {
-					if (!open && !isPending) {
-						setIsOpen(false);
-					}
-				}}
-				role="alertdialog"
-				size="md"
-			>
+			<ModalContent isOpen={isOpen} onOpenChange={setIsOpen} role="alertdialog" size="md">
+				<SubmitOnClose formId={formId} isConfirmedRef={isConfirmedRef} />
 				<ModalHeader description={confirmation.description} title={confirmation.title} />
 				<ModalFooter>
-					<ModalClose isDisabled={isPending}>{t("Cancel")}</ModalClose>
-					{/* The dialog renders in a portal outside the form, so the button targets it by id. */}
-					<Button form={formId} isPending={isPending} type="submit">
+					<ModalClose>{t("Cancel")}</ModalClose>
+					<Button
+						onPress={() => {
+							isConfirmedRef.current = true;
+							setIsOpen(false);
+						}}
+					>
 						{confirmation.confirmLabel}
 					</Button>
 				</ModalFooter>
 			</ModalContent>
 		</Fragment>
 	);
+}
+
+interface SubmitOnCloseProps {
+	formId: string;
+	isConfirmedRef: RefObject<boolean>;
+}
+
+/**
+ * Submits the form once the dialog has fully closed (after its exit animation), and only if it was
+ * confirmed. Submitting from inside the open dialog left the action's redirect uncommitted, so the
+ * form is submitted from the page, exactly as a plain submit button would.
+ */
+function SubmitOnClose(props: Readonly<SubmitOnCloseProps>): null {
+	const { formId, isConfirmedRef } = props;
+
+	useEffect(() => {
+		const confirmed = isConfirmedRef;
+
+		return () => {
+			if (!confirmed.current) {
+				return;
+			}
+
+			confirmed.current = false;
+			const form = document.getElementById(formId);
+			if (form instanceof HTMLFormElement) {
+				form.requestSubmit();
+			}
+		};
+	}, [formId, isConfirmedRef]);
+
+	return null;
 }
