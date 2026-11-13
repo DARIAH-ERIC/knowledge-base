@@ -1,5 +1,5 @@
 import { Extension } from "@tiptap/core";
-import { Fragment, type Node as ProseMirrorNode, Slice } from "@tiptap/pm/model";
+import { Fragment, type NodeType, type Node as ProseMirrorNode, Slice } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 
 /**
@@ -36,10 +36,33 @@ function isPastedPlaceholder(node: ProseMirrorNode): boolean {
 	return node.type.name === "assetImage" && node.attrs.sourceUrl != null;
 }
 
+/** Whether `child` may appear anywhere in `parent`'s content, by walking its content expression. */
+export function canContain(parent: NodeType, child: NodeType): boolean {
+	const seen = new Set<unknown>();
+	const pending = [parent.contentMatch];
+
+	for (let match = pending.pop(); match != null; match = pending.pop()) {
+		if (seen.has(match)) {
+			continue;
+		}
+		seen.add(match);
+		for (let index = 0; index < match.edgeCount; index += 1) {
+			const edge = match.edge(index);
+			if (edge.type === child) {
+				return true;
+			}
+			pending.push(edge.next);
+		}
+	}
+
+	return false;
+}
+
 /**
- * A fragment without the pasted-image placeholders that cannot stay: every one nested inside a list
- * item, a table cell or a quote, where an image block cannot be stored, and — without
- * `withPlaceholders`, in an editor that offers no picker to fill them — the top-level ones too.
+ * A fragment without the pasted-image placeholders that cannot stay: every one nested somewhere an
+ * image cannot sit — a table cell, a byline quote, a media-text body — and, without
+ * `withPlaceholders`, in an editor that offers no picker to fill them, all of them. A placeholder
+ * in a list item or a plain blockquote stays, since an image can be picked for it there.
  *
  * A container left without its required content by a dropped image is refilled with the minimum its
  * schema asks for — a table cell that held only an image becomes a cell with an empty paragraph,
@@ -48,13 +71,14 @@ function isPastedPlaceholder(node: ProseMirrorNode): boolean {
 export function withoutPastedImages(
 	fragment: Fragment,
 	withPlaceholders: boolean,
-	depth = 0,
+	parent: NodeType | null = null,
 ): Fragment {
 	const nodes: Array<ProseMirrorNode> = [];
 
 	fragment.forEach((node) => {
 		if (isPastedPlaceholder(node)) {
-			if (depth === 0 && withPlaceholders) {
+			// At the top of the slice the parent is wherever the paste lands, which the schema checks.
+			if (withPlaceholders && (parent == null || canContain(parent, node.type))) {
 				nodes.push(node);
 			}
 			return;
@@ -64,7 +88,7 @@ export function withoutPastedImages(
 			return;
 		}
 
-		const content = withoutPastedImages(node.content, withPlaceholders, depth + 1);
+		const content = withoutPastedImages(node.content, withPlaceholders, node.type);
 		nodes.push(
 			node.type.validContent(content)
 				? node.copy(content)

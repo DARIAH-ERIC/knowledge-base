@@ -45,8 +45,10 @@ catalog:
   '@tailwindcss/turbopack': ^4.3.4
   "@tailwindcss/vite": ^4.3.4
   "@tiptap/core": ^3.32.2
+  "@tiptap/extension-blockquote": ^3.32.2
   "@tiptap/extension-heading": ^3.32.2
   "@tiptap/extension-link": ^3.32.2
+  "@tiptap/extension-list": ^3.32.2
   "@tiptap/extension-table": ^3.32.2
   "@tiptap/extension-typography": ^3.32.2
   "@tiptap/html": ^3.32.2

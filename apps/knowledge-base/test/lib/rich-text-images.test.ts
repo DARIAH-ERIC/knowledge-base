@@ -20,7 +20,7 @@ describe("hasEmbeddedMedia", () => {
 		).toBe(true);
 	});
 
-	it("finds an asset image nested in a list, where no image block can hold it", () => {
+	it("accepts an asset image directly inside a list item, which keeps its key", () => {
 		expect(
 			hasEmbeddedMedia({
 				type: "doc",
@@ -31,6 +31,37 @@ describe("hasEmbeddedMedia", () => {
 							{
 								type: "listItem",
 								content: [paragraph("Item."), { type: "assetImage", attrs: { imageKey: "a" } }],
+							},
+						],
+					},
+				],
+			}),
+		).toBe(false);
+	});
+
+	it("finds an asset image at the top of a body, which should have become an image block", () => {
+		expect(
+			hasEmbeddedMedia({
+				type: "doc",
+				content: [{ type: "assetImage", attrs: { imageKey: "a" } }],
+			}),
+		).toBe(true);
+	});
+
+	it("finds a pasted placeholder in a list item, which has no asset yet", () => {
+		expect(
+			hasEmbeddedMedia({
+				type: "doc",
+				content: [
+					{
+						type: "bulletList",
+						content: [
+							{
+								type: "listItem",
+								content: [
+									paragraph("Item."),
+									{ type: "assetImage", attrs: { imageKey: null, sourceUrl: "https://x.test/a" } },
+								],
 							},
 						],
 					},

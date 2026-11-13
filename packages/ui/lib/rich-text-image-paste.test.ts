@@ -89,7 +89,7 @@ describe("withoutPastedImages", () => {
 		expect(image).toMatchObject({ type: "assetImage", attrs: { imageKey: "images/a.jpg" } });
 	});
 
-	it("drops a placeholder nested where an image block cannot live", () => {
+	it("keeps a placeholder in a list item, where an image can be picked for it", () => {
 		const list: JSONContent = {
 			type: "bulletList",
 			content: [
@@ -100,12 +100,27 @@ describe("withoutPastedImages", () => {
 			],
 		};
 
-		expect(guard([list])).toStrictEqual([
+		expect(guard([list])).toMatchObject([
 			{
 				type: "bulletList",
-				content: [{ type: "listItem", content: [paragraph("Item.")] }],
+				content: [
+					{
+						type: "listItem",
+						content: [paragraph("Item."), { type: "assetImage", attrs: { imageKey: null } }],
+					},
+				],
 			},
 		]);
+	});
+
+	it("drops a placeholder nested where no image can sit", () => {
+		const quote: JSONContent = {
+			type: "quoteBlock",
+			attrs: { authors: [] },
+			content: [paragraph("Said."), placeholder("https://example.com/photo.jpg")],
+		};
+
+		expect(guard([quote])).toMatchObject([{ type: "quoteBlock", content: [paragraph("Said.")] }]);
 	});
 
 	it("refills a container that held nothing but the image", () => {

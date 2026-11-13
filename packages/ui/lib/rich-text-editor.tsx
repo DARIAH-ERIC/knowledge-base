@@ -5,7 +5,9 @@ import {
 	placeholderValueKindsEnum,
 } from "@dariah-eric/database/placeholder-values";
 import { type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
+import { Blockquote } from "@tiptap/extension-blockquote";
 import { Link } from "@tiptap/extension-link";
+import { ListItem } from "@tiptap/extension-list";
 import { Table } from "@tiptap/extension-table";
 import { TableKit } from "@tiptap/extension-table/kit";
 import { Typography } from "@tiptap/extension-typography";
@@ -100,7 +102,12 @@ import { FootnotePasteGuard } from "@/lib/rich-text-footnote";
 import { FootnoteNode, inlineFootnoteExtensions } from "@/lib/rich-text-footnote-node";
 import { HeadingWithoutBold } from "@/lib/rich-text-heading";
 import { PastedImageGuard, parsePastedImage } from "@/lib/rich-text-image-paste";
-import { MediaPasteGuard, mediaGroup } from "@/lib/rich-text-media-placement";
+import {
+	MediaPasteGuard,
+	isNestedImageAt,
+	mediaGroup,
+	nestedImageGroup,
+} from "@/lib/rich-text-media-placement";
 import { blockPanelFooterClassName, useContainerDraggable } from "@/lib/rich-text-node-chrome";
 import { PastedContentNormalizer } from "@/lib/rich-text-paste-normalize";
 import {
@@ -1019,14 +1026,36 @@ export const AccordionNode = Node.create({
  * and media-text bodies accept `block` content, so a media node in the `block` group could sit
  * inside one, where it would stay an editor node inside a `rich_text` block, with no asset
  * reference the api can resolve. A separate group allowed only in those three places makes that
- * impossible: an insert from inside a list or blockquote splits it and lands between the halves.
- * Tables, media-text bodies and quotes with a byline must not be split; see
- * `rich-text-media-placement` for how inserts and pastes are kept out of them.
+ * impossible. The one exception is an image in a list item or a plain blockquote (see
+ * {@link ListItemWithImages}). Tables, media-text bodies and quotes with a byline must not be
+ * split; see `rich-text-media-placement` for how inserts and pastes are kept out of them.
  */
 const DocumentWithContainers = Node.create({
 	name: "doc",
 	topNode: true,
 	content: `(block | ${mediaGroup} | container)+`,
+});
+
+/**
+ * A list item that can hold an image after its first paragraph, as in a step-by-step list with a
+ * screenshot per step. StarterKit's own item is `paragraph block*`.
+ *
+ * The image stays an `assetImage` node inside the `rich_text` json rather than becoming an image
+ * block: a list item cannot be split out into a block of its own without breaking the list. Its
+ * asset key is still covered by a foreign key, through `content_block_asset_references`, which a
+ * database trigger derives from the json; the api resolves the key in place.
+ *
+ * Because a node's content expression cannot depend on where the node sits, this also lets an image
+ * into a list inside a table cell or a media-text body. That is accepted: the reference and the
+ * resolution work the same there.
+ */
+const ListItemWithImages = ListItem.extend({
+	content: `paragraph (block | ${nestedImageGroup})*`,
+});
+
+/** A plain blockquote that can hold an image, as {@link ListItemWithImages} does. */
+const BlockquoteWithImages = Blockquote.extend({
+	content: `(block | ${nestedImageGroup})+`,
 });
 
 /**
@@ -1423,6 +1452,9 @@ function AssetImageNodeView({
 	const layout = normalizeImageLayout(node.attrs.layout);
 	const sourceUrl = node.attrs.sourceUrl as string | null;
 	const resolvedCaption = resolveImageCaption(captionMode, caption, assetCaption);
+	const nodePos = getPos();
+	// In a list item or blockquote the image sits in the run of text: it has no layout to choose.
+	const isNested = typeof nodePos === "number" && isNestedImageAt(editor.state.doc, nodePos);
 
 	const [isEditing, setIsEditing] = useState(
 		(editor.isEditable && (imageKey == null || imageUrl == null)) || false,
@@ -1464,7 +1496,7 @@ function AssetImageNodeView({
 			sourceUrl: null,
 			caption: isEmptyRichTextDocument(captionJson) ? null : captionJson,
 			captionMode: captionModeInput,
-			layout: layoutInput,
+			layout: isNested ? "default" : layoutInput,
 		});
 		setIsEditing(false);
 	}
@@ -1559,28 +1591,30 @@ function AssetImageNodeView({
 							</div>
 						</Fragment>
 					) : null}
-					<div className="flex flex-col gap-y-1">
-						<span className="text-sm/6 font-medium">{"Layout"}</span>
-						<ToggleGroup
-							aria-label="Layout"
-							className="[--toggle-focused-bg:var(--color-muted)] [--toggle-hover-bg:var(--color-muted)] [--toggle-selected-bg:var(--color-secondary)] [--toggle-selected-fg:var(--color-secondary-fg)]"
-							disallowEmptySelection={true}
-							onSelectionChange={(keys) => {
-								const nextLayout = [...keys][0] as ImageLayout | undefined;
-								if (nextLayout != null) {
-									setLayoutInput(nextLayout);
-								}
-							}}
-							selectedKeys={[layoutInput]}
-							size="sm"
-						>
-							<ToggleGroupItem id="default">{"Default"}</ToggleGroupItem>
-							<ToggleGroupItem id="wide">{"Wide"}</ToggleGroupItem>
-							<ToggleGroupItem id="full">{"Full width"}</ToggleGroupItem>
-							<ToggleGroupItem id="float-start">{"Float left"}</ToggleGroupItem>
-							<ToggleGroupItem id="float-end">{"Float right"}</ToggleGroupItem>
-						</ToggleGroup>
-					</div>
+					{isNested ? null : (
+						<div className="flex flex-col gap-y-1">
+							<span className="text-sm/6 font-medium">{"Layout"}</span>
+							<ToggleGroup
+								aria-label="Layout"
+								className="[--toggle-focused-bg:var(--color-muted)] [--toggle-hover-bg:var(--color-muted)] [--toggle-selected-bg:var(--color-secondary)] [--toggle-selected-fg:var(--color-secondary-fg)]"
+								disallowEmptySelection={true}
+								onSelectionChange={(keys) => {
+									const nextLayout = [...keys][0] as ImageLayout | undefined;
+									if (nextLayout != null) {
+										setLayoutInput(nextLayout);
+									}
+								}}
+								selectedKeys={[layoutInput]}
+								size="sm"
+							>
+								<ToggleGroupItem id="default">{"Default"}</ToggleGroupItem>
+								<ToggleGroupItem id="wide">{"Wide"}</ToggleGroupItem>
+								<ToggleGroupItem id="full">{"Full width"}</ToggleGroupItem>
+								<ToggleGroupItem id="float-start">{"Float left"}</ToggleGroupItem>
+								<ToggleGroupItem id="float-end">{"Float right"}</ToggleGroupItem>
+							</ToggleGroup>
+						</div>
+					)}
 					<div className="flex flex-col gap-y-1">
 						<span className="text-sm/6 font-medium">{"Caption behavior"}</span>
 						<ToggleGroup
@@ -1702,8 +1736,9 @@ function createAssetImageNode(
 ): Node {
 	return Node.create({
 		name: "assetImage",
-		// `media`, not `block`: see {@link DocumentWithContainers}.
-		group: mediaGroup,
+		// `media`, not `block`: see {@link DocumentWithContainers}. Also the one media node a list item
+		// or a plain blockquote takes: see {@link ListItemWithImages}.
+		group: `${mediaGroup} ${nestedImageGroup}`,
 		atom: true,
 		draggable: true,
 		selectable: true,
@@ -2910,9 +2945,14 @@ export function createRichTextExtensions(
 			underline: false,
 			// Replaced by `DocumentWithContainers` below, which widens the top level to take containers.
 			document: false,
+			// Replaced by `ListItemWithImages` and `BlockquoteWithImages` below, which take an image.
+			listItem: false,
+			blockquote: false,
 		}),
 		HeadingWithoutBold.configure({ levels: [2, 3, 4] }),
 		DocumentWithContainers,
+		ListItemWithImages,
+		BlockquoteWithImages,
 		// Normalise typography as authors type. Keep the unambiguous substitutions (smart
 		// quotes/apostrophes, `--` → em dash, `...` → ellipsis) and disable the rest, which corrupt
 		// legitimate technical/academic text — e.g. `(c)` as a list marker → ©, `1/2` → ½, `->` → →,

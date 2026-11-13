@@ -3,6 +3,7 @@ import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import { type PgColumn, alias } from "drizzle-orm/pg-core";
 
 import type { Database, Transaction } from "./index";
+import { nestedImageNodeType, nestedImageParentTypes } from "./nested-images";
 import * as schema from "./schema";
 
 /**
@@ -1891,10 +1892,13 @@ export async function checkHeadingHierarchy(
  * `media_text`) json, where nothing resolves it. Legacy tiptap `image` nodes are reported too: the
  * stock extension is gone, so any left behind are equally unrenderable.
  *
- * Read-only and not auto-fixable: whether a nested placement should be supported, lifted out, or
- * reported to an editor is a product decision, and this check exists to inform it. Every occurrence
- * is reported with the innermost container it sits in, so the counts read directly as a node-type ×
- * container matrix.
+ * An image with an asset key directly inside a list item or a plain blockquote is allowed (see
+ * `nested-images`) and not reported: its key has a foreign key through `content_block_assets`, and
+ * the api resolves it in place. Everything else is.
+ *
+ * Read-only and not auto-fixable: whether a stray node should be lifted out or removed depends on
+ * what the author meant. Every occurrence is reported with the innermost container it sits in, so
+ * the counts read directly as a node-type × container matrix.
  */
 
 export const richTextMediaNodeTypes = [
@@ -2000,6 +2004,17 @@ export function collectRichTextMedia(
 	return occurrences;
 }
 
+/** An image with an asset key directly inside a list item or a plain blockquote. */
+export function isAllowedNestedImage(occurrence: RichTextMediaOccurrence): boolean {
+	const parent = occurrence.path.at(-1);
+	return (
+		occurrence.nodeType === nestedImageNodeType &&
+		parent != null &&
+		nestedImageParentTypes.has(parent) &&
+		occurrence.reference !== ""
+	);
+}
+
 export interface RichTextMediaFinding extends RichTextMediaOccurrence {
 	entityId: string;
 	entityType: string;
@@ -2074,6 +2089,9 @@ export async function checkRichTextMedia(
 
 			for (const { blockType, content } of sources) {
 				for (const occurrence of collectRichTextMedia(content)) {
+					if (isAllowedNestedImage(occurrence)) {
+						continue;
+					}
 					findings.push({
 						...occurrence,
 						entityId: row.entityId,

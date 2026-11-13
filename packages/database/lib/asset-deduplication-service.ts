@@ -100,6 +100,18 @@ function countJsonValue(value: unknown, key: string): number {
 	return 0;
 }
 
+/**
+ * The foreign keys to `assets` that deduplication rewrites and counts. `content_block_assets` is
+ * left out: its rows are derived from the json keys by a trigger, so rewriting a key in the json
+ * re-points them, and rewriting them directly would collide on the primary key when a body already
+ * refers to both the stale and the canonical asset. Counting them would count each json reference
+ * twice.
+ */
+async function getRewritableForeignKeyColumns(db: Database | Transaction) {
+	const columns = await getForeignKeyColumns(db, "assets");
+	return columns.filter((column) => column.table !== "content_block_assets");
+}
+
 function rewriteJsonValue(value: unknown, staleKey: string, canonicalKey: string): unknown {
 	if (typeof value === "string") {
 		return value === staleKey ? canonicalKey : value;
@@ -250,7 +262,7 @@ export async function findDuplicateAssets(
 		};
 	});
 
-	const foreignKeys = await getForeignKeyColumns(db, "assets");
+	const foreignKeys = await getRewritableForeignKeyColumns(db);
 	const jsonColumns = await getJsonColumns(db);
 	const references = await countReferences(db, candidates, foreignKeys, jsonColumns);
 
@@ -292,7 +304,7 @@ export async function mergeDuplicateAssets(
 	}
 	const canonical = group.assets.find((asset) => asset.id === canonicalId)!;
 	const stale = group.assets.filter((asset) => staleIds.includes(asset.id));
-	const foreignKeys = await getForeignKeyColumns(db, "assets");
+	const foreignKeys = await getRewritableForeignKeyColumns(db);
 	const jsonColumns = await getJsonColumns(db);
 	let rewrittenForeignKeys = 0;
 	let rewrittenJsonRows = 0;

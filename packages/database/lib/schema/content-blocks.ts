@@ -479,3 +479,41 @@ export type RichTextContentBlockInput = typeof richTextContentBlocks.$inferInser
 export const RichTextContentBlockSelectSchema = createSelectSchema(richTextContentBlocks);
 export const RichTextContentBlockInsertSchema = createInsertSchema(richTextContentBlocks);
 export const RichTextContentBlockUpdateSchema = createUpdateSchema(richTextContentBlocks);
+
+/**
+ * The assets a `rich_text` or `media_text` body refers to by key, as foreign keys.
+ *
+ * Inside those bodies an asset is referenced by its storage key, not its id: an image in a list
+ * item or a blockquote (see `@dariah-eric/database/nested-images`), a typed-in quote author's
+ * picture, and a link to a document. A key in json is not a constraint, so this table holds one row
+ * per asset a body refers to, with a foreign key on each side: deleting an asset a body still uses
+ * fails, and deleting the block takes its rows with it.
+ *
+ * Derived, never written by the application. A trigger on both body tables rebuilds a block's rows
+ * from its json on every insert and update (see the `add_content_block_assets` migration), so every
+ * write path — the save path, maintenance scripts, deduplication's key rewrite, raw sql — keeps it
+ * in step. A key that names no asset gets no row: the save path refuses those, and reads degrade
+ * them to nothing.
+ *
+ * Captions and other json columns outside content-block bodies are not covered; the unused-asset
+ * cleanup still scans every json column for keys, so their assets stay protected from it.
+ */
+export const contentBlockAssets = p.snakeCase.table(
+	"content_block_assets",
+	{
+		contentBlockId: p
+			.uuid("content_block_id")
+			.notNull()
+			.references(() => contentBlocks.id, { onDelete: "cascade" }),
+		assetId: p
+			.uuid("asset_id")
+			.notNull()
+			.references(() => assets.id),
+	},
+	(t) => [
+		p.primaryKey({ columns: [t.contentBlockId, t.assetId], name: "content_block_assets_pkey" }),
+		p.index("content_block_assets_asset_id_idx").on(t.assetId),
+	],
+);
+
+export type ContentBlockAsset = typeof contentBlockAssets.$inferSelect;

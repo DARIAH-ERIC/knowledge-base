@@ -6,6 +6,7 @@ import {
 	collectLinkTargetEntityIds,
 } from "@dariah-eric/database/link-targets";
 import { getLinkTargetAssets } from "@dariah-eric/database/link-targets-service";
+import { collectNestedImageKeys, mapNestedImages } from "@dariah-eric/database/nested-images";
 import {
 	annotatePlaceholderValues,
 	collectPlaceholderValueKinds,
@@ -53,7 +54,7 @@ export const RichTextContentBlockSchema = v.object({
 		// Every other node maps onto one element, so it needs no explanation here. A footnote does not:
 		// rendering it takes assembling something the payload does not spell out.
 		v.description(
-			'Richtext as Tiptap JSON. The inline `footnote` node is a marker carrying its own note in `attrs.content` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item\'s content blocks and lists the notes, in that order, at the end of the item. The block `quoteBlock` node is a quotation (its content: paragraphs) with a byline in its attributes: `attrs.authors`, in order, each either `{ kind: "person", entityId, name, entity: EntityRef | null, image: Image | null }` or `{ kind: "text", name, image: Image | null }`, images at avatar width, and `attrs.description`, richtext of the caption shape saying who they are (may be null).',
+			'Richtext as Tiptap JSON. The inline `footnote` node is a marker carrying its own note in `attrs.content` (richtext of the same shape): it holds no number, so a renderer numbers the markers by their order across all of an item\'s content blocks and lists the notes, in that order, at the end of the item. The block `quoteBlock` node is a quotation (its content: paragraphs) with a byline in its attributes: `attrs.authors`, in order, each either `{ kind: "person", entityId, name, entity: EntityRef | null, image: Image | null }` or `{ kind: "text", name, image: Image | null }`, images at avatar width, and `attrs.description`, richtext of the caption shape saying who they are (may be null). An `assetImage` node is an image inside a list item or a blockquote: its `attrs` are `{ image: BlockImage | null, caption, captionSource }`, as on an `image` block, with the image at the width of a floated one; `image` is null once its asset is gone.',
 		),
 	),
 });
@@ -420,7 +421,11 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 
 	// Quote authors store a person's document id or a picture's asset key; attach the person's current
 	// name, page and portrait, and the picture itself.
-	return annotateQuoteAuthors(db, withEntityLinks);
+	const withQuoteAuthors = await annotateQuoteAuthors(db, withEntityLinks);
+
+	// An image in a list item or blockquote stores its asset key, caption and caption mode; resolve it
+	// to the shape an `image` block has.
+	return annotateNestedImages(db, withQuoteAuthors);
 }
 
 /**
@@ -557,6 +562,41 @@ async function annotateQuoteAuthors<T>(db: Database | Transaction, value: T): Pr
 			name: author.name,
 			image: author.imageKey != null ? (pictures.get(author.imageKey) ?? null) : null,
 		};
+	});
+}
+
+/**
+ * Resolves every image nested in a list item or a blockquote. Its attributes come out as an `image`
+ * block's fields — `{ image, caption, captionSource }` — with `image` at the width of a floated
+ * image, since it sits in the text column. `image` is null once its asset is gone; the caption then
+ * resolves from the stored one alone.
+ */
+async function annotateNestedImages<T>(db: Database | Transaction, value: T): Promise<T> {
+	const keys = collectNestedImageKeys(value);
+	if (keys.size === 0) {
+		return value;
+	}
+
+	const images = await getImagesByAssetKey(db, [...keys], imageWidth.preview);
+
+	return mapNestedImages(value, (attrs) => {
+		const asset = typeof attrs.imageKey === "string" ? (images.get(attrs.imageKey) ?? null) : null;
+		const blockCaption = (attrs.caption as JSONContent | null | undefined) ?? null;
+		const captionMode =
+			(attrs.captionMode as ImageCaptionMode | undefined) ??
+			(blockCaption != null ? "override" : "inherit");
+		const { caption, source: captionSource } = resolveImageCaption({
+			assetCaption: asset?.caption ?? null,
+			blockCaption,
+			captionMode,
+		});
+
+		if (asset == null) {
+			return { image: null, caption, captionSource };
+		}
+
+		const { caption: _assetCaption, ...image } = asset;
+		return { image, caption, captionSource };
 	});
 }
 

@@ -14,6 +14,8 @@ import {
 	type Transaction,
 } from "@tiptap/pm/state";
 
+import { canContain } from "@/lib/rich-text-image-paste";
+
 /**
  * Where media nodes may go, beyond what the schema says.
  *
@@ -32,6 +34,32 @@ import {
  */
 
 export const mediaGroup = "media";
+
+/**
+ * The media that may also sit in a list item or a plain blockquote: only `assetImage`. It stays an
+ * editor node inside the `rich_text` (or `media_text`) json there, referenced by its asset key; the
+ * `content_block_asset_references` table gives that key a foreign key, and the api resolves it in
+ * place. Galleries, media-text and embeds are page-level layouts with no meaning inside a list
+ * item, and table cells, byline quotes and media-text bodies still accept no media of their own.
+ */
+export const nestedImageGroup = "nestedImage";
+
+/**
+ * Whether the node at `pos` is an image nested in a list item or blockquote, rather than one that
+ * becomes an image block: its parent takes images, but not media in general. A nested image keeps
+ * no layout — it sits in the run of a list or a quote — so the editor offers none for it.
+ */
+export function isNestedImageAt(doc: ProseMirrorNode, pos: number): boolean {
+	const { parent } = doc.resolve(pos);
+	const gallery = parent.type.schema.nodes.galleryBlock;
+	const image = parent.type.schema.nodes.assetImage;
+	return (
+		image != null &&
+		gallery != null &&
+		canContain(parent.type, image) &&
+		!canContain(parent.type, gallery)
+	);
+}
 
 export function isMediaNode(node: ProseMirrorNode): boolean {
 	return node.type.isInGroup(mediaGroup);
