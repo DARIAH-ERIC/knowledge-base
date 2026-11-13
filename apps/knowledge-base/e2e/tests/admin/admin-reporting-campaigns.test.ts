@@ -127,7 +127,7 @@ test.describe("reporting campaigns admin", () => {
 		await campaignsPage.fillByLabel("Medium: amount", "20");
 		await campaignsPage.fillByLabel("Large: visits threshold", "10000");
 		await campaignsPage.fillByLabel("Large: amount", "30");
-		await campaignsPage.fillByLabel("Important service amount", "40");
+		await campaignsPage.fillByLabel("Resource-intensive service amount", "40");
 		await campaignsPage.fillByLabel("Core service amount", "5");
 		await campaignsPage.saveTabForm();
 

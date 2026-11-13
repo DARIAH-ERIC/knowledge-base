@@ -6983,19 +6983,19 @@ msgid "Large: amount"
 msgstr "Large: amount"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
-msgctxt "9IShMk"
-msgid "Services the country reporter marks as important, for example because of the investment in them, whatever their number of visits."
-msgstr "Services the country reporter marks as important, for example because of the investment in them, whatever their number of visits."
+msgctxt "fF7_-F"
+msgid "Services the country reporter marks as resource-intensive, for example because of the investment in them, whatever their number of visits."
+msgstr "Services the country reporter marks as resource-intensive, for example because of the investment in them, whatever their number of visits."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
-msgctxt "yKBl3q"
-msgid "Important services"
-msgstr "Important services"
+msgctxt "xHKynD"
+msgid "Resource-intensive services"
+msgstr "Resource-intensive services"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
-msgctxt "P8julp"
-msgid "Important service amount"
-msgstr "Important service amount"
+msgctxt "3iQhNK"
+msgid "Resource-intensive service amount"
+msgstr "Resource-intensive service amount"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form.tsx
 msgctxt "rnzaqG"
@@ -8455,9 +8455,9 @@ msgid "Core service: counted with the core service amount."
 msgstr "Core service: counted with the core service amount."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
-msgctxt "U3_4XV"
-msgid "Important service"
-msgstr "Important service"
+msgctxt "YK7s4Q"
+msgid "Resource-intensive service"
+msgstr "Resource-intensive service"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx

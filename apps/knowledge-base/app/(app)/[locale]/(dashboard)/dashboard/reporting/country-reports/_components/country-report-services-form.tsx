@@ -202,7 +202,7 @@ function ServiceCard(props: Readonly<ServiceCardProps>): ReactNode {
 			) : (
 				<Fragment>
 					<Checkbox isSelected={isImportant} onChange={setIsImportant}>
-						{t("Important service")}
+						{t("Resource-intensive service")}
 					</Checkbox>
 					{isImportant && (
 						<input form={KPI_FORM_ID} name={`important.${service.id}`} type="hidden" value="on" />
