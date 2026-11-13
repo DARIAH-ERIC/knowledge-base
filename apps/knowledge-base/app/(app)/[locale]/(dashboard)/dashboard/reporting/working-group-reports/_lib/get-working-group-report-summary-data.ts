@@ -40,10 +40,6 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 		with: {
 			campaign: { columns: { year: true, status: true } },
 			workingGroup: { columns: { name: true } },
-			socialMedia: {
-				columns: { id: true },
-				with: { socialMedia: { columns: { name: true, url: true } } },
-			},
 			events: {
 				columns: { id: true, title: true, date: true, url: true, role: true },
 				orderBy: { date: "asc" },
@@ -88,7 +84,6 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 					roleType: chair.chairRole,
 				};
 			}),
-			socialMedia: report.socialMedia,
 			events: report.events,
 			questions: questions.map((q) => {
 				return {

@@ -18,7 +18,6 @@ import {
 } from "@/lib/data/report-social-media";
 import { getCurrentPartnerInstitutions } from "@/lib/data/unit-relations";
 import { getWorkingGroupChairCandidates } from "@/lib/data/working-group-report-chairs";
-import { getCarriedOverWorkingGroupReportSocialMedia } from "@/lib/data/working-group-report-social-media";
 import type { Transaction } from "@/lib/db";
 import { and, eq, sql } from "@/lib/db/sql";
 
@@ -208,9 +207,8 @@ export async function createCountryReport(
 }
 
 /**
- * Creates a working group report and seeds its chairs from the current relations, plus the social
- * media coverage set carried over from last year's report. Callers must have checked that the
- * campaign is open and that the working group has no report in it yet.
+ * Creates a working group report and seeds its chairs from the current relations. Callers must have
+ * checked that the campaign is open and that the working group has no report in it yet.
  */
 export async function createWorkingGroupReport(
 	tx: Transaction,
@@ -234,30 +232,6 @@ export async function createWorkingGroupReport(
 					personToOrgUnitId: chair.personToOrgUnitId,
 					chairRole: chair.chairRole,
 				};
-			}),
-		);
-	}
-
-	const previousCampaign = await tx.query.reportingCampaigns.findFirst({
-		where: { year: campaign.year - 1 },
-		columns: { id: true },
-	});
-	const previousReport =
-		previousCampaign == null
-			? null
-			: await tx.query.workingGroupReports.findFirst({
-					where: { campaignId: previousCampaign.id, workingGroupDocumentId },
-					columns: { id: true },
-				});
-	const carriedSocialMediaIds =
-		previousReport == null
-			? []
-			: await getCarriedOverWorkingGroupReportSocialMedia(previousReport.id, tx);
-
-	if (carriedSocialMediaIds.length > 0) {
-		await tx.insert(schema.workingGroupReportSocialMedia).values(
-			carriedSocialMediaIds.map((socialMediaId) => {
-				return { workingGroupReportId: created.id, socialMediaId };
 			}),
 		);
 	}

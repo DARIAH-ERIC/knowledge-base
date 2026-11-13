@@ -133,17 +133,6 @@ export async function GET(
 				});
 			}
 
-			// Social media
-			if (summary.socialMedia.length > 0) {
-				blocks.push({ kind: "heading", text: "Social media" });
-				blocks.push({
-					kind: "itemList",
-					items: summary.socialMedia.map((item) => {
-						return { primary: item.socialMedia.name, secondary: item.socialMedia.url };
-					}),
-				});
-			}
-
 			// Events
 			if (summary.events.length > 0) {
 				blocks.push({ kind: "heading", text: "Events" });
