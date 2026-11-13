@@ -1,6 +1,7 @@
 "use client";
 
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
@@ -27,6 +28,7 @@ import type {
 } from "@/lib/data/report-social-media";
 import { countFormatOptions } from "@/lib/number-format-options";
 import type { ServerAction } from "@/lib/server/create-server-action";
+import { getSocialMediaTypeLabel } from "@/lib/social-media-type-label";
 
 /** Id linking the per-account KPI inputs (rendered inside account cards) to the single Save form. */
 const KPI_FORM_ID = "country-report-social-media-kpis-form";
@@ -184,7 +186,10 @@ function AccountCard(props: Readonly<AccountCardProps>): ReactNode {
 		<div className="flex flex-col gap-y-4 rounded-md border border-border p-4">
 			<div className="flex items-start justify-between gap-x-4">
 				<div className="flex flex-col gap-y-0.5">
-					<p className="text-sm font-medium text-fg">{account.name}</p>
+					<div className="flex flex-wrap items-center gap-2">
+						<p className="text-sm font-medium text-fg">{account.name}</p>
+						<Badge intent="secondary">{getSocialMediaTypeLabel(account.type)}</Badge>
+					</div>
 					<p className="text-xs text-muted-fg">{account.url}</p>
 				</div>
 				<ActionForm action={deleteAction}>

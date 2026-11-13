@@ -27,7 +27,7 @@ interface Contribution {
 	id: string;
 	amountEuros: number;
 	projectDocumentId: string;
-	project: Pick<schema.Project, "name"> | null;
+	project: Pick<schema.Project, "duration" | "name"> | null;
 }
 
 interface CountryReportProjectsFormProps {
@@ -78,6 +78,20 @@ export function CountryReportProjectsForm(
 							>
 								<div>
 									<p className="text-sm font-medium text-fg">{contribution.project?.name ?? ""}</p>
+									{contribution.project != null && (
+										<p className="text-xs text-muted-fg">
+											{t("Duration")}:{" "}
+											{contribution.project.duration.end != null
+												? format.dateTimeRange(
+														contribution.project.duration.start,
+														contribution.project.duration.end,
+														{ dateStyle: "short" },
+													)
+												: format.dateTime(contribution.project.duration.start, {
+														dateStyle: "short",
+													})}
+										</p>
+									)}
 									<p className="text-xs text-muted-fg">
 										{t("Total funding amount")}:{" "}
 										{format.number(contribution.amountEuros, euroFormatOptions)}
