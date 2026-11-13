@@ -459,6 +459,31 @@ describe("closed campaigns are read-only", () => {
 	});
 });
 
+describe("campaign questions", () => {
+	it("refuses an empty question, as the editor submits it", async () => {
+		await withAdminTransaction(async (tx) => {
+			const open = await seedCampaign(tx, "open");
+
+			for (const content of [
+				[],
+				[{ type: "paragraph" }],
+				[{ type: "paragraph", content: [{ type: "text", text: "   " }] }],
+			]) {
+				const added = await createWorkingGroupReportQuestionAction(
+					createActionStateInitial(),
+					toFormData({ campaignId: open, question: JSON.stringify({ type: "doc", content }) }),
+				);
+				expect(added.status, JSON.stringify(added)).toBe("error");
+				expect(added.status === "error" ? added.message : "").toBe("Enter a question.");
+			}
+
+			expect(
+				await tx.query.workingGroupReportQuestions.findFirst({ where: { campaignId: open } }),
+			).toBeUndefined();
+		});
+	});
+});
+
 describe("only the launch and close actions change a campaign's status", () => {
 	it("creates campaigns as drafts, whatever status is submitted", async () => {
 		await withAdminTransaction(async (tx) => {
