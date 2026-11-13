@@ -19,6 +19,7 @@ import {
 import { getReportScreenComments } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_lib/report-screen-comments";
 import { WorkingGroupReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
 import { getWorkingGroupReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
+import { can, isReportEditable } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { resolveWorkingGroupReportId } from "@/lib/data/reporting-urls";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -61,9 +62,19 @@ export default async function DashboardReportingWorkingGroupReportPage(
 	const report = result.data;
 
 	const t = await getExtracted();
-	const comments = await getReportScreenComments("working_group", report.id);
+	const reportResource = { type: "working_group_report", id: report.id } as const;
+	const [comments, canUpdate, isEditable] = await Promise.all([
+		getReportScreenComments("working_group", report.id),
+		can(user, "update", reportResource),
+		isReportEditable(user, reportResource),
+	]);
+	// Once the report can no longer be edited (e.g. after submitting), its edit forms redirect here,
+	// so reporters keep adding comments on this page instead.
+	const canComment = canUpdate && !isEditable;
 	const commentSectionLinks =
-		comments.length > 0 ? [{ id: reportCommentsSectionId, label: t("Comments") }] : [];
+		comments.length > 0 || canComment
+			? [{ id: reportCommentsSectionId, label: t("Comments") }]
+			: [];
 
 	return (
 		<div>
@@ -98,7 +109,10 @@ export default async function DashboardReportingWorkingGroupReportPage(
 
 			<div className="mbs-8 flex flex-col gap-y-10 px-(--layout-padding) max-inline-4xl">
 				<WorkingGroupReportSummary data={report.summary} extraSectionLinks={commentSectionLinks} />
-				<ReportCommentsSection comments={comments} />
+				<ReportCommentsSection
+					comments={comments}
+					editable={canComment ? { reportId: report.id, reportType: "working_group" } : undefined}
+				/>
 			</div>
 		</div>
 	);

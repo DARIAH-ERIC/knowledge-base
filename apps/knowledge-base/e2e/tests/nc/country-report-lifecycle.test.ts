@@ -62,10 +62,11 @@ test.describe("country report lifecycle (national coordinator)", () => {
 		// Wait out the dialog's exit animation: until then its "Submit report" button also matches.
 		await expect(dialog).toBeHidden();
 
-		// After the action redirects back to the summary screen the report is submitted and there is no
-		// re-submit affordance.
+		// The submitted report is view-only for the coordinator, so the redirect after submitting lands
+		// on the report itself, which has no re-submit affordance.
+		await expect(page).toHaveURL(`/en/dashboard/reporting/country-reports/${year!}/${slug!}`);
 		await expect(page.getByRole("button", { name: "Submit report" })).toBeHidden();
-		await expect(page.getByText("Submitted", { exact: true })).toBeVisible();
+		await expect(page.getByText(`Campaign ${year!} · Submitted`)).toBeVisible();
 
 		const updated = await db.getCountryReportById(reportId!);
 		expect(updated).toMatchObject({ status: "submitted" });
@@ -74,18 +75,11 @@ test.describe("country report lifecycle (national coordinator)", () => {
 	test("editing is frozen once the report is submitted", async ({ page }) => {
 		await page.goto(`/en/dashboard/reporting/country-reports/${year!}/${slug!}/edit/events`);
 
-		// The screen still renders (the coordinator retains the `update` permission), but saving is
-		// blocked: the content mutation's `assertReportEditable` guard redirects to the dashboard. A
-		// successful save would instead stay on the events screen, so the redirect is the signal that
-		// the edit was rejected and nothing was persisted.
-		await page.getByLabel("Small events").fill("7");
-		// Scope to the events form: the screen also renders a comment section with its own "Save".
-		await page
-			.locator("form")
-			.filter({ has: page.getByLabel("Small events") })
-			.getByRole("button", { name: "Save" })
-			.click();
-
-		await expect(page).toHaveURL(/\/en\/dashboard$/);
+		// A typed edit URL of a submitted report redirects to the report itself: no edit forms (the
+		// content mutations' `assertReportEditable` guard would reject a save anyway), but comments can
+		// still be added there.
+		await expect(page).toHaveURL(`/en/dashboard/reporting/country-reports/${year!}/${slug!}`);
+		await expect(page.getByLabel("Small events")).toHaveCount(0);
+		await expect(page.getByRole("textbox", { name: "Events", exact: true })).toBeVisible();
 	});
 });
