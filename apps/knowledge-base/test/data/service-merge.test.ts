@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import { mergeServices } from "@/lib/data/service-merge";
 import type { Transaction } from "@/lib/db";
-import { eq } from "@/lib/db/sql";
+import { eq, max } from "@/lib/db/sql";
 import { withTransaction } from "@/test/lib/with-transaction";
 
 type Tx = Transaction;
@@ -68,10 +68,14 @@ async function seedCountryReport(tx: Tx): Promise<string> {
 		.returning({ id: schema.entities.id });
 	assert(country);
 
-	// A year no seeded campaign uses — `reporting_campaigns.year` is unique.
+	// `reporting_campaigns.year` is unique. One past the highest year in use cannot clash, not even
+	// when a test seeds several reports in the same transaction (a random year could repeat).
+	const [latest] = await tx
+		.select({ year: max(schema.reportingCampaigns.year) })
+		.from(schema.reportingCampaigns);
 	const [campaign] = await tx
 		.insert(schema.reportingCampaigns)
-		.values({ year: 9000 + Math.floor(Math.random() * 900) })
+		.values({ year: (latest?.year ?? 0) + 1 })
 		.returning({ id: schema.reportingCampaigns.id });
 	assert(campaign);
 
