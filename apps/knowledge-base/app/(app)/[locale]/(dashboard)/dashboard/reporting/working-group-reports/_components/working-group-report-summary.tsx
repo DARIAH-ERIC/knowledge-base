@@ -2,6 +2,7 @@ import type { JSONContent } from "@tiptap/core";
 import { getExtracted, getFormatter } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { NameWithDraftBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-badge";
 import { RichTextView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-view";
 import {
 	ReportSummaryNav,
@@ -11,7 +12,7 @@ import {
 
 export interface WorkingGroupReportSummaryData {
 	numberOfMembers: number | null;
-	chairs: Array<{ id: string; personName: string; roleType: string }>;
+	chairs: Array<{ id: string; personName: string; personIsDraft?: boolean; roleType: string }>;
 	socialMedia: Array<{
 		id: string;
 		socialMedia: { name: string; url: string };
@@ -99,7 +100,9 @@ export async function WorkingGroupReportSummary(
 						<ul className="divide-y rounded-md border max-inline-sm">
 							{data.chairs.map((chair) => (
 								<li key={chair.id} className="px-4 py-3">
-									<p className="text-sm font-medium text-fg">{chair.personName}</p>
+									<p className="text-sm font-medium text-fg">
+										<NameWithDraftBadge isDraft={chair.personIsDraft} name={chair.personName} />
+									</p>
 									<p className="text-xs text-muted-fg">
 										{chair.roleType === "is_vice_chair_of" ? t("Vice chair") : t("Chair")}
 									</p>

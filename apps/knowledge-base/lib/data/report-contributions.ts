@@ -71,6 +71,8 @@ export interface ContributionCandidate {
 	personToOrgUnitId: string;
 	personName: string;
 	personSlug: string;
+	/** Never published: the person does not appear on the website yet. */
+	personIsDraft: boolean;
 	organisationalUnitName: string;
 	compensationRole: CompensationRole;
 }
@@ -87,6 +89,7 @@ function selectContributionRows(queryDb: Database | Transaction = db) {
 			personToOrgUnitId: schema.personsToOrganisationalUnits.id,
 			personName: schema.persons.name,
 			personSlug: personEntities.slug,
+			personIsDraft: sql<boolean>`${personLifecycle.publishedId} IS NULL`,
 			organisationalUnitName: schema.organisationalUnits.name,
 			organisationalUnitSlug: orgEntities.slug,
 			organisationalUnitType: schema.organisationalUnitTypes.type,
@@ -240,6 +243,8 @@ export interface ReportContribution {
 	personToOrgUnitId: string;
 	personName: string;
 	personSlug: string;
+	/** Never published: the person does not appear on the website yet. */
+	personIsDraft: boolean;
 	organisationalUnitName: string;
 	/** Stored role, or classified from the relation for legacy rows captured before it was tracked. */
 	compensationRole: CompensationRole | null;
@@ -265,6 +270,7 @@ export async function getCountryReportContributions(
 			storedRole: schema.countryReportContributions.contributionRole,
 			personName: schema.persons.name,
 			personSlug: personEntities.slug,
+			personIsDraft: sql<boolean>`${personLifecycle.publishedId} IS NULL`,
 			organisationalUnitName: schema.organisationalUnits.name,
 			organisationalUnitSlug: orgEntities.slug,
 			organisationalUnitType: schema.organisationalUnitTypes.type,
@@ -320,6 +326,7 @@ export async function getCountryReportContributions(
 			personToOrgUnitId: row.personToOrgUnitId,
 			personName: row.personName,
 			personSlug: row.personSlug,
+			personIsDraft: row.personIsDraft,
 			organisationalUnitName: row.organisationalUnitName,
 			compensationRole,
 		};
@@ -385,12 +392,14 @@ function toCandidate(row: {
 	personToOrgUnitId: string;
 	personName: string;
 	personSlug: string;
+	personIsDraft: boolean;
 	organisationalUnitName: string;
 }): Omit<ContributionCandidate, "compensationRole"> {
 	return {
 		personToOrgUnitId: row.personToOrgUnitId,
 		personName: row.personName,
 		personSlug: row.personSlug,
+		personIsDraft: row.personIsDraft,
 		organisationalUnitName: row.organisationalUnitName,
 	};
 }

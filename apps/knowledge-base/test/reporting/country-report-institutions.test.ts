@@ -41,6 +41,7 @@ describe("country report institutions", () => {
 				id: "row-1",
 				name: "Austrian Academy of Sciences",
 				acronym: "OEAW",
+				isDraft: false,
 				representationTypes: [
 					"is_national_coordinating_institution_in",
 					"is_national_representative_institution_in",
@@ -77,7 +78,7 @@ describe("country report institution rows", () => {
 		return documentId;
 	}
 
-	it("names institutions that are still draft-only", async () => {
+	it("names institutions that are still draft-only, and flags them as drafts", async () => {
 		await withTransaction(async (tx) => {
 			const draft = await seedInstitution(tx, "Draft Institution", true);
 			const published = await seedInstitution(tx, "Published Institution", false);
@@ -117,6 +118,12 @@ describe("country report institution rows", () => {
 			);
 			expect(names.get(draft)).toBe("Draft Institution");
 			expect(names.get(published)).toBe("Published Institution");
+
+			const isDraft = new Map(
+				rows.map((row) => [row.organisationalUnitDocumentId, row.organisationalUnit?.isDraft]),
+			);
+			expect(isDraft.get(draft)).toBe(true);
+			expect(isDraft.get(published)).toBe(false);
 		});
 	});
 });

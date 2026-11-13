@@ -2312,6 +2312,16 @@ msgctxt "ShOrju"
 msgid "Open quick search"
 msgstr ""
 
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/draft-badge.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option-item.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
+msgctxt "W6nwjo"
+msgid "Draft"
+msgstr ""
+
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons.tsx
 msgctxt "1y23Mb"
 msgid "Save (as draft)"
@@ -2392,15 +2402,6 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector.tsx
 msgctxt "w7tf2z"
 msgid "Published"
-msgstr ""
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/maintenance/_components/entity-option-item.tsx
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-shell.tsx
-msgctxt "W6nwjo"
-msgid "Draft"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx

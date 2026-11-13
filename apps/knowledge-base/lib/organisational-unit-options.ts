@@ -8,6 +8,8 @@ export interface OrganisationalUnitOption {
 	type: string;
 	/** Entity slug, used to build detail-page hrefs. */
 	slug: string;
+	/** Never published; only set by draft-including pickers. */
+	isDraft?: boolean;
 }
 
 export interface OrganisationalUnitDocumentOption extends AsyncOption {
@@ -16,6 +18,8 @@ export interface OrganisationalUnitDocumentOption extends AsyncOption {
 	type: string;
 	/** Entity slug, used to build detail-page hrefs. */
 	slug: string;
+	/** Never published; only set by draft-including pickers. */
+	isDraft?: boolean;
 }
 
 export function toOrganisationalUnitDocumentOption(

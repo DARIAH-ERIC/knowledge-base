@@ -109,6 +109,7 @@ export async function getOrganisationalUnitOptions(
 				name: schema.organisationalUnits.name,
 				type: schema.organisationalUnitTypes.type,
 				slug: schema.entities.slug,
+				isDraft: sql<boolean>`${schema.documentLifecycle.publishedId} IS NULL`,
 			})
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
@@ -117,6 +118,10 @@ export async function getOrganisationalUnitOptions(
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.documentId, schema.entityVersions.entityId),
 			)
 			.where(where)
 			.orderBy(schema.organisationalUnits.name)
@@ -142,6 +147,7 @@ export async function getOrganisationalUnitOptions(
 				description: formatOrganisationalUnitType(item.type),
 				type: item.type,
 				slug: item.slug,
+				isDraft: item.isDraft,
 			};
 		}),
 		total: aggregate.at(0)?.total ?? 0,

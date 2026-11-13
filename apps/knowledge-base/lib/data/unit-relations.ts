@@ -304,6 +304,8 @@ export async function getReverseUnitRelations(
 			unitName: schema.organisationalUnits.name,
 			unitSlug: schema.entities.slug,
 			unitType: schema.organisationalUnitTypes.type,
+			/** Never published: the unit does not appear on the website yet. */
+			unitIsDraft: sql<boolean>`${ownerUnitDocumentLifecycle.publishedId} IS NULL`,
 			description: schema.organisationalUnitsRelations.description,
 		})
 		.from(schema.organisationalUnitsRelations)
@@ -425,6 +427,8 @@ export async function getEricInstitutionsForCountry(countryDocumentId: string) {
 			institutionName: schema.organisationalUnits.name,
 			institutionSlug: schema.entities.slug,
 			institutionType: schema.organisationalUnitTypes.type,
+			/** Never published: the institution does not appear on the website yet. */
+			institutionIsDraft: sql<boolean>`${institutionLifecycle.publishedId} IS NULL`,
 			statusId: ericStatus.id,
 			statusType: ericStatus.status,
 			duration: ericRelations.duration,
@@ -505,6 +509,8 @@ export interface CurrentPartnerInstitution {
 	name: string;
 	acronym: string | null;
 	slug: string;
+	/** Never published: the institution does not appear on the website yet. */
+	isDraft: boolean;
 }
 
 export async function getCurrentPartnerInstitutions(
@@ -539,6 +545,7 @@ export async function getCurrentPartnerInstitutions(
 			name: schema.organisationalUnits.name,
 			acronym: schema.organisationalUnits.acronym,
 			slug: schema.entities.slug,
+			isDraft: sql<boolean>`${institutionLifecycle.publishedId} IS NULL`,
 		})
 		.from(ericRelations)
 		.innerJoin(ericStatus, eq(ericStatus.id, ericRelations.status))
@@ -584,6 +591,7 @@ export async function getCurrentPartnerInstitutions(
 				name: row.name,
 				acronym: row.acronym,
 				slug: row.slug,
+				isDraft: row.isDraft,
 			});
 		} else if (!existing.representationTypes.includes(representationType)) {
 			existing.representationTypes.push(representationType);

@@ -114,6 +114,7 @@ export default async function DashboardAdministratorEditCountryPage(
 			unitName: institution.institutionName,
 			unitSlug: institution.institutionSlug,
 			unitType: institution.institutionType,
+			unitIsDraft: institution.institutionIsDraft,
 			duration: institution.duration,
 			description: institution.description,
 		};

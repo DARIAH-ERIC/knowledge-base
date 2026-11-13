@@ -23,6 +23,8 @@ export async function getPersonRelations(organisationalUnitDocumentId: string) {
 			personName: schema.persons.name,
 			personSortName: schema.persons.sortName,
 			personSlug: schema.entities.slug,
+			/** Never published: the person does not appear on the website yet. */
+			personIsDraft: sql<boolean>`${personDocumentLifecycle.publishedId} IS NULL`,
 			roleTypeId: schema.personsToOrganisationalUnits.roleTypeId,
 			roleType: schema.personRoleTypes.type,
 			duration: schema.personsToOrganisationalUnits.duration,

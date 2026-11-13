@@ -41,6 +41,10 @@ import {
 } from "react";
 
 import { ActionErrorAlert } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/action-error-alert";
+import {
+	NameWithDraftBadge,
+	renderDraftAwareOption,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-badge";
 import { EntityFormSheet } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-sheet";
 import { RowActionsMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
@@ -245,6 +249,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							personName: person.name,
 							personSortName: person.sortName,
 							personSlug: data.personSlug,
+							personIsDraft: person.isDraft,
 							roleTypeId: option.roleTypeId,
 							roleType: option.roleType as PersonRelation["roleType"],
 							targetUnitType: data.targetUnitType,
@@ -271,6 +276,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 			id: relation.personDocumentId,
 			name: relation.personName,
 			sortName: relation.personSortName,
+			isDraft: relation.personIsDraft,
 		});
 		setEditStartDate(dateToCalendarDate(relation.duration.start));
 		setEditEndDate(dateToCalendarDate(relation.duration.end));
@@ -383,8 +389,11 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							{(relation) => (
 								<TableRow id={relation.id}>
 									<TableCell>
-										<div className="truncate max-inline-80" title={relation.personName}>
-											{relation.personName}
+										<div className="max-inline-80">
+											<NameWithDraftBadge
+												isDraft={relation.personIsDraft}
+												name={relation.personName}
+											/>
 										</div>
 									</TableCell>
 									<TableCell>
@@ -504,6 +513,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 								<input name="roleTypeId" type="hidden" value={selectedRoleTypeId ?? ""} />
 
 								<AsyncSelect
+									renderItem={renderDraftAwareOption}
 									aria-label={t("Person")}
 									emptyMessage={t("No persons found.")}
 									errorMessage={
@@ -689,6 +699,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 						</Select>
 						<input name="roleTypeId" type="hidden" value={editRoleTypeId ?? ""} />
 						<AsyncSelect
+							renderItem={renderDraftAwareOption}
 							aria-label={t("Person")}
 							emptyMessage={t("No persons found.")}
 							errorMessage={
@@ -814,7 +825,13 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 					isOpen={isCreatePersonOpen}
 					onOpenChange={setIsCreatePersonOpen}
 					onSuccess={(data: ContributionPersonOption) => {
-						setSelectedPerson({ id: data.id, name: data.name, sortName: data.sortName });
+						// A person created here is always a draft until an administrator publishes it.
+						setSelectedPerson({
+							id: data.id,
+							name: data.name,
+							sortName: data.sortName,
+							isDraft: true,
+						});
 					}}
 					submitLabel={t("Create person")}
 					title={t("Create new person")}
