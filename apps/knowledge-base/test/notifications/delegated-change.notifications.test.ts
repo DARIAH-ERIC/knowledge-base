@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
 	createDraftDocument,
@@ -17,6 +17,12 @@ import {
 	startsPendingChanges,
 } from "@/lib/email/send-delegated-change-notification";
 import { withTransaction } from "@/test/lib/with-transaction";
+
+// The notification module builds email links with next-intl's navigation helpers, which need the
+// Next.js runtime; these tests only cover the lifecycle and actor checks, which never build links.
+vi.mock("@/lib/navigation/navigation", () => {
+	return { getPathname: vi.fn(() => "/"), redirect: vi.fn() };
+});
 
 async function seedInstitution(tx: Transaction): Promise<string> {
 	const [entityType, unitType] = await Promise.all([
