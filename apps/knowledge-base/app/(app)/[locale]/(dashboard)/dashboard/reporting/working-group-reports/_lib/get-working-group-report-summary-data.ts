@@ -18,6 +18,7 @@ export interface WorkingGroupReportData {
 
 export interface WorkingGroupReportHeaderData {
 	id: string;
+	status: string;
 	workingGroup: { name: string };
 	campaign: { year: number };
 }
@@ -108,7 +109,7 @@ async function getWorkingGroupReportHeader(
 ): Promise<WorkingGroupReportHeaderData | null> {
 	const report = await db.query.workingGroupReports.findFirst({
 		where: { id },
-		columns: { id: true },
+		columns: { id: true, status: true },
 		with: {
 			campaign: { columns: { year: true } },
 			workingGroup: { columns: { name: true } },
@@ -124,6 +125,7 @@ async function getWorkingGroupReportHeader(
 
 	return {
 		id: report.id,
+		status: report.status,
 		workingGroup: report.workingGroup,
 		campaign: report.campaign,
 	};
