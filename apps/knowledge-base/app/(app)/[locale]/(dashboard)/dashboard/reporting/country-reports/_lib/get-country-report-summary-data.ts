@@ -10,6 +10,7 @@ import {
 import { type Action, can } from "@/lib/auth/permissions";
 import {
 	type CountryReportInstitutionSummaryItem,
+	getCountryReportInstitutionRows,
 	groupCountryReportInstitutionSummaryRows,
 } from "@/lib/data/country-report-institutions";
 import { classifyCompensationRole } from "@/lib/data/report-contributions";
@@ -139,13 +140,6 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 				},
 			},
 			country: { columns: { name: true } },
-			institutions: {
-				columns: { id: true, organisationalUnitDocumentId: true, representationType: true },
-				with: {
-					organisationalUnit: { columns: { name: true, acronym: true } },
-				},
-				orderBy: { organisationalUnitDocumentId: "asc" },
-			},
 			socialMediaKpis: {
 				columns: { socialMediaId: true, kpi: true, value: true },
 				with: {
@@ -187,6 +181,8 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 	if (report == null) {
 		return null;
 	}
+
+	const institutionRows = await getCountryReportInstitutionRows(report.id);
 
 	// Claimed contributions are document-level person↔org relations; resolve each endpoint to its
 	// latest editable version for display.
@@ -329,7 +325,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 		veryLargeEvents: report.veryLargeEvents,
 		dariahCommissionedEvent: report.dariahCommissionedEvent,
 		reusableOutcomes: report.reusableOutcomes,
-		institutions: groupCountryReportInstitutionSummaryRows(report.institutions),
+		institutions: groupCountryReportInstitutionSummaryRows(institutionRows),
 		contributions: reportContributions,
 		socialMediaAccounts: Array.from(socialMediaMap.entries()).map(([socialMediaId, data]) => {
 			return { socialMediaId, ...data };
