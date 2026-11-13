@@ -62,8 +62,8 @@ test.describe("working group people (delegated chair)", () => {
 
 		// Create a brand-new (draft) person; on success the dialog closes and the person is auto-selected
 		// in the "Add person" form's picker.
-		await page.getByRole("button", { name: "Create and add new person" }).click();
-		const dialog = page.getByRole("dialog", { name: "Create and add new person" });
+		await page.getByRole("button", { name: "Create new person" }).click();
+		const dialog = page.getByRole("dialog", { name: "Create new person" });
 		await dialog.getByLabel("Name", { exact: true }).fill(input.name);
 		await dialog.getByRole("textbox", { name: "Sort name" }).fill(input.sortName);
 		await dialog.getByRole("button", { name: "Create person" }).click();
@@ -162,8 +162,8 @@ test.describe("working group people (delegated chair)", () => {
 		await selectTab(page.getByRole("tab", { name: "People" }));
 
 		// Create the draft person but do NOT link them — the create alone persists the draft document.
-		await page.getByRole("button", { name: "Create and add new person" }).click();
-		const dialog = page.getByRole("dialog", { name: "Create and add new person" });
+		await page.getByRole("button", { name: "Create new person" }).click();
+		const dialog = page.getByRole("dialog", { name: "Create new person" });
 		await dialog.getByLabel("Name", { exact: true }).fill(name);
 		await dialog.getByRole("textbox", { name: "Sort name" }).fill(sortName);
 		await waitForActionSuccess({

@@ -2965,9 +2965,9 @@ msgid "No person selected"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
-msgctxt "kU7W7R"
-msgid "Create and add new person"
-msgstr "Create and add new person"
+msgctxt "qTU2Gh"
+msgid "Create new person"
+msgstr "Create new person"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
 msgctxt "vSuRKQ"
@@ -2996,9 +2996,9 @@ msgid "Could not delete person relation. Please try again."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
-msgctxt "VZy055"
-msgid "Create a new person, then select them above. The person is saved as a draft until an administrator publishes it."
-msgstr "Create a new person, then select them above. The person is saved as a draft until an administrator publishes it."
+msgctxt "610X6l"
+msgid "The new person is selected above. Press \"Add person\" to relate them. The person is saved as a draft until an administrator publishes it."
+msgstr "The new person is selected above. Press \"Add person\" to relate them. The person is saved as a draft until an administrator publishes it."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
 msgctxt "SyhZVW"
@@ -3093,9 +3093,9 @@ msgid "Could not delete relation. Please try again."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section.tsx
-msgctxt "x4XIQg"
-msgid "Create a new entry, then select it above. The entry is saved as a draft until an administrator publishes it."
-msgstr "Create a new entry, then select it above. The entry is saved as a draft until an administrator publishes it."
+msgctxt "AE9uzq"
+msgid "The new entry is selected above. Press \"{addButton}\" to relate it. The entry is saved as a draft until an administrator publishes it."
+msgstr "The new entry is selected above. Press \"{addButton}\" to relate it. The entry is saved as a draft until an administrator publishes it."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/reverse-unit-relations-section.tsx
 msgctxt "YH30ru"
@@ -8114,9 +8114,9 @@ msgid "No reports yet"
 msgstr "No reports yet"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_components/delegated-country-edit-form.tsx
-msgctxt "0FwdPy"
-msgid "Create and add new institution"
-msgstr "Create and add new institution"
+msgctxt "YJgK6D"
+msgid "Create new institution"
+msgstr "Create new institution"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_components/delegated-country-edit-form.tsx
 msgctxt "G0ROva"

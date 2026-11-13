@@ -828,7 +828,8 @@ export function ReverseUnitRelationsSection(
 				<EntityFormSheet
 					action={createSourceUnit.action}
 					description={t(
-						"Create a new entry, then select it above. The entry is saved as a draft until an administrator publishes it.",
+						'The new entry is selected above. Press "{addButton}" to relate it. The entry is saved as a draft until an administrator publishes it.',
+						{ addButton: messages.addButton },
 					)}
 					isOpen={isCreateUnitOpen}
 					onOpenChange={setIsCreateUnitOpen}
