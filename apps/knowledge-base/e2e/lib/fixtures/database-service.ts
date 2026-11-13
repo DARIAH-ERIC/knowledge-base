@@ -2,7 +2,7 @@ import { createCipheriv, createHash, randomBytes } from "node:crypto";
 
 import { type Transaction, createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
-import { and, eq, exists, inArray, notExists, or, sql } from "@dariah-eric/database/sql";
+import { alias, and, eq, exists, inArray, notExists, or, sql } from "@dariah-eric/database/sql";
 import type { InferOk } from "better-result";
 
 import { env } from "../../../config/env.config";
@@ -1823,6 +1823,92 @@ export class DatabaseService {
 		}
 
 		return row;
+	}
+
+	/**
+	 * The first seeded country or working group (by name) that reports for the campaign `year` — what
+	 * the admin create-report forms list first for a campaign of that year. Mirrors the app's
+	 * eligibility: a member/observer relation (countries) or an `is_part_of` relation to DARIAH-EU
+	 * (working groups) overlapping the year.
+	 */
+	private async getReportingOrgUnitOption(
+		unitType: "country" | "working_group",
+		year: number,
+	): Promise<{ id: string; name: string; slug: string }> {
+		const relatedUnits = alias(schema.entities, "reporting_option_related_units");
+		const relation = this.db
+			.select({ one: sql`1` })
+			.from(schema.organisationalUnitsRelations)
+			.innerJoin(
+				schema.organisationalUnitStatus,
+				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+			)
+			.innerJoin(
+				relatedUnits,
+				eq(relatedUnits.id, schema.organisationalUnitsRelations.relatedUnitDocumentId),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnitsRelations.unitDocumentId, schema.entityVersions.entityId),
+					unitType === "country"
+						? inArray(schema.organisationalUnitStatus.status, ["is_member_of", "is_observer_of"])
+						: and(
+								eq(schema.organisationalUnitStatus.status, "is_part_of"),
+								eq(relatedUnits.slug, "dariah-eu"),
+							),
+					sql`
+						${schema.organisationalUnitsRelations.duration} && tstzrange (
+							MAKE_DATE(${year}, 1, 1)::TIMESTAMPTZ,
+							MAKE_DATE(${year + 1}, 1, 1)::TIMESTAMPTZ
+						)
+					`,
+				),
+			);
+
+		const [row] = await this.db
+			.select({
+				id: schema.entityVersions.entityId,
+				name: schema.organisationalUnits.name,
+				slug: schema.entities.slug,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+			.where(
+				and(
+					eq(schema.organisationalUnitTypes.type, unitType),
+					eq(schema.entityStatus.type, "published"),
+					sql`${schema.organisationalUnits.name} NOT LIKE ${WORKER_FIXTURE_NAME_PATTERN}`,
+					exists(relation),
+				),
+			)
+			.orderBy(schema.organisationalUnits.name)
+			.limit(1);
+
+		if (row == null) {
+			throw new Error(
+				`Expected at least one ${unitType} reporting for ${String(year)} for e2e tests.`,
+			);
+		}
+
+		return row;
+	}
+
+	async getReportingCountryOption(
+		year: number,
+	): Promise<{ id: string; name: string; slug: string }> {
+		return this.getReportingOrgUnitOption("country", year);
+	}
+
+	async getReportingWorkingGroupOption(
+		year: number,
+	): Promise<{ id: string; name: string; slug: string }> {
+		return this.getReportingOrgUnitOption("working_group", year);
 	}
 
 	async getWorkingGroupOption(): Promise<{ id: string; name: string; slug: string }> {

@@ -26,7 +26,7 @@ export default async function DashboardAdministratorCreateCountryReportPage(
 	_props: Readonly<DashboardAdministratorCreateCountryReportPageProps>,
 ): Promise<ReactNode> {
 	const { user } = await assertAuthenticated();
-	const { campaigns, countries } = await getCountryReportCreateDataForAdmin(user);
+	const { campaigns } = await getCountryReportCreateDataForAdmin(user);
 
-	return <CountryReportCreateForm campaigns={campaigns} countries={countries} />;
+	return <CountryReportCreateForm campaigns={campaigns} />;
 }

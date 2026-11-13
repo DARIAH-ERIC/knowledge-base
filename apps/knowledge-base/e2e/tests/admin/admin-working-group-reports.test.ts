@@ -34,7 +34,7 @@ test.describe("working group reports admin", () => {
 		const campaign = await db.createOpenCampaign(campaignYear);
 		campaignId = campaign.id;
 
-		const workingGroup = await db.getWorkingGroupOption();
+		const workingGroup = await db.getReportingWorkingGroupOption(campaignYear);
 		workingGroupId = workingGroup.id;
 
 		await reportsPage.gotoCreate();
@@ -75,7 +75,7 @@ test.describe("working group reports admin", () => {
 
 		await reportsPage.goto();
 
-		const workingGroup = await db.getWorkingGroupOption();
+		const workingGroup = await db.getReportingWorkingGroupOption(campaignYear);
 		const deleteDialog = await reportsPage.openDeleteDialog(workingGroup.name, campaignYear);
 		await expect(deleteDialog).toBeVisible();
 		await reportsPage.confirmDelete(deleteDialog);
