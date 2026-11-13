@@ -7,6 +7,12 @@ import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import {
+	SearchableSelect,
+	SearchableSelectContent,
+	SearchableSelectInput,
+	SearchableSelectItem,
+} from "@dariah-eric/ui/searchable-select";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
@@ -287,7 +293,7 @@ function AddExistingAccountForm(props: Readonly<AddExistingAccountFormProps>): R
 			>
 				<input name="countryReportId" type="hidden" value={reportId} />
 
-				<Select
+				<SearchableSelect
 					isRequired={true}
 					onChange={(key) => {
 						setSelectedId(key == null ? "" : String(key));
@@ -295,17 +301,21 @@ function AddExistingAccountForm(props: Readonly<AddExistingAccountFormProps>): R
 					value={selectedId || null}
 				>
 					<Label>{t("Account")}</Label>
-					<SelectTrigger />
+					<SearchableSelectInput placeholder={t("Search accounts...")} />
 					<FieldError />
-					<SelectContent>
+					<SearchableSelectContent>
 						{availableAccounts.map((account) => (
-							<SelectItem key={account.id} id={account.id}>
+							<SearchableSelectItem
+								key={account.id}
+								id={account.id}
+								textValue={`${account.name} (${account.url})`}
+							>
 								{account.name}
 								{` (${account.url})`}
-							</SelectItem>
+							</SearchableSelectItem>
 						))}
-					</SelectContent>
-				</Select>
+					</SearchableSelectContent>
+				</SearchableSelect>
 				<input name="socialMediaId" type="hidden" value={selectedId} />
 
 				<Button className="self-start" isPending={isPending} type="submit">

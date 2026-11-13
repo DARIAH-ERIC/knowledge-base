@@ -4065,6 +4065,11 @@ msgid "Select the campaign and country for this report."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-create-form.tsx
+msgctxt "37zpJw"
+msgid "Search countries..."
+msgstr "Search countries..."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-create-form.tsx
 msgctxt "gf-H7u"
 msgid "Every country that reports for this campaign already has a report."
 msgstr "Every country that reports for this campaign already has a report."
@@ -7948,6 +7953,11 @@ msgid "Select the campaign and working group for this report."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form.tsx
+msgctxt "7J9GuR"
+msgid "Search working groups..."
+msgstr "Search working groups..."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form.tsx
 msgctxt "XyGmU2"
 msgid "Every working group that reports for this campaign already has a report."
 msgstr "Every working group that reports for this campaign already has a report."
@@ -8404,6 +8414,11 @@ msgid "Add project contribution"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
+msgctxt "Dw9Bae"
+msgid "Search projects..."
+msgstr "Search projects..."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
 msgctxt "OPeXEU"
 msgid "No projects available."
 msgstr ""
@@ -8454,6 +8469,11 @@ msgctxt "P_oSs1"
 msgid "Add an existing service"
 msgstr ""
 
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
+msgctxt "NEClMF"
+msgid "Search services..."
+msgstr "Search services..."
+
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
 msgctxt "Z4VSlt"
 msgid "The social media accounts this report covers. Add the relevant metrics per account — you only need to fill in the numbers you have."
@@ -8473,6 +8493,12 @@ msgstr ""
 msgctxt "c4Bnfs"
 msgid "Add an existing account"
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
+msgctxt "VSmsWL"
+msgid "Search accounts..."
+msgstr "Search accounts..."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-social-media-form.tsx
 msgctxt "6BK1pe"

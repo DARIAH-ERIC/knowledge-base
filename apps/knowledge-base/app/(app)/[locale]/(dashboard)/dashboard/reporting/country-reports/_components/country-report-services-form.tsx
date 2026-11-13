@@ -7,6 +7,12 @@ import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import {
+	SearchableSelect,
+	SearchableSelectContent,
+	SearchableSelectInput,
+	SearchableSelectItem,
+} from "@dariah-eric/ui/searchable-select";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
@@ -290,7 +296,7 @@ function AddExistingServiceForm(props: Readonly<AddExistingServiceFormProps>): R
 			>
 				<input name="countryReportId" type="hidden" value={reportId} />
 
-				<Select
+				<SearchableSelect
 					isRequired={true}
 					onChange={(key) => {
 						setSelectedId(key == null ? "" : String(key));
@@ -298,16 +304,16 @@ function AddExistingServiceForm(props: Readonly<AddExistingServiceFormProps>): R
 					value={selectedId || null}
 				>
 					<Label>{t("Service")}</Label>
-					<SelectTrigger />
+					<SearchableSelectInput placeholder={t("Search services...")} />
 					<FieldError />
-					<SelectContent>
+					<SearchableSelectContent>
 						{availableServices.map((service) => (
-							<SelectItem key={service.id} id={service.id}>
+							<SearchableSelectItem key={service.id} id={service.id} textValue={service.name}>
 								{service.name}
-							</SelectItem>
+							</SearchableSelectItem>
 						))}
-					</SelectContent>
-				</Select>
+					</SearchableSelectContent>
+				</SearchableSelect>
 				<input name="serviceId" type="hidden" value={selectedId} />
 
 				<Button className="self-start" isPending={isPending} type="submit">

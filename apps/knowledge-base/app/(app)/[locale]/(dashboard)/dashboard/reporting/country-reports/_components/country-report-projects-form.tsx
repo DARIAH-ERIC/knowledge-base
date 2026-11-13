@@ -8,7 +8,12 @@ import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import {
+	SearchableSelect,
+	SearchableSelectContent,
+	SearchableSelectInput,
+	SearchableSelectItem,
+} from "@dariah-eric/ui/searchable-select";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
@@ -109,7 +114,7 @@ export function CountryReportProjectsForm(
 					>
 						<input name="countryReportId" type="hidden" value={report.id} />
 
-						<Select
+						<SearchableSelect
 							isRequired={true}
 							onChange={(key) => {
 								setSelectedProjectId(key == null ? "" : String(key));
@@ -117,16 +122,16 @@ export function CountryReportProjectsForm(
 							value={selectedProjectId || null}
 						>
 							<Label>{t("Project")}</Label>
-							<SelectTrigger />
+							<SearchableSelectInput placeholder={t("Search projects...")} />
 							<FieldError />
-							<SelectContent>
+							<SearchableSelectContent>
 								{availableProjects.map((project) => (
-									<SelectItem key={project.id} id={project.id}>
+									<SearchableSelectItem key={project.id} id={project.id} textValue={project.name}>
 										{project.name}
-									</SelectItem>
+									</SearchableSelectItem>
 								))}
-							</SelectContent>
-						</Select>
+							</SearchableSelectContent>
+						</SearchableSelect>
 						<input name="projectDocumentId" type="hidden" value={selectedProjectId} />
 
 						<TextField isRequired={true} name="amountEuros" type="number">

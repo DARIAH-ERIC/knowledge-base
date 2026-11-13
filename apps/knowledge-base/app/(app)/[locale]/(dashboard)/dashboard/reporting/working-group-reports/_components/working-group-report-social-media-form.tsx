@@ -6,7 +6,12 @@ import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import {
+	SearchableSelect,
+	SearchableSelectContent,
+	SearchableSelectInput,
+	SearchableSelectItem,
+} from "@dariah-eric/ui/searchable-select";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -86,7 +91,7 @@ export function WorkingGroupReportSocialMediaForm(
 					>
 						<input name="workingGroupReportId" type="hidden" value={report.id} />
 
-						<Select
+						<SearchableSelect
 							isRequired={true}
 							onChange={(key) => {
 								setSelectedId(key == null ? "" : String(key));
@@ -94,17 +99,23 @@ export function WorkingGroupReportSocialMediaForm(
 							value={selectedId || null}
 						>
 							<Label>{t("Account")}</Label>
-							<SelectTrigger />
+							<SearchableSelectInput placeholder={t("Search accounts...")} />
 							<FieldError />
-							<SelectContent>
+							<SearchableSelectContent>
 								{availableSocialMedia.map((account) => (
-									<SelectItem key={account.id} id={account.id}>
+									<SearchableSelectItem
+										key={account.id}
+										id={account.id}
+										textValue={
+											account.url != null ? `${account.name} (${account.url})` : account.name
+										}
+									>
 										{account.name}
 										{account.url != null && ` (${account.url})`}
-									</SelectItem>
+									</SearchableSelectItem>
 								))}
-							</SelectContent>
-						</Select>
+							</SearchableSelectContent>
+						</SearchableSelect>
 						<input name="socialMediaId" type="hidden" value={selectedId} />
 
 						<Button className="self-start" isPending={isPending} type="submit">
