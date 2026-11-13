@@ -125,7 +125,10 @@ export async function GET(
 				blocks.push({
 					kind: "itemList",
 					items: summary.chairs.map((chair) => {
-						return { primary: chair.personName, secondary: formatRole(chair.roleType) };
+						return {
+							primary: chair.personName,
+							secondary: chair.roleType === "is_vice_chair_of" ? "Vice chair" : "Chair",
+						};
 					}),
 				});
 			}
