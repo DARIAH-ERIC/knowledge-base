@@ -4,7 +4,7 @@ import type * as schema from "@dariah-eric/database/schema";
 import { reportStatusEnum } from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError, Label } from "@dariah-eric/ui/field";
+import { Description, FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
@@ -20,8 +20,12 @@ import {
 import { createCountryReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/create-country-report.action";
 
 interface CountryReportCreateFormProps {
-	campaigns: Array<Pick<schema.ReportingCampaign, "id" | "year">>;
-	countries: Array<Pick<schema.OrganisationalUnit, "id" | "name">>;
+	/** Open campaigns, each with the countrys that may still get a report in it. */
+	campaigns: Array<
+		Pick<schema.ReportingCampaign, "id" | "year"> & {
+			countries: Array<Pick<schema.OrganisationalUnit, "id" | "name">>;
+		}
+	>;
 }
 
 function formatStatus(status: string): string {
@@ -29,7 +33,7 @@ function formatStatus(status: string): string {
 }
 
 export function CountryReportCreateForm(props: Readonly<CountryReportCreateFormProps>): ReactNode {
-	const { campaigns, countries } = props;
+	const { campaigns } = props;
 
 	const t = useExtracted();
 
@@ -41,6 +45,9 @@ export function CountryReportCreateForm(props: Readonly<CountryReportCreateFormP
 	const [selectedCampaignId, setSelectedCampaignId] = useState<string>(campaigns[0]?.id ?? "");
 	const [selectedCountryId, setSelectedCountryId] = useState<string>("");
 	const [selectedStatus, setSelectedStatus] = useState<string>("draft");
+
+	const countries =
+		campaigns.find((campaign) => campaign.id === selectedCampaignId)?.countries ?? [];
 
 	return (
 		<Fragment>
@@ -56,6 +63,8 @@ export function CountryReportCreateForm(props: Readonly<CountryReportCreateFormP
 							isRequired={true}
 							onChange={(key) => {
 								setSelectedCampaignId(key == null ? "" : String(key));
+								// The countrys that may still get a report differ per campaign.
+								setSelectedCountryId("");
 							}}
 							value={selectedCampaignId || null}
 						>
@@ -81,6 +90,11 @@ export function CountryReportCreateForm(props: Readonly<CountryReportCreateFormP
 						>
 							<Label>{t("Country")}</Label>
 							<SelectTrigger />
+							{selectedCampaignId !== "" && countries.length === 0 && (
+								<Description>
+									{t("Every country that reports for this campaign already has a report.")}
+								</Description>
+							)}
 							<FieldError />
 							<SelectContent>
 								{countries.map((country) => (

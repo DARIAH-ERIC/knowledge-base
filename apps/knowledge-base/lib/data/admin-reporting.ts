@@ -6,7 +6,10 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { hasDariahCommissionedEvent } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/calculate-operational-cost";
-import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
+import {
+	getReportingCountries,
+	getReportingWorkingGroups,
+} from "@/lib/data/reporting-campaign-readiness";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import {
@@ -257,30 +260,34 @@ export async function getCountryReportForAdmin(currentUser: Pick<User, "role">, 
 	return { ...report, country: report.country };
 }
 
+/**
+ * The open campaigns, each with the countries that report for its year but have no report in it
+ * yet. Launching a campaign creates these reports; this covers relations entered afterwards.
+ */
 export async function getCountryReportCreateDataForAdmin(currentUser: Pick<User, "role">) {
 	assertAdminUser(currentUser);
 
-	const [campaigns, countries] = await Promise.all([
-		db.query.reportingCampaigns.findMany({
-			where: { status: "open" },
-			orderBy: { year: "desc" },
-			columns: { id: true, year: true },
-		}),
-		db
-			// reports are keyed by document id; return the country's document id.
-			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
-			.from(schema.organisationalUnits)
-			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.innerJoin(
-				schema.organisationalUnitTypes,
-				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
-			)
-			.where(and(publishedEntityVersionWhere(), eq(schema.organisationalUnitTypes.type, "country")))
-			.orderBy(schema.organisationalUnits.name),
-	]);
+	const campaigns = await db.query.reportingCampaigns.findMany({
+		where: { status: "open" },
+		orderBy: { year: "desc" },
+		columns: { id: true, year: true },
+		with: { countryReports: { columns: { countryDocumentId: true } } },
+	});
 
-	return { campaigns, countries };
+	return {
+		campaigns: await Promise.all(
+			campaigns.map(async (campaign) => {
+				const reported = new Set(campaign.countryReports.map((report) => report.countryDocumentId));
+				const countries = await getReportingCountries(campaign.year);
+
+				return {
+					id: campaign.id,
+					year: campaign.year,
+					countries: countries.filter((country) => !reported.has(country.id)),
+				};
+			}),
+		),
+	};
 }
 
 export async function getWorkingGroupReportsForAdmin(
@@ -389,35 +396,53 @@ export async function getWorkingGroupReportForAdmin(currentUser: Pick<User, "rol
 	return { ...report, workingGroup: report.workingGroup };
 }
 
+/**
+ * The open campaigns, each with the working groups that report for its year but have no report in
+ * it yet. Launching a campaign creates these reports; this covers relations entered afterwards.
+ */
 export async function getWorkingGroupReportCreateDataForAdmin(currentUser: Pick<User, "role">) {
 	assertAdminUser(currentUser);
 
-	const [campaigns, workingGroups] = await Promise.all([
-		db.query.reportingCampaigns.findMany({
-			where: { status: "open" },
-			orderBy: { year: "desc" },
-			columns: { id: true, year: true },
-		}),
-		db
-			// reports are keyed by document id; return the working group's document id.
-			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
-			.from(schema.organisationalUnits)
-			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.innerJoin(
-				schema.organisationalUnitTypes,
-				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
-			)
-			.where(
-				and(
-					publishedEntityVersionWhere(),
-					eq(schema.organisationalUnitTypes.type, "working_group"),
-				),
-			)
-			.orderBy(schema.organisationalUnits.name),
-	]);
+	const campaigns = await db.query.reportingCampaigns.findMany({
+		where: { status: "open" },
+		orderBy: { year: "desc" },
+		columns: { id: true, year: true },
+		with: { workingGroupReports: { columns: { workingGroupDocumentId: true } } },
+	});
 
-	return { campaigns, workingGroups };
+	return {
+		campaigns: await Promise.all(
+			campaigns.map(async (campaign) => {
+				const reported = new Set(
+					campaign.workingGroupReports.map((report) => report.workingGroupDocumentId),
+				);
+				const workingGroups = await getReportingWorkingGroups(campaign.year);
+
+				return {
+					id: campaign.id,
+					year: campaign.year,
+					workingGroups: workingGroups.filter((workingGroup) => !reported.has(workingGroup.id)),
+				};
+			}),
+		),
+	};
+}
+
+/**
+ * Suggests the year for a new campaign: the year after the latest existing campaign, or the current
+ * year when there are none yet.
+ */
+export async function getReportingCampaignCreateDataForAdmin(currentUser: Pick<User, "role">) {
+	assertAdminUser(currentUser);
+
+	const latest = await db.query.reportingCampaigns.findFirst({
+		orderBy: { year: "desc" },
+		columns: { year: true },
+	});
+
+	const defaultYear = latest != null ? latest.year + 1 : new Date().getFullYear();
+
+	return { defaultYear };
 }
 
 export async function getReportingCampaignsForAdmin(
@@ -1312,7 +1337,7 @@ export async function getReportingCampaignHeaderForAdmin(
 
 	return db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true, year: true },
+		columns: { id: true, year: true, status: true },
 	});
 }
 
@@ -1334,15 +1359,24 @@ export async function getReportingCampaignEventAmountsForAdmin(
 ) {
 	assertAdminUser(currentUser);
 
-	return db.query.reportingCampaigns.findFirst({
+	const campaign = await db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true },
-		with: {
-			eventAmounts: {
-				columns: { eventType: true, amount: true },
-			},
-		},
+		columns: { id: true, status: true, year: true },
+		with: { eventAmounts: { columns: { eventType: true, amount: true } } },
 	});
+
+	if (campaign == null) {
+		return undefined;
+	}
+
+	const previous = await db.query.reportingCampaigns.findFirst({
+		where: { year: { lt: campaign.year } },
+		orderBy: { year: "desc" },
+		columns: { year: true },
+		with: { eventAmounts: { columns: { eventType: true, amount: true } } },
+	});
+
+	return { ...campaign, previous: previous ?? null };
 }
 
 export async function getReportingCampaignCountryThresholdsForAdmin(
@@ -1351,31 +1385,25 @@ export async function getReportingCampaignCountryThresholdsForAdmin(
 ) {
 	assertAdminUser(currentUser);
 
-	const [campaign, countries] = await Promise.all([
-		db.query.reportingCampaigns.findFirst({
-			where: { id },
-			columns: { id: true },
-			with: {
-				countryThresholds: {
-					columns: { countryDocumentId: true, amount: true },
-				},
-			},
-		}),
-		db
-			// thresholds are keyed by country document id; return the document id.
-			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
-			.from(schema.organisationalUnits)
-			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.innerJoin(
-				schema.organisationalUnitTypes,
-				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
-			)
-			.where(and(publishedEntityVersionWhere(), eq(schema.organisationalUnitTypes.type, "country")))
-			.orderBy(schema.organisationalUnits.name),
-	]);
+	const campaign = await db.query.reportingCampaigns.findFirst({
+		where: { id },
+		columns: { id: true, status: true, year: true },
+		with: { countryThresholds: { columns: { countryDocumentId: true, amount: true } } },
+	});
+	// Thresholds are needed for every country that files a report for the campaign year.
+	const countries = campaign != null ? await getReportingCountries(campaign.year) : [];
 
-	return { campaign, countries };
+	const previous =
+		campaign != null
+			? await db.query.reportingCampaigns.findFirst({
+					where: { year: { lt: campaign.year } },
+					orderBy: { year: "desc" },
+					columns: { year: true },
+					with: { countryThresholds: { columns: { countryDocumentId: true, amount: true } } },
+				})
+			: undefined;
+
+	return { campaign, countries, previous: previous ?? null };
 }
 
 export async function getReportingCampaignContributionAmountsForAdmin(
@@ -1384,15 +1412,24 @@ export async function getReportingCampaignContributionAmountsForAdmin(
 ) {
 	assertAdminUser(currentUser);
 
-	return db.query.reportingCampaigns.findFirst({
+	const campaign = await db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true },
-		with: {
-			contributionAmounts: {
-				columns: { roleType: true, amount: true },
-			},
-		},
+		columns: { id: true, status: true, year: true },
+		with: { contributionAmounts: { columns: { roleType: true, amount: true } } },
 	});
+
+	if (campaign == null) {
+		return undefined;
+	}
+
+	const previous = await db.query.reportingCampaigns.findFirst({
+		where: { year: { lt: campaign.year } },
+		orderBy: { year: "desc" },
+		columns: { year: true },
+		with: { contributionAmounts: { columns: { roleType: true, amount: true } } },
+	});
+
+	return { ...campaign, previous: previous ?? null };
 }
 
 export async function getReportingCampaignQuestionsForAdmin(
@@ -1401,9 +1438,9 @@ export async function getReportingCampaignQuestionsForAdmin(
 ) {
 	assertAdminUser(currentUser);
 
-	return db.query.reportingCampaigns.findFirst({
+	const campaign = await db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true },
+		columns: { id: true, status: true, year: true },
 		with: {
 			workingGroupReportQuestions: {
 				columns: { id: true, question: true, position: true },
@@ -1411,6 +1448,24 @@ export async function getReportingCampaignQuestionsForAdmin(
 			},
 		},
 	});
+
+	if (campaign == null) {
+		return undefined;
+	}
+
+	const previous = await db.query.reportingCampaigns.findFirst({
+		where: { year: { lt: campaign.year } },
+		orderBy: { year: "desc" },
+		columns: { year: true },
+		with: {
+			workingGroupReportQuestions: {
+				columns: { id: true, question: true, position: true },
+				orderBy: { position: "asc" },
+			},
+		},
+	});
+
+	return { ...campaign, previous: previous ?? null };
 }
 
 export async function getReportingCampaignServiceSizesForAdmin(
@@ -1419,15 +1474,24 @@ export async function getReportingCampaignServiceSizesForAdmin(
 ) {
 	assertAdminUser(currentUser);
 
-	return db.query.reportingCampaigns.findFirst({
+	const campaign = await db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true },
-		with: {
-			serviceSizes: {
-				columns: { serviceSize: true, visitsThreshold: true, amount: true },
-			},
-		},
+		columns: { id: true, status: true, year: true },
+		with: { serviceSizes: { columns: { serviceSize: true, visitsThreshold: true, amount: true } } },
 	});
+
+	if (campaign == null) {
+		return undefined;
+	}
+
+	const previous = await db.query.reportingCampaigns.findFirst({
+		where: { year: { lt: campaign.year } },
+		orderBy: { year: "desc" },
+		columns: { year: true },
+		with: { serviceSizes: { columns: { serviceSize: true, visitsThreshold: true, amount: true } } },
+	});
+
+	return { ...campaign, previous: previous ?? null };
 }
 
 export async function getReportingCampaignSocialMediaAmountsForAdmin(
@@ -1436,13 +1500,22 @@ export async function getReportingCampaignSocialMediaAmountsForAdmin(
 ) {
 	assertAdminUser(currentUser);
 
-	return db.query.reportingCampaigns.findFirst({
+	const campaign = await db.query.reportingCampaigns.findFirst({
 		where: { id },
-		columns: { id: true },
-		with: {
-			socialMediaAmounts: {
-				columns: { category: true, amount: true },
-			},
-		},
+		columns: { id: true, status: true, year: true },
+		with: { socialMediaAmounts: { columns: { category: true, amount: true } } },
 	});
+
+	if (campaign == null) {
+		return undefined;
+	}
+
+	const previous = await db.query.reportingCampaigns.findFirst({
+		where: { year: { lt: campaign.year } },
+		orderBy: { year: "desc" },
+		columns: { year: true },
+		with: { socialMediaAmounts: { columns: { category: true, amount: true } } },
+	});
+
+	return { ...campaign, previous: previous ?? null };
 }

@@ -1514,7 +1514,7 @@ async function main() {
 								["small", null, 6_875],
 								["medium", 7_000, 20_625],
 								["large", 170_000, 41_250],
-								["very_large", 500_000, 61_875],
+								["important", null, 61_875],
 								["core", null, 82_500],
 							] as const
 						).map(([serviceSize, visitsThreshold, amount]) => {

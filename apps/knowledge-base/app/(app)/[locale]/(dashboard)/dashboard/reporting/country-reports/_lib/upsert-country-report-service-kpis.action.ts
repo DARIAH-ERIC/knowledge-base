@@ -21,13 +21,15 @@ const UpsertCountryReportServiceKpisSchema = v.object({
 			),
 		),
 	),
+	/** Service ids the reporter marked as important; unticked checkboxes are not submitted. */
+	important: v.optional(v.record(v.string(), v.literal("on"))),
 });
 
 /**
- * Saves the per-service KPI values for a country report. Replace-set semantics scoped to the
- * country's services (resolved via its consortium): a removed/blanked metric is dropped from the
- * form data, so re-writing the set is what clears it, and a forged `serviceId` outside the
- * country's services is ignored.
+ * Saves the per-service KPI values and "important" marks for a country report. Replace-set
+ * semantics scoped to the country's services (resolved via its consortium): a removed/blanked
+ * metric is dropped from the form data, so re-writing the set is what clears it, and a forged
+ * `serviceId` outside the country's services is ignored.
  */
 export const upsertCountryReportServiceKpisAction = createMutationAction({
 	schema: UpsertCountryReportServiceKpisSchema,
@@ -47,6 +49,7 @@ export const upsertCountryReportServiceKpisAction = createMutationAction({
 		const memberships = await tx.query.countryReportServices.findMany({
 			where: { countryReportId: input.id },
 			columns: { serviceId: true },
+			with: { service: { columns: {}, with: { type: { columns: { type: true } } } } },
 		});
 		const allowedServiceIds = new Set(memberships.map((membership) => membership.serviceId));
 
@@ -76,6 +79,34 @@ export const upsertCountryReportServiceKpisAction = createMutationAction({
 
 			if (rows.length > 0) {
 				await tx.insert(schema.countryReportServiceKpis).values(rows);
+			}
+
+			// Core services are sized by their type, so a mark on one would have no effect.
+			const importantServiceIds = new Set(
+				memberships
+					.filter(
+						(membership) =>
+							membership.service.type.type !== "core" &&
+							Object.hasOwn(input.important ?? {}, membership.serviceId),
+					)
+					.map((membership) => membership.serviceId),
+			);
+			const otherServiceIds = [...allowedServiceIds].filter((id) => !importantServiceIds.has(id));
+			for (const [isImportant, serviceIds] of [
+				[true, [...importantServiceIds]],
+				[false, otherServiceIds],
+			] as const) {
+				if (serviceIds.length > 0) {
+					await tx
+						.update(schema.countryReportServices)
+						.set({ isImportant })
+						.where(
+							and(
+								eq(schema.countryReportServices.countryReportId, input.id),
+								inArray(schema.countryReportServices.serviceId, serviceIds),
+							),
+						);
+				}
 			}
 		}
 

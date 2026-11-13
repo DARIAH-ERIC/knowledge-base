@@ -100,7 +100,14 @@ import { FootnotePasteGuard } from "@/lib/rich-text-footnote";
 import { FootnoteNode, inlineFootnoteExtensions } from "@/lib/rich-text-footnote-node";
 import { HeadingWithoutBold } from "@/lib/rich-text-heading";
 import { PastedImageGuard, parsePastedImage } from "@/lib/rich-text-image-paste";
+import { MediaPasteGuard, mediaGroup } from "@/lib/rich-text-media-placement";
+import { blockPanelFooterClassName, useContainerDraggable } from "@/lib/rich-text-node-chrome";
 import { PastedContentNormalizer } from "@/lib/rich-text-paste-normalize";
+import {
+	QuoteHostContext,
+	QuoteNode,
+	type QuotePersonPickerRenderer,
+} from "@/lib/rich-text-quote-node";
 import {
 	type SlashCommandHandlers,
 	SlashCommandMenu,
@@ -181,6 +188,11 @@ interface RichTextEditorProps {
 	renderLinkTargetSummary?: (
 		target: { kind: "asset"; assetKey: string } | { kind: "entity"; entityId: string },
 	) => ReactNode;
+	/**
+	 * Picker a quote's attribution panel opens, to credit a person in the knowledge base rather than
+	 * a typed-in name. Without one, quotes can still be attributed by name.
+	 */
+	renderPersonPicker?: QuotePersonPickerRenderer;
 }
 
 export type InsertImage = (
@@ -298,14 +310,6 @@ function BlockNodeSurface({
 		</NodeViewWrapper>
 	);
 }
-
-/**
- * Footer of a block edit panel. Its buttons act on the block as a whole rather than on the setting
- * directly above them, so they sit below a rule which spans the full panel — the panel's own `p-4`
- * is reversed out and then reapplied.
- */
-const blockPanelFooterClassName =
-	"-ms-4 -me-4 mbs-1 flex items-center gap-x-2 border-bs border-border px-4 pbs-3";
 
 function getEmbedUrl(url: string): string {
 	const watchMatch = /youtube\.com\/watch\?.*?v=([\w-]+)/.exec(url);
@@ -562,7 +566,8 @@ function EmbedNodeView({
 function createEmbedNode(hasFootnotes = false): Node {
 	return Node.create({
 		name: "embedBlock",
-		group: "block",
+		// `media`, not `block`: see {@link DocumentWithContainers}.
+		group: mediaGroup,
 		atom: true,
 		draggable: true,
 		selectable: true,
@@ -609,37 +614,6 @@ function createEmbedNode(hasFootnotes = false): Node {
 			));
 		},
 	});
-}
-
-/**
- * Marks a container node's DOM as draggable, and hands back the ref to put on its
- * `NodeViewWrapper`.
- *
- * ProseMirror sets `draggable` itself only for nodes with no content hole (see `NodeViewDesc`), so
- * a container — whose body is editable prose — never gets it. Without the attribute the browser
- * fires no `dragstart`, tiptap's `data-drag-handle` handling never runs, and the block cannot be
- * moved at all. The same reason `BlockNodeSurface` sets it for the atoms it wraps.
- *
- * Cleared while the node is not draggable — a read-only editor, or a settings panel the author is
- * filling in — so a drag can never start from a form.
- */
-function useContainerDraggable(isDraggable: boolean): RefObject<HTMLDivElement | null> {
-	const wrapperRef = useRef<HTMLDivElement>(null);
-
-	useLayoutEffect(() => {
-		const nodeViewContainer = wrapperRef.current?.parentElement;
-		if (nodeViewContainer == null) {
-			return;
-		}
-
-		if (isDraggable) {
-			nodeViewContainer.setAttribute("draggable", "true");
-		} else {
-			nodeViewContainer.removeAttribute("draggable");
-		}
-	}, [isDraggable]);
-
-	return wrapperRef;
 }
 
 /**
@@ -824,7 +798,8 @@ export const CalloutNode = Node.create({
 	// of that group is what makes a callout inside a callout — or inside an accordion panel —
 	// impossible in the schema rather than merely discouraged. The document node accepts both groups.
 	group: "container",
-	content: "block+",
+	// Media too: a container's body is split into typed child blocks, just like a document.
+	content: `(block | ${mediaGroup})+`,
 	// `defining` keeps the callout when its content is replaced by a paste; `isolating` stops
 	// backspace at the start of the body from lifting the prose out into the block above.
 	defining: true,
@@ -945,7 +920,8 @@ export const AccordionItemNode = Node.create({
 	name: "accordionItem",
 	// In no group at all: an item is only ever reachable through `accordionBlock`'s content spec, so
 	// it cannot be dropped into a document — or into a callout — on its own.
-	content: "block+",
+	// Media too: a panel's body is split into typed child blocks, just like a document.
+	content: `(block | ${mediaGroup})+`,
 	defining: true,
 	isolating: true,
 	draggable: true,
@@ -1029,17 +1005,28 @@ export const AccordionNode = Node.create({
 });
 
 /**
- * The document, widened to take containers as well as ordinary blocks.
+ * The document, widened to take containers and media as well as ordinary blocks.
  *
  * StarterKit's own `doc` accepts `block+`, and containers are deliberately not in that group (see
  * {@link CalloutNode}) — so without this a callout could not sit at the top level either. Naming
  * both groups here is what draws the line in the schema: containers are legal in a document, and
  * nowhere else.
+ *
+ * Media nodes (`assetImage`, `galleryBlock`, `mediaTextBlock`, `embedBlock`) are kept out of
+ * `block` for the same reason. On save, the document is split into content blocks, and each media
+ * node becomes a typed block with a foreign key to its asset — but only where the splitter looks:
+ * the top level here, and the bodies of callouts and accordion panels. Lists, quotes, table cells
+ * and media-text bodies accept `block` content, so a media node in the `block` group could sit
+ * inside one, where it would stay an editor node inside a `rich_text` block, with no asset
+ * reference the api can resolve. A separate group allowed only in those three places makes that
+ * impossible: an insert from inside a list or blockquote splits it and lands between the halves.
+ * Tables, media-text bodies and quotes with a byline must not be split; see
+ * `rich-text-media-placement` for how inserts and pastes are kept out of them.
  */
 const DocumentWithContainers = Node.create({
 	name: "doc",
 	topNode: true,
-	content: "(block | container)+",
+	content: `(block | ${mediaGroup} | container)+`,
 });
 
 /**
@@ -1715,7 +1702,8 @@ function createAssetImageNode(
 ): Node {
 	return Node.create({
 		name: "assetImage",
-		group: "block",
+		// `media`, not `block`: see {@link DocumentWithContainers}.
+		group: mediaGroup,
 		atom: true,
 		draggable: true,
 		selectable: true,
@@ -2035,7 +2023,8 @@ function createMediaTextNode(
 ): Node {
 	return Node.create({
 		name: "mediaTextBlock",
-		group: "block",
+		// `media`, not `block`: see {@link DocumentWithContainers}.
+		group: mediaGroup,
 		// Prose only. The body is a passage bound to the image — a speaker bio, typically — so
 		// excluding headings keeps the document outline meaningful and makes a heading nested inside
 		// a media block impossible by construction rather than something the toolbar has to police.
@@ -2546,7 +2535,8 @@ function createGalleryNode(
 ): Node {
 	return Node.create({
 		name: "galleryBlock",
-		group: "block",
+		// `media`, not `block`: see {@link DocumentWithContainers}.
+		group: mediaGroup,
 		atom: true,
 		draggable: true,
 		selectable: true,
@@ -2971,6 +2961,7 @@ export function createRichTextExtensions(
 		),
 		createEmbedNode(options?.hasFootnotes),
 		CalloutNode,
+		QuoteNode,
 		LeadInNode,
 		AccordionNode,
 		AccordionItemNode,
@@ -2999,6 +2990,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		renderDocumentPicker,
 		renderEntityPicker,
 		renderLinkTargetSummary,
+		renderPersonPicker,
 	} = props;
 
 	const t = useExtracted("ui");
@@ -3006,6 +2998,10 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 	const initialContent = useMemo(() => normalizeInitialContent(content), [content]);
 
 	const slashCommandHandlersRef = useRef<SlashCommandHandlers | null>(null);
+
+	const quoteHost = useMemo(() => {
+		return { renderImagePicker, renderPersonPicker };
+	}, [renderImagePicker, renderPersonPicker]);
 
 	/**
 	 * Whether this field takes footnotes at all — the same opt-in that puts the action in the toolbar
@@ -3026,6 +3022,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			// A placeholder is only useful where its panel can open a picker to fill it.
 			PastedImageGuard.configure({ withPlaceholders: renderImagePicker != null }),
 			PastedContentNormalizer,
+			MediaPasteGuard,
 		],
 		[renderImagePicker, renderAssetMetadata, isEditable, hasFootnotes, slashCommandHandlersRef],
 	);
@@ -3736,7 +3733,9 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					value={JSON.stringify(editorJson ?? { type: "doc", content: [] })}
 				/>
 			)}
-			<EditorContent editor={editor} />
+			<QuoteHostContext value={quoteHost}>
+				<EditorContent editor={editor} />
+			</QuoteHostContext>
 			{footnotes.length > 0 ? (
 				<div className="border-bs border-border bg-muted/40 px-4 py-3">
 					<h3 className="text-xs font-medium tracking-wide text-muted-fg uppercase">

@@ -6,7 +6,6 @@ import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 
 import { CreateReportingCampaignActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/create-reporting-campaign.schema";
-import { findOtherOpenCampaign } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/find-other-open-campaign";
 import { db } from "@/lib/db";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
@@ -15,7 +14,9 @@ export const createReportingCampaignAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "create", subjectType: "reporting_campaigns" },
 	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
-	redirect: "/dashboard/administrator/reporting-campaigns",
+	// Straight into the campaign's settings, whose checklist lists the amounts still to set.
+	redirect: ({ result }) =>
+		`/dashboard/administrator/reporting-campaigns/${result.subjectId}/edit/settings`,
 
 	async preCheck({ input }) {
 		const t = await getExtracted();
@@ -33,25 +34,14 @@ export const createReportingCampaignAction = createMutationAction({
 			});
 		}
 
-		if (input.status === "open") {
-			const openCampaign = await findOtherOpenCampaign();
-			if (openCampaign != null) {
-				return createActionStateError({
-					message: t(
-						"The {year} campaign is still open. Close it before opening another campaign.",
-						{ year: String(openCampaign.year) },
-					),
-				});
-			}
-		}
-
 		return undefined;
 	},
 
 	async mutate(tx, input) {
 		const [created] = await tx
 			.insert(schema.reportingCampaigns)
-			.values({ year: input.year, status: input.status })
+			// Campaigns start as drafts; launching checks that their amounts are set.
+			.values({ year: input.year, status: "draft" })
 			.returning({ id: schema.reportingCampaigns.id });
 		assert(created);
 

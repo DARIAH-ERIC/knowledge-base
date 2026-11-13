@@ -3,6 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import { getExtracted } from "next-intl/server";
 
+import { checkCampaignEditable } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/campaign-readiness";
 import { UpsertCampaignServiceSizesActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-service-sizes.schema";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
@@ -11,6 +12,10 @@ export const upsertCampaignServiceSizesAction = createMutationAction({
 	requireAdmin: true,
 	audit: { action: "update", subjectType: "reporting_campaigns" },
 	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
+
+	preCheck({ input }) {
+		return checkCampaignEditable(input.id);
+	},
 
 	async mutate(tx, input) {
 		const t = await getExtracted();
@@ -32,9 +37,10 @@ export const upsertCampaignServiceSizesAction = createMutationAction({
 				amount: input.large_amount,
 			},
 			{
-				serviceSize: "very_large" as const,
-				threshold: input.very_large_threshold,
-				amount: input.very_large_amount,
+				// Marked by the country reporter, not matched by visits.
+				serviceSize: "important" as const,
+				threshold: undefined,
+				amount: input.important_amount,
 			},
 		];
 

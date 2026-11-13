@@ -10,6 +10,7 @@ interface CampaignStatusActionFormProps {
 	action: ServerAction;
 	campaignId: string;
 	intent?: ComponentProps<typeof Button>["intent"];
+	isDisabled?: boolean;
 	label: string;
 }
 
@@ -17,14 +18,14 @@ interface CampaignStatusActionFormProps {
 export function CampaignStatusActionForm(
 	props: Readonly<CampaignStatusActionFormProps>,
 ): ReactNode {
-	const { action, campaignId, intent, label } = props;
+	const { action, campaignId, intent, isDisabled, label } = props;
 
 	return (
 		<ActionForm action={action}>
 			{(isPending) => (
 				<Fragment>
 					<input name="id" type="hidden" value={campaignId} />
-					<Button intent={intent} isPending={isPending} type="submit">
+					<Button intent={intent} isDisabled={isDisabled} isPending={isPending} type="submit">
 						{label}
 					</Button>
 				</Fragment>

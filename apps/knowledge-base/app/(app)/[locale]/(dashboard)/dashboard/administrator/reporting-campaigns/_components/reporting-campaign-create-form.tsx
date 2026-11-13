@@ -7,14 +7,22 @@ import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_co
 import { ReportingCampaignForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaign-form";
 import { createReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/create-reporting-campaign.action";
 
-export function ReportingCampaignCreateForm(): ReactNode {
+interface ReportingCampaignCreateFormProps {
+	defaultYear: number;
+}
+
+export function ReportingCampaignCreateForm(
+	props: Readonly<ReportingCampaignCreateFormProps>,
+): ReactNode {
+	const { defaultYear } = props;
+
 	const t = useExtracted();
 
 	return (
 		<Fragment>
 			<EntityFormHeader title={t("New reporting campaign")} />
 
-			<ReportingCampaignForm formAction={createReportingCampaignAction} />
+			<ReportingCampaignForm defaultYear={defaultYear} formAction={createReportingCampaignAction} />
 		</Fragment>
 	);
 }

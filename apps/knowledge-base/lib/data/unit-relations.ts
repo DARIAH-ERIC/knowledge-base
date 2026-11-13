@@ -8,7 +8,7 @@ import {
 } from "@/lib/data/country-report-institutions";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import type { OrganisationalUnitType } from "@/lib/data/organisational-units";
-import { db } from "@/lib/db";
+import { type Database, type Transaction, db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { alias, and, count, eq, inArray, sql } from "@/lib/db/sql";
 
@@ -480,8 +480,10 @@ export { sortCountryReportInstitutionRepresentationTypes };
  * `dariah-eu` slug _and_ `eric` type — we deliberately do not assume a single `eric`-typed unit.
  * Returns `null` if it is absent.
  */
-export async function getDariahEricDocumentId(): Promise<string | null> {
-	const unit = await db.query.organisationalUnits.findFirst({
+export async function getDariahEricDocumentId(
+	queryDb: Database | Transaction = db,
+): Promise<string | null> {
+	const unit = await queryDb.query.organisationalUnits.findFirst({
 		where: { type: { type: "eric" }, entityVersion: { entity: { slug: dariahEricSlug } } },
 		columns: {},
 		with: { entityVersion: { columns: {}, with: { entity: { columns: { id: true } } } } },
@@ -508,8 +510,9 @@ export interface CurrentPartnerInstitution {
 export async function getCurrentPartnerInstitutions(
 	countryDocumentId: string,
 	year: number,
+	queryDb: Database | Transaction = db,
 ): Promise<Array<CurrentPartnerInstitution>> {
-	const ericDocumentId = await getDariahEricDocumentId();
+	const ericDocumentId = await getDariahEricDocumentId(queryDb);
 	if (ericDocumentId == null) {
 		return [];
 	}
@@ -529,7 +532,7 @@ export async function getCurrentPartnerInstitutions(
 		END
 	`;
 
-	const rows = await db
+	const rows = await queryDb
 		.select({
 			institutionDocumentId: ericRelations.unitDocumentId,
 			representationType: ericStatus.status,

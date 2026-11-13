@@ -30,7 +30,10 @@ export default async function DashboardAdministratorCampaignCountriesPage(
 	const { id } = await params;
 
 	const { user } = await assertAuthenticated();
-	const { campaign, countries } = await getReportingCampaignCountryThresholdsForAdmin(user, id);
+	const { campaign, countries, previous } = await getReportingCampaignCountryThresholdsForAdmin(
+		user,
+		id,
+	);
 
 	if (campaign == null) {
 		notFound();
@@ -39,6 +42,10 @@ export default async function DashboardAdministratorCampaignCountriesPage(
 	return (
 		<CampaignCountryThresholdsForm
 			campaignId={id}
+			isLocked={campaign.status === "closed"}
+			previous={
+				previous != null ? { year: previous.year, thresholds: previous.countryThresholds } : null
+			}
 			countries={countries}
 			formAction={upsertCampaignCountryThresholdsAction}
 			thresholds={campaign.countryThresholds}

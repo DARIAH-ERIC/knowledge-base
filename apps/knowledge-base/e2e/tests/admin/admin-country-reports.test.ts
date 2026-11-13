@@ -22,7 +22,7 @@ test.describe("country reports admin", () => {
 
 		const campaign = await db.createOpenCampaign(campaignYear);
 
-		const country = await db.getCountryOption();
+		const country = await db.getReportingCountryOption(campaignYear);
 
 		try {
 			await reportsPage.gotoCreate();
@@ -75,7 +75,7 @@ test.describe("country reports admin", () => {
 		const campaignYear = campaignYearForTest(2);
 		const reportsPage = createAdminCountryReportsPage(workerIndex);
 		const campaign = await db.createOpenCampaign(campaignYear);
-		const country = await db.getCountryOption();
+		const country = await db.getReportingCountryOption(campaignYear);
 		let reportId: string | null = null;
 
 		try {

@@ -15,7 +15,7 @@ export function useCompensationRoleLabel(): (role: CompensationRole | null) => s
 				return t("National coordinator");
 			}
 			case "national_coordinator_deputy": {
-				return t("National coordinator (deputy)");
+				return t("National coordinator deputy");
 			}
 			case "is_chair_of_jrc": {
 				return t("JRC chair");

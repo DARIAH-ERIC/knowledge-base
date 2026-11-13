@@ -1,6 +1,6 @@
 import * as schema from "@dariah-eric/database/schema";
 
-import { db } from "@/lib/db";
+import { type Database, type Transaction, db } from "@/lib/db";
 import { alias, and, eq, inArray, or, sql } from "@/lib/db/sql";
 
 /** A compensated contribution role (`reportingCampaignContributionAmounts` keys € amounts by these). */
@@ -76,13 +76,13 @@ export interface ContributionCandidate {
 }
 
 /** Shared select + joins resolving a person↔org relation to its current person/org versions + slugs. */
-function selectContributionRows() {
+function selectContributionRows(queryDb: Database | Transaction = db) {
 	const personLifecycle = alias(schema.documentLifecycle, "contribution_person_lifecycle");
 	const orgLifecycle = alias(schema.documentLifecycle, "contribution_org_lifecycle");
 	const personEntities = alias(schema.entities, "contribution_person_entities");
 	const orgEntities = alias(schema.entities, "contribution_org_entities");
 
-	return db
+	return queryDb
 		.select({
 			personToOrgUnitId: schema.personsToOrganisationalUnits.id,
 			personName: schema.persons.name,
@@ -138,8 +138,9 @@ function durationOverlapsYear(year: number) {
 export async function getSnapshotContributionCandidates(
 	countryDocumentId: string,
 	year: number,
+	queryDb: Database | Transaction = db,
 ): Promise<Array<ContributionCandidate>> {
-	const rows = await selectContributionRows()
+	const rows = await selectContributionRows(queryDb)
 		.where(
 			and(
 				inArray(schema.personRoleTypes.type, [...snapshotCompensationRoles]),
@@ -204,8 +205,9 @@ export async function getManualContributionCandidates(
 export async function getCarriedOverManualContributions(
 	previousReportId: string,
 	year: number,
+	queryDb: Database | Transaction = db,
 ): Promise<Array<{ personToOrgUnitId: string; contributionRole: CompensationRole }>> {
-	const rows = await db
+	const rows = await queryDb
 		.select({
 			personToOrgUnitId: schema.countryReportContributions.personToOrgUnitId,
 			contributionRole: schema.countryReportContributions.contributionRole,

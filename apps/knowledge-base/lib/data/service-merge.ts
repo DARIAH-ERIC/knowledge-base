@@ -190,6 +190,15 @@ export async function mergeServices(
 
 	const summary: MergeSummary = {};
 
+	// Where both services are on the same report, the source's membership is dropped as a duplicate;
+	// keep its "important" mark on the target's.
+	await tx.execute(sql`
+		update country_report_services tgt set is_important = true
+		from country_report_services src
+		where src.service_id = ${sourceId} and src.is_important
+			and tgt.service_id = ${targetId} and tgt.country_report_id = src.country_report_id
+	`);
+
 	for (const { table, columns } of linkTables) {
 		await repointLinks(tx, table, columns, sourceId, targetId, summary);
 	}
