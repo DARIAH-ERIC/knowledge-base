@@ -1,5 +1,6 @@
 "use server";
 
+import { isEmptyRichTextDocument } from "@dariah-eric/database/rich-text";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
@@ -61,7 +62,10 @@ export const copyWorkingGroupReportQuestionsAction = createMutationAction({
 					})
 				: undefined;
 
-		const questions = previous?.workingGroupReportQuestions ?? [];
+		// Skip empty questions that an earlier campaign may still hold.
+		const questions = (previous?.workingGroupReportQuestions ?? []).filter(
+			(question) => !isEmptyRichTextDocument(question.question),
+		);
 
 		if (questions.length > 0) {
 			await tx.insert(schema.workingGroupReportQuestions).values(

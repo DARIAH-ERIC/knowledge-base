@@ -7158,6 +7158,11 @@ msgid "A campaign for this year already exists."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/create-working-group-report-question.action.ts
+msgctxt "JNaTgP"
+msgid "Enter a question."
+msgstr "Enter a question."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/create-working-group-report-question.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/add-country-report-service.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/add-country-report-social-media.action.ts
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-contribution.action.ts

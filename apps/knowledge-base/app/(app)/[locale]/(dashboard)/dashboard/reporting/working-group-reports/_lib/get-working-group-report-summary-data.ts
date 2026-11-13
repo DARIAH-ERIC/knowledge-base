@@ -1,5 +1,6 @@
 import { assert } from "@acdh-oeaw/lib";
 import type { User } from "@dariah-eric/auth";
+import { isEmptyRichTextDocument } from "@dariah-eric/database/rich-text";
 
 import type { WorkingGroupReportSummaryData } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
 import { type Action, can } from "@/lib/auth/permissions";
@@ -87,7 +88,10 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 				return {
 					id: q.id,
 					question: q.question,
-					answer: answerMap.get(q.id) ?? null,
+					// Older saves stored empty documents for unanswered questions.
+					answer: isEmptyRichTextDocument(answerMap.get(q.id))
+						? null
+						: (answerMap.get(q.id) ?? null),
 				};
 			}),
 		},
