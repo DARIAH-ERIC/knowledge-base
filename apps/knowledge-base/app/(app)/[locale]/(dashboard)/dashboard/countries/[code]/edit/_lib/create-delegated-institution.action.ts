@@ -9,6 +9,7 @@ import { CreateInstitutionActionInputSchema } from "@/app/(app)/[locale]/(dashbo
 import { assertCan } from "@/lib/auth/permissions";
 import { createInstitutionDraft } from "@/lib/data/create-institution-draft";
 import { checkSshocMarketplaceActorIdAvailable } from "@/lib/data/sshoc-marketplace-actor-id";
+import { notifyDraftEntityCreated } from "@/lib/email/send-delegated-change-notification";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 const CreateDelegatedInstitutionActionInputSchema = v.object({
@@ -36,6 +37,16 @@ export const createDelegatedInstitutionAction = createMutationAction({
 		});
 		return checkSshocMarketplaceActorIdAvailable({
 			sshocMarketplaceActorId: input.sshocMarketplaceActorId,
+		});
+	},
+	postCommit({ result, input, ctx }) {
+		return notifyDraftEntityCreated({
+			kind: "institution",
+			documentId: result.subjectId,
+			name: input.name,
+			user: ctx.user,
+			realUser: ctx.realUser,
+			locale: ctx.locale,
 		});
 	},
 	async mutate(tx, input) {

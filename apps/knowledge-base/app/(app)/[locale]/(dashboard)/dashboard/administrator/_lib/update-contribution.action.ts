@@ -5,6 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import * as v from "valibot";
 
 import { UpdateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.schema";
@@ -13,13 +14,14 @@ import { assertCan } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 import { isExclusionViolation } from "@/lib/db/errors";
 import { and, eq, sql } from "@/lib/db/sql";
+import { notifyRelationChange } from "@/lib/email/send-delegated-change-notification";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateContributionAction = createServerAction(
 	{ requireAuth: true },
-	async function updateContributionAction(state, formData, { user }) {
+	async function updateContributionAction(state, formData, { user, realUser }) {
 		const locale = await getLocale();
 		const t = await getExtracted();
 		const result = await v.safeParseAsync(
@@ -133,6 +135,17 @@ export const updateContributionAction = createServerAction(
 
 			revalidatePath("/[locale]/dashboard/administrator", "layout");
 			await dispatchWebhook({ tags: ["persons"] });
+			// Best-effort, after the response: tell the office about changes coordinators make.
+			after(() =>
+				notifyRelationChange({
+					kind: "person",
+					relationId: id,
+					change: "updated",
+					user,
+					realUser,
+					locale,
+				}),
+			);
 			return createActionStateSuccess({});
 		} catch (error) {
 			// A person may hold the same role at the same org over several non-overlapping periods; the

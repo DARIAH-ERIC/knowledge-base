@@ -6,6 +6,7 @@ import * as v from "valibot";
 import { CreatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.schema";
 import { assertCan } from "@/lib/auth/permissions";
 import { createPersonDraft } from "@/lib/data/save-person-draft";
+import { notifyDraftEntityCreated } from "@/lib/email/send-delegated-change-notification";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 const CreateDelegatedPersonActionInputSchema = v.object({
@@ -28,6 +29,16 @@ export const createDelegatedPersonAction = createMutationAction({
 		await assertCan(ctx.user, "update", {
 			type: "organisational_unit",
 			id: input.organisationalUnitDocumentId,
+		});
+	},
+	postCommit({ result, input, ctx }) {
+		return notifyDraftEntityCreated({
+			kind: "person",
+			documentId: result.subjectId,
+			name: input.name,
+			user: ctx.user,
+			realUser: ctx.realUser,
+			locale: ctx.locale,
 		});
 	},
 	async mutate(tx, input) {
