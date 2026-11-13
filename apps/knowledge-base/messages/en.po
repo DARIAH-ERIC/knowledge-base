@@ -8404,9 +8404,9 @@ msgid "Manage projects"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
-msgctxt "wX34Ef"
-msgid "Total funding amount (EUR)"
-msgstr ""
+msgctxt "rp3xC6"
+msgid "Total funding amount"
+msgstr "Total funding amount"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
 msgctxt "tXaLlr"

@@ -6,6 +6,7 @@ import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
+import { NumberField } from "@dariah-eric/ui/number-field";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import {
 	SearchableSelect,
@@ -24,6 +25,7 @@ import type {
 	ReportSocialMediaAccount,
 	SocialMediaKpiCategory,
 } from "@/lib/data/report-social-media";
+import { countFormatOptions } from "@/lib/number-format-options";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 /** Id linking the per-account KPI inputs (rendered inside account cards) to the single Save form. */
@@ -211,21 +213,25 @@ function AccountCard(props: Readonly<AccountCardProps>): ReactNode {
 							<label
 								className="shrink-0 text-sm text-fg inline-40"
 								htmlFor={`${account.id}-${metric.kpi}`}
+								id={`${account.id}-${metric.kpi}-label`}
 							>
 								{formatKpi(metric.kpi)}
 							</label>
-							<input
-								className="rounded-md border border-border bg-bg px-2 py-1 text-sm text-fg inline-32"
+							<NumberField
+								aria-labelledby={`${account.id}-${metric.kpi}-label`}
+								className="shrink-0 inline-40"
 								form={KPI_FORM_ID}
+								formatOptions={countFormatOptions}
 								id={`${account.id}-${metric.kpi}`}
-								min={0}
+								minValue={0}
 								name={`kpis.${account.socialMediaId}.${metric.kpi}`}
-								onChange={(event) => {
-									setValue(metric.kpi, event.target.value);
+								onChange={(value) => {
+									setValue(metric.kpi, Number.isNaN(value) ? "" : String(value));
 								}}
-								type="number"
-								value={metric.value}
-							/>
+								value={metric.value === "" ? Number.NaN : Number(metric.value)}
+							>
+								<Input />
+							</NumberField>
 							<Button
 								intent="plain"
 								onPress={() => {
