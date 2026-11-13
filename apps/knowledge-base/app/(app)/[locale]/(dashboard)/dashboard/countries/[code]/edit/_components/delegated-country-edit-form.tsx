@@ -142,9 +142,9 @@ export function DelegatedCountryEditForm(
 								initialSocialMediaItems,
 								initialSocialMediaTotal,
 								scopeDocumentId: countryDocumentId,
-								buttonLabel: t("Add new institution"),
+								buttonLabel: t("Create and add new institution"),
 								submitLabel: t("Create institution"),
-								title: t("Add new institution"),
+								title: t("Create and add new institution"),
 							}}
 							editSourceUnit={{
 								updateAction: updateDelegatedInstitutionAction,

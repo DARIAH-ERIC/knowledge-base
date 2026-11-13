@@ -2965,9 +2965,9 @@ msgid "No person selected"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
-msgctxt "8iUqdG"
-msgid "Add new person"
-msgstr ""
+msgctxt "kU7W7R"
+msgid "Create and add new person"
+msgstr "Create and add new person"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx
 msgctxt "vSuRKQ"
@@ -8114,9 +8114,9 @@ msgid "No reports yet"
 msgstr "No reports yet"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_components/delegated-country-edit-form.tsx
-msgctxt "BrpGFe"
-msgid "Add new institution"
-msgstr ""
+msgctxt "0FwdPy"
+msgid "Create and add new institution"
+msgstr "Create and add new institution"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/edit/_components/delegated-country-edit-form.tsx
 msgctxt "G0ROva"

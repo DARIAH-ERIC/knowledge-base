@@ -105,8 +105,9 @@ interface PersonRelationsSectionProps {
 	initialPersonTotal: number;
 	actions: PersonRelationActions;
 	/**
-	 * When provided, an "Add new person" affordance creates a draft person and selects it. Used on
-	 * delegated dashboards where a coordinator may need to add someone not yet in the system.
+	 * When provided, a "Create and add new person" affordance creates a draft person and selects it.
+	 * Used on delegated dashboards where a coordinator may need to add someone not yet in the
+	 * system.
 	 */
 	createPerson?: CreatePerson;
 	/** When provided, a row action edits the selected person's own metadata (saved as a draft). */
@@ -530,7 +531,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 											setIsCreatePersonOpen(true);
 										}}
 									>
-										{t("Add new person")}
+										{t("Create and add new person")}
 									</Button>
 								) : null}
 
@@ -817,7 +818,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 						setSelectedPerson({ id: data.id, name: data.name, sortName: data.sortName });
 					}}
 					submitLabel={t("Create person")}
-					title={t("Add new person")}
+					title={t("Create and add new person")}
 				>
 					<PersonFormFields initialAssets={createPerson.initialAssets} />
 					<input
