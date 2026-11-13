@@ -13,6 +13,7 @@ import {
 	getCountryReportInstitutionRows,
 	groupCountryReportInstitutionSummaryRows,
 } from "@/lib/data/country-report-institutions";
+import { getCountryReportProjectContributionRows } from "@/lib/data/country-report-projects";
 import { classifyCompensationRole } from "@/lib/data/report-contributions";
 import { db } from "@/lib/db";
 import { alias, eq, sql } from "@/lib/db/sql";
@@ -90,6 +91,8 @@ export interface CountryReportSummaryData {
 	projectContributions: Array<{
 		id: string;
 		projectName: string;
+		/** Never published: the project does not appear on the website yet. */
+		projectIsDraft: boolean;
 		amountEuros: number;
 	}>;
 }
@@ -171,13 +174,6 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 					},
 				},
 			},
-			projectContributions: {
-				columns: { id: true, amountEuros: true },
-				with: {
-					project: { columns: { name: true } },
-				},
-				orderBy: { projectDocumentId: "asc" },
-			},
 		},
 	});
 
@@ -186,6 +182,9 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 	}
 
 	const institutionRows = await getCountryReportInstitutionRows(report.id);
+	// Projects resolve draft-first, so a project a coordinator created and reported before an
+	// administrator published it is still named.
+	const projectContributionRows = await getCountryReportProjectContributionRows(report.id);
 
 	// Claimed contributions are document-level person↔org relations; resolve each endpoint to its
 	// latest editable version for display.
@@ -338,10 +337,11 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 		services: Array.from(serviceMap.entries()).map(([serviceId, data]) => {
 			return { serviceId, ...data };
 		}),
-		projectContributions: report.projectContributions.map((p) => {
+		projectContributions: projectContributionRows.map((p) => {
 			return {
 				id: p.id,
 				projectName: p.project?.name ?? "",
+				projectIsDraft: p.project?.isDraft ?? false,
 				amountEuros: p.amountEuros,
 			};
 		}),

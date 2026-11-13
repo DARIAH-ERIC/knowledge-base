@@ -373,7 +373,9 @@ export async function CountryReportSummary(
 						<ul className="divide-y rounded-md border">
 							{data.projectContributions.map((p) => (
 								<li key={p.id} className="flex items-center justify-between gap-x-4 px-4 py-3">
-									<span className="text-sm font-medium text-fg">{p.projectName}</span>
+									<span className="text-sm font-medium text-fg min-inline-0">
+										<NameWithDraftBadge isDraft={p.projectIsDraft} name={p.projectName} />
+									</span>
 									<span className="shrink-0 text-sm text-muted-fg">
 										{eurFormatter.format(p.amountEuros)}
 									</span>

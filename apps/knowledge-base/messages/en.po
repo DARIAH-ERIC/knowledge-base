@@ -8437,9 +8437,19 @@ msgid "Search projects..."
 msgstr "Search projects..."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
-msgctxt "OPeXEU"
-msgid "No projects available."
-msgstr ""
+msgctxt "a7FtAn"
+msgid "Create new project"
+msgstr "Create new project"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
+msgctxt "nTyRaD"
+msgid "The new project is selected above. Enter the funding amount and press \"Add\" to report it. The project is saved as a draft until an administrator publishes it."
+msgstr "The new project is selected above. Enter the funding amount and press \"Add\" to report it. The project is saved as a draft until an administrator publishes it."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx
+msgctxt "VUN1K7"
+msgid "Create project"
+msgstr "Create project"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-services-form.tsx
 msgctxt "tq-rSI"
@@ -8780,14 +8790,19 @@ msgid "This person is not an eligible contributor for this campaign."
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-project-contribution.action.ts
-msgctxt "ng_Kdt"
-msgid "Select a published project."
-msgstr ""
+msgctxt "OD526N"
+msgid "Select a project."
+msgstr "Select a project."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-project-contribution.action.ts
 msgctxt "Z_bks4"
 msgid "A contribution for this project already exists."
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-delegated-project.action.ts
+msgctxt "y6T-9B"
+msgid "Project saved as draft."
+msgstr "Project saved as draft."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/refresh-country-report-contributions.action.ts
 msgctxt "WJ_4rD"
