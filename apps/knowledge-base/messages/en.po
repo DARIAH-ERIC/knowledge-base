@@ -4063,6 +4063,11 @@ msgctxt "P80xx1"
 msgid "Select the campaign and country for this report."
 msgstr ""
 
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-create-form.tsx
+msgctxt "gf-H7u"
+msgid "Every country that reports for this campaign already has a report."
+msgstr "Every country that reports for this campaign already has a report."
+
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-edit-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-edit-form.tsx
 msgctxt "7PZHPZ"
@@ -7940,6 +7945,11 @@ msgstr ""
 msgctxt "zW09Ew"
 msgid "Select the campaign and working group for this report."
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form.tsx
+msgctxt "XyGmU2"
+msgid "Every working group that reports for this campaign already has a report."
+msgstr "Every working group that reports for this campaign already has a report."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx
 msgctxt "_97qYI"

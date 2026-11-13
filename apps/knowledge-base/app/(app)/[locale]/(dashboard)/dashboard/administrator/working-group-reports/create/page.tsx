@@ -26,7 +26,7 @@ export default async function DashboardAdministratorCreateWorkingGroupReportPage
 	_props: Readonly<DashboardAdministratorCreateWorkingGroupReportPageProps>,
 ): Promise<ReactNode> {
 	const { user } = await assertAuthenticated();
-	const { campaigns, workingGroups } = await getWorkingGroupReportCreateDataForAdmin(user);
+	const { campaigns } = await getWorkingGroupReportCreateDataForAdmin(user);
 
-	return <WorkingGroupReportCreateForm campaigns={campaigns} workingGroups={workingGroups} />;
+	return <WorkingGroupReportCreateForm campaigns={campaigns} />;
 }

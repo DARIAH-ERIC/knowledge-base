@@ -4,7 +4,7 @@ import type * as schema from "@dariah-eric/database/schema";
 import { reportStatusEnum } from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError, Label } from "@dariah-eric/ui/field";
+import { Description, FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
@@ -20,8 +20,12 @@ import {
 import { createWorkingGroupReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_lib/create-working-group-report.action";
 
 interface WorkingGroupReportCreateFormProps {
-	campaigns: Array<Pick<schema.ReportingCampaign, "id" | "year">>;
-	workingGroups: Array<Pick<schema.OrganisationalUnit, "id" | "name">>;
+	/** Open campaigns, each with the working groups that may still get a report in it. */
+	campaigns: Array<
+		Pick<schema.ReportingCampaign, "id" | "year"> & {
+			workingGroups: Array<Pick<schema.OrganisationalUnit, "id" | "name">>;
+		}
+	>;
 }
 
 function formatStatus(status: string): string {
@@ -31,7 +35,7 @@ function formatStatus(status: string): string {
 export function WorkingGroupReportCreateForm(
 	props: Readonly<WorkingGroupReportCreateFormProps>,
 ): ReactNode {
-	const { campaigns, workingGroups } = props;
+	const { campaigns } = props;
 
 	const t = useExtracted();
 
@@ -43,6 +47,9 @@ export function WorkingGroupReportCreateForm(
 	const [selectedCampaignId, setSelectedCampaignId] = useState<string>(campaigns[0]?.id ?? "");
 	const [selectedWorkingGroupId, setSelectedWorkingGroupId] = useState<string>("");
 	const [selectedStatus, setSelectedStatus] = useState<string>("draft");
+
+	const workingGroups =
+		campaigns.find((campaign) => campaign.id === selectedCampaignId)?.workingGroups ?? [];
 
 	return (
 		<Fragment>
@@ -58,6 +65,8 @@ export function WorkingGroupReportCreateForm(
 							isRequired={true}
 							onChange={(key) => {
 								setSelectedCampaignId(key == null ? "" : String(key));
+								// The working groups that may still get a report differ per campaign.
+								setSelectedWorkingGroupId("");
 							}}
 							value={selectedCampaignId || null}
 						>
@@ -83,6 +92,11 @@ export function WorkingGroupReportCreateForm(
 						>
 							<Label>{t("Working group")}</Label>
 							<SelectTrigger />
+							{selectedCampaignId !== "" && workingGroups.length === 0 && (
+								<Description>
+									{t("Every working group that reports for this campaign already has a report.")}
+								</Description>
+							)}
 							<FieldError />
 							<SelectContent>
 								{workingGroups.map((workingGroup) => (
