@@ -1430,6 +1430,7 @@ msgstr ""
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-social-media-fields.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_components/project-partners-page.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-action-form.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx
@@ -8596,6 +8597,18 @@ msgstr ""
 msgctxt "Rya3GR"
 msgid "No SSH Open Marketplace resources recorded for this snapshot."
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-summary-screen.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-summary-screen.tsx
+msgctxt "Ra8QBT"
+msgid "Submit this report?"
+msgstr "Submit this report?"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-summary-screen.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-summary-screen.tsx
+msgctxt "Or2uhh"
+msgid "Once the report is submitted, you can no longer make changes to it. Please check that every section is complete before you submit."
+msgstr "Once the report is submitted, you can no longer make changes to it. Please check that every section is complete before you submit."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/screens/country-report-summary-screen.tsx
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/screens/working-group-report-summary-screen.tsx

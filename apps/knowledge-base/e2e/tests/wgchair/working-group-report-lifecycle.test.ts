@@ -42,6 +42,8 @@ test.describe("working group report lifecycle (chair)", () => {
 		await expect(submitButton).toBeVisible();
 
 		await submitButton.click();
+		const dialog = page.getByRole("alertdialog", { name: "Submit this report?" });
+		await dialog.getByRole("button", { name: "Submit report" }).click();
 
 		await expect(page.getByRole("button", { name: "Submit report" })).toBeHidden();
 		await expect(page.getByText("Submitted", { exact: true })).toBeVisible();
