@@ -44,6 +44,12 @@ export interface MutationResult<TSuccessData = unknown> {
 	auditSummary?: Record<string, unknown>;
 	successMessage?: string;
 	successData?: TSuccessData;
+	/**
+	 * Facts `mutate` learned inside the transaction that `postCommit` needs (e.g. whether this save
+	 * started a round of changes). Passed to `postCommit` only: neither returned to the client nor
+	 * written to the audit log.
+	 */
+	postCommitData?: Record<string, unknown>;
 }
 
 /**
