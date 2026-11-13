@@ -59,6 +59,8 @@ test.describe("country report lifecycle (national coordinator)", () => {
 
 		await submitButton.click();
 		await dialog.getByRole("button", { name: "Submit report" }).click();
+		// Wait out the dialog's exit animation: until then its "Submit report" button also matches.
+		await expect(dialog).toBeHidden();
 
 		// After the action redirects back to the summary screen the report is submitted and there is no
 		// re-submit affordance.
