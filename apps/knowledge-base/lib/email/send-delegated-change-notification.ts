@@ -387,3 +387,103 @@ export async function notifyDraftEntityCreated(params: {
 		locale,
 	});
 }
+
+/**
+ * Whether saving `documentId` now starts unpublished changes on top of its published version, i.e.
+ * whether this is the first save since the entry was last published. Check it inside the
+ * transaction, before saving. The edit pages create a draft when they open, but a freshly cloned
+ * draft has no changes (`hasDraftChanges` compares it with the published version), so opening a
+ * form does not count. Never-published entries return `false`: their creation is notified instead.
+ */
+export async function startsPendingChanges(tx: Transaction, documentId: string): Promise<boolean> {
+	const [row] = await tx
+		.select({
+			publishedId: schema.documentLifecycle.publishedId,
+			hasDraftChanges: schema.documentLifecycle.hasDraftChanges,
+		})
+		.from(schema.documentLifecycle)
+		.where(eq(schema.documentLifecycle.documentId, documentId))
+		.limit(1);
+
+	return row?.publishedId != null && !row.hasDraftChanges;
+}
+
+type DraftEntityKind = "institution" | "national consortium" | "person" | "working group";
+
+/**
+ * Notifies that a coordinator, chair or user started changes to a published entry, which wait for
+ * an administrator to publish them. Sent once per round of changes (see `startsPendingChanges`),
+ * not for every save. Call it after the transaction committed.
+ */
+export async function notifyChangesAwaitingReview(params: {
+	kind: DraftEntityKind;
+	documentId: string;
+	user: User | null;
+	realUser?: User | null;
+	locale: IntlLocale;
+}): Promise<void> {
+	const { kind, documentId, user, realUser, locale } = params;
+
+	if (user == null || !isDelegatedChange(user, realUser)) {
+		return;
+	}
+
+	let resolved: { name: string; href: string | null } | null;
+
+	if (kind === "person") {
+		const [row] = await db
+			.select({ name: schema.persons.name, slug: schema.entities.slug })
+			.from(schema.documentLifecycle)
+			.innerJoin(schema.entities, eq(schema.entities.id, schema.documentLifecycle.documentId))
+			.innerJoin(
+				schema.persons,
+				sql`${schema.persons.id} = COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`,
+			)
+			.where(eq(schema.documentLifecycle.documentId, documentId))
+			.limit(1);
+		resolved =
+			row == null
+				? null
+				: { name: row.name, href: getEntityDetailHref({ entityType: "persons", slug: row.slug }) };
+	} else {
+		const [row] = await db
+			.select({
+				name: schema.organisationalUnits.name,
+				slug: schema.entities.slug,
+				unitType: schema.organisationalUnitTypes.type,
+			})
+			.from(schema.documentLifecycle)
+			.innerJoin(schema.entities, eq(schema.entities.id, schema.documentLifecycle.documentId))
+			.innerJoin(
+				schema.organisationalUnits,
+				sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`,
+			)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.where(eq(schema.documentLifecycle.documentId, documentId))
+			.limit(1);
+		resolved =
+			row == null
+				? null
+				: { name: row.name, href: getOrganisationalUnitDetailHref(row.unitType, row.slug) };
+	}
+
+	if (resolved == null) {
+		return;
+	}
+
+	await send({
+		actor: user,
+		subject: `Changes awaiting review: ${resolved.name} (${kind})`,
+		lines: [
+			`${user.name} <${user.email}> saved changes to the ${kind} ${resolved.name}.`,
+			"",
+			"The changes are saved as a draft and are not shown on the website until an administrator publishes them. Further saves to the same draft are not notified separately.",
+			"",
+			...(resolved.href != null ? [`Review the ${kind}: ${toFullUrl(resolved.href, locale)}`] : []),
+			`All drafts awaiting review: ${toFullUrl("/dashboard/administrator/drafts", locale)}`,
+		],
+	});
+}
