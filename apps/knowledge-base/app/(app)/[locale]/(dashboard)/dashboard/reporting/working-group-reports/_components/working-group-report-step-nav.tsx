@@ -27,12 +27,12 @@ export function WorkingGroupReportStepNav(
 
 	const steps: Array<ReportStep> = [
 		...(variant === "admin" ? [{ href: editBasePath, label: t("Status") }] : []),
-		{ href: `${editBasePath}/summary`, label: t("Summary") },
 		{ href: `${editBasePath}/data`, label: t("Data") },
 		{ href: `${editBasePath}/events`, label: t("Events") },
 		{ href: `${editBasePath}/questions`, label: t("Questions") },
 		{ href: `${editBasePath}/software`, label: t("SSHOC resources") },
 		{ href: `${editBasePath}/publications`, label: t("Publications") },
+		{ href: `${editBasePath}/summary`, label: t("Summary") },
 	];
 
 	return <ReportStepTabs aria-label={t("Report sections")} steps={steps} />;
