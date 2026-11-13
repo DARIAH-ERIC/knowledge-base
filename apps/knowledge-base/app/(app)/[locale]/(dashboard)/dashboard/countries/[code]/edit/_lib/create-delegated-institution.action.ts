@@ -9,7 +9,6 @@ import { CreateInstitutionActionInputSchema } from "@/app/(app)/[locale]/(dashbo
 import { assertCan } from "@/lib/auth/permissions";
 import { createInstitutionDraft } from "@/lib/data/create-institution-draft";
 import { checkSshocMarketplaceActorIdAvailable } from "@/lib/data/sshoc-marketplace-actor-id";
-import { getRequestedSlug } from "@/lib/entity-slug-input";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 const CreateDelegatedInstitutionActionInputSchema = v.object({
@@ -44,7 +43,9 @@ export const createDelegatedInstitutionAction = createMutationAction({
 
 		const { documentId } = await createInstitutionDraft(tx, {
 			...input,
-			requestedSlug: getRequestedSlug(input.slug),
+			// Choosing the public URL is an administrator task, so a slug submitted from a delegated form is
+			// ignored: the slug is generated from the name.
+			requestedSlug: null,
 			relatedEntityIds: [],
 			relatedResourceIds: [],
 		});

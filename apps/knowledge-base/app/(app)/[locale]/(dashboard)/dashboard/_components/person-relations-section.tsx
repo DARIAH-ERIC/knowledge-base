@@ -819,7 +819,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 					submitLabel={t("Create person")}
 					title={t("Add new person")}
 				>
-					<PersonFormFields initialAssets={createPerson.initialAssets} />
+					<PersonFormFields initialAssets={createPerson.initialAssets} showSlug={false} />
 					<input
 						name="organisationalUnitDocumentId"
 						type="hidden"
@@ -857,6 +857,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 				>
 					{editPersonFields != null ? (
 						<PersonFormFields
+							showSlug={false}
 							initialAssets={personEditor.initialAssets}
 							isPublished={editPersonFields.isPublished}
 							person={editPersonFields}

@@ -92,6 +92,7 @@ export function DelegatedCountryEditForm(
 					shouldPreserveState={true}
 				>
 					<NationalConsortiumForm
+						showSlug={false}
 						formAction={updateDelegatedNationalConsortiumAction}
 						formId="delegated-national-consortium-edit-form"
 						initialAssets={initialAssets}
