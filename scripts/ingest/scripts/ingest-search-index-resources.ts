@@ -1,4 +1,5 @@
 import * as path from "node:path";
+import { parseArgs } from "node:util";
 
 import { assert, log } from "@acdh-oeaw/lib";
 import { createDariahCampusClient } from "@dariah-eric/client-campus";
@@ -111,7 +112,15 @@ async function main(): Promise<void> {
 		orgUnits,
 	});
 
-	const result = await searchResources.syncSearchResources({ cache });
+	const { force } = parseArgs({
+		options: { force: { type: "boolean", default: false } },
+	}).values;
+
+	/** The cache never expires, so a forced sync has to use what the upstream apis return now. */
+	const result = await searchResources.syncSearchResources({
+		cache: force ? undefined : cache,
+		force,
+	});
 
 	log.success(JSON.stringify(result, null, 2));
 }
