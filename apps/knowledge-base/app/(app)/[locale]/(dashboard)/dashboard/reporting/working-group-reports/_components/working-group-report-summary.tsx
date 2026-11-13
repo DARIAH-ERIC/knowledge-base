@@ -39,13 +39,6 @@ interface WorkingGroupReportSummaryProps {
 	extraSectionLinks?: ReadonlyArray<ReportSummarySectionLink>;
 }
 
-function formatRole(role: string): string {
-	return role
-		.replaceAll("_", " ")
-		.replace(/^is /, "")
-		.replaceAll(/\b\w/g, (c) => c.toUpperCase());
-}
-
 export async function WorkingGroupReportSummary(
 	props: Readonly<WorkingGroupReportSummaryProps>,
 ): Promise<ReactNode> {
@@ -107,7 +100,9 @@ export async function WorkingGroupReportSummary(
 							{data.chairs.map((chair) => (
 								<li key={chair.id} className="px-4 py-3">
 									<p className="text-sm font-medium text-fg">{chair.personName}</p>
-									<p className="text-xs text-muted-fg">{formatRole(chair.roleType)}</p>
+									<p className="text-xs text-muted-fg">
+										{chair.roleType === "is_vice_chair_of" ? t("Vice chair") : t("Chair")}
+									</p>
 								</li>
 							))}
 						</ul>

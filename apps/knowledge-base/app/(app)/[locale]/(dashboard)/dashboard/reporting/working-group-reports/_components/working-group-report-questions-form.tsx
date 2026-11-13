@@ -34,15 +34,18 @@ export function WorkingGroupReportQuestionsForm(
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
 	return (
-		<Form action={action} className="flex flex-col gap-y-8 max-inline-3xl" state={state}>
+		<Form action={action} className="flex flex-col gap-y-10 max-inline-3xl" state={state}>
 			<input name="id" type="hidden" value={reportId} />
 
-			{questions.map((question) => {
+			{questions.map((question, index) => {
 				const existingAnswer = answerMap[question.id];
 
 				return (
-					<section key={question.id} className="flex flex-col gap-y-4">
-						<div className="rounded-md border border-border bg-muted/30 p-4">
+					<section key={question.id} className="flex flex-col gap-y-3">
+						<div className="flex flex-col gap-y-1">
+							<p className="text-xs font-medium text-muted-fg">
+								{t("Question {number}", { number: String(index + 1) })}
+							</p>
 							<RichTextEditor
 								content={question.question as JSONContent}
 								isEditable={false}
@@ -50,7 +53,7 @@ export function WorkingGroupReportQuestionsForm(
 							/>
 						</div>
 						<RichTextEditor
-							aria-label={`Answer to question ${String(question.position)}`}
+							aria-label={t("Answer to question {number}", { number: String(index + 1) })}
 							content={existingAnswer ?? undefined}
 							name={`answers.${question.id}`}
 						/>

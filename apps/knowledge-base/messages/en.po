@@ -8909,11 +8909,13 @@ msgid "Chairs and vice chairs recorded for this report. Edit the relation on the
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-chairs-snapshot-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx
 msgctxt "GoOxtR"
 msgid "Vice chair"
 msgstr ""
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-chairs-snapshot-form.tsx
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx
 msgctxt "4O43Pd"
 msgid "Chair"
 msgstr ""
@@ -8949,6 +8951,16 @@ msgstr ""
 msgctxt "P7PLVj"
 msgid "Date"
 msgstr ""
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-questions-form.tsx
+msgctxt "kQXPCE"
+msgid "Question {number}"
+msgstr "Question {number}"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-questions-form.tsx
+msgctxt "3BU43Q"
+msgid "Answer to question {number}"
+msgstr "Answer to question {number}"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx
 msgctxt "F-bP20"
