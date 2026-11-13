@@ -991,6 +991,52 @@ export class DatabaseService {
 		return created?.id ?? null;
 	}
 
+	/**
+	 * Relates a unit to DARIAH-EU for the calendar `year` only, and returns the relation id so the
+	 * caller can delete it again. See {@link ensureDariahEricMembership} for why the seed has no such
+	 * relations. Limiting it to one year keeps workers (each with its own campaign year) from
+	 * tripping the no-overlap constraint, and leaves the unit's current status untouched.
+	 */
+	async createDariahEricRelationForYear(
+		unitDocumentId: string,
+		status: (typeof schema.organisationalUnitStatusEnum)[number],
+		year: number,
+	): Promise<string> {
+		const [eric] = await this.db
+			.select({ id: schema.entities.id })
+			.from(schema.entities)
+			.where(eq(schema.entities.slug, "dariah-eu"))
+			.limit(1);
+		const [relationStatus] = await this.db
+			.select({ id: schema.organisationalUnitStatus.id })
+			.from(schema.organisationalUnitStatus)
+			.where(eq(schema.organisationalUnitStatus.status, status))
+			.limit(1);
+
+		if (eric == null || relationStatus == null) {
+			throw new Error(`Expected DARIAH-EU and the "${status}" status for e2e tests.`);
+		}
+
+		const [created] = await this.db
+			.insert(schema.organisationalUnitsRelations)
+			.values({
+				unitDocumentId,
+				relatedUnitDocumentId: eric.id,
+				status: relationStatus.id,
+				duration: {
+					start: new Date(Date.UTC(year, 0, 1)),
+					end: new Date(Date.UTC(year, 11, 31)),
+				},
+			})
+			.returning({ id: schema.organisationalUnitsRelations.id });
+
+		if (created == null) {
+			throw new Error("Failed to create the DARIAH-EU relation.");
+		}
+
+		return created.id;
+	}
+
 	async getEntityDocumentIdBySlug(slug: string): Promise<string | null> {
 		const [row] = await this.db
 			.select({ id: schema.entities.id })

@@ -13,6 +13,21 @@ test.describe("working group reports admin", () => {
 	let campaignId: string | null = null;
 	let workingGroupId: string | null = null;
 	let reportId: string | null = null;
+	let ericRelationId: string | null = null;
+
+	/**
+	 * Only working groups that are part of DARIAH-EU in the campaign year can get a report, and the
+	 * seed relates its working groups to a separate `kitchen-sink-eric`. Relate one for this worker's
+	 * campaign year.
+	 */
+	test.beforeAll(async ({ db }, workerInfo) => {
+		const workingGroup = await db.getWorkingGroupOption();
+		ericRelationId = await db.createDariahEricRelationForYear(
+			workingGroup.id,
+			"is_part_of",
+			3300 + workerInfo.workerIndex,
+		);
+	});
 
 	test.afterAll(async ({ db }) => {
 		if (reportId != null) {
@@ -20,6 +35,9 @@ test.describe("working group reports admin", () => {
 		}
 		if (campaignId != null) {
 			await db.deleteReportingCampaign(campaignId);
+		}
+		if (ericRelationId != null) {
+			await db.deleteUnitRelationById(ericRelationId);
 		}
 	});
 
