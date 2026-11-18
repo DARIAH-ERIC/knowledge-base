@@ -1,15 +1,16 @@
 import * as schema from "@dariah-eric/database/schema";
 
-import { latestEditableEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { latestChangedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import type { Database, Transaction } from "@/lib/db";
 import { type SQL, and, asc, eq, inArray, isNull, max } from "@/lib/db/sql";
 
 /**
  * The order of documents and policies belongs to the entry, not to one of its versions - but each
  * version (draft and published) is its own `documents_policies` row with its own `position`.
- * Ordering therefore works on entries: they are listed by their latest editable version, as the
- * dashboard shows them, and a new order is written to every version of each entry, so publishing a
- * draft cannot bring back a stale position and the website lists entries as the dashboard does.
+ * Ordering therefore works on entries: they are listed by the version the dashboard shows (see
+ * `latestChangedEntityVersionWhere`), and a new order is written to every version of each entry, so
+ * publishing a draft cannot bring back a stale position and the website lists entries as the
+ * dashboard does.
  */
 
 function inGroup(groupId: string | null): SQL {
@@ -28,7 +29,7 @@ export async function getDocumentPolicyOrder(
 		.from(schema.documentsPolicies)
 		.innerJoin(schema.entityVersions, eq(schema.documentsPolicies.id, schema.entityVersions.id))
 		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-		.where(and(inGroup(groupId), latestEditableEntityVersionWhere()))
+		.where(and(inGroup(groupId), latestChangedEntityVersionWhere()))
 		.orderBy(
 			asc(schema.documentsPolicies.position),
 			asc(schema.documentsPolicies.title),

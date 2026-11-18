@@ -1,19 +1,15 @@
 "use server";
 
-import * as schema from "@dariah-eric/database/schema";
-
 import { resolveDocumentOrPolicyTarget } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/resolve-document-or-policy-target";
 import { UpdateDocumentOrPolicyDetailsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.schema";
-import { getNextDocumentPolicyPosition } from "@/lib/data/documents-policies-order";
-import { getDocumentIdForVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
-import { eq } from "@/lib/db/sql";
+import { updateDocumentPolicyDetails } from "@/lib/data/documents-policies-details";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateDocumentOrPolicyDetailsAction = createMutationAction<
 	typeof UpdateDocumentOrPolicyDetailsActionInputSchema,
-	{ entityDocumentId: string; shouldSyncPublishedVersion: boolean }
+	{ entityDocumentId: string; isPublishedChange: boolean }
 >({
 	schema: UpdateDocumentOrPolicyDetailsActionInputSchema,
 	requireAdmin: true,
@@ -21,43 +17,26 @@ export const updateDocumentOrPolicyDetailsAction = createMutationAction<
 	revalidate: "/[locale]/dashboard/website/documents-policies",
 
 	async mutate(tx, input) {
-		const entityDocumentId = await getDocumentIdForVersion(tx, input.id);
-		const { publishedId } = await getDocumentVersions(tx, entityDocumentId);
-		const shouldSyncPublishedVersion = publishedId === input.id;
-
 		const target = await resolveDocumentOrPolicyTarget(tx, input);
 
-		const current = await tx.query.documentsPolicies.findFirst({
-			where: { id: input.id },
-			columns: { groupId: true },
-		});
-
-		const newGroupId = input.groupId ?? null;
-		let newPosition: number | undefined;
-
-		if (current != null && current.groupId !== newGroupId) {
-			newPosition = await getNextDocumentPolicyPosition(tx, newGroupId);
-		}
-
-		await tx
-			.update(schema.documentsPolicies)
-			.set({
+		const { documentId, isPublishedChange } = await updateDocumentPolicyDetails(tx, {
+			versionId: input.id,
+			values: {
 				title: input.title,
 				summary: input.summary,
-				groupId: newGroupId,
+				groupId: input.groupId ?? null,
 				...target,
-				...(newPosition !== undefined ? { position: newPosition } : {}),
-			})
-			.where(eq(schema.documentsPolicies.id, input.id));
+			},
+		});
 
 		return {
 			subjectId: input.id,
-			successData: { entityDocumentId, shouldSyncPublishedVersion },
+			successData: { entityDocumentId: documentId, isPublishedChange },
 		};
 	},
 
 	async postCommit({ result }) {
-		if (result.successData == null || !result.successData.shouldSyncPublishedVersion) {
+		if (result.successData == null || !result.successData.isPublishedChange) {
 			return;
 		}
 
