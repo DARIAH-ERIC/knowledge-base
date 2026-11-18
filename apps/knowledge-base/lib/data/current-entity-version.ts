@@ -5,9 +5,8 @@ import { type SQL, and, eq, inArray, or, sql } from "@/lib/db/sql";
 
 /**
  * Pick exactly one version row per entity, preferring the draft when one exists. Use for _editor
- * list views_ (admin tables, the navigation menu list, the documents-policies list) where the
- * intent is to show the latest editable view per document — including unpublished edits and
- * draft-only documents.
+ * list views_ (admin tables, the navigation menu list) where the intent is to show the latest
+ * editable view per document — including unpublished edits and draft-only documents.
  *
  * Do NOT use for _pickers_ that build relations to a target document — those need
  * `publishedEntityVersionWhere()` so an unpublished or draft-only target cannot be selected.
@@ -30,6 +29,35 @@ export function latestEditableEntityVersionWhere(): SQL | undefined {
 				)
 			`,
 		),
+	);
+}
+
+/**
+ * Pick exactly one version row per entity: the draft when it holds unpublished changes (or the
+ * entity was never published), otherwise the published version. Uses the same rule as
+ * `document_lifecycle.has_draft_changes`, so a list built on it can take its "Draft" badge from the
+ * selected row's status and never shows draft data under a "Published" label.
+ *
+ * Differs from `latestEditableEntityVersionWhere()` for entities with a synced draft clone (a draft
+ * whose `updated_at` equals the published one, left behind by `ensureDraftVersion` and
+ * `publishVersion`): this one picks the published row for them.
+ */
+export function latestChangedEntityVersionWhere(): SQL | undefined {
+	const hasDraftChanges = sql`
+		EXISTS (
+			SELECT
+				1
+			FROM
+				"document_lifecycle" AS "dl"
+			WHERE
+				"dl"."document_id" = ${schema.entityVersions.entityId}
+				AND "dl"."has_draft_changes"
+		)
+	`;
+
+	return or(
+		and(eq(schema.entityStatus.type, "draft"), hasDraftChanges),
+		and(eq(schema.entityStatus.type, "published"), sql`NOT ${hasDraftChanges}`),
 	);
 }
 
