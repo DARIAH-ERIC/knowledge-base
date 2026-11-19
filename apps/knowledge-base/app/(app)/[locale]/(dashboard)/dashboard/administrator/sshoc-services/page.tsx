@@ -19,7 +19,14 @@ interface DashboardAdministratorSshocServicesPageProps extends PageProps<"/[loca
 
 const pageSize = dashboardPageSize;
 const defaultSort = "name" as const;
-const validSorts = ["name", "type", "status", "sshocMarketplaceId"] as const;
+const validSorts = [
+	"name",
+	"type",
+	"status",
+	"sshocMarketplaceId",
+	"serviceOwners",
+	"serviceProviders",
+] as const;
 
 function createListHref(
 	q: string,

@@ -4054,8 +4054,19 @@ export class DatabaseService {
 		sshocMarketplaceId?: string;
 		status?: (typeof schema.serviceStatusesEnum)[number];
 		type?: (typeof schema.serviceTypesEnum)[number];
+		/** Organisational-unit documents to link to the service in the given role. */
+		organisationalUnits?: Array<{
+			documentId: string;
+			role: (typeof schema.organisationalUnitServiceRolesEnum)[number];
+		}>;
 	}): Promise<{ id: string }> {
-		const { name, sshocMarketplaceId = null, status = "live", type = "internal" } = params;
+		const {
+			name,
+			organisationalUnits = [],
+			sshocMarketplaceId = null,
+			status = "live",
+			type = "internal",
+		} = params;
 
 		const [typeRow, statusRow] = await Promise.all([
 			this.db.query.serviceTypes.findFirst({ where: { type }, columns: { id: true } }),
@@ -4074,6 +4085,27 @@ export class DatabaseService {
 			.returning({ id: schema.services.id });
 		if (row == null) {
 			throw new Error("Failed to insert service.");
+		}
+
+		if (organisationalUnits.length > 0) {
+			const roles = await this.db.query.organisationalUnitServiceRoles.findMany({
+				columns: { id: true, role: true },
+			});
+			const roleIdByRole = new Map(roles.map((role) => [role.role, role.id] as const));
+
+			await this.db.insert(schema.servicesToOrganisationalUnits).values(
+				organisationalUnits.map((unit) => {
+					const roleId = roleIdByRole.get(unit.role);
+					if (roleId == null) {
+						throw new Error(`Service role "${unit.role}" not found.`);
+					}
+					return {
+						organisationalUnitDocumentId: unit.documentId,
+						roleId,
+						serviceId: row.id,
+					};
+				}),
+			);
 		}
 
 		return row;
