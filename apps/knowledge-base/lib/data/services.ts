@@ -4,20 +4,27 @@ import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import {
 	getOrganisationalUnitOptions,
 	getOrganisationalUnitOptionsByDocumentIds,
 } from "@/lib/data/organisational-units";
 import { db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
-import { and, count, desc, eq, isNotNull, isNull, sql } from "@/lib/db/sql";
+import { type SQL, and, count, desc, eq, isNotNull, isNull, sql } from "@/lib/db/sql";
 import {
 	toOrganisationalUnitDocumentOption,
 	toOrganisationalUnitDocumentOptionsPage,
 } from "@/lib/organisational-unit-options";
 import { getServiceStatusLabel } from "@/lib/service-status-label";
 
-export type ServicesSort = "name" | "type" | "status" | "sshocMarketplaceId";
+export type ServicesSort =
+	| "name"
+	| "type"
+	| "status"
+	| "sshocMarketplaceId"
+	| "serviceOwners"
+	| "serviceProviders";
 
 interface GetServicesParams {
 	limit: number;
@@ -33,6 +40,10 @@ export interface ServicesResult {
 		Pick<schema.Service, "id" | "name" | "sshocMarketplaceId"> & {
 			status: Pick<schema.ServiceStatus, "status">;
 			type: Pick<schema.ServiceType, "type">;
+			/** Comma-separated names of the published owner units, or `null` when there are none. */
+			serviceOwners: string | null;
+			/** Comma-separated names of the published provider units, or `null` when there are none. */
+			serviceProviders: string | null;
 		}
 	>;
 	limit: number;
@@ -46,11 +57,38 @@ function assertAdminUser(user: Pick<User, "role">): void {
 	}
 }
 
+/**
+ * Correlated subquery listing, alphabetically and comma-separated, the names of the published
+ * organisational units linked to the outer query's service in the given role. Yields `null` when
+ * the service has no such unit, so it sorts last and renders as empty.
+ */
+function serviceOrganisationalUnitNames(
+	role: schema.OrganisationalUnitServiceRole["role"],
+): SQL<string | null> {
+	return sql<string | null>`(
+		select string_agg(distinct ${schema.organisationalUnits.name}, ', ' order by ${schema.organisationalUnits.name})
+		from ${schema.servicesToOrganisationalUnits}
+		inner join ${schema.organisationalUnitServiceRoles}
+			on ${schema.organisationalUnitServiceRoles.id} = ${schema.servicesToOrganisationalUnits.roleId}
+		inner join ${schema.entityVersions}
+			on ${schema.entityVersions.entityId} = ${schema.servicesToOrganisationalUnits.organisationalUnitDocumentId}
+		inner join ${schema.entityStatus}
+			on ${schema.entityStatus.id} = ${schema.entityVersions.statusId}
+		inner join ${schema.organisationalUnits}
+			on ${schema.organisationalUnits.id} = ${schema.entityVersions.id}
+		where ${schema.servicesToOrganisationalUnits.serviceId} = ${schema.services.id}
+			and ${schema.organisationalUnitServiceRoles.role} = ${role}
+			and ${publishedEntityVersionWhere()}
+	)`;
+}
+
 export async function getServices(params: Readonly<GetServicesParams>): Promise<ServicesResult> {
 	const { limit, offset, q, sort = "name", type, dir = "asc" } = params;
 	const query = q?.trim();
+	const serviceOwners = serviceOrganisationalUnitNames("service_owner");
+	const serviceProviders = serviceOrganisationalUnitNames("service_provider");
 	const where = and(
-		matchesAllTerms(query, schema.services.name),
+		matchesAllTerms(query, schema.services.name, serviceOwners, serviceProviders),
 		type === "internal"
 			? isNull(schema.services.sshocMarketplaceId)
 			: isNotNull(schema.services.sshocMarketplaceId),
@@ -71,9 +109,17 @@ export async function getServices(params: Readonly<GetServicesParams>): Promise<
 					? dir === "asc"
 						? sql`${schema.services.sshocMarketplaceId} ASC NULLS LAST`
 						: sql`${schema.services.sshocMarketplaceId} DESC NULLS LAST`
-					: dir === "asc"
-						? schema.services.name
-						: desc(schema.services.name),
+					: sort === "serviceOwners"
+						? dir === "asc"
+							? sql`${serviceOwners} ASC NULLS LAST`
+							: sql`${serviceOwners} DESC NULLS LAST`
+						: sort === "serviceProviders"
+							? dir === "asc"
+								? sql`${serviceProviders} ASC NULLS LAST`
+								: sql`${serviceProviders} DESC NULLS LAST`
+							: dir === "asc"
+								? schema.services.name
+								: desc(schema.services.name),
 		schema.services.name,
 		schema.services.id,
 	];
@@ -86,6 +132,8 @@ export async function getServices(params: Readonly<GetServicesParams>): Promise<
 				sshocMarketplaceId: schema.services.sshocMarketplaceId,
 				status: schema.serviceStatuses.status,
 				type: schema.serviceTypes.type,
+				serviceOwners,
+				serviceProviders,
 			})
 			.from(schema.services)
 			.innerJoin(schema.serviceTypes, eq(schema.services.typeId, schema.serviceTypes.id))
@@ -110,6 +158,8 @@ export async function getServices(params: Readonly<GetServicesParams>): Promise<
 				sshocMarketplaceId: item.sshocMarketplaceId,
 				status: { status: item.status },
 				type: { type: item.type },
+				serviceOwners: item.serviceOwners,
+				serviceProviders: item.serviceProviders,
 			};
 		}),
 		limit,
