@@ -18,6 +18,7 @@ import {
 	EntityListHeader,
 	EntityListPagination,
 	EntityListSearchField,
+	EntityListTitle,
 	RowActionsMenu,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
@@ -116,7 +117,9 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 				<TableBody items={items}>
 					{(item) => (
 						<TableRow href={`/dashboard/administrator/sshoc-services/${item.id}/view`} id={item.id}>
-							<TableCell>{item.name}</TableCell>
+							<TableCell>
+								<EntityListTitle title={item.name} />
+							</TableCell>
 							<TableCell>{item.type.type}</TableCell>
 							<TableCell>
 								<Badge intent={statusIntent(item.status.status)}>
