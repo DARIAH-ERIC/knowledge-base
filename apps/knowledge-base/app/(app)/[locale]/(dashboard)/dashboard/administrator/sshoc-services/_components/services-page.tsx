@@ -33,11 +33,13 @@ interface ServicesPageProps {
 			Pick<schema.Service, "id" | "name" | "sshocMarketplaceId"> & {
 				status: Pick<schema.ServiceStatus, "status">;
 				type: Pick<schema.ServiceType, "type">;
+				serviceOwners: string | null;
+				serviceProviders: string | null;
 			}
 		>;
 		total: number;
 	};
-	sort: "name" | "type" | "status" | "sshocMarketplaceId";
+	sort: "name" | "type" | "status" | "sshocMarketplaceId" | "serviceOwners" | "serviceProviders";
 }
 
 function statusIntent(status: string): "success" | "warning" | "danger" | "info" {
@@ -100,6 +102,12 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 					<TableColumn allowsSorting={true} id="status">
 						{t("Status")}
 					</TableColumn>
+					<TableColumn allowsSorting={true} id="serviceOwners">
+						{t("Service owners")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="serviceProviders">
+						{t("Service providers")}
+					</TableColumn>
 					<TableColumn allowsSorting={true} id="sshocMarketplaceId">
 						{t("SSHOC ID")}
 					</TableColumn>
@@ -115,6 +123,8 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 									{getServiceStatusLabel(item.status.status)}
 								</Badge>
 							</TableCell>
+							<TableCell>{item.serviceOwners ?? "—"}</TableCell>
+							<TableCell>{item.serviceProviders ?? "—"}</TableCell>
 							<TableCell>{item.sshocMarketplaceId ?? "—"}</TableCell>
 							<TableCell className="sticky inset-e-0 z-10 bg-linear-to-l from-bg from-60% text-end">
 								<RowActionsMenu>

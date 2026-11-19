@@ -10,6 +10,71 @@ test.describe("sshoc services admin", () => {
 
 	test.afterAll(async ({ db }, testInfo) => {
 		await db.cleanupWorkerServices(testInfo.workerIndex);
+		await db.cleanupWorkerInstitutions(testInfo.workerIndex);
+	});
+
+	test("lists, searches and sorts services by owners and providers", async ({ page, db }) => {
+		const suffix = randomUUID();
+		const [alpha, beta] = await Promise.all([
+			db.createPublishedInstitution({
+				name: `${WORKER_PREFIX()} Alpha Institution ${suffix}`,
+				slug: `e2e-alpha-${suffix}`,
+			}),
+			db.createPublishedInstitution({
+				name: `${WORKER_PREFIX()} Beta Institution ${suffix}`,
+				slug: `e2e-beta-${suffix}`,
+			}),
+		]);
+		const firstName = `${WORKER_PREFIX()} SSHOC Service A ${suffix}`;
+		const secondName = `${WORKER_PREFIX()} SSHOC Service B ${suffix}`;
+
+		await db.createService({
+			name: firstName,
+			organisationalUnits: [
+				{ documentId: beta.documentId, role: "service_owner" },
+				{ documentId: alpha.documentId, role: "service_provider" },
+			],
+			sshocMarketplaceId: `e2e-a-${suffix}`,
+			type: "community",
+		});
+		await db.createService({
+			name: secondName,
+			organisationalUnits: [{ documentId: alpha.documentId, role: "service_owner" }],
+			sshocMarketplaceId: `e2e-b-${suffix}`,
+			type: "community",
+		});
+
+		const rows = page.getByRole("row").filter({ hasText: suffix });
+
+		await page.goto(`${BASE_PATH}?q=${encodeURIComponent(suffix)}`);
+		await expect(page.getByRole("columnheader", { name: "Service owners" })).toBeVisible();
+		await expect(page.getByRole("columnheader", { name: "Service providers" })).toBeVisible();
+		await expect(rows).toHaveCount(2);
+
+		const firstRow = rows.filter({ hasText: firstName });
+		await expect(firstRow.getByRole("gridcell").nth(2)).toHaveText(
+			`${WORKER_PREFIX()} Beta Institution ${suffix}`,
+		);
+		await expect(firstRow.getByRole("gridcell").nth(3)).toHaveText(
+			`${WORKER_PREFIX()} Alpha Institution ${suffix}`,
+		);
+
+		// Sorting by owners puts the "Alpha"-owned service first, ahead of the alphabetically earlier
+		// service name.
+		await page.goto(`${BASE_PATH}?q=${encodeURIComponent(suffix)}&sort=serviceOwners&dir=asc`);
+		await expect(rows.nth(0)).toContainText(secondName);
+		await expect(rows.nth(1)).toContainText(firstName);
+
+		// Services without a provider sort last in either direction.
+		await page.goto(`${BASE_PATH}?q=${encodeURIComponent(suffix)}&sort=serviceProviders&dir=desc`);
+		await expect(rows.nth(0)).toContainText(firstName);
+		await expect(rows.nth(1)).toContainText(secondName);
+
+		// The search also matches owner and provider names: only the first service has "Beta" as an
+		// owner or provider.
+		await page.goto(`${BASE_PATH}?q=${encodeURIComponent(`Beta Institution ${suffix}`)}`);
+		await expect(rows).toHaveCount(1);
+		await expect(rows.nth(0)).toContainText(firstName);
 	});
 
 	test("resolves a needs-review service by setting its status", async ({ page, db }) => {
