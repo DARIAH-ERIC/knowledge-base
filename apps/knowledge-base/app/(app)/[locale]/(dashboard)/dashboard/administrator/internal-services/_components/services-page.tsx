@@ -19,6 +19,7 @@ import {
 	EntityListHeader,
 	EntityListPagination,
 	EntityListSearchField,
+	EntityListTitle,
 	NewLink,
 	RowActionsMenu,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
@@ -122,7 +123,9 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 							href={`/dashboard/administrator/internal-services/${item.id}/details`}
 							id={item.id}
 						>
-							<TableCell>{item.name}</TableCell>
+							<TableCell>
+								<EntityListTitle title={item.name} />
+							</TableCell>
 							<TableCell>{item.type.type}</TableCell>
 							<TableCell>
 								<Badge intent={statusIntent(item.status.status)}>
