@@ -44,6 +44,8 @@ const blocks = {
 			url: "https://www.youtube.com/watch?v=abc123",
 			title: "Recording of the session",
 			caption: caption("Embed caption."),
+			layout: "wide",
+			aspectRatio: "3:4",
 		},
 	},
 	callout: {
@@ -148,6 +150,41 @@ describe("image layout", () => {
 		};
 
 		expect(contentOf(splitDocumentToBlocks(doc)[0])).toMatchObject({ layout: "default" });
+	});
+});
+
+describe("embed layout and aspect ratio", () => {
+	it("fall back to the defaults for unknown stored values", () => {
+		const doc: JSONContent = {
+			type: "doc",
+			content: [
+				{
+					type: "embedBlock",
+					attrs: {
+						url: "https://example.com/",
+						title: "Example",
+						layout: "float-start",
+						aspectRatio: "21:9",
+					},
+				},
+			],
+		};
+
+		expect(contentOf(splitDocumentToBlocks(doc)[0])).toMatchObject({
+			layout: "default",
+			aspectRatio: "16:9",
+		});
+	});
+
+	it("default for an embed stored before either existed", () => {
+		const stored: MergeableBlock = {
+			type: "embed",
+			content: { url: "https://example.com/", title: "Example" },
+		};
+
+		const [result] = splitDocumentToBlocks(mergeBlocksToDocument([stored]));
+
+		expect(contentOf(result)).toMatchObject({ layout: "default", aspectRatio: "16:9" });
 	});
 });
 

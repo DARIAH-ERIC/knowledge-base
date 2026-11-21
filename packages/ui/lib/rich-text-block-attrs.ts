@@ -25,6 +25,20 @@ export function normalizeImageLayout(value: unknown): ImageLayout {
 	return imageLayouts.has(value as ImageLayout) ? (value as ImageLayout) : "default";
 }
 
+/** Mirrors `embedLayoutEnum` in `@dariah-eric/database` — the stored column is a closed set. */
+export type EmbedLayout = "default" | "wide" | "full";
+
+export function normalizeEmbedLayout(value: unknown): EmbedLayout {
+	return value === "wide" || value === "full" ? value : "default";
+}
+
+/** Mirrors `embedAspectRatioEnum` in `@dariah-eric/database` — the stored column is a closed set. */
+export type EmbedAspectRatio = "16:9" | "4:3" | "1:1" | "3:4";
+
+export function normalizeEmbedAspectRatio(value: unknown): EmbedAspectRatio {
+	return value === "4:3" || value === "1:1" || value === "3:4" ? value : "16:9";
+}
+
 /** Mirrors `galleryLayoutEnum` in `@dariah-eric/database` — the stored column is a closed set. */
 export type GalleryLayout = "carousel" | "grid" | "logos";
 
