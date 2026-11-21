@@ -58,8 +58,16 @@ const config: Config = {
 		"/api/reporting/**/*": ["./node_modules/pdfkit/js/data/*.afm"],
 	},
 	reactCompiler: true,
-	/** @see {@link https://github.com/foliojs/pdfkit/issues/1549} */
-	serverExternalPackages: ["pdfkit"],
+	serverExternalPackages: [
+		/**
+		 * `drizzle-orm/postgres` registers its node `net`/`tls` transport as a module side effect, but
+		 * `drizzle-orm` declares `"sideEffects": false`, so bundling it drops the registration and
+		 * every query fails with "no transport". Loading it from `node_modules` keeps the side effect.
+		 */
+		"drizzle-orm",
+		/** @see {@link https://github.com/foliojs/pdfkit/issues/1549} */
+		"pdfkit",
+	],
 	turbopack: {
 		rules: {
 			"*.css": {

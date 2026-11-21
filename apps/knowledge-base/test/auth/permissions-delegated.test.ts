@@ -346,7 +346,7 @@ describe("delegated edit guards", () => {
 
 	it("country institution guards: allow every institution the Institutions tab lists, incl. ended located-in", async () => {
 		await withTransaction(async (tx) => {
-			const ericDocumentId = await getDariahEricDocumentId();
+			const ericDocumentId = await getDariahEricDocumentId(tx);
 			assert(ericDocumentId, "DARIAH ERIC must be seeded for this test");
 
 			const country = await seedUnit(tx, "country");
@@ -383,7 +383,7 @@ describe("delegated edit guards", () => {
 
 	it("assertCanManageCountryInstitutionRelation: requires ERIC target + own-country institution", async () => {
 		await withTransaction(async (tx) => {
-			const ericDocumentId = await getDariahEricDocumentId();
+			const ericDocumentId = await getDariahEricDocumentId(tx);
 			assert(ericDocumentId, "DARIAH ERIC must be seeded for this test");
 
 			const country = await seedUnit(tx, "country");
