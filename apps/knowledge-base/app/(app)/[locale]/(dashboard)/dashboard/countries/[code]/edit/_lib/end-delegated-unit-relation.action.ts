@@ -27,10 +27,14 @@ export const endDelegatedUnitRelationAction = createCommandAction({
 			throw new UserFacingError("record-not-found");
 		}
 
-		await assertCanManageCountryInstitutionRelation(ctx.user, {
-			institutionDocumentId: relation.unitDocumentId,
-			relatedUnitDocumentId: relation.relatedUnitDocumentId,
-		});
+		await assertCanManageCountryInstitutionRelation(
+			ctx.user,
+			{
+				institutionDocumentId: relation.unitDocumentId,
+				relatedUnitDocumentId: relation.relatedUnitDocumentId,
+			},
+			tx,
+		);
 
 		if (end < relation.duration.start) {
 			throw new UserFacingError("relation-end-before-start");

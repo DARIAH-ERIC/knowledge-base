@@ -30,8 +30,8 @@ export const mergeEntitiesAction = createCommandAction({
 	revalidate: "/[locale]/dashboard/administrator/maintenance",
 
 	async mutate(tx, [sourceId, targetId]: [string, string]): Promise<MergeEntitiesActionResult> {
-		// Capture the source's website document before it is deleted (read outside the tx).
-		const sourceDescriptor = await getWebsiteDocumentDescriptorByEntityId(sourceId);
+		// Capture the source's website document before the merge deletes it.
+		const sourceDescriptor = await getWebsiteDocumentDescriptorByEntityId(sourceId, tx);
 
 		// Snapshot the source's label before the merge deletes it: the audit subject is the entity
 		// that goes away, so the wrapper's own (post-mutate) resolution would find nothing left and

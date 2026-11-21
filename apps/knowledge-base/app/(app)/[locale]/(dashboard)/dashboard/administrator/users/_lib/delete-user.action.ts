@@ -36,7 +36,7 @@ export const deleteUserAction = createCommandAction({
 			throw new UserFacingError("admin-account-deletion-not-allowed");
 		}
 
-		if (user.role === "admin" && user.canManageAdmins && (await countAdminManagers()) <= 1) {
+		if (user.role === "admin" && user.canManageAdmins && (await countAdminManagers(tx)) <= 1) {
 			throw new UserFacingError("last-admin-manager");
 		}
 

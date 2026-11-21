@@ -25,9 +25,9 @@ export const updateEntitySlugAction = createCommandAction({
 	revalidate: "/[locale]/dashboard/administrator/maintenance",
 
 	async mutate(tx, [documentId, slug]: [string, string]): Promise<UpdateEntitySlugResult> {
-		// Capture the pre-change website document (read outside the tx, so it still reflects the old
+		// Capture the pre-change website document (read before the update, so it still reflects the old
 		// slug) so we can drop the stale `type:slug` entry once the new slug commits.
-		const previousDescriptor = await getWebsiteDocumentDescriptorByEntityId(documentId);
+		const previousDescriptor = await getWebsiteDocumentDescriptorByEntityId(documentId, tx);
 
 		const entity = await updateEntitySlug(tx, documentId, slug);
 

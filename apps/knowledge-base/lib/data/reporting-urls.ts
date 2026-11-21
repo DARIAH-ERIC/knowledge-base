@@ -1,6 +1,6 @@
 import * as schema from "@dariah-eric/database/schema";
 
-import { db } from "@/lib/db";
+import { type Database, type Transaction, db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
 
 export interface ReportRouteParams {
@@ -98,8 +98,12 @@ export async function resolveWorkingGroupReportId(
 	return report[0]?.id ?? null;
 }
 
-export async function getCountryReportEditHrefById(id: string, step?: string): Promise<string> {
-	const report = await db
+export async function getCountryReportEditHrefById(
+	id: string,
+	step?: string,
+	executor: Database | Transaction = db,
+): Promise<string> {
+	const report = await executor
 		.select({
 			year: schema.reportingCampaigns.year,
 			slug: schema.entities.slug,
@@ -123,8 +127,9 @@ export async function getCountryReportEditHrefById(id: string, step?: string): P
 export async function getWorkingGroupReportEditHrefById(
 	id: string,
 	step?: string,
+	executor: Database | Transaction = db,
 ): Promise<string> {
-	const report = await db
+	const report = await executor
 		.select({
 			year: schema.reportingCampaigns.year,
 			slug: schema.entities.slug,

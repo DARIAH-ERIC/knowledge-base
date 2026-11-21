@@ -352,8 +352,9 @@ function isManualRole(role: CompensationRole): boolean {
 export async function getManualContributionCandidateForReport(
 	countryReportId: string,
 	personToOrgUnitId: string,
+	queryDb: Database | Transaction = db,
 ): Promise<ContributionCandidate | null> {
-	const report = await db.query.countryReports.findFirst({
+	const report = await queryDb.query.countryReports.findFirst({
 		where: { id: countryReportId },
 		columns: {},
 		with: { campaign: { columns: { year: true } } },
@@ -362,7 +363,7 @@ export async function getManualContributionCandidateForReport(
 		return null;
 	}
 
-	const rows = await selectContributionRows()
+	const rows = await selectContributionRows(queryDb)
 		.where(
 			and(
 				eq(schema.personsToOrganisationalUnits.id, personToOrgUnitId),

@@ -71,7 +71,7 @@ export const submitWorkingGroupReportAction = createMutationAction<
 			subjectId: input.id,
 			auditSummary: { status: "submitted" },
 			successData: {
-				href: await getWorkingGroupReportEditHrefById(input.id, "confirm"),
+				href: await getWorkingGroupReportEditHrefById(input.id, "confirm", tx),
 				name: report?.workingGroup?.name ?? null,
 				year: report?.campaign.year ?? null,
 			},
