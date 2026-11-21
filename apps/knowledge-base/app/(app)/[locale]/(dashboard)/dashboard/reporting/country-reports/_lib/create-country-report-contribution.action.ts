@@ -61,6 +61,7 @@ export const createCountryReportContributionAction = createMutationAction({
 		const candidate = await getManualContributionCandidateForReport(
 			input.countryReportId,
 			input.personToOrgUnitId,
+			tx,
 		);
 		assert(candidate, "Contribution is not eligible.");
 

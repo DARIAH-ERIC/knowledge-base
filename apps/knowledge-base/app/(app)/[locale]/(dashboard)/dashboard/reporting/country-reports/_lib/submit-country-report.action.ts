@@ -71,7 +71,7 @@ export const submitCountryReportAction = createMutationAction<
 			subjectId: input.id,
 			auditSummary: { status: "submitted" },
 			successData: {
-				href: await getCountryReportEditHrefById(input.id, "confirm"),
+				href: await getCountryReportEditHrefById(input.id, "confirm", tx),
 				name: report?.country?.name ?? null,
 				year: report?.campaign.year ?? null,
 			},

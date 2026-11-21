@@ -32,10 +32,14 @@ export const deleteDelegatedUnitRelationAction = createCommandAction({
 			throw new UserFacingError("record-not-found");
 		}
 
-		await assertCanManageCountryInstitutionRelation(ctx.user, {
-			institutionDocumentId: relation.unitDocumentId,
-			relatedUnitDocumentId: relation.relatedUnitDocumentId,
-		});
+		await assertCanManageCountryInstitutionRelation(
+			ctx.user,
+			{
+				institutionDocumentId: relation.unitDocumentId,
+				relatedUnitDocumentId: relation.relatedUnitDocumentId,
+			},
+			tx,
+		);
 
 		// Snapshot the label while the row still exists, so the audit log doesn't fall back to the uuid.
 		const subjectLabel = await resolveAuditSubjectLabel("unit_relations", id, tx);

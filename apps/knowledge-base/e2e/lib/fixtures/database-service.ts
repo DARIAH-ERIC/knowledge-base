@@ -5101,7 +5101,7 @@ export class DatabaseService {
 		}
 	}
 
-	/** Closes the underlying pg pool. Called in worker teardown. */
+	/** Closes the underlying connection pool. Called in worker teardown. */
 	async close(): Promise<void> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
 		await (this.db as any).$client?.end?.();

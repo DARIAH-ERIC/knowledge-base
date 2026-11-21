@@ -18,7 +18,7 @@ import {
 	selectedImageWith,
 	toSelectedImage,
 } from "@/lib/data/selected-image";
-import { db } from "@/lib/db";
+import { type Database, type Transaction, db } from "@/lib/db";
 import { matchesAllTerms } from "@/lib/db/search";
 import { and, count, desc, eq, like } from "@/lib/db/sql";
 import { type FocalPoint, toFocalPoint } from "@/lib/focal-point";
@@ -316,10 +316,13 @@ interface UpdateAssetMetadataParams {
 	focalPoint?: FocalPoint | null;
 }
 
-export async function updateAssetMetadata(params: UpdateAssetMetadataParams) {
+export async function updateAssetMetadata(
+	params: UpdateAssetMetadataParams,
+	executor: Database | Transaction = db,
+) {
 	const { id, label, alt, caption, licenseId, focalPoint } = params;
 
-	await db
+	await executor
 		.update(schema.assets)
 		.set({
 			label,

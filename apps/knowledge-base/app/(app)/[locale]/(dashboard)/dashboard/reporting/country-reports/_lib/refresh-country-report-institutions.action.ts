@@ -43,6 +43,7 @@ export const refreshCountryReportInstitutionsAction = createMutationAction({
 		const partners = await getCurrentPartnerInstitutions(
 			report.countryDocumentId,
 			report.campaign.year,
+			tx,
 		);
 
 		// Replace the snapshot wholesale so it mirrors the current partner-institution relations.

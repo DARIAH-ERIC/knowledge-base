@@ -29,6 +29,7 @@ const db = createDatabaseService({
 		host: env.DATABASE_HOST,
 		password: env.DATABASE_PASSWORD,
 		port: env.DATABASE_PORT,
+		pooler: env.DATABASE_POOLER === "enabled",
 		user: env.DATABASE_USER,
 	},
 	logger: false,

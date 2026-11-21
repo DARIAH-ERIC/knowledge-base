@@ -1,8 +1,8 @@
 import { Result } from "better-result";
 import type { DrizzleConfig } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/node-postgres";
-import type { PoolConfig } from "pg";
+import { type PoolConfig, drizzle } from "drizzle-orm/postgres";
 
+import { clientDefaults } from "./client-defaults";
 import { DatabaseConnectionError } from "./errors";
 import { relations } from "./relations";
 
@@ -19,7 +19,10 @@ function createClient(params: CreateClientParams) {
 	const { connection, logger } = params;
 
 	const db = drizzle({
-		connection,
+		connection:
+			typeof connection === "string"
+				? { ...clientDefaults, url: connection }
+				: { ...clientDefaults, ...connection },
 		logger,
 		relations,
 	});

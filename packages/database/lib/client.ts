@@ -1,6 +1,7 @@
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle } from "drizzle-orm/postgres";
 
 import { env } from "../config/env.config";
+import { clientDefaults } from "./client-defaults";
 import { relations } from "./relations";
 
 type Client = Awaited<ReturnType<typeof createClient>>;
@@ -13,11 +14,13 @@ declare global {
 export function createClient() {
 	const db = drizzle({
 		connection: {
+			...clientDefaults,
 			database: env.DATABASE_NAME,
 			host: env.DATABASE_HOST,
 			password: env.DATABASE_PASSWORD,
 			port: env.DATABASE_PORT,
-			ssl: env.DATABASE_SSL_CONNECTION === "enabled",
+			pooler: env.DATABASE_POOLER === "enabled",
+			ssl: env.DATABASE_SSL_CONNECTION === "enabled" ? "verify-full" : false,
 			user: env.DATABASE_USER,
 		},
 		logger: env.NODE_ENV === "development",

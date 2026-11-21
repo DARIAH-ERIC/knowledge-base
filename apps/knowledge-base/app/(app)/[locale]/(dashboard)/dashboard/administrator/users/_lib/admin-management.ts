@@ -1,6 +1,6 @@
 import * as schema from "@dariah-eric/database/schema";
 
-import { db } from "@/lib/db";
+import { type Database, type Transaction, db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
 
 type AdminManagementActor = Pick<schema.User, "canManageAdmins" | "role">;
@@ -11,8 +11,8 @@ export function canManageAdminAccounts(
 	return user.role === "admin" && user.canManageAdmins;
 }
 
-export async function countAdminManagers(): Promise<number> {
-	return db.$count(
+export async function countAdminManagers(executor: Database | Transaction = db): Promise<number> {
+	return executor.$count(
 		schema.users,
 		and(eq(schema.users.role, "admin"), eq(schema.users.canManageAdmins, true)),
 	);
