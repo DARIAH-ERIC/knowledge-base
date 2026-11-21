@@ -203,16 +203,44 @@ export const DataContentBlockSelectSchema = createSelectSchema(dataContentBlocks
 export const DataContentBlockInsertSchema = createInsertSchema(dataContentBlocks);
 export const DataContentBlockUpdateSchema = createUpdateSchema(dataContentBlocks);
 
-export const embedContentBlocks = p.snakeCase.table("content_blocks_type_embed", {
-	id: p
-		.uuid("id")
-		.primaryKey()
-		.references(() => contentBlocks.id, { onDelete: "cascade" }),
-	url: p.text("url").notNull(),
-	title: p.text("title").notNull(),
-	caption: p.jsonb("caption").$type<JSONContent>(),
-	...f.timestamps(),
-});
+/**
+ * How an `embed` block sits in the content column: the same named slots as an image's `default`,
+ * `wide` and `full` (see `imageLayoutEnum`), without the floats — text wrapping around a frame
+ * someone else's page is drawn into is not a layout anyone asked for. Unlike an image, a frame has
+ * no natural width, so `default` fills the content column rather than fitting its content.
+ */
+export const embedLayoutEnum = ["default", "wide", "full"] as const;
+
+/**
+ * The shape of an `embed` block's frame, as width:height. An iframe has no intrinsic size the page
+ * could read, so the author names one: `16:9` suits a video player (and is the column default, the
+ * historical rendering), while a calendar, a map or a portrait video wants something taller. A
+ * closed set, like the layouts, so authors pick a shape rather than arbitrary geometry.
+ */
+export const embedAspectRatioEnum = ["16:9", "4:3", "1:1", "3:4"] as const;
+
+export const embedContentBlocks = p.snakeCase.table(
+	"content_blocks_type_embed",
+	{
+		id: p
+			.uuid("id")
+			.primaryKey()
+			.references(() => contentBlocks.id, { onDelete: "cascade" }),
+		url: p.text("url").notNull(),
+		title: p.text("title").notNull(),
+		caption: p.jsonb("caption").$type<JSONContent>(),
+		layout: p.text("layout", { enum: embedLayoutEnum }).notNull().default("default"),
+		aspectRatio: p.text("aspect_ratio", { enum: embedAspectRatioEnum }).notNull().default("16:9"),
+		...f.timestamps(),
+	},
+	(t) => [
+		p.check("content_blocks_type_embed_layout_enum_check", inArray(t.layout, embedLayoutEnum)),
+		p.check(
+			"content_blocks_type_embed_aspect_ratio_enum_check",
+			inArray(t.aspectRatio, embedAspectRatioEnum),
+		),
+	],
+);
 
 export type EmbedContentBlock = typeof embedContentBlocks.$inferSelect;
 export type EmbedContentBlockInput = typeof embedContentBlocks.$inferInsert;

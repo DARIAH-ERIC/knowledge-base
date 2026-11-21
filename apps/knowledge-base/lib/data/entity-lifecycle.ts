@@ -202,6 +202,8 @@ async function cloneTypedContentBlock(
 					url: schema.embedContentBlocks.url,
 					title: schema.embedContentBlocks.title,
 					caption: schema.embedContentBlocks.caption,
+					layout: schema.embedContentBlocks.layout,
+					aspectRatio: schema.embedContentBlocks.aspectRatio,
 				})
 				.from(schema.embedContentBlocks)
 				.where(eq(schema.embedContentBlocks.id, sourceBlockId))

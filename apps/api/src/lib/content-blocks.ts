@@ -71,6 +71,14 @@ export const EmbedContentBlockSchema = v.object({
 	 */
 	title: v.string(),
 	caption: v.nullable(v.any()),
+	/**
+	 * The slot the frame claims: content-column width, or broken out `wide` / `full` (see
+	 * `embedLayoutEnum`). Unlike an image, a frame has no natural width, so it always fills its
+	 * slot.
+	 */
+	layout: v.picklist(schema.embedLayoutEnum),
+	/** The frame's shape, as width:height — an iframe has no intrinsic size the page could read. */
+	aspectRatio: v.picklist(schema.embedAspectRatioEnum),
 });
 
 export const ImageContentBlockSchema = v.object({
@@ -209,6 +217,8 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			embedUrl: schema.embedContentBlocks.url,
 			embedTitle: schema.embedContentBlocks.title,
 			embedCaption: schema.embedContentBlocks.caption,
+			embedLayout: schema.embedContentBlocks.layout,
+			embedAspectRatio: schema.embedContentBlocks.aspectRatio,
 			imageCaption: schema.imageContentBlocks.caption,
 			imageCaptionMode: schema.imageContentBlocks.captionMode,
 			imageLayout: schema.imageContentBlocks.layout,
@@ -679,6 +689,8 @@ function normalizeRow(row: {
 	embedUrl: string | null;
 	embedTitle: string | null;
 	embedCaption: JSONContent | null;
+	embedLayout: (typeof schema.embedLayoutEnum)[number] | null;
+	embedAspectRatio: (typeof schema.embedAspectRatioEnum)[number] | null;
 	imageCaption: JSONContent | null;
 	imageCaptionMode: ImageCaptionMode | null;
 	imageLayout: (typeof schema.imageLayoutEnum)[number] | null;
@@ -752,6 +764,8 @@ function normalizeRow(row: {
 				embedUrl,
 				title: getEmbedTitle(row.embedTitle, row.embedUrl!, embedUrl),
 				caption: row.embedCaption,
+				layout: row.embedLayout ?? "default",
+				aspectRatio: row.embedAspectRatio ?? "16:9",
 			};
 		}
 		case "image": {

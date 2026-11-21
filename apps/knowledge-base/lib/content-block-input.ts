@@ -45,6 +45,8 @@ const NestableContentBlockInputSchema = v.union([
 				url: v.optional(v.string()),
 				title: v.optional(v.string()),
 				caption: v.optional(v.nullable(v.custom<JSONContent>(() => true))),
+				layout: v.optional(v.picklist(["default", "wide", "full"] as const)),
+				aspectRatio: v.optional(v.picklist(["16:9", "4:3", "1:1", "3:4"] as const)),
 			}),
 		),
 	}),

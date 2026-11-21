@@ -211,13 +211,17 @@ export async function upsertTypedContentBlock(
 			}
 
 			const caption = block.content?.caption ?? null;
+			const layout = block.content?.layout ?? "default";
+			const aspectRatio = block.content?.aspectRatio ?? "16:9";
 
 			if (isNew) {
-				await tx.insert(schema.embedContentBlocks).values({ id: blockId, url, title, caption });
+				await tx
+					.insert(schema.embedContentBlocks)
+					.values({ id: blockId, url, title, caption, layout, aspectRatio });
 			} else {
 				await tx
 					.update(schema.embedContentBlocks)
-					.set({ url, title, caption })
+					.set({ url, title, caption, layout, aspectRatio })
 					.where(eq(schema.embedContentBlocks.id, blockId));
 			}
 			break;
@@ -516,6 +520,8 @@ export async function getEntityContentBlocks(
 				url: schema.embedContentBlocks.url,
 				title: schema.embedContentBlocks.title,
 				caption: schema.embedContentBlocks.caption,
+				layout: schema.embedContentBlocks.layout,
+				aspectRatio: schema.embedContentBlocks.aspectRatio,
 			})
 			.from(schema.embedContentBlocks)
 			.innerJoin(schema.contentBlocks, eq(schema.embedContentBlocks.id, schema.contentBlocks.id))
@@ -720,7 +726,13 @@ export async function getEntityContentBlocks(
 			position: row.position,
 			parentBlockId: row.parentBlockId,
 			type: "embed" as const,
-			content: { url: row.url, title: row.title, caption: row.caption ?? undefined },
+			content: {
+				url: row.url,
+				title: row.title,
+				caption: row.caption ?? undefined,
+				layout: row.layout,
+				aspectRatio: row.aspectRatio,
+			},
 		};
 	});
 

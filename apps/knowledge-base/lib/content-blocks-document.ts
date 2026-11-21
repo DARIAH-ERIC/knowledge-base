@@ -13,6 +13,20 @@ function normalizeImageLayout(value: unknown): ImageLayout {
 	return imageLayouts.has(value as ImageLayout) ? (value as ImageLayout) : "default";
 }
 
+/** Mirrors `embedLayoutEnum` in `@dariah-eric/database`. */
+type EmbedLayout = "default" | "wide" | "full";
+
+function normalizeEmbedLayout(value: unknown): EmbedLayout {
+	return value === "wide" || value === "full" ? value : "default";
+}
+
+/** Mirrors `embedAspectRatioEnum` in `@dariah-eric/database`. */
+type EmbedAspectRatio = "16:9" | "4:3" | "1:1" | "3:4";
+
+function normalizeEmbedAspectRatio(value: unknown): EmbedAspectRatio {
+	return value === "4:3" || value === "1:1" || value === "3:4" ? value : "16:9";
+}
+
 /** Mirrors `galleryLayoutEnum` in `@dariah-eric/database`. */
 type GalleryLayout = "carousel" | "grid" | "logos";
 
@@ -51,7 +65,13 @@ interface ImageBlock {
 
 interface EmbedBlock {
 	type: "embed";
-	content?: { url?: string; title?: string; caption?: JSONContent | null };
+	content?: {
+		url?: string;
+		title?: string;
+		caption?: JSONContent | null;
+		layout?: EmbedLayout;
+		aspectRatio?: EmbedAspectRatio;
+	};
 }
 
 interface CalloutBlock {
@@ -202,6 +222,8 @@ function mergeBlocksToNodes(blocks: Array<MergeableBlock>): Array<JSONContent> {
 					url: block.content?.url ?? null,
 					title: block.content?.title ?? null,
 					caption: block.content?.caption ?? null,
+					layout: normalizeEmbedLayout(block.content?.layout),
+					aspectRatio: normalizeEmbedAspectRatio(block.content?.aspectRatio),
 				},
 			});
 		} else if (block.type === "accordion") {
@@ -366,6 +388,8 @@ function splitNodesToBlocks(nodes: Array<JSONContent>): Array<ContentBlockInput>
 					url: (node.attrs?.url as string | null | undefined) ?? undefined,
 					title: (node.attrs?.title as string | null | undefined) ?? undefined,
 					caption: (node.attrs?.caption as JSONContent | null | undefined) ?? undefined,
+					layout: normalizeEmbedLayout(node.attrs?.layout),
+					aspectRatio: normalizeEmbedAspectRatio(node.attrs?.aspectRatio),
 				},
 			});
 		} else if (node.type === "calloutBlock") {
