@@ -618,7 +618,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				// Classify by unit type rather than by the members-and-partners / working-groups views,
 				// so institutions and national consortia are recognised too. Whether a unit actually
 				// warrants a document is decided when its documents are built.
-				const unit = await db.query.organisationalUnits.findFirst({
+				const unit = await executor.query.organisationalUnits.findFirst({
 					where: {
 						entityVersion: {
 							entityId,
