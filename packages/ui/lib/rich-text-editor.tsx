@@ -78,6 +78,8 @@ import {
 import {
 	type ButtonLinkVariant,
 	type CalloutIntent,
+	type EmbedAspectRatio,
+	type EmbedLayout,
 	type GalleryItemAttrs,
 	type GalleryLayout,
 	type ImageCaptionMode,
@@ -86,6 +88,8 @@ import {
 	captionFromElementText,
 	normalizeButtonLinkVariant,
 	normalizeCalloutIntent,
+	normalizeEmbedAspectRatio,
+	normalizeEmbedLayout,
 	normalizeGalleryItems,
 	normalizeGalleryLayout,
 	normalizeImageLayout,
@@ -368,6 +372,20 @@ interface EmbedNodeViewProps extends NodeViewProps {
 	hasFootnotes?: boolean;
 }
 
+/** The frame's shape in the editor preview, so the author sees the ratio they picked. */
+const embedAspectRatioClassName: Record<EmbedAspectRatio, string> = {
+	"16:9": "aspect-video",
+	"4:3": "aspect-[4/3]",
+	"1:1": "aspect-square",
+	"3:4": "aspect-[3/4]",
+};
+
+const embedLayoutLabel: Record<EmbedLayout, string> = {
+	default: "Default",
+	wide: "Wide",
+	full: "Full width",
+};
+
 function EmbedNodeView({
 	editor,
 	getPos,
@@ -380,11 +398,15 @@ function EmbedNodeView({
 	const url = node.attrs.url as string | null;
 	const title = node.attrs.title as string | null;
 	const caption = node.attrs.caption as JSONContent | null;
+	const layout = normalizeEmbedLayout(node.attrs.layout);
+	const aspectRatio = normalizeEmbedAspectRatio(node.attrs.aspectRatio);
 
 	const [isEditing, setIsEditing] = useState(url == null && editor.isEditable);
 	const [urlInput, setUrlInput] = useState(url ?? "");
 	const [titleInput, setTitleInput] = useState(title ?? "");
 	const [captionJson, setCaptionJson] = useState<JSONContent | null>(caption);
+	const [layoutInput, setLayoutInput] = useState<EmbedLayout>(layout);
+	const [aspectRatioInput, setAspectRatioInput] = useState<EmbedAspectRatio>(aspectRatio);
 
 	function handleApply() {
 		if (!urlInput.trim() || !titleInput.trim()) {
@@ -394,6 +416,8 @@ function EmbedNodeView({
 			url: urlInput.trim(),
 			title: titleInput.trim(),
 			caption: isEmptyRichTextDocument(captionJson) ? null : captionJson,
+			layout: layoutInput,
+			aspectRatio: aspectRatioInput,
 		});
 		setIsEditing(false);
 	}
@@ -407,6 +431,8 @@ function EmbedNodeView({
 		setUrlInput(url ?? "");
 		setTitleInput(title ?? "");
 		setCaptionJson(caption);
+		setLayoutInput(layout);
+		setAspectRatioInput(aspectRatio);
 	}
 
 	function selectNode() {
@@ -469,6 +495,47 @@ function EmbedNodeView({
 								onChange={setCaptionJson}
 							/>
 						</div>
+						<div className="flex flex-col gap-y-1">
+							<span className="text-sm/6 font-medium">{"Layout"}</span>
+							<ToggleGroup
+								aria-label="Layout"
+								className="[--toggle-focused-bg:var(--color-muted)] [--toggle-hover-bg:var(--color-muted)] [--toggle-selected-bg:var(--color-secondary)] [--toggle-selected-fg:var(--color-secondary-fg)]"
+								disallowEmptySelection={true}
+								onSelectionChange={(keys) => {
+									const nextLayout = [...keys][0] as EmbedLayout | undefined;
+									if (nextLayout != null) {
+										setLayoutInput(nextLayout);
+									}
+								}}
+								selectedKeys={[layoutInput]}
+								size="sm"
+							>
+								<ToggleGroupItem id="default">{embedLayoutLabel.default}</ToggleGroupItem>
+								<ToggleGroupItem id="wide">{embedLayoutLabel.wide}</ToggleGroupItem>
+								<ToggleGroupItem id="full">{embedLayoutLabel.full}</ToggleGroupItem>
+							</ToggleGroup>
+						</div>
+						<div className="flex flex-col gap-y-1">
+							<span className="text-sm/6 font-medium">{"Aspect ratio"}</span>
+							<ToggleGroup
+								aria-label="Aspect ratio"
+								className="[--toggle-focused-bg:var(--color-muted)] [--toggle-hover-bg:var(--color-muted)] [--toggle-selected-bg:var(--color-secondary)] [--toggle-selected-fg:var(--color-secondary-fg)]"
+								disallowEmptySelection={true}
+								onSelectionChange={(keys) => {
+									const nextAspectRatio = [...keys][0] as EmbedAspectRatio | undefined;
+									if (nextAspectRatio != null) {
+										setAspectRatioInput(nextAspectRatio);
+									}
+								}}
+								selectedKeys={[aspectRatioInput]}
+								size="sm"
+							>
+								<ToggleGroupItem id="16:9">{"16:9 (video)"}</ToggleGroupItem>
+								<ToggleGroupItem id="4:3">{"4:3"}</ToggleGroupItem>
+								<ToggleGroupItem id="1:1">{"1:1 (square)"}</ToggleGroupItem>
+								<ToggleGroupItem id="3:4">{"3:4 (portrait)"}</ToggleGroupItem>
+							</ToggleGroup>
+						</div>
 						<div className={blockPanelFooterClassName}>
 							<Button
 								intent="primary"
@@ -500,7 +567,7 @@ function EmbedNodeView({
 				) : (
 					<div>
 						{url != null && embedUrl != null && (
-							<div className="aspect-video inline-full">
+							<div className={cn(embedAspectRatioClassName[aspectRatio], "inline-full")}>
 								<iframe
 									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 									allowFullScreen={true}
@@ -516,6 +583,9 @@ function EmbedNodeView({
 						{editor.isEditable ? (
 							<div className="flex items-center justify-between gap-x-2 border-bs border-border px-4 py-2">
 								<span className="truncate text-xs text-muted-fg min-inline-0">{url}</span>
+								<span className="shrink-0 text-xs text-muted-fg">
+									{`${embedLayoutLabel[layout]} · ${aspectRatio}`}
+								</span>
 								<div className="flex shrink-0 gap-x-1">
 									<button
 										aria-label="Edit embed"
@@ -525,6 +595,8 @@ function EmbedNodeView({
 											setUrlInput(url ?? "");
 											setTitleInput(title ?? "");
 											setCaptionJson(caption);
+											setLayoutInput(layout);
+											setAspectRatioInput(aspectRatio);
 											setIsEditing(true);
 										}}
 										type="button"
@@ -577,6 +649,8 @@ function createEmbedNode(hasFootnotes = false): Node {
 				url: { default: null },
 				title: { default: null },
 				caption: { default: null },
+				layout: { default: "default" },
+				aspectRatio: { default: "16:9" },
 			};
 		},
 
@@ -590,6 +664,8 @@ function createEmbedNode(hasFootnotes = false): Node {
 							url: el.dataset.url,
 							title: el.dataset.title,
 							caption: parseCaptionAttr(el.dataset.caption),
+							layout: normalizeEmbedLayout(el.dataset.layout),
+							aspectRatio: normalizeEmbedAspectRatio(el.dataset.aspectRatio),
 						};
 					},
 				},
@@ -604,6 +680,8 @@ function createEmbedNode(hasFootnotes = false): Node {
 					"data-url": node.attrs.url as string | null,
 					"data-title": node.attrs.title as string | null,
 					"data-caption": serializeCaptionAttr(node.attrs.caption as JSONContent | null),
+					"data-layout": normalizeEmbedLayout(node.attrs.layout),
+					"data-aspect-ratio": normalizeEmbedAspectRatio(node.attrs.aspectRatio),
 				},
 			];
 		},
