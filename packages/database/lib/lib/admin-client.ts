@@ -16,6 +16,7 @@ export function createClient() {
 			max: 1,
 			password: env.DATABASE_PASSWORD,
 			port: env.DATABASE_PORT,
+			pooler: env.DATABASE_POOLER === "enabled",
 			ssl: env.DATABASE_SSL_CONNECTION === "enabled" ? "verify-full" : false,
 			user: env.DATABASE_USER,
 		},
