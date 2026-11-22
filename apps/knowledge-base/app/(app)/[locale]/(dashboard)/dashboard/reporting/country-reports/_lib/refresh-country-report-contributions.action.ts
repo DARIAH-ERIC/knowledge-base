@@ -45,6 +45,7 @@ export const refreshCountryReportContributionsAction = createMutationAction({
 		const candidates = await getSnapshotContributionCandidates(
 			report.countryDocumentId,
 			report.campaign.year,
+			tx,
 		);
 		const candidateIds = candidates.map((candidate) => candidate.personToOrgUnitId);
 

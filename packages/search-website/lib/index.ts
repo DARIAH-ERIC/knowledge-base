@@ -1,5 +1,5 @@
 import { log } from "@acdh-oeaw/lib";
-import type { Database } from "@dariah-eric/database";
+import type { Database, Transaction } from "@dariah-eric/database";
 import {
 	annotatePlaceholderValues,
 	collectPlaceholderValueKinds,
@@ -558,10 +558,12 @@ const countryScopedUnitQueries = [
 export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndexServiceParams) {
 	const { db, search, searchService } = params;
 
+	/** Pass the caller's transaction when calling from inside one. */
 	async function getWebsiteDocumentDescriptorByEntityId(
 		entityId: string,
+		executor: Database | Transaction = db,
 	): Promise<WebsiteDocumentDescriptor | null> {
-		const entity = await db.query.entities.findFirst({
+		const entity = await executor.query.entities.findFirst({
 			where: {
 				id: entityId,
 			},
@@ -616,7 +618,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				// Classify by unit type rather than by the members-and-partners / working-groups views,
 				// so institutions and national consortia are recognised too. Whether a unit actually
 				// warrants a document is decided when its documents are built.
-				const unit = await db.query.organisationalUnits.findFirst({
+				const unit = await executor.query.organisationalUnits.findFirst({
 					where: {
 						entityVersion: {
 							entityId,

@@ -57,7 +57,7 @@ export async function assertCanManageCountryInstitutionRelation(
 	executor: Database | Transaction = db,
 ): Promise<void> {
 	if (user.role !== "admin") {
-		const ericDocumentId = await getDariahEricDocumentId();
+		const ericDocumentId = await getDariahEricDocumentId(executor);
 
 		const targetsEric = ericDocumentId != null && params.relatedUnitDocumentId === ericDocumentId;
 

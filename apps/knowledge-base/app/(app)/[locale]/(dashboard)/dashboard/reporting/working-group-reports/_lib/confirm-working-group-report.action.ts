@@ -59,7 +59,7 @@ export const confirmWorkingGroupReportAction = createMutationAction<
 		return {
 			subjectId: input.id,
 			auditSummary: { status: "accepted" },
-			successData: { href: await getWorkingGroupReportEditHrefById(input.id, "confirm") },
+			successData: { href: await getWorkingGroupReportEditHrefById(input.id, "confirm", tx) },
 		};
 	},
 });

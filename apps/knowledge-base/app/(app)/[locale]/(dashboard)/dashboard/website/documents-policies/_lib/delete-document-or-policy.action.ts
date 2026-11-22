@@ -32,7 +32,7 @@ export const deleteDocumentOrPolicyAction = createCommandAction({
 		// Snapshot the label before the entity is wiped, so the audit log keeps it readable.
 		const subjectLabel = await resolveAuditSubjectLabel("documents_policies", documentId, tx);
 
-		const descriptor = await getWebsiteDocumentDescriptorByEntityId(documentId);
+		const descriptor = await getWebsiteDocumentDescriptorByEntityId(documentId, tx);
 
 		const { draftId, publishedId } = await getDocumentVersions(tx, documentId);
 		const versionIds = [draftId, publishedId].filter((id): id is string => id != null);

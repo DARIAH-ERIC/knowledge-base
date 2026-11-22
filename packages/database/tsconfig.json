@@ -2,7 +2,7 @@
 	"$schema": "https://www.schemastore.org/tsconfig",
 	"extends": "@dariah-eric/configs/typescript/lib",
 	"compilerOptions": {
-		"types": ["node", "pg"]
+		"types": ["node"]
 	},
 	"include": ["./**/*.js", "./**/*.ts"],
 	"exclude": ["dist", "node_modules"]

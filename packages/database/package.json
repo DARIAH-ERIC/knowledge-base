@@ -56,7 +56,6 @@
 		"@tiptap/core": "catalog:",
 		"better-result": "catalog:",
 		"drizzle-orm": "catalog:",
-		"pg": "catalog:",
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
@@ -64,7 +63,6 @@
 		"@faker-js/faker": "catalog:",
 		"@sindresorhus/slugify": "catalog:",
 		"@types/node": "catalog:",
-		"@types/pg": "catalog:",
 		"drizzle-dbml-generator": "catalog:",
 		"drizzle-kit": "catalog:",
 		"drizzle-seed": "catalog:",

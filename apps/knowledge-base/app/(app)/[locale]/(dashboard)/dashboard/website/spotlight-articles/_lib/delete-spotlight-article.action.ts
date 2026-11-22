@@ -35,7 +35,7 @@ export const deleteSpotlightArticleAction = createCommandAction({
 		// Snapshot the label before deletion so the audit log doesn't fall back to the uuid.
 		const subjectLabel = await resolveEntityDocumentLabel(tx, documentId);
 
-		const descriptor = await getWebsiteDocumentDescriptorByEntityId(documentId);
+		const descriptor = await getWebsiteDocumentDescriptorByEntityId(documentId, tx);
 
 		const { draftId, publishedId } = await getDocumentVersions(tx, documentId);
 		const versionIds = [draftId, publishedId].filter((id): id is string => id != null);

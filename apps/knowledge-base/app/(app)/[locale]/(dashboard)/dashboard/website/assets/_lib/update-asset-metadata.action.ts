@@ -16,7 +16,7 @@ export const updateAssetMetadataAction = createMutationAction({
 	async mutate(tx, input) {
 		const t = await getExtracted();
 		const cacheTags = await getAssetCacheTags(tx, [input.id]);
-		await updateAssetMetadata(input);
+		await updateAssetMetadata(input, tx);
 		return {
 			subjectId: input.id,
 			successMessage: t("Asset metadata saved."),
