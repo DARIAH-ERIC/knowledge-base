@@ -10,8 +10,7 @@ import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { SendContactFormInputSchema } from "@/app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.schema";
-import { env } from "@/config/env.config";
-import { email as emailService } from "@/lib/email";
+import { email as emailService, reportingEmailAddress, sentOnBehalfOf } from "@/lib/email";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 
@@ -39,17 +38,9 @@ export const sendContactFormEmailAction = createServerAction<
 
 	const { email, message, name, subject } = validation.output;
 
-	/**
-	 * The sender's address goes into `reply-to`, never into `from`: the smtp server only sends for
-	 * its own domains, and a `from` address of a foreign domain fails spf/dmarc checks at the
-	 * recipient's mail server, which then quarantines or rejects it. The sender's name is the display
-	 * name of `from` instead, so that the inbox lists the message by who wrote it, and replying
-	 * answers them.
-	 */
 	const result = await emailService.sendEmail({
-		from: { name: `${name} (via DARIAH knowledge base)`, address: env.EMAIL_ADDRESS },
-		replyTo: { name, address: email },
-		to: env.EMAIL_ADDRESS,
+		...sentOnBehalfOf({ email, name }),
+		to: reportingEmailAddress,
 		subject,
 		text: message,
 	});

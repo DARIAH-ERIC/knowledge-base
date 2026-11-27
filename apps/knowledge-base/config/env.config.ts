@@ -48,6 +48,7 @@ const validate = define({
 		DATABASE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		DATABASE_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 		DATABASE_USER: v.pipe(v.string(), v.nonEmpty()),
+		/** The sender address of all emails; must be accepted by the smtp server. Never a recipient. */
 		EMAIL_ADDRESS: v.pipe(v.string(), v.email()),
 		EMAIL_SMTP_PASSWORD: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		EMAIL_SMTP_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
@@ -74,6 +75,12 @@ const validate = define({
 		OTEL_EXPORTER_OTLP_ENDPOINT: v.optional(v.pipe(v.string(), v.url())),
 		/** Optional headers (e.g. for authentication) sent to the collector, as `key=value,key=value`. */
 		OTEL_EXPORTER_OTLP_HEADERS: v.optional(v.pipe(v.string(), v.nonEmpty())),
+		/**
+		 * Where the knowledge base's contact form messages and reporting notifications are delivered:
+		 * dariah-internal communication, separate from the website's contact form, which the api
+		 * delivers to its own `CONTACT_EMAIL_ADDRESS`.
+		 */
+		REPORTING_EMAIL_ADDRESS: v.pipe(v.string(), v.email()),
 		REVALIDATION_WEBHOOK_SECRET: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		REVALIDATION_WEBHOOK_URL: v.optional(v.pipe(v.string(), v.url())),
 		S3_ACCESS_KEY: v.pipe(v.string(), v.nonEmpty()),
@@ -141,6 +148,7 @@ export const env = validate({
 		NEXT_RUNTIME: process.env.NEXT_RUNTIME,
 		OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
 		OTEL_EXPORTER_OTLP_HEADERS: process.env.OTEL_EXPORTER_OTLP_HEADERS,
+		REPORTING_EMAIL_ADDRESS: process.env.REPORTING_EMAIL_ADDRESS,
 		REVALIDATION_WEBHOOK_SECRET: process.env.REVALIDATION_WEBHOOK_SECRET,
 		REVALIDATION_WEBHOOK_URL: process.env.REVALIDATION_WEBHOOK_URL,
 		S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,

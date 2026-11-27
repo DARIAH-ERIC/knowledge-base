@@ -127,7 +127,7 @@ test.describe("contact page", () => {
 			expect(msg).toBeDefined();
 			assert(msg);
 
-			expect(msg.To[0]?.Address).toBe(env.EMAIL_ADDRESS);
+			expect(msg.To[0]?.Address).toBe(env.REPORTING_EMAIL_ADDRESS);
 			expect(msg.Subject).toBe(subject);
 			expect(msg.From.Address).toBe(env.EMAIL_ADDRESS);
 			expect(msg.From.Name).toBe(`${name} (via DARIAH knowledge base)`);
