@@ -19605,6 +19605,84 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
         "type": "object",
       },
+      "SendContactMessageRequest": {
+        "description": "Contact form message",
+        "properties": {
+          "email": {
+            "description": "Email address of the sender, used as reply-to address",
+            "format": "email",
+            "maxLength": 254,
+            "type": "string",
+          },
+          "message": {
+            "description": "Message text",
+            "maxLength": 10000,
+            "minLength": 1,
+            "type": "string",
+          },
+          "name": {
+            "description": "Name of the sender",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+          },
+          "subject": {
+            "description": "Subject of the message",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+          },
+          "topic": {
+            "description": "Topic of the message",
+            "enum": [
+              "education-and-training",
+              "general",
+              "join-dariah",
+              "open-science",
+              "projects",
+              "technical-issues",
+              "tools-and-services",
+              "working-groups",
+            ],
+            "type": "string",
+          },
+        },
+        "required": [
+          "name",
+          "email",
+          "topic",
+          "subject",
+          "message",
+        ],
+        "type": "object",
+      },
+      "SendContactMessageResponse": {
+        "description": "Contact form message sent",
+        "properties": {
+          "message": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "message",
+        ],
+        "type": "object",
+      },
+      "ServiceUnavailableResponse": {
+        "description": "Service unavailable response",
+        "properties": {
+          "message": {
+            "examples": [
+              "Service Unavailable",
+            ],
+            "type": "string",
+          },
+        },
+        "required": [
+          "message",
+        ],
+        "type": "object",
+      },
       "SiteMetadata": {
         "description": "Site metadata",
         "properties": {
@@ -22986,6 +23064,84 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "summary": "Redirect to a rendered image variant",
         "tags": [
           "assets",
+        ],
+        "x-cache-tags": [],
+      },
+    },
+    "/api/v1/contact": {
+      "post": {
+        "description": "Send a message from the website's contact form via email. Requires the api access token; the website forwards the visitor's ip address in the \`x-client-ip\` header, which the rate limit is counted against.",
+        "operationId": "sendContactMessage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendContactMessageRequest",
+              },
+            },
+          },
+          "required": true,
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendContactMessageResponse",
+                },
+              },
+            },
+            "description": "Message sent",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse",
+                },
+              },
+            },
+            "description": "Unauthorized",
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse",
+                },
+              },
+            },
+            "description": "Internal Server Error",
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableResponse",
+                },
+              },
+            },
+            "description": "Service Unavailable",
+          },
+        },
+        "security": [
+          {
+            "apiAccessToken": [],
+          },
+        ],
+        "summary": "Send contact message",
+        "tags": [
+          "contact",
         ],
         "x-cache-tags": [],
       },

@@ -11,6 +11,7 @@ interface MailAddress {
 interface MailMessage {
 	ID: string;
 	From: MailAddress;
+	ReplyTo: Array<MailAddress>;
 	To: Array<MailAddress>;
 	Cc?: Array<MailAddress>;
 	Bcc?: Array<MailAddress>;

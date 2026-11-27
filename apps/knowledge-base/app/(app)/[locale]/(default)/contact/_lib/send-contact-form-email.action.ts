@@ -39,8 +39,16 @@ export const sendContactFormEmailAction = createServerAction<
 
 	const { email, message, name, subject } = validation.output;
 
+	/**
+	 * The sender's address goes into `reply-to`, never into `from`: the smtp server only sends for
+	 * its own domains, and a `from` address of a foreign domain fails spf/dmarc checks at the
+	 * recipient's mail server, which then quarantines or rejects it. The sender's name is the display
+	 * name of `from` instead, so that the inbox lists the message by who wrote it, and replying
+	 * answers them.
+	 */
 	const result = await emailService.sendEmail({
-		from: `${name} <${email}>`,
+		from: { name: `${name} (via DARIAH knowledge base)`, address: env.EMAIL_ADDRESS },
+		replyTo: { name, address: email },
 		to: env.EMAIL_ADDRESS,
 		subject,
 		text: message,
