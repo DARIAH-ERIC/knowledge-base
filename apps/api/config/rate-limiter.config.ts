@@ -87,3 +87,25 @@ export const assetConfig: RateLimiterConfig = {
 	keyGenerator: getClientKey,
 	skip: hasAccessToken,
 };
+
+/**
+ * The limit for contact form messages, which send an email for every accepted request.
+ *
+ * Only the website's server can call the route, since it requires the access token, so every
+ * request arrives from the same address. The website therefore forwards the address of the visitor
+ * who submitted the form in the `x-client-ip` header, which can be trusted because only a holder of
+ * the access token gets this far (the token check runs before this limiter).
+ */
+export const contactConfig: RateLimiterConfig = {
+	windowMs: 1000 * 60 * 15,
+	limit: 5,
+	keyGenerator(c) {
+		const clientIp = c.req.header("x-client-ip")?.trim();
+
+		if (clientIp != null && clientIp !== "") {
+			return `contact:${clientIp}`;
+		}
+
+		return `contact:${getClientKey(c)}`;
+	},
+};

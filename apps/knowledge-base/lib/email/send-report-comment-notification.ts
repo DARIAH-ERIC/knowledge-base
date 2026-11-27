@@ -6,13 +6,12 @@ import type {
 	ReportScreenCommentType,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_lib/report-screen-comments";
 import { richTextToText } from "@/app/api/reporting/_lib/rich-text-to-text";
-import { env } from "@/config/env.config";
 import {
 	getCountryReportEditHrefById,
 	getWorkingGroupReportEditHrefById,
 } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
-import { email } from "@/lib/email";
+import { email, reportingEmailAddress, sentOnBehalfOf } from "@/lib/email";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { createFullUrl } from "@/lib/navigation/create-full-url";
 import { getPathname } from "@/lib/navigation/navigation";
@@ -124,8 +123,8 @@ export async function sendReportCommentNotification(
 	].join("\n");
 
 	const result = await email.sendEmail({
-		from: `${editedBy.name} <${editedBy.email}>`,
-		to: env.EMAIL_ADDRESS,
+		...sentOnBehalfOf(editedBy),
+		to: reportingEmailAddress,
 		subject,
 		text,
 	});

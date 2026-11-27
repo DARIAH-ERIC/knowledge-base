@@ -607,6 +607,9 @@ importers:
       '@dariah-eric/database':
         specifier: workspace:^
         version: link:../../packages/database
+      '@dariah-eric/email':
+        specifier: workspace:^
+        version: link:../../packages/email
       '@dariah-eric/env':
         specifier: workspace:^
         version: link:../../packages/env
@@ -670,6 +673,9 @@ importers:
       hono-rate-limiter:
         specifier: 'catalog:'
         version: 0.5.4(hono@4.13.16)
+      nodemailer:
+        specifier: 'catalog:'
+        version: 10.3.1
       pino:
         specifier: 'catalog:'
         version: 10.4.0
@@ -698,6 +704,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.6
+      '@types/nodemailer':
+        specifier: 'catalog:'
+        version: 8.0.2
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 5.1.0(@vitest/browser@5.1.0)(vitest@5.1.0)

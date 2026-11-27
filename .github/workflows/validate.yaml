@@ -51,6 +51,7 @@ env:
   NEXT_PUBLIC_TYPESENSE_PROTOCOL: "http"
   NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: "dariah-resources"
   NEXT_PUBLIC_TYPESENSE_WEBSITE_COLLECTION_NAME: "dariah-website"
+  REPORTING_EMAIL_ADDRESS: "reporting@example.com"
   S3_ACCESS_KEY: "${{ secrets.TEST_S3_ACCESS_KEY }}"
   S3_BUCKET_NAME: "dariah-knowledge-base"
   S3_HOST: "localhost"

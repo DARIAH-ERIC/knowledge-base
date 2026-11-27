@@ -70,3 +70,20 @@ export const INTERNAL_SERVER_ERROR = {
 		},
 	},
 };
+
+export const SERVICE_UNAVAILABLE = {
+	503: {
+		description: STATUS_CODES[503]!,
+		content: {
+			"application/json": {
+				schema: resolver(
+					v.pipe(
+						v.object({ message: v.pipe(v.string(), v.examples([STATUS_CODES[503]!])) }),
+						v.description("Service unavailable response"),
+						v.metadata({ ref: "ServiceUnavailableResponse" }),
+					),
+				),
+			},
+		},
+	},
+};

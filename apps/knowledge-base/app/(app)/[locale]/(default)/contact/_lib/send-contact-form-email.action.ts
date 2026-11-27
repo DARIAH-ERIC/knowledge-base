@@ -10,8 +10,7 @@ import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { SendContactFormInputSchema } from "@/app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.schema";
-import { env } from "@/config/env.config";
-import { email as emailService } from "@/lib/email";
+import { email as emailService, reportingEmailAddress, sentOnBehalfOf } from "@/lib/email";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 
@@ -40,8 +39,8 @@ export const sendContactFormEmailAction = createServerAction<
 	const { email, message, name, subject } = validation.output;
 
 	const result = await emailService.sendEmail({
-		from: `${name} <${email}>`,
-		to: env.EMAIL_ADDRESS,
+		...sentOnBehalfOf({ email, name }),
+		to: reportingEmailAddress,
 		subject,
 		text: message,
 	});

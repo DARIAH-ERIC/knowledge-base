@@ -1,7 +1,6 @@
 import { log } from "@acdh-oeaw/lib";
 
-import { env } from "@/config/env.config";
-import { email } from "@/lib/email";
+import { email, reportingEmailAddress, sentOnBehalfOf } from "@/lib/email";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { createFullUrl } from "@/lib/navigation/create-full-url";
 import { getPathname } from "@/lib/navigation/navigation";
@@ -53,8 +52,8 @@ export async function sendReportSubmittedNotification(
 	].join("\n");
 
 	const result = await email.sendEmail({
-		from: `${submittedBy.name} <${submittedBy.email}>`,
-		to: env.EMAIL_ADDRESS,
+		...sentOnBehalfOf(submittedBy),
+		to: reportingEmailAddress,
 		subject,
 		text,
 	});
