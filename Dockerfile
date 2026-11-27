@@ -176,6 +176,7 @@ RUN --mount=type=secret,id=TURBO_TEAM,env=TURBO_TEAM \
     MAILCHIMP_API_BASE_URL="http://localhost" \
     MAILCHIMP_API_KEY="placeholder" \
     MAILCHIMP_LIST_ID="placeholder" \
+    REPORTING_EMAIL_ADDRESS="placeholder@example.com" \
     S3_ACCESS_KEY="placeholder" \
     S3_BUCKET_NAME="placeholder" \
     S3_HOST="localhost" \
