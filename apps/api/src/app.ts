@@ -7,6 +7,7 @@ import { database } from "@/middlewares/db";
 import { storage as storageMiddleware } from "@/middlewares/storage";
 import { router as announcements } from "@/routes/announcements";
 import { router as assets } from "@/routes/assets";
+import { router as contact } from "@/routes/contact";
 import { router as dariahProjects } from "@/routes/dariah-projects";
 import { router as documentsPolicies } from "@/routes/documents-policies";
 import { router as events } from "@/routes/events";
@@ -38,6 +39,7 @@ const openapi = createOpenApi(app);
 const api = createRouter()
 	.route("/announcements", announcements)
 	.route("/assets", assets)
+	.route("/contact", contact)
 	.route("/dariah-projects", dariahProjects)
 	.route("/documents-policies", documentsPolicies)
 	.route("/navigation", navigation)

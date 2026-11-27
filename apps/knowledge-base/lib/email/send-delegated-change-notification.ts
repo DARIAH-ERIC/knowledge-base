@@ -2,10 +2,9 @@ import { log } from "@acdh-oeaw/lib";
 import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 
-import { env } from "@/config/env.config";
 import { type Database, type Transaction, db } from "@/lib/db";
 import { alias, eq, sql } from "@/lib/db/sql";
-import { email } from "@/lib/email";
+import { email, reportingEmailAddress, sentOnBehalfOf } from "@/lib/email";
 import { getEntityDetailHref, getOrganisationalUnitDetailHref } from "@/lib/entity-detail-href";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { createFullUrl } from "@/lib/navigation/create-full-url";
@@ -234,8 +233,8 @@ async function send(params: { actor: Actor; subject: string; lines: Array<string
 	const { actor, subject, lines } = params;
 
 	const result = await email.sendEmail({
-		from: `${actor.name} <${actor.email}>`,
-		to: env.EMAIL_ADDRESS,
+		...sentOnBehalfOf(actor),
+		to: reportingEmailAddress,
 		subject,
 		text: lines.join("\n"),
 	});

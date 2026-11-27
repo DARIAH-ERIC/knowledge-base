@@ -6,7 +6,7 @@ import { EmailConnectionError, EmailSendError } from "./errors";
 
 interface SendEmailParams extends Pick<
 	SendMailOptions,
-	"attachments" | "from" | "html" | "subject" | "text" | "to"
+	"attachments" | "from" | "html" | "replyTo" | "subject" | "text" | "to"
 > {}
 
 export interface CreateEmailServiceParams {
@@ -35,7 +35,7 @@ export function createEmailService(params: CreateEmailServiceParams) {
 
 	const service = {
 		async sendEmail(params: SendEmailParams) {
-			const { attachments, from, html, subject, text, to } = params;
+			const { attachments, from, html, replyTo, subject, text, to } = params;
 
 			const result = Result.tryPromise({
 				async try() {
@@ -43,6 +43,7 @@ export function createEmailService(params: CreateEmailServiceParams) {
 						attachments,
 						from,
 						html,
+						replyTo,
 						subject,
 						text,
 						to,

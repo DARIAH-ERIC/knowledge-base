@@ -22,6 +22,7 @@
 		"@acdh-oeaw/lib": "catalog:",
 		"@dariah-eric/cache-tags": "workspace:^",
 		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/email": "workspace:^",
 		"@dariah-eric/env": "workspace:^",
 		"@dariah-eric/images": "workspace:^",
 		"@dariah-eric/mailchimp": "workspace:^",
@@ -43,6 +44,7 @@
 		"hono-openapi": "catalog:",
 		"hono-pino": "catalog:",
 		"hono-rate-limiter": "catalog:",
+		"nodemailer": "catalog:",
 		"pino": "catalog:",
 		"typesense": "catalog:",
 		"valibot": "catalog:"
@@ -54,6 +56,7 @@
 		"@sindresorhus/slugify": "catalog:",
 		"@tiptap/core": "catalog:",
 		"@types/node": "catalog:",
+		"@types/nodemailer": "catalog:",
 		"@vitest/coverage-v8": "catalog:",
 		"is-in-ci": "catalog:",
 		"openapi-types": "catalog:",
